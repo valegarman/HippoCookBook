@@ -122,7 +122,8 @@ powerProfile_hfo = bz_PowerSpectrumProfile_temp(hfo_bandpass,'showfig',true,'for
 UDStates = detectUD_temp('plotOpt', true,'forceDetect',true','NREMInts','all'); % ,'skipCluster',26,'spikeThreshold',.5,'deltaWaveThreshold',[],'ch',18);
 
 %% 7. Ripple Master Detector (to be done)
-rippleChannels = computeRippleChannel('discardShanks', 6);
+rippleChannels = computeRippleChannel_temp(); % rippleChannels output is now 1-index
+% rippleChannels = computeRippleChannel('discardShanks', 6);
 rippleChannels.Ripple_Channel = 17; rippleChannels.Noise_Channel = 50; % I dont know if 0-index or 1-index (I think 0-index)
 % ripples = bz_DetectSWR([rippleChannels.Ripple_Channel, rippleChannels.Sharpwave_Channel],'saveMat',true,'forceDetect',true,'useSPW',true,'thresSDrip',[.5 1.5]);
 ripples = bz_FindRipples(pwd, rippleChannels.Ripple_Channel,'thresholds', [1 2], 'passband', [80 240],...
@@ -130,6 +131,9 @@ ripples = bz_FindRipples(pwd, rippleChannels.Ripple_Channel,'thresholds', [1 2],
 ripples = removeArtifactsFromEvents(ripples);
 ripples = eventSpikingTreshold(ripples,[],'spikingThreshold',2); % .8
 EventExplorer(pwd,ripples);
+
+
+
 % spikes = loadSpikes;
 % spkEventTimes = bz_getSpikesRank('events',ripples, 'spikes',spikes);
 % [rankStats] = bz_RankOrder('spkEventTimes',spkEventTimes,'numRep',100);
@@ -146,6 +150,8 @@ EventExplorer(pwd,ripples);
 % deepSup.reversalPosition = deepSup.reversalPosition(idx);
 % deepSup.identity = deepSup.reversalPosition<1; % sup is 1, deep is 0, just like in the old times
 % ripples.deepSup = deepSup;
+
+
 targetFile = dir('*ripples.events*'); save(targetFile.name,'ripples');
 
 %% 8. TO DO: Theta detection
