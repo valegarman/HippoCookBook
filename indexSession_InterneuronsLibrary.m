@@ -28,6 +28,10 @@ addParameter(p,'theta_bandpass',[6 12], @isnumeric);
 addParameter(p,'hfo_bandpass',[100 500], @isnumeric);
 addParameter(p,'analogCh',64,@isnumeric); % 0-index
 addParameter(p,'rejectChannels',[],@isnumeric); % 0-index
+addParameter(p,'project','Undefined',@isstring);
+addParameter(p,'indexedProjects_path',[],@isstring);
+addParameter(p,'indexedProjects_name','indexedSessions',@isstring);
+addParameter(p,'hippoCookBook_path','HippoCookBook',@isstring);
 
 parse(p,varargin{:})
 
@@ -36,8 +40,30 @@ theta_bandpass = p.Results.theta_bandpass;
 hfo_bandpass = p.Results.hfo_bandpass;
 analogCh = p.Results.analogCh;
 rejectChannels = p.Results.rejectChannels;
+project = p.Results.project;
+indexedProjects_path = p.Results.indexedProjects_path;
+indexedProjects_name = p.Results.indexedProjects_name;
+hippoCookBook_path = p.Results.hippoCookBook_path;
 
 
+%% Creates a pointer to the folder where the index variable is located
+if isempty(indexedProjects_name)
+    error('Need to provide the name of the index Project variable');
+end
+if isempty(indexedProjects_path)
+    warning('Not included the path where the indexed Projects .mat variable is located. Trying to find it...');
+    indexedProjects_path = fileparts(which([indexedProjects_name,'.mat']));
+    if isempty(indexedProjects_path)
+        disp('No indexed Projects .mat file found. Lets create one !' );
+        directory = what(hippoCookBook_path);
+        cd(directory.path);
+        allSessions = [];
+        save([indexedProjects_name,'.mat'],'allSessions');
+        indexedProjects_path = fileparts(which([indexedProjects_name,'.mat']));
+    end
+end
+
+cd(basepath)
 %% 1. Runs sessionTemplate
 session = sessionTemplate(basepath,'showGUI',true);
 % Parsing rejectChannels from session.mat file in case rejectChannels is empty
@@ -79,7 +105,7 @@ pulses = bz_getAnalogPulses('analogCh',analogCh,'manualThr',false); % 0-index
 % SleepScoreMaster(pwd,'noPrompts',true,'ignoretime',pulses.intsPeriods, 'overwrite', true,'rejectChannels',rejectChannels); % 0-index
 % MODIFIED BY PABLO
 SleepScoreMaster(pwd,'noPrompts',true,'ignoretime',pulses.intsPeriods, 'overwrite', true);
-TheStateEditor;
+% TheStateEditor;
 
 %% 5. Power Profiles
 % powerProfile_theta = bz_PowerSpectrumProfile(theta_bandpass,'showfig',true,'channels',[0:63],'forceDetect',true); % [0:63] 0-index
@@ -96,7 +122,8 @@ powerProfile_hfo = bz_PowerSpectrumProfile_temp(hfo_bandpass,'showfig',true,'for
 UDStates = detectUD_temp('plotOpt', true,'forceDetect',true','NREMInts','all'); % ,'skipCluster',26,'spikeThreshold',.5,'deltaWaveThreshold',[],'ch',18);
 
 %% 7. Ripple Master Detector (to be done)
-rippleChannels = computeRippleChannel('discardShanks', 6);
+rippleChannels = computeRippleChannel_temp(); % rippleChannels output is now 1-index
+% rippleChannels = computeRippleChannel('discardShanks', 6);
 rippleChannels.Ripple_Channel = 17; rippleChannels.Noise_Channel = 50; % I dont know if 0-index or 1-index (I think 0-index)
 % ripples = bz_DetectSWR([rippleChannels.Ripple_Channel, rippleChannels.Sharpwave_Channel],'saveMat',true,'forceDetect',true,'useSPW',true,'thresSDrip',[.5 1.5]);
 ripples = bz_FindRipples(pwd, rippleChannels.Ripple_Channel,'thresholds', [1 2], 'passband', [80 240],...
@@ -104,6 +131,9 @@ ripples = bz_FindRipples(pwd, rippleChannels.Ripple_Channel,'thresholds', [1 2],
 ripples = removeArtifactsFromEvents(ripples);
 ripples = eventSpikingTreshold(ripples,[],'spikingThreshold',2); % .8
 EventExplorer(pwd,ripples);
+
+
+
 % spikes = loadSpikes;
 % spkEventTimes = bz_getSpikesRank('events',ripples, 'spikes',spikes);
 % [rankStats] = bz_RankOrder('spkEventTimes',spkEventTimes,'numRep',100);
@@ -120,18 +150,58 @@ EventExplorer(pwd,ripples);
 % deepSup.reversalPosition = deepSup.reversalPosition(idx);
 % deepSup.identity = deepSup.reversalPosition<1; % sup is 1, deep is 0, just like in the old times
 % ripples.deepSup = deepSup;
+
+
 targetFile = dir('*ripples.events*'); save(targetFile.name,'ripples');
 
 %% 8. TO DO: Theta detection
 
 %% 9. Cell metrics
 cell_metrics = ProcessCellMetrics('session', session,'excludeMetrics',{'deepSuperficial'});
-cell_metrics = CellExplorer('metrics',cell_metrics);
+% cell_metrics = CellExplorer('metrics',cell_metrics);
 
 %% 10. Spike Features
 spikeFeatures()
 % pulses.analogChannel = analogCh;
 % save([session.general.name,'.pulses.events.mat'],'pulses');
 optogeneticResponses = getOptogeneticResponse('numRep',100);
-end
 
+%% 11. Indexing
+session = sessionTemplate(basepath,'showGUI',false);
+currentPath = split(pwd,':'); currentPath = currentPath{end};
+sessionName = session.general.name;
+load([indexedProjects_path filesep indexedProjects_name,'.mat']); % the variable is called allSessions
+allSessions.(sessionName).path = currentPath;
+allSessions.(sessionName).name = session.animal.name;
+allSessions.(sessionName).strain = session.animal.strain;
+allSessions.(sessionName).geneticLine = session.animal.geneticLine;
+if isfield(session.animal,'opticFiberImplants')
+    for i = 1:length(session.animal.opticFiberImplants)
+        allSessions.(sessionName).optogenetics{i} = session.animal.opticFiberImplants{i}.opticFiber;
+    end
+end
+behav = [];
+for i = 1:length(session.epochs)
+    if strcmpi(session.epochs{i}.behavioralParadigm, 'Maze')
+        behav = [behav session.epochs{i}.environment];
+    end
+end
+allSessions.(sessionName).behav = behav;
+allSessions.(sessionName).project = sessions.general.projects;
+allSessions.(sessionName).tag = 1;
+save([indexedProjects_path filesep indexedProjects_name,'.mat'],'allSessions');
+
+% Lets do a push for git repository
+cd(indexedProjects_path)
+% Git add variable to the repository
+commandToExecute = ['git add ', indexedProjects_name,'.mat']
+system(commandToExecute)
+% Git Commit
+commentToCommit = ['Added Session: ' session.general.name];
+commandToExecute = ['git commit -m "' commentToCommit '"'];
+system(commandToExecute)
+% Git Push
+commandToExecute = ['git push'];
+system(commandToExecute)
+
+end

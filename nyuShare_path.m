@@ -7,6 +7,8 @@ function dp = nyuShare_path
             dp = 'W:';
         case 'MANUXPS'
             dp = 'W:';
+        case 'SB13FLPC017'
+            dp = 'W';
     end
 
 end
