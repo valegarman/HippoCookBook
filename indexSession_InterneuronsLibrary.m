@@ -25,6 +25,7 @@ p = inputParser;
 
 addParameter(p,'basepath',pwd,@isdir);
 addParameter(p,'theta_bandpass',[6 12], @isnumeric);
+addParameter(p,'gamma_bandpass',[20 100], @isnumeric);
 addParameter(p,'hfo_bandpass',[100 500], @isnumeric);
 addParameter(p,'analogCh',64,@isnumeric); % 0-index
 addParameter(p,'rejectChannels',[],@isnumeric); % 0-index
@@ -37,6 +38,7 @@ parse(p,varargin{:})
 
 basepath = p.Results.basepath;
 theta_bandpass = p.Results.theta_bandpass;
+gamma_bandpass = p.Results.gamma_bandpass;
 hfo_bandpass = p.Results.hfo_bandpass;
 analogCh = p.Results.analogCh;
 rejectChannels = p.Results.rejectChannels;
@@ -64,6 +66,9 @@ if isempty(indexedProjects_path)
 end
 
 cd(basepath)
+
+
+
 %% 1. Runs sessionTemplate
 session = sessionTemplate(basepath,'showGUI',true);
 % Parsing rejectChannels from session.mat file in case rejectChannels is empty
@@ -114,6 +119,7 @@ SleepScoreMaster(pwd,'noPrompts',true,'ignoretime',pulses.intsPeriods, 'overwrit
 % Trying changes in bz_PowerSpectrumProfile_temp
 % MODIFIED BY PABLO
 powerProfile_theta = bz_PowerSpectrumProfile_temp(theta_bandpass,'showfig',true,'forceDetect',true);
+powerProfile_gamma = bz_PowerSpectrumProfile_temp(gamma_bandpass,'showfig',true,'forceDetect',true);
 powerProfile_hfo = bz_PowerSpectrumProfile_temp(hfo_bandpass,'showfig',true,'forceDetect',true);
 
 %% 6. Check Brain Events
@@ -121,7 +127,14 @@ powerProfile_hfo = bz_PowerSpectrumProfile_temp(hfo_bandpass,'showfig',true,'for
 % UDStates = detectUD('plotOpt', true,'forceDetect',true','NREMInts','all'); % ,'skipCluster',26,'spikeThreshold',.5,'deltaWaveThreshold',[],'ch',18);
 UDStates = detectUD_temp('plotOpt', true,'forceDetect',true','NREMInts','all'); % ,'skipCluster',26,'spikeThreshold',.5,'deltaWaveThreshold',[],'ch',18);
 
-%% 7. Ripple Master Detector (to be done)
+%% 7. Getting Hippocampal Layers
+[hippocampalLayers] = getHippocampalLayers_temp();
+
+%% 8. Ripple Master Detector (to be done)
+rippleChannel = hippocampalLayers.layers{hippocampalLayers.bestShank}.pyramidal;
+ripples = rippleMasterDetector(pwd,rippleChannel,'thresholds',[1 2],'passband',[80 240],...
+    'EMGThres',1,'durations',[20 150], 'saveMat',true);
+
 rippleChannels = computeRippleChannel_temp(); % rippleChannels output is now 1-index
 % rippleChannels = computeRippleChannel('discardShanks', 6);
 rippleChannels.Ripple_Channel = 17; rippleChannels.Noise_Channel = 50; % I dont know if 0-index or 1-index (I think 0-index)
@@ -154,19 +167,19 @@ EventExplorer(pwd,ripples);
 
 targetFile = dir('*ripples.events*'); save(targetFile.name,'ripples');
 
-%% 8. TO DO: Theta detection
+%% 9. TO DO: Theta detection
 
-%% 9. Cell metrics
+%% 10. Cell metrics
 cell_metrics = ProcessCellMetrics('session', session,'excludeMetrics',{'deepSuperficial'});
 % cell_metrics = CellExplorer('metrics',cell_metrics);
 
-%% 10. Spike Features
+%% 11. Spike Features
 spikeFeatures()
 % pulses.analogChannel = analogCh;
 % save([session.general.name,'.pulses.events.mat'],'pulses');
 optogeneticResponses = getOptogeneticResponse('numRep',100);
 
-%% 11. Indexing
+%% 12. Indexing
 session = sessionTemplate(basepath,'showGUI',false);
 currentPath = split(pwd,':'); currentPath = currentPath{end};
 sessionName = session.general.name;

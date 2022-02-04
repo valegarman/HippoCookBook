@@ -31,12 +31,13 @@ function [powerProfile] = bz_PowerSpectrumProfile_temp(frange,varargin)
 %
 % MV-BuzsakiLab 2019
 % Edited by Peter Petersen
-% Edited by Pablo Abad (removed bad channels from sessionTemplate and
-%                           removed sessionInfo dependencies)
 
 % TODO
 % Handle bad channels
 % Remove sessionInfo dependencies
+
+% Edited by Pablo Abad (compute NaN on bad channels from sessionTemplate and
+%                           removed sessionInfo dependencies)
 
 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
@@ -95,18 +96,7 @@ if ~exist('frange') || isempty(frange)
 end
   
 %% Dealing with channels input
-if ischar(channels) && strcmpi(channels,'all')
-    % Remove bad channels from session metadata
-    disp('Removing bad channels from session metadata...')
-    flag = 1;
-    channels = 1:session.extracellular.nChannels;
-    channels(ismember(channels,session.channelTags.Bad.channels)) = [];
-elseif isnumeric(channels) && any(ismember(channels,session.channelTags.Bad.channels))
-    disp('Yoy are trying to analyze a bad channel !!!')
-    disp('Removing that channel from session metadata...')
-    flag = 2;
-%     channels(ismember(channels,session.channelTags.Bad.channels)) = [];
-end   
+channels = 1:session.extracellular.nChannels;
 %% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 % Calculate spectrogram per channel
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
@@ -147,6 +137,15 @@ else
     end
 end
 toc
+
+% In this part we compute NaNs in bad channels.
+% Also, in all the channels that belong to a shank are considered bad,
+% remove those channels
+powerProfileMean(session.channelTags.Bad.channels) = NaN;
+powerProfileStd(session.channelTags.Bad.channels) = NaN;
+powerProfileIc95(session.channelTags.Bad.channels) = NaN;
+powerProfileMedian(session.channelTags.Bad.channels) = NaN;
+
 powerProfile.mean = powerProfileMean;
 powerProfile.std = powerProfileStd;
 powerProfile.ic95 = powerProfileIc95;
@@ -170,53 +169,24 @@ end
 %% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 % Plotting
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-
-% For plotting purposes: NaNs when channels are rejected (powerProfile.mean
-% and powerProfile.ic95)
-
-mean_temp = nan(1,session.extracellular.nChannels);
-mean_temp(channels) = powerProfile.mean;
-ic95_temp = nan(1,session.extracellular.nChannels);
-ic95_temp(channels) = powerProfile.ic95;
-std_temp = nan(1,session.extracellular.nChannels);
-std_temp(channels) = powerProfile.std;
-median_temp = nan(1,session.extracellular.nChannels);
-median_temp(channels) = powerProfile.median;
-% channels_temp = nan(1,session.extracellular.nChannels);
-% channels_temp(channels) = powerProfile.channels;
-
-if flag == 1
-    powerProfile.mean = mean_temp;
-    powerProfile.ic95 = ic95_temp;
-    powerProfile.std = std_temp;
-    powerProfile.median = median_temp;
-%     powerProfile.channels = channels_temp;
-end
-
-
 if showfig
     figure('Position', get(0,'screensize'),'Name',session.general.name)
     cmap = jet(size(session.extracellular.electrodeGroups.channels,2));
     plt1 = [];
     for ii = 1:size(session.extracellular.electrodeGroups.channels,2)
-        [Lia] = ismember(session.extracellular.electrodeGroups.channels{ii}, channels);
-        nC = 1:length(session.extracellular.electrodeGroups.channels{ii});
-        nC = nC(Lia);
-        hold on
-%         [lia1,locb1] = ismember(powerProfile.channels,session.extracellular.electrodeGroups.channels{ii});
-%         [~,cols,val] = find(locb1);
-%         get order form val vector
-%         [~,valSort] = sort(val);
-%         cols = cols(valSort);    
-%         dev1 = powerProfile.mean(cols) - powerProfile.ic95(cols);
-%         dev2 = powerProfile.mean(cols) + powerProfile.ic95(cols);
+        if ~all(ismember(session.extracellular.electrodeGroups.channels{ii},session.channelTags.Bad.channels))
+            [Lia] = ismember(session.extracellular.electrodeGroups.channels{ii}, channels);
+            nC = 1:length(session.extracellular.electrodeGroups.channels{ii});
+            nC = nC(Lia);
+            hold on
 
-        dev1 = mean_temp(session.extracellular.electrodeGroups.channels{ii}(Lia)) - ic95_temp(session.extracellular.electrodeGroups.channels{ii}(Lia));
-        dev2 = mean_temp(session.extracellular.electrodeGroups.channels{ii}(Lia)) + ic95_temp(session.extracellular.electrodeGroups.channels{ii}(Lia));
-        
-        hold on
-        fill([dev1 flip(dev2)],[nC flip(nC)],cmap(ii,:),'FaceAlpha',.2,'EdgeColor','none')
-        try plt1(ii) = plot(mean_temp(session.extracellular.electrodeGroups.channels{ii}(Lia)),nC(Lia),'color',cmap(ii,:)); end
+            dev1 = powerProfile.mean(session.extracellular.electrodeGroups.channels{ii}(Lia)) - powerProfile.ic95(session.extracellular.electrodeGroups.channels{ii}(Lia));
+            dev2 = powerProfile.mean(session.extracellular.electrodeGroups.channels{ii}(Lia)) + powerProfile.ic95(session.extracellular.electrodeGroups.channels{ii}(Lia));
+
+            hold on
+            fill([dev1 flip(dev2)],[nC flip(nC)],cmap(ii,:),'FaceAlpha',.2,'EdgeColor','none')
+            try plt1(ii) = plot(powerProfile.mean(session.extracellular.electrodeGroups.channels{ii}(Lia)),nC(Lia),'color',cmap(ii,:)); end
+        end
     end
     
     ax=axis; axis tight; xlim(ax(1:2));

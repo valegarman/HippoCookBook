@@ -38,11 +38,11 @@ prevPath = pwd;
 cd(basePath);
 
 filename = dir('*.channelinfo.ripples.mat');
-% if ~isempty(filename) && ~force
-%     disp('Ripple channel already detected! Loading file.');
-%     load(filename.name);
-%     return
-% end
+if ~isempty(filename) && ~force
+    disp('Ripple channel already detected! Loading file.');
+    load(filename.name);
+    return
+end
 
 % Using session metadata
 session = sessionTemplate(basePath,'showGUI',false);
