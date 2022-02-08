@@ -116,7 +116,7 @@ disp('Calculating spectrograms channelwise')
 if useParfor
     parfor (ii = 1:length(channels),18)
         fprintf('Channel %3.i/%3.i, ',ii, length(channels));
-        lfp = bz_GetLFP(channels(ii)-1,'noPrompts', true); % now channels are 1-index but bz_GetLFP needs 0-index
+        lfp = getLFP_temp(channels(ii),'noPrompts', true); % now channels are 1-index an getLFP_temp is also 1-index
         [S,t,f] = mtspecgramc_fast(single(lfp.data),[4 2],params);
         S = 10 * log10(S);
         powerProfileMean(ii) = mean(mean(S,2));
@@ -131,7 +131,7 @@ else
     end
     for ii = 1:length(channels)
         fprintf('Channel %3.i/%3.i ,\n',ii, length(channels));
-        [S,t,f] = mtspecgramc_fast(single(lfp.data(:,channels(ii)+1)),[4 2],params);
+        [S,t,f] = mtspecgramc_fast(single(lfp.data(:,channels(ii))),[4 2],params);
         S = 10 * log10(S);
         powerProfileMean(ii) = mean(mean(S,2));
         powerProfileStd(ii) = std(mean(S,2));
