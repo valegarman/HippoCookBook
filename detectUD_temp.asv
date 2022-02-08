@@ -174,7 +174,7 @@ end
 clear gamm delt avGamma stdGamma gdCorr dscore
 
 %% find states
-lfp = getLFP_temp(ch,'basepath',basepath,'noPrompts',noPrompts);
+lfp = bz_GetLFP(ch,'basepath',basepath,'noPrompts',noPrompts);
 gammaLFP = bz_Filter(lfp,'passband',filterparams.gamma,'filter','fir1','order',4);
 smoothGamm = smoothGamm * session.extracellular.srLfp;
 envGamm = movmean(gammaLFP.data.^2,smoothGamm);
