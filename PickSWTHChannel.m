@@ -114,7 +114,7 @@ else
 end
 
 %% Pick channels to use
-keyboard;
+
 % Par = bz_getSessionInfo(basePath,'noPrompts',noPrompts);
 Par = sessionTemplate(basePath,'showGUI',false);
 nChannels = Par.extracellular.nChannels;
@@ -222,9 +222,7 @@ parfor idx = 1:numSWChannels;
         specdt = mode(diff(t_FFT));
         %Calculate per-bin weights onto SlowWave
         broadbandSlowWave = zFFTspec*SWweights';
-        
     end
-    
     
     broadbandSlowWave = smooth(broadbandSlowWave,smoothfact./specdt);
     
@@ -325,8 +323,10 @@ SWchanID = SWChannels(goodSWidx);      %Channel IDnumber of the
 THchanID = ThetaChannels(goodTHidx);   %best SW and theta channels
 
 %% Load the best channels at sampling frequency needed for clustering later
-downsample_save = Par.lfpSampleRate./250;
-swthLFP = bz_GetLFP([SWchanID,THchanID],'basepath',basePath,'basename',recordingname,...
+% downsample_save = Par.lfpSampleRate./250;
+keyboard;
+downsample_save = Par.extracellular.srLfp./250;
+swthLFP = getLFP_temp([SWchanID,THchanID],'basepath',basePath,'basename',recordingname,...
     'downsample',downsample_save,'intervals',scoretime,'noPrompts',noPrompts);
 
 swLFP = (swthLFP.data(:,1));
@@ -345,12 +345,12 @@ params = v2struct(SWfreqlist,SWweights,SWWeightsName,Notch60Hz,...
     
 SleepScoreLFP = v2struct(thLFP,swLFP,THchanID,SWchanID,sf,t,params);
 
-try
-    bz_tagChannel(basePath,SWchanID,'NREMDetectionChan','noPrompts',true);
-    bz_tagChannel(basePath,THchanID,'ThetaChan','noPrompts',true);
-catch
-    display('Unable to save channel tags in sessionInfo')
-end
+% try
+%     bz_tagChannel(basePath,SWchanID,'NREMDetectionChan','noPrompts',true);
+%     bz_tagChannel(basePath,THchanID,'ThetaChan','noPrompts',true);
+% catch
+%     display('Unable to save channel tags in sessionInfo')
+% end
 
 if saveFiles
     %Need to update to Save in buzcode format for lfp.mat
@@ -435,7 +435,6 @@ normTHspec = bz_NormToRange(THmeanspec,[0 numusedchannels.*0.6]);
         specdt = mode(diff(t_FFT));
         %Calculate per-bin weights onto SlowWave
         broadbandSlowWave = zFFTspec*SWweights';
-        
     end
  
     broadbandSlowWave = smooth(broadbandSlowWave,smoothfact./specdt);
