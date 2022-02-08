@@ -106,8 +106,7 @@ SleepScoreMaster(pwd,'noPrompts',true,'ignoretime',pulses.intsPeriods, 'overwrit
 % and sessionInfo depenencies.
 
 %% 5. Power Profiles
-% MODIFIED BY PABLO
-powerProfile_theta = bz_PowerSpectrumProfile_temp(theta_bandpass,'showfig',true,'forceDetect',true);
+powerProfile_theta = powerSpectrumProfile(theta_bandpass,'showfig',true,'forceDetect',true);
 powerProfile_gamma = bz_PowerSpectrumProfile_temp(gamma_bandpass,'showfig',true,'forceDetect',true);
 powerProfile_hfo = bz_PowerSpectrumProfile_temp(hfo_bandpass,'showfig',true,'forceDetect',true);
 
