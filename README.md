@@ -7,3 +7,5 @@ IMPORTANT: everything is under collective development. If you find something tha
 ## Dependencies
 - https://github.com/petersenpeter/CellExplorer
 - https://github.com/petersenpeter/KilosortWrapper
+
+Includes Chronux (2.12) and CircStats
