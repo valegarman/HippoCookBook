@@ -1,4 +1,4 @@
-function SleepState = SleepScoreMaster_temp(basePath,varargin)
+function SleepState = SleepScoreMaster(basePath,varargin)
 %SleepScoreMaster(basePath,<options>)
 %This is the master function for sleep state scoring.
 %
@@ -261,8 +261,6 @@ display('Quantifying metrics for state scoring')
 display('Clustering States Based on EMG, SW, and TH LFP channels')
 [ints,idx,MinTimeWindowParms] = ClusterStates_DetermineStates(SleepScoreMetrics);
 
-
-                                
 %% RECORD PARAMETERS from scoring
 detectionparms.userinputs = p.Results;
 detectionparms.MinTimeWindowParms = MinTimeWindowParms;

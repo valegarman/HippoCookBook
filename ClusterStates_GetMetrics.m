@@ -32,7 +32,7 @@ window = p.Results.window;
 smoothfact = p.Results.smoothfact; 
 IRASA = p.Results.IRASA; 
 ThIRASA = p.Results.ThIRASA; 
-keyboard;
+
 %This is the sticky trigger passed through to DetermineStates via histsandthreshs
 if onSticky
     stickySW = true; stickyTH=false; stickyEMG=true;

@@ -35,6 +35,7 @@ addParameter(p,'project','Undefined',@isstring);
 addParameter(p,'indexedProjects_path',[],@isstring);
 addParameter(p,'indexedProjects_name','indexedSessions',@isstring);
 addParameter(p,'hippoCookBook_path','HippoCookBook',@isstring);
+addParameter(p,'force_analogPulsesDetection',true,@islogical);
 
 parse(p,varargin{:})
 
@@ -48,6 +49,7 @@ project = p.Results.project;
 indexedProjects_path = p.Results.indexedProjects_path;
 indexedProjects_name = p.Results.indexedProjects_name;
 hippoCookBook_path = p.Results.hippoCookBook_path;
+force_analogPulsesDetection = p.Results.force_analogPulsesDetection;
 
 keyboard;
 %% Creates a pointer to the folder where the index variable is located
@@ -93,30 +95,17 @@ disp('Loading Spikes...')
 spikes = loadSpikes;
 
 
-%% 3. Remove previous opto pulses file (pulses.events.mat) and re-runs opto
-
-if ~isempty(dir([basepath filesep session.general.name ,'.pulses.events.mat']))
-    disp('Loading and deleting old opto pulses.events.mat file ...')
-    file = dir([basepath filesep session.general.name ,'.pulses.events.mat']);
-    delete(file.name)
-else
-    disp('Pulses.events.mat does not exist !')
-end
+%% 3. Analog pulses detection
 
 disp('Getting analog Pulses...')
-pulses = getAnalogPulses('analogCh',analogCh,'manualThr',false); % 1-index
+pulses = getAnalogPulses('analogCh',analogCh,'manualThr',false,'overwrite',force_analogPulsesDetection); % 1-index
 
 %% 4. Check Sleep Score
-% SleepScoreMaster(pwd,'noPrompts',true,'ignoretime',pulses.intsPeriods, 'overwrite', true,'rejectChannels',rejectChannels); % 0-index
-% MODIFIED BY PABLO
-SleepScoreMaster_temp(pwd,'noPrompts',true,'ignoretime',pulses.intsPeriods, 'overwrite', true);
-% TheStateEditor;
+SleepScoreMaster(pwd,'noPrompts',true,'ignoretime',pulses.intsPeriods, 'overwrite', true);
+% TheStateEditor; TO DO: TheStateEditor has to be modified for 1-indexing
+% and sessionInfo depenencies.
 
 %% 5. Power Profiles
-% powerProfile_theta = bz_PowerSpectrumProfile(theta_bandpass,'showfig',true,'channels',[0:63],'forceDetect',true); % [0:63] 0-index
-% powerProfile_HFOs = bz_PowerSpectrumProfile(hfo_bandpass,'showfig',true,'channels',0:63); % [0:63] 0-index
-
-% Trying changes in bz_PowerSpectrumProfile_temp
 % MODIFIED BY PABLO
 powerProfile_theta = bz_PowerSpectrumProfile_temp(theta_bandpass,'showfig',true,'forceDetect',true);
 powerProfile_gamma = bz_PowerSpectrumProfile_temp(gamma_bandpass,'showfig',true,'forceDetect',true);
