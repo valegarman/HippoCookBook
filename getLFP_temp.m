@@ -205,23 +205,22 @@ for i = 1:nIntervals
         lfp(i).duration = (lfp(i).interval(i,2)-lfp(i).interval(i,1));
     end
     
-%     if isfield(session,'brainRegions') && isfield(session,'channels')
-%         [~,~,regionidx] = intersect(lfp(i).channels,session.channels,'stable');
-%         lfp(i).region = session.brainRegions(regionidx); % match region order to channel order..
-%     end
-%     if isfield(session,'brainRegions') && isfield(session,'channels')
-%         bRegions = [];
-%         regions = fields(session.brainRegions);
-%         for i = 1:length(lfp.channels)
-%             for j = 1:length(regions)
-%                 if ismember(lfp.channels(i),session.brainRegions.(regions{j}).channels)
-%                     bRegions = {bRegions regions{j}};
-%                 end
-%             end
-%         end
-%             lfp(i).region = 
-%     end
+    
+    if isfield(session,'brainRegions') && isfield(session,'channels')    
+        bRegions = cell(1,session.extracellular.nChannels);
+        for j = 1:length(bRegions)
+            bRegions{j} = NaN;
+        end
+        regions = fields(session.brainRegions);
+        for k = 1:length(lfp.channels)
+            for j = 1:length(regions)
+                if ismember(lfp.channels(k),session.brainRegions.(regions{j}).channels)
+                    bRegions{k} = [regions{j}];
+                end
+            end
+        end
+             lfp(i).region = bRegions;
+    end
 
 end
-
 end
