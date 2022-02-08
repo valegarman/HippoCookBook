@@ -189,7 +189,7 @@ for i = 1:nIntervals
     % Load data and put into struct
     % we assume 1-indexing like neuroscope, and bz_LoadBinary uses 1-indexing to
     % load
-    lfp(i).data = bz_LoadBinary([basepath filesep lfp.Filename],...
+    lfp(i).data = LoadBinary([basepath filesep lfp.Filename],...
         'duration',double(lfp(i).duration),...
                   'frequency',samplingRate,'nchannels',session.extracellular.nChannels,...
                   'start',double(lfp(i).interval(1)),'channels',channels,...
@@ -207,20 +207,26 @@ for i = 1:nIntervals
     
     
     if isfield(session,'brainRegions') && isfield(session,'channels')    
-        bRegions = cell(1,session.extracellular.nChannels);
+        bRegions = cell(1,length(channels));
         for j = 1:length(bRegions)
             bRegions{j} = NaN;
         end
         regions = fields(session.brainRegions);
-        for k = 1:length(lfp.channels)
+        for k = 1:length(channels)
             for j = 1:length(regions)
-                if ismember(lfp.channels(k),session.brainRegions.(regions{j}).channels)
+                if ismember(channels(k),session.brainRegions.(regions{j}).channels)
                     bRegions{k} = [regions{j}];
                 end
             end
         end
-             lfp(i).region = bRegions;
+             if length(bRegions) == 1
+                lfp(i).region = bRegions{1};
+             else
+                 lfp(i).region = bRegions;
+             end
     end
+    
+    
 
 end
 end
