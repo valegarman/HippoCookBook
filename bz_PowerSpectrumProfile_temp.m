@@ -44,6 +44,7 @@ function [powerProfile] = bz_PowerSpectrumProfile_temp(frange,varargin)
 % Parsing inputs
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 p = inputParser;
+addParameter(p,'basepath',pwd,@isdir);
 addParameter(p,'winSize',4,@isscalar)
 addParameter(p,'dt',2, @isscalar)
 addParameter(p,'channels','all')
@@ -64,7 +65,7 @@ dt = p.Results.dt;
 forceDetect = p.Results.forceDetect;
 useParfor = p.Results.useParfor;
 rejectChannels = p.Results.rejectChannels;
-
+basepath = p.Results.basepath;
 
 %% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 % Resolving inputs   
@@ -82,13 +83,16 @@ try [session] = sessionTemplate(pwd,'showGUI',false);
     end
 catch disp('No sessionTemplate file!!')
     if ischar('channels') && strcmpi(channels,'all')
-        channels = lfp.channels;
+        lfp = bz_GetLFP('all');
+        channels = lfp.channels+1;
     end
     keyboard;
-    sessionInfo.rates.lfp = lfp.samplingRate;
+    session.extracellular.srLfp = lfp.samplingRate;
     useParfor = false;
-    sessionInfo.FileName = date;
-    sessionInfo.AnatGrps(1).Channels = lfp.channels; 
+    fileName = strsplit(basepath,filesep);
+    fileName = fileName{end};
+    session.general.name = fileName;
+    session.extracellular.spikeGroups.channels = lfp.channels+1; 
 end
 
 if ~exist('frange') || isempty(frange)

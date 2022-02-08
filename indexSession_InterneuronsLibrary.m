@@ -109,7 +109,7 @@ pulses = bz_getAnalogPulses('analogCh',analogCh,'manualThr',false); % 0-index
 %% 4. Check Sleep Score
 % SleepScoreMaster(pwd,'noPrompts',true,'ignoretime',pulses.intsPeriods, 'overwrite', true,'rejectChannels',rejectChannels); % 0-index
 % MODIFIED BY PABLO
-SleepScoreMaster(pwd,'noPrompts',true,'ignoretime',pulses.intsPeriods, 'overwrite', true);
+SleepScoreMaster_temp(pwd,'noPrompts',true,'ignoretime',pulses.intsPeriods, 'overwrite', true);
 % TheStateEditor;
 
 %% 5. Power Profiles
