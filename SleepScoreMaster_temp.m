@@ -193,15 +193,18 @@ if exist(bz_sleepstatepath,'file') && ~overwrite && ~ignoreManual
 end
 
 %% Get channels not to use
-sessionInfo = bz_getSessionInfo(basePath,'noPrompts',noPrompts);
+% sessionInfo = bz_getSessionInfo(basePath,'noPrompts',noPrompts);
+session = sessionTemplate(basePath,'showGUI',false);
 % check that SW/Theta channels exist in rec..
 if length(SWChannels) > 1 
-    if sum(ismember(SWChannels,sessionInfo.channels)) ~= length(SWChannels)
+    % if sum(ismember(SWChannels,sessionInfo.channels)) ~= length(SWChannels)
+    if sum(ismember(SWChannels,session.channels)) ~= length(SWChannels)
         error('some of the SW input channels dont exist in this recording...?')
     end   
 end
 if length(ThetaChannels) > 1 
-    if sum(ismember(ThetaChannels,sessionInfo.channels)) ~= length(ThetaChannels)
+    % if sum(ismember(ThetaChannels,sessionInfo.channels)) ~= length(ThetaChannels)
+    if sum(ismember(ThetaChannels,session.channels)) ~= length(ThetaChannels)
         error('some of the theta input channels dont exist in this recording...?')
     end   
 end
@@ -211,14 +214,14 @@ end
 %     load(sessionmetadatapath)
 %     rejectChannels = [rejectChannels SessionMetadata.ExtracellEphys.BadChannels];
 % elseif isfield(sessionInfo,'badchannels')
-if isfield(sessionInfo,'badchannels')
-    rejectChannels = [rejectChannels sessionInfo.badchannels]; %get badchannels from the .xml
-end
+% if isfield(sessionInfo,'badchannels')
+%     rejectChannels = [rejectChannels sessionInfo.badchannels]; %get badchannels from the .xml
+% end
 
 % Update by Pablo Abad to pick bad channels from session.mat
-session = sessionTemplate(basePath,'showGUI',false);
+
 if ~isempty(session.channelTags.Bad.channels)
-    rejectChannels = session.channelTags.Bad.channels -1;
+    rejectChannels = session.channelTags.Bad.channels;
 end
 
 if isempty(rejectChannels)
@@ -229,7 +232,7 @@ end
 % Load/Calculate EMG based on cross-shank correlations 
 % (high frequency correlation signal = high EMG).  
 % Schomburg E.W. Neuron 84, 470?485. 2014)
-EMGFromLFP = bz_EMGFromLFP(basePath,'overwrite',overwrite,...
+EMGFromLFP = bz_EMGFromLFP_temp(basePath,'overwrite',overwrite,...
                                      'rejectChannels',rejectChannels,'noPrompts',noPrompts,...
                                      'saveMat',savebool);
 
