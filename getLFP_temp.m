@@ -65,7 +65,7 @@ function [lfp] = getLFP_temp(varargin)
 % add saveMat input 
 % expand channel selection options (i.e. region or spikegroup)
 % add forcereload
-%% Updated by Pablo Abad from bz_GetLFP() to remove sessionInfo dependencies and also 1-index.
+% Updated by Pablo Abad from bz_GetLFP() to remove sessionInfo dependencies and also 1-index.
 %% Parse the inputs!
 
 channelsValidation = @(x) isnumeric(x) || strcmp(x,'all');
