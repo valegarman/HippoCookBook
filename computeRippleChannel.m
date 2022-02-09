@@ -157,7 +157,8 @@ try
     targetFile = dir('*.ripples.events.mat'); load(targetFile.name);
     LfpSamplingrate = lfp.samplingRate;
 catch
-    [ripples] = bz_FindRipples(basePath,RefrenceRippleChannel_test);
+    keyboard;
+    [ripples] = findRipples(basePath,RefrenceRippleChannel_test);
 end
 Win=70;
 LfpSamplingrate = lfp.samplingRate;
