@@ -165,7 +165,7 @@ end
 numThetaChannels = length(ThetaChannels);
 
 %% Load LFP files from .lfp
-allLFP = getLFP_temp(usechannels,'basepath',basePath,'basename',recordingname,...
+allLFP = getLFP(usechannels,'basepath',basePath,'basename',recordingname,...
     'downsample',downsamplefactor,'intervals',scoretime,'noPrompts',noPrompts);
 Fs = allLFP.samplingRate;
 
@@ -325,7 +325,7 @@ THchanID = ThetaChannels(goodTHidx);   %best SW and theta channels
 %% Load the best channels at sampling frequency needed for clustering later
 % downsample_save = Par.lfpSampleRate./250;
 downsample_save = Par.extracellular.srLfp./250;
-swthLFP = getLFP_temp([SWchanID,THchanID],'basepath',basePath,'basename',recordingname,...
+swthLFP = getLFP([SWchanID,THchanID],'basepath',basePath,'basename',recordingname,...
     'downsample',downsample_save,'intervals',scoretime,'noPrompts',noPrompts);
 
 swLFP = (swthLFP.data(:,1));

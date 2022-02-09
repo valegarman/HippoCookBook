@@ -106,17 +106,16 @@ SleepScoreMaster(pwd,'noPrompts',true,'ignoretime',pulses.intsPeriods, 'overwrit
 % and sessionInfo depenencies.
 
 %% 5. Power Profiles
-powerProfile_theta = bz_PowerSpectrumProfile_temp(theta_bandpass,'showfig',true,'forceDetect',true);
-powerProfile_gamma = bz_PowerSpectrumProfile_temp(gamma_bandpass,'showfig',true,'forceDetect',true);
-powerProfile_hfo = bz_PowerSpectrumProfile_temp(hfo_bandpass,'showfig',true,'forceDetect',true);
+powerProfile_theta = powerSpectrumProfile(theta_bandpass,'showfig',true,'forceDetect',true);
+powerProfile_gamma = powerSpectrumProfile(gamma_bandpass,'showfig',true,'forceDetect',true);
+powerProfile_hfo = powerSpectrumProfile(hfo_bandpass,'showfig',true,'forceDetect',true);
 
-%% 6. Check Brain Events
-% Trying changes in detecUD_temp
-% UDStates = detectUD('plotOpt', true,'forceDetect',true','NREMInts','all'); % ,'skipCluster',26,'spikeThreshold',.5,'deltaWaveThreshold',[],'ch',18);
-UDStates = detectUD_temp('plotOpt', true,'forceDetect',true','NREMInts','all'); % ,'skipCluster',26,'spikeThreshold',.5,'deltaWaveThreshold',[],'ch',18);
-
-%% 7. Getting Hippocampal Layers
+%% 6. Getting Hippocampal Layers
 [hippocampalLayers] = getHippocampalLayers_temp();
+
+%% 7. Check Brain Events
+% Trying changes in detecUD_temp
+UDStates = detectUD_temp('plotOpt', true,'forceDetect',true','NREMInts','all'); % ,'skipCluster',26,'spikeThreshold',.5,'deltaWaveThreshold',[],'ch',18);
 
 %% 8. Ripple Master Detector (to be done)
 rippleChannel = hippocampalLayers.layers{hippocampalLayers.bestShank}.pyramidal;

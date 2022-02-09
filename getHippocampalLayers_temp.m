@@ -57,7 +57,7 @@ if ~isempty(targetFile) && ~force
 end
 
 if isempty(lfp)
-    try lfp = bz_GetLFP('all');
+    try lfp = getLFP('all');
     catch
         error('No LFP file!!');
     end
@@ -68,9 +68,9 @@ end
 session = sessionTemplate(basepath,'showGUI',false);
 channel_order = session.channels;
 % channels.pyramidal = bz_GetBestRippleChan(lfp);
-powerProfile_theta = bz_PowerSpectrumProfile_temp(theta_bandpass,'showfig',true,'saveMat',false); 
-powerProfile_gamma = bz_PowerSpectrumProfile_temp(gamma_bandpass,'showfig',true,'saveMat',false);
-powerProfile_hfo = bz_PowerSpectrumProfile_temp(hfo_bandpass,'showfig',true,'saveMat',false); 
+powerProfile_theta = powerSpectrumProfile(theta_bandpass,'showfig',true,'saveMat',false); 
+powerProfile_gamma = powerSpectrumProfile(gamma_bandpass,'showfig',true,'saveMat',false);
+powerProfile_hfo = powerSpectrumProfile(hfo_bandpass,'showfig',true,'saveMat',false); 
 %% Computing Hippocampal Layers by looking at powerSpectrum profiles for theta and hfo
 for i = 1:length(session.extracellular.spikeGroups.channels)
     if ~all(ismember(session.extracellular.spikeGroups.channels{i},session.channelTags.Bad.channels))
@@ -94,8 +94,8 @@ for i = 1:length(session.extracellular.spikeGroups.channels)
         end
         
         %% Ripples
-        rippleChannels = computeRippleChannel_temp(); % rippleChannels output is now 1-index
-        ripples{i} = bz_FindRipples(bz_GetLFP(channels{i}.pyramidal),'thresholds',[1 2],'passband',[80 240],...
+        rippleChannels = computeRippleChannel(); % rippleChannels output is now 1-index
+        ripples{i} = bz_FindRipples(getLFP(channels{i}.pyramidal),'thresholds',[1 2],'passband',[80 240],...
             'EMGThresh',1,'durations',[20 150],'saveMat',false,'noise',rippleChannels.Noise_Channel);
         twin = 0.1;
 %         [evCsd,lfpAvg] = bz_eventCSD(lfp,ripples{i}.peaks,'twin',[twin twin],'plotLFP',false,'plotCSD',false);
