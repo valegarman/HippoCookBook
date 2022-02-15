@@ -111,7 +111,7 @@ powerProfile_gamma = powerSpectrumProfile(gamma_bandpass,'showfig',true,'forceDe
 powerProfile_hfo = powerSpectrumProfile(hfo_bandpass,'showfig',true,'forceDetect',true);
 
 %% 6. Getting Hippocampal Layers
-[hippocampalLayers] = getHippocampalLayers_temp();
+[hippocampalLayers] = getHippocampalLayers();
 
 %% 7. Check Brain Events
 % Trying changes in detecUD_temp

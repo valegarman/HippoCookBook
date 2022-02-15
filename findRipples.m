@@ -21,6 +21,16 @@ function [ripples] = findRipples(varargin)
 %    OR
 %
 %    channel      	Ripple channel to use for detection (0-indexed, a la neuroscope)
+%    
+%    OR (legacy)
+% 
+%    lfp            unfiltered LFP (one channel) to use
+%	 timestamps	    timestamps to match filtered variable
+%
+%    OR
+%
+%    basepath       path to a single session to run findRipples on
+%    channel      	Ripple channel to use for detection (1-indexed)
 %
 %    =========================================================================
 %     Properties    Values
@@ -88,8 +98,10 @@ addParameter(p,'EMGThresh',.9,@isnumeric);
 addParameter(p,'saveMat',false,@islogical);
 addParameter(p,'minDuration',20,@isnumeric)
 addParameter(p,'plotType',2,@isnumeric)
+addParameter(p,'basepath',pwd,@isfolder)
 
-keyboard;
+prevPath = pwd;
+
 if isstr(varargin{1})  % if first arg is basepath
     addRequired(p,'basepath',@isstr)
     addRequired(p,'channel',@isnumeric)    
@@ -101,7 +113,7 @@ if isstr(varargin{1})  % if first arg is basepath
     lfp = getLFP(p.Results.channel,'basepath',p.Results.basepath,'basename',basename);%currently cannot take path inputs
     signal = bz_Filter(double(lfp.data),'filter','butter','passband',passband,'order', 3);
     timestamps = lfp.timestamps;
-elseif isnumeric(varargin{1}) % if first arg is filtered LFP
+elseif isnumeric(varargin{1}) && length(varargin{1})>2 % if first arg is filtered LFP
     addRequired(p,'lfp',@isnumeric)
     addRequired(p,'timestamps',@isnumeric)
     parse(p,varargin{:})
@@ -111,6 +123,35 @@ elseif isnumeric(varargin{1}) % if first arg is filtered LFP
     timestamps = p.Results.timestamps;
     basepath = pwd;
     basename = basenameFromBasepath(basepath);
+elseif isstruct(varargin{1})
+    % Added by Pablo Abad to manage when first input if lfp file, not
+    % filtered. This lfp channel should have 
+    addRequired(p,'lfp',@isstruct);
+    parse(p,varargin{:})
+    passband = p.Results.passband;
+    EMGThresh = p.Results.EMGThresh;
+    timestamps = p.Results.lfp.timestamps;
+    EMGThres  = p.Results.EMGThresh;
+    lfp = p.Results.lfp;
+    basepath = p.Results.basepath;
+    if length(lfp.channels)>1
+        error('lfp structure must not have more than 1 channel!');
+    else
+        signal = bz_Filter(double(lfp.data),'filter','butter','passband',passband,'order',3);
+        basename = basenameFromBasepath(basepath);
+    end
+elseif isnumeric(varargin{1})
+    addRequired(p,'channel',@isnumeric) 
+    parse(p,varargin{:});
+    passband = p.Results.passband;
+    EMGThresh = p.Results.EMGThresh;
+    basepath = p.Results.basepath;
+    cd(basepath);
+    basename = basenameFromBasepath(p.Results.basepath);
+    lfp = getLFP(p.Results.channel,'basepath',p.Results.basepath,'basename',basename);
+    signal = bz_Filter(lfp,'filter','butter','passband',passband,'order',3);
+    timestamps = signal.timestamps;
+    signal = signal.data;
 end
 
 % assign parameters (either defaults or given)
@@ -125,6 +166,7 @@ minInterRippleInterval = p.Results.durations(1);
 maxRippleDuration = p.Results.durations(2);
 minRippleDuration = p.Results.minDuration;
 plotType = p.Results.plotType;
+
 
 %% filter and calculate noise
 
@@ -232,7 +274,7 @@ disp(['After duration test: ' num2str(size(ripples,1)) ' events.']);
 bad = [];
 if ~isempty(noise)
     if length(noise) == 1 % you gave a channel number
-       noiselfp = bz_GetLFP(p.Results.noise,'basepath',p.Results.basepath,'basename',basename);%currently cannot take path inputs
+       noiselfp = getLFP(p.Results.noise,'basepath',p.Results.basepath,'basename',basename);%currently cannot take path inputs
        squaredNoise = bz_Filter(double(noiselfp.data),'filter','butter','passband',passband,'order', 3).^2;
     else
             
@@ -258,8 +300,8 @@ if ~isempty(noise)
 end
     %% lets try to also remove EMG artifact?
 if EMGThresh
-    basenameFromBasepath
-    EMGfilename = fullfile(basepath,[sessionInfo.FileName '.EMGFromLFP.LFP.mat']);
+    basename = basenameFromBasepath(basepath);
+    EMGfilename = fullfile(basepath,[basename '.EMGFromLFP.LFP.mat']);
     if exist(EMGfilename)
         load(EMGfilename)   %should use a bz_load script here
     else
@@ -370,7 +412,7 @@ else
 end
 
 %The detectorinto substructure
-detectorinfo.detectorname = 'bz_FindRipples';
+detectorinfo.detectorname = 'findRipples';
 detectorinfo.detectiondate = today;
 detectorinfo.detectionintervals = restrict;
 detectorinfo.detectionparms = p.Results;
@@ -390,6 +432,8 @@ end
 
 %Put it into the ripples structure
 ripples.detectorinfo = detectorinfo;
+
+cd(prevPath);
 
 %Save
 if p.Results.saveMat

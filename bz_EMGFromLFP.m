@@ -1,4 +1,4 @@
-function [EMGFromLFP] = bz_EMGFromLFP_temp(basePath,varargin)
+function [EMGFromLFP] = bz_EMGFromLFP(basePath,varargin)
 % USAGE
 % [EMGCorr] = bz_EMGCorrFromLFP(basePath)
 %
@@ -47,6 +47,7 @@ function [EMGFromLFP] = bz_EMGFromLFP_temp(basePath,varargin)
 % 
 % Erik Schomburg, Brendon Watson, Dan Levenstein, David Tingley, 2017
 % Updated: Rachel Swanson 5/2017
+% Manu, 2022 (remove sessionInfo dependencies)
 %% Buzcode name of the EMGCorr.LFP.mat file
 [datasetfolder,recordingname] = fileparts(basePath);
 matfilename = fullfile(basePath,[recordingname,'.EMGFromLFP.LFP.mat']);
