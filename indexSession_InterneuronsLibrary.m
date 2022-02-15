@@ -170,6 +170,7 @@ targetFile = dir('*ripples.events*'); save(targetFile.name,'ripples');
 %% 9. TO DO: Theta detection
 
 %% 10. Cell metrics
+% Exclude stimulation intervals for computing CellMetrics
 cell_metrics = ProcessCellMetrics('session', session,'excludeMetrics',{'deepSuperficial'});
 % cell_metrics = CellExplorer('metrics',cell_metrics);
 

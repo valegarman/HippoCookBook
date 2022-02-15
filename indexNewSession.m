@@ -36,6 +36,7 @@ addParameter(p,'indexedProjects_path',[],@isstring);
 addParameter(p,'indexedProjects_name','indexedSessions',@isstring);
 addParameter(p,'hippoCookBook_path','HippoCookBook',@isstring);
 addParameter(p,'force_analogPulsesDetection',true,@islogical);
+addParameter(p,'excludeManipulationIntervals',[],@isnumeric);
 
 parse(p,varargin{:})
 
@@ -50,6 +51,7 @@ indexedProjects_path = p.Results.indexedProjects_path;
 indexedProjects_name = p.Results.indexedProjects_name;
 hippoCookBook_path = p.Results.hippoCookBook_path;
 force_analogPulsesDetection = p.Results.force_analogPulsesDetection;
+excludeManipulationIntervals = p.Results.excludeManipulationIntervals;
 
 keyboard;
 %% Creates a pointer to the folder where the index variable is located
@@ -157,7 +159,13 @@ targetFile = dir('*ripples.events*'); save(targetFile.name,'ripples');
 %% 9. TO DO: Theta detection
 
 %% 10. Cell metrics
-cell_metrics = ProcessCellMetrics('session', session,'excludeMetrics',{'deepSuperficial'});
+% Exclude manipulation intervals for computing CellMetrics
+try
+    excludeManipulationIntervals = pulses.intsPeriods;
+catch
+    warning('Not possible to get manipulation periods. Running CellMetrics withouth excluding manipulation epochs');
+end
+cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',{'deepSuperficial'});
 % cell_metrics = CellExplorer('metrics',cell_metrics);
 
 %% 11. Spike Features
