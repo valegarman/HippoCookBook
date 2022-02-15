@@ -166,6 +166,7 @@ if spikeSort
 end
 cd(basepath);
 
+keyboard;
 %% Get tracking positions 
 if getPos
     getSessionTracking('convFact',tracking_pixel_cm,'roiTracking','manual'); 

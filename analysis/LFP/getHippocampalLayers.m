@@ -1,4 +1,4 @@
-function [hippocampalLayers] = getHippocampalLayers_temp(varargin)
+function [hippocampalLayers] = getHippocampalLayers(varargin)
 % Identify hippocampal layers based in spectral hallmarks
 % 
 % INPUTS
@@ -22,7 +22,7 @@ function [hippocampalLayers] = getHippocampalLayers_temp(varargin)
 % Radiatum is channel with highest current sink during SPW-ripples.
 %
 % Manu Valero 2020
-% WORK IN PROGRESS!!!!
+% Pablo Abad, Manu Valero 2022
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Parse options
 p = inputParser;
@@ -71,7 +71,12 @@ channel_order = session.channels;
 powerProfile_theta = powerSpectrumProfile(theta_bandpass,'showfig',true,'saveMat',false); 
 powerProfile_gamma = powerSpectrumProfile(gamma_bandpass,'showfig',true,'saveMat',false);
 powerProfile_hfo = powerSpectrumProfile(hfo_bandpass,'showfig',true,'saveMat',false); 
+
 %% Computing Hippocampal Layers by looking at powerSpectrum profiles for theta and hfo
+figure
+set(gcf,'Position',[100 100 1400 600])
+nShanks = length(session.extracellular.spikeGroups.channels);
+index = reshape(1:2*nShanks, nShanks, 2).';
 for i = 1:length(session.extracellular.spikeGroups.channels)
     if ~all(ismember(session.extracellular.spikeGroups.channels{i},session.channelTags.Bad.channels))
         % Channel slm : Channel with bigger theta amplitude
@@ -95,8 +100,8 @@ for i = 1:length(session.extracellular.spikeGroups.channels)
         
         %% Ripples
         rippleChannels = computeRippleChannel(); % rippleChannels output is now 1-index
-        ripples{i} = bz_FindRipples(getLFP(channels{i}.pyramidal),'thresholds',[1 2],'passband',[80 240],...
-            'EMGThresh',1,'durations',[20 150],'saveMat',false,'noise',rippleChannels.Noise_Channel);
+        ripples{i} = findRipples(channels{i}.pyramidal,'thresholds',[1 2],'passband',[80 240],...
+            'EMGThresh',0.99,'durations',[20 150],'saveMat',false);
         twin = 0.1;
 %         [evCsd,lfpAvg] = bz_eventCSD(lfp,ripples{i}.peaks,'twin',[twin twin],'plotLFP',false,'plotCSD',false);
         [evCsd,lfpAvg] = bz_eventCSD(lfp,ripples{i}.peaks,'channels',session.extracellular.spikeGroups.channels{i},'twin',[twin twin],'plotLFP',false,'plotCSD',false);
@@ -107,8 +112,7 @@ for i = 1:length(session.extracellular.spikeGroups.channels)
         channels{i}.all = [channels{i}.oriens; channels{i}.pyramidal; channels{i}.radiatum; channels{i}.slm];
         
         %% Summary Plot
-        figure
-        subplot(1,2,1)
+        subplot(2,nShanks,index(2*i-1))
         title(['Shank : ', num2str(i)])
         hold on
         % Theta
@@ -172,7 +176,7 @@ for i = 1:length(session.extracellular.spikeGroups.channels)
         
         
         % Subplot (1,2,2)
-        subplot(1,2,2)
+        subplot(2,nShanks,index(2*i))
         title(['Shank : ', num2str(i)])
         contourf(evCsd.timestamps,(nC(2:end-1)),evCsd.data',40,'LineColor','none');hold on;
         box off; colormap(jet); caxis([-max(abs(evCsd.data(:))) max(abs(evCsd.data(:)))]);
@@ -196,14 +200,13 @@ for i = 1:length(session.extracellular.spikeGroups.channels)
             text(xs(2),find(session.extracellular.spikeGroups.channels{i} == channels{i}.slm),'Slm','color',[.1 .8 1]);
         end
         ylim([min(nC) max(nC)]);
-        set(gca,'TickDir','out','YDir','reverse'); ylabel('Channels'); xlabel('Time [s]');
-       
-        % Save Figure
-        if saveSummary
-            mkdir('SummaryFigures'); % create folder
-            saveas(gcf,['SummaryFigures\hippocampalLayers_Shank',num2str(i),'.png']);
-        end
+        set(gca,'TickDir','out','YDir','reverse'); ylabel('Channels'); xlabel('Time [s]');     
     end
+end
+% Save Figure
+if saveSummary
+    mkdir('SummaryFigures'); % create folder
+    saveas(gcf,['SummaryFigures\hippocampalLayers_Shank',num2str(i),'.png']);
 end
 
 

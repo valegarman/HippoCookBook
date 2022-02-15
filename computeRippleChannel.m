@@ -96,7 +96,6 @@ end
 clear SHANKS
 SHANKS=SHANKS_PerProb;
 
-
 % Discard shanks based on session metadata and if all the channels of the
 % same shanks are marked as Bad
 if isempty(discardShanks) && ~isempty(session.channelTags.Bad.channels)
@@ -116,7 +115,7 @@ end
 
 Ripple_window_start=120;
 Ripple_window_end=180;
-[lfp] = bz_GetLFP('all');
+[lfp] = getLFP('all');
 [bbb aaa]=butter(4,[Ripple_window_start Ripple_window_end]/lfp.samplingRate*2,'bandpass');
 
 Refrence_chan=[];
@@ -158,7 +157,7 @@ try
     LfpSamplingrate = lfp.samplingRate;
 catch
     keyboard;
-    [ripples] = findRipples(basePath,RefrenceRippleChannel_test);
+    [ripples] = findRipples(RefrenceRippleChannel_test);
 end
 Win=70;
 LfpSamplingrate = lfp.samplingRate;
@@ -260,19 +259,19 @@ for shk=1:length(SHANKS)
         plot(Ripple_X,Ripple_Y,'color',Cr,'linewidth',1);
         hold on
         % Channel Colors ##################################################
-        if SHANKS{1,shk}(CH)==Rip_chnl
-            channelname='Ripple';
-            plot(Ripple_X,Ripple_Y,'color','r','linewidth',1,'LineStyle','-.');
-            text(Ripple_X(end)-20,Ripple_Y(1)+2*Sh_spacing,channelname,'color','r','fontsize',10)
-        elseif SHANKS{1,shk}(CH)==SWR_chnl
-            channelname='SWR';
-            plot(Ripple_X,Ripple_Y,'color','r','linewidth',1,'LineStyle','-.');
-            text(Ripple_X(end),Ripple_Y(1)+2*Sh_spacing,channelname,'color','r','fontsize',10)
-        elseif SHANKS{1,shk}(CH)==noise_chnl
-            channelname='noise';
-            plot(Ripple_X,Ripple_Y,'color','r','linewidth',1,'LineStyle','-.');
-            text(Ripple_X(end),Ripple_Y(1)+2*Sh_spacing,channelname,'color','r','fontsize',10)
-        end
+%         if SHANKS{1,shk}(CH)==Rip_chnl
+%             channelname='Ripple';
+%             plot(Ripple_X,Ripple_Y,'color','r','linewidth',1,'LineStyle','-.');
+%             text(Ripple_X(end)-20,Ripple_Y(1)+2*Sh_spacing,channelname,'color','r','fontsize',10)
+%         elseif SHANKS{1,shk}(CH)==SWR_chnl
+%             channelname='SWR';
+%             plot(Ripple_X,Ripple_Y,'color','r','linewidth',1,'LineStyle','-.');
+%             text(Ripple_X(end),Ripple_Y(1)+2*Sh_spacing,channelname,'color','r','fontsize',10)
+%         elseif SHANKS{1,shk}(CH)==noise_chnl
+%             channelname='noise';
+%             plot(Ripple_X,Ripple_Y,'color','r','linewidth',1,'LineStyle','-.');
+%             text(Ripple_X(end),Ripple_Y(1)+2*Sh_spacing,channelname,'color','r','fontsize',10)
+%         end
         %Type channel number and deep sup
         %##################################################################
         if SD <0
