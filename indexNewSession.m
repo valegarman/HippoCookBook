@@ -102,8 +102,7 @@ pulses = getAnalogPulses('analogCh',analogCh,'manualThr',false,'overwrite',force
 
 %% 4. Check Sleep Score
 SleepScoreMaster(pwd,'noPrompts',true,'ignoretime',pulses.intsPeriods, 'overwrite', true);
-% TheStateEditor; TO DO: TheStateEditor has to be modified for 1-indexing
-% and sessionInfo depenencies.
+bz_ThetaStates(pwd);
 
 %% 5. Power Profiles
 powerProfile_theta = powerSpectrumProfile(theta_bandpass,'showfig',true,'forceDetect',true);
@@ -120,7 +119,7 @@ powerProfile_hfo = powerSpectrumProfile(hfo_bandpass,'showfig',true,'forceDetect
 
     % 7.2 Ripples
     rippleChannel = hippocampalLayers.layers{hippocampalLayers.bestShank}.pyramidal;
-    ripples = rippleMasterDetector(pwd,rippleChannel,'thresholds',[1 2],'passband',[80 240],...
+    ripples = rippleMasterDetector(pwd,rippleChannel,'thresholds',[2 5],'passband',[80 240],...
         'EMGThres',1,'durations',[20 150], 'saveMat',true);
 
     rippleChannels = computeRippleChannel_temp(); % rippleChannels output is now 1-index
@@ -134,27 +133,7 @@ powerProfile_hfo = powerSpectrumProfile(hfo_bandpass,'showfig',true,'forceDetect
     EventExplorer(pwd,ripples);
 
     % 7.3 Theta intervals
-    % work in progress... 
-
-% spikes = loadSpikes;
-% spkEventTimes = bz_getSpikesRank('events',ripples, 'spikes',spikes);
-% [rankStats] = bz_RankOrder('spkEventTimes',spkEventTimes,'numRep',100);
-% rippleChannels = computeRippleChannel('saveMat',false,'force',false);
-% xml = LoadParameters;
-% clear deepSup
-% deepSup.channel = []; deepSup.reversalPosition = [];
-% for ii = 1:size(xml.AnatGrps,2)
-%     deepSup.channel = [deepSup.channel; xml.AnatGrps(ii).Channels'];
-%     deepSup.reversalPosition = [deepSup.reversalPosition; rippleChannels.Deep_Sup{ii}];
-% end
-% [~,idx] = sort(deepSup.channel);
-% deepSup.channel = deepSup.channel(idx);
-% deepSup.reversalPosition = deepSup.reversalPosition(idx);
-% deepSup.identity = deepSup.reversalPosition<1; % sup is 1, deep is 0, just like in the old times
-% ripples.deepSup = deepSup;
-
-
-targetFile = dir('*ripples.events*'); save(targetFile.name,'ripples');
+    thetaEpochs = detectThetaEpochs;
 
 
 %% 8. Cell metrics

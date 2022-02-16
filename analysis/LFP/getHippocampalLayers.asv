@@ -243,9 +243,7 @@ end
 hippocampalLayers.layers = channels;
 hippocampalLayers.channels = powerProfile_theta.channels;
 hippocampalLayers.bestShank = bestShank;
-
-% definition in best channel
-hippocampalLayers.bestShankLayers =  channels{bestShank};
+hippocampalLayers.orien
 
 if saveMat
     filename = split(pwd,filesep); filename = filename{end};
