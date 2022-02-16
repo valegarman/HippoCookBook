@@ -66,7 +66,7 @@ addParameter(p,'basepath',pwd,@isdir);
 addParameter(p,'rippleChannel',[],@isnumeric);
 addParameter(p,'SWChannel',[],@isnumeric);
 addParameter(p,'thresholds',[2 5],@isnumeric);
-addParameter(p,'SWthresholds',[0.5 -2], @isnumeric);
+addParameter(p,'SWthresholds',[-0.5 -2], @isnumeric);
 addParameter(p,'durations',[20 250],@isnumeric);
 addParameter(p,'restrict',[],@isnumeric);
 addParameter(p,'frequency',1250,@isnumeric);
@@ -137,6 +137,12 @@ ripples = removeArtifactsFromEvents(ripples);
 ripples = eventSpikingTreshold(ripples,[],'spikingThreshold',2);
 
 % Computing SharpWaves
+
+SW = [];
+SW.timestamps = nan(size(ripples.timestamps,1),size(ripples.timestamps,2));
+SW.peaks = nan(size(ripples.peaks,1));
+
+
 lfpRipple = getLFP(rippleChannel);
 lfpSW = getLFP(SWChannel);
 
@@ -147,12 +153,26 @@ zRipple = zscore(filteredRipple);
 zSW = zscore(filteredSW);
 
 for i = 1:size(ripples.timestamps,1)
-    signal = zSW(ripples.timestamps(i,1)*srLfp:ripples.timestamps(i,2)*srLfp);
-    negPeak = find(zSW(signal < SWthresholds(2));
+    dur = 0;
+    signalSW = zSW((ripples.timestamps(i,1)-dur)*srLfp:(ripples.timestamps(i,2)+dur)*srLfp);    
+    negPeak = find(signalSW < SWthresholds(2));
+    [minimum,index] = min(signalSW);
     if ~isempty(negPeak)
         disp('SharpWaveDetected')
-        posPeak1 = find(signal < SWthresholds(1),1);
-        posPeak2 = find(signal < SWthresholds(1),end);
+        dur = 0.1;
+        posSignalSW = zSW((ripples.timestamps(i,1)-dur)*srLfp:(ripples.timestamps(i,2)+dur)*srLfp);
+       [minNegPeak,ind] = min(posSignalSW);
+        posPeak1 = find(posSignalSW < SWthresholds(1));
+        % minimum distance between negative peak and positive peak1
+        for i = ind-1:-1:1
+            if (posSignalSW(i) > SWthresholds(1))
+                
+            end
+        end
+        a = diff(posPeak1);
+        max(ind-posPeak1)
+        
+        posPeak2 = find(zSW < SWthresholds(1));
     end
 end
 
