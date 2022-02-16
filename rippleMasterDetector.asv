@@ -148,12 +148,7 @@ zSW = zscore(filteredSW);
 
 for i = 1:size(ripples.timestamps,1)
     signal = zSW(ripples.timestamps(i,1)*srLfp:ripples.timestamps(i,2)*srLfp);
-    negPeak = find(zSW(signal < SWthresholds(2));
-    if ~isempty(negPeak)
-        disp('SharpWaveDetected')
-        posPeak1 = find(signal < SWthresholds(1),1);
-        posPeak2 = find(signal < SWthresholds(1),end);
-    end
+    negPeaks = find(zSW(ripples.timestamps(i,1)*srLfp:ripples.timestamps(i,2)*srLfp) > SWthresholds(2));
 end
 
 

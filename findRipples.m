@@ -96,9 +96,8 @@ addParameter(p,'noise',[],@ismatrix)
 addParameter(p,'passband',[130 200],@isnumeric)
 addParameter(p,'EMGThresh',.9,@isnumeric);
 addParameter(p,'saveMat',false,@islogical);
-addParameter(p,'minDuration',20,@isnumeric)
-addParameter(p,'plotType',2,@isnumeric)
-addParameter(p,'basepath',pwd,@isfolder)
+addParameter(p,'minDuration',20,@isnumeric);
+addParameter(p,'plotType',2,@isnumeric);
 
 prevPath = pwd;
 
@@ -133,7 +132,7 @@ elseif isstruct(varargin{1})
     timestamps = p.Results.lfp.timestamps;
     EMGThres  = p.Results.EMGThresh;
     lfp = p.Results.lfp;
-    basepath = p.Results.basepath;
+    basepath = pwd;
     if length(lfp.channels)>1
         error('lfp structure must not have more than 1 channel!');
     else
@@ -145,7 +144,7 @@ elseif isnumeric(varargin{1})
     parse(p,varargin{:});
     passband = p.Results.passband;
     EMGThresh = p.Results.EMGThresh;
-    basepath = p.Results.basepath;
+    basepath = pwd;
     cd(basepath);
     basename = basenameFromBasepath(p.Results.basepath);
     lfp = getLFP(p.Results.channel,'basepath',p.Results.basepath,'basename',basename);

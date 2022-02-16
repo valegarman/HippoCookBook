@@ -120,8 +120,9 @@ powerProfile_hfo = powerSpectrumProfile(hfo_bandpass,'showfig',true,'forceDetect
 UDStates = detectUD_temp('plotOpt', true,'forceDetect',true','NREMInts','all'); % ,'skipCluster',26,'spikeThreshold',.5,'deltaWaveThreshold',[],'ch',18);
 
 %% 8. Ripple Master Detector (to be done)
-% rippleChannel = hippocampalLayers.layers{hippocampalLayers.bestShank}.pyramidal;
-ripples = rippleMasterDetector();
+rippleChannel = hippocampalLayers.layers{hippocampalLayers.bestShank}.pyramidal;
+ripples = rippleMasterDetector(pwd,rippleChannel,'thresholds',[2 5],'passband',[80 240],...
+    'EMGThres',1,'durations',[20 150], 'saveMat',true);
 
 rippleChannels = computeRippleChannel_temp(); % rippleChannels output is now 1-index
 % rippleChannels = computeRippleChannel('discardShanks', 6);
