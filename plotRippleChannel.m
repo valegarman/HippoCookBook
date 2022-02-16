@@ -106,7 +106,7 @@ end
 
 %% Get Ripple
 lfp = getLFP('all');
-[ripples] = findRipples(basePath,rippleChannel);
+[ripples] = findRipples(rippleChannel);
 
 Win=70;
 LfpSamplingrate = lfp.samplingRate;
