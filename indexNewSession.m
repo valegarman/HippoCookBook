@@ -120,7 +120,7 @@ powerProfile_hfo = powerSpectrumProfile(hfo_bandpass,'showfig',true,'forceDetect
 UDStates = detectUD('plotOpt', true,'forceDetect',true','NREMInts','all');
 
 % 7.2 Ripples
-ripples = rippleMasterDetector();
+ripples = rippleMasterDetector('SWChannel',48);
 
 % 7.3 Theta intervals
 thetaEpochs = detectThetaEpochs;
