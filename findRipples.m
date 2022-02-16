@@ -101,7 +101,6 @@ addParameter(p,'plotType',2,@isnumeric)
 addParameter(p,'basepath',pwd,@isfolder)
 
 prevPath = pwd;
-
 if isstr(varargin{1})  % if first arg is basepath
     addRequired(p,'basepath',@isstr)
     addRequired(p,'channel',@isnumeric)    

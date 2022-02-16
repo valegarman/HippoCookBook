@@ -1,4 +1,4 @@
-function [UDStates] = detectUD_temp(varargin)
+function [UDStates] = detectUD(varargin)
 % Detect up and down states from LFP.
 %
 % USAGE
@@ -107,7 +107,7 @@ if exist([session.general.name '.UDStates.events.mat'],'file') && ~forceDetect
     load([sessionInfo.FileName '.UDStates.events.mat']);
     return
 end
-tlfp = getLFP_temp(1,'basepath',basepath,'noPrompts',noPrompts);
+tlfp = getLFP(1,'basepath',basepath,'noPrompts',noPrompts);
 if ischar(NREMInts) && strcmpi(NREMInts,'all')
     NREMInts = [0 tlfp.duration];                                          % Consider all file as NREMInts
 elseif isempty(NREMInts)                                                   % if empty, try to generate
@@ -151,7 +151,7 @@ if isempty(ch) % if no channel declared, pick channel with higher gamma std duri
             gdCorr(ii) = 0; stdGamma(ii) = 0;
         else
             fprintf(' **Channel %3.i/ %3.i, ',ii, session.extracellular.nChannels); %\n
-            chlfp = getLFP_temp(ii,'basepath',basepath,'noPrompts',noPrompts);
+            chlfp = getLFP(ii,'basepath',basepath,'noPrompts',noPrompts);
             [S,t,f] = mtspecgramc_fast(double(chlfp.data(NREM_ts)),[2 1],params);
             S = 10 * log10(S)' + 60;
             gamm = sum(S(find(f >= filterparams.gamma(1) & f <= filterparams.gamma(2)),:));
@@ -174,7 +174,7 @@ end
 clear gamm delt avGamma stdGamma gdCorr dscore
 
 %% find states
-lfp = getLFP_temp(ch,'basepath',basepath,'noPrompts',noPrompts);
+lfp = getLFP(ch,'basepath',basepath,'noPrompts',noPrompts);
 gammaLFP = bz_Filter(lfp,'passband',filterparams.gamma,'filter','fir1','order',4);
 smoothGamm = smoothGamm * session.extracellular.srLfp;
 envGamm = movmean(gammaLFP.data.^2,smoothGamm);

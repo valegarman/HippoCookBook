@@ -9,6 +9,7 @@ function [hippocampalLayers] = getHippocampalLayers(varargin)
 %                       If empty or no exist, look for lfp in basePath folder
 % 'saveSummary'       Default true
 % 'saveMat'           Detault true
+% 'force'             Default false
 % 
 % OUTPUT
 % hippocampalLayers   channelinfo structure with best channel for stratum
@@ -99,11 +100,9 @@ for i = 1:length(session.extracellular.spikeGroups.channels)
         end
         
         %% Ripples
-        rippleChannels = computeRippleChannel(); % rippleChannels output is now 1-index
-        ripples{i} = findRipples(channels{i}.pyramidal,'thresholds',[1 2],'passband',[80 240],...
-            'EMGThresh',0.99,'durations',[20 150],'saveMat',false);
+        ripples{i} = findRipples(channels{i}.pyramidal,'thresholds',[2 5],'passband',[80 200],'durations',[20 150],'saveMat',false);
+        
         twin = 0.1;
-%         [evCsd,lfpAvg] = bz_eventCSD(lfp,ripples{i}.peaks,'twin',[twin twin],'plotLFP',false,'plotCSD',false);
         [evCsd,lfpAvg] = bz_eventCSD(lfp,ripples{i}.peaks,'channels',session.extracellular.spikeGroups.channels{i},'twin',[twin twin],'plotLFP',false,'plotCSD',false);
         csdRippleProfile = [0 mean(evCsd.data(find(evCsd.timestamps > -10 & evCsd.timestamps < 10),:)) 0];
         shank_channels = session.extracellular.spikeGroups.channels{i};
