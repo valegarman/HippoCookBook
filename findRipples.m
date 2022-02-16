@@ -100,7 +100,6 @@ addParameter(p,'minDuration',20,@isnumeric);
 addParameter(p,'plotType',2,@isnumeric);
 
 prevPath = pwd;
-
 if isstr(varargin{1})  % if first arg is basepath
     addRequired(p,'basepath',@isstr)
     addRequired(p,'channel',@isnumeric)    
