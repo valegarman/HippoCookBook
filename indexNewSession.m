@@ -36,6 +36,7 @@ addParameter(p,'indexedProjects_path',[],@isstring);
 addParameter(p,'indexedProjects_name','indexedSessions',@isstring);
 addParameter(p,'hippoCookBook_path','HippoCookBook',@isstring);
 addParameter(p,'force_analogPulsesDetection',true,@islogical);
+addParameter(p,'excludeManipulationIntervals',[],@isnumeric);
 
 parse(p,varargin{:})
 
@@ -50,6 +51,7 @@ indexedProjects_path = p.Results.indexedProjects_path;
 indexedProjects_name = p.Results.indexedProjects_name;
 hippoCookBook_path = p.Results.hippoCookBook_path;
 force_analogPulsesDetection = p.Results.force_analogPulsesDetection;
+excludeManipulationIntervals = p.Results.excludeManipulationIntervals;
 
 keyboard;
 %% Creates a pointer to the folder where the index variable is located
@@ -113,6 +115,7 @@ powerProfile_hfo = powerSpectrumProfile(hfo_bandpass,'showfig',true,'forceDetect
 [hippocampalLayers] = getHippocampalLayers('force',true);
 
 %% 7. Check Brain Events
+<<<<<<< HEAD
     % Trying changes in detecUD_temp
     % 7.1 Up and downs
     UDStates = detectUD('plotOpt', true,'forceDetect',true','NREMInts','all');
@@ -134,8 +137,71 @@ powerProfile_hfo = powerSpectrumProfile(hfo_bandpass,'showfig',true,'forceDetect
 
     % 7.3 Theta intervals
     thetaEpochs = detectThetaEpochs;
+=======
+% Trying changes in detecUD_temp
+% 7.1 Up and downs
+UDStates = detectUD('plotOpt', true,'forceDetect',true','NREMInts','all');
+
+%% 8. Ripple Master Detector (to be done)
+% rippleChannel = hippocampalLayers.layers{hippocampalLayers.bestShank}.pyramidal;
+ripples = rippleMasterDetector();
+
+rippleChannels = computeRippleChannel_temp(); % rippleChannels output is now 1-index
+% rippleChannels = computeRippleChannel('discardShanks', 6);
+rippleChannels.Ripple_Channel = 17; rippleChannels.Noise_Channel = 50; % I dont know if 0-index or 1-index (I think 0-index)
+% ripples = bz_DetectSWR([rippleChannels.Ripple_Channel, rippleChannels.Sharpwave_Channel],'saveMat',true,'forceDetect',true,'useSPW',true,'thresSDrip',[.5 1.5]);
+ripples = bz_FindRipples(pwd, rippleChannels.Ripple_Channel,'thresholds', [1 2], 'passband', [80 240],...
+    'EMGThresh', 1, 'durations', [20 150],'saveMat',true,'noise',rippleChannels.Noise_Channel); % [.2 .4]
+ripples = removeArtifactsFromEvents(ripples);
+ripples = eventSpikingTreshold(ripples,[],'spikingThreshold',2); % .8
+EventExplorer(pwd,ripples);
+% 7.2 Ripples
+rippleChannel = hippocampalLayers.layers{hippocampalLayers.bestShank}.pyramidal;
+ripples = rippleMasterDetector(pwd,rippleChannel,'thresholds',[1 2],'passband',[80 240],...
+    'EMGThres',1,'durations',[20 150], 'saveMat',true);
+
+rippleChannels = computeRippleChannel_temp(); % rippleChannels output is now 1-index
+% rippleChannels = computeRippleChannel('discardShanks', 6);
+rippleChannels.Ripple_Channel = 17; rippleChannels.Noise_Channel = 50; % I dont know if 0-index or 1-index (I think 0-index)
+% ripples = bz_DetectSWR([rippleChannels.Ripple_Channel, rippleChannels.Sharpwave_Channel],'saveMat',true,'forceDetect',true,'useSPW',true,'thresSDrip',[.5 1.5]);
+ripples = bz_FindRipples(pwd, rippleChannels.Ripple_Channel,'thresholds', [1 2], 'passband', [80 240],...
+    'EMGThresh', 1, 'durations', [20 150],'saveMat',true,'noise',rippleChannels.Noise_Channel); % [.2 .4]
+ripples = removeArtifactsFromEvents(ripples);
+ripples = eventSpikingTreshold(ripples,[],'spikingThreshold',2); % .8
+EventExplorer(pwd,ripples);
+
+% 7.3 Theta intervals
+% work in progress... 
+
+% spikes = loadSpikes;
+% spkEventTimes = bz_getSpikesRank('events',ripples, 'spikes',spikes);
+% [rankStats] = bz_RankOrder('spkEventTimes',spkEventTimes,'numRep',100);
+% rippleChannels = computeRippleChannel('saveMat',false,'force',false);
+% xml = LoadParameters;
+% clear deepSup
+% deepSup.channel = []; deepSup.reversalPosition = [];
+% for ii = 1:size(xml.AnatGrps,2)
+%     deepSup.channel = [deepSup.channel; xml.AnatGrps(ii).Channels'];
+%     deepSup.reversalPosition = [deepSup.reversalPosition; rippleChannels.Deep_Sup{ii}];
+% end
+% [~,idx] = sort(deepSup.channel);
+% deepSup.channel = deepSup.channel(idx);
+% deepSup.reversalPosition = deepSup.reversalPosition(idx);
+% deepSup.identity = deepSup.reversalPosition<1; % sup is 1, deep is 0, just like in the old times
+% ripples.deepSup = deepSup;
 
 
+targetFile = dir('*ripples.events*'); save(targetFile.name,'ripples');
+>>>>>>> 058e6c1288a22605475b3afa480f9d5082a714dd
+
+%% 10. Cell metrics
+% Exclude manipulation intervals for computing CellMetrics
+try
+    excludeManipulationIntervals = pulses.intsPeriods;
+catch
+    warning('Not possible to get manipulation periods. Running CellMetrics withouth excluding manipulation epochs');
+end
+cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',{'deepSuperficial'});
 %% 8. Cell metrics
 cell_metrics = ProcessCellMetrics('session', session,'excludeMetrics',{'deepSuperficial'});
 % cell_metrics = CellExplorer('metrics',cell_metrics);

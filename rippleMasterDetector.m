@@ -3,11 +3,8 @@ function [ripples] = rippleMasterDetector(varargin)
 %                           characteristics about hippocampal ripples (100 ~ 200 Hz oscillations).
 %
 % USAGE
-%   [ripples] = rippleMasterDetector(lfp.data,lfp.timestamps,<options>)
-%       OR
-%   [ripples] = rippleMasterDetector(basepath,channel,<options>) Probably
-%      
-%   Probably needs to be changed the usage
+%   [ripples] = rippleMasterDetector(<options>)
+%   
 %
 %    Ripples are detected using the normalized squared signal (NSS) by
 %    thresholding the baseline, merging neighboring events, thresholding
@@ -18,14 +15,7 @@ function [ripples] = rippleMasterDetector(varargin)
 %    exclusion criteria
 %
 % INPUTS - note these are NOT name-value pairs... just raw values
-%    lfp            unfiltered LFP (one channel) to use
-%	 timestamps	    timestamps to match filtered variable
 %    <options>      optional list of property-value pairs (see tables below)
-%
-%    OR
-%
-%    basepath       path to a single session to run findRipples on
-%    channel      	Ripple channel to use for detection (0-indexed, a la neuroscope)
 %
 %    =========================================================================
 %     Properties    Values
@@ -70,93 +60,108 @@ function [ripples] = rippleMasterDetector(varargin)
 %   Develop by Manu Valero and Pablo Abad 2022. Buzsaki Lab.
 warning('this function is under development and may not work... yet')
 
-% Default values
+%% Default values
 p = inputParser;
-addParameter(p,'thresholds',[2 5],@isnumeric)
-addParameter(p,'durations',[30 100],@isnumeric)
-addParameter(p,'restrict',[],@isnumeric)
-addParameter(p,'frequency',1250,@isnumeric)
-addParameter(p,'stdev',[],@isnumeric)
-addParameter(p,'show','off',@isstr)
-addParameter(p,'noise',[],@ismatrix)
-addParameter(p,'passband',[130 200],@isnumeric)
-addParameter(p,'EMGThresh',.9,@isnumeric);
-addParameter(p,'saveMat',false,@islogical);
+addParameter(p,'basepath',pwd,@isdir);
+addParameter(p,'rippleChannel',[],@isnumeric);
+addParameter(p,'SWChannel',[],@isnumeric);
+addParameter(p,'thresholds',[2 5],@isnumeric);
+addParameter(p,'SWthresholds',[0.5 -2], @isnumeric);
+addParameter(p,'durations',[20 250],@isnumeric);
+addParameter(p,'restrict',[],@isnumeric);
+addParameter(p,'frequency',1250,@isnumeric);
+addParameter(p,'stdev',[],@isnumeric);
+addParameter(p,'show','off',@isstr);
+addParameter(p,'noise',[],@ismatrix);
+addParameter(p,'passband',[80 200],@isnumeric);
+addParameter(p,'SWpassband',[2 10],@isnumeric);
+addParameter(p,'EMGThresh',1,@isnumeric);
+addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'minDuration',20,@isnumeric);
 addParameter(p,'plotType',2,@isnumeric);
+addParameter(p,'srLfp',1250,@isnumeric);
 
-if isstr(varargin{1})  % if first arg is basepath
-    addRequired(p,'basepath',@isstr)
-    addRequired(p,'channel',@isnumeric)    
-    parse(p,varargin{:})
-    basename = bz_BasenameFromBasepath(p.Results.basepath);
-    basepath = p.Results.basepath;
-    passband = p.Results.passband;
-    EMGThresh = p.Results.EMGThresh;
-    lfp = bz_GetLFP(p.Results.channel-1,'basepath',p.Results.basepath,'basename',basename);%currently cannot take path inputs
-    signal = bz_Filter(double(lfp.data),'filter','butter','passband',passband,'order', 3);
-    timestamps = lfp.timestamps;
-    channel = p.Results.channel;
-elseif isnumeric(varargin{1}) % if first arg is filtered LFP
-    addRequired(p,'lfp',@isnumeric)
-    addRequired(p,'timestamps',@isnumeric)
-    parse(p,varargin{:})
-    passband = p.Results.passband;
-    EMGThresh = p.Results.EMGThresh;
-    signal = bz_Filter(double(p.Results.lfp),'filter','butter','passband',passband,'order', 3);
-    timestamps = p.Results.timestamps;
-    basepath = pwd;
-    basename = bz_BasenameFromBasepath(basepath);
-elseif isstruct(varargin{1})
-    % Added by Pablo Abad to manage when first input if lfp file, not
-    % filtered
-    addRequired(p,'lfp',@isstruct);
-    parse(p,varargin{:})
-    passband = p.Results.passband;
-    EMGThresh = p.Results.EMGThresh;
-    timestamps = p.Results.lfp.timestamps;
-    EMGThres  = p.Results.EMGThresh;
-    signal = bz_Filter(double(p.Results.lfp.data),'filter','butter','passband',passband,'order',3);
-    basepath = pwd;
-    basename = bz_BasenameFromBasepath(basepath);
-    
-end
+parse(p,varargin{:})
 
-frequency = p.Results.frequency;
-show = p.Results.show;
-restrict = p.Results.restrict;
-sd = p.Results.stdev;
-noise = p.Results.noise;
+basepath = p.Results.basepath;
+rippleChannel = p.Results.rippleChannel;
+SWChannel = p.Results.SWChannel;
 thresholds = p.Results.thresholds;
+SWthresholds = p.Results.SWthresholds;
 durations = p.Results.durations;
-minRippleDuration = p.Results.minDuration;
+restrict = p.Results.restrict;
+frequency = p.Results.frequency;
+stdev = p.Results.stdev;
+show = p.Results.show;
+noise = p.Results.noise;
+passband = p.Results.passband;
+SWpassband = p.Results.SWpassband;
+EMGThresh = p.Results.EMGThresh;
+saveMat = p.Results.saveMat;
+minDuration = p.Results.minDuration;
 plotType = p.Results.plotType;
-
-
-%% Load session metadata
+srLfp = p.Results.srLfp;
+%% Load Session Metadata and several variables if not provided
 session = sessionTemplate(basepath,'showGUI',false);
 
-% %% Load best Ripple Channel based on hippocampalLayers
-try
+% Ripple and SW Channel are loaded separately in case we want to provide
+% only one of the
+if isempty(rippleChannel)
     if ~isempty(dir([session.general.name,'.hippocampalLayers.channelinfo.mat']))
-        disp('Hippocampal layers file found. Loading file !');
         file = dir([session.general.name,'.hippocampalLayers.channelinfo.mat']);
         load(file.name);
-        rippleChannel = hippocampalLayers.layers{hippocampalLayers.bestShank}.pyramidal;
+    else
+        [hippocampalLayers] = getHippocampalLayers();
     end
-catch
-    rippleChannel = [];
+    rippleChannel = hippocampalLayers.layers{hippocampalLayers.bestShank}.pyramidal;
 end
+
+if isempty(SWChannel)
+    if ~isempty(dir([session.general.name,'.hippocampalLayers.channelinfo.mat']))
+        file = dir([session.general.name,'.hippocampalLayers.channelinfo.mat']);
+        load(file.name);
+    else
+        [hippocampalLayers] = getHippocampalLayers();
+    end
+    SWChannel = hippocampalLayers.layers{hippocampalLayers.bestShank}.radiatum;
+end
+
+
 % Just plotting purposes
-plotRippleChannel_temp('rippleChannel',channel);
-ripples = bz_FindRipples(basepath,rippleChannel,'thresholds',thresholds,'passband',passband,...
-    'EMGThresh',EMGThresh,'durations',durations, 'saveMat',true);
+plotRippleChannel('rippleChannel',rippleChannel);
+
+% Computing Ripples
+ripples = findRipples(rippleChannel,'thresholds',thresholds,'passband',passband,...
+    'EMGThresh',EMGThresh,'durations',durations, 'saveMat',false);
 ripples = removeArtifactsFromEvents(ripples);
 ripples = eventSpikingTreshold(ripples,[],'spikingThreshold',2);
 
+% Computing SharpWaves
+lfpRipple = getLFP(rippleChannel);
+lfpSW = getLFP(SWChannel);
+
+filteredRipple = bz_Filter(double(lfpRipple.data),'filter','butter','passband',passband,'order',3);
+filteredSW = bz_Filter(double(lfpSW.data),'filter','butter','passband',SWpassband,'order',3);
+
+zRipple = zscore(filteredRipple);
+zSW = zscore(filteredSW);
+
+for i = 1:size(ripples.timestamps,1)
+    signal = zSW(ripples.timestamps(i,1)*srLfp:ripples.timestamps(i,2)*srLfp);
+    negPeak = find(zSW(signal < SWthresholds(2));
+    if ~isempty(negPeak)
+        disp('SharpWaveDetected')
+        posPeak1 = find(signal < SWthresholds(1),1);
+        posPeak2 = find(signal < SWthresholds(1),end);
+    end
+end
+
+
+
+
 %% Stats
 lfp = bz_GetLFP('all');
-filtered = bz_Filter(lfp,'channels',channel-1,'filter','butter','passband',passband,'order',3);
+filtered = bz_Filter(lfp,'channels',channel,'filter','butter','passband',passband,'order',3);
 [maps,data,stats] = bz_RippleStats(filtered.data,filtered.timestamps,ripples);
 ripples.maps = maps;
 ripples.data = data;
