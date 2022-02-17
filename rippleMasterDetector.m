@@ -185,7 +185,7 @@ filteredRipple = bz_Filter(getLFP(rippleChannel),'filter','butter','passband',pa
 filteredSW = bz_Filter(getLFP(SWChannel),'filter','butter','passband',SWpassband,'order',3);
 zRipple = zscore(filteredRipple.data);
 zSW = zscore(filteredSW.data);
-ts = lfpRipple.timestamps;
+ts = filteredRipple.timestamps;
 
 eliminatedSW = false;
 for i = 1:size(ripples.timestamps,1)
