@@ -128,7 +128,7 @@ ripples = rippleMasterDetector('SWChannel',SWChannel);
 % 7.3 Theta intervals
 thetaEpochs = detectThetaEpochs;
 
-%% 10. Cell metrics
+%% 8. Cell metrics
 % Exclude manipulation intervals for computing CellMetrics
 try
     excludeManipulationIntervals = pulses.intsPeriods;
@@ -136,9 +136,6 @@ catch
     warning('Not possible to get manipulation periods. Running CellMetrics withouth excluding manipulation epochs');
 end
 cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',{'deepSuperficial'});
-%% 8. Cell metrics
-cell_metrics = ProcessCellMetrics('session', session,'excludeMetrics',{'deepSuperficial'});
-% cell_metrics = CellExplorer('metrics',cell_metrics);
 
 %% 9. Spike Features
 spikeFeatures()
