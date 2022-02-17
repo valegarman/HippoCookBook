@@ -19,11 +19,8 @@ function [ripples] = rippleMasterDetector(varargin)
 %   SharpWaves are detected based on the detected ripples. Radiatum lfp
 %   signal is filtered (default [2 10] Hz) and szcore of the signal is
 %   computed. SW peak is detected as the time when zscore rad signal
-%   exceeds SWthreshold(2) during the ocurrence of a ripple (SW.peaks). If a ripple
-%   does not have an associated SharpWave, nan values are in play. Onset
-%   and offset of the sharpwave is computed as the time when radiatum
-%   zscore signal first crosses threshold(1) both before and after the
-%   peaks ( SW.timestamps)
+%   exceeds SWthreshold(2) during the ocurrence of a ripple. Ocurring
+%   ripples with no associ
 %
 %
 %
@@ -98,7 +95,6 @@ addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'minDuration',20,@isnumeric);
 addParameter(p,'plotType',2,@isnumeric);
 addParameter(p,'srLfp',1250,@isnumeric);
-addParameter(p,'rippleStats',false,@islogical);
 addParameter(p,'debug',false,@islogical);
 
 parse(p,varargin{:})
@@ -121,7 +117,6 @@ saveMat = p.Results.saveMat;
 minDuration = p.Results.minDuration;
 plotType = p.Results.plotType;
 srLfp = p.Results.srLfp;
-rippleStats = p.Results.rippleStats;
 debug = p.Results.debug;
 %% Load Session Metadata and several variables if not provided
 session = sessionTemplate(basepath,'showGUI',false);
@@ -161,15 +156,14 @@ ripples = removeArtifactsFromEvents(ripples);
 ripples = eventSpikingTreshold(ripples,[],'spikingThreshold',2);
 
 %% Ripple Stats
-if rippleStats
-    lfp = bz_GetLFP('all');
-    filtered = bz_Filter(lfp,'channels',rippleChannel,'filter','butter','passband',passband,'order',3);
-    [maps,data,stats] = bz_RippleStats(filtered.data,filtered.timestamps,ripples);
-    ripples.maps = maps;
-    ripples.data = data;
-    ripples.stats = stats;
-    bz_PlotRippleStats(ripples.maps, ripples.data, ripples.stats);
-end
+lfp = bz_GetLFP('all');
+filtered = bz_Filter(lfp,'channels',rippleChannel,'filter','butter','passband',passband,'order',3);
+[maps,data,stats] = bz_RippleStats(filtered.data,filtered.timestamps,ripples);
+ripples.maps = maps;
+ripples.data = data;
+ripples.stats = stats;
+bz_PlotRippleStats(ripples.maps, ripples.data, ripples.stats);
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Computing SharpWaves
 %%%%%%%%%%%%%%%%%%%%%%%%%
@@ -302,15 +296,16 @@ SWequalPerc = length(SWequal) / SWnumber;
 
 %% OUTPUT SHARPWAVES
 SW.stats.SWperc = SWperc;
-SW.stats.SWbeforeperc = SWbeforePerc;
-SW.stats.SWafterperc = SWafterPerc;
-SW.stats.SWequalperc = SWequalPerc;
+SW.stats.SWbeforeperc = SEbeforeperc;
+SW.
 
 SW.detectorinfo.detectionparams = p.Results;
 SW.detectorinfo.detectorname = 'rippleMasterDetector';
 SW.detectorinfo.detectiondate = today;
 SW.detectorinfo.detectionintervals = [];
 SW.detectorinfo.detectionchannel = SWChannel;
+
+
 
 
 if saveMat

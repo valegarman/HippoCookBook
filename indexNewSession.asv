@@ -37,7 +37,7 @@ addParameter(p,'indexedProjects_name','indexedSessions',@isstring);
 addParameter(p,'hippoCookBook_path','HippoCookBook',@isstring);
 addParameter(p,'force_analogPulsesDetection',true,@islogical);
 addParameter(p,'excludeManipulationIntervals',[],@isnumeric);
-addParameter(p,'SWChannel',[],@isnumeric); % manually selecting SW Channel in case getHippocampalLayers does not provide a right output
+addParameter(p,'SWChannel',[],isnumeric); % manually selecting SW Channel in case getHippocampalLayers does not provide a right output
 
 
 parse(p,varargin{:})

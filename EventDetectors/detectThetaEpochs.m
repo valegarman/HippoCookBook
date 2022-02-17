@@ -120,7 +120,7 @@ thetaEpochs.channel = channel;
 if saveMat
     disp('Saving...');
     filename = split(pwd,filesep); filename = filename{end};
-    save([filename '*.thetaEpochs.states.mat'],'hippocampalLayers');
+    save([filename '*.thetaEpochs.states.mat'],'thetaEpochs');
 end
 
 if plotOpt
