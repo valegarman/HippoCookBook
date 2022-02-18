@@ -1,4 +1,4 @@
-function [ripples] = rippleMasterDetector(varargin)
+function [ripples,SW] = rippleMasterDetector(varargin)
 %   rippleMasterDetector - Wrapped function to compute different
 %                           characteristics about hippocampal ripples (100
 %                           ~ 200 Hz oscillations). It also computes
