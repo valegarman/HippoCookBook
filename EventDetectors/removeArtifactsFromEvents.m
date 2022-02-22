@@ -38,7 +38,7 @@ stdThreshold = p.Results.stdThreshold;
 prevPath = pwd;
 cd(basepath);
 
-lfp = bz_GetLFP(events.detectorinfo.detectionchannel);
+lfp = getLFP(events.detectorinfo.detectionchannel);
 disp('Computing ripples std...');
 stdEvents = [];
 M = movstd(double(lfp.data),winSize * lfp.samplingRate);

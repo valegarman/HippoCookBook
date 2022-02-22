@@ -34,7 +34,7 @@ addParameter(p,'bandpass',[6 12], @isnumeric);
 addParameter(p,'powerThreshold',1, @isnumeric);
 addParameter(p,'restrictToIntervals',[0 Inf], @isnumeric);
 addParameter(p,'channel',[],@isnumeric)
-addParameter(p,'plotOpt',true,@islogical)
+addParameter(p,'plotting',true,@islogical)
 
 parse(p,varargin{:})
 basepath = p.Results.basepath;
@@ -46,6 +46,7 @@ theta_bandpass = p.Results.bandpass;
 powerThresh = p.Results.powerThreshold;
 restrictToIntervals = p.Results.restrictToIntervals;
 channel = p.Results.channel;
+plotting = p.Results.plotting;
 
 % Deal with inputs
 prevBasepath = pwd;
@@ -120,10 +121,10 @@ thetaEpochs.channel = channel;
 if saveMat
     disp('Saving...');
     filename = split(pwd,filesep); filename = filename{end};
-    save([filename '*.thetaEpochs.states.mat'],'hippocampalLayers');
+    save([filename '.thetaEpochs.states.mat'],'thetaEpochs');
 end
 
-if plotOpt
+if plotting
     params.Fs = lfpT.samplingRate; params.fpass = [2 120]; params.tapers = [3 5]; params.pad = 1;
     [S,t,f] = mtspecgramc_fast(single(lfpT.data),[2 1],params); S(S==0) = NaN;
     S = log10(S); % in Db

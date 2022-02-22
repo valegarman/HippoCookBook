@@ -37,6 +37,8 @@ addParameter(p,'indexedProjects_name','indexedSessions',@isstring);
 addParameter(p,'hippoCookBook_path','HippoCookBook',@isstring);
 addParameter(p,'force_analogPulsesDetection',true,@islogical);
 addParameter(p,'excludeManipulationIntervals',[],@isnumeric);
+addParameter(p,'SWChannel',[],@isnumeric); % manually selecting SW Channel in case getHippocampalLayers does not provide a right output
+
 
 parse(p,varargin{:})
 
@@ -52,6 +54,7 @@ indexedProjects_name = p.Results.indexedProjects_name;
 hippoCookBook_path = p.Results.hippoCookBook_path;
 force_analogPulsesDetection = p.Results.force_analogPulsesDetection;
 excludeManipulationIntervals = p.Results.excludeManipulationIntervals;
+SWChannel = p.Results.SWChannel;
 
 keyboard;
 %% Creates a pointer to the folder where the index variable is located
@@ -120,12 +123,12 @@ powerProfile_hfo = powerSpectrumProfile(hfo_bandpass,'showfig',true,'forceDetect
 UDStates = detectUD('plotOpt', true,'forceDetect',true','NREMInts','all');
 
 % 7.2 Ripples
-ripples = rippleMasterDetector('SWChannel',48);
+ripples = rippleMasterDetector('SWChannel',SWChannel);
 
 % 7.3 Theta intervals
 thetaEpochs = detectThetaEpochs;
 
-%% 10. Cell metrics
+%% 8. Cell metrics
 % Exclude manipulation intervals for computing CellMetrics
 try
     excludeManipulationIntervals = pulses.intsPeriods;
@@ -133,9 +136,6 @@ catch
     warning('Not possible to get manipulation periods. Running CellMetrics withouth excluding manipulation epochs');
 end
 cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',{'deepSuperficial'});
-%% 8. Cell metrics
-cell_metrics = ProcessCellMetrics('session', session,'excludeMetrics',{'deepSuperficial'});
-% cell_metrics = CellExplorer('metrics',cell_metrics);
 
 %% 9. Spike Features
 spikeFeatures()
