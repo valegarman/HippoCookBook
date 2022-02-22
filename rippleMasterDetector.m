@@ -100,6 +100,7 @@ addParameter(p,'plotType',2,@isnumeric);
 addParameter(p,'srLfp',1250,@isnumeric);
 addParameter(p,'rippleStats',false,@islogical);
 addParameter(p,'debug',false,@islogical);
+addParameter(p,'eventSpikeThreshold',1,@isnumeric);
 
 parse(p,varargin{:})
 
@@ -123,6 +124,7 @@ plotType = p.Results.plotType;
 srLfp = p.Results.srLfp;
 rippleStats = p.Results.rippleStats;
 debug = p.Results.debug;
+eventSpikeThreshold = p.Results.eventSpikeThreshold;
 %% Load Session Metadata and several variables if not provided
 session = sessionTemplate(basepath,'showGUI',false);
 
@@ -158,7 +160,7 @@ plotRippleChannel('rippleChannel',rippleChannel);
 ripples = findRipples(rippleChannel,'thresholds',thresholds,'passband',passband,...
     'EMGThresh',EMGThresh,'durations',durations, 'saveMat',false);
 ripples = removeArtifactsFromEvents(ripples);
-ripples = eventSpikingTreshold(ripples,[],'spikingThreshold',2);
+ripples = eventSpikingTreshold(ripples,[],'spikingThreshold',eventSpikeThreshold);
 
 %% Ripple Stats
 if rippleStats

@@ -108,7 +108,12 @@ for i = 1:length(session.extracellular.spikeGroups.channels)
         shank_channels = session.extracellular.spikeGroups.channels{i};
         csdRippleProfile(find(ismember(shank_channels,shank_channels(1:find(shank_channels == channels{i}.pyramidal))))) = 0;
         channels{i}.radiatum = shank_channels(find(csdRippleProfile == min(csdRippleProfile)));
+        % Just in case it detects two radiatum channels
+        if length(channels{i}.radiatum) > 1
+            channels{i}.radiatum = channels{i}.radiatum(1);
+        end
         channels{i}.all = [channels{i}.oriens; channels{i}.pyramidal; channels{i}.radiatum; channels{i}.slm];
+
         
         %% Summary Plot
         subplot(2,nShanks,index(2*i-1))
