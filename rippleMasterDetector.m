@@ -164,7 +164,7 @@ ripples = eventSpikingTreshold(ripples,[],'spikingThreshold',eventSpikeThreshold
 
 %% Ripple Stats
 if rippleStats
-    lfp = bz_GetLFP('all');
+    lfp = getLFP('all');
     filtered = bz_Filter(lfp,'channels',rippleChannel,'filter','butter','passband',passband,'order',3);
     [maps,data,stats] = bz_RippleStats(filtered.data,filtered.timestamps,ripples);
     ripples.maps = maps;
