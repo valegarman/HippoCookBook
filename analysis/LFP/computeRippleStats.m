@@ -1,4 +1,4 @@
-function [stats] = computeRippleStats(varargin)
+function [ripples] = computeRippleStats(varargin)
 
 %RippleStats - Compute descriptive stats for ripples (100~200Hz oscillations).
 %
@@ -53,10 +53,11 @@ p = inputParser;
 addParameter(p,'basepath',pwd,@isstruct);
 addParameter(p,'bandpass',[80 200],@isnumeric);
 addParameter(p,'saveSummary',true,@islogical);
-addParameter(p,'saveMat',true,@islogical);
+addParameter(p,'saveMat',false,@islogical);
 addParameter(p,'durations',[-0.075 0.075], @isnumeric);
 addParameter(p,'ripples',[], @isstruct);
 addParameter(p,'rippleChannel',[], @isstruct);
+addParameter(p,'plotOpt',[], @islogical);
 
 parse(p,varargin{:})
 basepath = p.Results.basepath;
@@ -66,6 +67,7 @@ saveSummary = p.Results.saveSummary;
 durations = p.Results.durations;
 ripples = p.Results.ripples;
 rippleChannel = p.Results.rippleChannel;
+plotOpt = p.Results.plotOpt;
 
 % Dealing with inputs
 prevBasepath = pwd;
@@ -126,7 +128,7 @@ maps.phase = SyncMap(p,i,'durations',durations,'nbins',nBins,'smooth',0);
 [a,i] = Sync([timestamps amplitude],ripples.peaks,'durations',durations);
 maps.amplitude = SyncMap(a,i,'durations',durations,'nbins',nBins,'smooth',0);
 
-maps.timestamps = linspace(durations(1),durations(2),nBins)
+maps.timestamps = linspace(durations(1),durations(2),nBins);
 
 data.peakFrequency = maps.frequency(:,centerBin);
 data.peakAmplitude = maps.amplitude(:,centerBin);
@@ -141,34 +143,74 @@ data.duration = abs(diff(ripples.timestamps'))';
 [stats.durationAmplitude.rho,stats.durationAmplitude.p] = corrcoef(data.duration,data.peakAmplitude);
 
 % fastRipple index and entropy (as computed in Foffani et al, 2007; Valero et al, 2017)
-keyboard;
 [r,i] = Sync([timestamps double(unfiltered)],ripples.peaks,'durations',[-0.5 0.5]);
 matDouble = SyncMap(r,i,'durations',[-0.5 0.5],'smooth',0,'nbins',1250);
 
-ripSpec = ripSpectrogram(double(matDouble), samplingRate,0)
-figure;
+disp('Computing ripple features... ');
+ripSpec = ripSpectrogram(double(matDouble'), samplingRate,0);
 
+% collect results
+data.spectralEntropy = ripSpec.entropyDada;
+data.fastRippleIndex = ripSpec.frippindex;
+data.multiTapperFreq = ripSpec.freqData;
 
-resolHz=10; %spectral resolution in Hz
-nfft=floor(samplingRate/resolHz);
-nw=2; %parametro del multitaper ("time-bandwidth product")
-noverlap=nfft/1.024; %window overlap default:nfft/2
-aa=(100/resolHz)+1; bb=(600/resolHz)+1; cc=(400/resolHz)+1; %aa=11; bb=61; cc=41;
-for ii = 1:size(maps.ripples_raw,1) 
-    for jj = 1:size(maps.ripples_raw,2)
-        [S,F]= pmtm(maps.ripples_raw(ii,:),nw,nfft,samplingRate);
-    end
-end
-T=(1:floor(length(X)/delta)*delta)*(1/Fs);
-
-[TimeFreq(:,:,i),Ftf,T] = SpectrogramMultiTaper(maps.ripples_raw,noverlap,nfft,samplingRate,nw);
-
-
-keyboard;
+maps.multitaperSpecs = ripSpec;
 
 rippleStats.stats = stats;
 rippleStats.data = data;
 rippleStats.maps = maps;
+ripples.rippleStats = rippleStats;
 
-
+if plotOpt
+    mkdir('SummaryFigures'); % create folder
+    saveas(gcf,['SummaryFigures\ripplesDetection.png']);
 end
+    
+    h = figure;
+    subplot(3,2,1)
+    computeWavelet(mean(maps.ripples_raw), maps.timestamps, [80 300]);
+
+    subplot(3,2,2)
+    scatter(data.spectralEntropy, data.fastRippleIndex,10,[.7 .7 .7],"filled");
+    xlabel('Spectral Entropy'); ylabel('Fast ripple index');
+
+    subplot(3,2,3)
+    [~, idx] = sort(data.fastRippleIndex);
+    imagesc(maps.multitaperSpecs.Freq_range,[1 length(idx)],maps.multitaperSpecs.Suma(:,idx)');
+    xlabel('Hz'); ylabel('#');
+
+    subplot(3,2,4)
+    imagesc(maps.timestamps,[1 length(idx)],maps.ripples_filtered(idx,:));
+    xlabel('s');
+
+    subplot(3,2,5)
+    hold on
+    plot(maps.timestamps, maps.ripples_raw/1E3,'color', [.8 .8 .8 .1]);
+    plot(maps.timestamps, median(maps.ripples_raw)/1E3,'color', [0 0 0],'LineWidth',1.5);
+    axis tight
+    xlabel('s'); ylabel('Amp');
+
+    subplot(3,2,6)
+    hold on
+    scatter(data.peakAmplitude, data.peakFrequency,10,data.duration,"filled");
+    ylabel('Peak amplitude'); xlabel('Peak Freq');
+    cb = colorbar;
+    cb.Label.String = 's';
+    
+    if saveSummary
+        mkdir('SummaryFigures'); % create folder
+        saveas(gcf,['SummaryFigures\ripplesDetection.png']);
+    end
+
+    if ~plotOpt
+        close(h);
+    end
+    
+    if saveMat
+        disp('Saving Ripples Results...');
+        save([basenameFromBasepath(pwd) , '.ripples.events.mat'],'ripples');
+    end
+
+    cd(prevBasepath);
+end
+

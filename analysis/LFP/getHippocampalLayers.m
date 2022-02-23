@@ -210,7 +210,7 @@ end
 % Save Figure
 if saveSummary
     mkdir('SummaryFigures'); % create folder
-    saveas(gcf,['SummaryFigures\hippocampalLayers_Shank',num2str(i),'.png']);
+    saveas(gcf,['SummaryFigures\hippocampalLayers.png']);
 end
 
 

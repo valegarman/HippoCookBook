@@ -157,16 +157,8 @@ plotRippleChannel('rippleChannel',rippleChannel,'ripples',ripples); % to do, run
 %% Ripple Stats
 if rippleStats
     ripples = computeRippleStats('ripples',ripples);
-    
-    
-    ripples.maps = maps; 
-    ripples.data = data;
-    ripples.stats = stats;
-    bz_PlotRippleStats(ripples.maps, ripples.data, ripples.stats);
-    
-    plotWavelet()
-    
 end
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Computing SharpWaves
 %%%%%%%%%%%%%%%%%%%%%%%%%
