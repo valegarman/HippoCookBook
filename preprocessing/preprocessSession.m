@@ -25,6 +25,7 @@ function  preprocessSession(varargin)
 %                       kilosort. Careful!! it would compromises dat file!
 %                       (default false). If scalar, perform median
 %                       substraction in those channels.
+%   sessionSummary    Default, 'all'. 
 %  tracking_pixel_cm  Default, 0.1149
 %
 %  HISTORY: 
@@ -46,6 +47,7 @@ addParameter(p,'getPos',true,@islogical);
 addParameter(p,'cleanArtifacts',false);
 addParameter(p,'medianSubstr',true);
 addParameter(p,'tracking_pixel_cm',0.1149,@isnumeric);
+addParameter(p,'sessionSummary',true,@islogical);
 
 % addParameter(p,'pullData',[],@isdir); To do... 
 parse(p,varargin{:});
@@ -57,6 +59,7 @@ getPos = p.Results.getPos;
 cleanArtifacts = p.Results.cleanArtifacts;
 medianSubstr = p.Results.medianSubstr;
 tracking_pixel_cm = p.Results.tracking_pixel_cm;
+sessionSummary = p.Results.sessionSummary;
 
 if ~exist('basepath') || isempty(basepath)
     basepath = uigetdir; % select folder
@@ -169,6 +172,10 @@ cd(basepath);
 %% Get tracking positions 
 if getPos
     getSessionTracking('convFact',tracking_pixel_cm,'roiTracking','manual'); 
+end
+
+if sessionSummary
+    
 end
 
 end
