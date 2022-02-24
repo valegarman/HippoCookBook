@@ -163,6 +163,7 @@ if rippleStats
     ripples.maps = maps;
 =======
     ripples = computeRippleStats('ripples',ripples);
+<<<<<<< HEAD
     
     
     ripples.maps = maps; 
@@ -173,7 +174,10 @@ if rippleStats
     
     plotWavelet()
     
+=======
+>>>>>>> ceccf697c9dbaef5660ebb503d5ba86693ee2ca9
 end
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Computing SharpWaves
 %%%%%%%%%%%%%%%%%%%%%%%%%

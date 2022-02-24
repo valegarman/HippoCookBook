@@ -36,6 +36,7 @@ addParameter(p,'indexedProjects_path',[],@isstring);
 addParameter(p,'indexedProjects_name','indexedSessions',@isstring);
 addParameter(p,'hippoCookBook_path','HippoCookBook',@isstring);
 addParameter(p,'force_analogPulsesDetection',true,@islogical);
+addPArameter(p,'force_loadingSpikes',true,@islogical);
 addParameter(p,'excludeManipulationIntervals',[],@isnumeric);
 addParameter(p,'SWChannel',[],@isnumeric); % manually selecting SW Channel in case getHippocampalLayers does not provide a right output
 
@@ -53,10 +54,10 @@ indexedProjects_path = p.Results.indexedProjects_path;
 indexedProjects_name = p.Results.indexedProjects_name;
 hippoCookBook_path = p.Results.hippoCookBook_path;
 force_analogPulsesDetection = p.Results.force_analogPulsesDetection;
+force_loadingSpikes = p.Results.force_loadingSpikes;
 excludeManipulationIntervals = p.Results.excludeManipulationIntervals;
 SWChannel = p.Results.SWChannel;
 
-keyboard;
 %% Creates a pointer to the folder where the index variable is located
 if isempty(indexedProjects_name)
     error('Need to provide the name of the index Project variable');
@@ -87,17 +88,17 @@ session.channels = 1:session.extracellular.nChannels;
 save([basepath filesep session.general.name,'.session.mat'],'session','-v7.3');
 
 %% 2. Remove previous cellinfo.spikes.mat and computes spikes again (manual clustered)
-
-if ~isempty(dir([basepath filesep session.general.name ,'.spikes.cellinfo.mat']))
-    disp('Loading and deleting old spikes.cellinfo.mat file ...');
-    file = dir([basepath filesep session.general.name ,'.spikes.cellinfo.mat']);
-    delete(file.name);
-else
-    ('spikes.cellinfo.mat does not exist !');
-end
+% if ~isempty(dir([basepath filesep session.general.name ,'.spikes.cellinfo.mat']))
+%     disp('Loading and deleting old spikes.cellinfo.mat file ...');
+%     file = dir([basepath filesep session.general.name ,'.spikes.cellinfo.mat']);
+%     delete(file.name);
+% else
+%     ('spikes.cellinfo.mat does not exist !');
+% end
+% Consider removing this, forceReload instead... MV
 
 disp('Loading Spikes...')
-spikes = loadSpikes;
+spikes = loadSpikes('forceReload',force_loadingSpikes);
 
 
 %% 3. Analog pulses detection
@@ -138,12 +139,22 @@ end
 cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',{'deepSuperficial'});
 
 %% 9. Spike Features
-spikeFeatures()
+spikeFeatures;
+getAverageCCG;
 % pulses.analogChannel = analogCh;
 % save([session.general.name,'.pulses.events.mat'],'pulses');
-optogeneticResponses = getOptogeneticResponse('numRep',100);
+optogeneticResponses = getOptogeneticResponse('numRep',500,'force',true);
 
-%% 10. Indexing
+% LFP-spikes modulation
+
+%% 10. Spatial modulation
+behaviour = getSessionLinearize('forceReload',true);  
+firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',false);
+placeFieldStats = bz_findPlaceFields1D('firingMaps',firingMaps,'maxSize',.75,'sepEdge',0.03); %% ,'maxSize',.75,'sepEdge',0.03
+firingTrialsMap = firingMapPerTrial;
+
+
+%% 11. Indexing
 session = sessionTemplate(basepath,'showGUI',false);
 currentPath = split(pwd,':'); currentPath = currentPath{end};
 sessionName = session.general.name;
