@@ -27,8 +27,8 @@ function [optogeneticResponses] = getOptogeneticResponse(varargin)
 
 % Parse options
 p = inputParser;
-addParameter(p,'analogCh',[],@isnumeric);
-addParameter(p,'digitalCh',[],@isnumeric);
+addParameter(p,'analogCh',[]);
+addParameter(p,'digitalCh',[]);
 addParameter(p,'spikes',[],@isstruct);
 addParameter(p,'basepath',pwd,@ischar);
 addParameter(p,'numRep',500,@isnumeric);
@@ -39,6 +39,8 @@ addParameter(p,'ratePlot',true,@islogical);
 addParameter(p,'winSizePlot',[-.1 .5],@islogical);
 addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'force',false,@islogical);
+addParameter(p,'minNumberOfPulses',100,@isnumeric);
+
 
 parse(p, varargin{:});
 analogCh = p.Results.analogCh;
@@ -53,11 +55,12 @@ ratePlot = p.Results.rasterPlot;
 saveMat = p.Results.saveMat;
 winSizePlot = p.Results.winSizePlot;
 force = p.Results.force;
+minNumberOfPulses = p.Results.minNumberOfPulses;
 
 % Deal with inputs
 prevPath = pwd;
 cd(basepath);
-
+keyboard;
 targetFile = dir('*.optogeneticResponse.cellinfo.mat');
 if ~isempty(targetFile) && ~force
     disp('Optogenetic responses already computed! Loading file...');
@@ -69,10 +72,10 @@ if isempty(spikes)
     spikes = loadSpikes('getWaveformsFromDat',false);
 end
 
-if isempty(analogCh)
-    pulsesAnalog = bz_getAnalogPulses;
+if isempty(analogCh) || strcmpi(analogCh,'all')
+    pulsesAnalog = getAnalogPulses;
 else
-    pulsesAnalog = bz_getAnalogPulses('analogCh',analogCh);
+    pulsesAnalog = getAnalogPulses('analogCh',analogCh);
 end
 
 pulsesDigital.timestamps = []; pulsesDigital.digitalChannel = [];
@@ -93,15 +96,21 @@ pulses.duration = round(pulses.timestamps(:,2) - pulses.timestamps(:,1),3);  %
 
 % get cell response
 optogeneticResponses = [];
-pulseDuration = unique(pulses.duration); % because code only codes for channel, we take minimum duration channel for responses
+pulseDuration = unique(round(pulses.duration,3)); % because code only codes for channel, we take minimum duration channel for responses
 channels = unique(pulses.channel); % code per channel, channel x duration should be implemented... 
 
-spikes = loadSpikes;
 timestamps_recording = min(pulses.timestamps(:,2)):1/1250:max(pulses.timestamps(:,2));
 % pulses condition channels x durations
 [m,n] = ndgrid(pulseDuration,channels);
 conditions = [m(:),n(:)];
+for ii = 1:size(conditions,1)
+    conditions(ii,3) = length(find(pulses.duration==conditions(ii,1)));
+end
+notEnoughtPulses = conditions(:,3)<minNumberOfPulses;
+conditions(notEnoughtPulses,:) = [];
 nConditions = size(conditions,1);
+
+spikes = loadSpikes;
 
 % generate random events for boostraping
 disp('Generating boostrap template...');
@@ -178,8 +187,8 @@ for ii = 1:length(spikes.UID)
             end
             optogeneticResponses.threeWaysTest(ii,jj,1) = test;
         else
-            optogeneticResponses.responsecurve(ii,jj,:) = nan(duration/binSize + 1,1);
-            optogeneticResponses.responsecurveZ(ii,jj,:) = nan(duration/binSize + 1,1);
+            optogeneticResponses.responsecurve(ii,jj,:) = nan; %nan(pulseDuration/binSize + 1,1);
+            optogeneticResponses.responsecurveZ(ii,jj,:) = nan; %(pulseDuration/binSize + 1,1);
             optogeneticResponses.modulationSignificanceLevel(ii,jj,1) = NaN;
             optogeneticResponses.rateDuringPulse(ii,jj,1) = NaN;
             optogeneticResponses.rateBeforePulse(ii,jj,1) = NaN;
