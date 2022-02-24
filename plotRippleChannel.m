@@ -9,10 +9,15 @@ function plotRippleChannel(varargin)
 %   noPrompts       Default, true
 %   saveMat         Default, true.
 %   force           Default, false
+%   ripples         By default tries to load ripple.event.mat structure or
+%                   runs findRipples. Otherwise, ripple timing information structure (see
+%                       findRipples)
 %
 %   F.Sharif 2020. Converted to buzcode from Channel_Info by MV.
 %   Removing shanks where all channels are bad and also removing sessionInfo and LoadParameters dependencies 
 %   And also, output now is 1-index by Pablo Abad 2022
+%
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -25,6 +30,7 @@ addParameter(p,'noPrompts',true,@islogical);
 addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'force',false,@islogical);
 addParameter(p,'rippleChannel',[],@isnumeric);
+addParameter(p,'ripples',[], @isstruct);
 parse(p,varargin{:});
 basePath = p.Results.basepath;
 discardShanks = p.Results.discardShanks;
@@ -33,6 +39,7 @@ noPrompts = p.Results.noPrompts;
 saveMat = p.Results.saveMat;
 force = p.Results.force;
 rippleChannel = p.Results.rippleChannel;
+ripples = p.Results.ripples;
 
 prevPath = pwd;
 cd(basePath);
@@ -106,7 +113,9 @@ end
 
 %% Get Ripple
 lfp = getLFP('all');
-[ripples] = findRipples(rippleChannel);
+if isempty(ripples)
+    [ripples] = findRipples(rippleChannel);
+end
 
 Win=70;
 LfpSamplingrate = lfp.samplingRate;

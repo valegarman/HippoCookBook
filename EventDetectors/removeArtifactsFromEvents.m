@@ -25,7 +25,7 @@ addParameter(p,'basepath',pwd,@isfolder);
 addParameter(p,'winSize',.5);
 addParameter(p,'figOpt',true,@islogical);
 addParameter(p,'method','std');
-addParameter(p,'stdThreshold',2);
+addParameter(p,'stdThreshold',1.5);
 
 
 parse(p,varargin{:});
