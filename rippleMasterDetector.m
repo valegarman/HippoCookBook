@@ -156,26 +156,20 @@ plotRippleChannel('rippleChannel',rippleChannel,'ripples',ripples); % to do, run
 
 %% Ripple Stats
 if rippleStats
-<<<<<<< HEAD
     lfp = getLFP('all');
     filtered = bz_Filter(lfp,'channels',rippleChannel,'filter','butter','passband',passband,'order',3);
     [maps,data,stats] = bz_RippleStats(filtered.data,filtered.timestamps,ripples);
     ripples.maps = maps;
-=======
     ripples = computeRippleStats('ripples',ripples);
-<<<<<<< HEAD
     
     
     ripples.maps = maps; 
->>>>>>> de83c35029bbbaa6ff165e742164b7646eb187f5
     ripples.data = data;
     ripples.stats = stats;
     bz_PlotRippleStats(ripples.maps, ripples.data, ripples.stats);
     
     plotWavelet()
     
-=======
->>>>>>> ceccf697c9dbaef5660ebb503d5ba86693ee2ca9
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
