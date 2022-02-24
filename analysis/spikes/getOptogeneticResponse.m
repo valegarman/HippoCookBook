@@ -22,6 +22,8 @@ function [optogeneticResponses] = getOptogeneticResponse(varargin)
 % optogeneticResponse
 %
 % Manu-BuzsakiLab 2021
+% To do: include different test for different durations stimuli
+% to do: include statistical test in figures (as with uLEDs)
 
 % Parse options
 p = inputParser;

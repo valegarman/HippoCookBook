@@ -141,15 +141,15 @@ cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeM
 %% 9. Spike Features
 spikeFeatures;
 getAverageCCG;
-
 % pulses.analogChannel = analogCh;
 % save([session.general.name,'.pulses.events.mat'],'pulses');
-optogeneticResponses = getOptogeneticResponse('numRep',100);
+optogeneticResponses = getOptogeneticResponse('numRep',500,'force',true);
+
+% LFP-spikes modulation
 
 %% 10. Spatial modulation
-behaviour = getSessionLinearize;  
+behaviour = getSessionLinearize('forceReload',true);  
 firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',false);
-% work in progress! remove bz_findPlaceFields1D session info dependency
 placeFieldStats = bz_findPlaceFields1D('firingMaps',firingMaps,'maxSize',.75,'sepEdge',0.03); %% ,'maxSize',.75,'sepEdge',0.03
 firingTrialsMap = firingMapPerTrial;
 
