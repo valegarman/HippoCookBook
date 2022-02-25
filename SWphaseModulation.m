@@ -1,6 +1,6 @@
 function [PhaseLockingData] = SWphaseModulation(varargin)
 % USAGE
-%[PhaseLockingData] = bz_PhaseModulation(varargin)
+%[PhaseLockingData] = SWphaseModulation(varargin)
 %
 % INPUTS
 % spikes        -spike time cellinfo struct
@@ -42,11 +42,9 @@ function [PhaseLockingData] = SWphaseModulation(varargin)
 %                    phasestats.r        mean resultant length
 %
 %
-% Calculates distribution of spikes over various phases from a specified
-% cycle of an lfp vector.   Phase 0 means peak of lfp wave.
+% Calculates distribution of spikes over phases of SharpWave.
 %
-% Brendon Watson 2015
-% edited by david tingley, 2017
+% Pablo Abad and Manuel Valero 2022. Based on bz_PhaseModulation
 
 %% defaults
 p = inputParser;

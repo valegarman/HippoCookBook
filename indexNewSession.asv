@@ -20,7 +20,7 @@ function [] = indexNewSession(varargin)
 % TO DO:
 % Deactivate by inputs loadSpikes or other analysis
 
-%% Pablo Abad and Manuel Valero 2022
+%% Pablo Abad 2022
 
 %% Defaults and Params
 p = inputParser;
@@ -36,7 +36,7 @@ addParameter(p,'indexedProjects_path',[],@isstring);
 addParameter(p,'indexedProjects_name','indexedSessions',@isstring);
 addParameter(p,'hippoCookBook_path','HippoCookBook',@isstring);
 addParameter(p,'force_analogPulsesDetection',true,@islogical);
-addParameter(p,'force_loadingSpikes',true,@islogical);
+addPArameter(p,'force_loadingSpikes',true,@islogical);
 addParameter(p,'excludeManipulationIntervals',[],@isnumeric);
 addParameter(p,'SWChannel',[],@isnumeric); % manually selecting SW Channel in case getHippocampalLayers does not provide a right output
 
@@ -146,7 +146,7 @@ getAverageCCG;
 optogeneticResponses = getOptogeneticResponse('numRep',500,'force',true);
 
 % LFP-spikes modulation
-[rippleMod,SWMod,thetaMod,lgammaMod,hgammaMod] = computePhaseModulation('SWChannel',SWChannel);
+
 
 %% 10. Spatial modulation
 behaviour = getSessionLinearize('forceReload',true);  

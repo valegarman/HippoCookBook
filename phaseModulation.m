@@ -1,6 +1,6 @@
 function [PhaseLockingData] = phaseModulation(varargin)
 % USAGE
-%[PhaseLockingData] = bz_PhaseModulation(varargin)
+%[PhaseLockingData] = phaseModulation(varargin)
 %
 % INPUTS
 % spikes        -spike time cellinfo struct
@@ -47,6 +47,7 @@ function [PhaseLockingData] = phaseModulation(varargin)
 %
 % Brendon Watson 2015
 % edited by david tingley, 2017
+% Edited by Pablo Abad 2022. Based on bz_PhaseModulation
 
 %% defaults
 p = inputParser;
