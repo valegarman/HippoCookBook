@@ -175,7 +175,7 @@ if getPos
 end
 
 if sessionSummary
-    
+    computeSessionSummary;
 end
 
 end

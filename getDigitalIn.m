@@ -1,6 +1,6 @@
 
 function [digitalIn] = getDigitalIn(ch,varargin)
-% [pul, val, dur] = getPulses(d,varargin)
+% [digitalIn] = getDigitalIn(ch,varargin)
 %
 % Find digital In pulses
 %
