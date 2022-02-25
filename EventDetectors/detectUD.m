@@ -143,11 +143,12 @@ NREMInts = [tlfp.timestamps(find(diff(indState)==1)+1) tlfp.timestamps(find(diff
 NREM_ts = find(indState); % NREM timestamps
 clear tlfp
 
+channels = 1:session.extracellular.nChannels;
 if isempty(ch) % if no channel declared, pick channel with higher gamma std during NREM and out of stimulation periods %anticorrelation delta gamma
     disp('Selecting best channel... ');
     params.Fs = session.extracellular.srLfp; params.fpass = [1 400]; params.tapers = [3 5]; params.pad = 1;
     parfor ii = 1:session.extracellular.nChannels
-        if isfield(session.channelTags,'Bad') && any(session.channels(ii) == session.channelTags.Bad.channels)
+        if isfield(session.channelTags,'Bad') && any(channels(ii) == session.channelTags.Bad.channels)
             gdCorr(ii) = 0; stdGamma(ii) = 0;
         else
             fprintf(' **Channel %3.i/ %3.i, ',ii, session.extracellular.nChannels); %\n
@@ -168,7 +169,7 @@ if isempty(ch) % if no channel declared, pick channel with higher gamma std duri
     sdScore(~isnan(sdScore)) = zscore(sdScore(~isnan(sdScore)));                                     % down score increase with std gamma and gamma delta anticorr
     sdScore(sdScore>4) = 0; % remove outlier
     [~,ch] = max(sdScore(sdScore<4));
-    ch = session.channels(ch);
+    ch = channels(ch);
     fprintf(' Best channel: %3.i!! \n',ch);
 end
 clear gamm delt avGamma stdGamma gdCorr dscore
@@ -242,7 +243,7 @@ end
 %% Spike thresholding
 if ~isempty(spikeThreshold)
     downWinSize = 0.4;
-    spikes = bz_LoadPhy('noPrompts',true);
+    spikes = loadSpikes;
     if ~isempty(skipCluster)                                               % skip non-cortical cluster and DownStateActive cells
         for ii = 1:length(skipCluster)
             spikes.times{skipCluster(ii)} = [];

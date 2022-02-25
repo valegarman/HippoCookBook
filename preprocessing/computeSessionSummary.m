@@ -245,11 +245,11 @@ end
 if any(ismember(listOfAnalysis,'downStates'))
     try
         disp('Slow-waves CSD and PSTH...');
+
         UDStates = detectUD;
-        xml = LoadParameters;
-        shanks = xml.AnatGrps;
-        shanks(excludeShanks) = [];
         % CSD
+        shanks = session.extracellular.electrodeGroups.channels;            
+        shanks(excludeShanks) = [];
         twin = 0.2;
         evs = UDStates.timestamps.DOWN(:,1);
         figure
