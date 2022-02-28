@@ -101,10 +101,9 @@ skipCluster = p.Results.skipCluster;
 
 
 %% Collect pieces
-session = sessionTemplate(basepath,'showGUI',false);
-if exist([session.general.name '.UDStates.events.mat'],'file') && ~forceDetect
+if exist([basenameFromBasepath '.UDStates.events.mat'],'file') && ~forceDetect
     disp('Up and down states already detected! Loading file.');
-    load([sessionInfo.FileName '.UDStates.events.mat']);
+    load([basenameFromBasepath '.UDStates.events.mat']);
     return
 end
 tlfp = getLFP(1,'basepath',basepath,'noPrompts',noPrompts);

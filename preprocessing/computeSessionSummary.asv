@@ -114,12 +114,11 @@ if any(ismember(listOfAnalysis,'analogPulses'))
                     end
                 end
                 saveas(gcf,['SummaryFigures\analogPulsesCSD_ch',num2str(listOfChannel(mm)), '.png']);
-                clear pulses listOfChannel
             end
         end
 
     catch
-        warning('Error on CSD from analog inputs! ');
+        warning('Error on CSD from analog-in inputs! ');
     end
 end
 
@@ -163,44 +162,19 @@ if any(ismember(listOfAnalysis,'digitalPulses'))
                     end
                 end
                 saveas(gcf,['SummaryFigures\digitalPulsesCSD_ch',num2str(listOfChannel(mm)), '.png']);
-                clear pulses listOfChannel
             end
         end
 
     catch
-        warning('Error on CSD from digital inputs! ');
+        warning('Error on CSD from digital-in inputs! ');
     end
 end
 
 % PSTH RESPONSES ON DIGITAL AND ANALOG CH INPUTS
 if any(ismember(listOfAnalysis,{'digitalPulses', 'analogPulses'}))
     try
-        disp('Analog-in and/or digital-in PSTH...');
-        % getting analog pulses channel
-        if ischar(analogChannelsList) && strcmpi(analogChannelsList,'all')
-            analogPulses = getAnalogPulses;
-            listOfAnalogChannel = unique(analogPulses.analogChannel);
-            clear analogPulses
-        else
-            listOfAnalogChannel = analogChannelsList;
-        end
-        % getting digital pulses channel
-        if ischar(digitalChannelsList) && strcmpi(digitalChannelsList,'all')
-            digPulses = getDigitalIn;
-            listOfDigitalChannel = zeros(size(digPulses.timestampsOn));
-            for ii = 1:length(pulses.timestampsOn)
-                listOfDigitalChannel(ii) = ~isempty(digPulses.timestampsOn{ii});
-            end
-            listOfDigitalChannel = find(listOfDigitalChannel);
-            clear digPulses
-        else
-            listOfDigitalChannel = digitalChannelsList;
-        end
-        
-        optogeneticResponses = getOptogeneticResponse('analogCh',listOfAnalogChannel,'digitalCh', listOfDigitalChannel,'numRep',0);
-
     catch
-        warning('Error on PSTH from digital and/or analog inputs! ');
+        warning('Error on PSTH from digital-in inputs! ');
     end
 end
 
@@ -218,7 +192,7 @@ if any(ismember(listOfAnalysis,'downStates'))
         figure
         set(gcf,'Position',[100 100 1400 600])
         for jj = 1:size(shanks,2)
-            lfp = getLFP(shanks{jj},'noPrompts', true);
+            lfp = bz_GetLFP(shanks(jj).Channels,'noPrompts', true);
             [csd,lfpAvg] = bz_eventCSD(lfp,evs,'twin',[twin twin],'plotLFP',false,'plotCSD',false);
             taxis = linspace(-twin,twin,size(csd.data,1));
             cmax = max(max(csd.data)); 
@@ -234,7 +208,6 @@ if any(ismember(listOfAnalysis,'downStates'))
         saveas(gcf,'SummaryFigures\downUpStatesCSD.png');
 
         % PSTH
-        % include psthSpikes!!!!!
         st = UDStates.timestamps.DOWN;
         spikeResponse = [];
         win = [-0.2 0.2];

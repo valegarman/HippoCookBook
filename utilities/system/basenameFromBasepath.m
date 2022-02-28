@@ -14,6 +14,11 @@ function basename = basenameFromBasepath(basepath)
 % basename  as specified above
 %
 % Brendon Watson, 2017
+% Manu Valero, 2022
+
+if nargin < 1
+    basepath = pwd;
+end
 
 
 if strcmp(basepath(end),filesep);

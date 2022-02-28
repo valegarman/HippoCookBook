@@ -5,10 +5,9 @@ function [optogeneticResponses] = getOptogeneticResponse(varargin)
 % Computes Psth and a several statistical measures of the cell responses.
 %
 % <OPTIONALS>
-% analogCh      List of analog channels with light pulses. If not provided,
-%                   gets psth for all analog channels.
-% digitalCh     List of digital channels with light pulses. By defaut,
-%                   none.
+% analogCh      List of analog channels with light pulses. By default, []
+% digitalCh     List of digital channels with light pulses. By default,
+%                   [].
 % spikes        buzcode spikes structure, if not provided tries loadSpikes.
 % basepath      By default pwd.
 % numRep        For boostraping, default, 500. If 0, no boostraping.
@@ -17,6 +16,7 @@ function [optogeneticResponses] = getOptogeneticResponse(varargin)
 % rasterPlot    Default true.
 % ratePlot      Default true.
 % winSizePlot Default [-0.1 .5];
+% force         Default, false
 %
 % OUTPUTS
 % optogeneticResponse
@@ -60,7 +60,7 @@ minNumberOfPulses = p.Results.minNumberOfPulses;
 % Deal with inputs
 prevPath = pwd;
 cd(basepath);
-keyboard;
+
 targetFile = dir('*.optogeneticResponse.cellinfo.mat');
 if ~isempty(targetFile) && ~force
     disp('Optogenetic responses already computed! Loading file...');
@@ -72,7 +72,7 @@ if isempty(spikes)
     spikes = loadSpikes('getWaveformsFromDat',false);
 end
 
-if isempty(analogCh) || strcmpi(analogCh,'all')
+if strcmpi(analogCh,'all')
     pulsesAnalog = getAnalogPulses;
 else
     pulsesAnalog = getAnalogPulses('analogCh',analogCh);
@@ -80,11 +80,10 @@ end
 
 pulsesDigital.timestamps = []; pulsesDigital.digitalChannel = [];
 if ~isempty(digitalCh)
-    parameters = LoadParameters(pwd); % read xml
-    digitalIn = bz_getDigitalIn('all','fs',parameters.rates.wideband); 
+    digitalIn = getDigitalIn;
     for ii = 1:length(digitalCh)
         pulsesDigital.timestamps = [pulsesDigital.timestamps; digitalIn.ints{digitalCh(ii)}];
-        pulsesDigital.digitalChannel = [pulsesDigital.digitalChannel; ones(size(digitalIn.ints{digitalCh(ii)})) * digitalCh(ii)];
+        pulsesDigital.digitalChannel = [pulsesDigital.digitalChannel; ones(size(digitalIn.ints{digitalCh(ii)},1),1) * digitalCh(ii)];
     end
 end
 
@@ -284,7 +283,13 @@ if rasterPlot
             hold on
             plot(t(t>winSizePlot(1) & t<winSizePlot(2)), resp(t>winSizePlot(1) & t<winSizePlot(2)) * kk/max(resp)/2,'k','LineWidth',2);
             xlim([winSizePlot(1) winSizePlot(2)]); ylim([0 kk]);
-            title(num2str(jj),'FontWeight','normal','FontSize',10);
+            if optogeneticResponses.threeWaysTest(jj,ii) == 0
+                title(num2str(jj),'FontWeight','normal','FontSize',10);
+            elseif optogeneticResponses.threeWaysTest(jj,ii) == -1
+                title([num2str(jj) '(-)'],'FontWeight','normal','FontSize',10);
+            elseif optogeneticResponses.threeWaysTest(jj,ii) == 1
+                title([num2str(jj) '(+)'],'FontWeight','normal','FontSize',10);
+            end
 
             if jj == 1
                 ylabel('Trial');
