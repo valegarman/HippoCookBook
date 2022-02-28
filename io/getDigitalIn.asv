@@ -49,6 +49,13 @@ if ~isempty(dir('*DigitalIn.events.mat'))
     disp('Pulses already detected! Loading file.');
     file = dir('*DigitalIn.events.mat');
     load(file.name);
+    keyboard;
+    for ii = 1:size(digitalIn.ints,2)
+        if size(digitalIn.ints{ii},1) ~= size(digitalIn.timestampsOff{ii},1)
+            digitalIn.ints{ii} = digitalIn.ints{ii}';
+        end
+    end
+
     return
 end
 
@@ -109,6 +116,7 @@ for ii = 1:size(digital_on,2)
         if d(2,end) == 0; d(2,end) = nan; end
         digitalIn.ints{ii} = d;
         digitalIn.dur{ii} = digitalIn.ints{ii}(2,:) - digitalIn.ints{ii}(1,:); % durantion
+        digitalIn.ints{ii} = d;
         
         clear intsPeriods
         intsPeriods(1,1) = d(1,1); % find stimulation intervals
