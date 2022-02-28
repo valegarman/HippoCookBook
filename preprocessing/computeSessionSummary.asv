@@ -16,7 +16,6 @@ function computeSessionSummary(varargin)
 %  
 %   (specific analysis optionss)
 %   excludeShanks           Default []
-%   getWaveformsFromDat     From 'spikes' summary, default false.
 %   analogChannelsList      Array of channel to perform 'analogPulses' psth and csd. Default 'all'
 %   digitalChannelsList     Array of channel to perform 'digitalPulses' psth and csd. Default 'all'
 %
@@ -28,7 +27,6 @@ addParameter(p,'basepath',pwd,@isdir);
 addParameter(p,'listOfAnalysis','all',@iscellstr);
 addParameter(p,'exclude',[],@iscellstr);
 addParameter(p,'excludeShanks',[],@isnumeric);
-addParameter(p,'getWaveformsFromDat',false,@islogical);
 addParameter(p,'analogChannelsList','all',@isnumeric);
 addParameter(p,'digitalChannelsList','all',@isnumeric);
 
@@ -37,7 +35,6 @@ basepath = p.Results.basepath;
 listOfAnalysis = p.Results.listOfAnalysis;
 exclude = p.Results.exclude;
 excludeShanks = p.Results.excludeShanks;
-getWaveformsFromDat = p.Results.getWaveformsFromDat;
 analogChannelsList = p.Results.analogChannelsList;
 digitalChannelsList = p.Results.digitalChannelsList;
 
@@ -58,7 +55,7 @@ end
 
 mkdir('SummaryFigures'); % create folder
 close all
-
+keyboard;
 % SPIKES SUMMARY
 if any(ismember(listOfAnalysis,'spikes'))
     try
@@ -114,11 +111,12 @@ if any(ismember(listOfAnalysis,'analogPulses'))
                     end
                 end
                 saveas(gcf,['SummaryFigures\analogPulsesCSD_ch',num2str(listOfChannel(mm)), '.png']);
+                clear pulses listOfChannel
             end
         end
 
     catch
-        warning('Error on CSD from analog-in inputs! ');
+        warning('Error on CSD from analog inputs! ');
     end
 end
 
@@ -162,19 +160,44 @@ if any(ismember(listOfAnalysis,'digitalPulses'))
                     end
                 end
                 saveas(gcf,['SummaryFigures\digitalPulsesCSD_ch',num2str(listOfChannel(mm)), '.png']);
+                clear pulses listOfChannel
             end
         end
 
     catch
-        warning('Error on CSD from digital-in inputs! ');
+        warning('Error on CSD from digital inputs! ');
     end
 end
 
 % PSTH RESPONSES ON DIGITAL AND ANALOG CH INPUTS
 if any(ismember(listOfAnalysis,{'digitalPulses', 'analogPulses'}))
     try
+        disp('Analog-in and/or digital-in PSTH...');
+        % getting analog pulses channel
+        if ischar(analogChannelsList) && strcmpi(analogChannelsList,'all')
+            analogPulses = getAnalogPulses;
+            listOfAnalogChannel = unique(analogPulses.analogChannel);
+            clear analogPulses
+        else
+            listOfAnalogChannel = analogChannelsList;
+        end
+        % getting digital pulses channel
+        if ischar(digitalChannelsList) && strcmpi(digitalChannelsList,'all')
+            digPulses = getDigitalIn;
+            listOfDigitalChannel = zeros(size(digPulses.timestampsOn));
+            for ii = 1:length(pulses.timestampsOn)
+                listOfDigitalChannel(ii) = ~isempty(digPulses.timestampsOn{ii});
+            end
+            listOfDigitalChannel = find(listOfDigitalChannel);
+            clear digPulses
+        else
+            listOfDigitalChannel = digitalChannelsList;
+        end
+        
+        optogeneticResponses = getOptogeneticResponse('analogCh',listOfAnalogChannel,'digitalCh', listOfDigitalChannel,'numRep',0);
+
     catch
-        warning('Error on PSTH from digital-in inputs! ');
+        warning('Error on PSTH from digital and/or analog inputs! ');
     end
 end
 
@@ -192,7 +215,7 @@ if any(ismember(listOfAnalysis,'downStates'))
         figure
         set(gcf,'Position',[100 100 1400 600])
         for jj = 1:size(shanks,2)
-            lfp = bz_GetLFP(shanks(jj).Channels,'noPrompts', true);
+            lfp = getLFP(shanks{jj},'noPrompts', true);
             [csd,lfpAvg] = bz_eventCSD(lfp,evs,'twin',[twin twin],'plotLFP',false,'plotCSD',false);
             taxis = linspace(-twin,twin,size(csd.data,1));
             cmax = max(max(csd.data)); 
@@ -206,8 +229,13 @@ if any(ismember(listOfAnalysis,'downStates'))
             end
         end
         saveas(gcf,'SummaryFigures\downUpStatesCSD.png');
+        
+        % PSTH
+        evs = UDStates.timestamps.DOWN(:,1);
+        psthUD = spikesPsth(evs,'winSize',1,'winSizePlot',[-0.5 .5],'label','slowOscillations');
 
         % PSTH
+        % include psthSpikes!!!!!
         st = UDStates.timestamps.DOWN;
         spikeResponse = [];
         win = [-0.2 0.2];

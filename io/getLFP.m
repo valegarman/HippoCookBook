@@ -172,7 +172,10 @@ end
 %indexing), we could also add options for this to be select region or spike
 %group from the xml...
 if strcmp(channels,'all')
-    channels = session.channels;
+    try channels = session.channels;
+    catch
+        channels = 1:session.extracellular.nChannels;
+    end
 else
     %Put in something here to collapse into X-Y for consecutive channels...
     display(['Loading Channels ',num2str(channels),' (1-indexing)'])

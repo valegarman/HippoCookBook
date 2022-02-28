@@ -216,9 +216,12 @@ end
 
 %% Taking best shank
 % First we look how many shanks are in CA1
-CA1Shanks = session.brainRegions.CA1.electrodeGroups;
-numCA1Shanks = length(CA1Shanks);
-disp(['There are: ' , num2str(numCA1Shanks), ' Shanks (#', num2str(CA1Shanks),') in CA1']);
+try CA1Shanks = session.brainRegions.CA1.electrodeGroups;
+    numCA1Shanks = length(CA1Shanks);
+    disp(['There are: ' , num2str(numCA1Shanks), ' Shanks (#', num2str(CA1Shanks),') in CA1']);
+catch
+    disp('No brain regions detected! Skiping...');
+end
 
 for i = 1:length(session.extracellular.spikeGroups.channels)
     if ~all(ismember(session.extracellular.spikeGroups.channels{i},session.channelTags.Bad.channels))
@@ -239,10 +242,12 @@ score = maxTheta_zscore + maxHfo_zscore + numRipples_zscore;
 [bestScore, bestShank] = max(score);
 
 % Let's check that best Shank chosen in indeed in CA1
-if ismember(bestShank,session.brainRegions.CA1.electrodeGroups)
-    disp('Successfully chosen hippocampal best Shank');
-else
-    disp('Best chosen Shank is not in CA1 region..Problem !!');
+try 
+    if ismember(bestShank,session.brainRegions.CA1.electrodeGroups)
+        disp('Successfully chosen hippocampal best Shank');
+    else
+        disp('Best chosen Shank is not in CA1 region..Problem !!');
+    end
 end
 
 hippocampalLayers.layers = channels;

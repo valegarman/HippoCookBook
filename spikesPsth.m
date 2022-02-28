@@ -16,10 +16,14 @@ function [psth] = spikesPsth(timestamps,varargin)
 %   rasterPlot - Default true
 %   ratePlot - Default true
 %   saveMat - default true
+%   eventType - default, date
+%   event_ints - interval around events timestamps to compute cell reponses
+%   baseline_ints - interval before events timestamps to compute baseline
 %
 % OUTPUTS
 %   psth - struct
 %
+% To do: implement post-baseline
 % Developed by Pablo Abad and Manuel Valero 2022.
 %% Defaults and Params
 p = inputParser;
@@ -32,10 +36,13 @@ addParameter(p,'binSize',0.001,@isnumeric);
 addParameter(p,'winSize',1,@isnumeric);
 addParameter(p,'rasterPlot',true,@islogical);
 addParameter(p,'ratePlot',true,@islogical);
-addParameter(p,'winSizePlot',[-.1 .5],@islogical);
+addParameter(p,'winSizePlot',[-.1 .5],@isnumeric);
 addParameter(p,'saveMat',false,@islogical);
 addParameter(p,'savePlot',false,@islogical);
 addParameter(p,'force',false,@islogical);
+addParameter(p,'eventType',date,@ischar);
+addParameter(p,'event_ints',[-0.02 0.02],@isnumeric);
+addParameter(p,'baseline_ints',[-0.5 -0.46],@isnumeric);
 
 parse(p, timestamps,varargin{:});
 
@@ -50,9 +57,44 @@ winSizePlot = p.Results.winSizePlot;
 saveMat = p.Results.saveMat;
 savePlot = p.Results.savePlot;
 force = p.Results.force;
+eventType = p.Results.eventType;
+event_ints = p.Results.event_ints;
+baseline_ints = p.Results.baseline_ints;
+
+if saveMat
+    disp('Saving results...');
+    save([session.general.name '.' eventType '_psth.cellinfo.mat'],'psth');
+end
 
 %% Session Template
-session = sessionTemplate(basepath,'showGUI',false);
+% Deal with inputs
+prevPath = pwd;
+cd(basepath);
+
+session = loadSession;
+if (exist([session.general.name '.' eventType '_psth.cellinfo.mat'],'file') || ...
+        exist([session.general.name '.' eventType '_psth.cellinfo.mat'],'file')) ...
+        && ~force
+    disp(['Psth already computed for ', session.general.name, ' ', eventType,'. Loading file.']);
+    load([session.general.name '.' eventType '_psth.cellinfo.mat']);
+    return
+end
+
+% default detection parameters
+if strcmpi(eventType,'slowOscillations')
+    if isempty(timestamps)
+        UDStates = detectUD;
+        timestamps = UDStates.timestamps.DOWN;
+    end
+    warning('Using default parameters for slow oscillations!');
+    binSize = 0.01;
+    winSize = 1;
+    winSizePlot = [-0.5 0.5];
+    event_ints = [-0.05 0.05];
+    baseline_ints = [-0.5 0.4];
+elseif strcmpi(eventType,'ripples')
+    keyboard;
+end
 
 %% Spikes
 if isempty(spikes)
@@ -79,7 +121,7 @@ for ii = 1:length(spikes.UID)
         [stccg, t] = CCG([spikes.times{ii} randomEvents],[],'binSize',binSize,'duration',winSize,'norm','rate');
         for jj = 1:nConditions
 %             t_duringPulse = t > 0 & t < conditions(jj,1);
-            t_duringPulse = t > 0 & t < 0.1;
+            t_duringPulse = t > event_ints(1) & t < event_ints(2);
             randomRatesDuringPulse = nanmean(stccg(t_duringPulse,2:size(randomEvents,2)+1,1),1);
             psth.bootsTrapRate(ii,jj) = mean(randomRatesDuringPulse);
             psth.bootsTrapRateStd(ii,jj) = std(randomRatesDuringPulse);
@@ -97,10 +139,10 @@ for ii = 1:length(spikes.UID)
             [stccg, t] = CCG({spikes.times{ii}, timestamps},[],'binSize',binSize,'duration',winSize,'norm','rate');
             psth.responsecurve(ii,jj,:) = stccg(:,2,1);
             psth.responsecurveSmooth(ii,jj,:) = smooth(stccg(:,2,1));
-            t_duringPulse = t > 0 & t < 0.1; 
-            t_beforePulse = t > -0.1 & t < 0; 
-            psth.responsecurveZ(ii,jj,:) = (stccg(:,2,1) - mean(stccg(t < 0,2,1)))/std(stccg(t < 0,2,1));
-            psth.responsecurveZSmooth(ii,jj,:) = smooth((stccg(:,2,1) - mean(stccg(t < 0,2,1)))/std(stccg(t < 0,2,1)));
+            t_duringPulse = t > event_ints(1) & t < event_ints(2);
+            t_beforePulse = t > baseline_ints(1) & t < baseline_ints(2);
+            psth.responsecurveZ(ii,jj,:) = (stccg(:,2,1) - mean(stccg(t_beforePulse,2,1)))/std(stccg(t_beforePulse,2,1));
+            psth.responsecurveZSmooth(ii,jj,:) = smooth((stccg(:,2,1) - mean(stccg(t_beforePulse,2,1)))/std(stccg(t_beforePulse,2,1)));
             psth.rateDuringPulse(ii,jj,1) = mean(stccg(t_duringPulse,2,1));
             psth.rateBeforePulse(ii,jj,1) = mean(stccg(t_beforePulse,2,1));
             psth.rateZDuringPulse(ii,jj,1) = mean(squeeze(psth.responsecurveZ(ii,jj,t_duringPulse)));
@@ -190,10 +232,26 @@ for ii = 1:length(spikes.UID)
 end
 
 psth.responseMetrics = responseMetrics;
+psth.eventType = eventType;
+psth.numRep = numRep;
+psth.binSize = binSize;
+psth.winSize = winSize;
+psth.event_ints = event_ints;
+psth.baseline_ints = baseline_ints;
+
+% squeeze matrix, if number of conditions is 1
+if nConditions == 1
+    nameOfFields = fieldnames(psth);
+    for ii = 1:length(nameOfFields)
+        if ndims(psth.(nameOfFields{ii})) > 2
+            psth.(nameOfFields{ii}) = squeeze(psth.(nameOfFields{ii}));
+        end
+    end
+end
 
 if saveMat
     disp('Saving results...');
-    save([session.general.name '.psth.cellinfo.mat'],'psth');
+    save([session.general.name '.' eventType '_psth.cellinfo.mat'],'psth');
 end
 
 % PLOTS
@@ -220,13 +278,19 @@ if rasterPlot
         end
 
         % spikeResponse = [spikeResponse; zscore(squeeze(stccg(:,end,jj)))'];
-        resp = squeeze(psth.responsecurveSmooth(jj,1,:));
+        resp = psth.responsecurveSmooth(jj,:);
         subplot(7,ceil(size(spikes.UID,2)/7),jj); % autocorrelogram
         plot(rast_x, rast_y,'.','MarkerSize',1)
         hold on
         plot(t(t>winSizePlot(1) & t<winSizePlot(2)), resp(t>winSizePlot(1) & t<winSizePlot(2)) * kk/max(resp)/2,'k','LineWidth',2);
         xlim([winSizePlot(1) winSizePlot(2)]); ylim([0 kk]);
-        title(num2str(jj),'FontWeight','normal','FontSize',10);
+        if psth.threeWaysTest(jj) == 0
+            title(num2str(jj),'FontWeight','normal','FontSize',10);
+        elseif psth.threeWaysTest(jj) == -1
+            title([num2str(jj) '(-)'],'FontWeight','normal','FontSize',10);
+        elseif psth.threeWaysTest(jj) == 1
+            title([num2str(jj) '(+)'],'FontWeight','normal','FontSize',10);
+        end
 
         if jj == 1
             ylabel('Trial');
@@ -237,7 +301,7 @@ if rasterPlot
         end
     end
     if savePlot
-        saveas(gcf,['SummaryFigures\spikesPsthRaster_ch',num2str(channels(ii)) ,'ch.png']); 
+        saveas(gcf,['SummaryFigures\spikesPsthRaster_', eventType ,'.png']); 
     end
 end
 % 2. Rate plot
@@ -247,7 +311,7 @@ if ratePlot
     for ii = 1:nConditions;
         subplot(nConditions,2,1 + ii * 2 - 2)
         imagesc([t(1) t(end)],[1 size(psth.responsecurve,1)],...
-            squeeze(psth.responsecurveSmooth(:,ii,:))); caxis([0 10]); colormap(jet);
+            psth.responsecurveSmooth); caxis([0 10]); colormap(jet);
         set(gca,'TickDir','out'); xlim([winSizePlot(1) winSizePlot(2)]);
         if ii == 1
             title('Rate [0 to 10 Hz]','FontWeight','normal','FontSize',10);
@@ -261,7 +325,7 @@ if ratePlot
 
         subplot(nConditions,2,2 + ii * 2 - 2)
         imagesc([t(1) t(end)],[1 size(psth.responsecurve,1)],...
-            squeeze(psth.responsecurveZSmooth(:,ii,:))); caxis([-3 3]); colormap(jet);
+            psth.responsecurveZSmooth); caxis([-3 3]); colormap(jet);
         set(gca,'TickDir','out'); xlim([winSizePlot(1) winSizePlot(2)]);
         if ii == 1
            title('Z Rate [-3 to 3 SD]','FontWeight','normal','FontSize',10);
@@ -275,8 +339,9 @@ if ratePlot
     end
 end          
 if savePlot
-    saveas(gcf,['SummaryFigures\spikesPsthRate.png']); 
+    saveas(gcf,['SummaryFigures\spikesPsthRate_',eventType,'.png']); 
 end
 
+cd(prevPath);
 end
 

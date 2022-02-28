@@ -16,7 +16,6 @@ function computeSessionSummary(varargin)
 %  
 %   (specific analysis optionss)
 %   excludeShanks           Default []
-%   getWaveformsFromDat     From 'spikes' summary, default false.
 %   analogChannelsList      Array of channel to perform 'analogPulses' psth and csd. Default 'all'
 %   digitalChannelsList     Array of channel to perform 'digitalPulses' psth and csd. Default 'all'
 %
@@ -28,7 +27,6 @@ addParameter(p,'basepath',pwd,@isdir);
 addParameter(p,'listOfAnalysis','all',@iscellstr);
 addParameter(p,'exclude',[],@iscellstr);
 addParameter(p,'excludeShanks',[],@isnumeric);
-addParameter(p,'getWaveformsFromDat',false,@islogical);
 addParameter(p,'analogChannelsList','all',@isnumeric);
 addParameter(p,'digitalChannelsList','all',@isnumeric);
 
@@ -37,7 +35,6 @@ basepath = p.Results.basepath;
 listOfAnalysis = p.Results.listOfAnalysis;
 exclude = p.Results.exclude;
 excludeShanks = p.Results.excludeShanks;
-getWaveformsFromDat = p.Results.getWaveformsFromDat;
 analogChannelsList = p.Results.analogChannelsList;
 digitalChannelsList = p.Results.digitalChannelsList;
 
@@ -51,6 +48,9 @@ if ~isempty(exclude)
     listOfAnalysis(ismember(listOfAnalysis, exclude)) = [];
 end
 session = loadSession;
+session.channels = 1:session.extracellular.nChannels;
+save([basepath filesep session.general.name,'.session.mat'],'session','-v7.3');
+
 excludeChannels = [];
 for ii = 1:length(excludeShanks)
     excludeChannels = session.extracellular.electrodeGroups.channels{excludeShanks(ii)};
@@ -58,7 +58,7 @@ end
 
 mkdir('SummaryFigures'); % create folder
 close all
-
+keyboard;
 % SPIKES SUMMARY
 if any(ismember(listOfAnalysis,'spikes'))
     try
@@ -232,46 +232,9 @@ if any(ismember(listOfAnalysis,'downStates'))
             end
         end
         saveas(gcf,'SummaryFigures\downUpStatesCSD.png');
-
-        % PSTH
-        % include psthSpikes!!!!!
-        st = UDStates.timestamps.DOWN;
-        spikeResponse = [];
-        win = [-0.2 0.2];
-        figure
-        set(gcf,'Position',[100 -100 2500 1200])
-        for jj = 1:size(spikes.UID,2)
-            fprintf(' **UD from unit %3.i/ %3.i \n',jj, size(spikes.UID,2)); %\n
-            rast_x = []; rast_y = [];
-            for kk = 1:length(st)
-                temp_rast = spikes.times{jj} - st(kk);
-                temp_rast = temp_rast(temp_rast>win(1) & temp_rast<win(2));
-                rast_x = [rast_x temp_rast'];
-                rast_y = [rast_y kk*ones(size(temp_rast))'];
-            end
-            [stccg, t] = CCG({spikes.times{jj} st},[],'binSize',0.005,'duration',1);
-            spikeResponse = [spikeResponse; zscore(squeeze(stccg(:,end,1:end-1)))'];
-            subplot(7,ceil(size(spikes.UID,2)/7),jj); % autocorrelogram
-            plot(rast_x, rast_y,'.','MarkerSize',1)
-            hold on
-            plot(t(t>win(1) & t<win(2)), stccg(t>win(1) & t<win(2),2,1) * kk/max(stccg(:,2,1))/2,'k','LineWidth',2);
-            xlim([win(1) win(2)]); ylim([0 kk]);
-            title(num2str(jj),'FontWeight','normal','FontSize',10);
-
-            if jj == 1
-                ylabel('Trial');
-            elseif jj == size(spikes.UID,2)
-                xlabel('Time (s)');
-            else
-                set(gca,'YTick',[],'XTick',[]);
-            end
-        end
-        saveas(gcf,'SummaryFigures\downUpStatesRaster.png'); 
         
-        figure
-        imagesc([t(1) t(end)],[1 size(spikeResponse,2)], spikeResponse); caxis([-3 3]); colormap(jet);
-        set(gca,'TickDir','out'); xlabel('Time'); ylabel('Cells');
-        saveas(gcf,['SummaryFigures\downUpStatesRasterPsth.png']); 
+        % PSTH
+        psthUD = spikesPsth([],'eventType','slowOscillations');
     catch
         warning('Error on Psth and CSD from down-states!');
     end
@@ -281,6 +244,11 @@ end
 if any(ismember(listOfAnalysis,'ripples'))
     try
         disp('Ripples CSD and PSTH...');
+        
+        ripples = rippleMasterDetector;
+        
+        % CSD
+        
         rippleChannels = computeRippleChannel('discardShanks',excludeShanks);
         ripples = bz_DetectSWR([rippleChannels.Ripple_Channel, rippleChannels.Sharpwave_Channel],'saveMat',true);
         % ripples = bz_FindRipples(basepath, rippleChannels.Ripple_Channel);

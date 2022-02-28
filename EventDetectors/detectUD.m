@@ -101,9 +101,9 @@ skipCluster = p.Results.skipCluster;
 
 
 %% Collect pieces
-if exist([basenameFromBasepath '.UDStates.events.mat'],'file') && ~forceDetect
+if exist([basenameFromBasepath(pwd) '.UDStates.events.mat'],'file') && ~forceDetect
     disp('Up and down states already detected! Loading file.');
-    load([basenameFromBasepath '.UDStates.events.mat']);
+    load([basenameFromBasepath(pwd) '.UDStates.events.mat']);
     return
 end
 tlfp = getLFP(1,'basepath',basepath,'noPrompts',noPrompts);

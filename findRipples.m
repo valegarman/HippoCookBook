@@ -412,7 +412,7 @@ end
 
 %The detectorinto substructure
 detectorinfo.detectorname = 'findRipples';
-detectorinfo.detectiondate = today;
+detectorinfo.detectiondate = date;
 detectorinfo.detectionintervals = restrict;
 detectorinfo.detectionparms = p.Results;
 detectorinfo.detectionparms = rmfield(detectorinfo.detectionparms,'noise');
