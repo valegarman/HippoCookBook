@@ -37,16 +37,12 @@ addParameter(p,'winSize',1,@isnumeric);
 addParameter(p,'rasterPlot',true,@islogical);
 addParameter(p,'ratePlot',true,@islogical);
 addParameter(p,'winSizePlot',[-.1 .5],@isnumeric);
-addParameter(p,'saveMat',false,@islogical);
+addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'savePlot',false,@islogical);
 addParameter(p,'force',false,@islogical);
-<<<<<<< HEAD
 addParameter(p,'eventType',date,@ischar);
 addParameter(p,'event_ints',[-0.02 0.02],@isnumeric);
 addParameter(p,'baseline_ints',[-0.5 -0.46],@isnumeric);
-=======
-addParameter(p,'eventType',[],@islogical);
->>>>>>> 32ac85944db5986fc47eb6bb79f16401b81fff7f
 
 parse(p, timestamps,varargin{:});
 
@@ -62,16 +58,8 @@ saveMat = p.Results.saveMat;
 savePlot = p.Results.savePlot;
 force = p.Results.force;
 eventType = p.Results.eventType;
-<<<<<<< HEAD
 event_ints = p.Results.event_ints;
 baseline_ints = p.Results.baseline_ints;
-
-if saveMat
-    disp('Saving results...');
-    save([session.general.name '.' eventType '_psth.cellinfo.mat'],'psth');
-end
-=======
->>>>>>> 32ac85944db5986fc47eb6bb79f16401b81fff7f
 
 %% Session Template
 % Deal with inputs
@@ -99,8 +87,17 @@ if strcmpi(eventType,'slowOscillations')
     winSizePlot = [-0.5 0.5];
     event_ints = [-0.05 0.05];
     baseline_ints = [-0.5 0.4];
-elseif strcmpi(eventType,'ripples')
-    keyboard;
+    elseif strcmpi(eventType,'ripples')
+    if isempty(timestamps)
+        ripples = rippleMasterDetector;
+        timestamps = ripples.peaks;
+    end
+    warning('Using default parameters for ripples!');
+    binSize = 0.005;
+    winSize = 1;
+    winSizePlot = [-0.5 0.5];
+    event_ints = [-0.01 0.01];
+    baseline_ints = [-0.5 -0.5 + diff(event_ints)];
 end
 
 %% Spikes
@@ -108,16 +105,6 @@ if isempty(spikes)
     spikes = loadSpikes();
 end
 
-%% Managing Event Type and selecting appropiate windows
-
-if ~isempty(eventType) && ischar(eventType)
-    switch eventType
-        case 'ripples'
-            winSizePlot = [-0.5 0.5];
-            timeResponse = 0.1;
-        case 'SW'
-    end
-end
 %% Get cell response
 psth = [];
 timestamps_recording = timestamps(1):1/1250:timestamps(end);
@@ -187,10 +174,10 @@ for ii = 1:length(spikes.UID)
             psth.zscoreTest(ii,jj,1) = test;
             
             % 3 ways test. If not boostrap, it would be 2 ways.
-            if (psth.rateDuringPulse(ii,jj,1) > ci(2) || isnan(ci(2))) && psth.modulationSignificanceLevel(ii,jj,1)<0.01...
+            if (psth.rateDuringPulse(ii,jj,1) > ci(2) || isnan(ci(2))) && psth.modulationSignificanceLevel(ii,jj,1)<0.05...
                     && mean(psth.responsecurveZ(ii,jj,t_duringPulse)) > 1.96
                 test = 1;
-            elseif (psth.rateDuringPulse(ii,jj,1) < ci(1) || isnan(ci(1))) && psth.modulationSignificanceLevel(ii,jj,1)<0.01 ...
+            elseif (psth.rateDuringPulse(ii,jj,1) < ci(1) || isnan(ci(1))) && psth.modulationSignificanceLevel(ii,jj,1)<0.05 ...
                     && mean(psth.responsecurveZ(ii,jj,t_duringPulse)) < -1.96
                 test = -1;
             else
@@ -268,7 +255,7 @@ end
 
 if saveMat
     disp('Saving results...');
-    save([session.general.name '.' eventType '_psth.cellinfo.mat'],'psth');
+    save([basenameFromBasepath(pwd) '.' eventType '_psth.cellinfo.mat'],'psth');
 end
 
 % PLOTS

@@ -246,29 +246,21 @@ if any(ismember(listOfAnalysis,'ripples'))
         disp('Ripples CSD and PSTH...');
         
         ripples = rippleMasterDetector;
-        
         % CSD
-        
-        rippleChannels = computeRippleChannel('discardShanks',excludeShanks);
-        ripples = bz_DetectSWR([rippleChannels.Ripple_Channel, rippleChannels.Sharpwave_Channel],'saveMat',true);
-        % ripples = bz_FindRipples(basepath, rippleChannels.Ripple_Channel);
-        
-        xml = LoadParameters;
-        shanks = xml.AnatGrps;
+        shanks = session.extracellular.electrodeGroups.channels;            
         shanks(excludeShanks) = [];
-        % CSD
         twin = 0.1;
         evs = ripples.peaks;
         figure
         set(gcf,'Position',[100 100 1400 600])
         for jj = 1:size(shanks,2)
-            lfp = bz_GetLFP(shanks(jj).Channels,'noPrompts', true);
+            lfp = getLFP(shanks{jj},'noPrompts', true);
             [csd,lfpAvg] = bz_eventCSD(lfp,evs,'twin',[twin twin],'plotLFP',false,'plotCSD',false);
             taxis = linspace(-twin,twin,size(csd.data,1));
             cmax = max(max(csd.data)); 
             subplot(1,size(shanks,2),jj);
             contourf(taxis,1:size(csd.data,2),csd.data',40,'LineColor','none');hold on;
-            set(gca,'YDir','reverse'); xlabel('time (s)'); ylabel('channel'); title(strcat('RIPPLES, Shank #',num2str(jj)),'FontWeight','normal'); 
+            set(gca,'YDir','reverse'); xlabel('time (s)'); ylabel('channel'); title(strcat('DOWN-UP, Shank #',num2str(jj)),'FontWeight','normal'); 
             colormap jet; caxis([-cmax cmax]);
             hold on
             for kk = 1:size(lfpAvg.data,2)
@@ -276,45 +268,10 @@ if any(ismember(listOfAnalysis,'ripples'))
             end
         end
         saveas(gcf,'SummaryFigures\ripplesCSD.png');
-
-        % PSTH
-        st = ripples.peaks;
-        spikeResponse = [];
-        win = [-0.2 0.2];
-        figure
-        set(gcf,'Position',[100 -100 2500 1200])
-        for jj = 1:size(spikes.UID,2)
-            fprintf(' **Ripple from unit %3.i/ %3.i \n',jj, size(spikes.UID,2)); %\n
-            rast_x = []; rast_y = [];
-            for kk = 1:length(st)
-                temp_rast = spikes.times{jj} - st(kk);
-                temp_rast = temp_rast(temp_rast>win(1) & temp_rast<win(2));
-                rast_x = [rast_x temp_rast'];
-                rast_y = [rast_y kk*ones(size(temp_rast))'];
-            end
-            [stccg, t] = CCG({spikes.times{jj} st},[],'binSize',0.005,'duration',1);
-            spikeResponse = [spikeResponse; zscore(squeeze(stccg(:,end,1:end-1)))'];
-            subplot(7,ceil(size(spikes.UID,2)/7),jj); % autocorrelogram
-            plot(rast_x, rast_y,'.','MarkerSize',1)
-            hold on
-            plot(t(t>win(1) & t<win(2)), stccg(t>win(1) & t<win(2),2,1) * kk/max(stccg(:,2,1))/2,'k','LineWidth',2);
-            xlim([win(1) win(2)]); ylim([0 kk]);
-            title(num2str(jj),'FontWeight','normal','FontSize',10);
-
-            if jj == 1
-                ylabel('Trial');
-            elseif jj == size(spikes.UID,2)
-                xlabel('Time (s)');
-            else
-                set(gca,'YTick',[],'XTick',[]);
-            end
-        end
-        saveas(gcf,'SummaryFigures\ripplesRaster.png'); 
         
-        figure
-        imagesc([t(1) t(end)],[1 size(spikeResponse,2)], spikeResponse); caxis([-3 3]); colormap(jet);
-        xlim([-.2 .2]); set(gca,'TickDir','out'); xlabel('Time'); ylabel('Cells');
-        saveas(gcf,['SummaryFigures\ripplesPsth.png']); title('Ripples');
+        % PSTH
+        psthRipples = spikesPsth([],'eventType','ripples','numRep',100);
+        
     catch
         warning('Error on Psth and CSD from ripples! ');
     end
@@ -340,6 +297,13 @@ end
 
 % THETA AND GAMMA PHASE MODULATION
 if any(ismember(listOfAnalysis,'thetaModulation'))
+    
+    thetaEpochs = detectThetaEpochs;
+    computePhaseModulation;
+
+    
+
+    
     try 
         disp('Theta modulation...');
         % Theta profile
