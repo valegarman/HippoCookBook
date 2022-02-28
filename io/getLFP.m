@@ -150,7 +150,8 @@ end
 
 %% things we can parse from sessionTemplate metadata
 
-session = sessionTemplate(basepath,'showGUI',false);
+% session = sessionTemplate(basepath,'showGUI',false);
+session = loadSession(basepath);
 switch fromDat
     case false
         try

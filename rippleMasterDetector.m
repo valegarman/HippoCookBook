@@ -123,7 +123,8 @@ rippleStats = p.Results.rippleStats;
 debug = p.Results.debug;
 eventSpikeThreshold = p.Results.eventSpikeThreshold;
 %% Load Session Metadata and several variables if not provided
-session = sessionTemplate(basepath,'showGUI',false);
+% session = sessionTemplate(basepath,'showGUI',false);
+session = loadSession(basepath);
 
 % Ripple and SW Channel are loaded separately in case we want to provide
 % only one of the

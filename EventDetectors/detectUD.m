@@ -101,7 +101,17 @@ skipCluster = p.Results.skipCluster;
 
 
 %% Collect pieces
+<<<<<<< HEAD
 if exist([basenameFromBasepath(pwd) '.UDStates.events.mat'],'file') && ~forceDetect
+=======
+<<<<<<< HEAD
+% session = sessionTemplate(basepath,'showGUI',false);
+session = loadSession(basepath);
+if exist([session.general.name '.UDStates.events.mat'],'file') && ~forceDetect
+=======
+if exist([basenameFromBasepath '.UDStates.events.mat'],'file') && ~forceDetect
+>>>>>>> b911b221125fd93ea08c959480cad29e550f9147
+>>>>>>> 32ac85944db5986fc47eb6bb79f16401b81fff7f
     disp('Up and down states already detected! Loading file.');
     load([basenameFromBasepath(pwd) '.UDStates.events.mat']);
     return

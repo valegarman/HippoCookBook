@@ -45,7 +45,8 @@ prevPath = pwd;
 cd(basePath);
 
 % Using session metadata
-session = sessionTemplate(basePath,'showGUI',false);
+% session = sessionTemplate(basePath,'showGUI',false);
+session = loadSession(basePath);
 Anatomical_groups = session.extracellular.electrodeGroups.channels;
 
 SHANKS=[];

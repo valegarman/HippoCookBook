@@ -40,9 +40,13 @@ addParameter(p,'winSizePlot',[-.1 .5],@isnumeric);
 addParameter(p,'saveMat',false,@islogical);
 addParameter(p,'savePlot',false,@islogical);
 addParameter(p,'force',false,@islogical);
+<<<<<<< HEAD
 addParameter(p,'eventType',date,@ischar);
 addParameter(p,'event_ints',[-0.02 0.02],@isnumeric);
 addParameter(p,'baseline_ints',[-0.5 -0.46],@isnumeric);
+=======
+addParameter(p,'eventType',[],@islogical);
+>>>>>>> 32ac85944db5986fc47eb6bb79f16401b81fff7f
 
 parse(p, timestamps,varargin{:});
 
@@ -58,6 +62,7 @@ saveMat = p.Results.saveMat;
 savePlot = p.Results.savePlot;
 force = p.Results.force;
 eventType = p.Results.eventType;
+<<<<<<< HEAD
 event_ints = p.Results.event_ints;
 baseline_ints = p.Results.baseline_ints;
 
@@ -65,6 +70,8 @@ if saveMat
     disp('Saving results...');
     save([session.general.name '.' eventType '_psth.cellinfo.mat'],'psth');
 end
+=======
+>>>>>>> 32ac85944db5986fc47eb6bb79f16401b81fff7f
 
 %% Session Template
 % Deal with inputs
@@ -101,6 +108,16 @@ if isempty(spikes)
     spikes = loadSpikes();
 end
 
+%% Managing Event Type and selecting appropiate windows
+
+if ~isempty(eventType) && ischar(eventType)
+    switch eventType
+        case 'ripples'
+            winSizePlot = [-0.5 0.5];
+            timeResponse = 0.1;
+        case 'SW'
+    end
+end
 %% Get cell response
 psth = [];
 timestamps_recording = timestamps(1):1/1250:timestamps(end);

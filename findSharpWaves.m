@@ -51,7 +51,8 @@ SWpassband = p.Results.SWpassband;
 SWthresholds = p.Results.SWthresholds;
 debug = p.Results.debug;
 %% Load Session Metadata
-session = sessionTemplate(basepath,'showGUI',false);
+% session = sessionTemplate(basepath,'showGUI',false);
+session = loadSession(basepath);
 srLfp = session.extracellular.srLfp;
 %% Initialization of SW
 SW = [];

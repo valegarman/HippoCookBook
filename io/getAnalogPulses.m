@@ -90,7 +90,7 @@ if isempty(f) || f.bytes == 0                                              % if 
 %     else 
 %         analogCh = analogCh+1; % 0 to 1 index
     end
-    session = sessionTemplate(basepath,'showGUI',false);
+    session = loadSession(basepath);
     samplingRate = session.extracellular.sr;
     nChannels = session.extracellular.nChannels;
 %     parameters = LoadParameters(pwd); % read xml

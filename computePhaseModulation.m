@@ -85,8 +85,8 @@ plotting = p.Results.plotting;
 saveMat = p.Results.saveMat;
 
 %% Session template
-session = sessionTemplate(basepath,'showGUI',false);
-
+% session = sessionTemplate(basepath,'showGUI',false);
+session = loadSession(basepath);
 %% Spikes
 if isempty(spikes)
     spikes = loadSpikes;
