@@ -36,6 +36,7 @@ addParameter(p,'winSizePlot',[-.1 .5],@islogical);
 addParameter(p,'saveMat',false,@islogical);
 addParameter(p,'savePlot',false,@islogical);
 addParameter(p,'force',false,@islogical);
+addParameter(p,'eventType',[],@islogical);
 
 parse(p, timestamps,varargin{:});
 
@@ -50,6 +51,7 @@ winSizePlot = p.Results.winSizePlot;
 saveMat = p.Results.saveMat;
 savePlot = p.Results.savePlot;
 force = p.Results.force;
+eventType = p.Results.eventType;
 
 %% Session Template
 session = sessionTemplate(basepath,'showGUI',false);
@@ -59,6 +61,16 @@ if isempty(spikes)
     spikes = loadSpikes();
 end
 
+%% Managing Event Type and selecting appropiate windows
+
+if ~isempty(eventType) && ischar(eventType)
+    switch eventType
+        case 'ripples'
+            winSizePlot = [-0.5 0.5];
+            timeResponse = 0.1;
+        case 'SW'
+    end
+end
 %% Get cell response
 psth = [];
 timestamps_recording = timestamps(1):1/1250:timestamps(end);

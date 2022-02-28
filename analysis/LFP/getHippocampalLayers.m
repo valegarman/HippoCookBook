@@ -66,12 +66,12 @@ end
 
 % Compute channels features
 % Updated by Pablo Abad to use session metadata instead of sessionInfo
-session = sessionTemplate(basepath,'showGUI',false);
+session = loadSession(basepath);
 channel_order = session.channels;
 % channels.pyramidal = bz_GetBestRippleChan(lfp);
-powerProfile_theta = powerSpectrumProfile(theta_bandpass,'showfig',true,'saveMat',false); 
-powerProfile_gamma = powerSpectrumProfile(gamma_bandpass,'showfig',true,'saveMat',false);
-powerProfile_hfo = powerSpectrumProfile(hfo_bandpass,'showfig',true,'saveMat',false); 
+powerProfile_theta = powerSpectrumProfile(theta_bandpass,'showfig',true,'saveMat',true); 
+powerProfile_gamma = powerSpectrumProfile(gamma_bandpass,'showfig',true,'saveMat',true);
+powerProfile_hfo = powerSpectrumProfile(hfo_bandpass,'showfig',true,'saveMat',true); 
 
 %% Computing Hippocampal Layers by looking at powerSpectrum profiles for theta and hfo
 figure

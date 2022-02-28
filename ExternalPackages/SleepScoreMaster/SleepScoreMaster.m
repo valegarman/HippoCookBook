@@ -194,7 +194,7 @@ end
 
 %% Get channels not to use
 % sessionInfo = bz_getSessionInfo(basePath,'noPrompts',noPrompts);
-session = sessionTemplate(basePath,'showGUI',false);
+session = loadSession(basePath);
 % check that SW/Theta channels exist in rec..
 if length(SWChannels) > 1 
     % if sum(ismember(SWChannels,sessionInfo.channels)) ~= length(SWChannels)

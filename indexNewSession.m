@@ -149,14 +149,15 @@ optogeneticResponses = getOptogeneticResponse('numRep',500,'force',true);
 [rippleMod,SWMod,thetaMod,lgammaMod,hgammaMod] = computePhaseModulation('SWChannel',SWChannel);
 
 %% 10. Spatial modulation
-behaviour = getSessionLinearize('forceReload',true);  
+behaviour = getSessionLinearize('forceReload',false);  
 firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',false);
 placeFieldStats = bz_findPlaceFields1D('firingMaps',firingMaps,'maxSize',.75,'sepEdge',0.03); %% ,'maxSize',.75,'sepEdge',0.03
 firingTrialsMap = firingMapPerTrial;
 
 
 %% 11. Indexing
-session = sessionTemplate(basepath,'showGUI',false);
+% session = sessionTemplate(basepath,'showGUI',false);
+session = loadSession(basepath);
 currentPath = split(pwd,':'); currentPath = currentPath{end};
 sessionName = session.general.name;
 load([indexedProjects_path filesep indexedProjects_name,'.mat']); % the variable is called allSessions

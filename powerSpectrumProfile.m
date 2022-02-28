@@ -65,7 +65,7 @@ basepath = p.Results.basepath;
 %% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 % Resolving inputs   
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-try [session] = sessionTemplate(pwd,'showGUI',false);
+try [session] = loadSession(basepath);
     if (exist([session.general.name,'.PowerSpectrumProfile_',num2str(frange(1)),'_',num2str(frange(2)),'.channelinfo.mat'],'file') || ...
             exist([session.general.name,'.PowerSpectrumProfile_',num2str(frange(1)),'_',num2str(frange(2)),'.lfp.mat'],'file')) ...
             && ~forceDetect

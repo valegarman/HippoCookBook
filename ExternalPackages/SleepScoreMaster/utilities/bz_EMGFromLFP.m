@@ -102,7 +102,7 @@ display('Calculating EMGFromLFP from High Frequency LFP Correlation')
 %% get basics about.lfp/lfp file
 
 % sessionInfo = bz_getSessionInfo(basePath,'noPrompts',noPrompts); % now using the updated version
-session = sessionTemplate(basepath,'showGUI',false);
+session = loadSession(basepath);
 switch fromDat
     case false
         if exist([basePath filesep session.general.name '.lfp'])

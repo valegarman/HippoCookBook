@@ -76,7 +76,8 @@ SW = p.Results.SW;
 saveMat = p.Results.saveMat;
 
 %% Load session metadate
-session = sessionTemplate(pwd,'showGUI',false);
+% session = sessionTemplate(pwd,'showGUI',false);
+session = loadSession(pwd);
 srLfp = lfp.samplingRate;
 ts = lfp.timestamps;
 %% Loading SharpWaves

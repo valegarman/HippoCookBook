@@ -116,7 +116,8 @@ end
 %% Pick channels to use
 
 % Par = bz_getSessionInfo(basePath,'noPrompts',noPrompts);
-Par = sessionTemplate(basePath,'showGUI',false);
+% Par = sessionTemplate(basePath,'showGUI',false);
+Par = loadSession(basePath);
 nChannels = Par.extracellular.nChannels;
 
 %Remove spike groups requirement DL9/3/19 - returned 12/11/19...
