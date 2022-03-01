@@ -29,6 +29,7 @@ addParameter(p,'exclude',[],@iscellstr);
 addParameter(p,'excludeShanks',[],@isnumeric);
 addParameter(p,'analogChannelsList','all',@isnumeric);
 addParameter(p,'digitalChannelsList','all',@isnumeric);
+addParameter(p,'tracking_pixel_cm',0.1149,@isnumeric);
 
 parse(p,varargin{:});
 basepath = p.Results.basepath;
@@ -37,6 +38,7 @@ exclude = p.Results.exclude;
 excludeShanks = p.Results.excludeShanks;
 analogChannelsList = p.Results.analogChannelsList;
 digitalChannelsList = p.Results.digitalChannelsList;
+tracking_pixel_cm = p.Results.tracking_pixel_cm;
 
 prevPath = pwd;
 cd(basepath);
@@ -280,7 +282,7 @@ end
 % TMAZEBEHAVIOUR AND LINEARMAZEBEHAVIOUR
 if any(ismember(listOfAnalysis,'tMazeBehaviour')) || any(ismember(listOfAnalysis,'linearMazeBehaviour'))
    try 
-        getSessionTracking('convFact',0.1149,'roiTracking','manual'); 
+        getSessionTracking('convFact',tracking_pixel_cm,'roiTracking','manual'); 
         if any(ismember(listOfAnalysis,'tMazeBehaviour'))
             getSessionArmChoice;
         end
@@ -300,104 +302,7 @@ if any(ismember(listOfAnalysis,'thetaModulation'))
     
     thetaEpochs = detectThetaEpochs;
     computePhaseModulation;
-
-    
-
-    
-    try 
-        disp('Theta modulation...');
-        % Theta profile
-        xml = LoadParameters;
-        channels = xml.channels; channels(excludeChannels) = [];
-        powerProfile_theta = bz_PowerSpectrumProfile([6 12],'channels',channels,'showfig',true); % [0:63]
-        
-        % max theta power above pyr layer
-        rippleChannels = computeRippleChannel('discardShanks',excludeShanks);
-        for ii = 1:length(xml.AnatGrps)
-            if any(find(xml.AnatGrps(ii).Channels == rippleChannels.Ripple_Channel))
-                rippleShank = ii;
-            end
-        end
-        [~, channels_ripleShank] = intersect(powerProfile_theta.channels, xml.AnatGrps(rippleShank).Channels);
-        thetaProfile_rippleShank = powerProfile_theta.mean(channels_ripleShank);
-        [~, indx_channel] = max(thetaProfile_rippleShank(1:find(channels_ripleShank == rippleChannels.Ripple_Channel)));
-        thetaChannel = channels_ripleShank(indx_channel);
-
-        lfpT = bz_GetLFP(thetaChannel,'noPrompts',true);
-        
-        % thetaMod modulation
-        spikes = loadSpikes('getWaveformsFromDat',false);
-        PLD = bz_PhaseModulation(spikes,lfpT,[6 12],'plotting',false,'method','wavelet');  
-        disp('Theta modulation...');
-        figure
-        set(gcf,'Position',[100 -100 2500 1200]);
-        for jj = 1:size(spikes.UID,2)
-            subplot(7,ceil(size(spikes.UID,2)/7),jj); % autocorrelogram
-            area([PLD.phasebins; PLD.phasebins + pi*2],[PLD.phasedistros(:,jj); PLD.phasedistros(:,jj)],'EdgeColor','none');
-            hold on
-            ax = axis;
-            x = 0:.001:4*pi;
-            y = cos(x);
-            y = y - min(y); y = ((y/max(y))*(ax(4)-ax(3)))+ax(3);
-            h = plot(x,y,'-','color',[1 .8 .8]); uistack(h,'bottom') % [1 .8 .8]
-            xlim([0 4*pi]);
-            title(num2str(jj),'FontWeight','normal','FontSize',10);
-
-            if jj == 1
-                ylabel('prob'); title(['Channel (1-index): ' num2str(thetaChannel)],'FontWeight','normal','FontSize',10);
-            elseif jj == size(spikes.UID,2)
-                set(gca,'XTick',[0:2*pi:4*pi],'XTickLabel',{'0','2\pi','4\pi'},'YTick',[])
-                xlabel('phase (rad)');
-            else
-                set(gca,'YTick',[],'XTick',[]);
-            end
-        end
-        saveas(gcf,'SummaryFigures\thetaPhaseModulation.png');
-
-        % gamma modulation
-        PLD = bz_PhaseModulation(spikes,lfpT,[30 60],'plotting',false,'method','wavelet');  
-        disp('Gamma modulation...');
-        figure
-        set(gcf,'Position',[100 -100 2500 1200]);
-        for jj = 1:size(spikes.UID,2)
-            subplot(7,ceil(size(spikes.UID,2)/7),jj); % autocorrelogram
-            area([PLD.phasebins; PLD.phasebins + pi*2],[PLD.phasedistros(:,jj); PLD.phasedistros(:,jj)],'EdgeColor','none');
-            hold on
-            ax = axis;
-            x = 0:.001:4*pi;
-            y = cos(x);
-            y = y - min(y); y = ((y/max(y))*(ax(4)-ax(3)))+ax(3);
-            h = plot(x,y,'-','color',[1 .8 .8]); uistack(h,'bottom') % [1 .8 .8]
-            xlim([0 4*pi]);
-            title(num2str(jj),'FontWeight','normal','FontSize',10);
-
-            if jj == 1
-                ylabel('prob'); title(['Channel (1-index): ' num2str(thetaChannel)],'FontWeight','normal','FontSize',10);
-            elseif jj == size(spikes.UID,2)
-                set(gca,'XTick',[0:2*pi:4*pi],'XTickLabel',{'0','2\pi','4\pi'},'YTick',[])
-                xlabel('phase (rad)');
-            else
-                set(gca,'YTick',[],'XTick',[]);
-            end
-        end
-        saveas(gcf,'SummaryFigures\gamma30_60HzPhaseModulation.png');
-        
-        % spectrogram
-        params.Fs = lfpT.samplingRate; params.fpass = [2 120]; params.tapers = [3 5]; params.pad = 1;
-        [S,t,f] = mtspecgramc_fast(single(lfpT.data),[2 1],params);
-        S = log10(S); % in Db
-        S_det= bsxfun(@minus,S,polyval(polyfit(f,mean(S,1),2),f)); % detrending
-
-        figure;
-        subplot(1,5,1:4)
-        imagesc(t,f,S_det',[-1.5 1.5]);
-        set(gca,'XTick',[]); ylabel('Freqs');
-        subplot(1,5,5);
-        plot(mean(S,1),f);
-        set(gca,'YDir','reverse','YTick',[]); xlabel('Power');
-        ylim([f(1) f(end)]);
-        saveas(gcf,'SummaryFigures\spectrogramAllSession.png');    
-        
+ 
     catch
         warning('It has not been possible to run theta and gamma mod code...');
     end

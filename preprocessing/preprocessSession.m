@@ -108,7 +108,11 @@ concatenateDats(pwd,0,1);
 
 %% Get analog and digital pulses
 if  ~isempty(analogCh)
-    [pulses] = getAnalogPulses('analogCh',analogCh,'manualThr', false);
+    try
+        [pulses] = getAnalogPulses('analogCh',analogCh,'manualThr', false);
+    catch
+        warning('No analog pulses detected');
+    end
 end
 if ~isempty(dir('*digitalIn.mat'))
     digitalIn = getDigitalIn('all','fs',session.extracellular.sr); 

@@ -131,7 +131,6 @@ if rippleModulation
             file = dir([session.general.name,'.ripples.events.mat']);
             load(file.name);
         end
-        keyboard;
         lfpRipple = getLFP(rippleChannel);
         rippleMod = phaseModulation(spikes,lfpRipple,ripple_passband,'intervals',ripples.timestamps,...
             'useThresh',false,'useMinWidth',false);
