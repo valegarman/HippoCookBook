@@ -86,7 +86,9 @@ if isempty(f) || f.bytes == 0                                              % if 
     end
     
     if isempty(analogCh)
-        error('No posible to run bz_getAnalogPulses from Intan Buzsaki Ed with no analogCh inputs!');
+        warning('No posible to run getAnalogPulses from Intan Buzsaki Ed with no analogCh inputs!');
+        pulses = [];
+        return
 %     else 
 %         analogCh = analogCh+1; % 0 to 1 index
     end

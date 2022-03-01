@@ -18,18 +18,20 @@ function computeSessionSummary(varargin)
 %   excludeShanks           Default []
 %   analogChannelsList      Array of channel to perform 'analogPulses' psth and csd. Default 'all'
 %   digitalChannelsList     Array of channel to perform 'digitalPulses' psth and csd. Default 'all'
+%   skipErrors      Default, true
 %
 % Manu Valero-BuzsakiLab 2020
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Defaults and Parms
 p = inputParser;
 addParameter(p,'basepath',pwd,@isdir);
-addParameter(p,'listOfAnalysis','all',@iscellstr);
-addParameter(p,'exclude',[],@iscellstr);
+addParameter(p,'listOfAnalysis','all');
+addParameter(p,'exclude',[]);
 addParameter(p,'excludeShanks',[],@isnumeric);
 addParameter(p,'analogChannelsList','all',@isnumeric);
 addParameter(p,'digitalChannelsList','all',@isnumeric);
 addParameter(p,'tracking_pixel_cm',0.1149,@isnumeric);
+addParameter(p,'skipErrors',true,@islogical);
 
 parse(p,varargin{:});
 basepath = p.Results.basepath;
@@ -60,12 +62,14 @@ end
 
 mkdir('SummaryFigures'); % create folder
 close all
-keyboard;
+
 % SPIKES SUMMARY
 if any(ismember(listOfAnalysis,'spikes'))
     try
-       spikeFeatures;
+       spikes = loadSpikes('forceReload',true);
+       spikeFeatures();
        getAverageCCG;
+       clear spikes;
     catch
         warning('Error on Spike-waveform, autocorrelogram and cluster location! ');
     end
@@ -179,25 +183,43 @@ if any(ismember(listOfAnalysis,{'digitalPulses', 'analogPulses'}))
     try
         disp('Analog-in and/or digital-in PSTH...');
         % getting analog pulses channel
-        if ischar(analogChannelsList) && strcmpi(analogChannelsList,'all')
-            analogPulses = getAnalogPulses;
-            listOfAnalogChannel = unique(analogPulses.analogChannel);
-            clear analogPulses
-        else
-            listOfAnalogChannel = analogChannelsList;
-        end
-        % getting digital pulses channel
-        if ischar(digitalChannelsList) && strcmpi(digitalChannelsList,'all')
-            digPulses = getDigitalIn;
-            listOfDigitalChannel = zeros(size(digPulses.timestampsOn));
-            for ii = 1:length(pulses.timestampsOn)
-                listOfDigitalChannel(ii) = ~isempty(digPulses.timestampsOn{ii});
+        analogPulses = getAnalogPulses;
+        if isempty(analogPulses)
+            listOfAnalogChannel = [];
+            if ~isempty(analogChannelsList)
+                warning('Analog channel list is empty, but some digital channel were specified for analysis!!')
             end
-            listOfDigitalChannel = find(listOfDigitalChannel);
-            clear digPulses
         else
-            listOfDigitalChannel = digitalChannelsList;
+            if ischar(analogChannelsList) && strcmpi(analogChannelsList,'all')
+                analogPulses = getAnalogPulses;
+                listOfAnalogChannel = unique(analogPulses.analogChannel);
+                clear analogPulses
+            else
+                listOfAnalogChannel = analogChannelsList;
+            end
         end
+        clear analogPulses
+        
+        % getting digital pulses channel
+        digPulses = getDigitalIn;
+        if isempty(digPulses)
+            listOfDigitalChannel = [];
+            if ~isempty(digitalChannelsList)
+                warning('Digital channel list is empty, but some digital channel were specified for analysis!!')
+            end
+        else
+            if ischar(digitalChannelsList) && strcmpi(digitalChannelsList,'all')
+                listOfDigitalChannel = zeros(size(digPulses.timestampsOn));
+                for ii = 1:length(pulses.timestampsOn)
+                    listOfDigitalChannel(ii) = ~isempty(digPulses.timestampsOn{ii});
+                end
+                listOfDigitalChannel = find(listOfDigitalChannel);
+                clear digPulses
+            else
+                listOfDigitalChannel = digitalChannelsList;
+            end
+        end
+        clear digPulses
         
         optogeneticResponses = getOptogeneticResponse('analogCh',listOfAnalogChannel,'digitalCh', listOfDigitalChannel,'numRep',0);
 
@@ -236,7 +258,7 @@ if any(ismember(listOfAnalysis,'downStates'))
         saveas(gcf,'SummaryFigures\downUpStatesCSD.png');
         
         % PSTH
-        psthUD = spikesPsth([],'eventType','slowOscillations');
+        psthUD = spikesPsth([],'eventType','slowOscillations','numRep',100);
     catch
         warning('Error on Psth and CSD from down-states!');
     end
@@ -299,10 +321,9 @@ end
 
 % THETA AND GAMMA PHASE MODULATION
 if any(ismember(listOfAnalysis,'thetaModulation'))
-    
-    thetaEpochs = detectThetaEpochs;
-    computePhaseModulation;
- 
+    try
+        thetaEpochs = detectThetaEpochs;
+        computePhaseModulation;
     catch
         warning('It has not been possible to run theta and gamma mod code...');
     end

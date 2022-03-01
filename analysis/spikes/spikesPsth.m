@@ -38,7 +38,7 @@ addParameter(p,'rasterPlot',true,@islogical);
 addParameter(p,'ratePlot',true,@islogical);
 addParameter(p,'winSizePlot',[-.1 .5],@isnumeric);
 addParameter(p,'saveMat',true,@islogical);
-addParameter(p,'savePlot',false,@islogical);
+addParameter(p,'savePlot',true,@islogical);
 addParameter(p,'force',false,@islogical);
 addParameter(p,'eventType',date,@ischar);
 addParameter(p,'event_ints',[-0.02 0.02],@isnumeric);
@@ -120,7 +120,7 @@ end
 
 disp('Computing responses...');
 for ii = 1:length(spikes.UID)
-    fprintf(' **Pulses from unit %3.i/ %3.i \n',ii, size(spikes.UID,2));
+    fprintf(' **Events from unit %3.i/ %3.i \n',ii, size(spikes.UID,2));
     if numRep > 0
         [stccg, t] = CCG([spikes.times{ii} randomEvents],[],'binSize',binSize,'duration',winSize,'norm','rate');
         for jj = 1:nConditions
@@ -272,7 +272,7 @@ if rasterPlot
     figure;
     set(gcf,'Position',[200 -500 2500 1200]);
     for jj = 1:size(spikes.UID,2)
-        fprintf(' **Pulses from unit %3.i/ %3.i \n',jj, size(spikes.UID,2)); %\n
+        fprintf(' **Events from unit %3.i/ %3.i \n',jj, size(spikes.UID,2)); %\n
         rast_x = []; rast_y = [];
         for kk = 1:length(st)
             temp_rast = spikes.times{jj} - st(kk);

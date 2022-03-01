@@ -218,7 +218,7 @@ if plotting
     end
     
     % Sharpwave Modulation
-    if SWModulation
+    if SWModulation && ~isempty(SWMod)
         figure,
         set(gcf,'Position',get(0,'ScreenSize'))
         for i = 1:length(spikes.UID)

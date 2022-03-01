@@ -117,7 +117,7 @@ end
 if ~isempty(dir('*digitalIn.dat'))
     digitalIn = getDigitalIn('all','fs',session.extracellular.sr); 
 end
-
+keyboard;
 %% Remove stimulation artifacts
 if iscell(cleanArtifacts) || cleanArtifacts
     if iscell(cleanArtifacts)

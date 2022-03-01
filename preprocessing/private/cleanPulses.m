@@ -42,7 +42,7 @@ winArt = p.Results.winArt;
 winDC = p.Results.winDC;
 
 % try [sessionInfo] = sessionTemplate(basepath, 'noPrompts', true);
-try session = sessionTemplate(basepath,'showGUI',false);
+try session = loadSession;
 %     fs = sessionInfo.rates.wideband;
 %     nChannels = sessionInfo.nChannels;
     fs = session.extracellular.sr;

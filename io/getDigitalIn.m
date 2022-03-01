@@ -67,7 +67,6 @@ if isempty(filename)
     else
         filename = filename.name;
     end
-    filename = filename.name;
 else
     
 end

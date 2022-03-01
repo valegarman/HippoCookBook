@@ -1,4 +1,4 @@
-function spikeFeatures(spikes,varargin)
+function spikeFeatures(varargin)
 % Computes and Plot Spike Features (ACG and population CCG)
 %
 % USAGE

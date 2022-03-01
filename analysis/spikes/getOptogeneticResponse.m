@@ -31,14 +31,14 @@ addParameter(p,'analogCh',[]);
 addParameter(p,'digitalCh',[]);
 addParameter(p,'spikes',[],@isstruct);
 addParameter(p,'basepath',pwd,@ischar);
-addParameter(p,'numRep',500,@isnumeric);
+addParameter(p,'numRep',50,@isnumeric);
 addParameter(p,'binSize',0.001,@isnumeric);
 addParameter(p,'winSize',1,@isnumeric);
 addParameter(p,'rasterPlot',true,@islogical);
 addParameter(p,'ratePlot',true,@islogical);
 addParameter(p,'winSizePlot',[-.1 .5],@islogical);
 addParameter(p,'saveMat',true,@islogical);
-addParameter(p,'force',false,@islogical);
+addParameter(p,'force',true,@islogical);
 addParameter(p,'minNumberOfPulses',100,@isnumeric);
 
 
@@ -92,6 +92,9 @@ pulses.channel = [pulsesAnalog.analogChannel; pulsesDigital.digitalChannel + max
 pulses.analogChannel = [pulsesAnalog.analogChannel; nan(size(pulsesDigital.digitalChannel))];  % 
 pulses.digitalChannel = [nan(size(pulsesAnalog.analogChannel)); pulsesDigital.digitalChannel];  % 
 pulses.duration = round(pulses.timestamps(:,2) - pulses.timestamps(:,1),3);  % 
+pulses.isAnalog = [ones(size(pulsesAnalog.analogChannel)); zeros(size(pulsesDigital.digitalChannel))];
+pulses.isDigital = [zeros(size(pulsesAnalog.analogChannel)); ones(size(pulsesDigital.digitalChannel))];
+
 
 % get cell response
 optogeneticResponses = [];
@@ -110,7 +113,6 @@ conditions(notEnoughtPulses,:) = [];
 nConditions = size(conditions,1);
 
 spikes = loadSpikes;
-
 % generate random events for boostraping
 disp('Generating boostrap template...');
 nPulses = int32(size(pulses.timestamps,1));
@@ -138,6 +140,9 @@ for ii = 1:length(spikes.UID)
     end
     for jj = 1:nConditions
         pul = pulses.timestamps(pulses.channel == conditions(jj,2) & pulses.duration == conditions(jj,1),:);
+        isAnalog = median(pulses.isAnalog(pulses.channel == conditions(jj,2) & pulses.duration == conditions(jj,1)));
+        channelPulse = median(pulses.channel(pulses.channel == conditions(jj,2) & pulses.duration == conditions(jj,1)));
+        
         nPulses = length(pul);
         pulseDuration = conditions(jj,1);
         if nPulses > 100
@@ -151,6 +156,11 @@ for ii = 1:length(spikes.UID)
             optogeneticResponses.rateDuringPulse(ii,jj,1) = mean(stccg(t_duringPulse,2,1));
             optogeneticResponses.rateBeforePulse(ii,jj,1) = mean(stccg(t_beforePulse,2,1));
             optogeneticResponses.rateZDuringPulse(ii,jj,1) = mean(squeeze(optogeneticResponses.responsecurveZ(ii,jj,t_duringPulse)));
+            optogeneticResponses.durationPerPulse(ii,jj,1) = t(find(t_duringPulse,1,'last')+1) - t(find(t_duringPulse,1,'first')-1);
+            optogeneticResponses.isAnalog(ii,jj,1) = isAnalog;
+            optogeneticResponses.isDigital(ii,jj,1) = ~isAnalog;
+            optogeneticResponses.channelPulse(ii,jj,1) = channelPulse;
+            
             [h, optogeneticResponses.modulationSignificanceLevel(ii,jj,1)] = kstest2(stccg(t_duringPulse,2,1),stccg(t_beforePulse,2,1));
             ci = squeeze(optogeneticResponses.bootsTrapCI(ii,jj,:));
             
@@ -195,6 +205,10 @@ for ii = 1:length(spikes.UID)
             optogeneticResponses.bootsTrapTest(ii,jj,1) = NaN;
             optogeneticResponses.zscoreTest(ii,jj,1) = NaN;
             optogeneticResponses.threeWaysTest(ii,jj,1) = NaN;
+            optogeneticResponses.durationPerPulse(ii,jj,1) = NaN;
+            optogeneticResponses.isAnalog(ii,jj,1) = isAnalog;
+            optogeneticResponses.isDigital(ii,jj,1) = ~isAnalog;
+            optogeneticResponses.channelPulse(ii,jj,1) = channelPulse;
         end
     end
     optogeneticResponses.timestamps = t;
@@ -278,11 +292,14 @@ if rasterPlot
 
             % spikeResponse = [spikeResponse; zscore(squeeze(stccg(:,end,jj)))'];
             resp = squeeze(optogeneticResponses.responsecurveSmooth(jj,ii,:));
+            dur = optogeneticResponses.durationPerPulse(jj,ii,1);
             subplot(7,ceil(size(spikes.UID,2)/7),jj); % autocorrelogram
-            plot(rast_x, rast_y,'.','MarkerSize',1)
+            plot(rast_x, rast_y,'.','MarkerSize',1,'color',[.6 .6 .6]);
             hold on
             plot(t(t>winSizePlot(1) & t<winSizePlot(2)), resp(t>winSizePlot(1) & t<winSizePlot(2)) * kk/max(resp)/2,'k','LineWidth',2);
-            xlim([winSizePlot(1) winSizePlot(2)]); ylim([0 kk]);
+            xlim([winSizePlot(1) winSizePlot(2)]); ylim([0 kk*1.1]);
+            plot([0 dur],[kk*1.05 kk*1.05],'color',[0 0.6 0.6],'LineWidth',2);
+            
             if optogeneticResponses.threeWaysTest(jj,ii) == 0
                 title(num2str(jj),'FontWeight','normal','FontSize',10);
             elseif optogeneticResponses.threeWaysTest(jj,ii) == -1
@@ -306,7 +323,7 @@ end
 if ratePlot
     t = optogeneticResponses.timestamps;
     figure
-    for ii = 1:nConditions;
+    for ii = 1:nConditions
         subplot(nConditions,2,1 + ii * 2 - 2)
         imagesc([t(1) t(end)],[1 size(optogeneticResponses.responsecurve,1)],...
             squeeze(optogeneticResponses.responsecurveSmooth(:,ii,:))); caxis([0 10]); colormap(jet);
@@ -320,7 +337,10 @@ if ratePlot
         else
             set(gca,'XTick',[]);
         end
-
+        ylim([-1.5 size(optogeneticResponses.responsecurveSmooth(:,ii,:),1)]);
+        hold on
+        plot([0 median(optogeneticResponses.durationPerPulse(:,ii,:))],[-0.5 -0.5],'color',[0 0.6 0.6],'LineWidth',2);
+        
         subplot(nConditions,2,2 + ii * 2 - 2)
         imagesc([t(1) t(end)],[1 size(optogeneticResponses.responsecurve,1)],...
             squeeze(optogeneticResponses.responsecurveZSmooth(:,ii,:))); caxis([-3 3]); colormap(jet);
@@ -334,9 +354,12 @@ if ratePlot
         else
             set(gca,'XTick',[]);
         end
+        ylim([-1.5 size(optogeneticResponses.responsecurveSmooth(:,ii,:),1)]);
+        hold on
+        plot([0 median(optogeneticResponses.durationPerPulse(:,ii,:))],[-0.5 -0.5],'color',[0 0.6 0.6],'LineWidth',2);
     end
 end          
-saveas(gcf,['SummaryFigures\AnalogPulsesPsth.png']); 
+saveas(gcf,['SummaryFigures\optogeneticPulsesPsth.png']); 
 
 cd(prevPath);
 end
