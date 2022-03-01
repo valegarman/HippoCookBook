@@ -98,6 +98,7 @@ addParameter(p,'srLfp',1250,@isnumeric);
 addParameter(p,'rippleStats',true,@islogical);
 addParameter(p,'debug',false,@islogical);
 addParameter(p,'eventSpikeThreshold',1,@isnumeric);
+addParameter(p,'force',false,@islogical);
 
 parse(p,varargin{:})
 
@@ -122,9 +123,19 @@ srLfp = p.Results.srLfp;
 rippleStats = p.Results.rippleStats;
 debug = p.Results.debug;
 eventSpikeThreshold = p.Results.eventSpikeThreshold;
+force = p.Results.force;
+
+
 %% Load Session Metadata and several variables if not provided
 % session = sessionTemplate(basepath,'showGUI',false);
 session = loadSession(basepath);
+
+if (exist([session.general.name '.ripples.events.mat'],'file') ...
+        && ~force)
+    disp(['Ripples already detected for ', session.general.name, '. Loading file.']);
+    load([session.general.name '.ripples.events.mat']);
+    return
+end
 
 % Ripple and SW Channel are loaded separately in case we want to provide
 % only one of the

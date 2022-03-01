@@ -29,7 +29,7 @@ addParameter(p,'filename',filename,@isstr);
 addParameter(p,'basepath',pwd,@isstr);
 addParameter(p,'correctDC',false, @islogical);
 addParameter(p,'ch','all');
-addParameter(p,'winArt',0.0005,@isnumeric);
+addParameter(p,'winArt',0.00025,@isnumeric);
 addParameter(p,'winDC',0.005,@isnumeric);
 
 parse(p, varargin{:});
@@ -41,9 +41,8 @@ ch = p.Results.ch;
 winArt = p.Results.winArt;
 winDC = p.Results.winDC;
 
-keyboard;
 % try [sessionInfo] = sessionTemplate(basepath, 'noPrompts', true);
-try session = sessionTemplate(basepath,'showGUI',false);
+try session = loadSession;
 %     fs = sessionInfo.rates.wideband;
 %     nChannels = sessionInfo.nChannels;
     fs = session.extracellular.sr;

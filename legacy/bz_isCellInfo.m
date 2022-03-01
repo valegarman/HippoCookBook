@@ -12,9 +12,8 @@ function [iscellinfo] = bz_isCellInfo(cellinfo)
 %      logical true if struct meets cellinfo criteria, false if otherwise
 %
 % written by david tingley, 2017
-
-if isfield(cellinfo,'UID') && isfield(cellinfo,'sessionName') %&& isfield(cellinfo,'region') % check that fields exist
-     if ischar(cellinfo.sessionName) && isvector(cellinfo.UID) %&& isvector(cellinfo.region)
+if isfield(cellinfo,'UID') && isfield(cellinfo,'basename') %&& isfield(cellinfo,'region') % check that fields exist
+     if ischar(cellinfo.basename) && isvector(cellinfo.UID) %&& isvector(cellinfo.region)
          iscellinfo = true;
      else
          warning('one of the required fields for a cellinfo type is not formatted correctly')

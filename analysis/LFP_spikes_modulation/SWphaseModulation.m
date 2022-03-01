@@ -169,12 +169,22 @@ for i = 1:length(spikes.times)
     swMod{i} = cSW;
     
     % Gather binned counts and stats (incl Rayleigh Test)
-    [phasedistros(:,i),phasebins,ps]=CircularDistribution(deg2rad(swMod{i}),'nBins',numBins);
-    phasestats.m(i) = mod(ps.m,2*pi);
-    phasestats.r(i) = ps.r;
-    phasestats.k(i) = ps.k;
-    phasestats.p(i) = ps.p;
-    phasestats.mode(i) = ps.mode;
+    if isempty(swMod{i})
+        swMod{i} = NaN;
+        [phasedistros(:,i)]=NaN;
+        phasestats.m(i) = NaN;
+        phasestats.r(i) = NaN;
+        phasestats.k(i) = NaN;
+        phasestats.p(i) =NaN;
+        phasestats.mode(i) = NaN;
+    else
+        [phasedistros(:,i),phasebins,ps]=CircularDistribution(deg2rad(swMod{i}),'nBins',numBins);
+        phasestats.m(i) = mod(ps.m,2*pi);
+        phasestats.r(i) = ps.r;
+        phasestats.k(i) = ps.k;
+        phasestats.p(i) = ps.p;
+        phasestats.mode(i) = ps.mode;
+    end
     
     %% plotting
     if plotting

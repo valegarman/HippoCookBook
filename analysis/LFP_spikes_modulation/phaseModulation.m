@@ -1,6 +1,6 @@
-function [PhaseLockingData] = bz_PhaseModulation(varargin)
+function [PhaseLockingData] = phaseModulation(varargin)
 % USAGE
-%[PhaseLockingData] = bz_PhaseModulation(varargin)
+%[PhaseLockingData] = phaseModulation(varargin)
 %
 % INPUTS
 % spikes        -spike time cellinfo struct
@@ -47,6 +47,7 @@ function [PhaseLockingData] = bz_PhaseModulation(varargin)
 %
 % Brendon Watson 2015
 % edited by david tingley, 2017
+% Edited by Pablo Abad 2022. Based on bz_PhaseModulation
 
 %% defaults
 p = inputParser;
@@ -56,7 +57,7 @@ addRequired(p,'passband',@isnumeric)
 addParameter(p,'intervals',[0 inf],@isnumeric)
 addParameter(p,'samplingRate',1250,@isnumeric)
 addParameter(p,'method','hilbert',@isstr)
-addParameter(p,'plotting',true,@islogical)
+addParameter(p,'plotting',false,@islogical)
 addParameter(p,'numBins',180,@isnumeric)
 addParameter(p,'powerThresh',2,@isnumeric)
 addParameter(p,'useThresh',true,@islogical);
@@ -169,6 +170,8 @@ if useMinWidth
     intervals = intervals(diff(intervals')>minWidth./samplingRate,:); % only keep min width epochs
 end
 
+
+
 %% Get phases for each spike for each cell
 h = [];
 % cum_spkphases = [];
@@ -245,7 +248,7 @@ end
 %     end
 % end
 
-detectorName = 'bz_PhaseModulation';
+detectorName = 'phaseModulation';
 channels = lfp.channels;
 detectorParams = v2struct(intervals,samplingRate,method,plotting,numBins,...
     passband,powerThresh,channels);
@@ -259,10 +262,14 @@ catch
 PhaseLockingData.region = [];
 end
 PhaseLockingData.UID = spikes.UID;
-PhaseLockingData.sessionName = spikes.sessionName;
+try
+    PhaseLockingData.basename = spikes.basename;
+catch
+    PhaseLockingData.sessionName = spikes.sessionName;
+end
 
 if saveMat
-    save([lfp.Filename(1:end-4) '.PhaseLockingData.cellinfo.mat'],'PhaseLockingData');
+    save([lfp.Filename(1:end-4) '.PhaseLockingData_',num2str(passband(1)),'-',num2str(passband(end)),'.cellinfo.mat'],'PhaseLockingData');
 end
 
 end

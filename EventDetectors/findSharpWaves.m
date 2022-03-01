@@ -189,7 +189,7 @@ SW.stats.SWequalperc = SWequalPerc;
 
 SW.detectorinfo.detectionparams = p.Results;
 SW.detectorinfo.detectorname = 'rippleMasterDetector';
-SW.detectorinfo.detectiondate = today;
+SW.detectorinfo.detectiondate = date;
 SW.detectorinfo.detectionintervals = [];
 SW.detectorinfo.detectionchannel = SWChannel;
 

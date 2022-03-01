@@ -131,7 +131,6 @@ if rippleModulation
             file = dir([session.general.name,'.ripples.events.mat']);
             load(file.name);
         end
-        
         lfpRipple = getLFP(rippleChannel);
         rippleMod = phaseModulation(spikes,lfpRipple,ripple_passband,'intervals',ripples.timestamps,...
             'useThresh',false,'useMinWidth',false);
@@ -219,7 +218,7 @@ if plotting
     end
     
     % Sharpwave Modulation
-    if SWModulation
+    if SWModulation && ~isempty(SWMod)
         figure,
         set(gcf,'Position',get(0,'ScreenSize'))
         for i = 1:length(spikes.UID)
