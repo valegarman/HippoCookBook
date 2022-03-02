@@ -1,13 +1,13 @@
 %% sessionBatchScript
 
 %1% Transfer files and organize session's folder
-updateExpFolder({'V:\data\fCck1'},'E:\data\fCck1');
+updateExpFolder({'V:\data\fCck1', 'Y:\fCck1'},'E:\data\fCck1');
 
 %2% Preprocessing
-batch_preprocessSession('basepath','E:\data\fCck1','analogCh',1);
+batch_preprocessSession('basepath','E:\data\fCck1','cleanArtifacts',({[],1}));
 
 %3% Computing summary
-batch_sessionSummary('basepath','E:\data\fCck1','analogChannelsList',1,'digitalChannelsList',1);
+batch_sessionSummary('basepath','E:\data\fCck1','analogChannelsList',1,'digitalChannelsList',1,);
 
 
 preprocessSession('basepath','E:\data\fCck1\fCck1_220214_sess11','cleanArtifacts',({[],1}));
