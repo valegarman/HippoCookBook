@@ -51,7 +51,7 @@ addParameter(p,'cleanArtifacts',false);
 addParameter(p,'medianSubstr',true);
 addParameter(p,'tracking_pixel_cm',0.1149,@isnumeric);
 addParameter(p,'sessionSummary',true,@islogical);
-addParameter(p,'digitalChannelsList',true,@islogical);
+addParameter(p,'digitalChannelsList',[],@isnumeric);
 
 % addParameter(p,'pullData',[],@isdir); To do... 
 parse(p,varargin{:});
@@ -65,7 +65,6 @@ medianSubstr = p.Results.medianSubstr;
 tracking_pixel_cm = p.Results.tracking_pixel_cm;
 sessionSummary = p.Results.sessionSummary;
 digitalChannelsList = p.Results.digitalChannelsList;
-
 
 if ~exist('basepath') || isempty(basepath)
     basepath = uigetdir; % select folder
