@@ -73,7 +73,7 @@ end
 
 try [amplifier_channels, notes, aux_input_channels, spike_triggers,...
     board_dig_in_channels, supply_voltage_channels, frequency_parameters, board_adc_channels ] =...
-    read_Intan_RHD2000_file_2;
+    read_Intan_RHD2000_file_HCB;
     fs = frequency_parameters.board_dig_in_sample_rate;
 catch
     disp('File ''info.rhd'' not found. (Type ''help <a href="matlab:help loadAnalog">loadAnalog</a>'' for details) ');

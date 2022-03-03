@@ -37,11 +37,13 @@ try session = sessionTemplate(basepath,'showGUI',false);
     channels = 1:session.extracellular.nChannels;
     nChannels = session.extracellular.nChannels;
     frequency = session.extracellular.sr;
+    total_duration = session.general.duration;
 catch
     xml = LoadParameters;
     channels = xml.channels + 1;
     nChannels = xml.nChannels;
     frequency = xml.rates.wideband;
+    total_duration = [];
 end
 
 
@@ -59,10 +61,15 @@ if ischar(ch) && strcmpi(ch, 'all')
     ch = channels;
 end
 duration = 60;
+
 fid = fopen(fileTargetAmplifier.name,'r'); filename = fileTargetAmplifier.name;
 C = strsplit(fileTargetAmplifier.name,'.dat'); filenameOut = [C{1} '_temp.dat'];
 fidOutput = fopen(filenameOut,'a');
 
+acumulated_duration = 0;
+if ~isempty(total_duration)
+    textprogressbar('Performing median subtraction: ');
+end
 while 1
     data = fread(fid,[nChannels frequency*duration],'int16');
     if isempty(data)
@@ -79,6 +86,14 @@ while 1
         data(ch(ii),:) = int16(double(data(ch(ii),:)) - double(m_data));
     end
     fwrite(fidOutput,data,'int16');
+    
+    if ~isempty(total_duration)
+        acumulated_duration = 0 + duration;
+        textprogressbar(acumulated_duration/total_duration * 100);
+    end
+end
+if ~isempty(total_duration)
+    textprogressbar('terminated');
 end
 fclose(fid);
 fclose(fidOutput);

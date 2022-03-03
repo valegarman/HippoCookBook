@@ -127,14 +127,13 @@ if iscell(cleanArtifacts) || cleanArtifacts
         end
         pulArtifacts_dig = [];
         for ii = cleanArtifacts{2}
-            disp(ii);
-            pulArtifacts_dig = [pulArtifacts_dig; digitalIn.ints{ii}(:)];
+            pulArtifacts_dig = [pulArtifacts_dig; digitalIn.ints{ii}];
         end
-        pulArtifacts = sort([pulArtifacts_analog.timestamps(:); pulArtifacts_dig]);
+        pulArtifacts = [pulArtifacts_analog.timestamps; pulArtifacts_dig];
     else
-        pulArtifacts = pulses.timestamps(:);
+        pulArtifacts = pulses.timestamps;
     end
-    cleanPulses(pulArtifacts);
+    removeStimulationArtifacts(pulArtifacts);
 end
 
 %% Make LFP

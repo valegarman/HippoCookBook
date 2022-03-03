@@ -1,5 +1,5 @@
 
-function updateExpFolder(inputFolder, outputFolder)
+function updateExpFolder(inputFolder, outputFolder,varargin)
 % Update experiment folder from Recording computer to Analysis computer
 %
 % USAGE
@@ -11,8 +11,17 @@ function updateExpFolder(inputFolder, outputFolder)
 %   outputFolder    Experiment folder in analysis computer. Only one
 %                       folder...
 %
+% <OPTIONAL>
+%  arrangeFolder   Move same day recordings to session folders. Default,
+%                       true
+%
 % Manu Valero-BuzsakiLab 2019
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+p = inputParser;
+addParameter(p,'arrangeFolder',true,@islogical);
+parse(p,varargin{:});
+arrangeFolder = p.Results.arrangeFolder;
+
 or = pwd;
 % get session list codes from output folder
 cd(outputFolder);
@@ -85,6 +94,11 @@ for jj = 1:length(inputFolder)
             strcat(outputFolder,filesep,allRecInp(newExp(ii)).name));
     end
     clear expNameInput recInput allRecInp
+end
+
+if arrangeFolder
+    cd(outputFolder)
+    arrangeSessionFolder;
 end
 
 cd(or);
