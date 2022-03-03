@@ -11,8 +11,7 @@ function  preprocessSession(varargin)
 %   <options>         optional list of property-value pairs (see table below)
 %   basepath          Basepath for experiment. It contains all session
 %                       folders. If not provided takes pwd.
-%   analogChannelsList  
-%                     List of analog channels with pulses to be detected (it support Intan Buzsaki Edition).
+%   analogChannelsList          List of analog channels with pulses to be detected (it support Intan Buzsaki Edition).
 %   forceSum          Force make folder summary (overwrite, if necessary). Default false.
 %   cleanArtifacts    Remove artifacts from dat file (false by default). If
 %                       true, remove artifacts from all Analog events. It also
@@ -27,9 +26,7 @@ function  preprocessSession(varargin)
 %                       (default false). If scalar, perform median
 %                       substraction in those channels.
 %   sessionSummary    Default, 'false'. 
-%   tracking_pixel_cm Default, 0.1149
-%   digitalChannelsList     Array of channel to perform 'digitalPulses'
-%                     if summary is done, otherwise [] 
+%   tracking_pixel_cm  Default, 0.1149
 %
 %  HISTORY: 
 %     - Created based on sessionsPipeline
@@ -43,7 +40,7 @@ function  preprocessSession(varargin)
 
 %% Defaults and Parms
 p = inputParser;
-addParameter(p,'basepath',pwd,@isfolder); % by default, current folder
+addParameter(p,'basepath',pwd,@isdir); % by default, current folder
 addParameter(p,'analogChannelsList',[],@isnumeric);
 addParameter(p,'spikeSort',true,@islogical);
 addParameter(p,'getPos',true,@islogical);
@@ -51,7 +48,6 @@ addParameter(p,'cleanArtifacts',false);
 addParameter(p,'medianSubstr',true);
 addParameter(p,'tracking_pixel_cm',0.1149,@isnumeric);
 addParameter(p,'sessionSummary',true,@islogical);
-addParameter(p,'digitalChannelsList',true,@islogical);
 
 % addParameter(p,'pullData',[],@isdir); To do... 
 parse(p,varargin{:});
@@ -64,8 +60,6 @@ cleanArtifacts = p.Results.cleanArtifacts;
 medianSubstr = p.Results.medianSubstr;
 tracking_pixel_cm = p.Results.tracking_pixel_cm;
 sessionSummary = p.Results.sessionSummary;
-digitalChannelsList = p.Results.digitalChannelsList;
-
 
 if ~exist('basepath') || isempty(basepath)
     basepath = uigetdir; % select folder
@@ -102,8 +96,7 @@ end
 try
     session = sessionTemplate(pwd,'showGUI',false); % 
     session.channels = 1:session.extracellular.nChannels;
-    session.analysisTags.digital_optogenetic_channels = digitalChannelsList;
-    session.analysisTags.analog_optogenetic_channels = analogChannelsList;
+    session.analysisTags.digital_optogenetic_channels = 
     
     save([basepath filesep session.general.name,'.session.mat'],'session','-v7.3');
 catch
@@ -191,7 +184,7 @@ if getPos
 end
 
 if sessionSummary
-    computeSessionSummary('digitalChannelsList',digitalChannelsList,'analogChannelsList',analogChannelsList);
+    computeSessionSummary;
 end
 
 end

@@ -72,10 +72,15 @@ if isempty(spikes)
     spikes = loadSpikes('getWaveformsFromDat',false);
 end
 
+pulsesAnalog.timestamps = []; pulsesAnalog.analogChannel = [];
 if strcmpi(analogCh,'all')
     pulsesAnalog = getAnalogPulses;
 else
     pulsesAnalog = getAnalogPulses('analogCh',analogCh);
+end
+lastAnalogChannel = max(pulsesAnalog.analogChannel);
+if isempty(lastAnalogChannel)
+    lastAnalogChannel = 0;
 end
 
 pulsesDigital.timestamps = []; pulsesDigital.digitalChannel = [];
@@ -88,7 +93,7 @@ if ~isempty(digitalCh)
 end
 
 pulses.timestamps = [pulsesAnalog.timestamps; pulsesDigital.timestamps];  % combine pulses
-pulses.channel = [pulsesAnalog.analogChannel; pulsesDigital.digitalChannel + max(pulsesAnalog.analogChannel)];  % combine pulses
+pulses.channel = [pulsesAnalog.analogChannel; pulsesDigital.digitalChannel + lastAnalogChannel];  % combine pulses
 pulses.analogChannel = [pulsesAnalog.analogChannel; nan(size(pulsesDigital.digitalChannel))];  % 
 pulses.digitalChannel = [nan(size(pulsesAnalog.analogChannel)); pulsesDigital.digitalChannel];  % 
 pulses.duration = round(pulses.timestamps(:,2) - pulses.timestamps(:,1),3);  % 
@@ -221,6 +226,9 @@ optogeneticResponses.numRep = numRep;
 optogeneticResponses.binSize = binSize;
 optogeneticResponses.winSize = winSize;
 optogeneticResponses.winSizePlot = winSizePlot;
+optogeneticResponses.conditions = conditions;
+optogeneticResponses.conditionsLabels = {'durations','channels','numberOfPulses'};
+optogeneticResponses.nConditions = nConditions;
 
 % Some metrics reponses
 responseMetrics = [];
@@ -270,8 +278,9 @@ end
 % 1. Rasters plot
 if rasterPlot
     t = optogeneticResponses.timestamps;
-    for ii = 1:length(channels)
-        st = pulses.timestamps(pulses.channel==channels(ii),1);
+    for ii = 1:optogeneticResponses.nConditions
+        st = pulses.timestamps(pulses.channel == conditions(ii,2) & pulses.duration == conditions(ii,1),1);
+        
         if length(st) > 5000 % if more than 5000
             st = randsample(st, 5000);
             st = sort(st);
@@ -316,13 +325,15 @@ if rasterPlot
                 set(gca,'YTick',[],'XTick',[]);
             end
         end
-        saveas(gcf,['SummaryFigures\OptogenticRespRaster_ch',num2str(channels(ii)) ,'ch.png']); 
+        saveas(gcf,['SummaryFigures\OptogenticRespRaster_ch',num2str(conditions(ii,2)),'_dur',num2str(conditions(ii,1)),'ch.png']); 
+        close(gcf);
     end
 end
 % 2. Rate plot
 if ratePlot
     t = optogeneticResponses.timestamps;
     figure
+    set(gcf,'Position',[200 -100 1000 700]);
     for ii = 1:nConditions
         subplot(nConditions,2,1 + ii * 2 - 2)
         imagesc([t(1) t(end)],[1 size(optogeneticResponses.responsecurve,1)],...
@@ -330,16 +341,17 @@ if ratePlot
         set(gca,'TickDir','out'); xlim([winSizePlot(1) winSizePlot(2)]);
         if ii == 1
             title('Rate [0 to 10 Hz]','FontWeight','normal','FontSize',10);
-            ylabel('Cells');
         end
         if ii == nConditions
             xlabel('Time');
         else
             set(gca,'XTick',[]);
         end
-        ylim([-1.5 size(optogeneticResponses.responsecurveSmooth(:,ii,:),1)]);
+        ylabel(['ch: ' num2str(conditions(ii,2)) ', dur: ' num2str(conditions(ii,1)),'s']);
+        
+        ylim([-3 size(optogeneticResponses.responsecurveSmooth(:,ii,:),1)]);
         hold on
-        plot([0 median(optogeneticResponses.durationPerPulse(:,ii,:))],[-0.5 -0.5],'color',[0 0.6 0.6],'LineWidth',2);
+        plot([0 median(optogeneticResponses.durationPerPulse(:,ii,:))],[-1.5 -1.5],'color',[0 0.6 0.6],'LineWidth',2);
         
         subplot(nConditions,2,2 + ii * 2 - 2)
         imagesc([t(1) t(end)],[1 size(optogeneticResponses.responsecurve,1)],...
@@ -347,19 +359,21 @@ if ratePlot
         set(gca,'TickDir','out'); xlim([winSizePlot(1) winSizePlot(2)]);
         if ii == 1
            title('Z Rate [-3 to 3 SD]','FontWeight','normal','FontSize',10);
-           ylabel('Cells');
         end
         if ii == nConditions
             xlabel('Time');
         else
             set(gca,'XTick',[]);
         end
-        ylim([-1.5 size(optogeneticResponses.responsecurveSmooth(:,ii,:),1)]);
+        ylabel(['ch: ' num2str(conditions(ii,2)) ', dur: ' num2str(conditions(ii,1)),'s']);
+        
+        ylim([-3 size(optogeneticResponses.responsecurveSmooth(:,ii,:),1)]);
         hold on
-        plot([0 median(optogeneticResponses.durationPerPulse(:,ii,:))],[-0.5 -0.5],'color',[0 0.6 0.6],'LineWidth',2);
+        plot([0 median(optogeneticResponses.durationPerPulse(:,ii,:))],[-1.5 -1.5],'color',[0 0.6 0.6],'LineWidth',2);
     end
+    saveas(gcf,['SummaryFigures\optogeneticPulsesPsth.png']); 
 end          
-saveas(gcf,['SummaryFigures\optogeneticPulsesPsth.png']); 
+
 
 cd(prevPath);
 end
