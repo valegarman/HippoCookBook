@@ -61,7 +61,7 @@ end
 
 mkdir('SummaryFigures'); % create folder
 close all
-keyboard;
+
 % SPIKES SUMMARY
 if any(ismember(listOfAnalysis,'spikes'))
     try
