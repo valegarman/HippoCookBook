@@ -62,12 +62,12 @@ if overwrite || exist([filetarget '.pulses.events.mat'],'file')
     disp('Pulses already detected! Loading file.');
     load([filetarget '.pulses.events.mat']);
     if ~isempty(analogChannelsList) && isnumeric(analogChannelsList)
-        maskPulses = ismember(pulses.analogChannelsListannel, analogChannelsList);
+        maskPulses = ismember(pulses.analogChannelsList, analogChannelsList);
         pulses.timestamps = pulses.timestamps(maskPulses,:);
         pulses.amplitude = pulses.amplitude(maskPulses,:);
         pulses.duration = pulses.duration(maskPulses,:);
         pulses.eventGroupID = pulses.eventGroupID(maskPulses,:);
-        pulses.analogChannelsListannel = pulses.analogChannelsListannel(maskPulses,:);
+        pulses.analogChannelsList = pulses.analogChannelsList(maskPulses,:);
     end
     return
 end
@@ -274,7 +274,7 @@ if ~isempty(pul) % if no pulses, not save anything...
     pulses.amplitude = stackCell(val);
     pulses.duration = stackCell(dur);
     pulses.eventGroupID = stackCell(eventGroupID);
-    pulses.analogChannelsListannel = stackCell(eventChannel);
+    pulses.analogChannelsList = stackCell(eventChannel);
     intsPeriods = [];
     for ii = 1:length(stimPer)
         intsPeriods = [intsPeriods; stimPer{ii}];
@@ -287,7 +287,7 @@ if ~isempty(pul) % if no pulses, not save anything...
     pulses.amplitude = pulses.amplitude(idx,:);
     pulses.duration = pulses.duration(idx,:);
     pulses.eventGroupID = pulses.eventGroupID(idx,:);
-    pulses.analogChannelsListannel = pulses.analogChannelsListannel(idx,:);
+    pulses.analogChannelsList = pulses.analogChannelsList(idx,:);
     
     try [~, idx] = sort(pulses.intsPeriods(:,1));
         pulses.intsPeriods = pulses.intsPeriods(idx,:);
