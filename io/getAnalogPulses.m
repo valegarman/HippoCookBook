@@ -7,7 +7,7 @@ function [pulses] = getAnalogPulses(varargin)
 % Based on bz_getAnalogPulses.
 %
 % <OPTIONALS>
-% analogCh      List of analog channels with pulses to be detected (it support Intan Buzsaki Edition).
+% analogChannelsList      List of analog channels with pulses to be detected (it support Intan Buzsaki Edition).
 % data          R x C matrix with analog data. C is data, R should be
 %               greater than 1.
 % offset        Offset subtracted (in seconds), default 0.
@@ -33,7 +33,7 @@ function [pulses] = getAnalogPulses(varargin)
 
 % Parse options
 p = inputParser;
-addParameter(p,'analogCh',[],@isnumeric);
+addParameter(p,'analogChannelsList',[],@isnumeric);
 addParameter(p,'data',[],@isnumeric);
 addParameter(p,'offset',0,@isnumeric);
 addParameter(p,'periodLag',20,@isnumeric);
@@ -48,7 +48,7 @@ offset = p.Results.offset;
 lag = p.Results.periodLag;
 manualThr = p.Results.manualThr;
 d = p.Results.data;
-analogCh = p.Results.analogCh;
+analogChannelsList = p.Results.analogChannelsList;
 groupPulses = p.Results.groupPulses;
 basepath = p.Results.basepath;
 useGPU = p.Results.useGPU;
@@ -61,13 +61,13 @@ filetarget = split(pwd,filesep); filetarget = filetarget{end};
 if overwrite || exist([filetarget '.pulses.events.mat'],'file') 
     disp('Pulses already detected! Loading file.');
     load([filetarget '.pulses.events.mat']);
-    if ~isempty(analogCh) && isnumeric(analogCh)
-        maskPulses = ismember(pulses.analogChannel, analogCh);
+    if ~isempty(analogChannelsList) && isnumeric(analogChannelsList)
+        maskPulses = ismember(pulses.analogChannelsListannel, analogChannelsList);
         pulses.timestamps = pulses.timestamps(maskPulses,:);
         pulses.amplitude = pulses.amplitude(maskPulses,:);
         pulses.duration = pulses.duration(maskPulses,:);
         pulses.eventGroupID = pulses.eventGroupID(maskPulses,:);
-        pulses.analogChannel = pulses.analogChannel(maskPulses,:);
+        pulses.analogChannelsListannel = pulses.analogChannelsListannel(maskPulses,:);
     end
     return
 end
@@ -85,12 +85,12 @@ if isempty(f) || f.bytes == 0                                              % if 
         analogFile = f.name;
     end
     
-    if isempty(analogCh)
-        warning('No posible to run getAnalogPulses from Intan Buzsaki Ed with no analogCh inputs!');
+    if isempty(analogChannelsList)
+        warning('No posible to run getAnalogPulses from Intan Buzsaki Ed with no analogChannelsList inputs!');
         pulses = [];
         return
 %     else 
-%         analogCh = analogCh+1; % 0 to 1 index
+%         analogChannelsList = analogChannelsList+1; % 0 to 1 index
     end
     session = loadSession(basepath);
     samplingRate = session.extracellular.sr;
@@ -120,8 +120,8 @@ else
     end
     samplingRate = frequency_parameters.board_adc_sample_rate;
     nChannels = length(board_adc_channels); % ADC input info from header file
-    if isempty(analogCh)
-        analogCh = 1:nChannels;
+    if isempty(analogChannelsList)
+        analogChannelsList = 1:nChannels;
     end
     fileTargetAnalogIn =  dir('analogin*.dat');
     mAnalogIn = memmapfile(fullfile(basepath,fileTargetAnalogIn.name),'Format','uint16','Writable', true);
@@ -131,14 +131,14 @@ end
 
 h=figure;
 % set(gcf,'Position',[100 -100 2500 1200]);
-for jj = 1 : length(analogCh)
-    fprintf(' ** Channel %3.i of %3.i... \n',jj, length(analogCh));
+for jj = 1 : length(analogChannelsList)
+    fprintf(' ** Channel %3.i of %3.i... \n',jj, length(analogChannelsList));
     disp('    Loading file...');
     if IntanBuzEd
-        d = LoadBinary(analogFile, 'frequency', samplingRate, 'nChannels', nChannels,'channels', analogCh(jj));
+        d = LoadBinary(analogFile, 'frequency', samplingRate, 'nChannels', nChannels,'channels', analogChannelsList(jj));
     else
-        % d = dataAnalogIn(analogCh(jj),:);
-        d = dataAnalogIn(find(analogCh(jj) == analogCh),:);
+        % d = dataAnalogIn(analogChannelsList(jj),:);
+        d = dataAnalogIn(find(analogChannelsList(jj) == analogChannelsList),:);
     end    
     xt = linspace(1,length(d)/samplingRate,length(d));
     
@@ -244,11 +244,11 @@ for jj = 1 : length(analogCh)
             eventGroupID{jj}(pul{jj}(1,:) >= eventGroup(kk,1) & pul{jj}(1,:) <= eventGroup(kk,2)) = jj + size(d,1) + kk - 2;
         end
     end
-    eventChannel{jj} = ones(size(dur{jj})) * analogCh(jj);
+    eventChannel{jj} = ones(size(dur{jj})) * analogChannelsList(jj);
     
     % d = gpuArray(d); locsA = gpuArray(locsA);
     figure(h);
-    subplot(length(analogCh),1,jj);
+    subplot(length(analogChannelsList),1,jj);
     hold on
     plot(xt(1:1000:end), d(1:1000:end));
     plot(xt([1 end]), [thr thr],'r','LineWidth',2);
@@ -262,7 +262,7 @@ for jj = 1 : length(analogCh)
             plot([eventGroup(kk,1) eventGroup(kk,2)],[thr+100 thr+100],'LineWidth',10);
         end
     end
-    xlabel('s'); ylabel(['Ch', num2str(analogCh(jj)),' (au)']); 
+    xlabel('s'); ylabel(['Ch', num2str(analogChannelsList(jj)),' (au)']); 
 end
 mkdir('Pulses');
 saveas(gca,['pulses\analogPulsesDetection.png']);
@@ -274,7 +274,7 @@ if ~isempty(pul) % if no pulses, not save anything...
     pulses.amplitude = stackCell(val);
     pulses.duration = stackCell(dur);
     pulses.eventGroupID = stackCell(eventGroupID);
-    pulses.analogChannel = stackCell(eventChannel);
+    pulses.analogChannelsListannel = stackCell(eventChannel);
     intsPeriods = [];
     for ii = 1:length(stimPer)
         intsPeriods = [intsPeriods; stimPer{ii}];
@@ -287,7 +287,7 @@ if ~isempty(pul) % if no pulses, not save anything...
     pulses.amplitude = pulses.amplitude(idx,:);
     pulses.duration = pulses.duration(idx,:);
     pulses.eventGroupID = pulses.eventGroupID(idx,:);
-    pulses.analogChannel = pulses.analogChannel(idx,:);
+    pulses.analogChannelsListannel = pulses.analogChannelsListannel(idx,:);
     
     try [~, idx] = sort(pulses.intsPeriods(:,1));
         pulses.intsPeriods = pulses.intsPeriods(idx,:);
