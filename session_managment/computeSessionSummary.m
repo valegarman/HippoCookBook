@@ -228,7 +228,7 @@ if any(ismember(listOfAnalysis,{'digitalPulses', 'analogPulses'}))
             listOfDigitalChannel = [];
         end
         
-        optogeneticResponses = getOptogeneticResponse('analogCh',listOfAnalogChannel,'digitalCh', listOfDigitalChannel,'numRep',0);
+        optogeneticResponses = getOptogeneticResponse('analogChannelsList',listOfAnalogChannel,'digitalChannelsList', listOfDigitalChannel,'numRep',0);
 
     catch
         warning('Error on PSTH from digital and/or analog inputs! ');
