@@ -39,7 +39,7 @@ addParameter(p,'ratePlot',true,@islogical);
 addParameter(p,'winSizePlot',[-.1 .5],@islogical);
 addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'force',true,@islogical);
-addParameter(p,'minNumberOfPulses',100,@isnumeric);
+addParameter(p,'minNumberOfPulses',200,@isnumeric);
 
 
 parse(p, varargin{:});
@@ -78,9 +78,12 @@ if strcmpi(analogCh,'all')
 else
     pulsesAnalog = getAnalogPulses('analogCh',analogCh);
 end
-lastAnalogChannel = max(pulsesAnalog.analogChannel);
-if isempty(lastAnalogChannel)
+if isempty(pulsesAnalog)
+    pulsesAnalog.timestamps = []; 
+    pulsesAnalog.analogChannel = [];
     lastAnalogChannel = 0;
+else
+    lastAnalogChannel = max(pulsesAnalog.analogChannel);
 end
 
 pulsesDigital.timestamps = []; pulsesDigital.digitalChannel = [];
@@ -99,7 +102,6 @@ pulses.digitalChannel = [nan(size(pulsesAnalog.analogChannel)); pulsesDigital.di
 pulses.duration = round(pulses.timestamps(:,2) - pulses.timestamps(:,1),3);  % 
 pulses.isAnalog = [ones(size(pulsesAnalog.analogChannel)); zeros(size(pulsesDigital.digitalChannel))];
 pulses.isDigital = [zeros(size(pulsesAnalog.analogChannel)); ones(size(pulsesDigital.digitalChannel))];
-
 
 % get cell response
 optogeneticResponses = [];
