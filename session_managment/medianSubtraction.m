@@ -88,7 +88,7 @@ while 1
     fwrite(fidOutput,data,'int16');
     
     if ~isempty(total_duration)
-        acumulated_duration = 0 + duration;
+        acumulated_duration = acumulated_duration + duration;
         textprogressbar(acumulated_duration/total_duration * 100);
     end
 end

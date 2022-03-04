@@ -318,6 +318,7 @@ if any(ismember(listOfAnalysis,'thetaModulation'))
     end
 end
 
+keyboard;
 % TMAZEBEHAVIOUR AND LINEARMAZEBEHAVIOUR
 if any(ismember(listOfAnalysis,'tMazeBehaviour')) || any(ismember(listOfAnalysis,'linearMazeBehaviour'))
    try 
