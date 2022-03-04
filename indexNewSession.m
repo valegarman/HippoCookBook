@@ -152,10 +152,10 @@ firingTrialsMap = firingMapPerTrial;
 %% 11. Indexing
 % session = sessionTemplate(basepath,'showGUI',false);
 session = loadSession(basepath);
-currentPath = split(pwd,':'); currentPath = currentPath{end};
+generalPath = [session.animal.name,'\',session.general.name];
 sessionName = session.general.name;
 load([indexedProjects_path filesep indexedProjects_name,'.mat']); % the variable is called allSessions
-allSessions.(sessionName).path = currentPath;
+allSessions.(sessionName).path = generalPath;
 allSessions.(sessionName).name = session.animal.name;
 allSessions.(sessionName).strain = session.animal.strain;
 allSessions.(sessionName).geneticLine = session.animal.geneticLine;
@@ -171,7 +171,7 @@ for i = 1:length(session.epochs)
     end
 end
 allSessions.(sessionName).behav = behav;
-allSessions.(sessionName).project = sessions.general.projects;
+allSessions.(sessionName).project = session.general.projects;
 allSessions.(sessionName).tag = 1;
 save([indexedProjects_path filesep indexedProjects_name,'.mat'],'allSessions');
 
@@ -188,4 +188,5 @@ system(commandToExecute)
 commandToExecute = ['git push'];
 system(commandToExecute)
 
+cd(basepath)
 end
