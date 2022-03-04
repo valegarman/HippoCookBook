@@ -308,6 +308,16 @@ if any(ismember(listOfAnalysis,'ripples'))
     end
 end
 
+% THETA AND GAMMA PHASE MODULATION
+if any(ismember(listOfAnalysis,'thetaModulation'))
+    try
+        thetaEpochs = detectThetaEpochs;
+        computePhaseModulation;
+    catch
+        warning('It has not been possible to run theta and gamma mod code...');
+    end
+end
+
 % TMAZEBEHAVIOUR AND LINEARMAZEBEHAVIOUR
 if any(ismember(listOfAnalysis,'tMazeBehaviour')) || any(ismember(listOfAnalysis,'linearMazeBehaviour'))
    try 
@@ -324,16 +334,6 @@ if any(ismember(listOfAnalysis,'tMazeBehaviour')) || any(ismember(listOfAnalysis
    catch
        warning('It has not been possible to run the behaviour code...');
    end
-end
-
-% THETA AND GAMMA PHASE MODULATION
-if any(ismember(listOfAnalysis,'thetaModulation'))
-    try
-        thetaEpochs = detectThetaEpochs;
-        computePhaseModulation;
-    catch
-        warning('It has not been possible to run theta and gamma mod code...');
-    end
 end
 
 cd(prevPath);
