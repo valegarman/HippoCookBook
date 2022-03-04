@@ -160,7 +160,7 @@ if any(ismember(listOfAnalysis,'digitalPulses'))
                     cmax = max(max(csd.data)); 
                     subplot(1,size(shanks,2),jj);
                     contourf(taxis,1:size(csd.data,2),csd.data',40,'LineColor','none');hold on;
-                    set(gca,'YDir','reverse'); xlabel('time (s)'); ylabel('channel'); title(strcat('AnalogCh #',num2str(listOfChannel(mm))),'FontWeight','normal'); 
+                    set(gca,'YDir','reverse'); xlabel('time (s)'); ylabel('channel'); title(strcat('DigitalCh #',num2str(listOfChannel(mm))),'FontWeight','normal'); 
                     colormap jet; try caxis([-cmax cmax]); end
                     hold on
                     for kk = 1:size(lfpAvg.data,2)
