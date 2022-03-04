@@ -5,18 +5,20 @@ function [optogeneticResponses] = getOptogeneticResponse(varargin)
 % Computes Psth and a several statistical measures of the cell responses.
 %
 % <OPTIONALS>
-% analogCh      List of analog channels with light pulses. By default, []
-% digitalCh     List of digital channels with light pulses. By default,
-%                   [].
-% spikes        buzcode spikes structure, if not provided tries loadSpikes.
-% basepath      By default pwd.
-% numRep        For boostraping, default, 500. If 0, no boostraping.
-% binSize       In seconds, default, 0.001.
-% winSize       In seconds, default, 0.5.
-% rasterPlot    Default true.
-% ratePlot      Default true.
-% winSizePlot Default [-0.1 .5];
-% force         Default, false
+% analogChannelsList          List of analog channels with light pulses. By default, []
+% digitalChannelsList         List of digital channels with light pulses. By default,
+%                       [].
+% spikes            buzcode spikes structure, if not provided tries loadSpikes.
+% basepath          By default pwd.
+% numRep            For boostraping, default, 500. If 0, no boostraping.
+% binSize           In seconds, default, 0.001.
+% winSize           In seconds, default, 0.5.
+% rasterPlot        Default true.
+% ratePlot          Default true.
+% winSizePlot       Default [-0.1 .5];
+% force             Default, false
+% saveEventsFile    Default, true
+%                   
 %
 % OUTPUTS
 % optogeneticResponse
@@ -27,8 +29,8 @@ function [optogeneticResponses] = getOptogeneticResponse(varargin)
 
 % Parse options
 p = inputParser;
-addParameter(p,'analogCh',[]);
-addParameter(p,'digitalCh',[]);
+addParameter(p,'analogChannelsList',[]);
+addParameter(p,'digitalChannelsList',[]);
 addParameter(p,'spikes',[],@isstruct);
 addParameter(p,'basepath',pwd,@ischar);
 addParameter(p,'numRep',50,@isnumeric);
@@ -40,11 +42,11 @@ addParameter(p,'winSizePlot',[-.1 .5],@islogical);
 addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'force',true,@islogical);
 addParameter(p,'minNumberOfPulses',200,@isnumeric);
-
+addParameter(p,'saveEventsFile',true,@islogical);
 
 parse(p, varargin{:});
-analogCh = p.Results.analogCh;
-digitalCh = p.Results.digitalCh;
+analogChannelsList = p.Results.analogChannelsList;
+digitalChannelsList = p.Results.digitalChannelsList;
 basepath = p.Results.basepath;
 spikes = p.Results.spikes;
 numRep = p.Results.numRep;
@@ -56,6 +58,7 @@ saveMat = p.Results.saveMat;
 winSizePlot = p.Results.winSizePlot;
 force = p.Results.force;
 minNumberOfPulses = p.Results.minNumberOfPulses;
+saveEventsFile = p.Results.saveEventsFile;
 
 % Deal with inputs
 prevPath = pwd;
@@ -72,36 +75,36 @@ if isempty(spikes)
     spikes = loadSpikes('getWaveformsFromDat',false);
 end
 
-pulsesAnalog.timestamps = []; pulsesAnalog.analogChannel = [];
-if strcmpi(analogCh,'all')
+pulsesAnalog.timestamps = []; pulsesAnalog.analogChannelsListannel = [];
+if strcmpi(analogChannelsList,'all')
     pulsesAnalog = getAnalogPulses;
 else
-    pulsesAnalog = getAnalogPulses('analogCh',analogCh);
+    pulsesAnalog = getAnalogPulses('analogChannelsList',analogChannelsList);
 end
 if isempty(pulsesAnalog)
     pulsesAnalog.timestamps = []; 
-    pulsesAnalog.analogChannel = [];
-    lastAnalogChannel = 0;
+    pulsesAnalog.analogChannelsListannel = [];
+    lastanalogChannelsListannel = 0;
 else
-    lastAnalogChannel = max(pulsesAnalog.analogChannel);
+    lastanalogChannelsListannel = max(pulsesAnalog.analogChannelsListannel);
 end
 
-pulsesDigital.timestamps = []; pulsesDigital.digitalChannel = [];
-if ~isempty(digitalCh)
+pulsesDigital.timestamps = []; pulsesDigital.digitalChannelsListannel = [];
+if ~isempty(digitalChannelsList)
     digitalIn = getDigitalIn;
-    for ii = 1:length(digitalCh)
-        pulsesDigital.timestamps = [pulsesDigital.timestamps; digitalIn.ints{digitalCh(ii)}];
-        pulsesDigital.digitalChannel = [pulsesDigital.digitalChannel; ones(size(digitalIn.ints{digitalCh(ii)},1),1) * digitalCh(ii)];
+    for ii = 1:length(digitalChannelsList)
+        pulsesDigital.timestamps = [pulsesDigital.timestamps; digitalIn.ints{digitalChannelsList(ii)}];
+        pulsesDigital.digitalChannelsListannel = [pulsesDigital.digitalChannelsListannel; ones(size(digitalIn.ints{digitalChannelsList(ii)},1),1) * digitalChannelsList(ii)];
     end
 end
 
 pulses.timestamps = [pulsesAnalog.timestamps; pulsesDigital.timestamps];  % combine pulses
-pulses.channel = [pulsesAnalog.analogChannel; pulsesDigital.digitalChannel + lastAnalogChannel];  % combine pulses
-pulses.analogChannel = [pulsesAnalog.analogChannel; nan(size(pulsesDigital.digitalChannel))];  % 
-pulses.digitalChannel = [nan(size(pulsesAnalog.analogChannel)); pulsesDigital.digitalChannel];  % 
+pulses.channel = [pulsesAnalog.analogChannelsListannel; pulsesDigital.digitalChannelsListannel + lastanalogChannelsListannel];  % combine pulses
+pulses.analogChannelsListannel = [pulsesAnalog.analogChannelsListannel; nan(size(pulsesDigital.digitalChannelsListannel))];  % 
+pulses.digitalChannelsListannel = [nan(size(pulsesAnalog.analogChannelsListannel)); pulsesDigital.digitalChannelsListannel];  % 
 pulses.duration = round(pulses.timestamps(:,2) - pulses.timestamps(:,1),3);  % 
-pulses.isAnalog = [ones(size(pulsesAnalog.analogChannel)); zeros(size(pulsesDigital.digitalChannel))];
-pulses.isDigital = [zeros(size(pulsesAnalog.analogChannel)); ones(size(pulsesDigital.digitalChannel))];
+pulses.isAnalog = [ones(size(pulsesAnalog.analogChannelsListannel)); zeros(size(pulsesDigital.digitalChannelsListannel))];
+pulses.isDigital = [zeros(size(pulsesAnalog.analogChannelsListannel)); ones(size(pulsesDigital.digitalChannelsListannel))];
 
 % get cell response
 optogeneticResponses = [];
@@ -274,6 +277,13 @@ if saveMat
     disp('Saving results...');
     filename = split(pwd,filesep); filename = filename{end};
     save([filename '.optogeneticResponse.cellinfo.mat'],'optogeneticResponses');
+end
+
+if saveEventsFile
+    disp('Saving timestamps...');
+    filename = split(pwd,filesep); filename = filename{end};
+    optoPulses = optogeneticResponses.pulses;
+    save([filename '.optogeneticPulses.events.mat'],'optoPulses');
 end
 
 % PLOTS
