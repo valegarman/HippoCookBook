@@ -58,7 +58,7 @@ prevPath = pwd;
 cd(basepath);
 
 filetarget = split(pwd,filesep); filetarget = filetarget{end};
-if overwrite || exist([filetarget '.pulses.events.mat'],'file') 
+if overwrite && exist([filetarget '.pulses.events.mat'],'file') 
     disp('Pulses already detected! Loading file.');
     load([filetarget '.pulses.events.mat']);
     if ~isempty(analogChannelsList) && isnumeric(analogChannelsList)

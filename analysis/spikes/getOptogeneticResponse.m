@@ -71,6 +71,18 @@ if ~isempty(targetFile) && ~force
     return
 end
 
+%% Load session metadata
+session = loadSession(basepath);
+
+%% Digital and Analog Pulses
+try
+    analogChannelsList = session.analysisTags.analog_optogenetic_channels;
+    digitalChannelsList = session.analysisTags.digital_optogenetic_channels;
+catch
+    warning('There is a problem with analog and digital channels...');
+end
+
+%%
 if isempty(spikes)
     spikes = loadSpikes('getWaveformsFromDat',false);
 end
@@ -83,28 +95,28 @@ else
 end
 if isempty(pulsesAnalog)
     pulsesAnalog.timestamps = []; 
-    pulsesAnalog.analogChannelsListannel = [];
-    lastanalogChannelsListannel = 0;
+    pulsesAnalog.analogChannelsList = [];
+    lastAnalogChannels = 0;
 else
-    lastanalogChannelsListannel = max(pulsesAnalog.analogChannelsListannel);
+    lastAnalogChannels = max(pulsesAnalog.analogChannelsList);
 end
 
-pulsesDigital.timestamps = []; pulsesDigital.digitalChannelsListannel = [];
+pulsesDigital.timestamps = []; pulsesDigital.digitalChannelsList = [];
 if ~isempty(digitalChannelsList)
     digitalIn = getDigitalIn;
     for ii = 1:length(digitalChannelsList)
         pulsesDigital.timestamps = [pulsesDigital.timestamps; digitalIn.ints{digitalChannelsList(ii)}];
-        pulsesDigital.digitalChannelsListannel = [pulsesDigital.digitalChannelsListannel; ones(size(digitalIn.ints{digitalChannelsList(ii)},1),1) * digitalChannelsList(ii)];
+        pulsesDigital.digitalChannelsList = [pulsesDigital.digitalChannelsList; ones(size(digitalIn.ints{digitalChannelsList(ii)},1),1) * digitalChannelsList(ii)];
     end
 end
 
 pulses.timestamps = [pulsesAnalog.timestamps; pulsesDigital.timestamps];  % combine pulses
-pulses.channel = [pulsesAnalog.analogChannelsListannel; pulsesDigital.digitalChannelsListannel + lastanalogChannelsListannel];  % combine pulses
-pulses.analogChannelsListannel = [pulsesAnalog.analogChannelsListannel; nan(size(pulsesDigital.digitalChannelsListannel))];  % 
-pulses.digitalChannelsListannel = [nan(size(pulsesAnalog.analogChannelsListannel)); pulsesDigital.digitalChannelsListannel];  % 
+pulses.channel = [pulsesAnalog.analogChannelsList; pulsesDigital.digitalChannelsList + lastAnalogChannels];  % combine pulses
+pulses.analogChannelsListannel = [pulsesAnalog.analogChannelsList; nan(size(pulsesDigital.digitalChannelsList))];  % 
+pulses.digitalChannelsListannel = [nan(size(pulsesAnalog.analogChannelsList)); pulsesDigital.digitalChannelsList];  % 
 pulses.duration = round(pulses.timestamps(:,2) - pulses.timestamps(:,1),3);  % 
-pulses.isAnalog = [ones(size(pulsesAnalog.analogChannelsListannel)); zeros(size(pulsesDigital.digitalChannelsListannel))];
-pulses.isDigital = [zeros(size(pulsesAnalog.analogChannelsListannel)); ones(size(pulsesDigital.digitalChannelsListannel))];
+pulses.isAnalog = [ones(size(pulsesAnalog.analogChannelsList)); zeros(size(pulsesDigital.digitalChannelsList))];
+pulses.isDigital = [zeros(size(pulsesAnalog.analogChannelsList)); ones(size(pulsesDigital.digitalChannelsList))];
 
 % get cell response
 optogeneticResponses = [];

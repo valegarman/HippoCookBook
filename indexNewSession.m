@@ -29,7 +29,6 @@ addParameter(p,'basepath',pwd,@isdir);
 addParameter(p,'theta_bandpass',[6 12], @isnumeric);
 addParameter(p,'gamma_bandpass',[20 100], @isnumeric);
 addParameter(p,'hfo_bandpass',[100 500], @isnumeric);
-addParameter(p,'analogCh',65,@isnumeric); % 0-index
 addParameter(p,'rejectChannels',[],@isnumeric); % 0-index
 addParameter(p,'project','Undefined',@isstring);
 addParameter(p,'indexedProjects_path',[],@isstring);
@@ -48,7 +47,6 @@ basepath = p.Results.basepath;
 theta_bandpass = p.Results.theta_bandpass;
 gamma_bandpass = p.Results.gamma_bandpass;
 hfo_bandpass = p.Results.hfo_bandpass;
-analogCh = p.Results.analogCh;
 rejectChannels = p.Results.rejectChannels;
 project = p.Results.project;
 indexedProjects_path = p.Results.indexedProjects_path;
@@ -100,7 +98,7 @@ spikes = loadSpikes('forceReload',force_loadingSpikes);
 
 %% 3. Analog pulses detection
 disp('Getting analog Pulses...')
-pulses = getAnalogPulses('analogCh',analogCh,'manualThr',false,'overwrite',force_analogPulsesDetection); % 1-index
+pulses = getAnalogPulses('analogChannelsList',analogChannelsList,'manualThr',false,'overwrite',force_analogPulsesDetection); % 1-index
 
 %% 4. Check Sleep Score
 SleepScoreMaster(pwd,'noPrompts',true,'ignoretime',pulses.intsPeriods, 'overwrite', true);
