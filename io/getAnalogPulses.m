@@ -58,18 +58,20 @@ prevPath = pwd;
 cd(basepath);
 
 filetarget = split(pwd,filesep); filetarget = filetarget{end};
-if overwrite && exist([filetarget '.pulses.events.mat'],'file') 
-    disp('Pulses already detected! Loading file.');
-    load([filetarget '.pulses.events.mat']);
-    if ~isempty(analogChannelsList) && isnumeric(analogChannelsList)
-        maskPulses = ismember(pulses.analogChannelsList, analogChannelsList);
-        pulses.timestamps = pulses.timestamps(maskPulses,:);
-        pulses.amplitude = pulses.amplitude(maskPulses,:);
-        pulses.duration = pulses.duration(maskPulses,:);
-        pulses.eventGroupID = pulses.eventGroupID(maskPulses,:);
-        pulses.analogChannelsList = pulses.analogChannelsList(maskPulses,:);
+if exist([filetarget '.pulses.events.mat'],'file') 
+    if overwrite || exist([filetarget '.pulses.events.mat'],'file') 
+        disp('Pulses already detected! Loading file.');
+        load([filetarget '.pulses.events.mat']);
+        if ~isempty(analogChannelsList) && isnumeric(analogChannelsList)
+            maskPulses = ismember(pulses.analogChannelsList, analogChannelsList);
+            pulses.timestamps = pulses.timestamps(maskPulses,:);
+            pulses.amplitude = pulses.amplitude(maskPulses,:);
+            pulses.duration = pulses.duration(maskPulses,:);
+            pulses.eventGroupID = pulses.eventGroupID(maskPulses,:);
+            pulses.analogChannelsList = pulses.analogChannelsList(maskPulses,:);
+        end
+        return
     end
-    return
 end
 
 analogFile = []; IntanBuzEd = [];

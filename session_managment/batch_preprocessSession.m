@@ -62,7 +62,7 @@ medianSubstr = p.Results.medianSubstr;
 tracking_pixel_cm = p.Results.tracking_pixel_cm;
 sessionSummary = p.Results.sessionSummary;
 digitalChannelsList = p.Results.digitalChannelsList;
-
+keyboard;
 
 % batch processing...
 all_folders = dir(basepath);
