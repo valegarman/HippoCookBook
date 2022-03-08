@@ -49,9 +49,12 @@ if ~isempty(dir('*DigitalIn.events.mat'))
     disp('Pulses already detected! Loading file.');
     file = dir('*DigitalIn.events.mat');
     load(file.name);
-    for ii = 1:size(digitalIn.ints,2)
-        if size(digitalIn.ints{ii},1) ~= size(digitalIn.timestampsOff{ii},1)
-            digitalIn.ints{ii} = digitalIn.ints{ii}';
+    
+    if ~isempty(digitalIn)
+        for ii = 1:size(digitalIn.ints,2)
+            if size(digitalIn.ints{ii},1) ~= size(digitalIn.timestampsOff{ii},1)
+                digitalIn.ints{ii} = digitalIn.ints{ii}';
+            end
         end
     end
 
@@ -139,7 +142,7 @@ if exist('digitalIn')==1
     mkdir('Pulses');
     saveas(h,'pulses\digitalIn.png');
 
-    try save([basenameFromBasepath '.DigitalIn.events.mat'],'digitalIn');
+    try save([basenameFromBasepath(pwd) '.DigitalIn.events.mat'],'digitalIn');
     catch
         save('digitalIn.events.mat','digitalIn');
     end

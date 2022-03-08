@@ -135,8 +135,15 @@ try
                 pulArtifacts_analog.timestamps = [];
             end
             pulArtifacts_dig = [];
-            for ii = cleanArtifacts{2}
-                pulArtifacts_dig = [pulArtifacts_dig; digitalIn.ints{ii}];
+            
+            
+            pulArtifacts_dig = getDigitalIn;
+            if isempty(pulArtifacts_dig)
+                pulArtifacts_dig = [];
+            else
+                for ii = cleanArtifacts{2}
+                    pulArtifacts_dig = [pulArtifacts_dig; digitalIn.ints{ii}];
+                end
             end
             pulArtifacts = [pulArtifacts_analog.timestamps; pulArtifacts_dig];
         else
