@@ -391,8 +391,6 @@ if promt
     plot(score,'color',[.4 .9 .4],'LineWidth',2);
     text(4, score(4),'Total score','color',[.4 .9 .4],'FontSize',12);
     
-    xlabel('Shanks');     
-    
     ax = axis;
     bsl = plot([bestShank bestShank], [ax([3 4])],'color',[.7 1 .7],'LineWidth',1.5);
     bst = text(bestShank+0.1, ax(3)+0.3,'Best shank','color',[.7 1 .7],'FontSize',12);
@@ -410,11 +408,11 @@ if promt
     delete([bsl bst]);
             
     plot([bestShank bestShank], [ax([3 4])],'color',[.7 1 .7],'LineWidth',1.5);
-    text(bestShank+0.1, ax(3)+0.3,'Best shank','color',[.7 1 .7],'FontSize',12);
-    
+    text(4, score(4),'Total score','color',[.4 .9 .4],'FontSize',12);
             
-    pause(2);
-    close(fp);
+            pause(2);
+            close(fp);
+    
 end
 
 hippocampalLayers.layers = channels;

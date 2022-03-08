@@ -16,7 +16,8 @@ preprocessSession('basepath','E:\data\fCck1\fCck1_220215_sess12','cleanArtifacts
 preprocessSession('basepath','D:\Dropbox\DATA\sharedRecordings\NewXmlAnimal\190222\rec1_220219_sess1');
 computeSessionSummary('basepath','E:\data\fCck1\fCck1_220216_sess13','analogChannelsList',0,'digitalChannelsList',1);
 
-%3% compute summary
+% Index!
+indexNewSession('SWChannel',18);
  
 %% others
 editDatFile(pwd,[0.001 1],'option','zeroes');   % remove zeroes
