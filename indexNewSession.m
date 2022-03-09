@@ -82,8 +82,12 @@ cd(basepath)
 try
     session = loadSession(basepath);
     session.channels = 1:session.extracellular.nChannels;
-    session.analysisTags.digital_optogenetic_channels = digitalChannelsList;
-    session.analysisTags.analog_optogenetic_channels = analogChannelsList;
+    if ~isempty(session.analysisTags.digital_optogenetic_channels)
+        session.analysisTags.digital_optogenetic_channels = digitalChannelsList;
+    end
+    if ~isempty(session.analysisTags.analog_optogenetic_channels)
+        session.analysisTags.analog_optogenetic_channels = analogChannelsList;
+    end
     if isempty(rejectChannels)
         rejectChannels = session.channelTags.Bad.channels; % 1-index
     end

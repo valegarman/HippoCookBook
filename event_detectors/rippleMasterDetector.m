@@ -168,6 +168,23 @@ ripples = removeArtifactsFromEvents(ripples);
 ripples = eventSpikingTreshold(ripples,[],'spikingThreshold',eventSpikeThreshold);
 plotRippleChannel('rippleChannel',rippleChannel,'ripples',ripples); % to do, run this after ripple detection
 
+% Remove ripples durting stimulation artifacts
+if ~isempty(dir('*.optogeneticPulses.events.mat'))
+    f = dir('*.optogeneticPulses.events.mat');
+    disp('Using stimulation periods from optogeneticPulses.events.mat file');
+    load(f.name);
+    pulPeriods = optoPulses.stimulationEpochs;
+
+elseif ~isempty(dir('.pulses.events.mat'))
+    f = dir('*Pulses.events.mat');
+    disp('Using stimulation periods from pulses.events.mat file');
+    load(f.name);
+    pulPeriods = pulses.intsPeriods;
+else
+    warning('No pulses epochs detected!');
+end
+
+
 % EventExplorer(pwd, ripples)
 
 %% Ripple Stats
