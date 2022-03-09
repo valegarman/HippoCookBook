@@ -149,12 +149,10 @@ try
             pulArtifacts_analog = getAnalogPulses('analogChannelsList',cleanArtifacts{1});
             if isempty(pulArtifacts_analog)
                 pulArtifacts_analog.timestamps = [];
-            end
-            pulArtifacts_dig = [];
-            
+            end            
             
             pulArtifacts_dig = getDigitalIn;
-            if isempty(pulArtifacts_dig)
+            if isempty(pulArtifacts_dig) || isempty(cleanArtifacts{2})
                 pulArtifacts_dig = [];
             else
                 for ii = cleanArtifacts{2}

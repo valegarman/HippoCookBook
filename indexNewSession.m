@@ -85,7 +85,7 @@ if isempty(indexedProjects_path)
 end
 
 cd(basepath)
-
+keyboard
 %% 1. Runs sessionTemplate
 try
     session = loadSession(basepath);
@@ -156,8 +156,6 @@ catch
 end
 cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',{'deepSuperficial'});
 
-
-
 %% 10. Spatial modulation
 behaviour = getSessionLinearize('forceReload',false);  
 firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',false);
@@ -174,12 +172,15 @@ allSessions.(sessionName).path = generalPath;
 allSessions.(sessionName).name = session.animal.name;
 allSessions.(sessionName).strain = session.animal.strain;
 allSessions.(sessionName).geneticLine = session.animal.geneticLine;
+allSessions.(sessionName).brainRegions = session.brainRegions;
 if isfield(session.animal,'opticFiberImplants')
     for i = 1:length(session.animal.opticFiberImplants)
         allSessions.(sessionName).optogenetics{i} = session.animal.opticFiberImplants{i}.opticFiber;
     end
+else
+    allSessions.(sessionName).optogenetics = NaN;
 end
-behav = [];
+behav = NaN;
 for i = 1:length(session.epochs)
     if strcmpi(session.epochs{i}.behavioralParadigm, 'Maze')
         behav = [behav session.epochs{i}.environment];
@@ -187,21 +188,20 @@ for i = 1:length(session.epochs)
 end
 allSessions.(sessionName).behav = behav;
 allSessions.(sessionName).project = session.general.projects;
-allSessions.(sessionName).tag = 1;
 save([indexedProjects_path filesep indexedProjects_name,'.mat'],'allSessions');
 
 % Lets do a push for git repository
-cd(indexedProjects_path)
+cd(indexedProjects_path);
 % Git add variable to the repository
 commandToExecute = ['git add ', indexedProjects_name,'.mat']
-system(commandToExecute)
+system(commandToExecute);
 % Git Commit
 commentToCommit = ['Added Session: ' session.general.name];
 commandToExecute = ['git commit -m "' commentToCommit '"'];
-system(commandToExecute)
+system(commandToExecute);
 % Git Push
 commandToExecute = ['git push'];
-system(commandToExecute)
+system(commandToExecute);
 
 cd(basepath)
 
