@@ -146,7 +146,7 @@ if isempty(rippleChannel)
     else
         [hippocampalLayers] = getHippocampalLayers();
     end
-    rippleChannel = hippocampalLayers.layers{hippocampalLayers.bestShank}.pyramidal;
+    rippleChannel = hippocampalLayers.bestShankLayers.pyramidal;
 end
 
 if isempty(SWChannel)
@@ -156,7 +156,7 @@ if isempty(SWChannel)
     else
         [hippocampalLayers] = getHippocampalLayers();
     end
-    SWChannel = hippocampalLayers.layers{hippocampalLayers.bestShank}.radiatum;
+    SWChannel = hippocampalLayers.bestShankLayers.radiatum;
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%

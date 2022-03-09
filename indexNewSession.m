@@ -40,6 +40,8 @@ addParameter(p,'excludeManipulationIntervals',[],@isnumeric);
 addParameter(p,'SWChannel',[],@isnumeric); % manually selecting SW Channel in case getHippocampalLayers does not provide a right output
 addParameter(p,'digitalChannelsList',[],@isnumeric);
 addParameter(p,'analogChannelsList',[],@isnumeric);
+addParameter(p,'promt_hippo_layers',false,@islogical);
+addParameter(p,'manual_analog_pulses_threshold',false,@islogical);
 
 parse(p,varargin{:})
 
@@ -58,6 +60,8 @@ excludeManipulationIntervals = p.Results.excludeManipulationIntervals;
 SWChannel = p.Results.SWChannel;
 digitalChannelsList = p.Results.digitalChannelsList;
 analogChannelsList = p.Results.analogChannelsList;
+promt_hippo_layers = p.Results.promt_hippo_layers;
+manual_analog_pulses_threshold = p.Results.manual_analog_pulses_threshold;
 
 %% Creates a pointer to the folder where the index variable is located
 if isempty(indexedProjects_name)
@@ -98,7 +102,7 @@ spikes = loadSpikes('forceReload',force_loadingSpikes);
 
 %% 3. Analog pulses detection
 disp('Getting analog Pulses...')
-pulses = getAnalogPulses('analogChannelsList',analogChannelsList,'manualThr',false,'overwrite',force_analogPulsesDetection); % 1-index
+pulses = getAnalogPulses('analogChannelsList',analogChannelsList,'manualThr',manual_analog_pulses_threshold,'overwrite',force_analogPulsesDetection); % 1-index
 
 %% 4. Check Sleep Score
 SleepScoreMaster(pwd,'noPrompts',true,'ignoretime',pulses.intsPeriods, 'overwrite', true);
@@ -110,15 +114,17 @@ powerProfile_gamma = powerSpectrumProfile(gamma_bandpass,'showfig',true,'forceDe
 powerProfile_hfo = powerSpectrumProfile(hfo_bandpass,'showfig',true,'forceDetect',true);
 
 %% 6. Getting Hippocampal Layers
-[hippocampalLayers] = getHippocampalLayers('force',true);
+[hippocampalLayers] = getHippocampalLayers('force',true,'promt',promt_hippo_layers);
 
 %% 7. Check Brain Events
 % Trying changes in detecUD_temp
 % 7.1 Up and downs
 UDStates = detectUD('plotOpt', true,'forceDetect',true','NREMInts','all');
+psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500);
 
 % 7.2 Ripples
-ripples = rippleMasterDetector('SWChannel',SWChannel);
+ripples = rippleMasterDetector('SWChannel',SWChannel,'force',true);
+psthRipples = spikesPsth([],'eventType','ripples','numRep',500);
 
 % 7.3 Theta intervals
 thetaEpochs = detectThetaEpochs;
@@ -147,7 +153,6 @@ behaviour = getSessionLinearize('forceReload',false);
 firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',false);
 placeFieldStats = bz_findPlaceFields1D('firingMaps',firingMaps,'maxSize',.75,'sepEdge',0.03); %% ,'maxSize',.75,'sepEdge',0.03
 firingTrialsMap = firingMapPerTrial;
-
 
 %% 11. Indexing
 % session = sessionTemplate(basepath,'showGUI',false);

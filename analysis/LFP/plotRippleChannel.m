@@ -17,7 +17,7 @@ function plotRippleChannel(varargin)
 %   Removing shanks where all channels are bad and also removing sessionInfo and LoadParameters dependencies 
 %   And also, output now is 1-index by Pablo Abad 2022
 %
-%
+% To do: if ripple channed assigned, not compute!!
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 

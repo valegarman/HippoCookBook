@@ -59,7 +59,7 @@ cd(basepath);
 
 filetarget = split(pwd,filesep); filetarget = filetarget{end};
 if exist([filetarget '.pulses.events.mat'],'file') 
-    if overwrite || exist([filetarget '.pulses.events.mat'],'file') 
+    if ~overwrite % || exist([filetarget '.pulses.events.mat'],'file') 
         disp('Pulses already detected! Loading file.');
         load([filetarget '.pulses.events.mat']);
         if ~isempty(analogChannelsList) && isnumeric(analogChannelsList)
@@ -149,7 +149,7 @@ for jj = 1 : length(analogChannelsList)
     end
     
     if ~manualThr
-        thr = 150*median(d(1:100:end)/0.6745); % computing threshold
+        thr = 125*median(d(1:100:end)/0.6745); % computing threshold
         if thr == 0 || ~any(d>thr)
             disp('Trying 5*std threshold...');
             thr = 4.5 * std(double(d));
