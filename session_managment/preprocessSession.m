@@ -229,7 +229,9 @@ if ~isempty(analysisPath)
     copyfile([analysisPath,'\',session.general.name],basepath);
     try
         rmdir([analysisPath,'\',session.general.name],'s')
+        rmdir([analysisPath,'\',session.general.name],'s')
     catch
+        rmdir([analysisPath,'\',session.general.name],'s')
         rmdir([analysisPath,'\',session.general.name],'s')
     end
 end

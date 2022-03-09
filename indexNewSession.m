@@ -40,13 +40,10 @@ addParameter(p,'excludeManipulationIntervals',[],@isnumeric);
 addParameter(p,'SWChannel',[],@isnumeric); % manually selecting SW Channel in case getHippocampalLayers does not provide a right output
 addParameter(p,'digitalChannelsList',[],@isnumeric);
 addParameter(p,'analogChannelsList',[],@isnumeric);
-<<<<<<< HEAD
 addParameter(p,'promt_hippo_layers',false,@islogical);
 addParameter(p,'manual_analog_pulses_threshold',false,@islogical);
-=======
 addParameter(p,'removeDatFiles',true,@islogical);
 addParameter(p,'removeDat',false,@islogical);
->>>>>>> baf45ff5abb62fc1de1527ae7594d8d56ff882b0
 
 parse(p,varargin{:})
 
@@ -65,13 +62,10 @@ excludeManipulationIntervals = p.Results.excludeManipulationIntervals;
 SWChannel = p.Results.SWChannel;
 digitalChannelsList = p.Results.digitalChannelsList;
 analogChannelsList = p.Results.analogChannelsList;
-<<<<<<< HEAD
 promt_hippo_layers = p.Results.promt_hippo_layers;
 manual_analog_pulses_threshold = p.Results.manual_analog_pulses_threshold;
-=======
 removeDatFiles = p.Results.removeDatFiles;
 removeDat = p.Results.removeDat;
->>>>>>> baf45ff5abb62fc1de1527ae7594d8d56ff882b0
 
 %% Creates a pointer to the folder where the index variable is located
 if isempty(indexedProjects_name)
