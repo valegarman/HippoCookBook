@@ -69,7 +69,10 @@ medianSubstr = p.Results.medianSubstr;
 tracking_pixel_cm = p.Results.tracking_pixel_cm;
 sessionSummary = p.Results.sessionSummary;
 digitalChannelsList = p.Results.digitalChannelsList;
+<<<<<<< HEAD
 analysisPath = p.Results.analysisPath;
+=======
+>>>>>>> 89efa2798f76fdfc6e0b8b301e4ac421bdb958e5
 
 % batch processing...
 all_folders = dir(basepath);

@@ -11,12 +11,6 @@ function  preprocessSession(varargin)
 %   <options>         optional list of property-value pairs (see table below)
 %   basepath          Basepath for experiment. It contains all session
 %                       folders. If not provided takes pwd.
-%   analysisPath        local path to run preprocessing. If empty,
-%                       preprocessing will be done in basepath, if any
-%                       folder selected, files will be copied from basepath
-%                       to analysisPath, run the analysis to speed up and
-%                       then copy back again to basepath and delete
-%                       analysisPath
 %   analogChannelsList  
 %                     List of analog channels with pulses to be detected (it support Intan Buzsaki Edition).
 %   forceSum          Force make folder summary (overwrite, if necessary). Default false.
@@ -50,7 +44,6 @@ function  preprocessSession(varargin)
 %% Defaults and Parms
 p = inputParser;
 addParameter(p,'basepath',pwd,@isfolder); % by default, current folder
-addParameter(p,'analysisPath',[],@isfolder); % Local paht to run the anaysis, is em
 addParameter(p,'analogChannelsList',[],@isnumeric);
 addParameter(p,'spikeSort',true,@islogical);
 addParameter(p,'getPos',true,@islogical);
@@ -64,7 +57,6 @@ addParameter(p,'digitalChannelsList',[],@isnumeric);
 parse(p,varargin{:});
 
 basepath = p.Results.basepath;
-analysisPath = p.Results.analysisPath;
 analogChannelsList = p.Results.analogChannelsList;
 spikeSort = p.Results.spikeSort;
 getPos = p.Results.getPos;
@@ -117,16 +109,8 @@ catch
     warning('it seems that CellExplorer is not on your path');
 end
 
-if ~isempty(analysisPath)
-    cd(analysisPath);
-    mkdir(session.general.name);
-    copyfile(basepath,[analysisPath,'\',session.general.name]);
-    disp('Copying files to analysis path folder...');
-    cd([analysisPath,'\',session.general.name]);
-    disp('Copied files. Peforming preprocessSession...')
-end
-    
 %% Concatenate sessions
+cd(basepath);
 disp('Concatenate session folders...'); 
 concatenateDats(pwd,0,1);
 
@@ -149,12 +133,10 @@ try
             pulArtifacts_analog = getAnalogPulses('analogChannelsList',cleanArtifacts{1});
             if isempty(pulArtifacts_analog)
                 pulArtifacts_analog.timestamps = [];
-            end
-            pulArtifacts_dig = [];
-            
+            end            
             
             pulArtifacts_dig = getDigitalIn;
-            if isempty(pulArtifacts_dig)
+            if isempty(pulArtifacts_dig) || isempty(cleanArtifacts{2})
                 pulArtifacts_dig = [];
             else
                 for ii = cleanArtifacts{2}
@@ -209,12 +191,7 @@ if spikeSort
         warning('Session was already run kilosort in. Spiking...');
     end
 end
-
-if ~isempty(analysisPath)
-    cd([analysisPath,'\',session.general.name])
-else
-    cd(basepath)
-end
+cd(basepath);
 
 %% Get tracking positions 
 if getPos
@@ -225,12 +202,5 @@ if sessionSummary
     computeSessionSummary('digitalChannelsList',digitalChannelsList,'analogChannelsList',analogChannelsList);
 end
 
-if ~isempty(analysisPath)
-    copyfile([analysisPath,'\',session.general.name],basepath);
-    try
-        rmdir([analysisPath,'\',session.general.name],'s')
-    catch
-        rmdir([analysisPath,'\',session.general.name],'s')
-    end
 end
 
