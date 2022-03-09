@@ -8,6 +8,12 @@ function  batch_preprocessSession(varargin)
 %   <options>         optional list of property-value pairs (see table below)
 %   basepath          Basepath for experiment. It contains all session
 %                       folders. If not provided takes pwd.
+%   analysisPath        local path to run preprocessing. If empty,
+%                       preprocessing will be done in basepath, if any
+%                       folder selected, files will be copied from basepath
+%                       to analysisPath, run the analysis to speed up and
+%                       then copy back again to basepath and delete
+%                       analysisPath
 %   analogChannelsList          
 %                     List of analog channels with pulses to be detected (it support Intan Buzsaki Edition).
 %   forceSum          Force make folder summary (overwrite, if necessary). Default false.
@@ -41,6 +47,7 @@ function  batch_preprocessSession(varargin)
 %% Defaults and Parms
 p = inputParser;
 addParameter(p,'basepath',pwd,@isdir); % by default, current folder
+addParameter(p,'analysisPath',[],@isdir);
 addParameter(p,'analogChannelsList',[],@isnumeric);
 addParameter(p,'spikeSort',true,@islogical);
 addParameter(p,'getPos',false,@islogical);
@@ -62,6 +69,8 @@ medianSubstr = p.Results.medianSubstr;
 tracking_pixel_cm = p.Results.tracking_pixel_cm;
 sessionSummary = p.Results.sessionSummary;
 digitalChannelsList = p.Results.digitalChannelsList;
+analysisPath = p.Results.analysisPath;
+
 
 % batch processing...
 all_folders = dir(basepath);
@@ -71,7 +80,7 @@ for ii = 1:size(all_folders,1)
         kilosortFolder = dir('*Kilosort*');
         if isempty(kilosortFolder)
             disp([' * Preprocessing of ' all_folders(ii).folder filesep all_folders(ii).name]);
-            preprocessSession('basepath',pwd,'analogChannelsList',analogChannelsList,'spikeSort',spikeSort,'getPos',getPos, 'cleanArtifacts',cleanArtifacts,...
+            preprocessSession('basepath',pwd,'analysisPath',analysisPath,'analogChannelsList',analogChannelsList,'spikeSort',spikeSort,'getPos',getPos, 'cleanArtifacts',cleanArtifacts,...
                 'medianSubstr',medianSubstr,'tracking_pixel_cm',tracking_pixel_cm,'sessionSummary',sessionSummary,'digitalChannelsList',digitalChannelsList);
         else 
             disp(['Spikiping ' all_folders(ii).folder filesep all_folders(ii).name]);

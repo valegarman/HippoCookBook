@@ -21,7 +21,7 @@ function [UDStates] = detectUD(varargin)
 %                      (Default: loaded from SleepState.states.mat, 
 %                      it uses all recording if doesnt exist).
 %   pulPeriods     - Interval of times with stimulation pulses.
-%                      (Default: load from Pulses.events.mat, it uses all
+%                      (Default: load from OptogeneticPulses.events.mat, it uses all
 %                      recording if doesn't exist).
 %   filterparams   - Structure as filterparams.gamma and .delta with filter
 %                       parameters (default, filterparams.gamma = [20 200]
@@ -123,10 +123,19 @@ else
 end
 
 if isempty(pulPeriods)
-    if ~isempty(dir('*Pulses.events.mat'))
+    if ~isempty(dir('*.optogeneticPulses.events.mat'))
+        f = dir('*.optogeneticPulses.events.mat');
+        disp('Using stimulation periods from optogeneticPulses.events.mat file');
+        load(f.name);
+        pulPeriods = optoPulses.stimulationEpochs;
+        
+    elseif ~isempty(dir('.pulses.events.mat'))
         f = dir('*Pulses.events.mat');
+        disp('Using stimulation periods from pulses.events.mat file');
         load(f.name);
         pulPeriods = pulses.intsPeriods;
+    else
+        warning('No pulses epochs detected!');
     end
 end
 

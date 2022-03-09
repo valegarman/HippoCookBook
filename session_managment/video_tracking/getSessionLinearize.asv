@@ -56,7 +56,7 @@ end
 cd(basepath);
 sess = basenameFromBasepath(pwd);
 % [sessionInfo] = bz_getSessionInfo(basepath, 'noPrompts', true);
-C = strsplit(basenameFromBasepath(pwd),'_');
+% C = strsplit(sessionInfo.session.name,'_');
 sess = dir(strcat(C{1},'_',C{2},'*')); % get session files
 count = 1;
 for ii = 1:size(sess,1)

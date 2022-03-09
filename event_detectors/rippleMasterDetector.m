@@ -99,6 +99,7 @@ addParameter(p,'rippleStats',true,@islogical);
 addParameter(p,'debug',false,@islogical);
 addParameter(p,'eventSpikeThreshold',1,@isnumeric);
 addParameter(p,'force',false,@islogical);
+addParameter(p,'removeRipplesStimulation',true,@islogical);
 
 parse(p,varargin{:})
 
@@ -124,7 +125,7 @@ rippleStats = p.Results.rippleStats;
 debug = p.Results.debug;
 eventSpikeThreshold = p.Results.eventSpikeThreshold;
 force = p.Results.force;
-
+removeRipplesStimulation = p.Results.removeRipplesStimulation;
 
 %% Load Session Metadata and several variables if not provided
 % session = sessionTemplate(basepath,'showGUI',false);
@@ -146,7 +147,7 @@ if isempty(rippleChannel)
     else
         [hippocampalLayers] = getHippocampalLayers();
     end
-    rippleChannel = hippocampalLayers.layers{hippocampalLayers.bestShank}.pyramidal;
+    rippleChannel = hippocampalLayers.bestShankLayers.pyramidal;
 end
 
 if isempty(SWChannel)
@@ -156,7 +157,7 @@ if isempty(SWChannel)
     else
         [hippocampalLayers] = getHippocampalLayers();
     end
-    SWChannel = hippocampalLayers.layers{hippocampalLayers.bestShank}.radiatum;
+    SWChannel = hippocampalLayers.bestShankLayers.radiatum;
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
@@ -168,6 +169,36 @@ ripples = removeArtifactsFromEvents(ripples);
 ripples = eventSpikingTreshold(ripples,[],'spikingThreshold',eventSpikeThreshold);
 plotRippleChannel('rippleChannel',rippleChannel,'ripples',ripples); % to do, run this after ripple detection
 
+if removeRipplesStimulation
+    try
+        % Remove ripples durting stimulation artifacts
+        if ~isempty(dir('*.optogeneticPulses.events.mat'))
+            f = dir('*.optogeneticPulses.events.mat');
+            disp('Using stimulation periods from optogeneticPulses.events.mat file');
+            load(f.name);
+            pulPeriods = optoPulses.stimulationEpochs;
+
+        elseif ~isempty(dir('.pulses.events.mat'))
+            f = dir('*Pulses.events.mat');
+            disp('Using stimulation periods from pulses.events.mat file');
+            load(f.name);
+            pulPeriods = pulses.intsPeriods;
+        else
+            warning('No pulses epochs detected!');
+        end
+        for i = 1:size(pulPeriods,1)
+            a = InIntervals(ripples.peaks,pulPeriods(i,:));
+            fieldsR = fields(ripples);
+            for j = 1:size(fieldsR,1)
+                if ~isstruct(ripples.(fieldsR{j})) && size(ripples.(fieldsR{j}),1) > 3
+                    ripples.(fieldsR{j})(a,:) = [];
+                end
+            end
+        end
+    catch
+        warning('Not possible to remove ripples during stimulation epochs...');
+    end
+end
 % EventExplorer(pwd, ripples)
 
 %% Ripple Stats
