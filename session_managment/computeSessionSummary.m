@@ -333,6 +333,7 @@ if any(ismember(listOfAnalysis,'tMazeBehaviour')) || any(ismember(listOfAnalysis
         spikes = loadSpikes('getWaveformsFromDat',false);
         firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',true);
         placeFieldStats = bz_findPlaceFields1D('firingMaps',firingMaps);
+        firingTrialsMap = firingMapPerTrial;
    catch
        warning('It has not been possible to run the behaviour code...');
    end

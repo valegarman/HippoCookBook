@@ -40,13 +40,10 @@ addParameter(p,'excludeManipulationIntervals',[],@isnumeric);
 addParameter(p,'SWChannel',[],@isnumeric); % manually selecting SW Channel in case getHippocampalLayers does not provide a right output
 addParameter(p,'digitalChannelsList',[],@isnumeric);
 addParameter(p,'analogChannelsList',[],@isnumeric);
-<<<<<<< HEAD
 addParameter(p,'promt_hippo_layers',false,@islogical);
 addParameter(p,'manual_analog_pulses_threshold',false,@islogical);
-=======
 addParameter(p,'removeDatFiles',true,@islogical);
 addParameter(p,'removeDat',false,@islogical);
->>>>>>> baf45ff5abb62fc1de1527ae7594d8d56ff882b0
 
 parse(p,varargin{:})
 
@@ -65,13 +62,10 @@ excludeManipulationIntervals = p.Results.excludeManipulationIntervals;
 SWChannel = p.Results.SWChannel;
 digitalChannelsList = p.Results.digitalChannelsList;
 analogChannelsList = p.Results.analogChannelsList;
-<<<<<<< HEAD
 promt_hippo_layers = p.Results.promt_hippo_layers;
 manual_analog_pulses_threshold = p.Results.manual_analog_pulses_threshold;
-=======
 removeDatFiles = p.Results.removeDatFiles;
 removeDat = p.Results.removeDat;
->>>>>>> baf45ff5abb62fc1de1527ae7594d8d56ff882b0
 
 %% Creates a pointer to the folder where the index variable is located
 if isempty(indexedProjects_name)
@@ -91,7 +85,7 @@ if isempty(indexedProjects_path)
 end
 
 cd(basepath)
-
+keyboard
 %% 1. Runs sessionTemplate
 try
     session = loadSession(basepath);
@@ -162,8 +156,6 @@ catch
 end
 cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',{'deepSuperficial'});
 
-
-
 %% 10. Spatial modulation
 behaviour = getSessionLinearize('forceReload',false);  
 firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',false);
@@ -180,12 +172,15 @@ allSessions.(sessionName).path = generalPath;
 allSessions.(sessionName).name = session.animal.name;
 allSessions.(sessionName).strain = session.animal.strain;
 allSessions.(sessionName).geneticLine = session.animal.geneticLine;
+allSessions.(sessionName).brainRegions = session.brainRegions;
 if isfield(session.animal,'opticFiberImplants')
     for i = 1:length(session.animal.opticFiberImplants)
         allSessions.(sessionName).optogenetics{i} = session.animal.opticFiberImplants{i}.opticFiber;
     end
+else
+    allSessions.(sessionName).optogenetics = NaN;
 end
-behav = [];
+behav = NaN;
 for i = 1:length(session.epochs)
     if strcmpi(session.epochs{i}.behavioralParadigm, 'Maze')
         behav = [behav session.epochs{i}.environment];
@@ -193,21 +188,20 @@ for i = 1:length(session.epochs)
 end
 allSessions.(sessionName).behav = behav;
 allSessions.(sessionName).project = session.general.projects;
-allSessions.(sessionName).tag = 1;
 save([indexedProjects_path filesep indexedProjects_name,'.mat'],'allSessions');
 
 % Lets do a push for git repository
-cd(indexedProjects_path)
+cd(indexedProjects_path);
 % Git add variable to the repository
 commandToExecute = ['git add ', indexedProjects_name,'.mat']
-system(commandToExecute)
+system(commandToExecute);
 % Git Commit
 commentToCommit = ['Added Session: ' session.general.name];
 commandToExecute = ['git commit -m "' commentToCommit '"'];
-system(commandToExecute)
+system(commandToExecute);
 % Git Push
 commandToExecute = ['git push'];
-system(commandToExecute)
+system(commandToExecute);
 
 cd(basepath)
 
