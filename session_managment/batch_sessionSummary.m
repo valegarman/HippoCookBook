@@ -27,6 +27,7 @@ function  batch_sessionSummary(varargin)
 %% Defaults and Parms
 p = inputParser;
 addParameter(p,'basepath',pwd,@isdir);
+addParameter(p,'analysisPath',[],@isdir);
 addParameter(p,'listOfAnalysis','all',@iscellstr);
 addParameter(p,'exclude',[],@iscellstr);
 addParameter(p,'excludeShanks',[],@isnumeric);
