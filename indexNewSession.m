@@ -40,6 +40,8 @@ addParameter(p,'excludeManipulationIntervals',[],@isnumeric);
 addParameter(p,'SWChannel',[],@isnumeric); % manually selecting SW Channel in case getHippocampalLayers does not provide a right output
 addParameter(p,'digitalChannelsList',[],@isnumeric);
 addParameter(p,'analogChannelsList',[],@isnumeric);
+addParameter(p,'removeDatFiles',true,@islogical);
+addParameter(p,'removeDat',false,@islogical);
 
 parse(p,varargin{:})
 
@@ -58,6 +60,8 @@ excludeManipulationIntervals = p.Results.excludeManipulationIntervals;
 SWChannel = p.Results.SWChannel;
 digitalChannelsList = p.Results.digitalChannelsList;
 analogChannelsList = p.Results.analogChannelsList;
+removeDatFiles = p.Results.removeDatFiles;
+removeDat = p.Results.removeDat;
 
 %% Creates a pointer to the folder where the index variable is located
 if isempty(indexedProjects_name)
@@ -116,7 +120,17 @@ powerProfile_hfo = powerSpectrumProfile(hfo_bandpass,'showfig',true,'forceDetect
 %% 6. Getting Hippocampal Layers
 [hippocampalLayers] = getHippocampalLayers('force',true);
 
-%% 7. Check Brain Events
+%% 7. Spike Features
+spikeFeatures;
+getAverageCCG;
+% pulses.analogChannel = analogCh;
+% save([session.general.name,'.pulses.events.mat'],'pulses');
+optogeneticResponses = getOptogeneticResponse('numRep',500,'force',true);
+
+% LFP-spikes modulation
+[rippleMod,SWMod,thetaMod,lgammaMod,hgammaMod] = computePhaseModulation('SWChannel',SWChannel);
+
+%% 8. Check Brain Events
 % Trying changes in detecUD_temp
 % 7.1 Up and downs
 UDStates = detectUD('plotOpt', true,'forceDetect',true','NREMInts','all');
@@ -127,7 +141,7 @@ ripples = rippleMasterDetector('SWChannel',SWChannel);
 % 7.3 Theta intervals
 thetaEpochs = detectThetaEpochs;
 
-%% 8. Cell metrics
+%% 9. Cell metrics
 % Exclude manipulation intervals for computing CellMetrics
 try
     excludeManipulationIntervals = pulses.intsPeriods;
@@ -136,15 +150,7 @@ catch
 end
 cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',{'deepSuperficial'});
 
-%% 9. Spike Features
-spikeFeatures;
-getAverageCCG;
-% pulses.analogChannel = analogCh;
-% save([session.general.name,'.pulses.events.mat'],'pulses');
-optogeneticResponses = getOptogeneticResponse('numRep',500,'force',true);
 
-% LFP-spikes modulation
-[rippleMod,SWMod,thetaMod,lgammaMod,hgammaMod] = computePhaseModulation('SWChannel',SWChannel);
 
 %% 10. Spatial modulation
 behaviour = getSessionLinearize('forceReload',false);  
@@ -193,4 +199,51 @@ commandToExecute = ['git push'];
 system(commandToExecute)
 
 cd(basepath)
+
+%% Removing dat files before copying files to buzsakilab or synology
+if removeDatFiles
+    % Remove _original and _temp .dat
+    if ~isempty(dir([session.general.name,'_original.dat']))
+        delete([session.general.name,'_original.dat']);
+    end
+    if ~isempty(dir([session.general.name,'_temp.dat']))
+        delete([session.general.name,'_temp.dat']);
+    end
+    
+    % Remove amplifier*.dat in subfolders
+    if ~isempty(dir([session.general.name,'.MergePoints.events.mat']))
+        file = dir([session.general.name,'.MergePoints.events.mat']);
+        load(file.name)
+        
+        for i = 1:length(MergePoints.foldernames)
+            cd(MergePoints.foldernames{i})
+            if ~isempty(dir('amplifier*.dat'))
+                file = dir('amplifier*.dat');
+                delete(file.name);
+            end
+            cd(basepath)
+        end
+    end
+    
+    % Remove kilosort .phy
+    if ~isempty(dir('Kilosort*'))
+        file = dir('Kilosort*');
+        cd(file.name);
+        if exist('.phy','dir')
+            rmdir('.phy','s');
+        end
+        cd(basepath);
+    end
+end
+
+if removeDat
+    if ~isempty(dir([session.general.name,'.dat']))
+        file = dir([session.general.name,'.dat']);
+        delete(file.name);
+    end
+end
+
+%% TO DO. Copy files to remote and delete in this computer
+% .....
+
 end

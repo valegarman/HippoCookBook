@@ -69,10 +69,8 @@ medianSubstr = p.Results.medianSubstr;
 tracking_pixel_cm = p.Results.tracking_pixel_cm;
 sessionSummary = p.Results.sessionSummary;
 digitalChannelsList = p.Results.digitalChannelsList;
-<<<<<<< HEAD
 analysisPath = p.Results.analysisPath;
-=======
->>>>>>> 89efa2798f76fdfc6e0b8b301e4ac421bdb958e5
+
 
 % batch processing...
 all_folders = dir(basepath);
@@ -82,7 +80,7 @@ for ii = 1:size(all_folders,1)
         kilosortFolder = dir('*Kilosort*');
         if isempty(kilosortFolder)
             disp([' * Preprocessing of ' all_folders(ii).folder filesep all_folders(ii).name]);
-            preprocessSession('basepath',pwd,'analysisPath',analysisPath,analogChannelsList',analogChannelsList,'spikeSort',spikeSort,'getPos',getPos, 'cleanArtifacts',cleanArtifacts,...
+            preprocessSession('basepath',pwd,'analysisPath',analysisPath,'analogChannelsList',analogChannelsList,'spikeSort',spikeSort,'getPos',getPos, 'cleanArtifacts',cleanArtifacts,...
                 'medianSubstr',medianSubstr,'tracking_pixel_cm',tracking_pixel_cm,'sessionSummary',sessionSummary,'digitalChannelsList',digitalChannelsList);
         else 
             disp(['Spikiping ' all_folders(ii).folder filesep all_folders(ii).name]);

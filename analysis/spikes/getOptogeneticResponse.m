@@ -236,6 +236,16 @@ for ii = 1:length(spikes.UID)
     optogeneticResponses.timestamps = t;
 end
 
+% find intervals
+lag = 20; % max interval between pulses, in seconds
+stimulationEpochs(1,1) = pulses.timestamps(1,1);
+intPeaks =find(diff(pulses.timestamps(:,1))>lag);
+for ii = 1:length(intPeaks)
+    stimulationEpochs(ii,2) = pulses.timestamps(intPeaks(ii),2);
+    stimulationEpochs(ii+1,1) = pulses.timestamps(intPeaks(ii)+1,1);
+end
+stimulationEpochs(end,2) = pulses.timestamps(end,2);
+
 optogeneticResponses.channels = conditions(:,2);
 optogeneticResponses.pulseDuration = conditions(:,1);
 optogeneticResponses.pulses = pulses;
@@ -246,6 +256,7 @@ optogeneticResponses.winSizePlot = winSizePlot;
 optogeneticResponses.conditions = conditions;
 optogeneticResponses.conditionsLabels = {'durations','channels','numberOfPulses'};
 optogeneticResponses.nConditions = nConditions;
+optogeneticResponses.stimulationEpochs = stimulationEpochs;
 
 % Some metrics reponses
 responseMetrics = [];
@@ -295,6 +306,7 @@ if saveEventsFile
     disp('Saving timestamps...');
     filename = split(pwd,filesep); filename = filename{end};
     optoPulses = optogeneticResponses.pulses;
+    optoPulses.stimulationEpochs = stimulationEpochs;
     save([filename '.optogeneticPulses.events.mat'],'optoPulses');
 end
 
