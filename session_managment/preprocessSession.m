@@ -50,7 +50,7 @@ function  preprocessSession(varargin)
 %% Defaults and Parms
 p = inputParser;
 addParameter(p,'basepath',pwd,@isfolder); % by default, current folder
-addParameter(p,'analysisPath',[],@isfolder); % Local paht to run the anaysis, is em
+addParameter(p,'analysisPath',[]); % Local paht to run the anaysis, is em
 addParameter(p,'analogChannelsList',[],@isnumeric);
 addParameter(p,'spikeSort',true,@islogical);
 addParameter(p,'getPos',true,@islogical);
