@@ -16,7 +16,6 @@ function [] = indexNewSession(varargin)
 % 8. Cell Metrics and CellExplorer
 % 9. Spikes features
 % 10. Saving index path
-
 % TO DO:
 % Deactivate by inputs loadSpikes or other analysis
 
@@ -29,7 +28,6 @@ addParameter(p,'basepath',pwd,@isdir);
 addParameter(p,'theta_bandpass',[6 12], @isnumeric);
 addParameter(p,'gamma_bandpass',[20 100], @isnumeric);
 addParameter(p,'hfo_bandpass',[100 500], @isnumeric);
-addParameter(p,'analogCh',65,@isnumeric); % 0-index
 addParameter(p,'rejectChannels',[],@isnumeric); % 0-index
 addParameter(p,'project','Undefined',@isstring);
 addParameter(p,'indexedProjects_path',[],@isstring);
@@ -39,7 +37,13 @@ addParameter(p,'force_analogPulsesDetection',true,@islogical);
 addParameter(p,'force_loadingSpikes',true,@islogical);
 addParameter(p,'excludeManipulationIntervals',[],@isnumeric);
 addParameter(p,'SWChannel',[],@isnumeric); % manually selecting SW Channel in case getHippocampalLayers does not provide a right output
-
+addParameter(p,'digitalChannelsList',[],@isnumeric);
+addParameter(p,'analogChannelsList',[],@isnumeric);
+addParameter(p,'promt_hippo_layers',false,@islogical);
+addParameter(p,'manual_analog_pulses_threshold',false,@islogical);
+addParameter(p,'removeDatFiles',true,@islogical);
+addParameter(p,'removeDat',false,@islogical);
+addParameter(p,'copyPath',[],@isdir);
 
 parse(p,varargin{:})
 
@@ -47,7 +51,6 @@ basepath = p.Results.basepath;
 theta_bandpass = p.Results.theta_bandpass;
 gamma_bandpass = p.Results.gamma_bandpass;
 hfo_bandpass = p.Results.hfo_bandpass;
-analogCh = p.Results.analogCh;
 rejectChannels = p.Results.rejectChannels;
 project = p.Results.project;
 indexedProjects_path = p.Results.indexedProjects_path;
@@ -57,6 +60,13 @@ force_analogPulsesDetection = p.Results.force_analogPulsesDetection;
 force_loadingSpikes = p.Results.force_loadingSpikes;
 excludeManipulationIntervals = p.Results.excludeManipulationIntervals;
 SWChannel = p.Results.SWChannel;
+digitalChannelsList = p.Results.digitalChannelsList;
+analogChannelsList = p.Results.analogChannelsList;
+promt_hippo_layers = p.Results.promt_hippo_layers;
+manual_analog_pulses_threshold = p.Results.manual_analog_pulses_threshold;
+removeDatFiles = p.Results.removeDatFiles;
+removeDat = p.Results.removeDat;
+copyPath = p.Results.copyPath;
 
 %% Creates a pointer to the folder where the index variable is located
 if isempty(indexedProjects_name)
@@ -76,35 +86,37 @@ if isempty(indexedProjects_path)
 end
 
 cd(basepath)
+keyboard
 
-%% 1. Runs sessionTemplate
-session = sessionTemplate(basepath,'showGUI',true);
-% Parsing rejectChannels from session.mat file in case rejectChannels is empty
-if isempty(rejectChannels)
-    rejectChannels = session.channelTags.Bad.channels; % 1-index
+%% By default looks for Synology and copy files to it, it specified copy files to the specified folder
+if isempty(copypath)
+    
 end
-% Creating a field in session.mat called channels (1-index)
-session.channels = 1:session.extracellular.nChannels;
-save([basepath filesep session.general.name,'.session.mat'],'session','-v7.3');
-
+%% 1. Runs sessionTemplate
+try
+    session = loadSession(basepath);
+    session.channels = 1:session.extracellular.nChannels;
+    if ~isempty(session.analysisTags.digital_optogenetic_channels)
+        session.analysisTags.digital_optogenetic_channels = digitalChannelsList;
+    end
+    if ~isempty(session.analysisTags.analog_optogenetic_channels)
+        session.analysisTags.analog_optogenetic_channels = analogChannelsList;
+    end
+    if isempty(rejectChannels)
+        rejectChannels = session.channelTags.Bad.channels; % 1-index
+    end
+    save([basepath filesep session.general.name,'.session.mat'],'session','-v7.3');
+catch
+    warning('it seems that CellExplorer is not on your path');
+end
+session = sessionTemplate(basepath,'showGUI',true);
 %% 2. Remove previous cellinfo.spikes.mat and computes spikes again (manual clustered)
-% if ~isempty(dir([basepath filesep session.general.name ,'.spikes.cellinfo.mat']))
-%     disp('Loading and deleting old spikes.cellinfo.mat file ...');
-%     file = dir([basepath filesep session.general.name ,'.spikes.cellinfo.mat']);
-%     delete(file.name);
-% else
-%     ('spikes.cellinfo.mat does not exist !');
-% end
-% Consider removing this, forceReload instead... MV
-
 disp('Loading Spikes...')
 spikes = loadSpikes('forceReload',force_loadingSpikes);
 
-
 %% 3. Analog pulses detection
-
 disp('Getting analog Pulses...')
-pulses = getAnalogPulses('analogCh',analogCh,'manualThr',false,'overwrite',force_analogPulsesDetection); % 1-index
+pulses = getAnalogPulses('analogChannelsList',analogChannelsList,'manualThr',manual_analog_pulses_threshold,'overwrite',force_analogPulsesDetection); % 1-index
 
 %% 4. Check Sleep Score
 SleepScoreMaster(pwd,'noPrompts',true,'ignoretime',pulses.intsPeriods, 'overwrite', true);
@@ -116,20 +128,33 @@ powerProfile_gamma = powerSpectrumProfile(gamma_bandpass,'showfig',true,'forceDe
 powerProfile_hfo = powerSpectrumProfile(hfo_bandpass,'showfig',true,'forceDetect',true);
 
 %% 6. Getting Hippocampal Layers
-[hippocampalLayers] = getHippocampalLayers('force',true);
+[hippocampalLayers] = getHippocampalLayers('force',true,'promt',promt_hippo_layers);
 
-%% 7. Check Brain Events
+%% 7. Spike Features
+spikeFeatures;
+getAverageCCG;
+% pulses.analogChannel = analogCh;
+% save([session.general.name,'.pulses.events.mat'],'pulses');
+optogeneticResponses = getOptogeneticResponse('numRep',500,'force',true);
+
+%% 8. Check Brain Events
 % Trying changes in detecUD_temp
-% 7.1 Up and downs
+% 8.1 Up and downs
 UDStates = detectUD('plotOpt', true,'forceDetect',true','NREMInts','all');
+psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500);
 
-% 7.2 Ripples
-ripples = rippleMasterDetector('SWChannel',SWChannel);
+% 8.2 Ripples
+ripples = rippleMasterDetector('SWChannel',SWChannel,'force',true);
+psthRipples = spikesPsth([],'eventType','ripples','numRep',500);
 
-% 7.3 Theta intervals
+% 8.3 Theta intervals
 thetaEpochs = detectThetaEpochs;
 
-%% 8. Cell metrics
+%% 9. Phase Modulation
+% LFP-spikes modulation
+[rippleMod,SWMod,thetaMod,lgammaMod,hgammaMod] = computePhaseModulation('SWChannel',SWChannel);
+
+%% 10. Cell metrics
 % Exclude manipulation intervals for computing CellMetrics
 try
     excludeManipulationIntervals = pulses.intsPeriods;
@@ -138,60 +163,99 @@ catch
 end
 cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',{'deepSuperficial'});
 
-%% 9. Spike Features
-spikeFeatures;
-getAverageCCG;
-% pulses.analogChannel = analogCh;
-% save([session.general.name,'.pulses.events.mat'],'pulses');
-optogeneticResponses = getOptogeneticResponse('numRep',500,'force',true);
-
-% LFP-spikes modulation
-[rippleMod,SWMod,thetaMod,lgammaMod,hgammaMod] = computePhaseModulation('SWChannel',SWChannel);
-
-%% 10. Spatial modulation
+%% 11. Spatial modulation
 behaviour = getSessionLinearize('forceReload',false);  
 firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',false);
 placeFieldStats = bz_findPlaceFields1D('firingMaps',firingMaps,'maxSize',.75,'sepEdge',0.03); %% ,'maxSize',.75,'sepEdge',0.03
 firingTrialsMap = firingMapPerTrial;
 
-
 %% 11. Indexing
 % session = sessionTemplate(basepath,'showGUI',false);
 session = loadSession(basepath);
-currentPath = split(pwd,':'); currentPath = currentPath{end};
+generalPath = [session.animal.name,'\',session.general.name];
 sessionName = session.general.name;
 load([indexedProjects_path filesep indexedProjects_name,'.mat']); % the variable is called allSessions
-allSessions.(sessionName).path = currentPath;
+allSessions.(sessionName).path = generalPath;
 allSessions.(sessionName).name = session.animal.name;
 allSessions.(sessionName).strain = session.animal.strain;
 allSessions.(sessionName).geneticLine = session.animal.geneticLine;
+allSessions.(sessionName).brainRegions = session.brainRegions;
 if isfield(session.animal,'opticFiberImplants')
     for i = 1:length(session.animal.opticFiberImplants)
         allSessions.(sessionName).optogenetics{i} = session.animal.opticFiberImplants{i}.opticFiber;
     end
+else
+    allSessions.(sessionName).optogenetics = NaN;
 end
-behav = [];
+behav = NaN;
 for i = 1:length(session.epochs)
     if strcmpi(session.epochs{i}.behavioralParadigm, 'Maze')
         behav = [behav session.epochs{i}.environment];
     end
 end
 allSessions.(sessionName).behav = behav;
-allSessions.(sessionName).project = sessions.general.projects;
-allSessions.(sessionName).tag = 1;
+allSessions.(sessionName).project = session.general.projects;
 save([indexedProjects_path filesep indexedProjects_name,'.mat'],'allSessions');
 
 % Lets do a push for git repository
-cd(indexedProjects_path)
+cd(indexedProjects_path);
 % Git add variable to the repository
 commandToExecute = ['git add ', indexedProjects_name,'.mat']
-system(commandToExecute)
+system(commandToExecute);
 % Git Commit
 commentToCommit = ['Added Session: ' session.general.name];
 commandToExecute = ['git commit -m "' commentToCommit '"'];
-system(commandToExecute)
+system(commandToExecute);
 % Git Push
 commandToExecute = ['git push'];
-system(commandToExecute)
+system(commandToExecute);
+
+cd(basepath)
+
+%% Removing dat files before copying files to buzsakilab or synology
+if removeDatFiles
+    % Remove _original and _temp .dat
+    if ~isempty(dir([session.general.name,'_original.dat']))
+        delete([session.general.name,'_original.dat']);
+    end
+    if ~isempty(dir([session.general.name,'_temp.dat']))
+        delete([session.general.name,'_temp.dat']);
+    end
+    
+    % Remove amplifier*.dat in subfolders
+    if ~isempty(dir([session.general.name,'.MergePoints.events.mat']))
+        file = dir([session.general.name,'.MergePoints.events.mat']);
+        load(file.name)
+        
+        for i = 1:length(MergePoints.foldernames)
+            cd(MergePoints.foldernames{i})
+            if ~isempty(dir('amplifier*.dat'))
+                file = dir('amplifier*.dat');
+                delete(file.name);
+            end
+            cd(basepath)
+        end
+    end
+    
+    % Remove kilosort .phy
+    if ~isempty(dir('Kilosort*'))
+        file = dir('Kilosort*');
+        cd(file.name);
+        if exist('.phy','dir')
+            rmdir('.phy','s');
+        end
+        cd(basepath);
+    end
+end
+
+if removeDat
+    if ~isempty(dir([session.general.name,'.dat']))
+        file = dir([session.general.name,'.dat']);
+        delete(file.name);
+    end
+end
+
+%% TO DO. Copy files to remote and delete in this computer
+
 
 end
