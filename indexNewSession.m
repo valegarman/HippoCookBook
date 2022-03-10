@@ -131,23 +131,24 @@ getAverageCCG;
 % save([session.general.name,'.pulses.events.mat'],'pulses');
 optogeneticResponses = getOptogeneticResponse('numRep',500,'force',true);
 
-% LFP-spikes modulation
-[rippleMod,SWMod,thetaMod,lgammaMod,hgammaMod] = computePhaseModulation('SWChannel',SWChannel);
-
 %% 8. Check Brain Events
 % Trying changes in detecUD_temp
-% 7.1 Up and downs
+% 8.1 Up and downs
 UDStates = detectUD('plotOpt', true,'forceDetect',true','NREMInts','all');
 psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500);
 
-% 7.2 Ripples
+% 8.2 Ripples
 ripples = rippleMasterDetector('SWChannel',SWChannel,'force',true);
 psthRipples = spikesPsth([],'eventType','ripples','numRep',500);
 
-% 7.3 Theta intervals
+% 8.3 Theta intervals
 thetaEpochs = detectThetaEpochs;
 
-%% 9. Cell metrics
+%% 9. Phase Modulation
+% LFP-spikes modulation
+[rippleMod,SWMod,thetaMod,lgammaMod,hgammaMod] = computePhaseModulation('SWChannel',SWChannel);
+
+%% 10. Cell metrics
 % Exclude manipulation intervals for computing CellMetrics
 try
     excludeManipulationIntervals = pulses.intsPeriods;
@@ -156,7 +157,7 @@ catch
 end
 cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',{'deepSuperficial'});
 
-%% 10. Spatial modulation
+%% 11. Spatial modulation
 behaviour = getSessionLinearize('forceReload',false);  
 firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',false);
 placeFieldStats = bz_findPlaceFields1D('firingMaps',firingMaps,'maxSize',.75,'sepEdge',0.03); %% ,'maxSize',.75,'sepEdge',0.03

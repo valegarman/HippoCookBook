@@ -152,8 +152,16 @@ try
             end            
             
             pulArtifacts_dig = [];
-          digitalIn = getDigitalIn;
-            if isempty(digitalIn) || isempty(cleanArtifacts{2})
+%           digitalIn = getDigitalIn;
+%             if isempty(digitalIn) || isempty(cleanArtifacts{2})
+%             else
+%                 for ii = cleanArtifacts{2}
+%                     pulArtifacts_dig = [pulArtifacts_dig; digitalIn.ints{ii}];
+%                 end
+%             end
+            pulArtifacts_dig = [];
+            if isempty(cleanArtifacts{2})
+                pulArtifacts_dig = [];
             else
                 for ii = cleanArtifacts{2}
                     pulArtifacts_dig = [pulArtifacts_dig; digitalIn.ints{ii}];
