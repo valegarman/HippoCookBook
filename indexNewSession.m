@@ -85,15 +85,15 @@ if isempty(indexedProjects_path)
 end
 
 cd(basepath)
-keyboard
+
 %% 1. Runs sessionTemplate
 try
     session = loadSession(basepath);
     session.channels = 1:session.extracellular.nChannels;
-    if ~isempty(session.analysisTags.digital_optogenetic_channels)
+    if ~isfield(session.analysisTags,'digital_optogenetic_channels')
         session.analysisTags.digital_optogenetic_channels = digitalChannelsList;
     end
-    if ~isempty(session.analysisTags.analog_optogenetic_channels)
+    if ~isfield(session.analysisTags,'analog_optogenetic_channels')
         session.analysisTags.analog_optogenetic_channels = analogChannelsList;
     end
     if isempty(rejectChannels)
