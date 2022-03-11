@@ -71,7 +71,7 @@ if isempty(tracking)
 end
 
 if isempty(digitalIn)
-    digitalIn = bz_getDigitalIn;
+    digitalIn = getDigitalIn;
 end
 if isempty(tracking) || isempty(digitalIn)
     warning('Missing components. No behaviour performed?');
