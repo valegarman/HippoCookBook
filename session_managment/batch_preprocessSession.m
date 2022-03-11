@@ -47,7 +47,7 @@ function  batch_preprocessSession(varargin)
 %% Defaults and Parms
 p = inputParser;
 addParameter(p,'basepath',pwd,@isdir); % by default, current folder
-addParameter(p,'analysisPath',[],@isdir);
+addParameter(p,'analysisPath',[]);
 addParameter(p,'analogChannelsList',[],@isnumeric);
 addParameter(p,'spikeSort',true,@islogical);
 addParameter(p,'getPos',false,@islogical);
