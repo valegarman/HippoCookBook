@@ -29,8 +29,8 @@ function [optogeneticResponses] = getOptogeneticResponse(varargin)
 
 % Parse options
 p = inputParser;
-addParameter(p,'analogChannelsList',[]);
-addParameter(p,'digitalChannelsList',[]);
+addParameter(p,'analogChannelsList',NaN);
+addParameter(p,'digitalChannelsList',NaN);
 addParameter(p,'spikes',[],@isstruct);
 addParameter(p,'basepath',pwd,@ischar);
 addParameter(p,'numRep',50,@isnumeric);
@@ -71,15 +71,23 @@ if ~isempty(targetFile) && ~force
     return
 end
 
-%% Load session metadata
-session = loadSession(basepath);
-
 %% Digital and Analog Pulses
-try
-    analogChannelsList = session.analysisTags.analog_optogenetic_channels;
-    digitalChannelsList = session.analysisTags.digital_optogenetic_channels;
-catch
-    warning('There is a problem with analog and digital channels...');
+if isnan(analogChannelsList)
+    try 
+        session = loadSession(basepath);
+        analogChannelsList = session.analysisTags.analog_optogenetic_channels;
+    catch
+        warning('There is a problem with the analog channels...');
+    end
+end
+
+if isnan(digitalChannelsList)
+    try
+        session = loadSession(basepath);
+        digitalChannelsList = session.analysisTags.digital_optogenetic_channels;
+    catch
+        warning('There is a problem with the digital channels...');
+    end
 end
 
 %%

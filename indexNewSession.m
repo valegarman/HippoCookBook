@@ -85,15 +85,15 @@ if isempty(indexedProjects_path)
 end
 
 cd(basepath)
-keyboard
+
 %% 1. Runs sessionTemplate
 try
     session = loadSession(basepath);
     session.channels = 1:session.extracellular.nChannels;
-    if ~isempty(session.analysisTags.digital_optogenetic_channels)
+    if ~isfield(session.analysisTags,'digital_optogenetic_channels')
         session.analysisTags.digital_optogenetic_channels = digitalChannelsList;
     end
-    if ~isempty(session.analysisTags.analog_optogenetic_channels)
+    if ~isfield(session.analysisTags,'analog_optogenetic_channels')
         session.analysisTags.analog_optogenetic_channels = analogChannelsList;
     end
     if isempty(rejectChannels)
@@ -131,24 +131,23 @@ getAverageCCG;
 % save([session.general.name,'.pulses.events.mat'],'pulses');
 optogeneticResponses = getOptogeneticResponse('numRep',500,'force',true);
 
-%% 8. Check Brain Events
-% Trying changes in detecUD_temp
-% 8.1 Up and downs
-UDStates = detectUD('plotOpt', true,'forceDetect',true','NREMInts','all');
-psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500);
-
-% 8.2 Ripples
-ripples = rippleMasterDetector('SWChannel',SWChannel,'force',true);
-psthRipples = spikesPsth([],'eventType','ripples','numRep',500);
-
-% 8.3 Theta intervals
-thetaEpochs = detectThetaEpochs;
-
-%% 9. Phase Modulation
 % LFP-spikes modulation
 [rippleMod,SWMod,thetaMod,lgammaMod,hgammaMod] = computePhaseModulation('SWChannel',SWChannel);
 
-%% 10. Cell metrics
+%% 8. Check Brain Events
+% Trying changes in detecUD_temp
+% 7.1 Up and downs
+UDStates = detectUD('plotOpt', true,'forceDetect',true','NREMInts','all');
+psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500);
+
+% 7.2 Ripples
+ripples = rippleMasterDetector('SWChannel',SWChannel,'force',true);
+psthRipples = spikesPsth([],'eventType','ripples','numRep',500);
+
+% 7.3 Theta intervals
+thetaEpochs = detectThetaEpochs;
+
+%% 9. Cell metrics
 % Exclude manipulation intervals for computing CellMetrics
 try
     excludeManipulationIntervals = pulses.intsPeriods;
@@ -157,7 +156,7 @@ catch
 end
 cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',{'deepSuperficial'});
 
-%% 11. Spatial modulation
+%% 10. Spatial modulation
 behaviour = getSessionLinearize('forceReload',false);  
 firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',false);
 placeFieldStats = bz_findPlaceFields1D('firingMaps',firingMaps,'maxSize',.75,'sepEdge',0.03); %% ,'maxSize',.75,'sepEdge',0.03
