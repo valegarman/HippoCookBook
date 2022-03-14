@@ -21,7 +21,7 @@ preprocessSession('basepath','G:\data\fNkx11\fNkx11_201102_sess13','cleanArtifac
 
 preprocessSession('basepath','D:\Dropbox\DATA\sharedRecordings\NewXmlAnimal\190222\rec1_220219_sess1');
 
-computeSessionSummary('basepath','G:\data\fNkx11\fNkx11_201116_sess23','analogChannelsList',65,'digitalChannelsList',[]);
+computeSessionSummary('basepath','G:\data\fNkx11\fNkx11_201112_sess21','analogChannelsList',65,'digitalChannelsList',[]);
 
 % Index!
 indexNewSession('analogChannelsList',65,'promt_hippo_layers',true);
