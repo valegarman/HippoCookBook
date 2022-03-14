@@ -100,7 +100,7 @@ end
 digital_on = pulses;
 digital_off = pulses2;
 disp('Done!');
-
+keyboard;
 for ii = 1:size(digital_on,2)
     if ~isempty(digital_on{ii})
         % take timestamp in seconds
@@ -140,14 +140,11 @@ if exist('digitalIn')==1
     imagesc(xt,1:size(data,2),data);
     xlabel('s'); ylabel('Channels'); colormap gray 
     mkdir('Pulses');
-    saveas(h,'pulses\digitalIn.png');
-
-    try save([basenameFromBasepath(pwd) '.DigitalIn.events.mat'],'digitalIn');
-    catch
-        save('digitalIn.events.mat','digitalIn');
-    end
+    saveas(h,'pulses\digitalIn.png');    
 else
     digitalIn = [];
 end
+
+save([basenameFromBasepath(pwd) '.DigitalIn.events.mat'],'digitalIn');
  
 end
