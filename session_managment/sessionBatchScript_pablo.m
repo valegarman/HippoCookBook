@@ -8,6 +8,7 @@ batch_preprocessSession('basepath','Z:\data\fCr1','cleanArtifacts',({[],1}),'ana
 % Cck3
 updateExpFolder({'V:\data\fCck3', 'Y:\fCck3'},'Z:\data\fCck3');
 batch_preprocessSession('basepath','Z:\data\fCck3','analysisPath','C:\data\fCck3','cleanArtifacts',({[],1}),'analogChannelsList',[],'digitalChannelsList',1);
+preprocessSession('basepath','C:\data\fCck3\fCck3_220303_sess10','cleanArtifacts',({[],1}),'analogChannelsList',[],'digitalChannelsList',1);
 batch_sessionSummary('basepath','Z:\data\fCck3','analogChannelsList',[],'digitalChannelsList',1);
 
 % batch_sessionSummary('basepath','C:\data\fCck3','analogChannelsList',0,'digitalChannelsList',1);

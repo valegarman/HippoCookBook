@@ -50,11 +50,11 @@ addParameter(p,'basepath',pwd,@isdir); % by default, current folder
 addParameter(p,'analysisPath',[]);
 addParameter(p,'analogChannelsList',[],@isnumeric);
 addParameter(p,'spikeSort',true,@islogical);
-addParameter(p,'getPos',false,@islogical);
+addParameter(p,'getPos',true,@islogical);
 addParameter(p,'cleanArtifacts',true);
 addParameter(p,'medianSubstr',true);
 addParameter(p,'tracking_pixel_cm',0.1149,@isnumeric);
-addParameter(p,'sessionSummary',false,@islogical);
+addParameter(p,'sessionSummary',true,@islogical);
 addParameter(p,'digitalChannelsList',[],@isnumeric);
 
 % addParameter(p,'pullData',[],@isdir); To do... 
