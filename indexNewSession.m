@@ -132,6 +132,8 @@ getAverageCCG;
 optogeneticResponses = getOptogeneticResponse('numRep',500,'force',true);
 
 % LFP-spikes modulation
+thetaEpochs = detectThetaEpochs;
+
 [rippleMod,SWMod,thetaMod,lgammaMod,hgammaMod] = computePhaseModulation('SWChannel',SWChannel);
 
 %% 8. Check Brain Events
@@ -144,8 +146,6 @@ psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500);
 ripples = rippleMasterDetector('SWChannel',SWChannel,'force',true);
 psthRipples = spikesPsth([],'eventType','ripples','numRep',500);
 
-% 7.3 Theta intervals
-thetaEpochs = detectThetaEpochs;
 
 %% 9. Cell metrics
 % Exclude manipulation intervals for computing CellMetrics
