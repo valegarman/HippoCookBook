@@ -100,7 +100,7 @@ end
 digital_on = pulses;
 digital_off = pulses2;
 disp('Done!');
-keyboard;
+
 for ii = 1:size(digital_on,2)
     if ~isempty(digital_on{ii})
         % take timestamp in seconds
