@@ -43,6 +43,7 @@ addParameter(p,'promt_hippo_layers',false,@islogical);
 addParameter(p,'manual_analog_pulses_threshold',false,@islogical);
 addParameter(p,'removeDatFiles',true,@islogical);
 addParameter(p,'removeDat',false,@islogical);
+addParameter(p,'copyFiles',false,@islogical);
 addParameter(p,'copyPath',[],@isdir);
 
 parse(p,varargin{:})
@@ -66,6 +67,7 @@ promt_hippo_layers = p.Results.promt_hippo_layers;
 manual_analog_pulses_threshold = p.Results.manual_analog_pulses_threshold;
 removeDatFiles = p.Results.removeDatFiles;
 removeDat = p.Results.removeDat;
+copyFiles = p.Results.copyFiles;
 copyPath = p.Results.copyPath;
 
 %% Creates a pointer to the folder where the index variable is located
@@ -89,17 +91,25 @@ cd(basepath)
 keyboard
 
 %% By default looks for Synology and copy files to it, it specified copy files to the specified folder
-if isempty(copypath)
-    
+if isempty(copyPath)
+    % Let's find the packrat synology 
+    F = getdrives();
+    for i = 1:length(F)
+        if strcmpi(driveName(cell2mat(strsplit(F{i},[':',filesep]))),'packrat')
+            copyPath = [F{i},'data'];
+            cd(copyPath);
+        end
+    end
 end
+cd(basepath)
 %% 1. Runs sessionTemplate
 try
     session = loadSession(basepath);
     session.channels = 1:session.extracellular.nChannels;
-    if ~isempty(session.analysisTags.digital_optogenetic_channels)
+    if ~isfield(session.analysisTags,'digital_optogenetic_channels')
         session.analysisTags.digital_optogenetic_channels = digitalChannelsList;
     end
-    if ~isempty(session.analysisTags.analog_optogenetic_channels)
+    if ~isfield(session.analysisTags,'analog_optogenetic_channels')
         session.analysisTags.analog_optogenetic_channels = analogChannelsList;
     end
     if isempty(rejectChannels)
@@ -112,6 +122,12 @@ end
 session = sessionTemplate(basepath,'showGUI',true);
 %% 2. Remove previous cellinfo.spikes.mat and computes spikes again (manual clustered)
 disp('Loading Spikes...')
+if force_loadingSpikes
+    if ~isempty(dir([session.general.name ,'.spikes.cellinfo.mat']))
+        file = dir([session.general.name ,'.spikes.cellinfo.mat']);
+        delete(file.name);
+    end
+end   
 spikes = loadSpikes('forceReload',force_loadingSpikes);
 
 %% 3. Analog pulses detection
@@ -157,7 +173,11 @@ thetaEpochs = detectThetaEpochs;
 %% 10. Cell metrics
 % Exclude manipulation intervals for computing CellMetrics
 try
-    excludeManipulationIntervals = pulses.intsPeriods;
+    if ~isempty(dir([session.general.name,'.optogeneticPulses.events.mat']))
+        file = dir([session.general.name,'.optogeneticPulses.events.mat']);
+        load(file.name);
+    end
+        excludeManipulationIntervals = optoPulses.stimulationEpochs;
 catch
     warning('Not possible to get manipulation periods. Running CellMetrics withouth excluding manipulation epochs');
 end
@@ -255,7 +275,16 @@ if removeDat
     end
 end
 
-%% TO DO. Copy files to remote and delete in this computer
-
+%% TO DO. Copy files to remote and delete the folder in this computer
+if copyFiles
+    if ~exist([copyPath,'\',session.animal.name],'dir')
+        mkdir([copyPath,'\',session.animal.name]);
+    end
+    [success] = copyfile(session.general.basePath,[copyPath,'\',session.animal.name,'\',session.general.name]);
+    if success
+        cd ..
+        rmdir(session.general.basePath,'s');
+    end
+end
 
 end

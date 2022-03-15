@@ -45,7 +45,7 @@ prevPath = pwd;
 cd(basepath);
 
 if ischar(listOfAnalysis) && strcmpi(listOfAnalysis,'all')
-    listOfAnalysis = {'spikes', 'analogPulses', 'digitalPulses', 'downStates', 'ripples', 'tMazeBehaviour','linearMazeBehaviour','thetaModulation'};
+    listOfAnalysis = {'spikes', 'analogPulses', 'digitalPulses', 'hippocampalLayers','downStates', 'ripples', 'tMazeBehaviour','linearMazeBehaviour','thetaModulation'};
 end
 if ~isempty(exclude)
     listOfAnalysis(ismember(listOfAnalysis, exclude)) = [];
@@ -179,6 +179,14 @@ if any(ismember(listOfAnalysis,'digitalPulses'))
     end
 end
 
+% HIPPOCAMPAL LAYERS
+if any(ismember(listOfAnalysis,{'hippocampalLayers'}))
+    try
+        [hippocampalLayers] = getHippocampalLayers('force',true,'promt',false);
+    catch
+        warning('Not possible to run getHippocampalLayers...')
+    end
+end
 % PSTH RESPONSES ON DIGITAL AND ANALOG CH INPUTS
 if any(ismember(listOfAnalysis,{'digitalPulses', 'analogPulses'}))
     try

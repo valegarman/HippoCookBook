@@ -224,12 +224,14 @@ if sessionSummary
 end
 
 if ~isempty(analysisPath)
-    copyfile([analysisPath,'\',session.general.name],basepath);
-    cd(analysisPath);
-    try
-        rmdir([analysisPath,'\',session.general.name],'s')
-    catch
-        rmdir([analysisPath,'\',session.general.name],'s')
+    [success] = copyfile([analysisPath,'\',session.general.name],basepath);
+    if success
+        cd(analysisPath);
+        try
+            rmdir([analysisPath,'\',session.general.name],'s')
+        catch
+            rmdir([analysisPath,'\',session.general.name],'s')
+        end
     end
 end
 

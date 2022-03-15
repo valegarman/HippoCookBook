@@ -183,8 +183,8 @@ for i = 1:length(session.extracellular.spikeGroups.channels)
                 l2 = plot(ax(1:2),ones(2,1)*find(flip(session.extracellular.spikeGroups.channels{i}) == channels{i}.oriens),'color',[.2 .2 1],'LineWidth',2);
                 t2 = text(l2.XData(2),l2.YData(2),'Or','color',[.2 .2 1],'FontSize',12);
             else
-                l1 = plot(ax(1:2),ones(2,1)*max(nC) + 1,'color',[.2 .2 1],'LineWidth',2);
-                t1 = text(l2.XData(2),l2.YData(2),'Or','color',[.2 .2 1],'FontSize',12);
+                l2 = plot(ax(1:2),ones(2,1)*max(nC) + 1,'color',[.2 .2 1],'LineWidth',2);
+                t2 = text(l2.XData(2),l2.YData(2),'Or','color',[.2 .2 1],'FontSize',12);
             end
             
             if ~isnan(channels{i}.radiatum)
