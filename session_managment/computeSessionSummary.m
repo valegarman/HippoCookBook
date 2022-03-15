@@ -95,9 +95,9 @@ if any(ismember(listOfAnalysis,'analogPulses'))
             % CSD
             for mm = 1:length(listOfChannel)
                 fprintf('Stimulus %3.i of %3.i \n',mm, length(listOfChannel)); %\n
-                st = pulses.timestamps(pulses.analogChannel == listOfChannel(mm),1);
+                st = pulses.timestamps(pulses.analogChannelsList == listOfChannel(mm),1);
                 if isempty(st)
-                    st = pulses.timestamps(pulses.analogChannel == listOfChannel(mm) + 1,1);
+                    st = pulses.timestamps(pulses.analogChannelsList == listOfChannel(mm) + 1,1);
                 end
                 shanks = session.extracellular.electrodeGroups.channels;            
                 shanks(excludeShanks) = [];
