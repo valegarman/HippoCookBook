@@ -43,7 +43,7 @@ addParameter(p,'promt_hippo_layers',false,@islogical);
 addParameter(p,'manual_analog_pulses_threshold',false,@islogical);
 addParameter(p,'removeDatFiles',true,@islogical);
 addParameter(p,'removeDat',false,@islogical);
-addParameter(p,'copyFiles',false,@islogical);
+addParameter(p,'copyFiles',true,@islogical);
 addParameter(p,'copyPath',[],@isdir);
 
 parse(p,varargin{:})
@@ -184,10 +184,14 @@ end
 cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',{'deepSuperficial'});
 
 %% 11. Spatial modulation
-behaviour = getSessionLinearize('forceReload',false);  
-firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',false);
-placeFieldStats = bz_findPlaceFields1D('firingMaps',firingMaps,'maxSize',.75,'sepEdge',0.03); %% ,'maxSize',.75,'sepEdge',0.03
-firingTrialsMap = firingMapPerTrial;
+try
+    behaviour = getSessionLinearize('forceReload',false);  
+    firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',false);
+    placeFieldStats = bz_findPlaceFields1D('firingMaps',firingMaps,'maxSize',.75,'sepEdge',0.03); %% ,'maxSize',.75,'sepEdge',0.03
+    firingTrialsMap = firingMapPerTrial;
+catch
+    warning('Not possible to run spatial modulation...');
+end
 
 %% 11. Indexing
 % session = sessionTemplate(basepath,'showGUI',false);

@@ -52,7 +52,7 @@ addParameter(p,'roiTracking',[],@ismatrix);
 addParameter(p,'roiLED',[],@ismatrix);
 addParameter(p,'roisPath',[],@isfolder);
 addParameter(p,'saveMat',true,@islogical)
-addParameter(p,'forceReload',false,@islogical)
+addParameter(p,'forceReload',false,@islogical);
 
 parse(p,varargin{:});
 basepath = p.Results.basepath;

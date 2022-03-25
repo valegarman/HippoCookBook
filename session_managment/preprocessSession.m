@@ -59,6 +59,7 @@ addParameter(p,'medianSubstr',true);
 addParameter(p,'tracking_pixel_cm',0.1149,@isnumeric);
 addParameter(p,'sessionSummary',true,@islogical);
 addParameter(p,'digitalChannelsList',[],@isnumeric);
+addParameter(p,'manualThr',false,@islogical);
 
 % addParameter(p,'pullData',[],@isdir); To do... 
 parse(p,varargin{:});
@@ -73,6 +74,7 @@ medianSubstr = p.Results.medianSubstr;
 tracking_pixel_cm = p.Results.tracking_pixel_cm;
 sessionSummary = p.Results.sessionSummary;
 digitalChannelsList = p.Results.digitalChannelsList;
+manualThr = p.Results.manualThr;
 
 if ~exist('basepath') || isempty(basepath)
     basepath = uigetdir; % select folder
@@ -133,7 +135,7 @@ concatenateDats(pwd,0,1);
 %% Get analog and digital pulses
 if  ~isempty(analogChannelsList)
     try
-        [pulses] = getAnalogPulses('analogChannelsList',analogChannelsList,'manualThr', false);
+        [pulses] = getAnalogPulses('analogChannelsList',analogChannelsList,'manualThr', manualThr);
     catch
         warning('No analog pulses detected');
     end
@@ -230,8 +232,24 @@ if ~isempty(analysisPath)
         try
             rmdir([analysisPath,'\',session.general.name],'s')
         catch
+            disp('Not possible to remove folder...');
+            fclose('all');
+            CloseNoPrompt;
             rmdir([analysisPath,'\',session.general.name],'s')
         end
     end
 end
 
+
+
+
+
+function CloseNoPrompt
+%Close all editor windows without prompting
+%Active Editor;
+hEditor = matlab.desktop.editor.getActive;
+%Close all files.
+while ~isempty(hEditor);
+  closeNoPrompt(hEditor);
+  hEditor = matlab.desktop.editor.getActive;
+end

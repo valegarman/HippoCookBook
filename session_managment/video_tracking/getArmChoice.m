@@ -249,6 +249,9 @@ elseif strcmpi(task,'alternation')
             armChoice.visitedArm(find(armChoice.choice == 1)),100,[.6 .9 .7],'filled');
         scatter(armChoice.timestamps(find(armChoice.choice == 0)),...
             armChoice.visitedArm(find(armChoice.choice == 0)),100,[.9 .6 .7],'filled');
+        if size(armChoice.delay.timestamps,1)== 2
+            armChoice.delay.timestamps = armChoice.delay.timestamps';
+        end
         for ii = 1:size(armChoice.delay.timestamps,1)
             fill([armChoice.delay.timestamps(ii,:)'; flip(armChoice.delay.timestamps(ii,:))'],[1 1 1.2 1.2]',...
             [.7 .6 .9],'EdgeColor',[.7 .6 .9],'FaceAlpha',.5)

@@ -42,6 +42,7 @@ addParameter(p,'winSizePlot',[-.1 .5],@islogical);
 addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'force',true,@islogical);
 addParameter(p,'minNumberOfPulses',200,@isnumeric);
+addParameter(p,'minDuration',0.004,@isnumeric); % 4 ms
 addParameter(p,'saveEventsFile',true,@islogical);
 
 parse(p, varargin{:});
@@ -58,6 +59,7 @@ saveMat = p.Results.saveMat;
 winSizePlot = p.Results.winSizePlot;
 force = p.Results.force;
 minNumberOfPulses = p.Results.minNumberOfPulses;
+minDuration = p.Results.minDuration;
 saveEventsFile = p.Results.saveEventsFile;
 
 % Deal with inputs
@@ -130,7 +132,6 @@ pulses.isDigital = [zeros(size(pulsesAnalog.analogChannelsList)); ones(size(puls
 optogeneticResponses = [];
 pulseDuration = unique(round(pulses.duration,3)); % because code only codes for channel, we take minimum duration channel for responses
 channels = unique(pulses.channel); % code per channel, channel x duration should be implemented... 
-
 timestamps_recording = min(pulses.timestamps(:,2)):1/1250:max(pulses.timestamps(:,2));
 % pulses condition channels x durations
 [m,n] = ndgrid(pulseDuration,channels);
@@ -141,6 +142,27 @@ end
 notEnoughtPulses = conditions(:,3)<minNumberOfPulses;
 conditions(notEnoughtPulses,:) = [];
 nConditions = size(conditions,1);
+
+if nConditions == 2
+    if abs(conditions(1,1) - conditions(2,1)) < minDuration
+        conditions(2,3) = conditions(2,3) + conditions(1,3);
+        minPulse = min(conditions(:,1));
+        maxPulse = max(conditions(:,1));
+        
+        pulses.duration(pulses.duration == minPulse) = maxPulse;
+        
+        pulseDuration = unique(round(pulses.duration,3)); % because code only codes for channel, we take minimum duration channel for responses
+        [m,n] = ndgrid(pulseDuration,channels);
+        conditions = [m(:),n(:)];
+        for ii = 1:size(conditions,1)
+            conditions(ii,3) = length(find(pulses.duration==conditions(ii,1)));
+        end
+        notEnoughtPulses = conditions(:,3)<minNumberOfPulses;
+        conditions(notEnoughtPulses,:) = [];
+        nConditions = size(conditions,1);
+    end
+end
+        
 
 spikes = loadSpikes;
 % generate random events for boostraping
