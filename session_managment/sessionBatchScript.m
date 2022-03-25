@@ -23,10 +23,10 @@ preprocessSession('basepath','G:\data\fNkx11\fNkx11_201102_sess13','cleanArtifac
 
 preprocessSession('basepath','D:\Dropbox\DATA\sharedRecordings\NewXmlAnimal\190222\rec1_220219_sess1');
 
-computeSessionSummary('basepath','G:\data\fNkx11\fNkx11_201113_sess22','analogChannelsList',65,'digitalChannelsList',[]);
+computeSessionSummary('basepath',pwd,'analogChannelsList',[],'digitalChannelsList',1);
 
 % Index!
-indexNewSession('analogChannelsList',65,'promt_hippo_layers',true);
+indexNewSession('analogChannelsList',65,'promt_hippo_layers',true,'manual_analog_pulses_threshold',true);
  
 %% others
 editDatFile(pwd,[0.001 1],'option','zeroes');   % remove zeroes
