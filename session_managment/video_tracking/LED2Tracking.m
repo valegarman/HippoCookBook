@@ -90,6 +90,13 @@ if ~isempty(dir([basepath filesep '*Tracking.Behavior.mat'])) || forceReload
     return
 end
 
+% Dealing with bazler_ttl_channel
+try
+    session = loadSession(basepath);
+    if isfield(session.analysisTags,'bazler_ttl_channel')
+        bazler_ttl_channel = session.analysisTags.bazler_ttl_channel;
+    end
+
 if ~exist('aviFile') || isempty(aviFile)
     if ~isempty(dir([basepath filesep '*Basler*avi']))
         aviFile = dir([basepath filesep '*Basler*avi']); 
