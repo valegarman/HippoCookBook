@@ -96,6 +96,7 @@ try
     if isfield(session.analysisTags,'bazler_ttl_channel')
         bazler_ttl_channel = session.analysisTags.bazler_ttl_channel;
     end
+end
 
 if ~exist('aviFile') || isempty(aviFile)
     if ~isempty(dir([basepath filesep '*Basler*avi']))
