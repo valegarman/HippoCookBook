@@ -36,7 +36,6 @@ function  preprocessSession(varargin)
 %   tracking_pixel_cm Default, 0.1149
 %   digitalChannelsList     Array of channel to perform 'digitalPulses'
 %                     if summary is done, otherwise [] 
-%   bazler_ttl_channel Channel for bazler tracking ttl
 %
 %  HISTORY: 
 %     - Created based on sessionsPipeline
@@ -61,7 +60,6 @@ addParameter(p,'tracking_pixel_cm',0.1149,@isnumeric);
 addParameter(p,'sessionSummary',true,@islogical);
 addParameter(p,'digitalChannelsList',[],@isnumeric);
 addParameter(p,'manualThr',false,@islogical);
-addParameter(p,'bazler_ttl_channel',10,@isnumeric);
 
 % addParameter(p,'pullData',[],@isdir); To do... 
 parse(p,varargin{:});
@@ -77,7 +75,6 @@ tracking_pixel_cm = p.Results.tracking_pixel_cm;
 sessionSummary = p.Results.sessionSummary;
 digitalChannelsList = p.Results.digitalChannelsList;
 manualThr = p.Results.manualThr;
-bazler_ttl_channel = p.Results.bazler_ttl_channel;
 
 if ~exist('basepath') || isempty(basepath)
     basepath = uigetdir; % select folder
@@ -116,9 +113,8 @@ try
     session.channels = 1:session.extracellular.nChannels;
     session.analysisTags.digital_optogenetic_channels = digitalChannelsList;
     session.analysisTags.analog_optogenetic_channels = analogChannelsList;
-    if ~isempty(bazler_ttl_channel)
-        session.analysisTags.bazler_ttl_channel = bazler_ttl_channel;
-    end
+    if 
+    session.analysisTags.
     
     save([basepath filesep session.general.name,'.session.mat'],'session','-v7.3');
 catch
