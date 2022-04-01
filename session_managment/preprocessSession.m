@@ -62,6 +62,7 @@ addParameter(p,'sessionSummary',true,@islogical);
 addParameter(p,'digitalChannelsList',[],@isnumeric);
 addParameter(p,'manualThr',false,@islogical);
 addParameter(p,'bazler_ttl_channel',10,@isnumeric);
+addParameter(p,'anymaze_ttl_channel',[],@isnumeric);
 
 % addParameter(p,'pullData',[],@isdir); To do... 
 parse(p,varargin{:});
@@ -78,6 +79,7 @@ sessionSummary = p.Results.sessionSummary;
 digitalChannelsList = p.Results.digitalChannelsList;
 manualThr = p.Results.manualThr;
 bazler_ttl_channel = p.Results.bazler_ttl_channel;
+anymaze_ttl_channel = p.Results.anymaze_ttl_channel;
 
 if ~exist('basepath') || isempty(basepath)
     basepath = uigetdir; % select folder
@@ -100,10 +102,10 @@ if isempty(dir([basename '.xml'])) && isempty(dir('global.xml'))
         cd(allpath{ii});
         xmlFile = dir('*amplifier*.xml');
         ii = ii + 1;
-    end
+    end    
     if isempty(xmlFile)    
         [file, path] = uigetfile('*.xml','Select global xml file');
-        copyfile(strcat(path,file),[basename '.xml']);
+        copyfile(strcat(path,file),[basepath,filesep,basename '.xml']);
     else
         copyfile(strcat(xmlFile.folder,filesep,xmlFile.name),strcat(allpath{1},filesep,basename,'.xml'));
     end
@@ -149,6 +151,7 @@ end
 if ~isempty(dir('*digitalIn.dat'))
     digitalIn = getDigitalIn('all','fs',session.extracellular.sr); 
 end
+% digitalIn = pap_getDigitalIn('all','fs',session.extracellular.sr);
 
 %% Remove stimulation artifacts
 try
@@ -245,10 +248,6 @@ if ~isempty(analysisPath)
         end
     end
 end
-
-
-
-
 
 function CloseNoPrompt
 %Close all editor windows without prompting

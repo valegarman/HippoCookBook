@@ -57,7 +57,13 @@ if ~isempty(dir('*DigitalIn.events.mat'))
             end
         end
     end
-
+    try
+        if ~isfield(digitalIn,'folder')
+            [~,fbasename,~] = fileparts(pwd);
+            digitalIn.folder = fbasename;
+            save([file.name],'digitalIn.events.mat')
+        end
+    end
     return
 end
 
