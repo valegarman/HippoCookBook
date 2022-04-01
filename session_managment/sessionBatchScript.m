@@ -8,7 +8,7 @@ updateExpFolder({'V:\data\fCck1', 'Y:\fCck1'},'E:\data\fCck1');
 %2% Preprocessing
 batch_preprocessSession('basepath','X:\data\fCr1','analysisPath','F:\fCr1','cleanArtifacts',({[],1}),'analogChannelsList',[],'digitalChannelsList',1);
 
-batch_preprocessSession('basepath','G:\data\fPv3','cleanArtifacts',({65,[]}),'analogChannelsList',65,'digitalChannelsList',0);
+batch_preprocessSession('basepath','G:\data\fPv4','cleanArtifacts',({65,[]}),'analogChannelsList',65,'digitalChannelsList',0);
 
 %3% Computing summary
 batch_sessionSummary('basepath','E:\data\fCck1','analogChannelsList',[],'digitalChannelsList',1);
