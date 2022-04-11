@@ -79,9 +79,13 @@ for ii = 1:size(all_folders,1)
         cd([all_folders(ii).folder filesep all_folders(ii).name]);
         kilosortFolder = dir('*Kilosort*');
         if isempty(kilosortFolder)
-            disp([' * Preprocessing of ' all_folders(ii).folder filesep all_folders(ii).name]);
-            preprocessSession('basepath',pwd,'analysisPath',analysisPath,'analogChannelsList',analogChannelsList,'spikeSort',spikeSort,'getPos',getPos, 'cleanArtifacts',cleanArtifacts,...
-                'medianSubstr',medianSubstr,'tracking_pixel_cm',tracking_pixel_cm,'sessionSummary',sessionSummary,'digitalChannelsList',digitalChannelsList);
+            if isempty(dir(['notPreprocessing.txt']))
+                disp([' * Preprocessing of ' all_folders(ii).folder filesep all_folders(ii).name]);
+                preprocessSession('basepath',pwd,'analysisPath',analysisPath,'analogChannelsList',analogChannelsList,'spikeSort',spikeSort,'getPos',getPos, 'cleanArtifacts',cleanArtifacts,...
+                    'medianSubstr',medianSubstr,'tracking_pixel_cm',tracking_pixel_cm,'sessionSummary',sessionSummary,'digitalChannelsList',digitalChannelsList);
+            else
+                disp(['Not to preprocess',all_folders(ii).folder filesep all_folders(ii).name]);
+            end
         else 
             disp(['Spikiping ' all_folders(ii).folder filesep all_folders(ii).name]);
         end

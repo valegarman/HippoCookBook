@@ -144,10 +144,8 @@ if count > 1 % if traking
             if strcmpi(MergePoints.foldernames{trackFolder(ii)},tempTracking{ii}.folder)
                 sumTs = tempTracking{ii}.timestamps + MergePoints.timestamps(trackFolder(ii),1);
                 subSessions = [subSessions; MergePoints.timestamps(trackFolder(ii),1:2)];
-                % Modified by Pablo to get different tracking in the same
-                % session
-                maskSessions = [maskSessions ones(size(sumTs))*ii];
-                ts = [ts sumTs];
+                maskSessions = [maskSessions; ones(size(sumTs))*ii];
+                ts = [ts; sumTs];
             else
                 error('Folders name does not match!!');
             end

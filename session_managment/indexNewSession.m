@@ -46,7 +46,7 @@ addParameter(p,'removeDat',false,@islogical);
 addParameter(p,'copyFiles',true,@islogical);
 addParameter(p,'copyPath',[],@isdir);
 addParameter(p,'bazler_ttl_channel',[],@isnumeric);
-addParameter(p,'forceAnalogPulses',true,@islogical);
+addParameter(p,'forceAnalogPulses',false,@islogical);
 
 parse(p,varargin{:})
 
@@ -138,7 +138,7 @@ end
 spikes = loadSpikes('forceReload',force_loadingSpikes);
 
 %% 3. Analog pulses detection
-if forceAnalogPulses
+if forceAnalogPulses || isempty(dir([session.general.name,'_original.dat']))
     disp('Getting analog Pulses...')
     pulses = getAnalogPulses('analogChannelsList',analogChannelsList,'manualThr',manual_analog_pulses_threshold,'overwrite',force_analogPulsesDetection); % 1-index
 else

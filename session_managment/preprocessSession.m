@@ -60,7 +60,7 @@ addParameter(p,'medianSubstr',true);
 addParameter(p,'tracking_pixel_cm',0.1149,@isnumeric);
 addParameter(p,'sessionSummary',true,@islogical);
 addParameter(p,'digitalChannelsList',[],@isnumeric);
-addParameter(p,'manualThr',false,@islogical);
+addParameter(p,'manualThr',true,@islogical);
 addParameter(p,'bazler_ttl_channel',10,@isnumeric);
 addParameter(p,'anymaze_ttl_channel',[],@isnumeric);
 
@@ -244,7 +244,8 @@ if ~isempty(analysisPath)
             disp('Not possible to remove folder...');
             fclose('all');
             CloseNoPrompt;
-            rmdir([analysisPath,'\',session.general.name],'s')
+            rmdir([analysisPath,'\',session.general.name],'s');
+            disp('Folder deleted');
         end
     end
 end
