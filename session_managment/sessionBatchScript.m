@@ -29,4 +29,4 @@ computeSessionSummary('basepath',pwd,'analogChannelsList',65,'digitalChannelsLis
 indexNewSession('analogChannelsList',65,'promt_hippo_layers',true,'manual_analog_pulses_threshold',true);
  
 %% others
-editDatFile(pwd,[0.001 1],'option','zeroes');   % remove zeroes
+editDatFile(pwd,[26460 inf],'option','zeroes');   % remove zeroes

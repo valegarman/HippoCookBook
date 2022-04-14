@@ -41,6 +41,7 @@ function [tracking] = getSessionTracking(varargin)
 %   HISTORY:
 %     - Manuel Valero 2019
 %     - Added OptiTrack support: 5/20, AntonioFR (STILL NEEDS TESTING)
+%     - Added AnyMaze support: 3/22 Pablo Abad
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -53,6 +54,7 @@ addParameter(p,'roiLED',[],@ismatrix);
 addParameter(p,'roisPath',[],@isfolder);
 addParameter(p,'saveMat',true,@islogical)
 addParameter(p,'forceReload',false,@islogical);
+addParameter(p,'anyMaze',false,@islogical);
 
 parse(p,varargin{:});
 basepath = p.Results.basepath;
@@ -62,6 +64,7 @@ roiLED = p.Results.roiLED;
 roisPath = p.Results.roisPath;
 saveMat = p.Results.saveMat;
 forceReload = p.Results.forceReload;
+anyMaze = p.Results.anyMaze;
 
 %% In case tracking already exists 
 if ~isempty(dir([basepath filesep '*Tracking.Behavior.mat'])) || forceReload
@@ -71,46 +74,67 @@ if ~isempty(dir([basepath filesep '*Tracking.Behavior.mat'])) || forceReload
     return
 end
 
-%% Basler tracking
-cd(basepath); cd ..; upBasepath = pwd; cd(basepath);
-if isempty(roisPath)
-    if exist([basepath filesep 'roiTracking.mat'],'file') || ...
-        exist([basepath filesep 'roiLED.mat'],'file')
-            roisPath = basepath;
-            try load([roisPath filesep 'roiLED.mat'],'roiLED'); end
-            load([roisPath filesep 'roiTracking.mat'],'roiTracking');
-    elseif exist([upBasepath filesep 'roiTracking.mat'],'file') || ...
-        exist([upBasepath filesep 'roiLED.mat'],'file')
-            roisPath = upBasepath;
-            try load([roisPath filesep 'roiLED.mat'],'roiLED'); end
-            load([roisPath filesep 'roiTracking.mat'],'roiTracking');
-    end   
-end
-
-%% Find subfolder recordings
-cd(basepath);
-basename = basenameFromBasepath(basepath);
-%C = strsplit(sessionInfo.session.name,'_');
-%sess = dir(strcat(C{1},'_',C{2},'*')); % get session files
-if exist([basepath filesep strcat(basename,'.MergePoints.events.mat')],'file')
-    load(strcat(basename,'.MergePoints.events.mat'));
-    count = 1;
-    for ii = 1:size(MergePoints.foldernames,2)
-        %if sess(ii).isdir && ~isempty(dir([basepath filesep sess(ii).name filesep '*Basler*avi']))
-         if ~isempty(dir([basepath filesep MergePoints.foldernames{ii} filesep '*Basler*avi']))   
-            cd([basepath filesep MergePoints.foldernames{ii}]); %cd([basepath filesep sess(ii).name]);
-            fprintf('Computing tracking in %s folder \n',MergePoints.foldernames{ii});
-             tempTracking{count}= LED2Tracking([],'convFact',convFact,'roiTracking',...
-                 roiTracking,'roiLED',roiLED,'forceReload',forceReload); % computing trajectory
-             trackFolder(count) = ii; 
-            count = count + 1;
-        end
+if ~anyMaze
+    %% Basler tracking
+    cd(basepath); cd ..; upBasepath = pwd; cd(basepath);
+    if isempty(roisPath)
+        if exist([basepath filesep 'roiTracking.mat'],'file') || ...
+            exist([basepath filesep 'roiLED.mat'],'file')
+                roisPath = basepath;
+                try load([roisPath filesep 'roiLED.mat'],'roiLED'); end
+                load([roisPath filesep 'roiTracking.mat'],'roiTracking');
+        elseif exist([upBasepath filesep 'roiTracking.mat'],'file') || ...
+            exist([upBasepath filesep 'roiLED.mat'],'file')
+                roisPath = upBasepath;
+                try load([roisPath filesep 'roiLED.mat'],'roiLED'); end
+                load([roisPath filesep 'roiTracking.mat'],'roiTracking');
+        end   
     end
-    cd(basepath);
-else
-    error('missing MergePoints, quiting...');
-end
 
+    %% Find subfolder recordings
+    cd(basepath);
+    basename = basenameFromBasepath(basepath);
+    %C = strsplit(sessionInfo.session.name,'_');
+    %sess = dir(strcat(C{1},'_',C{2},'*')); % get session files
+    if exist([basepath filesep strcat(basename,'.MergePoints.events.mat')],'file')
+        load(strcat(basename,'.MergePoints.events.mat'));
+        count = 1;
+        for ii = 1:size(MergePoints.foldernames,2)
+            %if sess(ii).isdir && ~isempty(dir([basepath filesep sess(ii).name filesep '*Basler*avi']))
+             if ~isempty(dir([basepath filesep MergePoints.foldernames{ii} filesep '*Basler*avi']))   
+                cd([basepath filesep MergePoints.foldernames{ii}]); %cd([basepath filesep sess(ii).name]);
+                fprintf('Computing tracking in %s folder \n',MergePoints.foldernames{ii});
+                 tempTracking{count}= LED2Tracking([],'convFact',convFact,'roiTracking',...
+                     roiTracking,'roiLED',roiLED,'forceReload',forceReload); % computing trajectory
+                 trackFolder(count) = ii; 
+                count = count + 1;
+            end
+        end
+        cd(basepath);
+    else
+        error('missing MergePoints, quiting...');
+    end
+elseif anyMaze
+    % Find subfolder recordings
+    cd(basepath);
+    basename = basenameFromBasepath(basepath);
+    if exist([basepath filesep strcat(basename,'.MergePoints.events.mat')],'file')
+        load(strcat(basename,'.MergePoints.events.mat'));
+        count = 1;
+        for ii = 1:size(MergePoints.foldernames,2)
+            if ~isempty(dir([basepath filesep MergePoints.foldernames{ii} filesep '*.csv*']))
+                cd([basepath filesep MergePoints.foldernames{ii}]);
+                fprintf('Computing tracking in %s foler \n',MergePoints.foldernames{ii});
+                tempTracking{count} = anyMazeTracking([],[]);
+                trackFolder(count) = ii;
+                count = count + 1;
+            end
+        end
+        cd(basepath);
+    else
+        error('Missing MergePoints, quitting...');
+    end
+end
 %% Concatenate and sync timestamps
 if count > 1 % if traking
     ts = []; subSessions = []; maskSessions = [];

@@ -41,8 +41,9 @@ end
             
 %%
 if makePlot
-    
-    load([recordingname '.sessionInfo.mat'])
+    try
+        load([recordingname '.sessionInfo.mat'])
+    end
 
     figure ('position',[0 700 2000 200])
     alpha=.05; Beta=0.09;a=.07; b=.14;

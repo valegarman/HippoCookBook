@@ -46,6 +46,7 @@ addParameter(p,'removeDat',false,@islogical);
 addParameter(p,'copyFiles',true,@islogical);
 addParameter(p,'copyPath',[],@isdir);
 addParameter(p,'bazler_ttl_channel',[],@isnumeric);
+addParameter(p,'forceAnalogPulses',false,@islogical);
 
 parse(p,varargin{:})
 
@@ -71,6 +72,7 @@ removeDat = p.Results.removeDat;
 copyFiles = p.Results.copyFiles;
 copyPath = p.Results.copyPath;
 bazler_ttl_channel = p.Results.bazler_ttl_channel;
+forceAnalogPulses = p.Results.forceAnalogPulses;
 
 %% Creates a pointer to the folder where the index variable is located
 if isempty(indexedProjects_name)
@@ -136,8 +138,19 @@ end
 spikes = loadSpikes('forceReload',force_loadingSpikes);
 
 %% 3. Analog pulses detection
-disp('Getting analog Pulses...')
-pulses = getAnalogPulses('analogChannelsList',analogChannelsList,'manualThr',manual_analog_pulses_threshold,'overwrite',force_analogPulsesDetection); % 1-index
+if forceAnalogPulses || isempty(dir([session.general.name,'_original.dat']))
+    disp('Getting analog Pulses...')
+    pulses = getAnalogPulses('analogChannelsList',analogChannelsList,'manualThr',manual_analog_pulses_threshold,'overwrite',force_analogPulsesDetection); % 1-index
+else
+    try
+        if ~isempty(dir([session.general.name,'.pulses.events.mat']))
+            file = dir([session.general.name,'.pulses.events.mat']);
+            load(file.name);
+        end
+    catch
+        warning('Problems with analogPulses');
+    end
+end
 
 %% 4. Check Sleep Score
 SleepScoreMaster(pwd,'noPrompts',true,'ignoretime',pulses.intsPeriods, 'overwrite', true);

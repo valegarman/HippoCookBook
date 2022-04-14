@@ -62,7 +62,7 @@ addParameter(p,'verbose',false,@islogical);
 addParameter(p,'thresh',.98,@isnumeric)
 addParameter(p,'bazlerTTL',[],@isnumeric)
 addParameter(p,'saveMat',true,@islogical);
-addParameter(p,'bazler_ttl_channel',1,@isnumeric);
+addParameter(p,'bazler_ttl_channel',10,@isnumeric);
 
 % addParameter(p,'RGBChannel',[],@isstr);
 
@@ -92,11 +92,13 @@ end
 
 % Dealing with bazler_ttl_channel
 try
-    session = loadSession(basepath);
+    cd ..
+    session = loadSession();
     if isfield(session.analysisTags,'bazler_ttl_channel')
         bazler_ttl_channel = session.analysisTags.bazler_ttl_channel;
     end
 end
+cd(basepath)
 
 if ~exist('aviFile') || isempty(aviFile)
     if ~isempty(dir([basepath filesep '*Basler*avi']))

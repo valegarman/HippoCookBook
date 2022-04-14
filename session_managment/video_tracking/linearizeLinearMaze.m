@@ -38,6 +38,7 @@ function [behavior] = linearizeLinearMaze(varargin)
 % behavior.trials.arm                (1x#trials). Trial's arm (ej 0 left, 1 right)
 % 
 %   Manu Valero 2020
+% Modified by Pablo Abad to depend on session metadata
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Deal with inputs
@@ -127,7 +128,7 @@ if editLOI
     save([basepath filesep 'virtualMaze.mat'],'maze');
 end
 
-linMazeCont =    [0   110];         % left to right
+linMazeCont = [0   110]; % left to right
              
 % gets steps along the maze
 dMaze = diff(maze,1);
@@ -147,8 +148,13 @@ for ii = 1:length(x)
 end
 
 % get trials
-xml = LoadParameters;
-digitalIn = bz_getDigitalIn('all','fs',xml.rates.wideband);
+try
+    cd ..
+    upBasepath = pwd;
+    session = loadSession();
+    cd(basepath)
+end
+digitalIn = getDigitalIn('all','fs',session.extracellular.sr);
 if length(digitalIn.timestampsOn{3}) <  length(digitalIn.timestampsOn{4})- 5 || length(digitalIn.timestampsOn{3}) >  length(digitalIn.timestampsOn{4})+ 5
     warning('Malfunctioning sensor!! Trying to fix');
     if length(digitalIn.timestampsOn{3}) <  length(digitalIn.timestampsOn{4})- 5
