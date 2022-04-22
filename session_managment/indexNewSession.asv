@@ -225,10 +225,8 @@ try
     behaviour.psth_lReward = psth_lReward;
     behaviour.psth_rReward = psth_rReward;
     behaviour.psth_intersection = psth_intersection;
-    behaviour.psth_startPoint = psth_startPoint; 
-    behavior = behaviour; % british to american :)
-    save([basenameFromBasepath(pwd) '.behavior.cellinfo.mat'],'behavior');
-end
+    behaviour.psth_startPoint = psth_startPoint;
+    save([basenameFromBasepath(pwd) '.behaviour.cellinfo.mat'])
 
 %% 13. Indexing
 % session = sessionTemplate(basepath,'showGUI',false);
