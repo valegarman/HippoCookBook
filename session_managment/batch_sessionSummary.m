@@ -53,7 +53,7 @@ for ii = 1:size(all_folders,1)
         cd([all_folders(ii).folder filesep all_folders(ii).name]);
         summaryFolder = dir('*SummaryFigures*');
         if isempty(summaryFolder) || force
-            disp(['Preprocessing of ' all_folders(ii).folder filesep all_folders(ii).name]);
+            disp(['Computing sessionSummary of ' all_folders(ii).folder filesep all_folders(ii).name]);
             computeSessionSummary('basepath',pwd,'listOfAnalysis',listOfAnalysis,'exclude',exclude,'excludeShanks',excludeShanks, 'analogChannelsList',analogChannelsList,...
                 'digitalChannelsList',digitalChannelsList,'tracking_pixel_cm',tracking_pixel_cm);
         else 

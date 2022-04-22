@@ -255,7 +255,7 @@ function CloseNoPrompt
 %Active Editor;
 hEditor = matlab.desktop.editor.getActive;
 %Close all files.
-while ~isempty(hEditor);
+while ~isempty(hEditor)
   closeNoPrompt(hEditor);
   hEditor = matlab.desktop.editor.getActive;
 end
