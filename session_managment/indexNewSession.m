@@ -214,14 +214,14 @@ end
 try 
     behaviour = getSessionLinearize;
     psth_lReward = spikesPsth([behaviour.events.lReward],'numRep',100,'saveMat',false,...
-        'min_pulsesNumber',15,'winSize',4,'event_ints',[0 0.2],'winSizePlot',[-2 2]);
+        'min_pulsesNumber',15,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01);
     psth_rReward = spikesPsth([behaviour.events.rReward],'numRep',100,'saveMat',false,...
-        'min_pulsesNumber',15,'winSize',4,'event_ints',[0 0.2],'winSizePlot',[-2 2]);
+        'min_pulsesNumber',15,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01);
     psth_intersection = spikesPsth([behaviour.events.intersection],'numRep',100,'saveMat',false,...
-        'min_pulsesNumber',15,'winSize',4,'event_ints',[0 0.2],'winSizePlot',[-2 2]);
+        'min_pulsesNumber',15,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01);
     psth_startPoint = spikesPsth([behaviour.events.startPoint],'numRep',100,'saveMat',false,...
-        'min_pulsesNumber',15,'winSize',4,'event_ints',[0 0.2],'winSizePlot',[-2 2]);
-    
+        'min_pulsesNumber',15,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01);
+
     behaviour.psth_lReward = psth_lReward;
     behaviour.psth_rReward = psth_rReward;
     behaviour.psth_intersection = psth_intersection;
