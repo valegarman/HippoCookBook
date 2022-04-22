@@ -26,7 +26,7 @@ preprocessSession('basepath','D:\Dropbox\DATA\sharedRecordings\NewXmlAnimal\1902
 computeSessionSummary('basepath',pwd,'analogChannelsList',65,'digitalChannelsList',[]);
 
 % Index!
-indexNewSession('analogChannelsList',65,'promt_hippo_layers',true,'manual_analog_pulses_threshold',true);
+indexNewSession('analogChannelsList',65,'promt_hippo_layers',true,'manual_analog_pulses_threshold',true,'bazler_ttl_channel',1);
  
 %% others
 editDatFile(pwd,[26460 inf],'option','zeroes');   % remove zeroes

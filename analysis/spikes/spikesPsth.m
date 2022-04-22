@@ -4,7 +4,7 @@ function [psth] = spikesPsth(timestamps,varargin)
 %   [psth] = spikesPsth(timestamps,<options>)
 %
 % INPUTS
-%   timestamps - mx1 matrix indicating timetamps (in seconds) over which to
+%   timestamps - mx2 matrix indicating timetamps (in seconds) over which to
 %                   compute psth
 %   
 % <OPTIONALS>
@@ -43,6 +43,7 @@ addParameter(p,'force',false,@islogical);
 addParameter(p,'eventType',date,@ischar);
 addParameter(p,'event_ints',[-0.02 0.02],@isnumeric);
 addParameter(p,'baseline_ints',[-0.5 -0.46],@isnumeric);
+addParameter(p,'min_pulsesNumber',100,@isnumeric);
 
 parse(p, timestamps,varargin{:});
 
@@ -60,6 +61,7 @@ force = p.Results.force;
 eventType = p.Results.eventType;
 event_ints = p.Results.event_ints;
 baseline_ints = p.Results.baseline_ints;
+min_pulsesNumber = p.Results.min_pulsesNumber;
 
 %% Session Template
 % Deal with inputs
@@ -139,7 +141,7 @@ for ii = 1:length(spikes.UID)
     end
     for jj = 1:nConditions
         nPulses = length(timestamps);
-        if nPulses > 100
+        if nPulses > min_pulsesNumber
             [stccg, t] = CCG({spikes.times{ii}, timestamps},[],'binSize',binSize,'duration',winSize,'norm','rate');
             psth.responsecurve(ii,jj,:) = stccg(:,2,1);
             psth.responsecurveSmooth(ii,jj,:) = smooth(stccg(:,2,1));
@@ -185,8 +187,10 @@ for ii = 1:length(spikes.UID)
             end
             psth.threeWaysTest(ii,jj,1) = test;
         else
-            psth.responsecurve(ii,jj,:) = nan(duration/binSize + 1,1);
-            psth.responsecurveZ(ii,jj,:) = nan(duration/binSize + 1,1);
+            %psth.responsecurve(ii,jj,:) = nan(duration/binSize + 1,1);
+            %psth.responsecurveZ(ii,jj,:) = nan(duration/binSize + 1,1);
+            psth.responsecurve(ii,jj,:) = NaN;
+            psth.responsecurveZ(ii,jj,:) = NaN;
             psth.modulationSignificanceLevel(ii,jj,1) = NaN;
             psth.rateDuringPulse(ii,jj,1) = NaN;
             psth.rateBeforePulse(ii,jj,1) = NaN;
