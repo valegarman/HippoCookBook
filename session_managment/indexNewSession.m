@@ -206,6 +206,7 @@ try
     firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',false);
     placeFieldStats = bz_findPlaceFields1D('firingMaps',firingMaps,'maxSize',.75,'sepEdge',0.03); %% ,'maxSize',.75,'sepEdge',0.03
     firingTrialsMap = firingMapPerTrial;
+    spatialModulation = getSpatialModulation;
 catch
     warning('Not possible to run spatial modulation...');
 end

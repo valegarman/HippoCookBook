@@ -72,6 +72,8 @@ for ii = 1:length(sessions.basepaths)
     % get some useful fields
     spikes = loadSpikes;
     projectSessionResults.numcells(ii) = spikes.numcells;
+    % session name!!
+    % metadata!!
     
     % spikes
     if includeSpikes
@@ -136,6 +138,13 @@ end
 
 save([analysis_project_path filesep date '_' project '.mat'],'projectSessionResults','-v7.3');
 %% stack all results
-projectResults.optogeneticResponses = stackSessionResult(projectSessionResults.optogeneticResponses);
+
+projectResults.optogeneticResponses = stackSessionResult(projectSessionResults.optogeneticResponses, projectSessionResults.numcells);
+projectResults.ripplesResponses = stackSessionResult(projectSessionResults.ripplesResponses, projectSessionResults.numcells);
+projectResults.averageCCG = stackSessionResult(projectSessionResults.averageCCG, projectSessionResults.numcells);
+projectResults.thetaModulation = stackSessionResult(projectSessionResults.thetaModulation, projectSessionResults.numcells);
+projectResults.lGammaModulation = stackSessionResult(projectSessionResults.lGammaModulation, projectSessionResults.numcells);
+projectResults.hGammaModulation = stackSessionResult(projectSessionResults.hGammaModulation, projectSessionResults.numcells);
+projectResults.behavior = stackSessionResult(projectSessionResults.behavior, projectSessionResults.numcells);
 
 end
