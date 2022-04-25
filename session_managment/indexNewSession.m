@@ -165,7 +165,7 @@ powerProfile_hfo = powerSpectrumProfile(hfo_bandpass,'showfig',true,'forceDetect
 
 %% 7. Spike Features
 spikeFeatures;
-getAverageCCG;
+getAverageCCG('force',true);
 % pulses.analogChannel = analogCh;
 % save([session.general.name,'.pulses.events.mat'],'pulses');
 optogeneticResponses = getOptogeneticResponse('numRep',500,'force',true);
@@ -174,11 +174,11 @@ optogeneticResponses = getOptogeneticResponse('numRep',500,'force',true);
 % Trying changes in detecUD_temp
 % 8.1 Up and downs
 UDStates = detectUD('plotOpt', true,'forceDetect',true','NREMInts','all');
-psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500);
+psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true);
 
 % 8.2 Ripples
 ripples = rippleMasterDetector('SWChannel',SWChannel,'force',true);
-psthRipples = spikesPsth([],'eventType','ripples','numRep',500);
+psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true);
 
 % 8.3 Theta intervals
 thetaEpochs = detectThetaEpochs;
@@ -203,10 +203,10 @@ cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeM
 %% 11. Spatial modulation
 try
     behaviour = getSessionLinearize('forceReload',false);  
-    firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',false);
+    firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',true);
     placeFieldStats = bz_findPlaceFields1D('firingMaps',firingMaps,'maxSize',.75,'sepEdge',0.03); %% ,'maxSize',.75,'sepEdge',0.03
-    firingTrialsMap = firingMapPerTrial;
-    spatialModulation = getSpatialModulation;
+    firingTrialsMap = firingMapPerTrial('force',true);
+    spatialModulation = getSpatialModulation('force',true);
 catch
     warning('Not possible to run spatial modulation...');
 end

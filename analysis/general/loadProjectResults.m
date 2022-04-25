@@ -7,7 +7,7 @@ function [results] =  loadProjectResults(varargin)
 
 %% Defaults and Parms
 p = inputParser;
-addParameter(p,'project','Undefined',@isstring);
+addParameter(p,'project','Undefined',@ischar);
 addParameter(p,'indexedProjects_path',[],@isstring);
 addParameter(p,'indexedProjects_name','indexedSessions',@isstring);
 addParameter(p,'data_path',database_path,@isstring);

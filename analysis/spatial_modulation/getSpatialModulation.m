@@ -31,8 +31,7 @@ addParameter(p,'placeFieldStats',[],@isstruct);
 addParameter(p,'firingTrialsMap',[],@isstruct);
 addParameter(p,'saveMat', true, @islogical);
 addParameter(p,'plotOpt', true, @islogical);
-addParameter(p,'forceReload', false, @islogical);
-
+addParameter(p,'force', false, @islogical);
 
 parse(p, varargin{:});
 firingMaps = p.Results.firingMaps;
@@ -43,14 +42,14 @@ placeFieldStats = p.Results.placeFieldStats;
 saveMat = p.Results.saveMat;
 plotOpt = p.Results.plotOpt;
 firingTrialsMap = p.Results.firingTrialsMap;
-forceReload = p.Results.forceReload;
+force = p.Results.force;
 
 % Deal with inputs
 prevPath = pwd;
 cd(basepath);
 
 filename = basenameFromBasepath;
-if ~isempty(dir([basenameFromBasepath '.spatialModulation.cellinfo.mat'])) || forceReload
+if ~isempty(dir([basenameFromBasepath '.spatialModulation.cellinfo.mat'])) || ~force
     disp('Firing maps per trial already computed! Loading file.');
     file =dir([basenameFromBasepath '.spatialModulation.cellinfo.mat']);
     load(file.name);

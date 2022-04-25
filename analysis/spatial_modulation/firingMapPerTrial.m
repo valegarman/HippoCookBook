@@ -33,7 +33,7 @@ addParameter(p,'speedThresh',0.1,@isnumeric);
 addParameter(p,'rasterUnit',1,@isnumeric);
 addParameter(p,'saveMat', true, @islogical);
 addParameter(p,'plotOpt', true, @islogical);
-addParameter(p,'forceReload', false, @islogical);
+addParameter(p,'force', false, @islogical);
 
 parse(p, varargin{:});
 basepath = p.Results.basepath;
@@ -46,14 +46,14 @@ rasterUnit = p.Results.rasterUnit;
 nBins = p.Results.nBins;
 saveMat = p.Results.saveMat;
 plotOpt = p.Results.plotOpt;
-forceReload = p.Results.forceReload;
+force = p.Results.force;
 
 % Deal with inputs
 prevPath = pwd;
 cd(basepath);
 
 filename = basenameFromBasepath;
-if ~isempty(dir([basenameFromBasepath '.firingMapPerTrial.cellinfo.mat'])) || forceReload
+if ~isempty(dir([basenameFromBasepath '.firingMapPerTrial.cellinfo.mat'])) && ~force
     disp('Firing maps per trial already computed! Loading file.');
     file =dir([basenameFromBasepath '.firingMapPerTrial.cellinfo.mat']);
     load(file.name);
