@@ -49,8 +49,8 @@ prevPath = pwd;
 cd(basepath);
 
 filename = basenameFromBasepath;
-if ~isempty(dir([basenameFromBasepath '.spatialModulation.cellinfo.mat'])) || ~force
-    disp('Firing maps per trial already computed! Loading file.');
+if ~isempty(dir([basenameFromBasepath '.spatialModulation.cellinfo.mat'])) && ~force
+    disp('Spatial modulation already computed! Loading file.');
     file =dir([basenameFromBasepath '.spatialModulation.cellinfo.mat']);
     load(file.name);
     return
@@ -148,7 +148,7 @@ for jj = 1:length(firingMaps.rateMaps{1})
             pf_size = NaN;
         end
         fieldX = placeFieldStats.mapStats{ii}{jj}.fieldX(1,:);
-        is_placeField = ~isnan(placeFieldStats.mapStats{ii}{jj}.x(1));
+        is_placeField = double(~isnan(placeFieldStats.mapStats{ii}{jj}.x(1)));
 
         spatialModulation.(['meanRate_map_' num2str(jj)])(ii,1) = meanFiringRate;
         spatialModulation.(['bits_spike_map_' num2str(jj)])(ii,1) = bits_spike;
@@ -160,7 +160,7 @@ for jj = 1:length(firingMaps.rateMaps{1})
         spatialModulation.(['PF_peak_map_' num2str(jj)])(ii,1) = pf_peak;
         spatialModulation.(['PF_size_map_' num2str(jj)])(ii,1) = pf_size;
         spatialModulation.(['PF_boundaries_map_' num2str(jj)])(ii,:) = fieldX;
-        spatialModulation.(['is_placeField_map_' num2str(jj)])(ii,:) = is_placeField;
+        spatialModulation.(['is_placeField_map_' num2str(jj)])(ii,:) = double(is_placeField);
         
         clear pf_position pf_peak pf_size fieldX is_placeField
         clear meanFiringRate bits_spike bits_second sparsity selectivity T logArg occupancy

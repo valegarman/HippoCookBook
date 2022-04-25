@@ -27,7 +27,7 @@ for ii = 1:length(sessions.basepaths)
     try
         cd(sessions.basepaths{ii});
         
-        % write code here!
+        spatialModulation = getSpatialModulation('force',true);
         
         close all;
     catch
