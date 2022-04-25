@@ -33,6 +33,7 @@ addParameter(p,'speedThresh',0.1,@isnumeric);
 addParameter(p,'rasterUnit',1,@isnumeric);
 addParameter(p,'saveMat', true, @islogical);
 addParameter(p,'plotOpt', true, @islogical);
+addParameter(p,'force', false, @islogical);
 
 parse(p, varargin{:});
 basepath = p.Results.basepath;
@@ -45,10 +46,19 @@ rasterUnit = p.Results.rasterUnit;
 nBins = p.Results.nBins;
 saveMat = p.Results.saveMat;
 plotOpt = p.Results.plotOpt;
+force = p.Results.force;
 
 % Deal with inputs
 prevPath = pwd;
 cd(basepath);
+
+filename = basenameFromBasepath;
+if ~isempty(dir([basenameFromBasepath '.firingMapPerTrial.cellinfo.mat'])) && ~force
+    disp('Firing maps per trial already computed! Loading file.');
+    file =dir([basenameFromBasepath '.firingMapPerTrial.cellinfo.mat']);
+    load(file.name);
+    return
+end
 
 if isempty(spikes)
     spikes = loadSpikes('getWaveformsFromDat',false);
@@ -167,7 +177,7 @@ if plotOpt
 end
 
 if saveMat
-   save([firingTrialsMap.sessionName '.firingMapPerTrial.cellinfo.mat'],'firingTrialsMap'); 
+   save([basenameFromBasepath '.firingMapPerTrial.cellinfo.mat'],'firingTrialsMap'); 
 end
 
 cd(prevPath);
