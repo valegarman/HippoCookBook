@@ -274,6 +274,10 @@ x(art(:)) = NaN; y(art(:)) = NaN;
 F = fillmissing([x y],'linear');
 x = F(:,1); y = F(:,2);
 
+% Get velocity
+[~,~,~,vx,vy,~,~] = KalmanVel(x,y,xt,1);
+velocity = sqrt(vx.^2 + vy.^2);
+
 h2 = figure;
 hold on
 imagesc(xMaze, yMaze,average_frame); colormap gray; caxis([0 .7]);
@@ -394,6 +398,8 @@ tracking.avFrame.xSize = xMaze;
 tracking.avFrame.ySize = yMaze;
 tracking.roi.roiTracking = roiTracking;
 tracking.roi.roiLED = roiLED;
+
+tracking.velocity = velocity;
 
 if saveMat
     save([basepath filesep fbasename '.Tracking.Behavior.mat'],'tracking');

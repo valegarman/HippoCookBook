@@ -62,6 +62,10 @@ end
 mkdir('SummaryFigures'); % create folder
 close all
 
+try
+    getuLEDsPulses();
+end
+
 % SPIKES SUMMARY
 if any(ismember(listOfAnalysis,'spikes'))
     try

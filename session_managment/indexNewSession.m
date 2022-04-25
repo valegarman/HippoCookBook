@@ -203,7 +203,7 @@ cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeM
 %% 11. Spatial modulation
 try
     behaviour = getSessionLinearize('forceReload',false);  
-    firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',false);
+    firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',true);
     placeFieldStats = bz_findPlaceFields1D('firingMaps',firingMaps,'maxSize',.75,'sepEdge',0.03); %% ,'maxSize',.75,'sepEdge',0.03
     firingTrialsMap = firingMapPerTrial;
 catch
