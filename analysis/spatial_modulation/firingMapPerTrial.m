@@ -52,10 +52,10 @@ force = p.Results.force;
 prevPath = pwd;
 cd(basepath);
 
-filename = basenameFromBasepath;
-if ~isempty(dir([basenameFromBasepath '.firingMapPerTrial.cellinfo.mat'])) && ~force
+filename = basenameFromBasepath(pwd);
+if ~isempty(dir([basenameFromBasepath(pwd) '.firingMapPerTrial.cellinfo.mat'])) && ~force
     disp('Firing maps per trial already computed! Loading file.');
-    file =dir([basenameFromBasepath '.firingMapPerTrial.cellinfo.mat']);
+    file =dir([basenameFromBasepath(pwd) '.firingMapPerTrial.cellinfo.mat']);
     load(file.name);
     return
 end
@@ -177,7 +177,7 @@ if plotOpt
 end
 
 if saveMat
-   save([basenameFromBasepath '.firingMapPerTrial.cellinfo.mat'],'firingTrialsMap'); 
+   save([basenameFromBasepath(pwd) '.firingMapPerTrial.cellinfo.mat'],'firingTrialsMap'); 
 end
 
 cd(prevPath);

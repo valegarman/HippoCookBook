@@ -50,7 +50,7 @@ cd(basepath);
 
 filename = basenameFromBasepath;
 if ~isempty(dir([basenameFromBasepath '.spatialModulation.cellinfo.mat'])) && ~force
-    disp('Spatial modulation already computed! Loading file.');
+    disp('Spatial modulation already computed! Loading file');
     file =dir([basenameFromBasepath '.spatialModulation.cellinfo.mat']);
     load(file.name);
     return
