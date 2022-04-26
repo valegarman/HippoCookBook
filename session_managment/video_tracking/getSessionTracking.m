@@ -67,7 +67,7 @@ forceReload = p.Results.forceReload;
 anyMaze = p.Results.anyMaze;
 
 %% In case tracking already exists 
-if ~isempty(dir([basepath filesep '*Tracking.Behavior.mat'])) && forceReload
+if ~isempty(dir([basepath filesep '*Tracking.Behavior.mat'])) || forceReload
     disp('Trajectory already detected! Loading file.');
     file = dir([basepath filesep '*Tracking.Behavior.mat']);
     load(file.name);
@@ -161,11 +161,12 @@ if count > 1 % if traking
 
     % Concatenating tracking fields...
     x = []; y = []; folder = []; samplingRate = []; description = [];
-    velocity = [];
+    velocity = []; acceleration = [];
     for ii = 1:size(tempTracking,2) 
         x = [x; tempTracking{ii}.position.x]; 
         y = [y; tempTracking{ii}.position.y]; 
         velocity = [velocity; tempTracking{ii}.velocity];
+        acceleration = [acceleration; tempTracking{ii}.acceleration];
         folder{ii} = tempTracking{ii}.folder; 
         samplingRate = [samplingRate; tempTracking{ii}.samplingRate];  
         description{ii} = tempTracking{ii}.description;
@@ -181,6 +182,7 @@ if count > 1 % if traking
     % Create speed structure .mat
     
     speed.velocity = velocity;
+    speed.acceleration = acceleration;
     speed.timestamps = ts;
     speed.folders = folder;
     

@@ -232,15 +232,50 @@ if saveMat
 end
 %% Rate map for speed bins
 close all
+speed_val = speed_val';
+
+zscore_speedVal = zscore(speed_val,[],2);
 figure,
-for i = 1:size(speed_val,3)
-    subplot(size(speed_val,3),1,i);
-    imagesc([prc_vals(1) prc_vals(end)], [1 size(speed_val,2)], zscore(speed_val(:,:,i)')); caxis([-3 3]); colormap(jet);
-    set(gca,'TickDir','out'); 
+subplot(1,2,1)
+imagesc([1 size(speed_val,2)] , [1 size(speed_val,1)], speed_val); caxis([0 10])
+colormap(jet(15))
+subplot(1,2,2)
+imagesc([1 size(zscore_speedVal,2)], [1 size(zscore_speedVal,1)], zscore_speedVal); caxis([-3 3]);
+colormap(jet(15));
+
+[M,I] = (max(zscore_speedVal,[],2));
+[A,B] = sort(I);
+zscore_speedVal_sorted = zeros(size(zscore_speedVal,1), size(zscore_speedVal,2));
+speedVal_sorted = zeros(size(speed_val,1), size(speed_val,2));
+for i = 1:size(zscore_speedVal,1)
+    zscore_speedVal_sorted(i,:) =  zscore_speedVal(B(i),:);
+    speedVal_sorted(i,:) = speed_val(B(i),:);
 end
 
+figure,
+subplot(1,2,1)
+imagesc([1 size(speedVal_sorted,2)] , [1 size(speedVal_sorted,1)], speedVal_sorted); caxis([0 10])
+colormap(jet(15))
+subplot(1,2,2)
+for i = 1:size(zscore_speedVal_sorted,1)
+    zscore_speedVal_sorted_smoothed(i,:) = smooth(zscore_speedVal_sorted(i,:))';
+end
+imagesc([1 size(zscore_speedVal_sorted,2)], [1 size(zscore_speedVal_sorted,1)], zscore_speedVal_sorted_smoothed); caxis([-3 3]);
+colormap(jet(15)); 
 
-
+figure,
+for jj = 1:size(speed_val,1)
+    subplot(7,ceil(size(speedVal_sorted,1)/7),jj);
+    plot(speed_val(jj,:));
+end
+% Speed rate sorted
+figure,
+for jj = 1:size(speedVal_sorted,1)
+    subplot(7,ceil(size(speedVal_sorted,1)/7),jj);
+    plot(speedVal_sorted(jj,:));
+end
+    
+    
 
 
 if saveMat

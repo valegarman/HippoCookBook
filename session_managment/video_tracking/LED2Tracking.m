@@ -267,7 +267,7 @@ art = find(sum(abs(diff(pos))>artifactThreshold,2))+1;  % remove artefacs as mov
 pos(art,:) = NaN;
 
 xt = linspace(0,size(pos,1)/fs,size(pos,1));            % kalman filter
-[t,x,y,vx,vy,ax,ay] = trajectory_kalman_filter(pos(:,1)',pos(:,2)',xt,0);
+[t,x,y,vx,vy,~,~] = trajectory_kalman_filter(pos(:,1)',pos(:,2)',xt,0);
 art = find(sum(abs(diff([x y]))>artifactThreshold,2))+1;
 art = [art - 2 art - 1 art art + 1 art + 2];
 x(art(:)) = NaN; y(art(:)) = NaN;
@@ -275,8 +275,9 @@ F = fillmissing([x y],'linear');
 x = F(:,1); y = F(:,2);
 
 % Get velocity
-[~,~,~,vx,vy,~,~] = KalmanVel(x,y,xt,1);
+[~,~,~,vx,vy,ax,ay] = KalmanVel(x,y,xt,2);
 velocity = sqrt(vx.^2 + vy.^2);
+acceleration = sqrt(ax.^2 + ay.^2);
 
 h2 = figure;
 hold on
@@ -400,7 +401,7 @@ tracking.roi.roiTracking = roiTracking;
 tracking.roi.roiLED = roiLED;
 
 tracking.velocity = velocity;
-
+tracking.acceleration = acceleration;
 if saveMat
     save([basepath filesep fbasename '.Tracking.Behavior.mat'],'tracking');
 end
