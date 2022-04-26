@@ -136,12 +136,63 @@ timestamps_recording = min(pulses.timestamps(:,2)):1/1250:max(pulses.timestamps(
 % pulses condition channels x durations
 [m,n] = ndgrid(pulseDuration,channels);
 conditions = [m(:),n(:)];
+
 for ii = 1:size(conditions,1)
-    conditions(ii,3) = length(find(pulses.duration==conditions(ii,1)));
+    conditions(ii,3) = length(find(pulses.duration==conditions(ii,1) & pulses.channel == conditions(ii,2)));
 end
 notEnoughtPulses = conditions(:,3)<minNumberOfPulses;
 conditions(notEnoughtPulses,:) = [];
 nConditions = size(conditions,1);
+
+%% Merge durations that are close enough to be the same pulse duration
+for i = 1:length(channels)
+    indexes{i} = find(conditions(:,2) == channels(i));
+    durations = conditions(find(conditions(:,2) == channels(i)),1);
+    index{i} = find(diff(abs(durations)) < minDuration);
+    
+end
+
+for i = 1:length(index)
+    if ~isempty(index{i})
+        for j = 1:length(index{i})
+             indexToMerge{i}(j) = find(conditions(:,3) == max(conditions(index{i}(j),3), conditions(index{i}(j)+1,3)));
+        end
+    else
+        indexToMerge{i} = [];
+    end
+end
+
+% Modify pulses.durations values
+for i = 1:length(channels)
+    if ~isempty(index{i})
+        ind = indexes{i}(index{i});
+        indToMerge = indexes{i}(indexToMerge{i});
+        for j = 1:length(ind)
+            dur = find(pulses.duration == conditions(ind(j),1) & pulses.channel == conditions(ind(j),2));
+            pulses.duration(dur) = conditions(indToMerge(j),1);
+        end
+    end
+end
+
+% Modify conditions
+for i = 1:length(channels)
+    if ~isempty(index{i})
+        ind = indexes{i}(index{i});
+        indToMerge = indexes{i}(indexToMerge{i});
+        for j = 1:length(ind)
+            conditions(indToMerge(j),3) = conditions(indToMerge(j),3) + conditions(ind(j),3);
+        end
+    end
+end
+
+% Delete the indices
+indxs = [];
+for i = 1:length(channels)
+    indxs = [indxs ;indexes{i}(index{i})];
+end
+conditions(indxs,:) = [];
+nConditions = size(conditions,1);
+
 
 if nConditions == 2
     if abs(conditions(1,1) - conditions(2,1)) < minDuration
@@ -164,6 +215,7 @@ if nConditions == 2
 end
         
 
+%%
 spikes = loadSpikes;
 % generate random events for boostraping
 disp('Generating boostrap template...');

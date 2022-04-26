@@ -62,10 +62,14 @@ end
 mkdir('SummaryFigures'); % create folder
 close all
 
+try
+    getuLEDsPulses();
+end
+
 % SPIKES SUMMARY
 if any(ismember(listOfAnalysis,'spikes'))
     try
-       spikes = loadSpikes('forceReload',true);
+       spikes = loadSpikes('forceReload',false);
        spikeFeatures();
        getAverageCCG;
        clear spikes;
@@ -78,7 +82,7 @@ end
 if any(ismember(listOfAnalysis,'analogPulses'))
     try 
         disp('Psth and CSD from analog-in inputs...');
-        pulses = getAnalogPulses;
+        pulses = getAnalogPulses('manualThr',true);
         if ~isfield(pulses,'analogChannelsList') && ~isempty(pulses)
             pulses.analogChannelsList = ones(size(pulses.amplitude))*65;
             pulses.eventGroupID = ones(size(pulses.amplitude));
@@ -170,7 +174,7 @@ if any(ismember(listOfAnalysis,'digitalPulses'))
                     end
                 end
                 saveas(gcf,['SummaryFigures\digitalPulsesCSD_ch',num2str(listOfChannel(mm)), '.png']);
-                clear pulses listOfChannel
+%                 clear pulses listOfChannel
             end
         end
 
@@ -224,7 +228,7 @@ if any(ismember(listOfAnalysis,{'digitalPulses', 'analogPulses'}))
             else
                 if ischar(digitalChannelsList) && strcmpi(digitalChannelsList,'all')
                     listOfDigitalChannel = zeros(size(digPulses.timestampsOn));
-                    for ii = 1:length(pulses.timestampsOn)
+                    for ii = 1:length(digPulses.timestampsOn)
                         listOfDigitalChannel(ii) = ~isempty(digPulses.timestampsOn{ii});
                     end
                     listOfDigitalChannel = find(listOfDigitalChannel);

@@ -56,6 +56,7 @@ addParameter(p,'medianSubstr',true);
 addParameter(p,'tracking_pixel_cm',0.1149,@isnumeric);
 addParameter(p,'sessionSummary',true,@islogical);
 addParameter(p,'digitalChannelsList',[],@isnumeric);
+addParameter(p,'bazler_ttl_channel',[],@isnumeric);
 
 % addParameter(p,'pullData',[],@isdir); To do... 
 parse(p,varargin{:});
@@ -70,7 +71,7 @@ tracking_pixel_cm = p.Results.tracking_pixel_cm;
 sessionSummary = p.Results.sessionSummary;
 digitalChannelsList = p.Results.digitalChannelsList;
 analysisPath = p.Results.analysisPath;
-
+bazler_ttl_channel = p.Results.bazler_ttl_channel;
 
 % batch processing...
 all_folders = dir(basepath);
@@ -82,7 +83,7 @@ for ii = 1:size(all_folders,1)
             if isempty(dir(['notPreprocessing.txt']))
                 disp([' * Preprocessing of ' all_folders(ii).folder filesep all_folders(ii).name]);
                 preprocessSession('basepath',pwd,'analysisPath',analysisPath,'analogChannelsList',analogChannelsList,'spikeSort',spikeSort,'getPos',getPos, 'cleanArtifacts',cleanArtifacts,...
-                    'medianSubstr',medianSubstr,'tracking_pixel_cm',tracking_pixel_cm,'sessionSummary',sessionSummary,'digitalChannelsList',digitalChannelsList);
+                    'medianSubstr',medianSubstr,'tracking_pixel_cm',tracking_pixel_cm,'sessionSummary',sessionSummary,'digitalChannelsList',digitalChannelsList,'bazler_ttl_channel',bazler_ttl_channel);
             else
                 disp(['Not to preprocess',all_folders(ii).folder filesep all_folders(ii).name]);
             end

@@ -161,9 +161,12 @@ if count > 1 % if traking
 
     % Concatenating tracking fields...
     x = []; y = []; folder = []; samplingRate = []; description = [];
+    velocity = []; acceleration = [];
     for ii = 1:size(tempTracking,2) 
         x = [x; tempTracking{ii}.position.x]; 
         y = [y; tempTracking{ii}.position.y]; 
+        velocity = [velocity; tempTracking{ii}.velocity];
+        acceleration = [acceleration; tempTracking{ii}.acceleration];
         folder{ii} = tempTracking{ii}.folder; 
         samplingRate = [samplingRate; tempTracking{ii}.samplingRate];  
         description{ii} = tempTracking{ii}.description;
@@ -176,11 +179,19 @@ if count > 1 % if traking
     tracking.timestamps = ts;
     tracking.events.subSessions =  subSessions;
     tracking.events.subSessionsMask = maskSessions;
+    % Create speed structure .mat
+    
+    speed.velocity = velocity;
+    speed.acceleration = acceleration;
+    speed.timestamps = ts;
+    speed.folders = folder;
+    
 
 
     %% save tracking 
     if saveMat
         save([basepath filesep basenameFromBasepath(basepath) '.Tracking.Behavior.mat'],'tracking');
+        save([basepath filesep basenameFromBasepath(basepath), '.Speed.events.mat'],'speed');
     end
 else
     warning('No tracking available!');

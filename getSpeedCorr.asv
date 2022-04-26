@@ -1,0 +1,283 @@
+function speedCorrs =  getSpeedCorr(basepath, varargin)
+
+p = inputParser;
+addParameter(p,'saveMat',true,@islogical);
+addParameter(p,'mkplt',true,@islogical);
+addParameter(p,'threshold',0,@isscalar);
+addParameter(p,'numQuantiles',10,@isscalar);
+addParameter(p,'fs_tracking',30,@isnumeric);
+addParameter(p,'order',2,@isnumeric);
+addParameter(p,'trials',false,@islogical);
+
+parse(p,varargin{:});
+saveMat = p.Results.saveMat;
+mkplt = p.Results.mkplt;
+threshold = p.Results.threshold;
+numQuantiles = p.Results.numQuantiles;
+fs_tracking = p.Results.fs_tracking;
+order = p.Results.order;
+trials = p.Results.trials;
+
+cd(basepath)
+basename = basenameFromBasepath(pwd);
+disp(['working on session ' basename])
+
+speedCorrs = struct();
+speedCorrs.sessionName = basename;
+
+%% Session metadata
+session = sessionTemplate(basepath);
+
+% Get behavior
+if ~isempty(dir([session.general.name,'.Behavior.mat']))
+    disp('Behavior.mat found. Loading file');
+    file = dir([session.general.name,'.Behavior.mat']);
+    load(file.name);
+end
+
+% Get Spikes
+if ~isempty(dir([session.general.name, '.spikes.cellinfo.mat']))
+    disp('Spikes.cellinfo.mat found. Loading file');
+    file = dir([[session.general.name, '.spikes.cellinfo.mat']]);
+    load(file.name);
+end
+
+% Get speed
+[~,~,~,vx,vy,ax,ay] = KalmanVel(behavior.position.x,behavior.position.y,behavior.timestamps,order);
+speed = sqrt(vx.^2 + vy.^2);
+acceleration = sqrt(ax.^2 + ay.^2);
+
+
+%% get speed score based on Spearman correlation from entire session
+speedScore= zeros(length(spikes.UID),1);
+dt =  mode(diff(behavior.timestamps));
+for j = 1:length(spikes.UID)
+    try
+        a    = Frequency(spikes.times{j},'binSize', dt,  'smooth', 10);
+        
+        valid_idx1 = InIntervals(a(:,1),behavior.trials.startPoint);
+        valid_idx2 = InIntervals(behavior.timestamps,behavior.trials.startPoint);
+        
+        valid_idx2(speed < threshold) = 0;
+        fr = a(:,2);
+        fr(~valid_idx1) = NaN;
+        vel = speed;
+        vel(~valid_idx2) = NaN;
+        
+        [n,b] = histc(behavior.timestamps, a(:,1));
+        vel(b==0) = [];
+        b(b==0) = [];
+        
+        c(:,1) = vel;
+        c(:,2) = fr(b);
+        speedScore(j) = corr(c(:,1), c(:,2), 'rows', 'complete', 'type', 'Spearman');
+        clear c;
+    catch
+        speedScore(j) = NaN;
+    end  
+end
+
+speedCorrs.speedScore = speedScore;
+%% quantile-based analysis
+
+run_time = behavior.timestamps;
+running  = speed;
+running(running<threshold) = NaN;
+
+Y        = quantileranks(running, numQuantiles);
+prc_vals = prctile(running,1:(100/numQuantiles):100);
+
+trialsNumber = size(behavior.trials.startPoint,1);
+trialType = unique(behavior.trials.visitedArm);
+
+if trials   
+    speed_val = zeros(numQuantiles,length(spikes.times),length(trialType));
+    speed_fr_corr = zeros(length(spikes.times),length(trialType));
+    ls = zeros(length(spikes.times),3,length(trialType));
+else
+    speed_val = zeros(numQuantiles,length(spikes.times),1);
+    speed_fr_corr = zeros(length(spikes.times),1);
+    ls = zeros(length(spikes.times),3);
+end
+
+for j = 1:length(spikes.times)
+    try
+         a    = Frequency(spikes.times{j},'binSize', 0.01,  'smooth', 10);% , 'limits' , [run_time(1) run_time(end)]);
+         tidx(1) = dsearchn(a(:,1), run_time(1));
+         tidx(2) = dsearchn(a(:,1), run_time(end));
+         inst_fr = a(tidx(1):tidx(2),2);
+         t       = a(tidx(1):tidx(2),1);
+        
+        if trials
+            for diri = 1:length(trialType)
+                for i = 1:length(prc_vals)
+                    tims = Y==i & behavior.masks.direction == diri-1;
+                    islands = bwconncomp(tims);
+                    epochs = zeros(length(islands.PixelIdxList),2);
+                    for k = 1:length(islands.PixelIdxList)
+                        epochs(k,1) = run_time(islands.PixelIdxList{k}(1));
+                        epochs(k,2) = run_time(islands.PixelIdxList{k}(end));
+                    end
+                    [status,~,~]       = InIntervals(t, epochs);
+                    speed_val(i, j,diri)  = nanmean(inst_fr(status));
+                end
+            end
+
+            speed_fr_corr(j,1) = corr(prc_vals',  speed_val(:,j,1), 'rows', 'complete', 'type', 'Spearman');
+            speed_fr_corr(j,2) = corr(prc_vals',  speed_val(:,j,2), 'rows', 'complete', 'type', 'Spearman');
+            b1 = polyfit(prc_vals, speed_val(:,j,1), 2);
+            b2 = polyfit(prc_vals, speed_val(:,j,2), 2);
+    %             b1 = [ones(length(prc_vals),1) prc_vals' (prc_vals').^2]\speed_val(:,j,1);
+    %             b2 = [ones(length(prc_vals),1) prc_vals' (prc_vals').^2]\speed_val(:,j,2);
+            ls(j,1,1) = b1(3);
+            ls(j,2,1) = b1(2);
+            ls(j,3,1) = b1(1);
+            ls(j,1,2) = b2(3);
+            ls(j,2,2) = b2(2);
+            ls(j,3,2) = b2(1);
+        else
+            for i = 1:length(prc_vals)
+                tims = Y==i;
+                islands = bwconncomp(tims);
+                epochs = zeros(length(islands.PixelIdxList),2);
+                for k = 1:length(islands.PixelIdxList)
+                    epochs(k,1) = run_time(islands.PixelIdxList{k}(1));
+                    epochs(k,2) = run_time(islands.PixelIdxList{k}(end));
+                end
+                [status,~,~]       = InIntervals(t, epochs);
+                speed_val(i, j)  = nanmean(inst_fr(status));
+            end
+            speed_fr_corr(j) = corr(prc_vals',speed_val(:,j), 'rows', 'complete', 'type', 'Spearman');
+            b1 = polyfit(prc_vals, speed_val(:,j), 2);
+            ls(j,1) = b1(3);
+            ls(j,2) = b1(2);
+            ls(j,3) = b1(1);
+        end
+    catch
+        disp(['problem with cell ' num2str(i)])
+    end
+end
+
+if mkplt
+    mkdir('speed_corrs')
+
+    for i = 1:length(spikes.times)
+        try
+            if trials
+                figure
+                subplot(121)
+                scatter(prc_vals', speed_val(:,i,1), 'k')
+                hold on
+                plot(prc_vals', [ones(length(prc_vals'),1) prc_vals' (prc_vals').^2]*ls(i,:,1)', '--k')
+                axis square
+                title(['inbound trials r = ' num2str(speed_fr_corr(i,1))])
+                xlabel('speed [cm/s]')
+                ylabel('FR [Hz]')
+                subplot(122)
+                scatter(prc_vals', speed_val(:,i,2), 'r')
+                hold on
+                plot(prc_vals', [ones(length(prc_vals'),1) prc_vals' (prc_vals').^2]*ls(i,:,2)', '--r')
+                axis square
+                title(['outbound trials r = ' num2str(speed_fr_corr(i,2))])
+                sgtitle(['speed correlation cell ' num2str(i) ' shank ' num2str(spikes.shankID(i)) ...
+                    ' speed score: ' num2str(speedScore(i)) ])
+                xlabel('speed [cm/s]')
+                ylabel('FR [Hz]')
+                saveas(gcf, [pwd filesep 'speed_corrs' filesep 'Cell_' num2str(i) '.jpg']);
+                close
+            else
+                figure,
+                scatter(prc_vals',speed_val(:,i),'k');
+                hold on
+                plot(prc_vals', [ones(length(prc_vals'),1) prc_vals' (prc_vals').^2]*ls(i,:)', '--k')
+                axis square
+                title(['Whole Recording r = ' num2str(speed_fr_corr(i,1))])
+                xlabel('speed [cm/s]')
+                ylabel('FR [Hz]')
+                sgtitle(['speed correlation cell ' num2str(i) ' shank ' num2str(spikes.shankID(i)) ...
+                    ' speed score: ' num2str(speedScore(i)) ])
+                xlabel('speed [cm/s]')
+                ylabel('FR [Hz]')
+                saveas(gcf, [pwd filesep 'speed_corrs' filesep 'Cell_' num2str(i) '.jpg']);
+            end
+        catch
+            disp(['problem with cell ' num2str(i)])
+        end
+    end
+
+    figure, hold on
+    colors = {'m','r', 'c','g','b','k'};
+    for shanki = 1:size(session.extracellular.electrodeGroups.channels,2)
+        try
+            plot(prc_vals', smoothdata(speed_val(:,[spikes.shankID == shanki]),1, 'gaussian',5), colors{shanki})
+        catch
+            disp(['no cells on shank ' num2str(shanki) ' to display'])
+        end
+    end
+    xlim([prc_vals(1) prc_vals(end)])
+    axis square
+    xlabel('speed [cm/s]')
+    ylabel('FR [Hz]')
+    saveas(gcf, [pwd filesep 'speed_corrs' filesep 'all_cells.jpg']);
+    close
+end
+
+speedCorrs.speedVals     = speed_val;
+speedCorrs.prc_vals      = prc_vals;
+speedCorrs.corrCoeff     = speed_fr_corr;
+speedCorrs.leastSquares  = ls;
+
+if saveMat
+    save([basename, '.speedCorrs.mat'], 'speedCorrs');
+end
+%% Rate map for speed bins
+close all
+speed_val = speed_val';
+
+zscore_speedVal = zscore(speed_val,[],2);
+figure,
+subplot(1,2,1)
+imagesc([1 size(speed_val,2)] , [1 size(speed_val,1)], speed_val); caxis([0 10])
+colormap(jet(15))
+subplot(1,2,2)
+imagesc([1 size(zscore_speedVal,2)], [1 size(zscore_speedVal,1)], zscore_speedVal); caxis([-3 3]);
+colormap(jet(15));
+
+[M,I] = (max(zscore_speedVal,[],2));
+[A,B] = sort(I);
+zscore_speedVal_sorted = zeros(size(zscore_speedVal,1), size(zscore_speedVal,2));
+speedVal_sorted = zeros(size(speed_val,1), size(speed_val,2));
+for i = 1:size(zscore_speedVal,1)
+    zscore_speedVal_sorted(i,:) =  zscore_speedVal(B(i),:);
+    speedVal_sorted(i,:) = speed_val(B(i),:);
+end
+
+figure,
+subplot(1,2,1)
+imagesc([1 size(speedVal_sorted,2)] , [1 size(speedVal_sorted,1)], speedVal_sorted); caxis([0 10])
+colormap(jet(15))
+subplot(1,2,2)
+for i = 1:size(zscore_speedVal_sorted,1)
+    zscore_speedVal_sorted_smoothed(i,:) = smooth(zscore_speedVal_sorted(i,:))';
+end
+imagesc([1 size(zscore_speedVal_sorted,2)], [1 size(zscore_speedVal_sorted,1)], zscore_speedVal_sorted_smoothed); caxis([-3 3]);
+colormap(jet(15)); 
+
+figure,
+for jj = 1:size(speed_val,1)
+    subplot(7,ceil(size(speedVal_sorted,1)/7),jj);
+    plot(speed_val(jj,:));
+end
+% Speed rate sorted
+figure,
+for jj = 1:size(speedVal_sorted,1)
+    subplot(7,ceil(size(speedVal_sorted,1)/7),jj);
+    plot(speedVal_sorted(jj,:));
+end
+    
+    
+
+
+if saveMat
+    save([basename '.speedCorrs.mat'],'speedCorrs');
+end
