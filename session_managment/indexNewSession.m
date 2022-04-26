@@ -109,6 +109,10 @@ cd(basepath)
 try
     session = loadSession(basepath);
     session.channels = 1:session.extracellular.nChannels;
+    
+    if ~isfield(session, 'analysisTags')
+        session.analysisTags = [];
+    end
     if ~isfield(session.analysisTags,'digital_optogenetic_channels')
         session.analysisTags.digital_optogenetic_channels = digitalChannelsList;
     end
