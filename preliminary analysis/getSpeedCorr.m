@@ -7,7 +7,8 @@ addParameter(p,'threshold',0,@isscalar);
 addParameter(p,'numQuantiles',10,@isscalar);
 addParameter(p,'fs_tracking',30,@isnumeric);
 addParameter(p,'order',2,@isnumeric);
-addParameter(p,'trials',false,@islogical);
+addParameter(p,'trials',true,@islogical);
+addParameter(p,'plt',true,@islogical);
 
 parse(p,varargin{:});
 saveMat = p.Results.saveMat;
@@ -17,6 +18,7 @@ numQuantiles = p.Results.numQuantiles;
 fs_tracking = p.Results.fs_tracking;
 order = p.Results.order;
 trials = p.Results.trials;
+plt = p.Results.plt;
 
 cd(basepath)
 basename = basenameFromBasepath(pwd);
@@ -160,7 +162,6 @@ end
 
 if mkplt
     mkdir('speed_corrs')
-
     for i = 1:length(spikes.times)
         try
             if trials
@@ -222,27 +223,116 @@ if mkplt
     close
 end
 
+
+if plt
+    % Rate map and field for each trial type unsorted
+    if trials
+        figure,
+        for i = 1:length(trialType)
+            speed_values = speed_val(:,:,i)';
+            zscore_speedVal = zscore(speed_values,[],2);
+            for jj = 1:size(zscore_speedVal,1)
+                zscore_speedVal_smoothed(jj,:) = smooth(zscore_speedVal(jj,:))';
+            end
+            subplot(2,2,i)
+            imagesc([1 size(speed_values,2)] , [1 size(speed_values,1)], speed_values); caxis([0 10])
+            colormap(jet(15)), 
+            if i == 1
+                title('Left trials Rate [0 to 10 Hz]');
+            else
+                title('Right trials Rate [0 to 10 Hz]');
+            end
+            subplot(2,2,i+2)
+            imagesc([1 size(zscore_speedVal_smoothed,2)], [1 size(zscore_speedVal_smoothed,1)], zscore_speedVal_smoothed); caxis([-3 3]);
+            colormap(jet(15)); 
+            if i == 1
+                title('Left trials Z Rate [-3 to 3 SD]')
+            else
+                title('Right trials Z Rate [-3 to 3 SD]');
+            end
+        end
+        saveas(gcf, [session.general.basePath filesep 'SummaryFigures' filesep 'Speed Rate Map per Trial_unsorted.png']);
+        
+        % Rate map and field for each trial type sorted by each trial type
+        figure,
+        for i = 1:length(trialType)
+            speed_values = speed_val(:,:,i)';
+            zscore_speedVal = zscore(speed_values,[],2);
+            [M,I] = (max(zscore_speedVal,[],2));
+            [A,B] = sort(I);
+            zscore_speedVal_sorted = zeros(size(zscore_speedVal,1), size(zscore_speedVal,2));
+            speedVal_sorted = zeros(size(speed_values,1), size(speed_values,2));
+            for jj = 1:size(zscore_speedVal,1)
+                zscore_speedVal_sorted(jj,:) =  zscore_speedVal(B(jj),:);
+                speedVal_sorted(jj,:) = speed_values(B(jj),:);
+            end
+            
+            subplot(2,2,i)
+            imagesc([1 size(speedVal_sorted,2)] , [1 size(speedVal_sorted,1)], speedVal_sorted); caxis([0 10])
+            colormap(jet(15))
+            if i == 1
+                title('Left trials Rate [0 to 10 Hz]');
+            else
+                title('Right trials Rate [0 to 10 Hz]');
+            end
+            subplot(2,2,i+2)
+            for i = 1:size(zscore_speedVal_sorted,1)
+                zscore_speedVal_sorted_smoothed(i,:) = smooth(zscore_speedVal_sorted(i,:))';
+            end
+            imagesc([1 size(zscore_speedVal_sorted,2)], [1 size(zscore_speedVal_sorted,1)], zscore_speedVal_sorted_smoothed); caxis([-3 3]);
+            colormap(jet(15)); 
+            if i == 1
+                title('Left trials Z Rate [-3 to 3 SD]')
+            else
+                title('Right trials Z Rate [-3 to 3 SD]');
+            end
+        end
+        saveas(gcf, [session.general.basePath filesep 'SummaryFigures' filesep 'Speed Rate Map per Trial_sorted.png']);
+        
+        figure,
+        for i = 1:length(trialType)
+            speed_values = speed_val(:,:,i)';
+            zscore_speedVal = zscore(speed_values,[],2);
+            if i == 1
+                [M,I] = (max(zscore_speedVal,[],2));
+                [A,B] = sort(I);
+            end
+            zscore_speedVal_sorted = zeros(size(zscore_speedVal,1), size(zscore_speedVal,2));
+            speedVal_sorted = zeros(size(speed_values,1), size(speed_values,2));
+            for jj = 1:size(zscore_speedVal,1)
+                zscore_speedVal_sorted(jj,:) =  zscore_speedVal(B(jj),:);
+                speedVal_sorted(jj,:) = speed_values(B(jj),:);
+            end
+            
+            subplot(2,2,i)
+            imagesc([1 size(speedVal_sorted,2)] , [1 size(speedVal_sorted,1)], speedVal_sorted); caxis([0 10])
+            colormap(jet(15))
+            if i == 1
+                title('Left trials Rate [0 to 10 Hz]');
+            else
+                title('Right trials Rate [0 to 10 Hz]');
+            end
+            subplot(2,2,i+2)
+            for i = 1:size(zscore_speedVal_sorted,1)
+                zscore_speedVal_sorted_smoothed(i,:) = smooth(zscore_speedVal_sorted(i,:))';
+            end
+            imagesc([1 size(zscore_speedVal_sorted,2)], [1 size(zscore_speedVal_sorted,1)], zscore_speedVal_sorted_smoothed); caxis([-3 3]);
+            colormap(jet(15)); 
+            if i == 1
+                title('Left trials Z Rate [-3 to 3 SD]')
+            else
+                title('Right trials Z Rate [-3 to 3 SD]');
+            end
+        end
+        saveas(gcf, [session.general.basePath filesep 'SummaryFigures' filesep 'Speed Rate Map per Trial_sorted by left trial.png']);
+    else
+    end
+end
 speedCorrs.speedVals     = speed_val;
 speedCorrs.prc_vals      = prc_vals;
 speedCorrs.corrCoeff     = speed_fr_corr;
 speedCorrs.leastSquares  = ls;
 
 if saveMat
-    save([basename, '.speedCorrs.mat'], 'speedCorrs');
-end
-%% Rate map for speed bins
-close all
-figure,
-for i = 1:size(speed_val,3)
-    subplot(size(speed_val,3),1,i);
-    imagesc([prc_vals(1) prc_vals(end)], [1 size(speed_val,2)], zscore(speed_val(:,:,i)')); caxis([-3 3]); colormap(jet);
-    set(gca,'TickDir','out'); 
-end
-
-
-
-
-
-if saveMat
-    save([basename '.speedCorrs.mat'],'speedCorrs');
+    save([basename, '.speedCorrs.cellinfo.mat'], 'speedCorrs');
 end

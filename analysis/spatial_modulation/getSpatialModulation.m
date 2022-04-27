@@ -48,10 +48,10 @@ force = p.Results.force;
 prevPath = pwd;
 cd(basepath);
 
-filename = basenameFromBasepath;
-if ~isempty(dir([basenameFromBasepath '.spatialModulation.cellinfo.mat'])) && ~force
+filename = basenameFromBasepath(pwd);
+if ~isempty(dir([basenameFromBasepath(pwd) '.spatialModulation.cellinfo.mat'])) && ~force
     disp('Spatial modulation already computed! Loading file');
-    file =dir([basenameFromBasepath '.spatialModulation.cellinfo.mat']);
+    file =dir([basenameFromBasepath(pwd) '.spatialModulation.cellinfo.mat']);
     load(file.name);
     return
 end
@@ -65,8 +65,8 @@ if isempty(spikes)
 end
 
 if isempty(firingMaps)
-    if exist([basenameFromBasepath '.firingMapsAvg.cellinfo.mat']) == 2
-        load([basenameFromBasepath '.firingMapsAvg.cellinfo.mat']);
+    if exist([basenameFromBasepath(pwd) '.firingMapsAvg.cellinfo.mat']) == 2
+        load([basenameFromBasepath(pwd) '.firingMapsAvg.cellinfo.mat']);
     else
         try
             firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',false);
@@ -77,8 +77,8 @@ if isempty(firingMaps)
 end
 
 if isempty(placeFieldStats)
-    if exist([basenameFromBasepath '.placeFields.cellinfo.mat']) == 2
-        load([basenameFromBasepath '.placeFields.cellinfo.mat']);
+    if exist([basenameFromBasepath(pwd) '.placeFields.cellinfo.mat']) == 2
+        load([basenameFromBasepath(pwd) '.placeFields.cellinfo.mat']);
     else
         try
             placeFieldStats = bz_findPlaceFields1D('firingMaps',firingMaps,'maxSize',.75,'sepEdge',0.03); %
@@ -185,7 +185,7 @@ for jj = 1:length(firingTrialsMap.raster_rate{1})
 end
 
 if saveMat
-    save([basenameFromBasepath '.spatialModulation.cellinfo.mat'],'spatialModulation'); 
+    save([basenameFromBasepath(pwd) '.spatialModulation.cellinfo.mat'],'spatialModulation'); 
 end
 
 cd(prevPath);
