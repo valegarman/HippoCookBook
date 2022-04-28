@@ -77,12 +77,15 @@ batch_preprocessSession('basepath','J:\fPv4','analysisPath','C:\data\fPv4','clea
 %% fCamk7
 preprocessSession('basepath','J:\fCamk7\fCamk7_220420_sess16','exclude','analogPulses','analogChannelsList',[],'digitalChannelsList',[1 2 6],'bazler_ttl_channel',10);
 
-updateExpFolder({'Y:\fCamk7','T:\','X:\fCamk7'},'J:\fCamk7');
+
+batch_preprocessSession('basepath','J:\fCamk7','cleanArtifacts',({[],[1 2 6]}),'analogChannelsList',[],'digitalChannelsList',[1 2 6],'bazler_ttl_channel',1);
 
 preprocessSession('basepath','J:\fCamk7\fCamk7_220418_sess14','analogChannelsList',[],'digitalChannelsList',[1 2 6],'bazler_ttl_channel',10,'getPos',false);
 preprocessSession('basepath','J:\fCamk7\fCamk7_220419_sess15','analogChannelsList',[],'digitalChannelsList',[1 2 6],'bazler_ttl_channel',10,'getPos',false);
-preprocessSession('basepath','J:\fCamk7\fCamk7_220421_sess17','analogChannelsList',[],'digitalChannelsList',[1 2 6],'bazler_ttl_channel',10,'getPos',false);
-preprocessSession('basepath','J:\fCamk7\fCamk7_220422_sess18','analogChannelsList',[],'digitalChannelsList',[1 2 6],'bazler_ttl_channel',10,'getPos',false);
+
+updateExpFolder({'Y:\fCamk7','T:\fCamk7','X:\fCamk7'},'J:\fCamk7');
+preprocessSession('basepath','J:\fCamk7\fCamk7_220421_sess17','cleanArtifacts',({[],[1 2 6]}),'analogChannelsList',[],'digitalChannelsList',[1 2 6],'bazler_ttl_channel',10,'getPos',false);
+preprocessSession('basepath','J:\fCamk7\fCamk7_220422_sess18','cleanArtifacts',({[],[1 2 6]}),'analogChannelsList',[],'digitalChannelsList',[1 2 6],'bazler_ttl_channel',10,'getPos',false);
 
 
 computeSessionSummary('basepath','J:\fCamk7\fCamk7_220418_sess14','exclude',{'analogPulses'},'analogChannelsList',[],'digitalChannelsList',[1 2 6]);
@@ -94,6 +97,9 @@ computeSessionSummary('basepath','J:\fCamk7\fCamk7_220422_sess18','exclude',{'an
 
 
 
+computeSessionSummary('basepath','Z:\data\fCck1\fCck1_220302_sess23','analogChannelsList',[],'digitalChannelsList',[1]);
+computeSessionSummary('basepath','Z:\data\fCck1\fCck1_220303_sess24','analogChannelsList',[],'digitalChannelsList',[1]);
+computeSessionSummary('basepath','Z:\data\fCck1\fCck1_220304_sess25','analogChannelsList',[],'digitalChannelsList',[1]);
 
 
 
