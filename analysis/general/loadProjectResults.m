@@ -33,7 +33,9 @@ if loadLast
     projectFiles = dir([analysis_project_path filesep '*' project '.mat']);
     if ~isempty(dir([analysis_project_path filesep '*' project '.mat']))
         disp('Loading data...');
-        load(projectFiles.name);
+        last_saved_data = projectFiles(end).name;
+        
+        load([projectFiles(end).folder filesep projectFiles(end).name]);
         return
     else
         warning('Not possible to reload project. Loading data from sessions...');
@@ -77,6 +79,8 @@ fprintf('Loading %3.i sessions... \n',length(sessions.basepaths)); %\n
 
 %% load cellexplorer results
 cell_metrics = loadCellMetricsBatch('basepaths',sessions.basepaths);
+cell_metrics = CellExplorer('metrics',cell_metrics);% run CELLEXPLORER when adding new data
+disp('Close when done exploring...');
 
 %% collect data per session
 projectSessionResults = [];
@@ -147,11 +151,19 @@ for ii = 1:length(sessions.basepaths)
         projectSessionResults.SWMod{ii} = NaN;
     end
     
+    % ripple phase_locking
+    try targetFile = dir('*.ripple*PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+        projectSessionResults.rippleMod{ii} = rippleMod;
+        clear rippleMod
+    catch
+        projectSessionResults.rippleMod{ii} = NaN;
+    end
+    
     % spatial modulation
     try spatialModulation = getSpatialModulation;
         
         projectSessionResults.spatialModulation{ii} = spatialModulation;
-        clear hgammaMod
+        clear spatialModulation
     catch
         projectSessionResults.spatialModulation{ii} = NaN;
     end
@@ -187,8 +199,10 @@ projectResults.averageCCG = stackSessionResult(projectSessionResults.averageCCG,
 projectResults.thetaModulation = stackSessionResult(projectSessionResults.thetaModulation, projectSessionResults.numcells);
 projectResults.lGammaModulation = stackSessionResult(projectSessionResults.lGammaModulation, projectSessionResults.numcells);
 projectResults.hGammaModulation = stackSessionResult(projectSessionResults.hGammaModulation, projectSessionResults.numcells);
+projectResults.ripplePhaseModulation = stackSessionResult(projectSessionResults.rippleMod, projectSessionResults.numcells);
 projectResults.behavior = stackSessionResult(projectSessionResults.behavior, projectSessionResults.numcells);
 projectResults.spatialModulation = stackSessionResult(projectSessionResults.spatialModulation, projectSessionResults.numcells);
+projectResults.cell_metrics = cell_metrics;
 
 % session, genetic line, experimentalSubject
 counCell = 1;
