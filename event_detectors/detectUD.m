@@ -246,7 +246,9 @@ for ii = 1:length(upPeaks)                                                 % fin
     uw = envGammFilt(upPeaks(ii)*session.extracellular.srLfp-win:upPeaks(ii)*session.extracellular.srLfp+win);
     zx = zci(uw);
     UP(ii,1) = double(max(zx(zx<win)) + upPeaks(ii)*session.extracellular.srLfp - win - 1)/ session.extracellular.srLfp;
-    UP(ii,2) = double(min(zx(zx>win)) + upPeaks(ii)*session.extracellular.srLfp - win - 1)/ session.extracellular.srLfp;
+    if isempty(min(zx(zx>win)))
+        UP(ii,2) = double(max(zx(zx<win)) + upPeaks(ii)*session.extracellular.srLfp - win - 1)/ session.extracellular.srLfp + 0.1;
+    end
 end
 
 %% Spike thresholding
