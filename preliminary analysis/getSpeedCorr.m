@@ -276,8 +276,8 @@ if plt
                 title('Right trials Rate [0 to 10 Hz]');
             end
             subplot(2,2,i+2)
-            for i = 1:size(zscore_speedVal_sorted,1)
-                zscore_speedVal_sorted_smoothed(i,:) = smooth(zscore_speedVal_sorted(i,:))';
+            for jj = 1:size(zscore_speedVal_sorted,1)
+                zscore_speedVal_sorted_smoothed(jj,:) = smooth(zscore_speedVal_sorted(jj,:))';
             end
             imagesc([1 size(zscore_speedVal_sorted,2)], [1 size(zscore_speedVal_sorted,1)], zscore_speedVal_sorted_smoothed); caxis([-3 3]);
             colormap(jet(15)); 
@@ -313,8 +313,8 @@ if plt
                 title('Right trials Rate [0 to 10 Hz]');
             end
             subplot(2,2,i+2)
-            for i = 1:size(zscore_speedVal_sorted,1)
-                zscore_speedVal_sorted_smoothed(i,:) = smooth(zscore_speedVal_sorted(i,:))';
+            for jj = 1:size(zscore_speedVal_sorted,1)
+                zscore_speedVal_sorted_smoothed(jj,:) = smooth(zscore_speedVal_sorted(jj,:))';
             end
             imagesc([1 size(zscore_speedVal_sorted,2)], [1 size(zscore_speedVal_sorted,1)], zscore_speedVal_sorted_smoothed); caxis([-3 3]);
             colormap(jet(15)); 

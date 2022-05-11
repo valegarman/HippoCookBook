@@ -30,7 +30,7 @@ for ii = 1:length(sessions.basepaths)
         %%% your code goes here...
         spatialModulation = getSpatialModulation('force',true);
         %%%
-        
+%         speedCorr = getSpeedCorr(pwd,'numQuantiles',20);
         close all;
     catch
         warning('Analysis was not possible!');

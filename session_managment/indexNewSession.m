@@ -47,6 +47,7 @@ addParameter(p,'copyFiles',true,@islogical);
 addParameter(p,'copyPath',[],@isdir);
 addParameter(p,'bazler_ttl_channel',[],@isnumeric);
 addParameter(p,'forceAnalogPulses',false,@islogical);
+addParameter(p,'tracking_pixel_cm',0.1149,@isnumeric);
 
 parse(p,varargin{:})
 
@@ -73,6 +74,7 @@ copyFiles = p.Results.copyFiles;
 copyPath = p.Results.copyPath;
 bazler_ttl_channel = p.Results.bazler_ttl_channel;
 forceAnalogPulses = p.Results.forceAnalogPulses;
+tracking_pixel_cm = p.Results.tracking_pixel_cm;
 
 %% Creates a pointer to the folder where the index variable is located
 if isempty(indexedProjects_name)
@@ -235,7 +237,9 @@ try
     save([basenameFromBasepath(pwd) '.behavior.cellinfo.mat'],'behavior');
 end
 
-%% 13. Indexing
+%% 13. Speed Score
+speedCorr = getSpeedCorr(basepath,'numQuantiles',20);
+%% 14. Indexing
 % session = sessionTemplate(basepath,'showGUI',false);
 session = loadSession(basepath);
 generalPath = [session.animal.name,'\',session.general.name];
