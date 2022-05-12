@@ -138,8 +138,13 @@ updateExpFolder({'Y:\fCamk7','T:\fCamk7'},'J:\fCamk7');
 
 editDatFile(pwd,[0 839]);
 
-
+%% fId2
 updateExpFolder('V:\data\fId2','Z:\data\fId2');
-batch_preprocessSession('basepath','Z:\data\fId2','analysisPath','C:\data\fId2','cleanArtifacts',({[],[1]}),'analogChannelsList',[],'digitalChannelsList',1,'bazler_ttl_channel',1);
-computeSessionSummary('basepath','Z:\data\fId2\fId2_220510_sess1','analogChannelsList',[],'digitalChannelsList',1);
+batch_preprocessSession('basepath','Z:\data\fId2','analysisPath','C:\data\fId2','cleanArtifacts',({[],[1]}),'analogChannelsList',[],'digitalChannelsList',1,'bazler_ttl_channel',10);
+% computeSessionSummary('basepath','Z:\data\fId2\fId2_220510_sess1','analogChannelsList',[],'digitalChannelsList',1);
+
+%% fVIP1
+updateExpFolder('V:\data\fVIP1','Z:\data\fVIP1');
+batch_preprocessSession('basepath','Z:\data\fVIP1','analysisPath','C:\data\fVIP1','cleanArtifacts',({[],[1]}),'analogChannelsList',[],'digitalChannelsList',1,'bazler_ttl_channel',10);
+
 
