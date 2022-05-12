@@ -248,6 +248,8 @@ speedCorr = getSpeedCorr(basepath,'numQuantiles',20);
 session = loadSession(basepath);
 generalPath = [session.animal.name,'\',session.general.name];
 sessionName = session.general.name;
+
+project = session.general.projects;
 % updated indexedSession table
 sessionsTable = readtable([indexedProjects_path filesep indexedProjects_name,'.csv']); % the variable is called allSessions
 % new table entry
@@ -287,10 +289,11 @@ sessionEntry = cell2table(sessionEntry,"VariableNames",["SessionName", "Subject"
 sessionsTable = [sessionsTable; sessionEntry];
 writetable(sessionsTable,[indexedProjects_path filesep indexedProjects_name,'.csv']); % the variable is called allSessions
 
+
 % Lets do a push for git repository
 cd(indexedProjects_path);
 % Git add variable to the repository
-commandToExecute = ['git add ', indexedProjects_name,'.mat']
+commandToExecute = ['git add ', indexedProjects_name,'.csv']
 system(commandToExecute);
 % Git Commit
 commentToCommit = ['Added Session: ' session.general.name];
