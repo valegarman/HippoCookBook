@@ -83,15 +83,15 @@ if isempty(indexedProjects_name)
     error('Need to provide the name of the index Project variable');
 end
 if isempty(indexedProjects_path)
-    warning('Not included the path where the indexed Projects .mat variable is located. Trying to find it...');
-    indexedProjects_path = fileparts(which([indexedProjects_name,'.mat']));
+    warning('Not included the path where the indexed Projects .csv variable is located. Trying to find it...');
+    indexedProjects_path = fileparts(which([indexedProjects_name,'.csv']));
     if isempty(indexedProjects_path)
         disp('No indexed Projects .mat file found. Lets create one !' );
         directory = what(hippoCookBook_path);
         cd(directory.path);
         allSessions = [];
         save([indexedProjects_name,'.mat'],'allSessions');
-        indexedProjects_path = fileparts(which([indexedProjects_name,'.mat']));
+        indexedProjects_path = fileparts(which([indexedProjects_name,'.csv']));
     end
 end
 
