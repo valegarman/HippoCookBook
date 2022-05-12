@@ -248,28 +248,44 @@ speedCorr = getSpeedCorr(basepath,'numQuantiles',20);
 session = loadSession(basepath);
 generalPath = [session.animal.name,'\',session.general.name];
 sessionName = session.general.name;
-load([indexedProjects_path filesep indexedProjects_name,'.mat']); % the variable is called allSessions
-allSessions.(sessionName).path = generalPath;
-allSessions.(sessionName).name = session.animal.name;
-allSessions.(sessionName).strain = session.animal.strain;
-allSessions.(sessionName).geneticLine = session.animal.geneticLine;
-allSessions.(sessionName).brainRegions = session.brainRegions;
-if isfield(session.animal,'opticFiberImplants')
-    for i = 1:length(session.animal.opticFiberImplants)
-        allSessions.(sessionName).optogenetics{i} = session.animal.opticFiberImplants{i}.opticFiber;
-    end
-else
-    allSessions.(sessionName).optogenetics = NaN;
+% updated indexedSession table
+sessionsTable = readtable([indexedProjects_path filesep indexedProjects_name,'.csv']); % the variable is called allSessions
+% new table entry
+
+optogenetics = cell(0);
+for ii = 1:length(session.animal.opticFiberImplants)
+    optogenetics{1, length(optogenetics)+1} = session.animal.opticFiberImplants{ii}.opticFiber;
+    optogenetics{1, length(optogenetics)+1} = ' ';
 end
-behav = NaN;
+optogenetics(end) = [];
+
+behav = cell(0); 
 for i = 1:length(session.epochs)
     if strcmpi(session.epochs{i}.behavioralParadigm, 'Maze')
-        behav = [behav session.epochs{i}.environment];
+        behav{1, length(behav)+1} = lower(session.epochs{i}.environment);
+        behav{1, length(behav)+1} = ' ';
     end
 end
-allSessions.(sessionName).behav = behav;
-allSessions.(sessionName).project = session.general.projects;
-save([indexedProjects_path filesep indexedProjects_name,'.mat'],'allSessions');
+behav(end) = [];
+if isempty(behav)
+    behav{1,1} = 'no';
+end
+
+spikes = loadSpikes;
+
+fn = fieldnames(session.brainRegions);
+brainRegions = cell(0);
+for jj = 1:length(fn)
+    brainRegions{1,length(brainRegions)+1} = fn{jj};
+    brainRegions{1,length(brainRegions)+1} = ' ';
+end    
+brainRegions(end) = [];
+
+sessionEntry = {lower(sessionName), lower(session.animal.name), lower(generalPath), lower(session.animal.strain),...
+    lower(session.animal.geneticLine), [optogenetics{:}], [behav{:}], spikes.numcells,  [brainRegions{:}], project};
+sessionEntry = cell2table(sessionEntry,"VariableNames",["SessionName", "Subject", "Path", "Strain", "GeneticLine", "Optogenetics", "Behavior", "numCells", "brainRegions", "Project"]);
+sessionsTable = [sessionsTable; sessionEntry];
+writetable(sessionsTable,[indexedProjects_path filesep indexedProjects_name,'.csv']); % the variable is called allSessions
 
 % Lets do a push for git repository
 cd(indexedProjects_path);
