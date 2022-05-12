@@ -36,6 +36,7 @@ addParameter(p,'hippoCookBook_path','HippoCookBook',@isstring);
 addParameter(p,'force_analogPulsesDetection',true,@islogical);
 addParameter(p,'force_loadingSpikes',true,@islogical);
 addParameter(p,'excludeManipulationIntervals',[],@isnumeric);
+addParameter(p,'rippleChannel',[],@isnumeric);% manually selecting ripple Channel in case getHippocampalLayers does not provide a right output
 addParameter(p,'SWChannel',[],@isnumeric); % manually selecting SW Channel in case getHippocampalLayers does not provide a right output
 addParameter(p,'digitalChannelsList',[],@isnumeric);
 addParameter(p,'analogChannelsList',[],@isnumeric);
@@ -63,6 +64,7 @@ hippoCookBook_path = p.Results.hippoCookBook_path;
 force_analogPulsesDetection = p.Results.force_analogPulsesDetection;
 force_loadingSpikes = p.Results.force_loadingSpikes;
 excludeManipulationIntervals = p.Results.excludeManipulationIntervals;
+rippleChannel = p.Results.rippleChannel;
 SWChannel = p.Results.SWChannel;
 digitalChannelsList = p.Results.digitalChannelsList;
 analogChannelsList = p.Results.analogChannelsList;
@@ -183,7 +185,7 @@ UDStates = detectUD('plotOpt', true,'forceDetect',true','NREMInts','all');
 psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true);
 
 % 8.2 Ripples
-ripples = rippleMasterDetector('SWChannel',SWChannel,'force',true);
+ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true);
 psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true);
 
 % 8.3 Theta intervals
@@ -208,6 +210,8 @@ cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeM
 
 %% 11. Spatial modulation
 try
+    getSessionTracking('convFact',tracking_pixel_cm,'roiTracking','manual');
+    getSessionArmChoice('task','alternation');
     behaviour = getSessionLinearize('forceReload',false);  
     firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',true);
     placeFieldStats = bz_findPlaceFields1D('firingMaps',firingMaps,'maxSize',.75,'sepEdge',0.03); %% ,'maxSize',.75,'sepEdge',0.03

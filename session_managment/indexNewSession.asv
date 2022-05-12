@@ -36,6 +36,10 @@ addParameter(p,'hippoCookBook_path','HippoCookBook',@isstring);
 addParameter(p,'force_analogPulsesDetection',true,@islogical);
 addParameter(p,'force_loadingSpikes',true,@islogical);
 addParameter(p,'excludeManipulationIntervals',[],@isnumeric);
+<<<<<<< HEAD
+=======
+addParameter(p,'rippleChannel',[],@isnumeric);% manually selecting ripple Channel in case getHippocampalLayers does not provide a right output
+>>>>>>> 634ec502ef7684d936673a7638ffcaad0b94d2dd
 addParameter(p,'SWChannel',[],@isnumeric); % manually selecting SW Channel in case getHippocampalLayers does not provide a right output
 addParameter(p,'digitalChannelsList',[],@isnumeric);
 addParameter(p,'analogChannelsList',[],@isnumeric);
@@ -63,6 +67,10 @@ hippoCookBook_path = p.Results.hippoCookBook_path;
 force_analogPulsesDetection = p.Results.force_analogPulsesDetection;
 force_loadingSpikes = p.Results.force_loadingSpikes;
 excludeManipulationIntervals = p.Results.excludeManipulationIntervals;
+<<<<<<< HEAD
+=======
+rippleChannel = p.Results.rippleChannel;
+>>>>>>> 634ec502ef7684d936673a7638ffcaad0b94d2dd
 SWChannel = p.Results.SWChannel;
 digitalChannelsList = p.Results.digitalChannelsList;
 analogChannelsList = p.Results.analogChannelsList;
@@ -183,7 +191,11 @@ UDStates = detectUD('plotOpt', true,'forceDetect',true','NREMInts','all');
 psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true);
 
 % 8.2 Ripples
+<<<<<<< HEAD
 ripples = rippleMasterDetector('SWChannel',SWChannel,'force',true);
+=======
+ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true);
+>>>>>>> 634ec502ef7684d936673a7638ffcaad0b94d2dd
 psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true);
 
 % 8.3 Theta intervals
@@ -208,6 +220,11 @@ cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeM
 
 %% 11. Spatial modulation
 try
+<<<<<<< HEAD
+=======
+    getSessionTracking('convFact',tracking_pixel_cm,'roiTracking','manual');
+    getSessionArmChoice('task','alternation');
+>>>>>>> 634ec502ef7684d936673a7638ffcaad0b94d2dd
     behaviour = getSessionLinearize('forceReload',false);  
     firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',true);
     placeFieldStats = bz_findPlaceFields1D('firingMaps',firingMaps,'maxSize',.75,'sepEdge',0.03); %% ,'maxSize',.75,'sepEdge',0.03
@@ -244,6 +261,7 @@ speedCorr = getSpeedCorr(basepath,'numQuantiles',20);
 session = loadSession(basepath);
 generalPath = [session.animal.name,'\',session.general.name];
 sessionName = session.general.name;
+<<<<<<< HEAD
 % updated indexedSession table
 sessionsTable = readtable([indexedProjects_path filesep indexedProjects_name,'.csv']); % the variable is called allSessions
 % new table entry
@@ -283,6 +301,30 @@ sessionEntry = cell2table(sessionEntry,"VariableNames",["SessionName", "Subject"
 sessionsTable = [sessionsTable; sessionEntry];
 writetable([indexedProjects_path filesep indexedProjects_name,'.csv'], ); % the variable is called allSessions
 
+=======
+load([indexedProjects_path filesep indexedProjects_name,'.mat']); % the variable is called allSessions
+allSessions.(sessionName).path = generalPath;
+allSessions.(sessionName).name = session.animal.name;
+allSessions.(sessionName).strain = session.animal.strain;
+allSessions.(sessionName).geneticLine = session.animal.geneticLine;
+allSessions.(sessionName).brainRegions = session.brainRegions;
+if isfield(session.animal,'opticFiberImplants')
+    for i = 1:length(session.animal.opticFiberImplants)
+        allSessions.(sessionName).optogenetics{i} = session.animal.opticFiberImplants{i}.opticFiber;
+    end
+else
+    allSessions.(sessionName).optogenetics = NaN;
+end
+behav = NaN;
+for i = 1:length(session.epochs)
+    if strcmpi(session.epochs{i}.behavioralParadigm, 'Maze')
+        behav = [behav session.epochs{i}.environment];
+    end
+end
+allSessions.(sessionName).behav = behav;
+allSessions.(sessionName).project = session.general.projects;
+save([indexedProjects_path filesep indexedProjects_name,'.mat'],'allSessions');
+>>>>>>> 634ec502ef7684d936673a7638ffcaad0b94d2dd
 
 % Lets do a push for git repository
 cd(indexedProjects_path);
