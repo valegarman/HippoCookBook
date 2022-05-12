@@ -282,7 +282,7 @@ end
 brainRegions(end) = [];
 
 sessionEntry = {lower(sessionName), lower(session.animal.name), lower(generalPath), lower(session.animal.strain),...
-    lower(session.animal.geneticLine), [optogenetics{:}], [behav{:}], spikes.numcells,  [brainRegions{:}], project};
+    lower(session.animal.geneticLine), lower([optogenetics{:}]), [behav{:}], spikes.numcells,  [brainRegions{:}], project};
 sessionEntry = cell2table(sessionEntry,"VariableNames",["SessionName", "Subject", "Path", "Strain", "GeneticLine", "Optogenetics", "Behavior", "numCells", "brainRegions", "Project"]);
 sessionsTable = [sessionsTable; sessionEntry];
 writetable(sessionsTable,[indexedProjects_path filesep indexedProjects_name,'.csv']); % the variable is called allSessions
