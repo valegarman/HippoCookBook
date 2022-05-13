@@ -115,6 +115,8 @@ computeSessionSummary('basepath','J:\fCamk7\fCamk7_220425_sess19','exclude',{'an
 computeSessionSummary('basepath','J:\fCamk7\fCamk7_220426_sess20','exclude',{'analogPulses'},'analogChannelsList',[],'digitalChannelsList',[1 2 6]);
 computeSessionSummary('basepath','J:\fCamk7\fCamk7_220427_sess21','exclude',{'analogPulses'},'analogChannelsList',[],'digitalChannelsList',[1 2 6]);
 
+computeSessionSummary('basepath','J:\fCamk7\fCamk7_220504_sess24','exclude',{'analogPulses'},'analogChannelsList',[],'digitalChannelsList',[1 2 6]);
+
 computeSessionSummary('basepath','J:\fCamk7\fCamk7_220429_sess23','exclude',{'analogPulses'},'analogChannelsList',[],'digitalChannelsList',[1 2 6]);
 
 updateExpFolder({'Y:\fCamk7','T:\fCamk7','X:\fCamk7'},'J:\fCamk7');

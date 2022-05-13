@@ -65,7 +65,7 @@ close all
 try
     getuLEDsPulses();
 end
-
+cd(basepath);
 % SPIKES SUMMARY
 if any(ismember(listOfAnalysis,'spikes'))
     try
