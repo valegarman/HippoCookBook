@@ -9,7 +9,7 @@ function dp = database_path
             dp = 'W:';
         case 'SB13FLPC017'
             %dp = 'W';
-            keyboard;
+            dp = 'Z:\data';
     end
 
 end

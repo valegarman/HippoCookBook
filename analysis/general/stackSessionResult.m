@@ -103,7 +103,10 @@ for ii = 1:length(names)
             type_field = 'struct';
         elseif any(strcmpi(type_field,'cell')) && ~isempty(clonned) % unless a structure was clonned
             type_field = 'struct';
+        elseif any(strcmpi(type_field,'logical')) && ~isempty(clonned) % unless a structure was clonned
+            type_field = 'double';
         else
+            disp('hay'); keyboard;
             error('More than one type of data per field!')
         end
     end
