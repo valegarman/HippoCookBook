@@ -50,7 +50,8 @@ end
 if ~isempty(exclude)
     listOfAnalysis(ismember(listOfAnalysis, exclude)) = [];
 end
-session = loadSession;
+% session = loadSession;
+session = sessionTemplate(pwd,'showGUI',false);
 session.channels = 1:session.extracellular.nChannels;
 save([basepath filesep session.general.name,'.session.mat'],'session','-v7.3');
 
@@ -65,7 +66,7 @@ close all
 try
     getuLEDsPulses();
 end
-
+cd(basepath);%winnie added
 % SPIKES SUMMARY
 if any(ismember(listOfAnalysis,'spikes'))
     try
@@ -133,7 +134,7 @@ if any(ismember(listOfAnalysis,'analogPulses'))
         warning('Error on CSD from analog inputs! ');
     end
 end
-
+cd(basepath) %winnie add to solve the error
 % DIGITAL CHANNELS CSD
 if any(ismember(listOfAnalysis,'digitalPulses'))
     try 
