@@ -40,7 +40,7 @@ addParameter(p,'rasterPlot',true,@islogical);
 addParameter(p,'ratePlot',true,@islogical);
 addParameter(p,'winSizePlot',[-.1 .5],@islogical);
 addParameter(p,'saveMat',true,@islogical);
-addParameter(p,'force',true,@islogical);
+addParameter(p,'force',false,@islogical);
 addParameter(p,'minNumberOfPulses',200,@isnumeric);
 addParameter(p,'minDuration',0.004,@isnumeric); % 4 ms
 addParameter(p,'saveEventsFile',true,@islogical);
