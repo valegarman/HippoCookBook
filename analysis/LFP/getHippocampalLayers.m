@@ -118,6 +118,7 @@ for i = 1:length(session.extracellular.spikeGroups.channels)
         % Ripples
         ripples{i} = findRipples(channels{i}.pyramidal,'thresholds',[2 5],'passband',[80 200],'durations',[20 150],'saveMat',false);
         
+        
         twin = 0.1;
         [evCsd,lfpAvg] = bz_eventCSD(lfp,ripples{i}.peaks,'channels',session.extracellular.spikeGroups.channels{i},'twin',[twin twin],'plotLFP',false,'plotCSD',false);
         csdRippleProfile = [NaN mean(evCsd.data(find(evCsd.timestamps > -10 & evCsd.timestamps < 10),:)) NaN];
@@ -131,118 +132,119 @@ for i = 1:length(session.extracellular.spikeGroups.channels)
         if isempty(channels{i}.radiatum)
             channels{i}.radiatum = NaN;
         end
-        
-        channels{i}.all = [channels{i}.oriens; channels{i}.pyramidal; channels{i}.radiatum; channels{i}.slm];
-        
-        if promt
-            fp = figure;
-            set(gcf,'Position',[100 100 500 500]);
-            [lia,locb] = ismember(powerProfile_theta.channels,session.extracellular.spikeGroups.channels{i});
-            [B,I] = sort(locb (locb > 0));
-            hold on
-            ppmean = powerProfile_theta.mean(ismember(powerProfile_theta.channels,session.extracellular.spikeGroups.channels{i}));
-            ppmean = ppmean(I);
-            nC = 1:length(ppmean);
-            p1 = plot(ppmean,flip(nC),'color',[.8 .2 .2]);
-            plot(ppmean,flip(nC),'o','color',[.8 .2 .2],'MarkerFaceColor',[.8 .2 .2]);
-            % Gamma
-            ppmean2 = powerProfile_gamma.mean(ismember(powerProfile_theta.channels,session.extracellular.spikeGroups.channels{i}));
-            ppmean2 = ppmean2(I);
-            p2 = plot(ppmean2 + 10,flip(nC),'color',[.2 .8 .2]);
-            plot(ppmean2 + 10,flip(nC),'o','color',[.2 .8 .2],'MarkerFaceColor',[.2 .8 .2]);
-            % HFO
-            ppmean3 = powerProfile_hfo.mean(ismember(powerProfile_hfo.channels,session.extracellular.spikeGroups.channels{i}));
-            ppmean3 = ppmean3(I);
-            p3 = plot(ppmean3 + 20,flip(nC),'color',[.2 .2 .2]);
-            plot(ppmean3 + 20,flip(nC),'o','color',[.2 .2 .2],'MarkerFaceColor',[.2 .2 .2]);
-            ylim([min(nC) max(nC) + 4]);
-            ax = axis;
-            set(gca,'YTick',[1:length(ppmean)],'YtickLabels',flip(session.extracellular.spikeGroups.channels{i})); 
-            
-            contourf((evCsd.timestamps  + max(evCsd.timestamps))/14 + ax(2),(nC(2:end-1)),evCsd.data',40,'LineColor','none');hold on;
-            targetWin = evCsd.timestamps > -10 & evCsd.timestamps < 10;
-            csd_profile = (mean(evCsd.data(targetWin,:)) - nanmean(mean(evCsd.data(targetWin,:))))/nanstd(mean(evCsd.data(targetWin,:)));
-            tt = (evCsd.timestamps  + max(evCsd.timestamps))/14 + ax(2); tt = tt(int32(length(tt)/2));
-            plot([nan tt + csd_profile nan], nC,'k');
-            colormap(jet); caxis([-max(abs(evCsd.data(:))) max(abs(evCsd.data(:)))]);
-            ax = axis;
-            title(['Shank ', num2str(i), ' of ', num2str(length(session.extracellular.spikeGroups.channels))],'FontWeight','normal');
-            
-            unsigned_area = [max(nC)+0.5  max(nC)+0.5+4];
-            fill([ax([1 2 2 1 1])],[unsigned_area([1 1 2 2 1])],[.7 .7 .7],'EdgeColor','none');
-            text(ax(1)+0.5,unsigned_area(2)-1,'unassigned area','FontSize',12,'color',[1 1 1]);
-            
 
-            if ~isnan(channels{i}.pyramidal)
-                l1 = plot(ax(1:2),ones(2,1)*find(flip(session.extracellular.spikeGroups.channels{i}) == channels{i}.pyramidal),'color',[.8 .2 1],'LineWidth',2);
+        channels{i}.all = [channels{i}.oriens; channels{i}.pyramidal; channels{i}.radiatum; channels{i}.slm];
+        try
+            if promt
+                fp = figure;
+                set(gcf,'Position',[100 100 500 500]);
+                [lia,locb] = ismember(powerProfile_theta.channels,session.extracellular.spikeGroups.channels{i});
+                [B,I] = sort(locb (locb > 0));
+                hold on
+                ppmean = powerProfile_theta.mean(ismember(powerProfile_theta.channels,session.extracellular.spikeGroups.channels{i}));
+                ppmean = ppmean(I);
+                nC = 1:length(ppmean);
+                p1 = plot(ppmean,flip(nC),'color',[.8 .2 .2]);
+                plot(ppmean,flip(nC),'o','color',[.8 .2 .2],'MarkerFaceColor',[.8 .2 .2]);
+                % Gamma
+                ppmean2 = powerProfile_gamma.mean(ismember(powerProfile_theta.channels,session.extracellular.spikeGroups.channels{i}));
+                ppmean2 = ppmean2(I);
+                p2 = plot(ppmean2 + 10,flip(nC),'color',[.2 .8 .2]);
+                plot(ppmean2 + 10,flip(nC),'o','color',[.2 .8 .2],'MarkerFaceColor',[.2 .8 .2]);
+                % HFO
+                ppmean3 = powerProfile_hfo.mean(ismember(powerProfile_hfo.channels,session.extracellular.spikeGroups.channels{i}));
+                ppmean3 = ppmean3(I);
+                p3 = plot(ppmean3 + 20,flip(nC),'color',[.2 .2 .2]);
+                plot(ppmean3 + 20,flip(nC),'o','color',[.2 .2 .2],'MarkerFaceColor',[.2 .2 .2]);
+                ylim([min(nC) max(nC) + 4]);
+                ax = axis;
+                set(gca,'YTick',[1:length(ppmean)],'YtickLabels',flip(session.extracellular.spikeGroups.channels{i})); 
+
+                contourf((evCsd.timestamps  + max(evCsd.timestamps))/14 + ax(2),(nC(2:end-1)),evCsd.data',40,'LineColor','none');hold on;
+                targetWin = evCsd.timestamps > -10 & evCsd.timestamps < 10;
+                csd_profile = (mean(evCsd.data(targetWin,:)) - nanmean(mean(evCsd.data(targetWin,:))))/nanstd(mean(evCsd.data(targetWin,:)));
+                tt = (evCsd.timestamps  + max(evCsd.timestamps))/14 + ax(2); tt = tt(int32(length(tt)/2));
+                plot([nan tt + csd_profile nan], nC,'k');
+                colormap(jet); caxis([-max(abs(evCsd.data(:))) max(abs(evCsd.data(:)))]);
+                ax = axis;
+                title(['Shank ', num2str(i), ' of ', num2str(length(session.extracellular.spikeGroups.channels))],'FontWeight','normal');
+
+                unsigned_area = [max(nC)+0.5  max(nC)+0.5+4];
+                fill([ax([1 2 2 1 1])],[unsigned_area([1 1 2 2 1])],[.7 .7 .7],'EdgeColor','none');
+                text(ax(1)+0.5,unsigned_area(2)-1,'unassigned area','FontSize',12,'color',[1 1 1]);
+
+
+                if ~isnan(channels{i}.pyramidal)
+                    l1 = plot(ax(1:2),ones(2,1)*find(flip(session.extracellular.spikeGroups.channels{i}) == channels{i}.pyramidal),'color',[.8 .2 1],'LineWidth',2);
+                    t1 = text(l1.XData(2),l1.YData(2),'Pyr','color',[.8 .2 1],'FontSize',12);
+                else
+                    l1 = plot(ax(1:2),ones(2,1)*max(nC) + 0,'color',[.8 .2 1],'LineWidth',2);
+                    t1 = text(l1.XData(2),l1.YData(2),'Pyr','color',[.8 .2 1],'FontSize',12);
+                end
+
+                if ~isnan(channels{i}.oriens)
+                    l2 = plot(ax(1:2),ones(2,1)*find(flip(session.extracellular.spikeGroups.channels{i}) == channels{i}.oriens),'color',[.2 .2 1],'LineWidth',2);
+                    t2 = text(l2.XData(2),l2.YData(2),'Or','color',[.2 .2 1],'FontSize',12);
+                else
+                    l2 = plot(ax(1:2),ones(2,1)*max(nC) + 1,'color',[.2 .2 1],'LineWidth',2);
+                    t2 = text(l2.XData(2),l2.YData(2),'Or','color',[.2 .2 1],'FontSize',12);
+                end
+
+                if ~isnan(channels{i}.radiatum)
+                    l3 = plot(ax(1:2),ones(2,1)*find(flip(session.extracellular.spikeGroups.channels{i}) == channels{i}.radiatum),'color',[.5 .5 .1],'LineWidth',2);
+                    t3 = text(l3.XData(2),l3.YData(2),'Rad','color',[.5 .5 .1],'FontSize',12);
+                else
+                    l3 = plot(ax(1:2),ones(2,1)* max(nC) + 2,'color',[.5 .5 .1],'LineWidth',2);
+                    t3 = text(l3.XData(2),l3.YData(2),'Rad','color',[.5 .5 .1],'FontSize',12);
+                end
+                if ~isnan(channels{i}.slm)
+                    l4 = plot(ax(1:2),ones(2,1)*find(flip(session.extracellular.spikeGroups.channels{i}) == channels{i}.slm),'color',[.8 .1 .1],'LineWidth',2);
+                    t4 = text(l4.XData(2),l4.YData(2),'Slm','color',[.8 .1 .1]);
+                else
+                    l4 = plot(ax(1:2),ones(2,1)* max(nC) + 3,'color',[.8 .1 .1],'LineWidth',2);
+                    t4 = text(l4.XData(2),l4.YData(2),'Slm','color',[.8 .1 .1],'FontSize',12);
+                end
+
+                draggable(l1,'constraint','v');
+                draggable(l2,'constraint','v');
+                draggable(l3,'constraint','v');
+                draggable(l4,'constraint','v');
+                leg = legend([p1 p2 p3], '3-12 Hz', '20-90 Hz','120-240 Hz','Location','southeast');
+                set(gca,'TickDir','out','XTick',nC,'XTickLabelRotation',45); ylabel('Channels'); xlabel('dB                                    Time');
+
+                btn = uicontrol('Style', 'pushbutton', 'String', 'Accept',...
+                            'Units','normalize','Position', [.82 .93 .15 .06],...
+                            'Callback', 'uiresume(gcbf)','BackgroundColor',[.5 .8 .5]);
+                disp('Press Accept when done...');
+                uiwait(gcf);
+                pyr=round(mean(get(l1,'YData')));
+                or=round(mean(get(l2,'YData')));
+                rad=round(mean(get(l3,'YData')));
+                slm=round(mean(get(l4,'YData')));
+
+                delete([l1 l2 l3 l4 t1 t2 t3 t4 leg]);
+
+                l1 = plot(ax(1:2),ones(2,1)*pyr,'color',[.8 .2 1],'LineWidth',2);
                 t1 = text(l1.XData(2),l1.YData(2),'Pyr','color',[.8 .2 1],'FontSize',12);
-            else
-                l1 = plot(ax(1:2),ones(2,1)*max(nC) + 0,'color',[.8 .2 1],'LineWidth',2);
-                t1 = text(l1.XData(2),l1.YData(2),'Pyr','color',[.8 .2 1],'FontSize',12);
-            end
-            
-            if ~isnan(channels{i}.oriens)
-                l2 = plot(ax(1:2),ones(2,1)*find(flip(session.extracellular.spikeGroups.channels{i}) == channels{i}.oriens),'color',[.2 .2 1],'LineWidth',2);
+
+                l2 = plot(ax(1:2),ones(2,1)*or,'color',[.2 .2 1],'LineWidth',2);
                 t2 = text(l2.XData(2),l2.YData(2),'Or','color',[.2 .2 1],'FontSize',12);
-            else
-                l2 = plot(ax(1:2),ones(2,1)*max(nC) + 1,'color',[.2 .2 1],'LineWidth',2);
-                t2 = text(l2.XData(2),l2.YData(2),'Or','color',[.2 .2 1],'FontSize',12);
-            end
-            
-            if ~isnan(channels{i}.radiatum)
-                l3 = plot(ax(1:2),ones(2,1)*find(flip(session.extracellular.spikeGroups.channels{i}) == channels{i}.radiatum),'color',[.5 .5 .1],'LineWidth',2);
+
+                l3 = plot(ax(1:2),ones(2,1)*rad,'color',[.5 .5 .1],'LineWidth',2);
                 t3 = text(l3.XData(2),l3.YData(2),'Rad','color',[.5 .5 .1],'FontSize',12);
-            else
-                l3 = plot(ax(1:2),ones(2,1)* max(nC) + 2,'color',[.5 .5 .1],'LineWidth',2);
-                t3 = text(l3.XData(2),l3.YData(2),'Rad','color',[.5 .5 .1],'FontSize',12);
-            end
-            if ~isnan(channels{i}.slm)
-                l4 = plot(ax(1:2),ones(2,1)*find(flip(session.extracellular.spikeGroups.channels{i}) == channels{i}.slm),'color',[.8 .1 .1],'LineWidth',2);
-                t4 = text(l4.XData(2),l4.YData(2),'Slm','color',[.8 .1 .1]);
-            else
-                l4 = plot(ax(1:2),ones(2,1)* max(nC) + 3,'color',[.8 .1 .1],'LineWidth',2);
+
+                l4 = plot(ax(1:2),ones(2,1)*slm,'color',[.8 .1 .1],'LineWidth',2);
                 t4 = text(l4.XData(2),l4.YData(2),'Slm','color',[.8 .1 .1],'FontSize',12);
+
+                pause(2);
+                close(fp);
+
+                channel_list = [flip(session.extracellular.spikeGroups.channels{i}) NaN(1,10)];
+                channels{i}.pyramidal = channel_list(pyr)
+                channels{i}.radiatum = channel_list(rad);
+                channels{i}.slm = channel_list(slm);
+                channels{i}.oriens = channel_list(or);
             end
-            
-            draggable(l1,'constraint','v');
-            draggable(l2,'constraint','v');
-            draggable(l3,'constraint','v');
-            draggable(l4,'constraint','v');
-            leg = legend([p1 p2 p3], '3-12 Hz', '20-90 Hz','120-240 Hz','Location','southeast');
-            set(gca,'TickDir','out','XTick',nC,'XTickLabelRotation',45); ylabel('Channels'); xlabel('dB                                    Time');
-            
-            btn = uicontrol('Style', 'pushbutton', 'String', 'Accept',...
-                        'Units','normalize','Position', [.82 .93 .15 .06],...
-                        'Callback', 'uiresume(gcbf)','BackgroundColor',[.5 .8 .5]);
-            disp('Press Accept when done...');
-            uiwait(gcf);
-            pyr=round(mean(get(l1,'YData')));
-            or=round(mean(get(l2,'YData')));
-            rad=round(mean(get(l3,'YData')));
-            slm=round(mean(get(l4,'YData')));
-            
-            delete([l1 l2 l3 l4 t1 t2 t3 t4 leg]);
-            
-            l1 = plot(ax(1:2),ones(2,1)*pyr,'color',[.8 .2 1],'LineWidth',2);
-            t1 = text(l1.XData(2),l1.YData(2),'Pyr','color',[.8 .2 1],'FontSize',12);
-            
-            l2 = plot(ax(1:2),ones(2,1)*or,'color',[.2 .2 1],'LineWidth',2);
-            t2 = text(l2.XData(2),l2.YData(2),'Or','color',[.2 .2 1],'FontSize',12);
-            
-            l3 = plot(ax(1:2),ones(2,1)*rad,'color',[.5 .5 .1],'LineWidth',2);
-            t3 = text(l3.XData(2),l3.YData(2),'Rad','color',[.5 .5 .1],'FontSize',12);
-            
-            l4 = plot(ax(1:2),ones(2,1)*slm,'color',[.8 .1 .1],'LineWidth',2);
-            t4 = text(l4.XData(2),l4.YData(2),'Slm','color',[.8 .1 .1],'FontSize',12);
-            
-            pause(2);
-            close(fp);
-            
-            channel_list = [flip(session.extracellular.spikeGroups.channels{i}) NaN(1,10)];
-            channels{i}.pyramidal = channel_list(pyr)
-            channels{i}.radiatum = channel_list(rad);
-            channels{i}.slm = channel_list(slm);
-            channels{i}.oriens = channel_list(or);
         end
         
         %% Summary Plot
@@ -310,31 +312,33 @@ for i = 1:length(session.extracellular.spikeGroups.channels)
         
         
         % Subplot (1,2,2)
-        subplot(2,nShanks,index(2*i))
-        title(['Shank : ', num2str(i)]);
-        contourf(evCsd.timestamps,(nC(2:end-1)),evCsd.data',40,'LineColor','none');hold on;
-        box off; colormap(jet); caxis([-max(abs(evCsd.data(:))) max(abs(evCsd.data(:)))]);
-        xs = [evCsd.timestamps(1) evCsd.timestamps(end)];
-%         set(gca,'YTick',[nC(2:end-1)],'YtickLabels',session.extracellular.spikeGroups.channels{i}(nC(2:end-1)));
-        
-        if ~isnan(channels{i}.pyramidal)
-            plot(xs, [find(session.extracellular.spikeGroups.channels{i} == channels{i}.pyramidal) find(session.extracellular.spikeGroups.channels{i} == channels{i}.pyramidal)],'color',[.8 .2 1]);
-            text(xs(2), find(session.extracellular.spikeGroups.channels{i} == channels{i}.pyramidal),'Pyr','color',[.8 .2 1]);
+        try
+            subplot(2,nShanks,index(2*i))
+            title(['Shank : ', num2str(i)]);
+            contourf(evCsd.timestamps,(nC(2:end-1)),evCsd.data',40,'LineColor','none');hold on;
+            box off; colormap(jet); caxis([-max(abs(evCsd.data(:))) max(abs(evCsd.data(:)))]);
+            xs = [evCsd.timestamps(1) evCsd.timestamps(end)];
+    %         set(gca,'YTick',[nC(2:end-1)],'YtickLabels',session.extracellular.spikeGroups.channels{i}(nC(2:end-1)));
+
+            if ~isnan(channels{i}.pyramidal)
+                plot(xs, [find(session.extracellular.spikeGroups.channels{i} == channels{i}.pyramidal) find(session.extracellular.spikeGroups.channels{i} == channels{i}.pyramidal)],'color',[.8 .2 1]);
+                text(xs(2), find(session.extracellular.spikeGroups.channels{i} == channels{i}.pyramidal),'Pyr','color',[.8 .2 1]);
+            end
+            if ~isnan(channels{i}.oriens)
+                plot(xs,[find(session.extracellular.spikeGroups.channels{i} == channels{i}.oriens) find(session.extracellular.spikeGroups.channels{i} == channels{i}.oriens)],'color',[.2 .2 1]);
+                text(xs(2),find(session.extracellular.spikeGroups.channels{i} == channels{i}.oriens),'Or','color',[.2 .2 1]);
+            end
+            if ~isnan(channels{i}.radiatum)
+                plot(xs,[find(session.extracellular.spikeGroups.channels{i} == channels{i}.radiatum) find(session.extracellular.spikeGroups.channels{i} == channels{i}.radiatum)],'color',[.5 .5 1]);
+                text(xs(2),find(session.extracellular.spikeGroups.channels{i} == channels{i}.radiatum),'Rad','color',[.5 .5 1]);
+            end
+            if ~isnan(channels{i}.slm)
+                plot(xs,[find(session.extracellular.spikeGroups.channels{i} == channels{i}.slm) find(session.extracellular.spikeGroups.channels{i} == channels{i}.slm)],'color',[.1 .8 1]);
+                text(xs(2),find(session.extracellular.spikeGroups.channels{i} == channels{i}.slm),'Slm','color',[.1 .8 1]);
+            end
+            ylim([min(nC) max(nC)]);
+            set(gca,'TickDir','out','YDir','reverse'); ylabel('Channels'); xlabel('Time [s]');
         end
-        if ~isnan(channels{i}.oriens)
-            plot(xs,[find(session.extracellular.spikeGroups.channels{i} == channels{i}.oriens) find(session.extracellular.spikeGroups.channels{i} == channels{i}.oriens)],'color',[.2 .2 1]);
-            text(xs(2),find(session.extracellular.spikeGroups.channels{i} == channels{i}.oriens),'Or','color',[.2 .2 1]);
-        end
-        if ~isnan(channels{i}.radiatum)
-            plot(xs,[find(session.extracellular.spikeGroups.channels{i} == channels{i}.radiatum) find(session.extracellular.spikeGroups.channels{i} == channels{i}.radiatum)],'color',[.5 .5 1]);
-            text(xs(2),find(session.extracellular.spikeGroups.channels{i} == channels{i}.radiatum),'Rad','color',[.5 .5 1]);
-        end
-        if ~isnan(channels{i}.slm)
-            plot(xs,[find(session.extracellular.spikeGroups.channels{i} == channels{i}.slm) find(session.extracellular.spikeGroups.channels{i} == channels{i}.slm)],'color',[.1 .8 1]);
-            text(xs(2),find(session.extracellular.spikeGroups.channels{i} == channels{i}.slm),'Slm','color',[.1 .8 1]);
-        end
-        ylim([min(nC) max(nC)]);
-        set(gca,'TickDir','out','YDir','reverse'); ylabel('Channels'); xlabel('Time [s]');     
     end
 end
 % Save Figure
