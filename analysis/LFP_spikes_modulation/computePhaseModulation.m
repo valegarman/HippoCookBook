@@ -61,6 +61,9 @@ addParameter(p,'hgamma_passband',[60 100],@isnumeric);
 addParameter(p,'method','wavelet',@isstr);
 addParameter(p,'plotting',true,@islogical);
 addParameter(p,'saveMat',true,@islogical);
+addParameter(p,'skipStimulationPeriods',true,@islogical);
+addParameter(p,'excludeIntervals',[],@isnumeric);
+addParameter(p,'powerThresh',[],@isnumeric);
 
 parse(p,varargin{:})
 
@@ -83,6 +86,9 @@ hgamma_passband = p.Results.hgamma_passband;
 method = p.Results.method;
 plotting = p.Results.plotting;
 saveMat = p.Results.saveMat;
+skipStimulationPeriods = p.Results.skipStimulationPeriods;
+excludeIntervals = p.Results.excludeIntervals;
+powerThresh = p.Results.powerThresh;
 
 %% Session template
 % session = sessionTemplate(basepath,'showGUI',false);
@@ -90,6 +96,28 @@ session = loadSession(basepath);
 %% Spikes
 if isempty(spikes)
     spikes = loadSpikes;
+end
+
+if skipStimulationPeriods
+    try
+        optogenetic_responses = getOptogeneticResponse;
+    catch
+        warning('Skip stimulation periods not possible...');
+    end
+end
+excludeIntervals = [excludeIntervals; optogenetic_responses.stimulationEpochs];
+if ~isempty(excludeIntervals)
+    warning('Excluding intervals...');
+    for ii = 1:length(spikes.times)
+        [status] = InIntervals(spikes.times{ii},excludeIntervals);
+        spikes.times{ii} = spikes.times{ii}(~status);
+    end
+end
+
+if isempty(powerThresh)
+    useThresh = false;
+else
+    useThresh = true;
 end
 
 %% Channels selection
@@ -133,7 +161,7 @@ if rippleModulation
         end
         lfpRipple = getLFP(rippleChannel);
         rippleMod = phaseModulation(spikes,lfpRipple,ripple_passband,'intervals',ripples.timestamps,...
-            'useThresh',false,'useMinWidth',false);
+            'useThresh',true,'useMinWidth',true,'powerThresh',0);
     catch
     end  
 end
@@ -160,7 +188,7 @@ if thetaModulation
         thetaEpochs = detectThetaEpochs;
         lfpT = getLFP(thetaEpochs.channel);
         thetaMod = phaseModulation(spikes,lfpT,theta_passband,'intervals',thetaEpochs.intervals,...
-            'useThresh',false,'useMinWidth',false);
+            'useThresh',true,'useMinWidth',false,'powerThresh',0);
     catch
     end
 end
@@ -172,7 +200,7 @@ if lgammaModulation
         thetaEpochs = detectThetaEpochs;
         lfpT = getLFP(thetaEpochs.channel);
         lgammaMod = phaseModulation(spikes,lfpT,lgamma_passband,'intervals',thetaEpochs.intervals,...
-            'useThresh',false,'useMinWidth',false);
+            'useThresh',true,'useMinWidth',false,'powerThresh',0);
     catch
     end
 end
@@ -183,9 +211,14 @@ if hgammaModulation
         thetaEpochs = detectThetaEpochs;
         lfpT = getLFP(thetaEpochs.channel);
         hgammaMod = phaseModulation(spikes,lfpT,hgamma_passband,'intervals',thetaEpochs.intervals,...
-            'useThresh',false,'useMinWidth',false);
+            'useThresh',true,'useMinWidth',false,'powerThresh',0);
     catch
     end
+end
+
+%% 6. Modulation spetra
+if modulationSpectra
+   getSpikesModulationSpectra; 
 end
 
 %% Plotting

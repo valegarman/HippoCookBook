@@ -1,4 +1,6 @@
 function [hippocampalLayers] = getHippocampalLayers(varargin)
+% [hippocampalLayers] = getHippocampalLayers(varargin)
+%
 % Identify hippocampal layers based in spectral hallmarks
 % 
 % INPUTS
@@ -26,7 +28,7 @@ function [hippocampalLayers] = getHippocampalLayers(varargin)
 % Manu Valero 2020
 % Pablo Abad, Manu Valero 2022
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Parse options
+
 p = inputParser;
 addParameter(p,'basepath',pwd,@isstruct);
 addParameter(p,'lfp',[],@isstruct);

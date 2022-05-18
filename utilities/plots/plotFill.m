@@ -18,6 +18,7 @@ function h = plotFill(datax,datay,varargin)
 %    'duplicate_x'  default, false
 %    'lineStyle'    default, '-'
 %    'error'        'ic95' (default), 'SE', 'std'
+%    'faceAlpha'    Default, 0.5
 
 % 
 % OUTPUS
@@ -34,6 +35,7 @@ addParameter(p,'xscale','linear',@ischar);
 addParameter(p,'yscale','linear',@ischar);
 addParameter(p,'show_cycle',false,@islogical);
 addParameter(p,'duplicate_x',false,@islogical);
+addParameter(p,'faceAlpha',0.5,@isnumeric);
 addParameter(p,'lineStyle','-');
 
 
@@ -47,6 +49,7 @@ yscale = p.Results.yscale;
 show_cycle = p.Results.show_cycle;
 duplicate_x = p.Results.duplicate_x;
 lineStyle = p.Results.lineStyle;
+faceAlpha = p.Results.faceAlpha;
 
 % Deal with inputs
 if length(datax) ~= size(datay,1)
@@ -98,7 +101,7 @@ if strcmpi(yscale,'circular')
     
     hold on
     if strcmpi(style,'alpha')
-        fill(x1, y1, color,'EdgeColor','none','faceAlpha',.2);
+        fill(x1, y1, color,'EdgeColor','none','faceAlpha',faceAlpha);
         h = plot(datax, smooth(rad2deg(circ_mean(datay,[],2)),smoothOpt),lineStyle,'lineWidth',1,'color',color);
     elseif strcmpi(style,'white')
         fill(x1, y1, [1 1 1],'EdgeColor',color);
@@ -107,7 +110,7 @@ if strcmpi(yscale,'circular')
         fill(x1, y1, color,'EdgeColor','none','faceAlpha',1);
         h = plot(datax, smooth(rad2deg(circ_mean(datay,[],2)),smoothOpt),lineStyle,'lineWidth',1,'color',[1 1 1]);
     elseif strcmpi(style,'filled') 
-        h = patch(x1, y1, color,'EdgeColor','none','faceAlpha',.1);
+        h = patch(x1, y1, color,'EdgeColor','none','faceAlpha',faceAlpha);
     end
     xlim(datax([1 end])); ylim([-180 180]);
     set(gca,'XScale',xscale,'TickDir','out','YTick',[-180 -90 0 90 180]);
@@ -133,16 +136,16 @@ else
     
     hold on
     if strcmpi(style,'alpha')
-        fill(x1, y1, color,'EdgeColor','none','faceAlpha',0.2);
+        fill(x1, y1, color,'EdgeColor','none','faceAlpha',faceAlpha);
         h = plot(datax, smooth(nanmean(datay,2),smoothOpt),lineStyle,'lineWidth',1,'color',color);
     elseif strcmpi(style,'white')
         fill(x1, y1, [1 1 1],'EdgeColor',color);
         h = plot(datax, smooth(nanmean(datay,2),smoothOpt),lineStyle,'lineWidth',1,'color',color);
     elseif strcmpi(style,'inverted')
-        fill(x1, y1, color,'EdgeColor','none','faceAlpha',1);
+        fill(x1, y1, color,'EdgeColor','none','faceAlpha',faceAlpha);
         h = plot(datax, smooth(nanmean(datay,2),smoothOpt),lineStyle,'lineWidth',1,'color',[1 1 1]);
     elseif strcmpi(style,'filled') 
-        h = fill(x1, y1, color,'EdgeColor','none','faceAlpha',.5);
+        h = fill(x1, y1, color,'EdgeColor','none','faceAlpha',faceAlpha);
     end
     set(gca,'XScale',xscale,'YScale',yscale,'TickDir','out');
 end
