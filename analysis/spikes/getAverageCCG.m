@@ -13,6 +13,11 @@ function [averageCCG] = getAverageCCG(varargin)
 % plotOpt       Default true.
 % saveMat       Default true.
 % force         Overwrite previos analysis, default false.
+% excludeStimulationPeriods
+%               Default, true
+% excludeIntervals 
+%               2xN intervals to exlude
+% winIndex      Default, [-.01 .01];
 %
 % OUTPUTS
 % averageCCG
@@ -29,6 +34,9 @@ addParameter(p,'plotOpt',true,@islogical);
 addParameter(p,'winSizePlot',[-.3 .3],@islogical);
 addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'force',false,@islogical);
+addParameter(p,'skipStimulationPeriods',true,@islogical);
+addParameter(p,'excludeIntervals',[],@isnumeric);
+addParameter(p,'winIndex',[-.01 .01],@isnumeric);
 
 parse(p, varargin{:});
 basepath = p.Results.basepath;
@@ -39,6 +47,9 @@ winSizePlot = p.Results.winSizePlot;
 plotOpt = p.Results.plotOpt;
 saveMat = p.Results.saveMat;
 force = p.Results.force;
+skipStimulationPeriods = p.Results.skipStimulationPeriods;
+excludeIntervals = p.Results.excludeIntervals;
+winIndex = p.Results.winIndex;
 
 % Deal with inputs
 prevPath = pwd;
@@ -55,6 +66,21 @@ if isempty(spikes)
     spikes = loadSpikes('getWaveformsFromDat',false);
 end
 
+if skipStimulationPeriods
+    try
+        optogenetic_responses = getOptogeneticResponse;
+    catch
+        warning('Skip stimulation periods not possible...');
+    end
+end
+excludeIntervals = [excludeIntervals; optogenetic_responses.stimulationEpochs];
+if ~isempty(excludeIntervals)
+    warning('Excluding intervals...');
+    for ii = 1:length(spikes.times)
+        [status] = InIntervals(spikes.times{ii},excludeIntervals);
+        spikes.times{ii} = spikes.times{ii}(~status);
+    end
+end
 % do ccg
 [allCcg, t_ccg] = CCG(spikes.times,[],'binSize',binSize,'duration',winSize);
 indCell = [1:size(allCcg,2)];
@@ -66,6 +92,9 @@ for jj = 1 : length(spikes.times)
     ccZMean(jj,:) = nanmean(zscore(squeeze(allCcg(:,jj,indCell(indCell~=jj)))',[],2)); % zCCG
 end
 
+win = t_ccg >= winIndex(1) & t_ccg <= winIndex(2);
+ccgIndex = mean(ccZMean(:,win),2);
+
 averageCCG.medianCCG = ccMedian;
 averageCCG.ZmedianCCG = ccZMedian;
 averageCCG.meanCCG = ccMean;
@@ -73,6 +102,8 @@ averageCCG.ZmeanCCG = ccZMean;
 averageCCG.binSize = binSize;
 averageCCG.winSize = winSize;
 averageCCG.timestamps = t_ccg;
+averageCCG.excludeIntervals = excludeIntervals;
+averageCCG.ccgIndex = ccgIndex;
 
 if saveMat
     disp('Saving results...');

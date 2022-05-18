@@ -107,7 +107,7 @@ if strcmpi(yscale,'circular')
         fill(x1, y1, color,'EdgeColor','none','faceAlpha',1);
         h = plot(datax, smooth(rad2deg(circ_mean(datay,[],2)),smoothOpt),lineStyle,'lineWidth',1,'color',[1 1 1]);
     elseif strcmpi(style,'filled') 
-        h = fill(x1, y1, color,'EdgeColor','none','faceAlpha',1);
+        h = patch(x1, y1, color,'EdgeColor','none','faceAlpha',.1);
     end
     xlim(datax([1 end])); ylim([-180 180]);
     set(gca,'XScale',xscale,'TickDir','out','YTick',[-180 -90 0 90 180]);
@@ -142,7 +142,7 @@ else
         fill(x1, y1, color,'EdgeColor','none','faceAlpha',1);
         h = plot(datax, smooth(nanmean(datay,2),smoothOpt),lineStyle,'lineWidth',1,'color',[1 1 1]);
     elseif strcmpi(style,'filled') 
-        h = fill(x1, y1, color,'EdgeColor','none','faceAlpha',1);
+        h = fill(x1, y1, color,'EdgeColor','none','faceAlpha',.5);
     end
     set(gca,'XScale',xscale,'YScale',yscale,'TickDir','out');
 end
