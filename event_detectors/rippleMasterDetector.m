@@ -73,6 +73,8 @@ function [ripples,SW] = rippleMasterDetector(varargin)
 %    See also bz_Filter, bz_RippleStats, bz_SaveRippleEvents, bz_PlotRippleStats.
 %   
 %   Develop by Manu Valero and Pablo Abad 2022. Buzsaki Lab.
+%   Edited by Winnie Yang 2022, Buzsaki lab to add find_SharpWaves as
+%   option
 warning('this function is under development and may not work... yet')
 
 %% Default values
@@ -100,7 +102,8 @@ addParameter(p,'debug',false,@islogical);
 addParameter(p,'eventSpikeThreshold',1,@isnumeric);
 addParameter(p,'force',false,@islogical);
 addParameter(p,'removeRipplesStimulation',true,@islogical);
-
+addParameter(p,'compute_RSE',true,@islogical); % to compute ripple HSE 
+addParameter(p,'SharpWaves',true,@islogical); 
 parse(p,varargin{:})
 
 basepath = p.Results.basepath;
@@ -126,7 +129,8 @@ debug = p.Results.debug;
 eventSpikeThreshold = p.Results.eventSpikeThreshold;
 force = p.Results.force;
 removeRipplesStimulation = p.Results.removeRipplesStimulation;
-
+compute_RSE = p.Results.compute_RSE;
+SharpWaves = p.Results.SharpWaves;
 %% Load Session Metadata and several variables if not provided
 % session = sessionTemplate(basepath,'showGUI',false);
 session = loadSession(basepath);
@@ -209,8 +213,20 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Computing SharpWaves
 %%%%%%%%%%%%%%%%%%%%%%%%%
-SW = findSharpWaves('ripples',ripples,'rippleChannel',rippleChannel,'SWChannel',SWChannel,...
-    'passband',passband,'SWpassband',SWpassband);
+if SharpWaves
+    SW = findSharpWaves('ripples',ripples,'rippleChannel',rippleChannel,'SWChannel',SWChannel,...
+        'passband',passband,'SWpassband',SWpassband);
+
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Computing ripple high synchronous events start and ending time
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+if compute_RSE
+    find_rippleHSE(basepath,ripples);
+end
+
+
 
 %% OUTPUT
 if saveMat
