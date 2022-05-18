@@ -333,23 +333,23 @@ if any(ismember(listOfAnalysis,'thetaModulation'))
 end
 
 % TMAZEBEHAVIOUR AND LINEARMAZEBEHAVIOUR
-if any(ismember(listOfAnalysis,'tMazeBehaviour')) || any(ismember(listOfAnalysis,'linearMazeBehaviour'))
-   try 
-        getSessionTracking('convFact',tracking_pixel_cm,'roiTracking','manual'); 
-        if any(ismember(listOfAnalysis,'tMazeBehaviour'))
-            getSessionArmChoice('task','alternation');
-        end
-        behaviour = getSessionLinearize;
-
-        % PLACE CELLS SUMMARY
-        spikes = loadSpikes('getWaveformsFromDat',false);
-        firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',true);
-        placeFieldStats = bz_findPlaceFields1D('firingMaps',firingMaps);
-        firingTrialsMap = firingMapPerTrial;
-   catch
-       warning('It has not been possible to run the behaviour code...');
-   end
-end
+% if any(ismember(listOfAnalysis,'tMazeBehaviour')) || any(ismember(listOfAnalysis,'linearMazeBehaviour'))
+%    try 
+%         getSessionTracking('convFact',tracking_pixel_cm,'roiTracking','manual'); 
+%         if any(ismember(listOfAnalysis,'tMazeBehaviour'))
+%             getSessionArmChoice('task','alternation');
+%         end
+%         behaviour = getSessionLinearize;
+% 
+%         % PLACE CELLS SUMMARY
+%         spikes = loadSpikes('getWaveformsFromDat',false);
+%         firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',true);
+%         placeFieldStats = bz_findPlaceFields1D('firingMaps',firingMaps);
+%         firingTrialsMap = firingMapPerTrial;
+%    catch
+%        warning('It has not been possible to run the behaviour code...');
+%    end
+% end
 
 cd(prevPath);
 end

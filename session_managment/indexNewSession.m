@@ -48,6 +48,7 @@ addParameter(p,'copyFiles',true,@islogical);
 addParameter(p,'copyPath',[],@isdir);
 addParameter(p,'bazler_ttl_channel',[],@isnumeric);
 addParameter(p,'forceAnalogPulses',false,@islogical);
+addParameter(p,'forceDigitalPulses',false,@islogical);
 addParameter(p,'tracking_pixel_cm',0.1149,@isnumeric);
 
 parse(p,varargin{:})
@@ -76,6 +77,7 @@ copyFiles = p.Results.copyFiles;
 copyPath = p.Results.copyPath;
 bazler_ttl_channel = p.Results.bazler_ttl_channel;
 forceAnalogPulses = p.Results.forceAnalogPulses;
+forceDigitalPulses = p.Results.forceDigitalPulses;
 tracking_pixel_cm = p.Results.tracking_pixel_cm;
 
 %% Creates a pointer to the folder where the index variable is located
@@ -158,7 +160,6 @@ else
         warning('Problems with analogPulses');
     end
 end
-
 %% 4. Check Sleep Score
 SleepScoreMaster(pwd,'noPrompts',true,'ignoretime',pulses.intsPeriods, 'overwrite', true);
 bz_ThetaStates(pwd);
@@ -268,8 +269,13 @@ for i = 1:length(session.epochs)
         behav{1, length(behav)+1} = ' ';
     end
 end
-behav(end) = [];
-if isempty(behav)
+
+if ~isempty(behav)
+    behav(end) = [];
+    if isempty(behav)
+        behav{1,1} = 'no';
+    end
+else
     behav{1,1} = 'no';
 end
 
