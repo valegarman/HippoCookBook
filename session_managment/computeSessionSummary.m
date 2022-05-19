@@ -98,7 +98,7 @@ if any(ismember(listOfAnalysis,'analogPulses'))
             end
             
             % CSD
-            for mm = 1:length(listOfChannel)
+            for mm = 1:length(listOfChannel)pulse
                 fprintf('Stimulus %3.i of %3.i \n',mm, length(listOfChannel)); %\n
                 st = pulses.timestamps(pulses.analogChannelsList == listOfChannel(mm),1);
                 if isempty(st)
@@ -249,7 +249,8 @@ if any(ismember(listOfAnalysis,{'digitalPulses', 'analogPulses'}))
         warning('Error on PSTH from digital and/or analog inputs! ');
     end
 end
-
+% SAVE DIGIGTAIN EVENTS FOR VISUALIZE IN NEUROSCOPE
+save_digitalIn_events_neuroscope();
 % DOWN-STATES
 if any(ismember(listOfAnalysis,'downStates'))
     try
