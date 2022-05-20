@@ -19,6 +19,9 @@ function [psth] = spikesPsth(timestamps,varargin)
 %   eventType - default, date
 %   event_ints - interval around events timestamps to compute cell reponses
 %   baseline_ints - interval before events timestamps to compute baseline
+%   min_pulsesNumber - minimum number of pulses to create pulses entry, default 100
+%   win_Z - Interval arround events to compting Zscore mean and SD. By
+%       default [-winSize/2 -events_ints(1)];
 %
 % OUTPUTS
 %   psth - struct
@@ -44,6 +47,7 @@ addParameter(p,'eventType',date,@ischar);
 addParameter(p,'event_ints',[-0.02 0.02],@isnumeric);
 addParameter(p,'baseline_ints',[-0.5 -0.46],@isnumeric);
 addParameter(p,'min_pulsesNumber',100,@isnumeric);
+addParameter(p,'win_Z',[],@isnumeric);
 
 parse(p, timestamps,varargin{:});
 
@@ -62,6 +66,7 @@ eventType = p.Results.eventType;
 event_ints = p.Results.event_ints;
 baseline_ints = p.Results.baseline_ints;
 min_pulsesNumber = p.Results.min_pulsesNumber;
+win_Z = p.Results.win_Z;
 
 %% Session Template
 % Deal with inputs
@@ -77,6 +82,10 @@ if (exist([session.general.name '.' eventType '_psth.cellinfo.mat'],'file') || .
     return
 end
 
+if isempty(win_Z)
+    win_Z = [-winSize/2 -event_ints(1)];
+end
+
 % default detection parameters
 if strcmpi(eventType,'slowOscillations')
     if isempty(timestamps)
@@ -89,7 +98,8 @@ if strcmpi(eventType,'slowOscillations')
     winSizePlot = [-0.5 0.5];
     event_ints = [-0.05 0.05];
     baseline_ints = [-0.5 0.4];
-    elseif strcmpi(eventType,'ripples')
+    win_Z = [-0.5 -0.1];
+elseif strcmpi(eventType,'ripples')
     if isempty(timestamps)
         ripples = rippleMasterDetector;
         timestamps = ripples.peaks;
@@ -98,8 +108,9 @@ if strcmpi(eventType,'slowOscillations')
     binSize = 0.005;
     winSize = 1;
     winSizePlot = [-0.5 0.5];
-    event_ints = [-0.01 0.01];
+    event_ints = [-0.025 0.025];
     baseline_ints = [-0.5 -0.5 + diff(event_ints)];
+    win_Z = [-0.5 -0.1];
 end
 
 %% Spikes
@@ -147,8 +158,9 @@ for ii = 1:length(spikes.UID)
             psth.responsecurveSmooth(ii,jj,:) = smooth(stccg(:,2,1));
             t_duringPulse = t > event_ints(1) & t < event_ints(2);
             t_beforePulse = t > baseline_ints(1) & t < baseline_ints(2);
-            psth.responsecurveZ(ii,jj,:) = (stccg(:,2,1) - mean(stccg(t_beforePulse,2,1)))/std(stccg(t_beforePulse,2,1));
-            psth.responsecurveZSmooth(ii,jj,:) = smooth((stccg(:,2,1) - mean(stccg(t_beforePulse,2,1)))/std(stccg(t_beforePulse,2,1)));
+            t_Z = t<=-0.1;
+            psth.responsecurveZ(ii,jj,:) = (stccg(:,2,1) - mean(stccg(t_Z,2,1)))/std(stccg(t_Z,2,1));
+            psth.responsecurveZSmooth(ii,jj,:) = smooth((stccg(:,2,1) - mean(stccg(t_Z,2,1)))/std(stccg(t_Z,2,1)));
             psth.rateDuringPulse(ii,jj,1) = mean(stccg(t_duringPulse,2,1));
             psth.rateBeforePulse(ii,jj,1) = mean(stccg(t_beforePulse,2,1));
             psth.rateZDuringPulse(ii,jj,1) = mean(squeeze(psth.responsecurveZ(ii,jj,t_duringPulse)));

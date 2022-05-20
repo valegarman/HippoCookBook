@@ -48,6 +48,7 @@ function [PhaseLockingData] = phaseModulation(varargin)
 % Brendon Watson 2015
 % edited by david tingley, 2017
 % Edited by Pablo Abad 2022. Based on bz_PhaseModulation
+% Included lowResolution bins option, MV 2022
 
 %% defaults
 p = inputParser;
@@ -63,6 +64,7 @@ addParameter(p,'powerThresh',2,@isnumeric)
 addParameter(p,'useThresh',true,@islogical);
 addParameter(p,'useMinWidth',true,@islogical);
 addParameter(p,'saveMat',false,@islogical)
+addParameter(p,'numBins_wider',36,@isnumeric)
 
 parse(p,varargin{:})
 
@@ -79,6 +81,7 @@ powerThresh = p.Results.powerThresh;
 useThresh = p.Results.useThresh;
 useMinWidth = p.Results.useMinWidth;
 saveMat = p.Results.saveMat;
+numBins_wider = p.Results.numBins_wider;
 
 %% Get phase for every time point in LFP
 switch lower(method)
@@ -90,7 +93,7 @@ switch lower(method)
         power = fastrms(filt,ceil(samplingRate./passband(1)));  % approximate power is frequency band
         hilb = hilbert(filt);
         lfpphase = mod(angle(hilb),2*pi);
-        clear fil
+        clear filt
     case ('wavelet')% Use Wavelet transform to calulate the signal phases
         %         nvoice = 12;
         %         freqlist= 2.^(log2(passband(1)):1/nvoice:log2(passband(2)));
@@ -117,7 +120,7 @@ end
 %% update intervals to remove sub-threshold power periods
 if useThresh
     if (lower(method) == 'hilbert')
-        disp('finding intervals below power threshold...')
+        % disp('finding intervals below power threshold...')
         thresh = mean(power) + std(power)*powerThresh;
         minWidth = (samplingRate./passband(2)) * 2; % set the minimum width to two cycles
 
@@ -267,6 +270,35 @@ try
 catch
     PhaseLockingData.sessionName = spikes.sessionName;
 end
+
+% acummulating data in less bins...
+if numBins_wider > 0
+    ps_bins = discretize(phasebins,36);
+    ps_lowRes = wrapTo2Pi(accumarray(ps_bins,phasebins,[],@circ_mean));
+    
+    for ii = 1:size(phasedistros,2)
+        phasedistro_wide(:,ii) = wrapTo2Pi(accumarray(ps_bins,phasedistros(:,ii),[],@circ_mean));
+        phasedistro_wide_prob(:,ii) = phasedistro_wide(:,ii)/sum(phasedistro_wide(:,ii));
+        phasedistro_wide_Z(:,ii) = zscore(phasedistro_wide(:,ii));
+        
+        phasedistro_wide_smoothZ(:,ii) = zscore(smooth(phasedistro_wide(:,ii),5));
+        phasedistro_wide_smoothZ_doubled(:,ii) = zscore(smooth([phasedistro_wide(:,ii) phasedistro_wide(:,ii)],5));
+    end
+else
+    phasedistro_wide = NaN;
+    phasedistro_wide_prob = NaN;
+    phasedistro_wide_Z = NaN;
+    phasedistro_wide_smoothZ = NaN;
+    phasedistro_wide_smoothZ_doubled = NaN;
+    ps_lowRes = NaN;
+end
+PhaseLockingData.phasedistro_wide = phasedistro_wide';
+PhaseLockingData.phasedistro_wide_prob = phasedistro_wide_prob';
+PhaseLockingData.phasedistro_wide_Z = phasedistro_wide_Z';
+PhaseLockingData.phasedistro_wide_smoothZ = phasedistro_wide_smoothZ';
+PhaseLockingData.phasedistro_wide_smoothZ_doubled = phasedistro_wide_smoothZ_doubled';
+PhaseLockingData.phasebins_wide = ps_lowRes';
+PhaseLockingData.phasebins_wide_doubled = [ps_lowRes' ps_lowRes' + 2*pi];
 
 if saveMat
     save([lfp.Filename(1:end-4) '.PhaseLockingData_',num2str(passband(1)),'-',num2str(passband(end)),'.cellinfo.mat'],'PhaseLockingData');
