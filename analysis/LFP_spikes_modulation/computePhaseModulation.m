@@ -216,10 +216,6 @@ if hgammaModulation
     end
 end
 
-%% 6. Modulation spetra
-if modulationSpectra
-   getSpikesModulationSpectra; 
-end
 
 %% Plotting
 if plotting
