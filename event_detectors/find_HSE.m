@@ -49,7 +49,7 @@ winSize = p.Results.winSize;
 
 %% Set defaults
 
-save_folder = [basepath,'\ripple_wy'];
+save_folder = [basepath, '\', 'rippleHSE'];
 if isempty(cell_ID)
     cell_ID = 1:length(spikes.UID);
 end
@@ -59,7 +59,7 @@ if isempty(name)
 end
 
 if isempty(basename)
-    basename = bz_BasenameFromBasepath(pwd);
+    basename = basenameFromBasepath(pwd);
 end
 
 %% Get spike rate over time
@@ -166,7 +166,7 @@ HSE.detectorinfo.winSize = winSize;
 
 if save_evts
     cd(save_folder);
-    save([basename '.' name '.mat'],'HSE');
+    save([save_folder, '/',basename '.' name '.mat'],'HSE');
 end
 
 %% Create FMA .evt structure and save it
@@ -181,7 +181,7 @@ if save_evts
         events1.description{i+2,1} = [name ' stop'];
     end
     
-    SaveEvents([basename '_' name '.HSE.evt'],events1);
+    SaveEvents([save_folder, '\', basename '_' name '.HSE.evt'],events1);
 end
 
 

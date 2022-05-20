@@ -22,7 +22,7 @@ load([basepath,'\',basename,'.session.mat'])
 digitalChannels = session.analysisTags.digital_optogenetic_channels;
 events = {};
 for i=1:length(digitalChannels)
-  eval(sprintf('digitalIn%d = {}', i));
+  eval(sprintf('digitalIn%d = {}', i))
 end
 for cc = 1: length(digitalChannels)
     num_events = length(digitalIn.timestampsOn{digitalChannels(cc)});
@@ -32,9 +32,10 @@ for cc = 1: length(digitalChannels)
     events.eventID = 1:num_events;
     events.duration = digitalIn.dur{digitalChannels(cc)};
     events.eventIDlabels = digitalChannels(cc); % label represent the digital in channel number
-    assignin('base',['digitalIn',num2str(cc)],events)
-    save([basepath,'\', basename, '.digitalIn',num2str(cc),'.events.mat'], ['digitalIn',num2str(cc)]);
- 
+    assignin('caller',['digitalIn',num2str(cc)],events)
+    %save([basepath,'\', basename, '.digitalIn',num2str(cc),'.events.mat'], ['digitalIn',num2str(cc)]);
+    save([basepath,'\', basename, '.digitalIn',num2str(cc),'.events.mat'], 'events');
+
 end
 
 

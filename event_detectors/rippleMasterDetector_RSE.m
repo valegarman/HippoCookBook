@@ -1,4 +1,4 @@
-function [ripples,SW] = rippleMasterDetector(varargin)
+function [ripples,SW] = rippleMasterDetector_RSE(varargin)
 %   rippleMasterDetector - Wrapped function to compute different
 %                           characteristics about hippocampal ripples (100
 %                           ~ 200 Hz oscillations). It also computes
@@ -73,7 +73,10 @@ function [ripples,SW] = rippleMasterDetector(varargin)
 %    See also bz_Filter, bz_RippleStats, bz_SaveRippleEvents, bz_PlotRippleStats.
 %   
 %   Develop by Manu Valero and Pablo Abad 2022. Buzsaki Lab.
-%   Edited by Winnie Yang 2022, Buzsaki lab to add find_SharpWaves as
+%   Deloped based on rippleMasterDetector by Winnie Yang 2022, Buzsaki lab :
+%       1.to add find_SharpWaves
+%       2.detect ripple HSE
+%       3.different default parameters
 %   option
 warning('this function is under development and may not work... yet')
 
@@ -82,15 +85,15 @@ p = inputParser;
 addParameter(p,'basepath',pwd,@isdir);
 addParameter(p,'rippleChannel',[],@isnumeric);
 addParameter(p,'SWChannel',[],@isnumeric);
-addParameter(p,'thresholds',[1.5 3.5],@isnumeric);
+addParameter(p,'thresholds',[1.5 3],@isnumeric);
 addParameter(p,'SWthresholds',[-0.5 -2], @isnumeric);
-addParameter(p,'durations',[30 100],@isnumeric);
+addParameter(p,'durations',[10 1000],@isnumeric);
 addParameter(p,'restrict',[],@isnumeric);
 addParameter(p,'frequency',1250,@isnumeric);
 addParameter(p,'stdev',[],@isnumeric);
 addParameter(p,'show','off',@isstr);
 addParameter(p,'noise',[],@ismatrix);
-addParameter(p,'passband',[120 200],@isnumeric);
+addParameter(p,'passband',[80 250],@isnumeric);
 addParameter(p,'SWpassband',[2 10],@isnumeric);
 addParameter(p,'EMGThresh',1,@isnumeric);
 addParameter(p,'saveMat',true,@islogical);
@@ -131,6 +134,8 @@ force = p.Results.force;
 removeRipplesStimulation = p.Results.removeRipplesStimulation;
 compute_RSE = p.Results.compute_RSE;
 SharpWaves = p.Results.SharpWaves;
+%%
+save_folder = [basepath,'\','rippleHSE'];
 %% Load Session Metadata and several variables if not provided
 % session = sessionTemplate(basepath,'showGUI',false);
 session = loadSession(basepath);
@@ -170,9 +175,9 @@ end
 ripples = findRipples(rippleChannel,'thresholds',thresholds,'passband',passband,...
     'EMGThresh',EMGThresh,'durations',durations, 'saveMat',false);
 ripples = removeArtifactsFromEvents(ripples);
-ripples = eventSpikingTreshold(ripples,[],'spikingThreshold',eventSpikeThreshold);
+%ripples = eventSpikingTreshold(ripples,[],'spikingThreshold',eventSpikeThreshold);
 plotRippleChannel('rippleChannel',rippleChannel,'ripples',ripples); % to do, run this after ripple detection
-
+%% remove stimulation
 if removeRipplesStimulation
     try
         % Remove ripples durting stimulation artifacts
@@ -213,22 +218,44 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Computing SharpWaves
 %%%%%%%%%%%%%%%%%%%%%%%%%
-if SharpWaves
-    SW = findSharpWaves('ripples',ripples,'rippleChannel',rippleChannel,'SWChannel',SWChannel,...
-        'passband',passband,'SWpassband',SWpassband);
+% if SharpWaves
+%     SW = findSharpWaves('ripples',ripples,'rippleChannel',rippleChannel,'SWChannel',SWChannel,...
+%         'passband',passband,'SWpassband',SWpassband);
+% 
+% end
+%% Create FMA .evt structure and save it
+% % .evt (FMA standard)
+% if save_events
+%     n = length(ripples);
+%     d1 = cat(1,ripples.timestamps(:,1),ripples.peaks,ripples.timestamps(:,2));%DS1triad(:,1:3)';
+%     events1.time = d1(:);
+%     for i = 1:3:3*n
+%         events1.description{i,1} = [name ' start'];
+%         events1.description{i+1,1} = [name ' peak'];
+%         events1.description{i+2,1} = [name ' stop'];
+%     end
+%     
+%     SaveEvents([basepath, '\', basename '_' name '.RIP.evt'],events1);
+% end
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Computing ripple high synchronous events start and ending time
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+if compute_RSE
+    find_rippleHSE(basepath,ripples);
 end
-
 
 
 
 %% OUTPUT
 if saveMat
     disp('Saving Ripples Results...');
-    save([session.general.name , '.ripples.events.mat'],'ripples');
+    save([save_folder, '\',session.general.name , '.ripples.events.mat'],'ripples');
     
-    disp('Saving SharpWaves Results...');
-    save([session.general.name , '.sharpwaves.events.mat'],'SW');
+%     disp('Saving SharpWaves Results...');
+%     save([session.general.name , '.sharpwaves.events.mat'],'SW');
 end
 
 

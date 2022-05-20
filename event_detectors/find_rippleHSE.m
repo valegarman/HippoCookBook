@@ -7,23 +7,28 @@ p = inputParser;
 addParameter(p,'interval','all'); 
 addParameter(p,'save_evt',true);
 addParameter(p,'cell_ID',[]); 
-
+addParameter(p,'force',false);
 parse(p,varargin{:});
 interval = p.Results.interval;
 save_evt = p.Results.save_evt;
 cell_ID = p.Results.cell_ID;
+force = p.Results.force;
 %%
-basename = bz_BasenameFromBasepath(basepath);
-save_folder = basepath;
+basename = basenameFromBasepath(basepath);
+save_folder = [basepath,'\','rippleHSE'];
+if ~exist(save_folder, 'dir')
+    mkdir(save_folder);
+end
+
 %% (1) find highly sychronized events (HSE)
 % check if the HSE file exist,if not call find_HSE
 cd(save_folder)
-if isfile([basename,'.HSE.mat'])
+if isfile([basename,'.HSE.mat']) && ~force
     load([basename,'.HSE.mat'],'-mat');
 else
     cd(basepath)
-    spikes = bz_GetSpikes();
-    HSE = find_HSE(basepath,spikes,'cell_ID',cell_ID);
+    spikes = loadSpikes_spindices();
+    HSE = find_HSE(basepath,spikes,'cell_ID',cell_ID,'nSigma',2);
 end
 
 
@@ -61,8 +66,8 @@ for i = 1:3:3*n
 end
 
 if save_evt
-    cd(save_folder)
-    SaveEvents([basename '_RSE.RSE.evt'],events1);
+    %cd(save_folder)
+    SaveEvents([save_folder,'\',basename '_RSE.RSE.evt'],events1);
 end
 
 

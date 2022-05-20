@@ -191,7 +191,7 @@ UDStates = detectUD('plotOpt', true,'forceDetect',true','NREMInts','all');
 psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true);
 
 % 8.2 Ripples
-ripples = rippleMasterDetector('SWChannel',SWChannel,'force',true, 'compute_RSE',true);
+ripples = rippleMasterDetector_RSE('SWChannel',SWChannel,'force',true, 'compute_RSE',true);
 psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true);
 
 % 8.3 Theta intervals

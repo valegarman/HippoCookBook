@@ -249,8 +249,12 @@ if any(ismember(listOfAnalysis,{'digitalPulses', 'analogPulses'}))
         warning('Error on PSTH from digital and/or analog inputs! ');
     end
 end
+
 % SAVE DIGIGTAIN EVENTS FOR VISUALIZE IN NEUROSCOPE
 save_digitalIn_events_neuroscope();
+plot_optostimulus_dur_ISI();
+
+
 % DOWN-STATES
 if any(ismember(listOfAnalysis,'downStates'))
     try
