@@ -99,6 +99,20 @@ computeSessionSummary('basepath','J:\fCamk7\fCamk7_220422_sess18','exclude',{'an
 
 
 updateExpFolder({'Y:\fCamk7','T:\fCamk7','X:\fCamk7','T:\'},'J:\fCamk7');
+<<<<<<< HEAD
+preprocessSession('basepath','J:\fCamk7\fCamk7_220425_sess19','cleanArtifacts',({[],[1 2 6]}),'analogChannelsList',[],'digitalChannelsList',[1 2 6],'bazler_ttl_channel',10,'getPos',false,'sessionSummary',false);
+preprocessSession('basepath','J:\fCamk7\fCamk7_220426_sess20','cleanArtifacts',({[],[1 2 6]}),'analogChannelsList',[],'digitalChannelsList',[1 2 6],'bazler_ttl_channel',10,'getPos',false,'sessionSummary',false);
+preprocessSession('basepath','J:\fCamk7\fCamk7_220427_sess21','cleanArtifacts',({[],[1 2 6]}),'analogChannelsList',[],'digitalChannelsList',[1 2 6],'bazler_ttl_channel',10,'getPos',false,'sessionSummary',false);
+
+
+
+preprocessSession('basepath','J:\fCamk7\fCamk7_220505_sess25','cleanArtifacts',({[],[1 2 6]}),'analogChannelsList',[],'digitalChannelsList',[1 2 6],'bazler_ttl_channel',10,'getPos',false,'sessionSummary',false);
+preprocessSession('basepath','J:\fCamk7\fCamk7_220506_sess26','cleanArtifacts',({[],[1 2 6]}),'analogChannelsList',[],'digitalChannelsList',[1 2 6],'bazler_ttl_channel',10,'getPos',false,'sessionSummary',false);
+preprocessSession('basepath','J:\fCamk7\fCamk7_220509_sess27','cleanArtifacts',({[],[1 2 6]}),'analogChannelsList',[],'digitalChannelsList',[1 2 6],'bazler_ttl_channel',10,'getPos',false,'sessionSummary',false);
+preprocessSession('basepath','J:\fCamk7\fCamk7_220510_sess28','cleanArtifacts',({[],[1 2 6]}),'analogChannelsList',[],'digitalChannelsList',[1 2 6],'bazler_ttl_channel',10,'getPos',false,'sessionSummary',false);
+preprocessSession('basepath','J:\fCamk7\fCamk7_220511_sess29','cleanArtifacts',({[],[1 2 6]}),'analogChannelsList',[],'digitalChannelsList',[1 2 6],'bazler_ttl_channel',10,'getPos',false,'sessionSummary',false);
+
+=======
 preprocessSession('basepath','J:\fCamk7\fCamk7_220425_sess19','cleanArtifacts',({[],[1 2 6]}),'analogChannelsList',[],'digitalChannelsList',[1 2 6],'bazler_ttl_channel',10,'getPos',true);
 preprocessSession('basepath','J:\fCamk7\fCamk7_220426_sess20','cleanArtifacts',({[],[1 2 6]}),'analogChannelsList',[],'digitalChannelsList',[1 2 6],'bazler_ttl_channel',10,'getPos',true);
 preprocessSession('basepath','J:\fCamk7\fCamk7_220427_sess21','cleanArtifacts',({[],[1 2 6]}),'analogChannelsList',[],'digitalChannelsList',[1 2 6],'bazler_ttl_channel',10,'getPos',true);
@@ -113,6 +127,7 @@ preprocessSession('basepath','J:\fCamk7\fCamk7_220510_sess28','cleanArtifacts',(
 preprocessSession('basepath','J:\fCamk7\fCamk7_220511_sess29','cleanArtifacts',({[],[1 2 6]}),'analogChannelsList',[],'digitalChannelsList',[1 2 6],'bazler_ttl_channel',10,'getPos',false);
 
 
+>>>>>>> 4962ab04febee65e6eb9e0fc7211a4a84a1f137c
 
 computeSessionSummary('basepath','J:\fCamk7\fCamk7_220425_sess19','exclude',{'analogPulses'},'analogChannelsList',[],'digitalChannelsList',[1 2 6]);
 computeSessionSummary('basepath','J:\fCamk7\fCamk7_220426_sess20','exclude',{'analogPulses'},'analogChannelsList',[],'digitalChannelsList',[1 2 6]);

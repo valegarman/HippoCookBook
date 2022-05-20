@@ -292,13 +292,13 @@ else
     phasedistro_wide_smoothZ_doubled = NaN;
     ps_lowRes = NaN;
 end
-PhaseLockingData.phasedistro_wide = phasedistro_wide;
-PhaseLockingData.phasedistro_wide_prob = phasedistro_wide_prob;
-PhaseLockingData.phasedistro_wide_Z = phasedistro_wide_Z;
-PhaseLockingData.phasedistro_wide_smoothZ = phasedistro_wide_smoothZ;
-PhaseLockingData.phasedistro_wide_smoothZ_doubled = phasedistro_wide_smoothZ_doubled;
-PhaseLockingData.phasebins_wide = ps_lowRes;
-PhaseLockingData.phasebins_wide_doubled = [ps_lowRes ps_lowRes + 2*pi];
+PhaseLockingData.phasedistro_wide = phasedistro_wide';
+PhaseLockingData.phasedistro_wide_prob = phasedistro_wide_prob';
+PhaseLockingData.phasedistro_wide_Z = phasedistro_wide_Z';
+PhaseLockingData.phasedistro_wide_smoothZ = phasedistro_wide_smoothZ';
+PhaseLockingData.phasedistro_wide_smoothZ_doubled = phasedistro_wide_smoothZ_doubled';
+PhaseLockingData.phasebins_wide = ps_lowRes';
+PhaseLockingData.phasebins_wide_doubled = [ps_lowRes' ps_lowRes' + 2*pi];
 
 if saveMat
     save([lfp.Filename(1:end-4) '.PhaseLockingData_',num2str(passband(1)),'-',num2str(passband(end)),'.cellinfo.mat'],'PhaseLockingData');

@@ -39,7 +39,7 @@ addParameter(p,'saveMat',true, @islogical);
 addParameter(p,'excludeIntervals',[],@isnumeric);
 addParameter(p,'skipStimulationPeriods',true,@islogical);
 addParameter(p,'powerThresh',2,@isnumeric);
-addParameter(p,'freq_intervals',[1:5:140],@isnumeric);
+addParameter(p,'freq_intervals',[1:5:100],@isnumeric); [1:5:140]
 addParameter(p,'pval_cutoff',0.01,@isnumeric);
 addParameter(p,'intervals',[0 Inf],@isnumeric);
 addParameter(p,'lfp',[]);
@@ -109,96 +109,36 @@ session = loadSession;
 lfp = getLFP(lfp, 'intervals', intervals, 'downsample', round(session.extracellular.srLfp/downsampled));
 samplingRate = lfp.samplingRate;
 
-clear freq_centers phasedistros mean_angle vector_length concentration p_Rayleigh vector_length_sig mean_angle_sig
+phasedistro_wide = []; mean_angle = []; vector_length = []; concentration = []; p_Rayleigh = [];
 tic
 textprogressbar(char('Computing modulation: '));
-for ii = 1:length(freq_intervals) - 1
+for ii = 1:(length(freq_intervals) - 1)
     freq1 = round(freq_intervals(ii) - diff(freq_intervals(ii:ii+1)) * padding);
     if freq1 < 1
         freq1 = 1;
     end
     freq2 = round(freq_intervals(ii+1) + diff(freq_intervals(ii:ii+1)) * padding);
+    clear mod
+    mod = phaseModulation(spikes,lfp,[freq1 freq2],'intervals',intervals,'useThresh',true,...
+        'useMinWidth',false,'powerThresh',0,'samplingRate',samplingRate,'saveMat',false,'plotting',false);
     
-    [b a] = butter(3,[freq_intervals(ii)/(samplingRate/2) freq2/(samplingRate/2)],'bandpass'); % order 3
-    if gpuDeviceCount > 0
-        reset(gpuDevice(1));
-        filt = gpuArray(FiltFiltM(b,a,double(lfp.data(:,1))));
-    else
-        filt = FiltFiltM(b,a,double(lfp.data(:,1)));
-    end 
-    power = fastrms(filt,ceil(samplingRate./freq1));  % approximate power is frequency band
-    hilb = hilbert(filt);
-    lfpphase = mod(angle(hilb),2*pi);
-    
-    clear filt
-    % finding intervals above threshold
-    thresh = mean(power) + std(power)*powerThresh;
-    below=find(power<thresh);
-    below=find(power<thresh);
-    clear below_thresh
-    if max(diff(diff(below))) == 0
-        below_thresh = [below(1) below(end)];
-    elseif length(below)>0
-        ends=find(diff(below)~=1);
-        ends(end+1)=length(below);
-        ends=sort(ends);
-        lengths=diff(ends);
-        stops=below(ends)./samplingRate;
-        starts=lengths./samplingRate;
-        starts = [1; starts];
-        below_thresh(:,2)=stops;
-        below_thresh(:,1)=stops-starts;
-    else
-        below_thresh=[];
-    end
-    intervals = SubtractIntervals(intervals,below_thresh);  % subtract out low power intervals
-    
-    if useMinWidth
-        minWidth = (samplingRate./freq_intervals(ii+1)) * 2;
-        intervals = intervals(diff(intervals')>minWidth./samplingRate,:); % only keep min width epochs
-    end
-    
-    % get phases for each cell
-    for jj = 1:length(spikes.times)
-        bools = InIntervals(spikes.times{jj},intervals);
-        s =spikes.times{jj}(bools);
-        
-        if ~isempty(s)
-            spkphases = lfpphase(ceil(s*samplingRate));
-            [phasedistros(ii,jj,:), phasebins, ps] = CircularDistribution(gather(spkphases),'nBins',numPhaseBins);
-            
-            mean_angle(ii,jj) = wrapTo2Pi(ps.m);
-            vector_length(ii,jj) = ps.r;
-            concentration(ii,jj) = ps.k;
-            p_Rayleigh(ii,jj) = ps.p;
-            
-            if ps.p<0.01
-                vector_length_sig(ii,jj) = ps.r;
-                mean_angle_sig(ii,jj) = wrapTo2Pi(ps.m);
-            else
-                vector_length_sig(ii,jj) = 0;
-                mean_angle_sig(ii,jj) = NaN;
-            end
-        else
-            phasedistros(ii,jj,:) = nan(1,numPhaseBins);
-            mean_angle(ii,jj) = NaN;
-            vector_length(ii,jj) = NaN;
-            concentration(ii,jj) = NaN;
-            p_Rayleigh(ii,jj) = NaN;
-            vector_length_sig = NaN;
-            mean_angle_sig = NaN;
-        end
-    end
-    freq_centers(ii) = mean(freq_intervals(ii:ii+1));
-    
+    phasedistros = cat(3,phasedistro_wide,mod.phasedistro_wide);
+    mean_angle = cat(2,mean_angle,mod.phasestats.m');
+    vector_length = cat(2,vector_length,mod.phasestats.r');
+    concentration = cat(2,concentration,mod.phasestats.k');
+    p_Rayleigh = cat(2,p_Rayleigh,mod.phasestats.p');
     textprogressbar(ii/(length(freq_intervals) - 1)*100);
+    
+    freq_centers(ii) = mean([freq1 freq2]);
 end
 textprogressbar('terminated');
 toc
 
 
+freq_centers= freq_intervals(1:end-1) + mean(diff(freq_intervals))/2;
+
 figure;
-plot(freq_centers, vector_length(:,1));
+plot(freq_centers, vector_length(2,:));
 
 cd(prevPath);
 

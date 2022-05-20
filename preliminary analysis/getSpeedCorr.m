@@ -1,4 +1,4 @@
-function speedCorrs =  getSpeedCorr(basepath, varargin)
+function speedCorrs =  getSpeedCorr(varargin)
 
 p = inputParser;
 addParameter(p,'saveMat',true,@islogical);
@@ -9,6 +9,8 @@ addParameter(p,'fs_tracking',30,@isnumeric);
 addParameter(p,'order',2,@isnumeric);
 addParameter(p,'trials',true,@islogical);
 addParameter(p,'plt',true,@islogical);
+addParameter(p,'basepath',pwd,@isfolder);
+addParameter(p,'force',false,@islogical);
 
 parse(p,varargin{:});
 saveMat = p.Results.saveMat;
@@ -19,8 +21,20 @@ fs_tracking = p.Results.fs_tracking;
 order = p.Results.order;
 trials = p.Results.trials;
 plt = p.Results.plt;
+basepath = p.Results.basepath;
+force = p.Results.force;
 
-cd(basepath)
+% Deal with inputs
+prevPath = pwd;
+cd(basepath);
+
+targetFile = dir('*.speedCorrs.cellinfo.mat');
+if ~isempty(targetFile) && ~force
+    disp('Speed correlation already computed! Loading file...');
+    load(targetFile.name);
+    return
+end
+
 basename = basenameFromBasepath(pwd);
 disp(['working on session ' basename])
 
@@ -328,11 +342,15 @@ if plt
     else
     end
 end
-speedCorrs.speedVals     = speed_val;
+speedCorrs.speedVals     = permute(speed_val, [2 1 3]);
 speedCorrs.prc_vals      = prc_vals;
 speedCorrs.corrCoeff     = speed_fr_corr;
 speedCorrs.leastSquares  = ls;
 
 if saveMat
     save([basename, '.speedCorrs.cellinfo.mat'], 'speedCorrs');
+end
+
+cd(prevPath);
+
 end
