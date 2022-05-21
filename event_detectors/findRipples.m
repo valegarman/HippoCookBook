@@ -184,8 +184,18 @@ if ~isempty(restrict)
 end
 keep = logical(keep); 
 
-[normalizedSquaredSignal,sd] = unity(Filter0(window,sum(squaredSignal,2)),sd,keep);
 
+normalizedSquaredSignal_new = normalize(Filter0(window,sum(squaredSignal,2)));
+
+[normalizedSquaredSignal,sd] = unity(Filter0(window,sum(squaredSignal,2)),sd,keep);
+%%
+figure; histogram(normalizedSquaredSignal);
+xlim([-0.5 2]);
+xlabel('normalized Squre signal');
+ylabel('count');
+title(basename);
+saveas(gcf,[basepath,'\SummaryFigures\ripplePowerDist.fig'])
+%%
 % Detect ripple periods by thresholding normalized squared signal
 thresholded = normalizedSquaredSignal > lowThresholdFactor;
 start = find(diff(thresholded)>0);
