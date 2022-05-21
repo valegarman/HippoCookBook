@@ -28,7 +28,7 @@ if isfile([basename,'.HSE.mat']) && ~force
 else
     cd(basepath)
     spikes = loadSpikes_spindices();
-    HSE = find_HSE(basepath,spikes,'cell_ID',cell_ID,'nSigma',2);
+    HSE = find_HSE(basepath,spikes,'cell_ID',cell_ID,'nSigma',1.5,'low_thr',0.5);
 end
 
 

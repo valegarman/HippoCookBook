@@ -33,6 +33,8 @@ addParameter(p,'save_evts',true,@islogical);
 addParameter(p,'mindur',.01,@isnumeric);
 addParameter(p,'maxdur',1,@isnumeric);
 addParameter(p,'winSize',0.5,@isnumeric);
+addParameter(p,'low_thr',0.5,@isnumeric);
+
 
 parse(p,varargin{:})
 
@@ -46,7 +48,7 @@ save_evts = p.Results.save_evts;
 mindur = p.Results.mindur;
 maxdur = p.Results.maxdur;
 winSize = p.Results.winSize;
-
+low_thr = p.Results.low_thr;
 %% Set defaults
 
 save_folder = [basepath, '\', 'rippleHSE'];
@@ -78,7 +80,7 @@ spkhist = zscore(spkhist);
 
 evtidx = spkhist>nSigma;
 evtidx = find(diff(evtidx)==1)+1;% diff helps to find the boundary of a chunk of spkhist > nSigma
-belowm = spkhist<spkmean; % Logical to run faster
+belowm = spkhist<low_thr; % Logical to run faster
 [startID, stopID, evtstart, evtstop, evtdur, evtamp, evtpeak] = deal(zeros(1,length(evtidx)));
 %startID = 1; % Initialize to 1 for the first comparison to work
 
