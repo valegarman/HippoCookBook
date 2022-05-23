@@ -289,7 +289,7 @@ end
 speedCorr = getSpeedCorr('numQuantiles',20);
 
 %% 14. Summary per cell
-getSummaryPerCell;
+getSummaryPer
 
 %% 14. Indexing
 % session = sessionTemplate(basepath,'showGUI',false);

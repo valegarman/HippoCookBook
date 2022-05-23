@@ -34,15 +34,21 @@ onlyOptoTag = p.Results.onlyOptoTag;
 prevPath = pwd;
 cd(basepath);
 
-if onlyOptoTag
-    optogenetic_responses = getOptogeneticResponse;
-    UID = find(optogenetic_responses.threeWaysTest==1);
-    clear optogenetic_responses
-end
-
 if isempty(UID)
     spikes = loadSpikes;
     UID = spikes.UID;
+end
+
+if onlyOptoTag
+    optogenetic_responses = getOptogeneticResponse;
+    UID = find(optogenetic_responses.threeWaysTest==1);
+    
+    if isempty(UID)
+        disp('No optotagged cells!');
+        return
+    end
+    
+    clear optogenetic_responses
 end
 
 % collecting pieces
@@ -96,7 +102,6 @@ speedVals = bsxfun(@rdivide,mean(speedCorr.speedVals,3),cell_metrics.firingRate(
 
 % spatial modulation
 targetFile = dir('*.spatialModulation.cellinfo.mat'); load(targetFile.name);
-
 
 % behavioural events
 targetFile = dir('*.behavior.cellinfo.mat'); load(targetFile.name);
