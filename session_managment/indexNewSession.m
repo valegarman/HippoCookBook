@@ -283,7 +283,13 @@ try
 end
 
 %% 13. Speed Score
+<<<<<<< HEAD
+try
+    speedCorr = getSpeedCorr(basepath,'numQuantiles',20);
+end
+=======
 speedCorr = getSpeedCorr('numQuantiles',20);
+>>>>>>> 05bc64dc90256bc10b8c8e307571b6bd76d89053
 %% 14. Indexing
 % session = sessionTemplate(basepath,'showGUI',false);
 session = loadSession(basepath);
