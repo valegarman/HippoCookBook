@@ -100,7 +100,6 @@ targetFile = dir('*.spatialModulation.cellinfo.mat'); load(targetFile.name);
 
 % behavioural events
 targetFile = dir('*.behavior.cellinfo.mat'); load(targetFile.name);
-
 for ii = 1:length(UID)
     figure;
     set(gcf,'Position',[200 -500 1400 800]);
@@ -179,7 +178,9 @@ for ii = 1:length(UID)
     xHist = smooth(histcounts(cell_metrics.trilat_y(all_ww), edges),1);
     xHist = xHist/max(xHist); xHist = xHist *  300;
     patch([0 xHist' 0],centers([1 1:end 1]),ww_color,'EdgeColor','none','FaceAlpha',.5);
-    plot([0 300],[cell_metrics.trilat_y(UID(ii)) cell_metrics.trilat_y(UID(ii))],'color',cell_color,'LineWidth',1.5)
+    plot([0 50],[cell_metrics.trilat_y(UID(ii)) cell_metrics.trilat_y(UID(ii))],'color',cell_color,'LineWidth',1.5)
+    xlim([min(cell_metrics.general.chanCoords.x)+50 max(cell_metrics.general.chanCoords.x)+150]);
+    ylim([min(cell_metrics.general.chanCoords.y)-100 max(cell_metrics.general.chanCoords.y)+100]);
     title(cell_metrics.brainRegion(UID(ii)),'FontWeight','normal');
     
     % firing rate

@@ -36,7 +36,13 @@ spikes = loadSpikes('getWaveformsFromDat',getWaveformsFromDat);
 
 % plot spikes summary
 disp('Plotting spikes summary...');
-if exist('chanMap.mat','file')
+if exist([basenameFromBasepath(pwd) '.chanCoords.channelInfo.mat'] ,'file')
+    load([basenameFromBasepath(pwd) '.chanCoords.channelInfo.mat'],'chanCoords');
+    xcoords = chanCoords.x - min(chanCoords.x); xcoords = xcoords/max(xcoords);
+    ycoords = chanCoords.y - min(chanCoords.y); ycoords = ycoords/max(ycoords); 
+    xcoords(excludeChannels) = [];
+    ycoords(excludeChannels) = [];
+elseif   exist('chanMap.mat','file')
     load('chanMap.mat','xcoords','ycoords');
     xcoords = xcoords - min(xcoords); xcoords = xcoords/max(xcoords);
     ycoords = ycoords - min(ycoords); ycoords = ycoords/max(ycoords); 
