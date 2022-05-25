@@ -39,7 +39,7 @@ try
     v = 0;
     w = 0;
     global winSize minP maxP delay thr;                 % moving windows size
-    winSize = 5;
+    winSize = 1;
 	minP = -2.;                         % set y-min
     maxP = 2;  
     delay = 0.001;                  % make sure sample faster than resolution 
@@ -85,22 +85,24 @@ try
     while ishandle(hMain) % Loop when Plot is Active will run until plot is closed!!
         absTime = toc; % track absolute time
         t(ii)=absTime; % time plot is absolute time - time plot
-        v(ii)=fscanf(s1,'%i')/204.6;        % must define the input % d, %f, %s, etc,
-        w(ii)=fscanf(s1,'%i')/204.6;        % must define the input % d, %f, %s, etc, 
+        v(ii)=fscanf(s1,'%f')/204.6;        % must define the input % d, %f, %s, etc,
+        w(ii)=fscanf(s1,'%f')/204.6;        % must define the input % d, %f, %s, etc, 
 
-        set(plotGraph,'XData',t,'YData',v); % Converting 1023 base to V (1023 is 5V)
+        %set(plotGraph,'XData',t,'YData',v); % Converting 1023 base to V (1023 is 5V)
         axis([zeroPlot zeroPlot+winSize minP maxP]);
         % disp(v(ii));
         if t(ii) > zeroPlot+winSize % max winSize
             ii = 1; % initialize ii
+            plotGraph = plot(t,v,'-r');
             t = t(ii);
             v = v(ii); 
             zeroPlot = absTime;
-            delete(plotGraph);
-            plotGraph = plot(t,v,'-r');  % start again plotting!
-            delete(plotThr);
-            plotThr = plot([zeroPlot zeroPlot+winSize],[thr thr],'--g');  % every AnalogRead needs to be on its own Plotgraph
+            %delete(plotGraph);
+            %plotGraph = plot(t,v,'-r');  % start again plotting!
+            %delete(plotThr);
+            %plotThr = plot([zeroPlot zeroPlot+winSize],[thr thr],'--g');  % every AnalogRead needs to be on its own Plotgraph
             % fwrite(s1, 5, 'int8'); % send threshold
+            clear t v w
         end
         ii = ii + 1;
         pause(delay);

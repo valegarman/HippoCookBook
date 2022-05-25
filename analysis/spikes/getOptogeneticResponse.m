@@ -44,6 +44,7 @@ addParameter(p,'force',false,@islogical);
 addParameter(p,'minNumberOfPulses',200,@isnumeric);
 addParameter(p,'minDuration',0.004,@isnumeric); % 4 ms
 addParameter(p,'saveEventsFile',true,@islogical);
+addParameter(p,'duration_round_decimal',3,@isscalar);
 
 parse(p, varargin{:});
 analogChannelsList = p.Results.analogChannelsList;
@@ -61,6 +62,7 @@ force = p.Results.force;
 minNumberOfPulses = p.Results.minNumberOfPulses;
 minDuration = p.Results.minDuration;
 saveEventsFile = p.Results.saveEventsFile;
+duration_round_decimal = p.Results.duration_round_decimal;
 
 % Deal with inputs
 prevPath = pwd;
@@ -130,7 +132,7 @@ pulses.isDigital = [zeros(size(pulsesAnalog.analogChannelsList)); ones(size(puls
 
 % get cell response
 optogeneticResponses = [];
-pulseDuration = unique(round(pulses.duration,3)); % because code only codes for channel, we take minimum duration channel for responses
+pulseDuration = unique(round(pulses.duration,duration_round_decimal)); % because code only codes for channel, we take minimum duration channel for responses
 channels = unique(pulses.channel); % code per channel, channel x duration should be implemented... 
 timestamps_recording = min(pulses.timestamps(:,2)):1/1250:max(pulses.timestamps(:,2));
 % pulses condition channels x durations

@@ -18,9 +18,19 @@ for ii = 1:length(sessionsTable.SessionName)
         try
 
             %%% your code goes here...
-            [rippleMod,SWMod,thetaMod,lgammaMod,hgammaMod] = computePhaseModulation('rippleChannel',[],'SWChannel',[]);
-            
-            getSummaryPerCell;
+            session = loadSession;
+            try
+                if ~isempty(dir([session.general.name,'.optogeneticPulses.events.mat']))
+                    file = dir([session.general.name,'.optogeneticPulses.events.mat']);
+                    load(file.name);
+                end
+                    excludeManipulationIntervals = optoPulses.stimulationEpochs;
+            catch
+                warning('Not possible to get manipulation periods. Running CellMetrics withouth excluding manipulation epochs');
+            end
+            cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals);
+            close all
+            clear session
             %%%
             
             close all;
