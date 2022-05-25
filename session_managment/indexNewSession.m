@@ -90,7 +90,7 @@ if isempty(indexedProjects_path)
     warning('Not included the path where the indexed Projects .csv variable is located. Trying to find it...');
     indexedProjects_path = fileparts(which([indexedProjects_name,'.csv']));
     if isempty(indexedProjects_path)
-        disp('No indexed Projects .mat file found. Lets create one !' );
+        disp('No indexed Projects .csv file found. Lets create one !' );
         directory = what(hippoCookBook_path);
         cd(directory.path);
         allSessions = [];
@@ -283,13 +283,11 @@ try
 end
 
 %% 13. Speed Score
-<<<<<<< HEAD
+
 try
     speedCorr = getSpeedCorr(basepath,'numQuantiles',20);
 end
-=======
-speedCorr = getSpeedCorr('numQuantiles',20);
->>>>>>> 05bc64dc90256bc10b8c8e307571b6bd76d89053
+
 %% 14. Indexing
 % session = sessionTemplate(basepath,'showGUI',false);
 session = loadSession(basepath);
