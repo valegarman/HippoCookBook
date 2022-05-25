@@ -90,7 +90,7 @@ if isempty(indexedProjects_path)
     warning('Not included the path where the indexed Projects .csv variable is located. Trying to find it...');
     indexedProjects_path = fileparts(which([indexedProjects_name,'.csv']));
     if isempty(indexedProjects_path)
-        disp('No indexed Projects .mat file found. Lets create one !' );
+        disp('No indexed Projects .csv file found. Lets create one !' );
         directory = what(hippoCookBook_path);
         cd(directory.path);
         allSessions = [];
@@ -213,7 +213,7 @@ spikeFeatures;
 getAverageCCG('force',true);
 % pulses.analogChannel = analogCh;
 % save([session.general.name,'.pulses.events.mat'],'pulses');
-optogeneticResponses = getOptogeneticResponse('numRep',500,'force',true);
+optogeneticResponses = getOptogeneticResponse('numRep',500,'force',true,'duration_round_decimal',1);
 
 %% 8. Check Brain Events
 % Trying changes in detecUD_temp
@@ -262,16 +262,16 @@ end
 try 
     behaviour = getSessionLinearize;
     psth_lReward = spikesPsth([behaviour.events.lReward],'numRep',100,'saveMat',false,...
-        'min_pulsesNumber',15,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
+        'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
     psth_rReward = spikesPsth([behaviour.events.rReward],'numRep',100,'saveMat',false,...
-        'min_pulsesNumber',15,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
+        'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
     psth_reward = spikesPsth([behaviour.events.lReward; behaviour.events.rReward],'numRep',100,'saveMat',false,...
-        'min_pulsesNumber',15,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
+        'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
     
     psth_intersection = spikesPsth([behaviour.events.intersection],'numRep',100,'saveMat',false,...
-        'min_pulsesNumber',15,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
+        'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
     psth_startPoint = spikesPsth([behaviour.events.startPoint],'numRep',100,'saveMat',false,...
-        'min_pulsesNumber',15,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
+        'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
 
     behaviour.psth_lReward = psth_lReward;
     behaviour.psth_rReward = psth_rReward;
@@ -283,6 +283,12 @@ try
 end
 
 %% 13. Speed Score
+<<<<<<< HEAD
+
+try
+    speedCorr = getSpeedCorr(basepath,'numQuantiles',20);
+end
+=======
 try
     speedCorr = getSpeedCorr(basepath,'numQuantiles',20);
 end
@@ -290,6 +296,7 @@ speedCorr = getSpeedCorr('numQuantiles',20);
 
 %% 14. Summary per cell
 getSummaryPerCell;
+>>>>>>> 5184f6eacf39cead288e523596975674cc2c3059
 
 %% 14. Indexing
 % session = sessionTemplate(basepath,'showGUI',false);
