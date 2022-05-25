@@ -50,7 +50,7 @@ addParameter(p,'bazler_ttl_channel',[],@isnumeric);
 addParameter(p,'forceAnalogPulses',false,@islogical);
 addParameter(p,'forceDigitalPulses',false,@islogical);
 addParameter(p,'tracking_pixel_cm',0.1149,@isnumeric);
-addParameter(p,'probe_type',[],@ischar);
+addParameter(p,'probe_type',[],@ischar); % 
 
 parse(p,varargin{:})
 
@@ -156,7 +156,10 @@ if ~isempty(probe_type)
             xlabel('um'); ylabel('um');
             title(['A5x12-16-Buz-lin-5mm-100-200-160-177 probe'],'FontWeight','normal');
             xlim([min(chanCoords.x)-100 max(chanCoords.x)+100]);
-            xlim([min(chanCoords.x)-100 max(chanCoords.x)+100]);
+            ylim([min(chanCoords.y)-100 max(chanCoords.y)+100]);
+            set(gca,'TickDir','out');
+            mkdir('SummaryFigures');
+            saveas(gcf,['SummaryFigures\probe_layout.png']);
             
             session = loadSession(basepath);
             session.animal.probeImplants{1}.probe = 'A5x12-16-Buz-lin-5mm-100-200-160-177';
@@ -280,7 +283,14 @@ try
 end
 
 %% 13. Speed Score
+try
+    speedCorr = getSpeedCorr(basepath,'numQuantiles',20);
+end
 speedCorr = getSpeedCorr('numQuantiles',20);
+
+%% 14. Summary per cell
+getSummaryPer
+
 %% 14. Indexing
 % session = sessionTemplate(basepath,'showGUI',false);
 session = loadSession(basepath);

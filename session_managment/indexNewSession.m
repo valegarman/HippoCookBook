@@ -283,10 +283,20 @@ try
 end
 
 %% 13. Speed Score
+<<<<<<< HEAD
 
 try
     speedCorr = getSpeedCorr(basepath,'numQuantiles',20);
 end
+=======
+try
+    speedCorr = getSpeedCorr(basepath,'numQuantiles',20);
+end
+speedCorr = getSpeedCorr('numQuantiles',20);
+
+%% 14. Summary per cell
+getSummaryPerCell;
+>>>>>>> 5184f6eacf39cead288e523596975674cc2c3059
 
 %% 14. Indexing
 % session = sessionTemplate(basepath,'showGUI',false);
