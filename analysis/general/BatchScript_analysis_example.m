@@ -18,9 +18,13 @@ for ii = 1:length(sessionsTable.SessionName)
         try
 
             %%% your code goes here...
+<<<<<<< HEAD
 %             [rippleMod,SWMod,thetaMod,lgammaMod,hgammaMod] = computePhaseModulation('rippleChannel',[],'SWChannel',[]);
             getACGPeak;
             getSummaryPerCell;
+=======
+            getAverageCCG('force',true);
+>>>>>>> 9fba728ccef17bf4c18938220fe2791f08817b75
             %%%
             
             close all;

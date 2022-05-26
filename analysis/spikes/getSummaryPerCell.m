@@ -291,15 +291,15 @@ for ii = 1:length(UID)
     % avCCG
     subplot(5,5,9)
     hold on
-    plotFill(averageCCG.timestamps,averageCCG.ZmeanCCG(all_nw,:),'color',nw_color,'style','filled');
-    plotFill(averageCCG.timestamps,averageCCG.ZmeanCCG(all_ww,:),'color',ww_color,'style','filled');
-    plotFill(averageCCG.timestamps,averageCCG.ZmeanCCG(all_pyr,:),'color',pyr_color,'style','filled');
-    plot(averageCCG.timestamps,averageCCG.ZmeanCCG(UID(ii),:),'color',cell_color,'LineWidth',1.5);
+    plotFill(averageCCG.timestamps,averageCCG.ZmedianCCG(all_nw,:),'color',nw_color,'style','filled');
+    plotFill(averageCCG.timestamps,averageCCG.ZmedianCCG(all_ww,:),'color',ww_color,'style','filled');
+    plotFill(averageCCG.timestamps,averageCCG.ZmedianCCG(all_pyr,:),'color',pyr_color,'style','filled');
+    plot(averageCCG.timestamps,averageCCG.ZmedianCCG(UID(ii),:),'color',cell_color,'LineWidth',1.5);
 
     scatter(rand(length(find(all_pyr)),1)/10 + .35, averageCCG.ccgIndex(all_pyr),20,pyr_color,'filled');
     scatter(rand(length(find(all_nw)),1)/10 + .4, averageCCG.ccgIndex(all_nw),20,nw_color,'filled');
     scatter(rand(length(find(all_ww)),1)/10 + .45, averageCCG.ccgIndex(all_ww),20,ww_color,'filled');
-    scatter(.41, run_quiet_index(UID(1)),20,cell_color,'filled');
+    scatter(.41, averageCCG.ccgIndex(UID(ii)),20,cell_color,'filled');
     axis tight
     xlabel('Time (s)'); ylabel('Rate (SD)');
     
