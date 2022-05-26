@@ -94,7 +94,7 @@ if isempty(indexedProjects_path)
         directory = what(hippoCookBook_path);
         cd(directory.path);
         allSessions = [];
-        save([indexedProjects_name,'.mat'],'allSessions');
+        save([indexedProjects_name,'.csv'],'allSessions');
         indexedProjects_path = fileparts(which([indexedProjects_name,'.csv']));
     end
 end
@@ -283,20 +283,13 @@ try
 end
 
 %% 13. Speed Score
-<<<<<<< HEAD
 
 try
     speedCorr = getSpeedCorr(basepath,'numQuantiles',20);
 end
-=======
-try
-    speedCorr = getSpeedCorr(basepath,'numQuantiles',20);
-end
-speedCorr = getSpeedCorr('numQuantiles',20);
 
 %% 14. Summary per cell
 getSummaryPerCell;
->>>>>>> 5184f6eacf39cead288e523596975674cc2c3059
 
 %% 14. Indexing
 % session = sessionTemplate(basepath,'showGUI',false);
