@@ -18,6 +18,7 @@ function [averageCCG] = getAverageCCG(varargin)
 % excludeIntervals 
 %               2xN intervals to exlude
 % winIndex      Default, [-.01 .01];
+% interp0       Default, true.
 %
 % OUTPUTS
 % averageCCG
@@ -37,6 +38,7 @@ addParameter(p,'force',false,@islogical);
 addParameter(p,'skipStimulationPeriods',true,@islogical);
 addParameter(p,'excludeIntervals',[],@isnumeric);
 addParameter(p,'winIndex',[-.01 .01],@isnumeric);
+addParameter(p,'interp0',[-.01 .01],@isnumeric);
 
 parse(p, varargin{:});
 basepath = p.Results.basepath;
@@ -50,6 +52,7 @@ force = p.Results.force;
 skipStimulationPeriods = p.Results.skipStimulationPeriods;
 excludeIntervals = p.Results.excludeIntervals;
 winIndex = p.Results.winIndex;
+interp0 = p.Results.interp0;
 
 % Deal with inputs
 prevPath = pwd;
@@ -92,8 +95,21 @@ for jj = 1 : length(spikes.times)
     ccZMean(jj,:) = nanmean(zscore(squeeze(allCcg(:,jj,indCell(indCell~=jj)))',[],2)); % zCCG
 end
 
+% interpolate value in 0
+if interp0
+    artifactSamples = find(t_ccg == 0);
+    x_axis = 1:length(t_ccg);
+    x_axis(artifactSamples) = [];
+    for jj = 1:size(ccMedian,1)
+        ccMedian(jj,artifactSamples) = interp1(x_axis,ccMedian(jj,x_axis),artifactSamples);
+        ccZMedian(jj,artifactSamples) = interp1(x_axis,ccZMedian(jj,x_axis),artifactSamples);
+        ccMean(jj,artifactSamples) = interp1(x_axis,ccMean(jj,x_axis),artifactSamples);
+        ccZMean(jj,artifactSamples) = interp1(x_axis,ccZMean(jj,x_axis),artifactSamples);
+    end
+end
+
 win = t_ccg >= winIndex(1) & t_ccg <= winIndex(2);
-ccgIndex = mean(ccZMean(:,win),2);
+ccgIndex = median(ccZMedian(:,win),2);
 
 averageCCG.medianCCG = ccMedian;
 averageCCG.ZmedianCCG = ccZMedian;
@@ -104,6 +120,7 @@ averageCCG.winSize = winSize;
 averageCCG.timestamps = t_ccg;
 averageCCG.excludeIntervals = excludeIntervals;
 averageCCG.ccgIndex = ccgIndex;
+averageCCG.winIndex = winIndex;
 
 if saveMat
     disp('Saving results...');
