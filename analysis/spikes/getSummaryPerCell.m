@@ -72,10 +72,23 @@ pyr_color = [1 .7 .7];
 nw_color = [.7 .7 1];
 ww_color = [.7 1 1];
 cell_color = [0 0 0];
+
+pyr_color_dark = pyr_color/4;
+nw_color_dark = nw_color/4;
+ww_color_dark = ww_color/4;
+
 % acg
 acg_time = [-50 : 0.5 : 50];
 acg = cell_metrics.acg.narrow;
 acg = acg./sum(acg);
+
+% acg PeakTime
+acg_peakTime_time = 1:length(cell_metrics.acgPeakTime.acg_time);
+acg_peakTime_smoothed = cell_metrics.acgPeakTime.acg_smoothed;
+acg_peakTime_smoothed = acg_peakTime_smoothed./sum(acg_peakTime_smoothed);
+acg_peakTime_sample = cell_metrics.acgPeakTime.acgPeak_sample;
+acg_peakTime = cell_metrics.general.acgs.log10(acg_peakTime_sample);
+
 % firing rate
 spikemat = bz_SpktToSpkmat(loadSpikes,'dt',10,'units','rate');
 states_rate = [cell_metrics.firingRate' cell_metrics.firingRate_WAKEnontheta' cell_metrics.firingRate_WAKEtheta' cell_metrics.firingRate_NREMstate' cell_metrics.firingRate_REMstate'];
@@ -214,6 +227,21 @@ for ii = 1:length(UID)
     subplot(5,5,5)
     axis off
     title([{session.animal.geneticLine;[basenameFromBasepath(pwd),' UID: ', num2str(UID(ii)),' (', num2str(ii),'/',num2str(length(UID)),')']}],'FontWeight','normal');
+    hold on
+    plotFill(acg_peakTime_time, acg_peakTime_smoothed(:,all_pyr),'style','filled','color',pyr_color,'faceAlpha',0.7);
+    plotFill(acg_peakTime_time, acg_peakTime_smoothed(:,all_nw),'style','filled','color',nw_color,'faceAlpha',0.7);
+    plotFill(acg_peakTime_time, acg_peakTime_smoothed(:,all_ww),'style','filled','color',ww_color,'faceAlpha',0.7);
+    plot(acg_peakTime_time, acg_peakTime_smoothed(:,UID(ii)),'LineWidth',1.5,'color',cell_color);
+    scatter(rand(length(find(all_pyr)),1)*2 + 102, acg_peakTime(all_pyr),20,pyr_color,'filled');
+    scatter(rand(length(find(all_nw)),1)*2 + 105, acg_peakTime(all_nw),20,nw_color,'filled');
+    scatter(rand(length(find(all_ww)),1)*2 + 108, acg_peakTime(all_ww),20,ww_color,'filled');
+    scatter(rand(length(find(UID(ii))),1)*2 + 110, acg_peakTime(UID(ii)),20,cell_color,'filled');
+    
+    scatter(rand(length(find(all_pyr)),1)*2 + 102, cell_metrics.acg_asymptote(all_pyr)/1000,20,pyr_color,'filled');
+    scatter(rand(length(find(all_nw)),1)*2 + 105, cell_metrics.acg_asymptote(all_nw)/1000,20,nw_color,'filled');
+    scatter(rand(length(find(all_ww)),1)*2 + 108, cell_metrics.acg_asymptote(all_ww)/1000,20,ww_color,'filled');
+    scatter(rand(length(find(UID(ii))),1)*2 + 106, cell_metrics.acg_asymptote(UID(ii))/1000,20,cell_color,'filled');
+    axis tight; xlabel('ms'); ylabel('ACG (prob)');
     
     % firing rate
     subplot(5,5,6)
@@ -274,7 +302,7 @@ for ii = 1:length(UID)
     scatter(.41, run_quiet_index(UID(1)),20,cell_color,'filled');
     axis tight
     xlabel('Time (s)'); ylabel('Rate (SD)');
-
+    
     % ripples
     subplot(5,5,11)
     hold on
