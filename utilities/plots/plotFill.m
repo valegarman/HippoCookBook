@@ -125,29 +125,32 @@ if strcmpi(yscale,'circular')
     end
 
 else
-    [x1, y1] = fillformat(datax(noNan), smooth(nanmean(datay(noNan,:),2),smoothOpt),...
-        smooth(nanstd(datay(noNan,:),[],2) * f1,smoothOpt));
-    if any(y1<=0) & strcmpi(yscale,'log')
-        warning('Truncating negative values of the Y deviation for log plot...');
-        ind = find(y1<=0);
-        y1(ind) = [];
-        x1(ind) = [];
+    if ~isempty(datay(noNan,:))
+        [x1, y1] = fillformat(datax(noNan), smooth(nanmean(datay(noNan,:),2),smoothOpt),...
+            smooth(nanstd(datay(noNan,:),[],2) * f1,smoothOpt));
+        if any(y1<=0) & strcmpi(yscale,'log')
+            warning('Truncating negative values of the Y deviation for log plot...');
+            ind = find(y1<=0);
+            y1(ind) = [];
+            x1(ind) = [];
+        end
+
+        hold on
+        if strcmpi(style,'alpha')
+            fill(x1, y1, color,'EdgeColor','none','faceAlpha',faceAlpha);
+            h = plot(datax, smooth(nanmean(datay,2),smoothOpt),lineStyle,'lineWidth',1,'color',color);
+        elseif strcmpi(style,'white')
+            fill(x1, y1, [1 1 1],'EdgeColor',color);
+            h = plot(datax, smooth(nanmean(datay,2),smoothOpt),lineStyle,'lineWidth',1,'color',color);
+        elseif strcmpi(style,'inverted')
+            fill(x1, y1, color,'EdgeColor','none','faceAlpha',faceAlpha);
+            h = plot(datax, smooth(nanmean(datay,2),smoothOpt),lineStyle,'lineWidth',1,'color',[1 1 1]);
+        elseif strcmpi(style,'filled') 
+            h = fill(x1, y1, color,'EdgeColor','none','faceAlpha',faceAlpha);
+        end
     end
-    
-    hold on
-    if strcmpi(style,'alpha')
-        fill(x1, y1, color,'EdgeColor','none','faceAlpha',faceAlpha);
-        h = plot(datax, smooth(nanmean(datay,2),smoothOpt),lineStyle,'lineWidth',1,'color',color);
-    elseif strcmpi(style,'white')
-        fill(x1, y1, [1 1 1],'EdgeColor',color);
-        h = plot(datax, smooth(nanmean(datay,2),smoothOpt),lineStyle,'lineWidth',1,'color',color);
-    elseif strcmpi(style,'inverted')
-        fill(x1, y1, color,'EdgeColor','none','faceAlpha',faceAlpha);
-        h = plot(datax, smooth(nanmean(datay,2),smoothOpt),lineStyle,'lineWidth',1,'color',[1 1 1]);
-    elseif strcmpi(style,'filled') 
-        h = fill(x1, y1, color,'EdgeColor','none','faceAlpha',faceAlpha);
-    end
-    set(gca,'XScale',xscale,'YScale',yscale,'TickDir','out');
+        set(gca,'XScale',xscale,'YScale',yscale,'TickDir','out');
+        
 end
 
 end

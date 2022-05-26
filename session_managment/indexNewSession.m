@@ -213,7 +213,7 @@ spikeFeatures;
 getAverageCCG('force',true);
 % pulses.analogChannel = analogCh;
 % save([session.general.name,'.pulses.events.mat'],'pulses');
-optogeneticResponses = getOptogeneticResponse('numRep',500,'force',true);
+optogeneticResponses = getOptogeneticResponse('numRep',500,'force',true,'duration_round_decimal',1);
 
 %% 8. Check Brain Events
 % Trying changes in detecUD_temp
@@ -262,16 +262,16 @@ end
 try 
     behaviour = getSessionLinearize;
     psth_lReward = spikesPsth([behaviour.events.lReward],'numRep',100,'saveMat',false,...
-        'min_pulsesNumber',15,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
+        'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
     psth_rReward = spikesPsth([behaviour.events.rReward],'numRep',100,'saveMat',false,...
-        'min_pulsesNumber',15,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
+        'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
     psth_reward = spikesPsth([behaviour.events.lReward; behaviour.events.rReward],'numRep',100,'saveMat',false,...
-        'min_pulsesNumber',15,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
+        'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
     
     psth_intersection = spikesPsth([behaviour.events.intersection],'numRep',100,'saveMat',false,...
-        'min_pulsesNumber',15,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
+        'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
     psth_startPoint = spikesPsth([behaviour.events.startPoint],'numRep',100,'saveMat',false,...
-        'min_pulsesNumber',15,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
+        'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
 
     behaviour.psth_lReward = psth_lReward;
     behaviour.psth_rReward = psth_rReward;

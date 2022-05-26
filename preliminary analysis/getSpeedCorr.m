@@ -49,6 +49,10 @@ if ~isempty(dir([session.general.name,'.Behavior.mat']))
     disp('Behavior.mat found. Loading file');
     file = dir([session.general.name,'.Behavior.mat']);
     load(file.name);
+else
+    warning('Behaviour.mat not found! SpeedCorr analysis not possible!');
+    speedCorrs = [];
+    return
 end
 
 % Get Spikes
