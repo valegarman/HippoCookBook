@@ -224,6 +224,7 @@ for ii = 1:length(UID)
     plot([0 50],[cell_metrics.trilat_y(UID(ii)) cell_metrics.trilat_y(UID(ii))],'color',cell_color,'LineWidth',1.5)
     xlim([min(cell_metrics.general.chanCoords.x)+50 max(cell_metrics.general.chanCoords.x)+150]);
     ylim([min(cell_metrics.general.chanCoords.y)-100 max(cell_metrics.general.chanCoords.y)+100]);
+<<<<<<< HEAD
     brainRegions = fields(session.brainRegions);
     for jj = 1:length(brainRegions)
         region(jj) = any(ismember(session.brainRegions.(brainRegions{jj}).channels,spikes.maxWaveformCh1(UID(ii))));
@@ -234,6 +235,9 @@ for ii = 1:length(UID)
     title(brainRegions{region},'FontWeight','normal');
         
     title(cell_metrics.brainRegion(UID(ii)),'FontWeight','normal');
+=======
+    title([cell_metrics.brainRegion{UID(ii)} ', ch: '  num2str(cell_metrics.maxWaveformCh1(UID(ii)))],'FontWeight','normal');
+>>>>>>> e9acd8831a13e5e25e8bf3da84d964d15eaf338c
     
     % ACG Peak
     subplot(5,5,5)
@@ -332,7 +336,7 @@ for ii = 1:length(UID)
     t_win = ripplesResponses.timestamps > -0.25 & ripplesResponses.timestamps < 0.25;
     plotFill(ripplesResponses.timestamps(t_win),ripplesResponses.responsecurveZSmooth(all_nw,t_win),'color',nw_color,'style','filled');
     plotFill(ripplesResponses.timestamps(t_win),ripplesResponses.responsecurveZSmooth(all_ww,t_win),'color',ww_color,'style','filled');
-    plotFill(ripplesResponses.timestamps(t_win),ripplesResponses.responsecurveZSmooth(all_pyr,t_win),'color',pyr_color,'style','filled');
+    plotFill(ripplesResponses.timestamps(t_win),ripplesResponses.responsecurveZSmooth(all_pyr,t_win),'color',pyr_color,'style','filled','faceAlpha',.9);
     plotFill(ripplesResponses.timestamps(t_win),ripplesResponses.responsecurveZSmooth(all_nw,t_win),'color',nw_color,'style','filled');
     plot(ripplesResponses.timestamps(t_win),ripplesResponses.responsecurveZSmooth(UID(ii),t_win),'color',cell_color,'LineWidth',1.5);
     
@@ -343,6 +347,10 @@ for ii = 1:length(UID)
     plot(ripples.rippleStats.maps.timestamps, zscore(mean(ripples.rippleStats.maps.ripples_raw))+20,'-k')
     axis tight
     xlabel('Ripple center (s)'); ylabel('Rate (SD)');
+    title(['Pyr: '  num2str(round(mean(ripplesResponses.rateZDuringPulse(all_pyr)),1)) ...
+        ', NW: '  num2str(round(mean(ripplesResponses.rateZDuringPulse(all_nw)),1))...
+        ', WW: '  num2str(round(mean(ripplesResponses.rateZDuringPulse(all_ww)),1))...
+        ', cell: '  num2str(round(mean(ripplesResponses.rateZDuringPulse(UID(ii))),1)),' SD'],'FontWeight','normal');
     
     subplot(5,5,12)
     hold on

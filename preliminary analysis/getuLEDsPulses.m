@@ -21,7 +21,7 @@ function [uLEDsIn] = getuLEDsPulses(varargin)
 % intsPeriods   Stimulation periods, as defined by perioLag
 %
 % Pablo Abad - BuzsakiLab 2022
-% Based on getDigitalIn by Manu Valero (MV)
+% Based on getDigitalIn and combineULEDPulses by Manu Valero (MV)
 
 %% Defaults and Params
 p = inputParser;
