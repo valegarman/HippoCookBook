@@ -16,8 +16,8 @@ function [optogeneticResponses] = getOptogeneticResponse(varargin)
 % rasterPlot        Default true.
 % ratePlot          Default true.
 % winSizePlot       Default [-0.1 .5];
-% force             Default, false
-% saveEventsFile    Default, true
+% force             Default, false.
+% saveEventsFile    Default, true.
 %                   
 %
 % OUTPUTS

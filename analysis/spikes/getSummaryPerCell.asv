@@ -246,7 +246,7 @@ for ii = 1:length(UID)
     scatter(acgPeak.acg_time(acgPeak.acgPeak_sample(all_pyr)),rand(length(find(all_pyr)),1)/100 + 0.04,20,pyr_color,'filled');
     scatter(acgPeak.acg_time(acgPeak.acgPeak_sample(all_nw)),rand(length(find(all_nw)),1)/100 + 0.042,20,nw_color,'filled');
     scatter(acgPeak.acg_time(acgPeak.acgPeak_sample(all_ww)),rand(length(find(all_ww)),1)/100 + 0.046,20,ww_color,'filled');
-    scatter(acgPeak.acg_time(acgPeak.acgPeak_sample(UID(ii))),rand(length(find(UID(ii))),1)/100 + 0.048,20,cell_color,'filled');
+    scatter(acgPeak.acg_time(acgPeak.acgPeak_sample(UID(ii))),rand(length(find(UID(ii))),1)/100 + 0.48,20,cell_color,'filled');
     
     % scatter(rand(length(find(all_pyr)),1)*0.1 + 1.02, acgPeak.acgPeak_sample(all_pyr)/1000,20,pyr_color,'filled');
     % scatter(rand(length(find(all_nw)),1)*0.1 + 1.12, acgPeak.acgPeak_sample(all_nw)/1000,20,nw_color,'filled');
@@ -255,7 +255,6 @@ for ii = 1:length(UID)
 
     XTick = [-2 -1 0 1];
     set(gca,'XTick',XTick);
-    XTickLabels = cellstr(num2str(round((XTick(:))), '10^{%d}'));
     set(gca,'XTickLabel',XTickLabels);
     ylabel('logACG (prob)'); xlabel('Time(s)');
     axis tight;
