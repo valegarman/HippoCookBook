@@ -224,7 +224,6 @@ for ii = 1:length(UID)
     plot([0 50],[cell_metrics.trilat_y(UID(ii)) cell_metrics.trilat_y(UID(ii))],'color',cell_color,'LineWidth',1.5)
     xlim([min(cell_metrics.general.chanCoords.x)+50 max(cell_metrics.general.chanCoords.x)+150]);
     ylim([min(cell_metrics.general.chanCoords.y)-100 max(cell_metrics.general.chanCoords.y)+100]);
-<<<<<<< HEAD
     brainRegions = fields(session.brainRegions);
     for jj = 1:length(brainRegions)
         region(jj) = any(ismember(session.brainRegions.(brainRegions{jj}).channels,spikes.maxWaveformCh1(UID(ii))));
@@ -235,9 +234,7 @@ for ii = 1:length(UID)
     title(brainRegions{region},'FontWeight','normal');
         
     title(cell_metrics.brainRegion(UID(ii)),'FontWeight','normal');
-=======
     title([cell_metrics.brainRegion{UID(ii)} ', ch: '  num2str(cell_metrics.maxWaveformCh1(UID(ii)))],'FontWeight','normal');
->>>>>>> e9acd8831a13e5e25e8bf3da84d964d15eaf338c
     
     % ACG Peak
     subplot(5,5,5)
@@ -263,12 +260,6 @@ for ii = 1:length(UID)
     set(gca,'XTickLabel',XTickLabels);
     ylabel('logACG (prob)'); xlabel('Time(s)');
     axis tight;
-    
-
-    
-
-    
-    axis tight; xlabel('ms'); ylabel('ACG (prob)');
     
     % firing rate
     subplot(5,5,6)
