@@ -321,9 +321,7 @@ for ii = 1:length(UID)
     axis tight
     xlabel('Ripple center (s)'); ylabel('Rate (SD)');
     title(['Pyr: '  num2str(round(mean(ripplesResponses.rateZDuringPulse(all_pyr)),1)) ...
-        ', NW: '  num2str(round(mean(ripplesResponses.rateZDuringPulse(all_nw)),1))...
-        ', WW: '  num2str(round(mean(ripplesResponses.rateZDuringPulse(all_ww)),1))...
-        ', cell: '  num2str(round(mean(ripplesResponses.rateZDuringPulse(UID(ii))),1)),' SD'],'FontWeight','normal');
+        'SD, NW: '  num2str(round(mean(ripplesResponses.rateZDuringPulse(all_nw)),1))],'FontWeight','normal');
     
     subplot(5,5,12)
     hold on
