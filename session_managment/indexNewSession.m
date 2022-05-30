@@ -143,7 +143,7 @@ if ~isempty(probe_type)
         case  {'fuckyou',lower('A5x12-16-Buz-lin-5mm-100-200-160-177')}
             disp('Probe founded!!');
             directory = what(hippoCookBook_path);
-            coord_path = dir([directory.path filesep 'session_files' filesep 'probes_coordinates' filesep 'electrodes_coordinates_A5x12-16-Buz-lin-5mm-100-200-160-177.chanCoords.channelInfo.mat'])
+            coord_path = dir([directory.path filesep 'session_files' filesep 'probes_coordinates' filesep 'electrodes_coordinates_A5x12-16-Buz-lin-5mm-100-200-160-177.chanCoords.channelInfo.mat']);
             load([coord_path.folder filesep coord_path.name],'chanCoords');
             save([basenameFromBasepath(pwd) '.chanCoords.channelInfo.mat'],'chanCoords');
             
