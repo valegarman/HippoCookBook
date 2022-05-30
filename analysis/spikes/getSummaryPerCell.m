@@ -48,6 +48,8 @@ if onlyOptoTag
     
     if isempty(UID)
         disp('No optotagged cells!');
+        disp('Running general summary for quality check.');
+        getSummaryPerSession;
         return
     end
     
@@ -86,12 +88,6 @@ acg = acg./sum(acg);
 targetFile = dir('*.ACGPeak.cellinfo.mat'); 
 acgPeak = importdata(targetFile.name);
 
-% acg_peakTime_time = 1:length(cell_metrics.acgPeakTime.acg_time);
-% acg_peakTime_smoothed = cell_metrics.acgPeakTime.acg_smoothed;
-% acg_peakTime_smoothed = acg_peakTime_smoothed./sum(acg_peakTime_smoothed);
-% acg_peakTime_sample = cell_metrics.acgPeakTime.acgPeak_sample;
-% acg_peakTime = cell_metrics.general.acgs.log10(acg_peakTime_sample);
-
 % firing rate
 spikemat = bz_SpktToSpkmat(loadSpikes,'dt',10,'units','rate');
 states_rate = [cell_metrics.firingRate' cell_metrics.firingRate_WAKEnontheta' cell_metrics.firingRate_WAKEtheta' cell_metrics.firingRate_NREMstate' cell_metrics.firingRate_REMstate'];
@@ -118,8 +114,8 @@ targetFile = dir('*.hgamma_60-100.PhaseLockingData.cellinfo.mat'); load(targetFi
 % speed
 speedCorr = getSpeedCorr;
 if ~isempty(speedCorr)
-    for ii = 1:size(speedCorr.speedVals,2)
-        speedVals(ii,:) = mean(speedCorr.speedVals(:,ii,:),3)/cell_metrics.firingRate(ii);
+    for ii = 1:size(speedCorr.speedVals,1)
+        speedVals(ii,:) = mean(speedCorr.speedVals(ii,:,:),3)/cell_metrics.firingRate(ii);
     end
 end
     
