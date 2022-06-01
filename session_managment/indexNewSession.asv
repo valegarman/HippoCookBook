@@ -227,14 +227,11 @@ ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChann
 psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true);
 
 % 8.3 Theta intervals
-thetaEpochs = detectThetaEpochs;
+thetaEpochs = detectThetaEpochs();
 
 %% 9. Phase Modulation
 % LFP-spikes modulation
-[rippleMod,SWMod,thetaMod,lgammaMod,hgammaMod, thetaRunMod, thetaREMMod] =...
-    computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel);
-computeCofiringModulation;
-
+[rippleMod,SWMod,thetaMod,lgammaMod,hgammaMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel);
 
 %% 10. Cell metrics
 % Exclude manipulation intervals for computing CellMetrics
@@ -247,13 +244,8 @@ try
 catch
     warning('Not possible to get manipulation periods. Running CellMetrics withouth excluding manipulation epochs');
 end
-<<<<<<< HEAD
-cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals);
-getACGPeak;
-=======
 cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',{'deepSuperficial'});
 
->>>>>>> d25b134f541c02f18b77ebd44592109371be42e6
 
 %% 11. Spatial modulation
 try
@@ -304,8 +296,6 @@ getSummaryPerCell;
 
 %% 14. Indexing
 % session = sessionTemplate(basepath,'showGUI',false);
-disp('Just checking this session. Not really indexing and deleting files.')
-keyboard;
 session = loadSession(basepath);
 generalPath = [session.animal.name,'\',session.general.name];
 sessionName = session.general.name;
