@@ -13,6 +13,8 @@ function [] = getSummaryPerCell(varargin)
 % 'onlyOptoTag'         - Runs code only in those cells with optogenetic responses.
 %                           By default, true.
 % 'lightPulseDuration'  - In seconds, default 0.1.
+% 'checkUnits'          - If true, ask which cells ID should be
+%                           discarted...
 %
 %% Manuel Valero 2022
 
@@ -542,6 +544,7 @@ for ii = 1:length(UID)
     if saveFigure
         saveas(gcf,['SummaryFigures\cell_',num2str(ii),'_(UID_', num2str(UID(ii))  ,')_Summary.png']);
     end
+<<<<<<< HEAD
 end
 
 if checkUnits
@@ -552,6 +555,8 @@ if checkUnits
     checkedCells(UID) = 1;
     checkedCells(discardUIDs) = 0;
     optogenetic_responses.checkedCells = checkedCells;
+=======
+>>>>>>> d5e66ec4a538db8fbbd4f7f994496b6b68d0c0e8
     
     optogeneticResponses = optogenetic_responses;
     save([basenameFromBasepath(pwd) '.optogeneticResponse.cellinfo.mat'],'optogeneticResponses');

@@ -136,7 +136,7 @@ end
 electrodes.meanPower = zeros(size(electrodes.y));
 electrodes.meanPower = (powerProfile.mean(electrodes.id));
 electrodes.meanPower = electrodes.meanPower - min(electrodes.meanPower);
-electrodes.meanPower = electrodes.meanPower/max(electrodes.meanPower)-.5;
+electrodes.meanPower = electrodes.meanPower/max(electrodes.meanPower);
 
 electrodes.lfp_event = lfp_avg';
 electrodes.lfp_event_norm = lfp_avg_norm';
