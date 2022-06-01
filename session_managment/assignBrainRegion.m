@@ -134,7 +134,9 @@ for ii = 1:length(session.extracellular.spikeGroups.channels)
     electrodes.shanks(ismember(electrodes.id,session.extracellular.spikeGroups.channels{ii}))=ii;
 end
 electrodes.meanPower = zeros(size(electrodes.y));
-electrodes.meanPower = nanzscore(powerProfile.mean(electrodes.id));
+electrodes.meanPower = (powerProfile.mean(electrodes.id));
+electrodes.meanPower = electrodes.meanPower - min(electrodes.meanPower);
+electrodes.meanPower = electrodes.meanPower/max(electrodes.meanPower)-.5;
 
 electrodes.lfp_event = lfp_avg';
 electrodes.lfp_event_norm = lfp_avg_norm';
@@ -157,6 +159,11 @@ for ii = 1:length(electrodes.id)
     text(electrodes.x(ii)-.2, electrodes.y(ii), num2str(electrodes.id(ii)));
     plot(electrodes.lfp_event_ts + electrodes.x(ii),...
         electrodes.lfp_event_norm(electrodes.id(ii),:) + electrodes.y(ii),'color',[.7 .7 .7]); 
+end
+
+for ii = 1:max(electrodes.shanks)
+    plot(electrodes.x(electrodes.shanks==ii) + electrodes.meanPower(electrodes.shanks==ii),...
+        electrodes.y(electrodes.shanks==ii),'color',[.8 .2 .2],'LineWidth',1);
 end
 
 selectSq = plot(0,0,'w');
