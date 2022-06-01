@@ -1,4 +1,4 @@
-function [rippleMod, SWMod, thetaMod, lgammaMod, hgammaMod] = computePhaseModulation(varargin)
+function [rippleMod, SWMod, thetaMod, lgammaMod, hgammaMod, thetaRunMod, thetaREMMod] = computePhaseModulation(varargin)
 %   Calculates distribution of spikes over phases of different oscillations
 %   (ripples, SW, theta, low gamma and high gamma)
 %
@@ -50,6 +50,8 @@ addParameter(p,'SWModulation',true,@islogical);
 addParameter(p,'thetaModulation',true,@islogical);
 addParameter(p,'lgammaModulation',true,@islogical);
 addParameter(p,'hgammaModulation',true,@islogical);
+addParameter(p,'thetaRunModulation',true,@islogical);
+addParameter(p,'thetaREMModulation',true,@islogical);
 addParameter(p,'rippleChannel',[],@isnumeric);
 addParameter(p,'SWChannel',[],@isnumeric);
 addParameter(p,'thetaChannel',[],@isnumeric);
@@ -75,6 +77,8 @@ SWModulation = p.Results.SWModulation;
 thetaModulation = p.Results.thetaModulation;
 lgammaModulation = p.Results.lgammaModulation;
 hgammaModulation = p.Results.hgammaModulation;
+thetaRunModulation = p.Results.thetaRunModulation;
+thetaREMModulation = p.Results.thetaREMModulation;
 rippleChannel = p.Results.rippleChannel;
 SWChannel = p.Results.SWChannel;
 thetaChannel = p.Results.thetaChannel;
@@ -150,6 +154,8 @@ SWMod = [];
 thetaMod = [];
 lgammaMod = [];
 hgammaMod = [];
+thetaMod_run = [];
+thetaMod_REM = [];
 
 %% 1. Phase Locking of Spikes to Ripples
 if rippleModulation
@@ -215,6 +221,35 @@ if hgammaModulation
     catch
     end
 end
+
+%% 6. Theta run mod
+if thetaRunModulation
+    try
+        thetaEpochs = detectThetaEpochs;
+        if ~isfield(thetaEpochs,'thetaRun')
+            thetaEpochs = detectThetaEpochs('force',true);
+        end
+        lfpT = getLFP(thetaEpochs.channel);
+        thetaRunMod = phaseModulation(spikes,lfpT,theta_passband,'intervals',thetaEpochs.thetaRun.ints,...
+            'useThresh',true,'useMinWidth',false,'powerThresh',0);
+    catch
+    end
+end
+
+%% 7. Theta REM mod
+if thetaREMModulation
+    try
+        thetaEpochs = detectThetaEpochs;
+        if ~isfield(thetaEpochs,'thetaREM')
+            thetaEpochs = detectThetaEpochs('force',true);
+        end
+        lfpT = getLFP(thetaEpochs.channel);
+        thetaREMMod = phaseModulation(spikes,lfpT,theta_passband,'intervals',thetaEpochs.thetaREM.ints,...
+            'useThresh',true,'useMinWidth',false,'powerThresh',0);
+    catch
+    end
+end
+
 
 
 %% Plotting
@@ -353,6 +388,62 @@ if plotting
         end
         saveas(gcf,['SummaryFigures\hGamma_',num2str(hgamma_passband(1)),'-',num2str(hgamma_passband(end)),'_PhaseModulation.png']);
     end
+
+    % ThetaRUN Modulation
+    if thetaRunModulation
+        figure,
+        set(gcf,'Position',get(0,'ScreenSize'))
+        for i = 1:length(spikes.UID)
+            subplot(7,ceil(size(spikes.UID,2)/7),i)
+            area([thetaRunMod.phasebins ; thetaRunMod.phasebins + 2*pi],[thetaRunMod.phasedistros(:,i) ;  thetaRunMod.phasedistros(:,i)], 'EdgeColor','none');
+            hold on;
+            ax = axis;
+            x = 0:.001:4*pi;
+            y = cos(x);
+            y = y - min(y); y = ((y/max(y))*(ax(4)-ax(3)))+ax(3);
+            h = plot(x,y,'-','color',[1 .8 .8]); uistack(h,'bottom') % [1 .8 .8]
+            xlim([0 4*pi]);
+            title(num2str(i),'FontWeight','normal','FontSize',10);
+            if i == 1
+                ylabel('prob'); title(['Channel (1-index): ' num2str(thetaEpochs.channel)],'FontWeight','normal','FontSize',10);
+            elseif i == size(spikes.UID,2)
+                set(gca,'XTick',[0:2*pi:4*pi],'XTickLabel',{'0','2\pi','4\pi'},'YTick',[])
+                xlabel('phase (rad)');
+            else
+                set(gca,'YTick',[],'XTick',[]);
+            end
+        end
+        saveas(gcf,['SummaryFigures\thetaRun_',num2str(theta_passband(1)),'-',num2str(theta_passband(end)),'_PhaseModulation.png']);
+    end
+
+    % ThetaREM Modulation
+    if thetaREMModulation
+        figure,
+        set(gcf,'Position',get(0,'ScreenSize'))
+        for i = 1:length(spikes.UID)
+            subplot(7,ceil(size(spikes.UID,2)/7),i)
+            area([thetaREMMod.phasebins ; thetaREMMod.phasebins + 2*pi],[thetaREMMod.phasedistros(:,i) ;  thetaREMMod.phasedistros(:,i)], 'EdgeColor','none');
+            hold on;
+            ax = axis;
+            x = 0:.001:4*pi;
+            y = cos(x);
+            y = y - min(y); y = ((y/max(y))*(ax(4)-ax(3)))+ax(3);
+            h = plot(x,y,'-','color',[1 .8 .8]); uistack(h,'bottom') % [1 .8 .8]
+            xlim([0 4*pi]);
+            title(num2str(i),'FontWeight','normal','FontSize',10);
+            if i == 1
+                ylabel('prob'); title(['Channel (1-index): ' num2str(thetaEpochs.channel)],'FontWeight','normal','FontSize',10);
+            elseif i == size(spikes.UID,2)
+                set(gca,'XTick',[0:2*pi:4*pi],'XTickLabel',{'0','2\pi','4\pi'},'YTick',[])
+                xlabel('phase (rad)');
+            else
+                set(gca,'YTick',[],'XTick',[]);
+            end
+        end
+        saveas(gcf,['SummaryFigures\thetaREM_',num2str(theta_passband(1)),'-',num2str(theta_passband(end)),'_PhaseModulation.png']);
+    end
+
+
 end
 
 
@@ -383,6 +474,16 @@ if saveMat
     if hgammaModulation
         save([session.general.name,'.hgamma_',num2str(hgamma_passband(1)),'-',num2str(hgamma_passband(end)),...
             '.PhaseLockingData.cellinfo.mat'],'hgammaMod');
+    end
+    % ThetaRun
+    if thetaRunModulation
+        save([session.general.name,'.thetaRun_',num2str(theta_passband(1)),'-',num2str(theta_passband(end)),...
+            '.PhaseLockingData.cellinfo.mat'],'thetaRunMod');
+    end
+    % thetaREM
+    if thetaRunModulation
+        save([session.general.name,'.thetaREM_',num2str(theta_passband(1)),'-',num2str(theta_passband(end)),...
+            '.PhaseLockingData.cellinfo.mat'],'thetaREMMod');
     end
 end
 

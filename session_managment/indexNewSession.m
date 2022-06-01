@@ -230,7 +230,10 @@ thetaEpochs = detectThetaEpochs;
 
 %% 9. Phase Modulation
 % LFP-spikes modulation
-[rippleMod,SWMod,thetaMod,lgammaMod,hgammaMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel);
+[rippleMod,SWMod,thetaMod,lgammaMod,hgammaMod, thetaRunMod, thetaREMMod] =...
+    computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel);
+computeCofiringModulation;
+
 
 %% 10. Cell metrics
 % Exclude manipulation intervals for computing CellMetrics
