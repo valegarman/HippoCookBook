@@ -50,7 +50,7 @@ saveMat = p.Results.saveMat;
 showPowerProfile = p.Results.showPowerProfile;
 
 % dealing with inputs 
-listOfRegions = {'Select region','CA1','CA3','PTLp','CA1sp','CA1so','CA1sr','CA1slm','Not assigned'};
+listOfRegions = {'Select region','CA1','CA3','PTLp','CA1sp','CA1so','CA1sr','CA1slm','DG','Not assigned'};
 listOfColors = hsv(length(listOfRegions)+10);
 listOfColors = listOfColors(randperm(length(listOfColors)),:);
 
@@ -236,7 +236,9 @@ close(fig);
 
 % create brainRegions
 for ii = 1:length(brainRegions_list)
-    brainRegions.(listOfRegions{brainRegions_number(ii)}).channels = brainRegions_list{ii};
+    if ~isempty(brainRegions_list{ii})
+        brainRegions.(listOfRegions{brainRegions_number(ii)}).channels = brainRegions_list{ii};
+    end
 end
 
 if updateSession
