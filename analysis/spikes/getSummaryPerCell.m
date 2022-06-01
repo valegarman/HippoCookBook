@@ -13,6 +13,8 @@ function [] = getSummaryPerCell(varargin)
 % 'onlyOptoTag'         - Runs code only in those cells with optogenetic responses.
 %                           By default, true.
 % 'lightPulseDuration'  - In seconds, default 0.1.
+% 'checkUnits'          - If true, ask which cells ID should be
+%                           discarted...
 %
 %% Manuel Valero 2022
 
@@ -24,6 +26,7 @@ addParameter(p,'UID',[], @isnumeric);
 addParameter(p,'saveFigure',true, @islogical);
 addParameter(p,'onlyOptoTag',true, @islogical);
 addParameter(p,'lightPulseDuration',0.1, @isnumeric);
+addParameter(p,'checkUnits',true, @islogical);
 
 parse(p,varargin{:})
 
@@ -32,6 +35,7 @@ UID = p.Results.UID;
 saveFigure = p.Results.saveFigure;
 onlyOptoTag = p.Results.onlyOptoTag;
 lightPulseDuration = p.Results.lightPulseDuration;
+checkUnits = p.Results.checkUnits;
 
 % dealing with inputs 
 prevPath = pwd;
@@ -537,7 +541,9 @@ for ii = 1:length(UID)
     axis off
     title([{session.animal.geneticLine;[basenameFromBasepath(pwd),' UID: ', num2str(UID(ii)),' (', num2str(ii),'/',num2str(length(UID)),')']}],'FontWeight','normal');
     
-    saveas(gcf,['SummaryFigures\cell_',num2str(ii),'_(UID_', num2str(UID(ii))  ,')_Summary.png']);
+    if saveFigure
+        saveas(gcf,['SummaryFigures\cell_',num2str(ii),'_(UID_', num2str(UID(ii))  ,')_Summary.png']);
+    end
     
 end
 
