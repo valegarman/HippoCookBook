@@ -544,7 +544,22 @@ for ii = 1:length(UID)
     if saveFigure
         saveas(gcf,['SummaryFigures\cell_',num2str(ii),'_(UID_', num2str(UID(ii))  ,')_Summary.png']);
     end
+<<<<<<< HEAD
+end
+
+if checkUnits
+    disp(['Unis UIDs ' num2str(UID') ' were defined as responsive']);
+    discardUIDs = str2num(input(['Do you want to discard any (introduce UIDs btw o press enter to continue)?: '],'s'));
     
+    checkedCells = zeros(size(spikes.UID))';
+    checkedCells(UID) = 1;
+    checkedCells(discardUIDs) = 0;
+    optogenetic_responses.checkedCells = checkedCells;
+=======
+>>>>>>> d5e66ec4a538db8fbbd4f7f994496b6b68d0c0e8
+    
+    optogeneticResponses = optogenetic_responses;
+    save([basenameFromBasepath(pwd) '.optogeneticResponse.cellinfo.mat'],'optogeneticResponses');
 end
 
 cd(prevPath);
