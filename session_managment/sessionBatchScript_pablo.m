@@ -216,3 +216,7 @@ batch_preprocessSession('basepath','J:\fCck4','analysisPath','C:\data\fCck4','cl
 basepath = 'Z:\data\fVIP1\fVIP1_220526_sess12';
 cd(basepath);
 optogeneticResponses = getOptogeneticResponse;
+
+
+
+
