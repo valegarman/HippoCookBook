@@ -189,6 +189,10 @@ if exist(bz_sleepstatepath,'file') && ~overwrite && ~ignoreManual
        ManScore.ints = SleepState_old.SleepState.ints;
        ManScore.idx = SleepState_old.SleepState.idx;
        ManScore.LastManualUpdate = SleepState_old.SleepState.detectorinfo.LastManualUpdate;
+   elseif ~overwrite
+       disp('Loading previous SleepState file');
+       SleepState = SleepState_old.SleepState;
+       return
    end
 end
 

@@ -118,6 +118,23 @@ thetaEpochs.powerThresh = powerThresh;
 thetaEpochs.bandpass = theta_bandpass;
 thetaEpochs.channel = channel;
 
+% try separating RUN and REM
+try SleepState = SleepScoreMaster(pwd,'noPrompts',true);
+    [thetaEpochs.idx.idx,thetaEpochs.idx.timestamps] = bz_INTtoIDX({thetaEpochs.intervals},'sf',1);
+    thetaRun_times = intersect(SleepState.idx.timestamps(SleepState.idx.states == 1),...
+        thetaEpochs.idx.timestamps(thetaEpochs.idx.idx)); % 1 is WAKE
+    thetaEpochs.thetaRun.idx = zeros(size(1:length(SleepState.idx.timestamps)));
+    thetaEpochs.thetaRun.timestamps = SleepState.idx.timestamps;
+    thetaEpochs.thetaRun.idx(thetaRun_times) = 1;
+    thetaEpochs.thetaRun.ints = IDXtoINT(thetaEpochs.thetaRun.idx,thetaEpochs.thetaRun.timestamps);
+    
+    thetaEpochs.thetaREM.timestamps = SleepState.idx.timestamps;
+    thetaEpochs.thetaREM.idx = double(SleepState.idx.states==5);
+    thetaEpochs.thetaREM.ints = SleepState.ints.REMstate;
+catch 
+    warning('Separating Run and REM was not possible!');
+end
+
 if saveMat
     disp('Saving...');
     filename = split(pwd,filesep); filename = filename{end};
