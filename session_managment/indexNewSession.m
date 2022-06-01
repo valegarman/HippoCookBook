@@ -211,6 +211,7 @@ powerProfile_hfo = powerSpectrumProfile(hfo_bandpass,'showfig',true,'forceDetect
 %% 7. Spike Features
 spikeFeatures;
 getAverageCCG('force',true);
+
 % pulses.analogChannel = analogCh;
 % save([session.general.name,'.pulses.events.mat'],'pulses');
 optogeneticResponses = getOptogeneticResponse('numRep',500,'force',true,'duration_round_decimal',1);
@@ -246,7 +247,8 @@ try
 catch
     warning('Not possible to get manipulation periods. Running CellMetrics withouth excluding manipulation epochs');
 end
-cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals);
+cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',{'deepSuperficial'});
+
 
 %% 11. Spatial modulation
 try
@@ -288,10 +290,11 @@ end
 %% 13. Speed Score
 
 try
-    speedCorr = getSpeedCorr(basepath,'numQuantiles',20);
+    speedCorr = getSpeedCorr('numQuantiles',20);
 end
 
 %% 14. Summary per cell
+getACGPeak;
 getSummaryPerCell;
 
 %% 14. Indexing
