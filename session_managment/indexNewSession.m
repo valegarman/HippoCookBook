@@ -244,8 +244,8 @@ try
 catch
     warning('Not possible to get manipulation periods. Running CellMetrics withouth excluding manipulation epochs');
 end
-cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',{'deepSuperficial'});
-
+cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals);
+getACGPeak;
 
 %% 11. Spatial modulation
 try
