@@ -24,6 +24,7 @@ addParameter(p,'UID',[], @isnumeric);
 addParameter(p,'saveFigure',true, @islogical);
 addParameter(p,'onlyOptoTag',true, @islogical);
 addParameter(p,'lightPulseDuration',0.1, @isnumeric);
+addParameter(p,'checkUnits',true, @islogical);
 
 parse(p,varargin{:})
 
@@ -32,6 +33,7 @@ UID = p.Results.UID;
 saveFigure = p.Results.saveFigure;
 onlyOptoTag = p.Results.onlyOptoTag;
 lightPulseDuration = p.Results.lightPulseDuration;
+checkUnits = p.Results.checkUnits;
 
 % dealing with inputs 
 prevPath = pwd;
@@ -537,8 +539,22 @@ for ii = 1:length(UID)
     axis off
     title([{session.animal.geneticLine;[basenameFromBasepath(pwd),' UID: ', num2str(UID(ii)),' (', num2str(ii),'/',num2str(length(UID)),')']}],'FontWeight','normal');
     
-    saveas(gcf,['SummaryFigures\cell_',num2str(ii),'_(UID_', num2str(UID(ii))  ,')_Summary.png']);
+    if saveFigure
+        saveas(gcf,['SummaryFigures\cell_',num2str(ii),'_(UID_', num2str(UID(ii))  ,')_Summary.png']);
+    end
+end
+
+if checkUnits
+    disp(['Unis UIDs ' num2str(UID') ' were defined as responsive']);
+    discardUIDs = str2num(input(['Do you want to discard any (introduce UIDs btw o press enter to continue)?: '],'s'));
     
+    checkedCells = zeros(size(spikes.UID))';
+    checkedCells(UID) = 1;
+    checkedCells(discardUIDs) = 0;
+    optogenetic_responses.checkedCells = checkedCells;
+    
+    optogeneticResponses = optogenetic_responses;
+    save([basenameFromBasepath(pwd) '.optogeneticResponse.cellinfo.mat'],'optogeneticResponses');
 end
 
 cd(prevPath);
