@@ -170,8 +170,9 @@ if plotting
     colormap jet
 
     subplot(3,3,[7 8])
-    imagesc([0 t_theta],f,S_det(~InIntervals(t,thetaEpochs.intervals),:)',[-1.5 1.5]);
-    set(gca,'TickDir','out'); ylabel('Non-Theta epochs [Freq, Hz]');
+    t_theta = sum(diff(thetaEpochs.intervals')) * diff(t);
+    imagesc([0 t_theta],f,S_det(InIntervals(t,thetaEpochs.intervals),:)',[-1.5 1.5]);
+    set(gca,'TickDir','out'); ylabel('Theta epochs [Freq, Hz]');
     colormap jet
     
     subplot(2,3,[3 6])
