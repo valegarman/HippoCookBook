@@ -142,7 +142,7 @@ if showFig
     if ~isempty(optoPyr)
         histogram(acgPeak_sample2(optoPyr),'FaceColor',optoPyr_color);
     end
-    axis tight; ylabel('Count'); xlabel('bin number');xlim([0 50])
+    axis tight; ylabel('Count'); xlabel('bin number');xlim([0 60])
 
     subplot(2,2,4)
     hold on;
@@ -155,7 +155,7 @@ if showFig
     if ~isempty(optoPyr)
         histogram(acgPeak_sample(optoPyr)+offset,'FaceColor',optoPyr_color);
     end
-    axis tight; ylabel('Count'); xlabel('bin number'); xlim([0 50])
+    axis tight; ylabel('Count'); xlabel('bin number'); xlim([0 60])
     if saveFig
        saveas(gcf,['SummaryFigures\ACGPeak.png']); 
     end
