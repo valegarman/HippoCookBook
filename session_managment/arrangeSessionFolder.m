@@ -50,9 +50,11 @@ for ii = 1:length(allFolder)
         if isempty(dir(strcat('*',folderFiels{2},'_','sess*'))) % if there is no session folder yet
             mkdir(strcat(folderFiels{1},'_',folderFiels{2},'_','sess',num2str(size(dir('*sess*'),1) + 1))); % create folder
         end
-        if ~contains(folderFiels{3},'sess') % if it is not a session folder
-            targetfoder = dir(strcat(folderFiels{1},'_',folderFiels{2},'_','sess*'));
-            movefile(strcat('*',folderFiels{2},'_',folderFiels{3}),targetfoder.name); % move to session folder
+        if length(folderFiels) > 2
+            if ~contains(folderFiels{3},'sess') % if it is not a session folder
+                targetfoder = dir(strcat(folderFiels{1},'_',folderFiels{2},'_','sess*'));
+                movefile(strcat('*',folderFiels{2},'_',folderFiels{3}),targetfoder.name); % move to session folder
+            end
         end
     end
 end
