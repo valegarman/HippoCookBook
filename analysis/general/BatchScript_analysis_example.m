@@ -1,4 +1,3 @@
-
 %% BatchScript_analysis_example
 % place your code to run an analysis across all sessions for a given
 % project

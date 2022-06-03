@@ -219,4 +219,7 @@ optogeneticResponses = getOptogeneticResponse;
 
 
 
+%%
+preprocessSession('basepath','J:\fCamk7\fCamk7_220509_sess27','cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'bazler_ttl_channel',10,'getPos',false,'sessionSummary',false);
+
 

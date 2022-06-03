@@ -1,7 +1,11 @@
 %% ======== CHECKING INTERNEURONS SESSIONS ================
-%%
+%% 'fnkx9_200818_sess2'
+
 basepath = 'Z:\data\fNkx9\fNkx9_200818_sess2';
 cd(basepath);
+% The State Editor
+session = loadSession(basepath);
+TheStateEditor_temp(session.general.name);
 % Brain Regions
 session = assignBrainRegion();
 % Re run cell_metrics
@@ -22,6 +26,9 @@ getSummaryPerCell;
 %%
 basepath = 'Z:\data\fNkx8\fNkx8_200817_sess1';
 cd(basepath);
+% The State Editor
+session = loadSession(basepath);
+TheStateEditor_temp(session.general.name);
 % Brain Regions
 session = assignBrainRegion();
 % Re run cell_metrics
@@ -63,5 +70,45 @@ cd(basepath);
 % Brain Regions
 session = assignBrainRegion();
 
+%% 'fNkx9_200825_sess7' Responsive cells that look like pyr ( even low firing rate)
+basepath = 'Z:\data\fNkx9\fNkx9_200825_sess7';
+cd(basepath);
+% Brain Regions
+session = assignBrainRegion();
+% Re run cell_metrics
+try
+    if ~isempty(dir([session.general.name,'.optogeneticPulses.events.mat']))
+        file = dir([session.general.name,'.optogeneticPulses.events.mat']);
+        load(file.name);
+    end
+        excludeManipulationIntervals = optoPulses.stimulationEpochs;
+catch
+    warning('Not possible to get manipulation periods. Running CellMetrics withouth excluding manipulation epochs');
+end
+cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',{'deepSuperficial'});
+% Get summary per cell
+getACGPeak;
+getSummaryPerCell;
 
+
+%% 'fNkx9_200827_sess9' Only 1 responsive cell. Check speed relationship, Check theta phase (bimodal).
+basepath = 'Z:\data\fNkx9\fNkx9_200827_sess9';
+cd(basepath);
+% Brain Regions
+session = assignBrainRegion();
+% Re run getSpeedCorr
+speedCorr = getSpeedCorr('numQuantiles',20,'force',true);
+% Re run cell_metrics
+try
+    if ~isempty(dir([session.general.name,'.optogeneticPulses.events.mat']))
+        file = dir([session.general.name,'.optogeneticPulses.events.mat']);
+        load(file.name);
+    end
+        excludeManipulationIntervals = optoPulses.stimulationEpochs;
+catch
+    warning('Not possible to get manipulation periods. Running CellMetrics withouth excluding manipulation epochs');
+end
+cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',{'deepSuperficial'});
+% Get summary per cell
+getSummaryPerCell;
 
