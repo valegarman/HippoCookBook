@@ -539,7 +539,7 @@ for ii = 1:length(UID)
     % black space
     subplot(5,5,25)
     axis off
-    title([{session.animal.geneticLine;[basenameFromBasepath(pwd),' UID: ', num2str(UID(ii)),' (', num2str(ii),'/',num2str(length(UID)),')',' CluID: ',num2str(spikes.cluID(UID))]}],'FontWeight','normal');
+    title([{session.animal.geneticLine;[basenameFromBasepath(pwd),' UID: ', num2str(UID(ii)),' (', num2str(ii),'/',num2str(length(UID)),')',' CluID: ',spikes.cluID]}],'FontWeight','normal');
     
     if saveFigure
         saveas(gcf,['SummaryFigures\cell_',num2str(ii),'_(UID_', num2str(UID(ii))  ,')_Summary.png']);
