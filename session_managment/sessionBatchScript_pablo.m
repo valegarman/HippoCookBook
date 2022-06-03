@@ -17,6 +17,8 @@ preprocessSession('basepath','C:\data\fCck3\fCck3_220314_sess17','cleanArtifacts
 preprocessSession('basepath','C:\data\fCck3\fCck3_220315_sess18','cleanArtifacts',({[],1}),'analogChannelsList',[],'digitalChannelsList',1);
 preprocessSession('basepath','C:\data\fCck3\fCck3_220316_sess19','cleanArtifacts',({[],1}),'analogChannelsList',[],'digitalChannelsList',1);
 preprocessSession('basepath','C:\data\fCck3\fCck3_220317_sess20','cleanArtifacts',({[],1}),'analogChannelsList',[],'digitalChannelsList',1);
+computeSessionSummary('basepath','W:\Buzsakilabspace\Datasets\ValeroM\fCck3\fCck3_220308_sess13','analogChannelsList',[],'digitalChannelsList',1);
+
 
 % batch_sessionSummary('basepath','C:\data\fCck3','analogChannelsList',0,'digitalChannelsList',1);
 
@@ -222,4 +224,19 @@ optogeneticResponses = getOptogeneticResponse;
 %%
 preprocessSession('basepath','J:\fCamk7\fCamk7_220509_sess27','cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'bazler_ttl_channel',10,'getPos',false,'sessionSummary',false);
 
+%%
+batch_preprocessSession('basepath','Z:\data\fCr3','analysisPath','C:\data\fCr3','cleanArtifacts',({[],1}),'analogChannelsList',[],'digitalChannelsList',1,'getPos',false);
+batch_preprocessSession('basepath','W:\Buzsakilabspace\Datasets\ValeroM\fCck3','analysisPath','C:\data\fCck3','cleanArtifacts',({[],1}),'analogChannelsList',[],'digitalChannelsList',1,'getPos',false);
+batch_preprocessSession('basepath','W:\Buzsakilabspace\Datasets\ValeroM\fCck4','analysisPath','C:\data\fCck4','cleanArtifacts',({[],1}),'analogChannelsList',[],'digitalChannelsList',1,'getPos',false);
+%% fVIP1
+updateExpFolder({'V:\data\fVIP1','Y:\fVIP1'},'Z:\data\fVIP1');
+batch_preprocessSession('basepath','Z:\data\fVIP1','analysisPath','C:\data\fVIP1','cleanArtifacts',({[],[1]}),'analogChannelsList',[],'digitalChannelsList',1,'bazler_ttl_channel',10,'getPos',false);
+
+%% fId3
+updateExpFolder('V:\data\fId3','Z:\data\fId3');
+batch_preprocessSession('basepath','Z:\data\fId3','analysisPath','C:\data\fId3','cleanArtifacts',({[],[1]}),'analogChannelsList',[],'digitalChannelsList',1,'bazler_ttl_channel',10,'getPos',false);
+
+%% fPv5
+updateExpFolder({'T:\fPv5','V:\data\fPv5'},'Z:\data\fId3');
+batch_preprocessSession('basepath','Z:\data\fId3','analysisPath','C:\data\fId3','cleanArtifacts',({[],[1]}),'analogChannelsList',[],'digitalChannelsList',1,'bazler_ttl_channel',10,'getPos',false);
 

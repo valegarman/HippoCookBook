@@ -40,8 +40,8 @@ force = p.Results.force;
 debug = p.Results.debug;
 
 %% Load session
-session = sessionTemplate(basepath);
-
+% session = sessionTemplate(basepath);
+session = loadSession(basepath);
 if ~isempty(dir([session.general.name,'.ACGPeak.cellinfo.mat'])) & ~force
     disp('ACGPeak file already detected. Loading file...');
     file = dir([session.general.name,'.ACGPeak.cellinfo.mat']);

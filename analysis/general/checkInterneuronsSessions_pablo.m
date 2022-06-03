@@ -91,9 +91,12 @@ getACGPeak;
 getSummaryPerCell;
 
 
-%% 'fNkx9_200827_sess9' Only 1 responsive cell. Check speed relationship, Check theta phase (bimodal).
+%% 'fNkx9_200827_sess9' Only 1 responsive cell. Check speed relationship, Check theta phase (bimodal), REM vs RUN
 basepath = 'Z:\data\fNkx9\fNkx9_200827_sess9';
 cd(basepath);
+% Channel 17 is not a bad Channel
+session = sessionTemplate(basepath,'showGUI',true);
+
 % Brain Regions
 session = assignBrainRegion();
 % Re run getSpeedCorr
@@ -110,5 +113,6 @@ catch
 end
 cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',{'deepSuperficial'});
 % Get summary per cell
+getACGPeak;
 getSummaryPerCell;
 
