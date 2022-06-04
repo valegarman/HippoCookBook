@@ -115,6 +115,10 @@ targetFile = dir('*.theta_6-12.PhaseLockingData.cellinfo.mat'); load(targetFile.
 targetFile = dir('*.lgamma_20-60.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
 targetFile = dir('*.hgamma_60-100.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
 
+% Theta for REM and RUN
+targetFile = dir('*.thetaRun_6-12.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+targetFile = dir('*.thetaREM_6-12.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+
 % speed
 speedCorr = getSpeedCorr;
 if ~isempty(speedCorr)
@@ -321,7 +325,7 @@ for ii = 1:length(UID)
     axis tight
     xlabel('Time (s)'); ylabel('Rate (SD)');
     
-    % ripples
+    % ripples 
     subplot(5,5,11)
     hold on
     t_win = ripplesResponses.timestamps > -0.25 & ripplesResponses.timestamps < 0.25;
@@ -342,7 +346,8 @@ for ii = 1:length(UID)
         ', NW: '  num2str(round(mean(ripplesResponses.rateZDuringPulse(all_nw)),1))...
         ', WW: '  num2str(round(mean(ripplesResponses.rateZDuringPulse(all_ww)),1))...
         ', cell: '  num2str(round(mean(ripplesResponses.rateZDuringPulse(UID(ii))),1)),' SD'],'FontWeight','normal');
-    
+        
+    % ripple phase
     subplot(5,5,12)
     hold on
     x_wave = 0:0.01:4*pi;
@@ -389,7 +394,7 @@ for ii = 1:length(UID)
     axis tight
     xlabel('Theta phase (deg)'); ylabel('Rate (SD)');
     set(gca,'XTick',[0:2*pi:4*pi],'XTickLabel',{'0', '2\pi', '4\pi'});
-    
+            
     % lgamma
     subplot(5,5,14)
     hold on
