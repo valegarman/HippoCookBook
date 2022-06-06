@@ -154,3 +154,109 @@ cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeM
 % Get summary per cell
 getACGPeak;
 getSummaryPerCell;
+
+%% fNkx8_200921_sess12. Problems with phaseModulation with pyr ( is a line)
+basepath = 'Z:\data\fNkx8\fNkx8_200901_sess12';
+cd(basepath);
+% The State Editor
+session = loadSession(basepath);
+TheStateEditor_temp(session.general.name);
+
+
+%% fNkx8_200902_sess13
+basepath = 'Z:\data\fNkx8\fNkx8_200902_sess13';
+cd(basepath);
+% The State Editor
+session = loadSession(basepath);
+TheStateEditor_temp(session.general.name);
+
+%% fNkx9_200821_sess5
+basepath = 'Z:\data\fNkx9\fNkx9_200821_sess5';
+cd(basepath);
+% The State Editor
+session = loadSession(basepath);
+TheStateEditor_temp(session.general.name);
+
+%% fNkx11_201029_sess11
+basepath = 'Z:\data\fNkx11\fNkx11_201029_sess11';
+cd(basepath);
+% The State Editor
+session = loadSession(basepath);
+TheStateEditor_temp(session.general.name);
+
+%% fNkx8_200908_sess16
+basepath = 'Z:\data\fNkx8\fNkx8_200908_sess16';
+cd(basepath);
+% The State Editor
+session = loadSession(basepath);
+TheStateEditor_temp(session.general.name);
+
+%% fNkx11_201104_sess15
+basepath = 'Z:\data\fNkx11\fNkx11_201104_sess15';
+cd(basepath);
+% The State Editor
+session = loadSession(basepath);
+TheStateEditor_temp(session.general.name);
+
+%% fNkx11_201015_sess1
+basepath = 'Z:\data\fNkx11\fNkx11_201015_sess1';
+cd(basepath);
+% The State Editor
+session = loadSession(basepath);
+TheStateEditor_temp(session.general.name);
+
+%% fSst1_190603_sess33
+basepath = 'Z:\data\fSst1\fSst1_190603_sess33';
+cd(basepath);
+% The State Editor
+session = loadSession(basepath);
+TheStateEditor_temp(session.general.name);
+
+%% fPv3_210305_sess5
+basepath = 'Z:\data\fPv3\fPV3_210305_sess5';
+cd(basepath);
+% The State Editor
+session = loadSession(basepath);
+TheStateEditor_temp(session.general.name);
+
+%% fPv3_210304_sess4
+basepath = 'Z:\data\fPv3\fPV3_210304_sess4';
+cd(basepath);
+% The State Editor
+session = loadSession(basepath);
+TheStateEditor_temp(session.general.name);
+
+%% fNkx8_200915_sess21
+basepath = 'Z:\data\fNkx8\fNkx8_200915_sess21';
+cd(basepath);
+% The State Editor
+session = loadSession(basepath);
+TheStateEditor_temp(session.general.name);
+
+%% fPv4_210310_sess3
+basepath = 'Z:\data\fPv4\fPv4_210310_sess3';
+cd(basepath);
+% The State Editor
+session = loadSession(basepath);
+TheStateEditor_temp(session.general.name);
+
+%% fPv4_210309_sess2
+basepath = 'Z:\data\fPv4\fPv4_210309_sess2';
+cd(basepath);
+% The State Editor
+session = loadSession(basepath);
+TheStateEditor_temp(session.general.name);
+
+%% fNkx11_201019_sess3
+basepath = 'Z:\data\fNkx11\fNkx11_201019_sess3';
+cd(basepath);
+% The State Editor
+session = loadSession(basepath);
+TheStateEditor_temp(session.general.name);
+
+%% fPv3_210302_sess2
+basepath = 'Z:\data\fPv3\fPV3_210302_sess2';
+cd(basepath);
+% The State Editor
+session = loadSession(basepath);
+TheStateEditor_temp(session.general.name);

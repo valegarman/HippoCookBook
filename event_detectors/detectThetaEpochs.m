@@ -139,7 +139,7 @@ end
 
 if updateSleepStates
     load([basenameFromBasepath(pwd) '.SleepState.states.mat'])
-    keyboard;
+%     keyboard;
 %     SleepState.ints.
 %     thetaEpochs.thetaRun.idx
 %     SleepState.detectorinfo
