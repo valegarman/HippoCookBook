@@ -277,6 +277,11 @@ end
 
 if updateSleepStates
     load([basenameFromBasepath(pwd) '.SleepState.states.mat'])
+%     keyboard;
+%     SleepState.ints.
+%     thetaEpochs.thetaRun.idx
+%     SleepState.detectorinfo
+%     SleepState.ints.WAKEtheta2 = thetaEpochs.thetaRun
         
     SleepState.ints.WAKEtheta_ThDt = thetaEpochs.thetaRun.intervals;
     SleepState.ints.REMtheta_ThDt = thetaEpochs.thetaREM.intervals;

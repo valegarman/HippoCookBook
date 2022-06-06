@@ -200,7 +200,7 @@ else
 end
 %% 4. Check Sleep Score
 SleepScoreMaster(pwd,'noPrompts',true,'ignoretime',pulses.intsPeriods, 'overwrite', true);
-TheStateEditor_temp(session.general.name);
+% TheStateEditor_temp(session.general.name);
 bz_ThetaStates(pwd);
 
 %% 5. Power Profiles
