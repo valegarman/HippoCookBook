@@ -50,7 +50,8 @@ addParameter(p,'bazler_ttl_channel',[],@isnumeric);
 addParameter(p,'forceAnalogPulses',false,@islogical);
 addParameter(p,'forceDigitalPulses',false,@islogical);
 addParameter(p,'tracking_pixel_cm',0.1149,@isnumeric);
-addParameter(p,'probe_type',[],@ischar); % 
+addParameter(p,'probe_type',[],@ischar); %
+addParameter(p,'indexing',true,@islogical);
 
 parse(p,varargin{:})
 
@@ -81,6 +82,7 @@ forceAnalogPulses = p.Results.forceAnalogPulses;
 forceDigitalPulses = p.Results.forceDigitalPulses;
 tracking_pixel_cm = p.Results.tracking_pixel_cm;
 probe_type = p.Results.probe_type;
+indexing = p.Results.indexing;
 
 %% Creates a pointer to the folder where the index variable is located
 if isempty(indexedProjects_name)
@@ -198,6 +200,7 @@ else
 end
 %% 4. Check Sleep Score
 SleepScoreMaster(pwd,'noPrompts',true,'ignoretime',pulses.intsPeriods, 'overwrite', true);
+TheStateEditor_temp(session.general.name);
 bz_ThetaStates(pwd);
 
 %% 5. Power Profiles
@@ -232,7 +235,7 @@ thetaEpochs = detectThetaEpochs();
 %% 9. Phase Modulation
 % LFP-spikes modulation
 [rippleMod,SWMod,thetaMod,lgammaMod,hgammaMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel);
-
+computeCofiringModulation;
 %% 10. Cell metrics
 % Exclude manipulation intervals for computing CellMetrics
 try
@@ -244,8 +247,7 @@ try
 catch
     warning('Not possible to get manipulation periods. Running CellMetrics withouth excluding manipulation epochs');
 end
-cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true);
-getACGPeak;
+cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true,'excludeMetrics','deepSuperficial');
 
 %% 11. Spatial modulation
 try
@@ -296,71 +298,72 @@ getSummaryPerCell;
 
 %% 14. Indexing
 % session = sessionTemplate(basepath,'showGUI',false);
-session = loadSession(basepath);
-generalPath = [session.animal.name,'\',session.general.name];
-sessionName = session.general.name;
+if indexing
+    session = loadSession(basepath);
+    generalPath = [session.animal.name,'\',session.general.name];
+    sessionName = session.general.name;
 
-project = session.general.projects;
-% updated indexedSession table
-sessionsTable = readtable([indexedProjects_path filesep indexedProjects_name,'.csv']); % the variable is called allSessions
-% new table entry
+    project = session.general.projects;
+    % updated indexedSession table
+    sessionsTable = readtable([indexedProjects_path filesep indexedProjects_name,'.csv']); % the variable is called allSessions
+    % new table entry
 
-optogenetics = cell(0);
-for ii = 1:length(session.animal.opticFiberImplants)
-    optogenetics{1, length(optogenetics)+1} = session.animal.opticFiberImplants{ii}.opticFiber;
-    optogenetics{1, length(optogenetics)+1} = ' ';
-end
-optogenetics(end) = [];
-
-behav = cell(0); 
-for i = 1:length(session.epochs)
-    if strcmpi(session.epochs{i}.behavioralParadigm, 'Maze')
-        behav{1, length(behav)+1} = lower(session.epochs{i}.environment);
-        behav{1, length(behav)+1} = ' ';
+    optogenetics = cell(0);
+    for ii = 1:length(session.animal.opticFiberImplants)
+        optogenetics{1, length(optogenetics)+1} = session.animal.opticFiberImplants{ii}.opticFiber;
+        optogenetics{1, length(optogenetics)+1} = ' ';
     end
-end
+    optogenetics(end) = [];
 
-if ~isempty(behav)
-    behav(end) = [];
-    if isempty(behav)
+    behav = cell(0); 
+    for i = 1:length(session.epochs)
+        if strcmpi(session.epochs{i}.behavioralParadigm, 'Maze')
+            behav{1, length(behav)+1} = lower(session.epochs{i}.environment);
+            behav{1, length(behav)+1} = ' ';
+        end
+    end
+
+    if ~isempty(behav)
+        behav(end) = [];
+        if isempty(behav)
+            behav{1,1} = 'no';
+        end
+    else
         behav{1,1} = 'no';
     end
-else
-    behav{1,1} = 'no';
+
+    spikes = loadSpikes;
+
+    fn = fieldnames(session.brainRegions);
+    brainRegions = cell(0);
+    for jj = 1:length(fn)
+        brainRegions{1,length(brainRegions)+1} = fn{jj};
+        brainRegions{1,length(brainRegions)+1} = ' ';
+    end    
+    brainRegions(end) = [];
+
+    sessionEntry = {lower(sessionName), lower(session.animal.name), lower(generalPath), lower(session.animal.strain),...
+        lower(session.animal.geneticLine), lower([optogenetics{:}]), [behav{:}], spikes.numcells,  [brainRegions{:}], project};
+    sessionEntry = cell2table(sessionEntry,"VariableNames",["SessionName", "Subject", "Path", "Strain", "GeneticLine", "Optogenetics", "Behavior", "numCells", "brainRegions", "Project"]);
+    sessionsTable = [sessionsTable; sessionEntry];
+    writetable(sessionsTable,[indexedProjects_path filesep indexedProjects_name,'.csv']); % the variable is called allSessions
+
+
+    % Lets do a push for git repository
+    cd(indexedProjects_path);
+    % Git add variable to the repository
+    commandToExecute = ['git add ', indexedProjects_name,'.csv']
+    system(commandToExecute);
+    % Git Commit
+    commentToCommit = ['Added Session: ' session.general.name];
+    commandToExecute = ['git commit -m "' commentToCommit '"'];
+    system(commandToExecute);
+    % Git Push
+    commandToExecute = ['git push'];
+    system(commandToExecute);
+
+    cd(basepath)     
 end
-
-spikes = loadSpikes;
-
-fn = fieldnames(session.brainRegions);
-brainRegions = cell(0);
-for jj = 1:length(fn)
-    brainRegions{1,length(brainRegions)+1} = fn{jj};
-    brainRegions{1,length(brainRegions)+1} = ' ';
-end    
-brainRegions(end) = [];
-
-sessionEntry = {lower(sessionName), lower(session.animal.name), lower(generalPath), lower(session.animal.strain),...
-    lower(session.animal.geneticLine), lower([optogenetics{:}]), [behav{:}], spikes.numcells,  [brainRegions{:}], project};
-sessionEntry = cell2table(sessionEntry,"VariableNames",["SessionName", "Subject", "Path", "Strain", "GeneticLine", "Optogenetics", "Behavior", "numCells", "brainRegions", "Project"]);
-sessionsTable = [sessionsTable; sessionEntry];
-writetable(sessionsTable,[indexedProjects_path filesep indexedProjects_name,'.csv']); % the variable is called allSessions
-
-
-% Lets do a push for git repository
-cd(indexedProjects_path);
-% Git add variable to the repository
-commandToExecute = ['git add ', indexedProjects_name,'.csv']
-system(commandToExecute);
-% Git Commit
-commentToCommit = ['Added Session: ' session.general.name];
-commandToExecute = ['git commit -m "' commentToCommit '"'];
-system(commandToExecute);
-% Git Push
-commandToExecute = ['git push'];
-system(commandToExecute);
-
-cd(basepath)
-
 %% Removing dat files before copying files to buzsakilab or synology
 if removeDatFiles
     % Remove _original and _temp .dat

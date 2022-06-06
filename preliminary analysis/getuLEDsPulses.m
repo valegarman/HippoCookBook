@@ -45,7 +45,8 @@ if ~isempty(dir('*uLEDsPulses.events.mat'))
 end
 
 %% Session metadata
-session = sessionTemplate(basepath);
+% session = sessionTemplate(basepath);
+session = loadSession(basepath);
 if ~isfield(session.analysisTags, 'uLEDs_ttl')
     session.analysisTags.uLEDs_ttl = uLEDs_ttl;
     save([session.general.name,'.session.mat'], 'session');
