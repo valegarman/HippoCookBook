@@ -9,7 +9,7 @@ function [rippleMod, SWMod, thetaMod, lgammaMod, hgammaMod, thetaRunMod, thetaRE
 %   rippleChannel - channel for ripple
 %   SWChannel - channel for SW, by default radiatum from geHippocampalLayers
 %   thetaChannel - channel for theta, by default take oriens from getHippocampallayers
-%   hgammaChannel - channel for high gamma, by default slm from geHippocampalLayers
+%   hgammaChannel - channel for high gamma, by default oriens from geHippocampalLayers
 %   lgammaChannel - channel for low gamma, by default oriens from geHippocampalLayers
 %   ripple_passband - frequency range for ripple phase modulation
 %   SW_passband - frequency range for sharp wave modulation
@@ -40,7 +40,7 @@ function [rippleMod, SWMod, thetaMod, lgammaMod, hgammaMod, thetaRunMod, thetaRE
 %% Defaults and params
 p = inputParser;
 addParameter(p,'basepath',pwd,@isdir);
-addParameter(p,'spikes',[],@bz_isCellInfo);
+addParameter(p,'spikes',[]);
 addParameter(p,'bandsToCompute',{'rippleModulation','SWModulation','thetaModulation','lgammaModulation',...
     'hgammaModulation','thetaRunModulation','thetaREMModulation'});
 addParameter(p,'rippleChannel',[],@isnumeric);
@@ -53,7 +53,7 @@ addParameter(p,'SW_passband',[2 10],@isnumeric);
 addParameter(p,'theta_passband',[6 12], @isnumeric);
 addParameter(p,'lgamma_passband',[20 60], @isnumeric);
 addParameter(p,'hgamma_passband',[60 100],@isnumeric);
-addParameter(p,'method','hilbert',@isstr);
+addParameter(p,'method','hilbert',@ischar);
 addParameter(p,'plotting',true,@islogical);
 addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'skipStimulationPeriods',true,@islogical);
@@ -135,7 +135,7 @@ if isempty(lgammaChannel)
 end
 
 if isempty(hgammaChannel)
-    hgammaChannel = hippocampalLayers.bestShankLayers.slm;
+    hgammaChannel = hippocampalLayers.bestShankLayers.oriens;
 end
 
 %% Initialization of output
@@ -165,7 +165,7 @@ end
 
 
 %% 2. Sharp Wave Modulation
-if SWModulation
+if ismember('SWModulation',bandsToCompute)
     try
         if ~isempty(dir([session.general.name,'.sharpwaves.events.mat']))
             disp('Sharpwaves detected. Loading file...');
@@ -181,7 +181,7 @@ if SWModulation
 end
 
 %% 3. Theta Modulation
-if thetaModulation
+if ismember('thetaModulation',bandsToCompute)
     try
         lfpT = getLFP(thetaChannel);
         thetaEpochs = detectThetaEpochs;
@@ -194,7 +194,7 @@ end
 
 
 %% 4. Low Gamma Modulation
-if lgammaModulation
+if ismember('lgammaModulation',bandsToCompute)
     try
         thetaEpochs = detectThetaEpochs;
         lfpT = getLFP(lgammaChannel);
@@ -205,7 +205,7 @@ if lgammaModulation
 end
 
 %% 5. High Gamma Modulation
-if hgammaModulation
+if ismember('hgammaModulation',bandsToCompute)
     try
         thetaEpochs = detectThetaEpochs;
         lfpT = getLFP(hgammaChannel);
@@ -216,7 +216,7 @@ if hgammaModulation
 end
 
 %% 6. Theta run mod
-if thetaRunModulation
+if ismember('thetaRunModulation',bandsToCompute)
     try
         thetaEpochs = detectThetaEpochs;
         if ~isfield(thetaEpochs,'thetaRun')
@@ -230,7 +230,7 @@ if thetaRunModulation
 end
 
 %% 7. Theta REM mod
-if thetaREMModulation
+if ismember('thetaREMModulation',bandsToCompute)
     try
         thetaEpochs = detectThetaEpochs;
         if ~isfield(thetaEpochs,'thetaREM')
@@ -248,7 +248,7 @@ end
 %% Plotting
 if plotting
     % Ripple Modulation
-    if rippleModulation
+    if ismember('rippleModulation',bandsToCompute)
         figure,
         set(gcf,'Position',get(0,'ScreenSize'))
         for i = 1:length(spikes.UID)
@@ -275,7 +275,7 @@ if plotting
     end
     
     % Sharpwave Modulation
-    if SWModulation && ~isempty(SWMod)
+    if ismember('SWModulation',bandsToCompute) && ~isempty(SWMod)
         figure,
         set(gcf,'Position',get(0,'ScreenSize'))
         for i = 1:length(spikes.UID)
@@ -302,7 +302,7 @@ if plotting
     end
     
     % Theta Modulation
-    if thetaModulation
+    if ismember('thetaModulation',bandsToCompute)
         figure,
         set(gcf,'Position',get(0,'ScreenSize'))
         for i = 1:length(spikes.UID)
@@ -329,7 +329,7 @@ if plotting
     end
     
     % LowGama Modulation
-    if lgammaModulation
+    if ismember('lgammaModulation',bandsToCompute)
         figure,
         set(gcf,'Position',get(0,'ScreenSize'))
         for i = 1:length(spikes.UID)
@@ -356,7 +356,7 @@ if plotting
     end
     
     % High Modulation
-    if hgammaModulation
+    if ismember('hgammaModulation',bandsToCompute)
         figure,
         set(gcf,'Position',get(0,'ScreenSize'))
         for i = 1:length(spikes.UID)
@@ -383,7 +383,7 @@ if plotting
     end
 
     % ThetaRUN Modulation
-    if thetaRunModulation
+    if ismember('thetaRunModulation',bandsToCompute)
         figure,
         set(gcf,'Position',get(0,'ScreenSize'))
         for i = 1:length(spikes.UID)
@@ -410,7 +410,7 @@ if plotting
     end
 
     % ThetaREM Modulation
-    if thetaREMModulation
+    if ithetaREMModulation
         figure,
         set(gcf,'Position',get(0,'ScreenSize'))
         for i = 1:length(spikes.UID)

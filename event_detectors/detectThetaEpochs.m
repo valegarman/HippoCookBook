@@ -277,13 +277,11 @@ end
 
 if updateSleepStates
     load([basenameFromBasepath(pwd) '.SleepState.states.mat'])
-<<<<<<< HEAD
 %     keyboard;
 %     SleepState.ints.
 %     thetaEpochs.thetaRun.idx
 %     SleepState.detectorinfo
 %     SleepState.ints.WAKEtheta2 = thetaEpochs.thetaRun
-=======
         
     SleepState.ints.WAKEtheta_ThDt = thetaEpochs.thetaRun.ints;
     SleepState.ints.REMtheta_ThDt = thetaEpochs.thetaREM.ints;
@@ -293,7 +291,6 @@ if updateSleepStates
     SleepState.ints.NREM_noRipples_ThDt = thetaEpochs.NREM_nonRipples.ints;
 
     save([basenameFromBasepath(pwd) '.SleepState.states.mat'],'SleepState');
->>>>>>> 2dbe996b29da75ef9d12a43067f79fe96ee6bf21
 end
 
 if saveMat

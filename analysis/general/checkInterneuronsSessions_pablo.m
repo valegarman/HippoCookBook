@@ -161,7 +161,9 @@ cd(basepath);
 % The State Editor
 session = loadSession(basepath);
 TheStateEditor_temp(session.general.name);
-
+% LFP-spikes modulation
+[rippleMod,SWMod,thetaMod,lgammaMod,hgammaMod,thetaRunMod,thetaREMMod] = computePhaseModulation('rippleChannel',[],'SWChannel',[]);
+computeCofiringModulation;
 
 %% fNkx8_200902_sess13
 basepath = 'Z:\data\fNkx8\fNkx8_200902_sess13';

@@ -165,7 +165,7 @@ end
 
 
 %% 2. Sharp Wave Modulation
-if SWModulation
+if ismember('SWModulation',bandsToCompute)
     try
         if ~isempty(dir([session.general.name,'.sharpwaves.events.mat']))
             disp('Sharpwaves detected. Loading file...');
@@ -181,7 +181,7 @@ if SWModulation
 end
 
 %% 3. Theta Modulation
-if thetaModulation
+if ismember('thetaModulation',bandsToCompute)
     try
         lfpT = getLFP(thetaChannel);
         thetaEpochs = detectThetaEpochs;
@@ -194,7 +194,7 @@ end
 
 
 %% 4. Low Gamma Modulation
-if lgammaModulation
+if ismember('lgammaModulation',bandsToCompute)
     try
         thetaEpochs = detectThetaEpochs;
         lfpT = getLFP(lgammaChannel);
@@ -205,7 +205,7 @@ if lgammaModulation
 end
 
 %% 5. High Gamma Modulation
-if hgammaModulation
+if ismember('hgammaModulation',bandsToCompute)
     try
         thetaEpochs = detectThetaEpochs;
         lfpT = getLFP(hgammaChannel);
@@ -216,7 +216,7 @@ if hgammaModulation
 end
 
 %% 6. Theta run mod
-if thetaRunModulation
+if ismember('thetaRunModulation',bandsToCompute)
     try
         thetaEpochs = detectThetaEpochs;
         if ~isfield(thetaEpochs,'thetaRun')
@@ -230,7 +230,7 @@ if thetaRunModulation
 end
 
 %% 7. Theta REM mod
-if thetaREMModulation
+if ismember('thetaREMModulation',bandsToCompute)
     try
         thetaEpochs = detectThetaEpochs;
         if ~isfield(thetaEpochs,'thetaREM')
@@ -248,7 +248,7 @@ end
 %% Plotting
 if plotting
     % Ripple Modulation
-    if rippleModulation
+    if ismember('rippleModulation',bandsToCompute)
         figure,
         set(gcf,'Position',get(0,'ScreenSize'))
         for i = 1:length(spikes.UID)
@@ -275,7 +275,7 @@ if plotting
     end
     
     % Sharpwave Modulation
-    if SWModulation && ~isempty(SWMod)
+    if ismember('SWModulation',bandsToCompute) && ~isempty(SWMod)
         figure,
         set(gcf,'Position',get(0,'ScreenSize'))
         for i = 1:length(spikes.UID)
@@ -302,7 +302,7 @@ if plotting
     end
     
     % Theta Modulation
-    if thetaModulation
+    if ismember('thetaModulation',bandsToCompute)
         figure,
         set(gcf,'Position',get(0,'ScreenSize'))
         for i = 1:length(spikes.UID)
@@ -329,7 +329,7 @@ if plotting
     end
     
     % LowGama Modulation
-    if lgammaModulation
+    if ismember('lgammaModulation',bandsToCompute)
         figure,
         set(gcf,'Position',get(0,'ScreenSize'))
         for i = 1:length(spikes.UID)
@@ -356,7 +356,7 @@ if plotting
     end
     
     % High Modulation
-    if hgammaModulation
+    if ismember('hgammaModulation',bandsToCompute)
         figure,
         set(gcf,'Position',get(0,'ScreenSize'))
         for i = 1:length(spikes.UID)
@@ -383,7 +383,7 @@ if plotting
     end
 
     % ThetaRUN Modulation
-    if thetaRunModulation
+    if ismember('thetaRunModulation',bandsToCompute)
         figure,
         set(gcf,'Position',get(0,'ScreenSize'))
         for i = 1:length(spikes.UID)
@@ -410,7 +410,7 @@ if plotting
     end
 
     % ThetaREM Modulation
-    if thetaREMModulation
+    if ismember('thetaREMModulation',bandsToCompute)
         figure,
         set(gcf,'Position',get(0,'ScreenSize'))
         for i = 1:length(spikes.UID)
@@ -444,37 +444,37 @@ end
 
 if saveMat
     % Ripple 
-    if rippleModulation
+    if ismember('rippleModulation',bandsToCompute)
         save([session.general.name,'.ripple_',num2str(ripple_passband(1)),'-',num2str(ripple_passband(end)),...
             '.PhaseLockingData.cellinfo.mat'],'rippleMod');
     end
     % Sharp Wave
-    if SWModulation
+    if ismember('SWModulation',bandsToCompute)
         save([session.general.name,'.SW_',num2str(SW_passband(1)),'-',num2str(SW_passband(end)),...
             '.PhaseLockingData.cellinfo.mat'],'SWMod');
     end
     % Theta
-    if thetaModulation
+    if ismember('thetaModulation',bandsToCompute)
         save([session.general.name,'.theta_',num2str(theta_passband(1)),'-',num2str(theta_passband(end)),...
             '.PhaseLockingData.cellinfo.mat'],'thetaMod');
     end
     % Low Gamma
-    if lgammaModulation
+    if ismember('lgammaModulation',bandsToCompute)
         save([session.general.name,'.lgamma_',num2str(lgamma_passband(1)),'-',num2str(lgamma_passband(end)),...
             '.PhaseLockingData.cellinfo.mat'],'lgammaMod');
     end
     % High Gamma
-    if hgammaModulation
+    if ismember('hgammaModulation',bandsToCompute)
         save([session.general.name,'.hgamma_',num2str(hgamma_passband(1)),'-',num2str(hgamma_passband(end)),...
             '.PhaseLockingData.cellinfo.mat'],'hgammaMod');
     end
     % ThetaRun
-    if thetaRunModulation
+    if ismember('thetaRunModulation',bandsToCompute)
         save([session.general.name,'.thetaRun_',num2str(theta_passband(1)),'-',num2str(theta_passband(end)),...
             '.PhaseLockingData.cellinfo.mat'],'thetaRunMod');
     end
     % thetaREM
-    if thetaRunModulation
+    if ismember('thetaRunModulation',bandsToCompute)
         save([session.general.name,'.thetaREM_',num2str(theta_passband(1)),'-',num2str(theta_passband(end)),...
             '.PhaseLockingData.cellinfo.mat'],'thetaREMMod');
     end
