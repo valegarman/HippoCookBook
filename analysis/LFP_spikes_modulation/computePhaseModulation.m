@@ -181,7 +181,6 @@ if ismember('SWModulation',bandsToCompute)
 end
 
 %% 3. Theta Modulation
-<<<<<<< HEAD
 try thetaEpochs = detectThetaEpochs;
     if ~isfield(thetaEpochs,'thetaREM')
         thetaEpochs = detectThetaEpochs('force',true);
@@ -193,9 +192,7 @@ end
 
 
 if thetaModulation
-=======
 if ismember('thetaModulation',bandsToCompute)
->>>>>>> 878f6c2824d28f8a5299acaccaf1514592c7cb17
     try
         lfpT = getLFP(thetaChannel);
         thetaMod = phaseModulation(spikes,lfpT,theta_passband,'intervals',thetaEpochs.intervals,...
