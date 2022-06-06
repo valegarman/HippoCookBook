@@ -161,9 +161,25 @@ cd(basepath);
 % The State Editor
 session = loadSession(basepath);
 TheStateEditor_temp(session.general.name);
+% Brain Regions
+session = assignBrainRegion();
 % LFP-spikes modulation
 [rippleMod,SWMod,thetaMod,lgammaMod,hgammaMod,thetaRunMod,thetaREMMod] = computePhaseModulation('rippleChannel',[],'SWChannel',[]);
 computeCofiringModulation;
+% Re run cell_metrics
+try
+    if ~isempty(dir([session.general.name,'.optogeneticPulses.events.mat']))
+        file = dir([session.general.name,'.optogeneticPulses.events.mat']);
+        load(file.name);
+    end
+        excludeManipulationIntervals = optoPulses.stimulationEpochs;
+catch
+    warning('Not possible to get manipulation periods. Running CellMetrics withouth excluding manipulation epochs');
+end
+cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',{'deepSuperficial'});
+% Get summary per cell
+getACGPeak;
+getSummaryPerCell;
 
 %% fNkx8_200902_sess13
 basepath = 'Z:\data\fNkx8\fNkx8_200902_sess13';
