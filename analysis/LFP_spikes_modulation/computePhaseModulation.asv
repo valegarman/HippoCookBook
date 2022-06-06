@@ -9,7 +9,7 @@ function [rippleMod, SWMod, thetaMod, lgammaMod, hgammaMod, thetaRunMod, thetaRE
 %   rippleChannel - channel for ripple
 %   SWChannel - channel for SW, by default radiatum from geHippocampalLayers
 %   thetaChannel - channel for theta, by default take oriens from getHippocampallayers
-%   hgammaChannel - channel for high gamma, by default oriens from geHippocampalLayers
+%   hgammaChannel - channel for high gamma, by default slm from geHippocampalLayers
 %   lgammaChannel - channel for low gamma, by default oriens from geHippocampalLayers
 %   ripple_passband - frequency range for ripple phase modulation
 %   SW_passband - frequency range for sharp wave modulation
@@ -40,7 +40,7 @@ function [rippleMod, SWMod, thetaMod, lgammaMod, hgammaMod, thetaRunMod, thetaRE
 %% Defaults and params
 p = inputParser;
 addParameter(p,'basepath',pwd,@isdir);
-addParameter(p,'spikes',[]);
+addParameter(p,'spikes',[],@bz_isCellInfo);
 addParameter(p,'bandsToCompute',{'rippleModulation','SWModulation','thetaModulation','lgammaModulation',...
     'hgammaModulation','thetaRunModulation','thetaREMModulation'});
 addParameter(p,'rippleChannel',[],@isnumeric);
@@ -53,7 +53,7 @@ addParameter(p,'SW_passband',[2 10],@isnumeric);
 addParameter(p,'theta_passband',[6 12], @isnumeric);
 addParameter(p,'lgamma_passband',[20 60], @isnumeric);
 addParameter(p,'hgamma_passband',[60 100],@isnumeric);
-addParameter(p,'method','hilbert',@ischar);
+addParameter(p,'method','hilbert',@isstr);
 addParameter(p,'plotting',true,@islogical);
 addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'skipStimulationPeriods',true,@islogical);
@@ -135,7 +135,7 @@ if isempty(lgammaChannel)
 end
 
 if isempty(hgammaChannel)
-    hgammaChannel = hippocampalLayers.bestShankLayers.oriens;
+    hgammaChannel = hippocampalLayers.bestShankLayers.slm;
 end
 
 %% Initialization of output
