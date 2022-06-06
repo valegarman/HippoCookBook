@@ -1,4 +1,4 @@
-function [rippleMod, SWMod, thetaMod, lgammaMod, hgammaMod, thetaRunMod, thetaREMMod] = computePhaseModulation(varargin)
+function [phaseMod] = computePhaseModulation(varargin)
 %   Calculates distribution of spikes over phases of different oscillations
 %   (ripples, SW, theta, low gamma and high gamma)
 %
@@ -181,10 +181,23 @@ if ismember('SWModulation',bandsToCompute)
 end
 
 %% 3. Theta Modulation
+<<<<<<< HEAD
+try thetaEpochs = detectThetaEpochs;
+    if ~isfield(thetaEpochs,'thetaREM')
+        thetaEpochs = detectThetaEpochs('force',true);
+    end
+catch
+    warning('Detecting theta epochs was not possible. Using full session...');
+    thetaEpochs.intervals = [0 Inf];
+end
+
+
+if thetaModulation
+=======
 if ismember('thetaModulation',bandsToCompute)
+>>>>>>> 878f6c2824d28f8a5299acaccaf1514592c7cb17
     try
         lfpT = getLFP(thetaChannel);
-        thetaEpochs = detectThetaEpochs;
         thetaMod = phaseModulation(spikes,lfpT,theta_passband,'intervals',thetaEpochs.intervals,...
             'useThresh',useThresh,'useMinWidth',false,'powerThresh',powerThresh,'method',method);
     catch
@@ -196,7 +209,6 @@ end
 %% 4. Low Gamma Modulation
 if ismember('lgammaModulation',bandsToCompute)
     try
-        thetaEpochs = detectThetaEpochs;
         lfpT = getLFP(lgammaChannel);
         lgammaMod = phaseModulation(spikes,lfpT,lgamma_passband,'intervals',thetaEpochs.intervals,...
             'useThresh',useThresh,'useMinWidth',false,'powerThresh',powerThresh,'method',method);
@@ -207,7 +219,6 @@ end
 %% 5. High Gamma Modulation
 if ismember('hgammaModulation',bandsToCompute)
     try
-        thetaEpochs = detectThetaEpochs;
         lfpT = getLFP(hgammaChannel);
         hgammaMod = phaseModulation(spikes,lfpT,hgamma_passband,'intervals',thetaEpochs.intervals,...
             'useThresh',useThresh,'useMinWidth',false,'powerThresh',powerThresh,'method',method);
@@ -218,10 +229,6 @@ end
 %% 6. Theta run mod
 if ismember('thetaRunModulation',bandsToCompute)
     try
-        thetaEpochs = detectThetaEpochs;
-        if ~isfield(thetaEpochs,'thetaRun')
-            thetaEpochs = detectThetaEpochs('force',true);
-        end
         lfpT = getLFP(thetaChannel);
         thetaRunMod = phaseModulation(spikes,lfpT,theta_passband,'intervals',thetaEpochs.thetaRun.ints,...
             'useThresh',useThresh,'useMinWidth',false,'powerThresh',powerThresh,'method',method);
@@ -232,18 +239,12 @@ end
 %% 7. Theta REM mod
 if ismember('thetaREMModulation',bandsToCompute)
     try
-        thetaEpochs = detectThetaEpochs;
-        if ~isfield(thetaEpochs,'thetaREM')
-            thetaEpochs = detectThetaEpochs('force',true);
-        end
         lfpT = getLFP(thetaChannel);
         thetaREMMod = phaseModulation(spikes,lfpT,theta_passband,'intervals',thetaEpochs.thetaREM.ints,...
             'useThresh',useThresh,'useMinWidth',false,'powerThresh',powerThresh,'method',method);
     catch
     end
 end
-
-
 
 %% Plotting
 if plotting
@@ -441,6 +442,13 @@ end
 
 
 %% Save Output
+phaseMod.ripples = rippleMod;
+phaseMod.SharpWave = SWMod;
+phaseMod.theta = thetaMod;
+phaseMod.lgamma = lgammaMod;
+phaseMod.hgamma = hgammaMod;
+phaseMod.thetaRunMod = thetaRunMod;
+phaseMod.thetaREMMod = thetaREMMod;
 
 if saveMat
     % Ripple 

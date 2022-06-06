@@ -224,11 +224,11 @@ try SleepState = SleepScoreMaster(pwd,'noPrompts',true);
     thetaEpochs.thetaRun.states = thetaEpochs.thetaRun.idx;
     thetaEpochs.thetaRun.statenames = {'theta'};
     temp = bz_IDXtoINT(thetaEpochs.thetaRun);
-    thetaEpochs.thetaRun.ints = temp.thetastate;
+    thetaEpochs.thetaRun.intervals = temp.thetastate;
     
     thetaEpochs.thetaREM.timestamps = SleepState.idx.timestamps;
     thetaEpochs.thetaREM.idx = double(SleepState.idx.states==5);
-    thetaEpochs.thetaREM.ints = SleepState.ints.REMstate;
+    thetaEpochs.thetaREM.intervals = SleepState.ints.REMstate;
     
     % isolating QWake
     QWake_times = intersect(SleepState.idx.timestamps(SleepState.idx.states == 1),...
@@ -239,7 +239,7 @@ try SleepState = SleepScoreMaster(pwd,'noPrompts',true);
     thetaEpochs.QWake.states = thetaEpochs.QWake.idx;
     thetaEpochs.QWake.statenames = {'QWake'};
     temp = bz_IDXtoINT(thetaEpochs.QWake);
-    thetaEpochs.QWake.ints = temp.QWakestate;
+    thetaEpochs.QWake.intervals = temp.QWakestate;
 
     QWake_nonRipples_times = intersect(SleepState.idx.timestamps(SleepState.idx.states == 1),...
         thetaEpochs.idx_nonTheta_nonRipples.timestamps(thetaEpochs.idx_nonTheta_nonRipples.idx)); % 1 is WAKE
@@ -249,7 +249,7 @@ try SleepState = SleepScoreMaster(pwd,'noPrompts',true);
     thetaEpochs.QWake_nonRipples.states = thetaEpochs.QWake_nonRipples.idx;
     thetaEpochs.QWake_nonRipples.statenames = {'QWake_nonRipples'};
     temp = bz_IDXtoINT(thetaEpochs.QWake_nonRipples);
-    thetaEpochs.QWake_nonRipples.ints = temp.QWake_nonRipplesstate;
+    thetaEpochs.QWake_nonRipples.intervals = temp.QWake_nonRipplesstate;
 
     % isolating NREM
     NREM_times = intersect(SleepState.idx.timestamps(SleepState.idx.states == 3),...
@@ -260,7 +260,7 @@ try SleepState = SleepScoreMaster(pwd,'noPrompts',true);
     thetaEpochs.NREM.states = thetaEpochs.NREM.idx;
     thetaEpochs.NREM.statenames = {'NREM'};
     temp = bz_IDXtoINT(thetaEpochs.NREM);
-    thetaEpochs.NREM.ints = temp.NREMstate;
+    thetaEpochs.NREM.intervals = temp.NREMstate;
 
     NREM_nonRipples_times = intersect(SleepState.idx.timestamps(SleepState.idx.states == 3),...
         thetaEpochs.idx_nonTheta_nonRipples.timestamps(thetaEpochs.idx_nonTheta_nonRipples.idx)); % 3 is NREM
@@ -270,7 +270,7 @@ try SleepState = SleepScoreMaster(pwd,'noPrompts',true);
     thetaEpochs.NREM_nonRipples.states = thetaEpochs.NREM_nonRipples.idx;
     thetaEpochs.NREM_nonRipples.statenames = {'NREM_nonRipples'};
     temp = bz_IDXtoINT(thetaEpochs.NREM_nonRipples);
-    thetaEpochs.NREM_nonRipples.ints = temp.NREM_nonRipplesstate;
+    thetaEpochs.NREM_nonRipples.intervals = temp.NREM_nonRipplesstate;
 catch 
     warning('Separating Run and REM was not possible!');
 end
@@ -283,12 +283,12 @@ if updateSleepStates
 %     SleepState.detectorinfo
 %     SleepState.ints.WAKEtheta2 = thetaEpochs.thetaRun
         
-    SleepState.ints.WAKEtheta_ThDt = thetaEpochs.thetaRun.ints;
-    SleepState.ints.REMtheta_ThDt = thetaEpochs.thetaREM.ints;
-    SleepState.ints.QWake_ThDt = thetaEpochs.QWake.ints;
-    SleepState.ints.QWake_noRipples_ThDt = thetaEpochs.QWake_nonRipples.ints;
-    SleepState.ints.NREM_ThDt = thetaEpochs.NREM.ints;
-    SleepState.ints.NREM_noRipples_ThDt = thetaEpochs.NREM_nonRipples.ints;
+    SleepState.ints.WAKEtheta_ThDt = thetaEpochs.thetaRun.intervals;
+    SleepState.ints.REMtheta_ThDt = thetaEpochs.thetaREM.intervals;
+    SleepState.ints.QWake_ThDt = thetaEpochs.QWake.intervals;
+    SleepState.ints.QWake_noRipples_ThDt = thetaEpochs.QWake_nonRipples.intervals;
+    SleepState.ints.NREM_ThDt = thetaEpochs.NREM.intervals;
+    SleepState.ints.NREM_noRipples_ThDt = thetaEpochs.NREM_nonRipples.intervals;
 
     save([basenameFromBasepath(pwd) '.SleepState.states.mat'],'SleepState');
 end
