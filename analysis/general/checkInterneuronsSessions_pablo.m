@@ -278,3 +278,10 @@ cd(basepath);
 % The State Editor
 session = loadSession(basepath);
 TheStateEditor_temp(session.general.name);
+
+%% fPv4_210311_sess4 
+basepath = 'Z:\data\fPv4\fPv4_210311_sess4';
+cd(basepath);
+% The State Editor
+session = loadSession(basepath);
+TheStateEditor_temp(session.general.name);
