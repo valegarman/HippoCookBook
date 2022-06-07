@@ -22,6 +22,7 @@ addParameter(p,'basepath',pwd,@isfolder);
 addParameter(p,'UID',[], @isnumeric);
 addParameter(p,'saveFigure',true, @islogical);
 addParameter(p,'lightPulseDuration',0.1, @isnumeric);
+addParameter(p,'use_deltaThetaEpochs',true, @islogical);
 
 parse(p,varargin{:})
 
@@ -29,6 +30,7 @@ basepath = p.Results.basepath;
 UID = p.Results.UID;
 saveFigure = p.Results.saveFigure;
 lightPulseDuration = p.Results.lightPulseDuration;
+use_deltaThetaEpochs = p.Results.use_deltaThetaEpochs;
 
 % dealing with inputs 
 prevPath = pwd;
