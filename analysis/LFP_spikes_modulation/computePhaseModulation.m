@@ -174,7 +174,7 @@ if ismember('SWModulation',bandsToCompute)
         end
         
         lfpSW = getLFP(SWChannel);
-        SWMod = SWphaseModulation(spikes,lfpSW,SW_passband,'plotting',false,'method',method);
+        SWMod = SWphaseModulation(spikes,lfpSW,SW_passband,'plotting',false);
     catch
         warning('Sharp Wave modulation estimation was not possible...');
     end
@@ -191,14 +191,17 @@ catch
 end
 
 
+<<<<<<< HEAD
+=======
 if thetaModulation
+>>>>>>> 0c8631c2d4e7722eb21c6acf2ff82eec805d481b
 if ismember('thetaModulation',bandsToCompute)
     try
         lfpT = getLFP(thetaChannel);
         thetaMod = phaseModulation(spikes,lfpT,theta_passband,'intervals',thetaEpochs.intervals,...
             'useThresh',useThresh,'useMinWidth',false,'powerThresh',powerThresh,'method',method);
     catch
-        warning('Sharp Wave modulation estimation was not possible...');
+        warning('Theta modulation estimation was not possible...');
     end
 end
 
@@ -210,6 +213,7 @@ if ismember('lgammaModulation',bandsToCompute)
         lgammaMod = phaseModulation(spikes,lfpT,lgamma_passband,'intervals',thetaEpochs.intervals,...
             'useThresh',useThresh,'useMinWidth',false,'powerThresh',powerThresh,'method',method);
     catch
+        warning('Low gamma modulation estimation was not possible...');
     end
 end
 
@@ -220,6 +224,7 @@ if ismember('hgammaModulation',bandsToCompute)
         hgammaMod = phaseModulation(spikes,lfpT,hgamma_passband,'intervals',thetaEpochs.intervals,...
             'useThresh',useThresh,'useMinWidth',false,'powerThresh',powerThresh,'method',method);
     catch
+        warning('High gamma modulation estimation was not possible...');
     end
 end
 
@@ -227,9 +232,10 @@ end
 if ismember('thetaRunModulation',bandsToCompute)
     try
         lfpT = getLFP(thetaChannel);
-        thetaRunMod = phaseModulation(spikes,lfpT,theta_passband,'intervals',thetaEpochs.thetaRun.ints,...
+        thetaRunMod = phaseModulation(spikes,lfpT,theta_passband,'intervals',thetaEpochs.thetaRun.intervals,...
             'useThresh',useThresh,'useMinWidth',false,'powerThresh',powerThresh,'method',method);
     catch
+        warning('Theta run modulation estimation was not possible...');
     end
 end
 
@@ -237,9 +243,10 @@ end
 if ismember('thetaREMModulation',bandsToCompute)
     try
         lfpT = getLFP(thetaChannel);
-        thetaREMMod = phaseModulation(spikes,lfpT,theta_passband,'intervals',thetaEpochs.thetaREM.ints,...
+        thetaREMMod = phaseModulation(spikes,lfpT,theta_passband,'intervals',thetaEpochs.thetaREM.intervals,...
             'useThresh',useThresh,'useMinWidth',false,'powerThresh',powerThresh,'method',method);
     catch
+        warning('Theta REM modulation estimation was not possible...');
     end
 end
 

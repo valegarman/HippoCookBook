@@ -17,11 +17,8 @@ for ii = 1:length(sessionsTable.SessionName)
         try
 
             %%% your code goes here...
-
-            computePhaseModulation('rippleChannel',[],'SWChannel',[],...
-                'rippleModulation',false,'SWModulation',false,...
-                'thetaModulation',false,'lgammaModulation',false,...
-                'hgammaModulation',false);
+            thetaEpochs = detectThetaEpochs('force',true);
+            [phaseMod] = computePhaseModulation('rippleChannel',[],'SWChannel',[]);
             computeCofiringModulation;
             %%%
             

@@ -78,7 +78,27 @@ end
 % 
 if isempty(channel)
     hippocampalLayers = getHippocampalLayers;
-    channel = hippocampalLayers.bestShankLayers.slm;
+    % first, try to load slm channel in best shank
+    if ~isnan(hippocampalLayers.bestShankLayers.slm)
+        channel = hippocampalLayers.bestShankLayers.slm;
+    else
+    % then, try to load it from any shank, and get the slm channel with the
+    % highest theta power
+    powerProfile_theta = powerSpectrumProfile([6 12]);
+        for ii = 1:length(hippocampalLayers.layers)
+            temp(ii) = hippocampalLayers.layers{ii}.slm;
+        end
+        if any(~isnan(temp))
+            temp(isnan(temp)) = [];
+            [~,idx]= max(powerProfile_theta.mean(ismember(powerProfile_theta.channels, temp)));
+            channel = temp(idx);
+        else
+            % if not possible, just take channel with most theta power
+            [~,idx]= max(powerProfile_theta.mean);
+            channel = powerProfile_theta.channels(idx);
+        end
+    end
+
 end
 
 if isempty(lfp) && ~useCSD
@@ -227,7 +247,7 @@ try SleepState = SleepScoreMaster(pwd,'noPrompts',true);
     thetaEpochs.thetaRun.intervals = temp.thetastate;
     
     thetaEpochs.thetaREM.timestamps = SleepState.idx.timestamps;
-    thetaEpochs.thetaREM.idx = double(SleepState.idx.states==5);
+    thetaEpochs.thetaREM.idx = double(SleepState.idx.states==5)';
     thetaEpochs.thetaREM.intervals = SleepState.ints.REMstate;
     
     % isolating QWake
