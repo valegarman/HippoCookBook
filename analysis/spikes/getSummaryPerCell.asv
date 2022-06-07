@@ -15,6 +15,7 @@ function [] = getSummaryPerCell(varargin)
 % 'lightPulseDuration'  - In seconds, default 0.1.
 % 'checkUnits'          - If true, ask which cells ID should be
 %                           discarted...
+% 'use_deltaThetaEpochs'- Default, true.
 %
 %% Manuel Valero 2022
 
@@ -27,6 +28,7 @@ addParameter(p,'saveFigure',true, @islogical);
 addParameter(p,'onlyOptoTag',true, @islogical);
 addParameter(p,'lightPulseDuration',0.1, @isnumeric);
 addParameter(p,'checkUnits',true, @islogical);
+addParameter(p,'use_deltaThetaEpochs',true, @islogical);
 
 parse(p,varargin{:})
 
@@ -36,6 +38,7 @@ saveFigure = p.Results.saveFigure;
 onlyOptoTag = p.Results.onlyOptoTag;
 lightPulseDuration = p.Results.lightPulseDuration;
 checkUnits = p.Results.checkUnits;
+use_deltaThetaEpochs = p.Results.use_deltaThetaEpochs;
 
 % dealing with inputs 
 prevPath = pwd;
@@ -94,9 +97,11 @@ acgPeak = importdata(targetFile.name);
 
 % firing rate
 spikemat = bz_SpktToSpkmat(loadSpikes,'dt',10,'units','rate');
-
-% states_rate2 = [cell_metrics.firingRate' cell_metrics.firingRate_WAKEnontheta'          cell_metrics.firingRate_WAKEtheta'      cell_metrics.firingRate_NREMstate'           cell_metrics.firingRate_REMstate'];
-states_rate =   [cell_metrics.firingRate' cell_metrics.firingRate_QWake_noRipples_ThDt'  cell_metrics.firingRate_WAKEtheta_ThDt' cell_metrics.firingRate_NREM_noRipples_ThDt' cell_metrics.firingRate_REMtheta_ThDt'];
+if use_deltaThetaEpochs
+    states_rate =   [cell_metrics.firingRate' cell_metrics.firingRate_QWake_noRipples_ThDt'  cell_metrics.firingRate_WAKEtheta_ThDt' cell_metrics.firingRate_NREM_noRipples_ThDt' cell_metrics.firingRate_REMtheta_ThDt'];
+else
+    states_rate =   [cell_metrics.firingRate' cell_metrics.firingRate_WAKEnontheta'          cell_metrics.firingRate_WAKEtheta'      cell_metrics.firingRate_NREMstate'           cell_metrics.firingRate_REMstate'];
+end
 run_quiet_index = (states_rate(:,3) - states_rate(:,2))./(states_rate(:,3) + states_rate(:,2));
 rem_nrem_index = (states_rate(:,5) - states_rate(:,4))./(states_rate(:,5) + states_rate(:,4));
 
@@ -122,7 +127,7 @@ targetFile = dir('*.thetaRun_6-12.PhaseLockingData.cellinfo.mat'); load(targetFi
 targetFile = dir('*.thetaREM_6-12.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
 
 % speed
-speedCorr = getSpeedCorr;
+speedCorr = getSpeedCorr('force',true);
 if ~isempty(speedCorr)
     for ii = 1:size(speedCorr.speedVals,1)
         speedVals(ii,:) = mean(speedCorr.speedVals(ii,:,:),3)/cell_metrics.firingRate(ii);
