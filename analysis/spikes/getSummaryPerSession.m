@@ -74,7 +74,11 @@ acgPeak = importdata(targetFile.name);
 
 % firing rate
 spikemat = bz_SpktToSpkmat(loadSpikes,'dt',10,'units','rate');
-states_rate = [cell_metrics.firingRate' cell_metrics.firingRate_WAKEnontheta' cell_metrics.firingRate_WAKEtheta' cell_metrics.firingRate_NREMstate' cell_metrics.firingRate_REMstate'];
+if use_deltaThetaEpochs
+    states_rate =   [cell_metrics.firingRate' cell_metrics.firingRate_QWake_noRipples_ThDt'  cell_metrics.firingRate_WAKEtheta_ThDt' cell_metrics.firingRate_NREM_noRipples_ThDt' cell_metrics.firingRate_REMtheta_ThDt'];
+else
+    states_rate =   [cell_metrics.firingRate' cell_metrics.firingRate_WAKEnontheta'          cell_metrics.firingRate_WAKEtheta'      cell_metrics.firingRate_NREMstate'           cell_metrics.firingRate_REMstate'];
+end
 run_quiet_index = (states_rate(:,3) - states_rate(:,2))./(states_rate(:,3) + states_rate(:,2));
 rem_nrem_index = (states_rate(:,5) - states_rate(:,4))./(states_rate(:,5) + states_rate(:,4));
 
@@ -96,7 +100,7 @@ targetFile = dir('*.lgamma_20-60.PhaseLockingData.cellinfo.mat'); load(targetFil
 targetFile = dir('*.hgamma_60-100.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
 
 % speed
-speedCorr = getSpeedCorr;
+speedCorr = getSpeedCorr('force',false);
 if ~isempty(speedCorr)
     for ii = 1:size(speedCorr.speedVals,2)
         speedVals(ii,:) = mean(speedCorr.speedVals(:,ii,:),3)/cell_metrics.firingRate(ii);
