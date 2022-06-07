@@ -250,5 +250,5 @@ batch_preprocessSession('basepath','J:\fCamk8','cleanArtifacts',[],'analogChanne
 %%
 
 updateExpFolder({'V:\data\fVIP1','Y:\fVIP1'},'Z:\data\fVIP1');
-updateExpFolder({'T:\fPv5','V:\data\fPv5'},'Z:\data\fId3');
+updateExpFolder({'T:\fPv5','V:\data\fPv5'},'Z:\data\fPv5');
 updateExpFolder({'T:\fCamk8','Y:\fCamk8'},'J:\fCamk8');
