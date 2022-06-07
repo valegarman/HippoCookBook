@@ -230,11 +230,11 @@ ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChann
 psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true);
 
 % 8.3 Theta intervals
-thetaEpochs = detectThetaEpochs();
+thetaEpochs = detectThetaEpochs('force',true);
 
 %% 9. Phase Modulation
 % LFP-spikes modulation
-[rippleMod,SWMod,thetaMod,lgammaMod,hgammaMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel);
+[phaseMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel);
 computeCofiringModulation;
 %% 10. Cell metrics
 % Exclude manipulation intervals for computing CellMetrics

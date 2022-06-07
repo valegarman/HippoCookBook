@@ -223,7 +223,10 @@ catch
 PhaseLockingData.region = [];
 end
 PhaseLockingData.UID = spikes.UID;
-PhaseLockingData.sessionName = spikes.sessionName;
+try PhaseLockingData.sessionName = spikes.sessionName;
+catch
+    PhaseLockingData.sessionName = spikes.basename;
+end
 
 if saveMat
     save([lfp.Filename(1:end-4) '.SWPhaseLockingData.cellinfo.mat'],'PhaseLockingData');
