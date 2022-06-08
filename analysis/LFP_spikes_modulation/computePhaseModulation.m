@@ -190,11 +190,6 @@ catch
     thetaEpochs.intervals = [0 Inf];
 end
 
-
-<<<<<<< HEAD
-=======
-if thetaModulation
->>>>>>> 0c8631c2d4e7722eb21c6acf2ff82eec805d481b
 if ismember('thetaModulation',bandsToCompute)
     try
         lfpT = getLFP(thetaChannel);
