@@ -127,7 +127,7 @@ targetFile = dir('*.thetaRun_6-12.PhaseLockingData.cellinfo.mat'); load(targetFi
 targetFile = dir('*.thetaREM_6-12.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
 
 % speed
-speedCorr = getSpeedCorr('force',true);
+speedCorr = getSpeedCorr('force',false);
 if ~isempty(speedCorr)
     for ii = 1:size(speedCorr.speedVals,1)
         speedVals(ii,:) = mean(speedCorr.speedVals(ii,:,:),3)/cell_metrics.firingRate(ii);
@@ -362,7 +362,7 @@ for ii = 1:length(UID)
     plot(x_wave,y_wave,'--k');
     plotFill(rippleMod.phasebins_wide_doubled,rippleMod.phasedistro_wide_smoothZ_doubled(all_nw,:),'color',nw_color,'style','filled');
     plotFill(rippleMod.phasebins_wide_doubled,rippleMod.phasedistro_wide_smoothZ_doubled(all_ww,:),'color',ww_color,'style','filled');
-    plotFill(rippleMod.phasebins_wide_doubled,rippleMod.phasedistro_wide_smoothZ_doubled(all_pyr,:),'color',pyr_color,'style','filled');
+    plotFill(rippleMod.phasebins_wide_doubled,rippleMod.phasedistro_wide_smoothZ_doubled(all_pyr,:)','color',pyr_color,'style','filled');
     plot(rippleMod.phasebins_wide_doubled,rippleMod.phasedistro_wide_smoothZ_doubled(UID(ii),:),'color',cell_color,'LineWidth',1.5);
     
     scatter(rand(length(find(all_pyr)),1)/2 + 12.6, rippleMod.phasestats.r(all_pyr)*5,20,pyr_color,'filled');
@@ -386,7 +386,7 @@ for ii = 1:length(UID)
     plot(x_wave,y_wave,'--k');
     plotFill(thetaMod.phasebins_wide_doubled,thetaMod.phasedistro_wide_smoothZ_doubled(all_nw,:),'color',nw_color,'style','filled');
     plotFill(thetaMod.phasebins_wide_doubled,thetaMod.phasedistro_wide_smoothZ_doubled(all_ww,:),'color',ww_color,'style','filled');
-    plotFill(thetaMod.phasebins_wide_doubled,thetaMod.phasedistro_wide_smoothZ_doubled(all_pyr,:),'color',pyr_color,'style','filled');
+    plotFill(thetaMod.phasebins_wide_doubled,thetaMod.phasedistro_wide_smoothZ_doubled(all_pyr,:)','color',pyr_color,'style','filled');
     plot(thetaMod.phasebins_wide_doubled,thetaMod.phasedistro_wide_smoothZ_doubled(UID(ii),:),'color',cell_color,'LineWidth',1.5);
     
     scatter(rand(length(find(all_pyr)),1)/2 + 12.6, thetaMod.phasestats.r(all_pyr)*5,20,pyr_color,'filled');
@@ -410,7 +410,7 @@ for ii = 1:length(UID)
     plot(x_wave,y_wave,'--k');
     plotFill(lgammaMod.phasebins_wide_doubled,lgammaMod.phasedistro_wide_smoothZ_doubled(all_nw,:),'color',nw_color,'style','filled');
     plotFill(lgammaMod.phasebins_wide_doubled,lgammaMod.phasedistro_wide_smoothZ_doubled(all_ww,:),'color',ww_color,'style','filled');
-    plotFill(lgammaMod.phasebins_wide_doubled,lgammaMod.phasedistro_wide_smoothZ_doubled(all_pyr,:),'color',pyr_color,'style','filled');
+    plotFill(lgammaMod.phasebins_wide_doubled,lgammaMod.phasedistro_wide_smoothZ_doubled(all_pyr,:)','color',pyr_color,'style','filled');
     plot(lgammaMod.phasebins_wide_doubled,lgammaMod.phasedistro_wide_smoothZ_doubled(UID(ii),:),'color',cell_color,'LineWidth',1.5);
     
     scatter(rand(length(find(all_pyr)),1)/2 + 12.6, lgammaMod.phasestats.r(all_pyr)*5,20,pyr_color,'filled');
@@ -434,7 +434,7 @@ for ii = 1:length(UID)
     plot(x_wave,y_wave,'--k');
     plotFill(hgammaMod.phasebins_wide_doubled,hgammaMod.phasedistro_wide_smoothZ_doubled(all_nw,:),'color',nw_color,'style','filled');
     plotFill(hgammaMod.phasebins_wide_doubled,hgammaMod.phasedistro_wide_smoothZ_doubled(all_ww,:),'color',ww_color,'style','filled');
-    plotFill(hgammaMod.phasebins_wide_doubled,hgammaMod.phasedistro_wide_smoothZ_doubled(all_pyr,:),'color',pyr_color,'style','filled');
+    plotFill(hgammaMod.phasebins_wide_doubled,hgammaMod.phasedistro_wide_smoothZ_doubled(all_pyr,:)','color',pyr_color,'style','filled');
     plot(hgammaMod.phasebins_wide_doubled,hgammaMod.phasedistro_wide_smoothZ_doubled(UID(ii),:),'color',cell_color,'LineWidth',1.5);
     
     scatter(rand(length(find(all_pyr)),1)/2 + 12.6, hgammaMod.phasestats.r(all_pyr)*5,20,pyr_color,'filled');
