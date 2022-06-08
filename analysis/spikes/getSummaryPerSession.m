@@ -104,8 +104,8 @@ targetFile = dir('*.hgamma_60-100.PhaseLockingData.cellinfo.mat'); load(targetFi
 % speed
 speedCorr = getSpeedCorr('force',false);
 if ~isempty(speedCorr)
-    for ii = 1:size(speedCorr.speedVals,2)
-        speedVals(ii,:) = mean(speedCorr.speedVals(:,ii,:),3)/cell_metrics.firingRate(ii);
+    for ii = 1:size(speedCorr.speedVals,1)
+        speedVals(ii,:) = mean(speedCorr.speedVals(ii,:,:),3)/cell_metrics.firingRate(ii);
     end
 end
     

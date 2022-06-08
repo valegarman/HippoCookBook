@@ -187,7 +187,17 @@ cd(basepath);
 % The State Editor
 session = loadSession(basepath);
 TheStateEditor_temp(session.general.name);
+% Brain Regions
+session = assignBrainRegion();
+bpath = 'Z:\data\fNkx8\fNkx8_200902_sess13';
+indexNewSession('basepath',bpath,'promt_hippo_layers',true,'analogChannelsList',65,'bazler_ttl_channel',1);
 
+% Get summary per cell
+getACGPeak;
+getSummaryPerCell;
+
+bpath = 'Z:\data\fNkx8\fNkx8_200902_sess13';
+indexNewSession('basepath',bpath,'promt_hippo_layers',true,'analogChannelsList',65);
 %% fNkx9_200821_sess5
 basepath = 'Z:\data\fNkx9\fNkx9_200821_sess5';
 cd(basepath);
