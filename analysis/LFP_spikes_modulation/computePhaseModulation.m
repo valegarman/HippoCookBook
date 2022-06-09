@@ -410,7 +410,7 @@ if plotting
     end
 
     % ThetaREM Modulation
-    if ismember('thetaREMModulation',bandsToCompute)
+    if ismember('thetaREMModulation',bandsToCompute) && ~isempty(thetaREMMod)
         figure,
         set(gcf,'Position',get(0,'ScreenSize'))
         for i = 1:length(spikes.UID)

@@ -64,31 +64,36 @@ else
     phasemod2.epochsName = 'phasemod2';
 end
 
-significant_cells = (phasemod1.phasestats.p < p_valueCutoff) & ...
-    (phasemod2.phasestats.p < p_valueCutoff);
+if isfield(phasemod1,'phasestats') && isfield(phasemod2,'phasestats')
+    significant_cells = (phasemod1.phasestats.p < p_valueCutoff) & ...
+        (phasemod2.phasestats.p < p_valueCutoff);
 
-phase_shift = wrapToPi(circ_dist(phasemod1.phasestats.m, phasemod2.phasestats.m));
-phase_shift(~significant_cells) = NaN;
-phase_shift_normalized = abs(phase_shift)/pi;
-shiftingUnits = abs(phase_shift) > shiftingThreshold;
+    phase_shift = wrapToPi(circ_dist(phasemod1.phasestats.m, phasemod2.phasestats.m));
+    phase_shift(~significant_cells) = NaN;
+    phase_shift_normalized = abs(phase_shift)/pi;
+    shiftingUnits = abs(phase_shift) > shiftingThreshold;
 
-cofiringMod.phasemod1 = phasemod1;
-cofiringMod.phasemod2 = phasemod2;
-cofiringMod.m_phase1 = phasemod1.phasestats.m;
-cofiringMod.m_phase2 = phasemod2.phasestats.m;
-cofiringMod.significant_units = significant_cells;
-cofiringMod.phase_shift = phase_shift;
-cofiringMod.phase_shift_normalized = phase_shift_normalized;
-cofiringMod.shiftingUnits = shiftingUnits;
-cofiringMod.shiftingThreshold = shiftingThreshold;
-cofiringMod.p_valueCutoff = p_valueCutoff;
+    cofiringMod.phasemod1 = phasemod1;
+    cofiringMod.phasemod2 = phasemod2;
+    cofiringMod.m_phase1 = phasemod1.phasestats.m;
+    cofiringMod.m_phase2 = phasemod2.phasestats.m;
+    cofiringMod.significant_units = significant_cells;
+    cofiringMod.phase_shift = phase_shift;
+    cofiringMod.phase_shift_normalized = phase_shift_normalized;
+    cofiringMod.shiftingUnits = shiftingUnits;
+    cofiringMod.shiftingThreshold = shiftingThreshold;
+    cofiringMod.p_valueCutoff = p_valueCutoff;
+else
+    warning('Analysis was not possible. Returning empty...');
+    cofiringMod = [];
+end
 
 if saveMat
     disp('Saving results...');
     save([basenameFromBasepath(pwd) '.cofiringMod_', phasemod1.epochsName, '_' phasemod1.epochsName '.cellinfo.mat'],'cofiringMod');
 end
 
-if plotOpt
+if plotOpt && isfield(phasemod1,'phasestats') && isfield(phasemod2,'phasestats')
     figure
     hold on
     units = ~cofiringMod.significant_units;

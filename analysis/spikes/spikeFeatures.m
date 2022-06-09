@@ -11,6 +11,7 @@ function spikeFeatures(varargin)
 %
 %
 % Pablo Abad 2022. Based on computeSessionSummary by Manu Valero 2020
+% MV, 2022 exclude and skip intervals
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Defaults and Params
 p = inputParser;
@@ -18,6 +19,8 @@ addParameter(p,'basepath',pwd,@isdir);
 addParameter(p,'spikes',[],@bz_isCellInfo);
 addParameter(p,'getWaveformsFromDat',false,@islogical);
 addParameter(p,'excludeChannels',[],@isnumeric);
+addParameter(p,'skipStimulationPeriods',true,@islogical);
+addParameter(p,'excludeIntervals',[],@isnumeric);
 
 parse(p,varargin{:})
 
@@ -25,14 +28,35 @@ basepath = p.Results.basepath;
 spikes = p.Results.spikes;
 getWaveformsFromDat = p.Results.getWaveformsFromDat;
 excludeChannels = p.Results.excludeChannels;
+skipStimulationPeriods = p.Results.skipStimulationPeriods;
+excludeIntervals = p.Results.excludeIntervals;
+
+prevPath = pwd;
+cd(basepath);
 
 if isempty(spikes)
     spikes = loadSpikes('getWaveformsFromDat',getWaveformsFromDat);
 end
 
+if skipStimulationPeriods
+    try
+        optogenetic_responses = getOptogeneticResponse;
+        excludeIntervals = [excludeIntervals; optogenetic_responses.stimulationEpochs];
+    catch
+        warning('Skip stimulation periods not possible...');
+    end
+end
+
+if ~isempty(excludeIntervals)
+    warning('Excluding intervals...');
+    for ii = 1:length(spikes.times)
+        [status] = InIntervals(spikes.times{ii},excludeIntervals);
+        spikes.times{ii} = spikes.times{ii}(~status);
+    end
+end
+
 %% Spikes Features
 disp('Spike-waveform, ACG and cluster location...');
-spikes = loadSpikes('getWaveformsFromDat',getWaveformsFromDat);
 
 % plot spikes summary
 disp('Plotting spikes summary...');
@@ -83,6 +107,7 @@ end
 saveas(gcf,'SummaryFigures\spikes.png');
 
 
+cd(prevPath);
 
 end
 
