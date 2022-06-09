@@ -458,12 +458,7 @@ for ii = 1:length(UID)
         end
         plotFill(log10(speedCorr.prc_vals),speedVals(all_nw,:),'color',nw_color,'style','filled');
         plotFill(log10(speedCorr.prc_vals),speedVals(all_ww,:),'color',ww_color,'style','filled');
-        if length(find(all_pyr == 1)) ~= size(speedVals(all_pyr),2)
-            plotFill(log10(speedCorr.prc_vals),speedVals(all_pyr,:),'color',pyr_color,'style','filled');
-        else
-            plotFill(log10(speedCorr.prc_vals),speedVals(all_pyr,:)','color',pyr_color,'style','filled');
-        end
-        
+        plotFill(log10(speedCorr.prc_vals),speedVals(all_pyr,:)','color',pyr_color,'style','filled');
         plot(log10(speedCorr.prc_vals),speedVals(UID(ii),:),'color',cell_color,'LineWidth',1.5);
         LogScale('x',10);
 

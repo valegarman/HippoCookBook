@@ -252,3 +252,6 @@ batch_preprocessSession('basepath','J:\fCamk8','cleanArtifacts',[],'analogChanne
 updateExpFolder({'V:\data\fVIP1','Y:\fVIP1'},'Z:\data\fVIP1');
 updateExpFolder({'T:\fPv5','V:\data\fPv5'},'Z:\data\fPv5');
 updateExpFolder({'T:\fCamk8','Y:\fCamk8'},'J:\fCamk8');
+
+batch_preprocessSession('basepath','Z:\data\fVIP1','analysisPath','C:\data\fVIP1','cleanArtifacts',({[],[1]}),'analogChannelsList',[],'digitalChannelsList',1,'bazler_ttl_channel',10,'getPos',false);
+
