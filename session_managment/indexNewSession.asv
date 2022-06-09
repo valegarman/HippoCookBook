@@ -183,12 +183,13 @@ if ~isempty(probe_type)
             text(session.extracellular.chanCoords.x(ii)+1, session.extracellular.chanCoords.y(ii)-1, num2str(ii));
         end
         xlabel('um'); ylabel('um');
-        title([session.animal.probeImplants{1}.probe 'probe'],'FontWeight','normal');
-        xlim([min(session.extracellular.chanCoords.x)-100 max(session.extracellular.chanCoords.x)+100]);
-        ylim([min(session.extracellular.chanCoords.y)-100 max(session.extracellular.chanCoords.y)+100]);
+        title(['A5x12-16-Buz-lin-5mm-100-200-160-177 probe'],'FontWeight','normal');
+        xlim([min(chanCoords.x)-100 max(chanCoords.x)+100]);
+        ylim([min(chanCoords.y)-100 max(chanCoords.y)+100]);
         set(gca,'TickDir','out');
         mkdir('SummaryFigures');
         saveas(gcf,['SummaryFigures\probe_layout.png']);
+
     end
 end
 
