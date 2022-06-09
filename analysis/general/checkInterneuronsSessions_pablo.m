@@ -25,6 +25,8 @@ psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true);
 % The State Editor
 session = loadSession(basepath);
 TheStateEditor_temp(session.general.name);
+% Brain Regions
+session = assignBrainRegion();
 % Re run cell_metrics
 try
     if ~isempty(dir([session.general.name,'.optogeneticPulses.events.mat']))
@@ -167,6 +169,7 @@ getSummaryPerCell;
 %% 'fNkx9_200827_sess9' Only 1 responsive cell. Check speed relationship, Check theta phase (bimodal), REM vs RUN
 basepath = 'Z:\data\fNkx9\fNkx9_200827_sess9';
 cd(basepath);
+session = loadSession(basepath);
 % Channel 17 is not a bad Channel
 session = sessionTemplate(basepath,'showGUI',true);
 indexNewSession('basepath',basepath,'force_loadingSpikes', false,'force_analogPulsesDetection',false,'promt_hippo_layers',true,'analogChannelsList',65,'removeDatFiles',false,'indexing',false);
@@ -175,6 +178,12 @@ indexNewSession('basepath',basepath,'force_loadingSpikes', false,'force_analogPu
 session = assignBrainRegion();
 % Re run getSpeedCorr
 speedCorr = getSpeedCorr('numQuantiles',20,'force',true);
+% 8.3 Theta intervals
+thetaEpochs = detectThetaEpochs('force',true);
+% 9. Phase Modulation
+% LFP-spikes modulation
+[phaseMod] = computePhaseModulation('rippleChannel',[],'SWChannel',[]);
+computeCofiringModulation;
 % Re run cell_metrics
 try
     if ~isempty(dir([session.general.name,'.optogeneticPulses.events.mat']))
