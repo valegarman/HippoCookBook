@@ -72,11 +72,12 @@ end
 if skipStimulationPeriods
     try
         optogenetic_responses = getOptogeneticResponse;
+        excludeIntervals = [excludeIntervals; optogenetic_responses.stimulationEpochs];
     catch
         warning('Skip stimulation periods not possible...');
     end
 end
-excludeIntervals = [excludeIntervals; optogenetic_responses.stimulationEpochs];
+
 if ~isempty(excludeIntervals)
     warning('Excluding intervals...');
     for ii = 1:length(spikes.times)

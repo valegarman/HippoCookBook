@@ -190,11 +190,6 @@ catch
     thetaEpochs.intervals = [0 Inf];
 end
 
-
-<<<<<<< HEAD
-=======
-if thetaModulation
->>>>>>> 0c8631c2d4e7722eb21c6acf2ff82eec805d481b
 if ismember('thetaModulation',bandsToCompute)
     try
         lfpT = getLFP(thetaChannel);
@@ -415,7 +410,7 @@ if plotting
     end
 
     % ThetaREM Modulation
-    if ismember('thetaREMModulation',bandsToCompute)
+    if ismember('thetaREMModulation',bandsToCompute) && ~isempty(thetaREMMod)
         figure,
         set(gcf,'Position',get(0,'ScreenSize'))
         for i = 1:length(spikes.UID)

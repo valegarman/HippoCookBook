@@ -37,7 +37,8 @@ function [ripples,SW] = rippleMasterDetector(varargin)
 %                   (default = [30 100]). 
 %     'minDuration' min ripple duration. Keeping this input nomenclature for backwards
 %                   compatibility
-%     'restrict'    interval used to compute normalization (default = all)
+%     'restrict'    interval used to compute normalization. By default,
+%                       tries to remove stimulated periods. Otherwise, 'off'
 %     'frequency'   sampling rate (in Hz) (default = 1250Hz)
 %     'stdev'       reuse previously computed stdev
 %     'show'        plot results (default = 'off')
@@ -160,15 +161,16 @@ if isempty(SWChannel)
     SWChannel = hippocampalLayers.bestShankLayers.radiatum;
 end
 
+if isempty(restrict)
+    targetFile = dir('*optogeneticPulses.events.mat'); load(targetFile.name);
+    restrict = SubtractIntervals([0 Inf],optoPulses.stimulationEpochs);
+end
+
 %%%%%%%%%%%%%%%%%%%%%%%%%
 %% Computing Ripples
 %%%%%%%%%%%%%%%%%%%%%%%%
 ripples = findRipples(rippleChannel,'thresholds',thresholds,'passband',passband,...
-    'EMGThresh',EMGThresh,'durations',durations, 'saveMat',false);
-ripples = removeArtifactsFromEvents(ripples);
-ripples = eventSpikingTreshold(ripples,[],'spikingThreshold',eventSpikeThreshold);
-plotRippleChannel('rippleChannel',rippleChannel,'ripples',ripples); % to do, run this after ripple detection
-
+    'EMGThresh',EMGThresh,'durations',durations, 'saveMat',false,'restrict',restrict,'frequency',frequency);
 if removeRipplesStimulation
     try
         % Remove ripples durting stimulation artifacts
@@ -186,6 +188,7 @@ if removeRipplesStimulation
         else
             warning('No pulses epochs detected!');
         end
+        nBefore = length(ripples.peaks);
         for i = 1:size(pulPeriods,1)
             a = InIntervals(ripples.peaks,pulPeriods(i,:));
             fieldsR = fields(ripples);
@@ -195,10 +198,14 @@ if removeRipplesStimulation
                 end
             end
         end
+        fprintf('%3.i/%3.i events during stimulation, discarted... \n',nBefore-length(ripples.peaks), nBefore); %\n
     catch
         warning('Not possible to remove ripples during stimulation epochs...');
     end
 end
+ripples = removeArtifactsFromEvents(ripples);
+ripples = eventSpikingTreshold(ripples,[],'spikingThreshold',eventSpikeThreshold);
+plotRippleChannel('rippleChannel',rippleChannel,'ripples',ripples); % to do, run this after ripple detection
 % EventExplorer(pwd, ripples)
 
 %% Ripple Stats
