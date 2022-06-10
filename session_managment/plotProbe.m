@@ -28,7 +28,7 @@ addParameter(p,'index1',1, @isnumeric);
 addParameter(p,'inAxis',false, @islogical);
 addParameter(p,'saveFigure',true, @islogical);
 addParameter(p,'updateSessionFile',true, @islogical);
-addParameter(p,'force',true, @islogical);
+addParameter(p,'force',false, @islogical);
 addParameter(p,'hippoCookBook_path','HippoCookBook',@isstring);
 
 parse(p,varargin{:})

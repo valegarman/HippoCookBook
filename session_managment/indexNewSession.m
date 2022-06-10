@@ -50,7 +50,6 @@ addParameter(p,'bazler_ttl_channel',[],@isnumeric);
 addParameter(p,'forceAnalogPulses',false,@islogical);
 addParameter(p,'forceDigitalPulses',false,@islogical);
 addParameter(p,'tracking_pixel_cm',0.1149,@isnumeric);
-addParameter(p,'probe_type',[],@ischar); %
 addParameter(p,'indexing',true,@islogical);
 
 parse(p,varargin{:})
@@ -81,7 +80,6 @@ bazler_ttl_channel = p.Results.bazler_ttl_channel;
 forceAnalogPulses = p.Results.forceAnalogPulses;
 forceDigitalPulses = p.Results.forceDigitalPulses;
 tracking_pixel_cm = p.Results.tracking_pixel_cm;
-probe_type = p.Results.probe_type;
 indexing = p.Results.indexing;
 
 %% Creates a pointer to the folder where the index variable is located
@@ -140,57 +138,8 @@ catch
     warning('it seems that CellExplorer is not on your path');
 end
 
-if ~isempty(probe_type)
-    switch lower(probe_type)
-        case  {'fuckyou',lower('A5x12-16-Buz-lin-5mm-100-200-160-177')}
-            disp('Probe founded!!');
-            directory = what(hippoCookBook_path);
-            coord_path = dir([directory.path filesep 'session_files' filesep 'probes_coordinates' filesep 'electrodes_coordinates_A5x12-16-Buz-lin-5mm-100-200-160-177.chanCoords.channelInfo.mat']);
-            load([coord_path.folder filesep coord_path.name],'chanCoords');
-            save([basenameFromBasepath(pwd) '.chanCoords.channelInfo.mat'],'chanCoords');
-            
-                       
-            session = loadSession(basepath);
-            session.animal.probeImplants{1}.probe = 'A5x12-16-Buz-lin-5mm-100-200-160-177';
-            session.animal.probeImplants{1}.layout = 'A5x12-16-Buz-lin-5mm-100-200-160-177';
-            session.extracellular.chanCoords = chanCoords;
-            save([basepath filesep session.general.name,'.session.mat'],'session','-v7.3');
-            
-        case {'e1',lower('E1-16ch (16 ch, 1 shanks, edge  )'),lower('E1-64ch(4shank-edge)')}    
-            disp('Probe founded!!');
-            directory = what(hippoCookBook_path);
-            coord_path = dir([directory.path filesep 'session_files'...
-                filesep 'probes_coordinates' filesep ...
-                'electrodes_coordinates_CambridgeNeurotech-E1-64ch.chanCoords.channelInfo.mat']);
-            load([coord_path.folder filesep coord_path.name],'chanCoords');
-            save([basenameFromBasepath(pwd) '.chanCoords.channelInfo.mat'],'chanCoords');
-
-            session = loadSession(basepath);
-            session.animal.probeImplants{1}.probe = 'CambridgeNeurotech-E1-64c';
-            session.animal.probeImplants{1}.layout = 'CambridgeNeurotech-E1-64c';
-            session.extracellular.chanCoords = chanCoords;
-            save([basepath filesep session.general.name,'.session.mat'],'session','-v7.3');
-        otherwise
-            disp('Probe not supported yet...');
-    end
-    
-    try
-        session = loadSession(basepath);
-        figure
-        hold on
-        plot(session.extracellular.chanCoords.x, session.extracellular.chanCoords.y,'.','MarkerSize',10,'color',[.8 .8 .8]);
-        for ii = 1:length(session.extracellular.chanCoords.x)
-            text(session.extracellular.chanCoords.x(ii)+1, session.extracellular.chanCoords.y(ii)-1, num2str(ii));
-        end
-        xlabel('um'); ylabel('um');
-        title([session.animal.probeImplants{1}.probe 'probe'],'FontWeight','normal');
-        xlim([min(session.extracellular.chanCoords.x)-100 max(session.extracellular.chanCoords.x)+100]);
-        ylim([min(session.extracellular.chanCoords.y)-100 max(session.extracellular.chanCoords.y)+100]);
-        set(gca,'TickDir','out');
-        mkdir('SummaryFigures');
-        saveas(gcf,['SummaryFigures\probe_layout.png']);
-    end
-end
+% manage probe
+plotProbe('force',true);
 
 session = sessionTemplate(basepath,'showGUI',true);
 %% 2. Remove previous cellinfo.spikes.mat and computes spikes again (manual clustered)
