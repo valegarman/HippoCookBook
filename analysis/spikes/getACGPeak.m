@@ -112,7 +112,7 @@ acg_time_samples = acg_time;
 acg_time = log10(cell_metrics.general.acgs.log10);
 if showFig
     gcf = figure;
-    set(gcf,'Position',get(0,'screensize'));
+    % set(gcf,'Position',get(0,'screensize'));
     subplot(2,2,[1 2])
     hold on;
     plotFill(acg_time,acg_smoothed_norm(:,all_pyr),'Color',pyr_color);
