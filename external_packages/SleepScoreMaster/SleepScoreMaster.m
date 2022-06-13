@@ -167,6 +167,16 @@ saveLFP = p.Results.saveLFP;
 winparms = p.Results.winparms;
 ignoreManual = p.Results.ignoreManual; 
 
+prevPath = pwd;
+cd(basePath);
+targetFile = dir('*.SleepState.states.mat');
+if ~isempty(targetFile) && ~overwrite
+    disp('Sleep state epochs already detected! Loading file.');
+    load(targetFile.name);
+    return
+end
+cd(prevPath);
+
 %% Database File Management 
 savefolder = fullfile(savedir,recordingname);
 if ~exist(savefolder,'dir')
