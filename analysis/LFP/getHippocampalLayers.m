@@ -420,6 +420,7 @@ if promt
     
             
     pause(2);
+    saveas(gcf,['SummaryFigures\hippocampalLayers_bestShank.png']);
     close(fp);
 end
 
