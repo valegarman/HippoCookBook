@@ -161,9 +161,10 @@ if isempty(SWChannel)
     SWChannel = hippocampalLayers.bestShankLayers.radiatum;
 end
 
-if isempty(restrict)
+if removeRipplesStimulation
     targetFile = dir('*optogeneticPulses.events.mat'); load(targetFile.name);
-    restrict = SubtractIntervals([0 Inf],optoPulses.stimulationEpochs);
+    restrict_temp = SubtractIntervals([0 Inf],optoPulses.stimulationEpochs);
+    restrict =  ConsolidateIntervals([restrict; restrict_temp]);
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%

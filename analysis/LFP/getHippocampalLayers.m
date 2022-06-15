@@ -39,6 +39,8 @@ addParameter(p,'theta_bandpass',[6 12], @isnumeric);
 addParameter(p,'gamma_bandpass',[20 100], @isnumeric);
 addParameter(p,'hfo_bandpass',[100 500], @isnumeric);
 addParameter(p,'promt',false, @islogical);
+addParameter(p,'removeRipplesStimulation',true,@islogical);
+addParameter(p,'restrict',[],@isnumeric);
 
 parse(p,varargin{:})
 basepath = p.Results.basepath;
@@ -50,6 +52,8 @@ theta_bandpass = p.Results.theta_bandpass;
 gamma_bandpass = p.Results.gamma_bandpass;
 hfo_bandpass = p.Results.hfo_bandpass;
 promt = p.Results.promt;
+removeRipplesStimulation = p.Results.removeRipplesStimulation;
+restrict = p.Results.restrict;
 
 % Deal with inputs
 prevBasepath = pwd;
@@ -67,6 +71,12 @@ if isempty(lfp)
     catch
         error('No LFP file!!');
     end
+end
+
+if removeRipplesStimulation
+    targetFile = dir('*optogeneticPulses.events.mat'); load(targetFile.name);
+    restrict_temp = SubtractIntervals([0 Inf],optoPulses.stimulationEpochs);
+    restrict =  ConsolidateIntervals([restrict; restrict_temp]);
 end
 
 % Compute channels features
@@ -116,7 +126,7 @@ for i = 1:length(session.extracellular.spikeGroups.channels)
         end
         
         % Ripples
-        ripples{i} = findRipples(channels{i}.pyramidal,'thresholds',[2 5],'passband',[80 200],'durations',[20 150],'saveMat',false);
+        ripples{i} = findRipples(channels{i}.pyramidal,'thresholds',[2 5],'passband',[80 200],'durations',[20 150],'saveMat',false,'restrict',restrict);
         
         
         twin = 0.1;
