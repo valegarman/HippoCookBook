@@ -137,9 +137,9 @@ subplot(5,5,1)
 % waveform
 subplot(5,5,2)
 hold on
-plotFill(cell_metrics.waveforms.time{UID(ii)}, all_waveforms(:,all_nw),'style','filled','color',nw_color,'faceAlpha',0.9);
-plotFill(cell_metrics.waveforms.time{UID(ii)}, all_waveforms(:,all_pyr),'style','filled','color',pyr_color,'faceAlpha',0.9);
-plotFill(cell_metrics.waveforms.time{UID(ii)}, all_waveforms(:,all_ww),'style','filled','color',ww_color,'faceAlpha',0.9);
+plotFill(cell_metrics.waveforms.time{1}, all_waveforms(:,all_nw),'style','filled','color',nw_color,'faceAlpha',0.9);
+plotFill(cell_metrics.waveforms.time{1}, all_waveforms(:,all_pyr),'style','filled','color',pyr_color,'faceAlpha',0.9);
+plotFill(cell_metrics.waveforms.time{1}, all_waveforms(:,all_ww),'style','filled','color',ww_color,'faceAlpha',0.9);
 
 scatter(cell_metrics.troughToPeak(all_pyr),rand(length(find(all_pyr)),1)/10 + 2,20,pyr_color,'filled');
 scatter(cell_metrics.troughToPeak(all_nw),rand(length(find(all_nw)),1)/10 + 2.2,20,nw_color,'filled');
@@ -179,8 +179,8 @@ xHist = xHist/max(xHist); xHist = xHist *  300;
 patch([0 xHist' 0],centers([1 1:end 1]),ww_color,'EdgeColor','none','FaceAlpha',.5);
 xlim([min(cell_metrics.general.chanCoords.x)+50 max(cell_metrics.general.chanCoords.x)+150]);
 ylim([min(cell_metrics.general.chanCoords.y)-100 max(cell_metrics.general.chanCoords.y)+100]);
-title(cell_metrics.brainRegion(UID(ii)),'FontWeight','normal');
-title([cell_metrics.brainRegion{UID(ii)} ', ch: '  num2str(cell_metrics.maxWaveformCh1(UID(ii)))],'FontWeight','normal');
+title(cell_metrics.brainRegion(1),'FontWeight','normal');
+title([cell_metrics.brainRegion{1} ', ch: '  num2str(cell_metrics.maxWaveformCh1(1))],'FontWeight','normal');
 
 % ACG Peak
 subplot(5,5,5)
