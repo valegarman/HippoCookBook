@@ -211,6 +211,7 @@ for ii = 1 : size(yC,2)
     stats.descriptive.q75(ii) = prctile(yC{ii},75);
     stats.descriptive.q37(ii) = prctile(yC{ii},37.5);
     stats.descriptive.q62(ii) = prctile(yC{ii},62.5);
+    stats.descriptive.N(ii) = length(yC{ii});
 end
 
 % normality
@@ -306,6 +307,36 @@ else
         stats.kruskalWallis.tbl = tblK;
         stats.kruskalWallis.stats = statsK;
     end
+end
+
+% if two groups
+if length(yC) == 2
+    %  Mann-Whitney U-test.
+    [p2,h2,stats2] = ranksum(yC{1},yC{2});
+    stats.mannWhitney_U.p = p2;
+    stats.mannWhitney_U.h = h2;
+    stats.mannWhitney_U.stats = stats2;
+    
+    % Wilcoxon signed rank test for paired observation
+    [p2,h2,stats2] = signrank(yC{1},yC{2});
+    stats.wilconxonSignedRank.p = p2;
+    stats.wilconxonSignedRank.h = h2;
+    stats.wilconxonSignedRank.stats = stats2;
+    stats.wilconxonSignedRank.testName = 'Wilcoxon paired signed-rank test';
+
+    % paired-sample t-test.
+    [p2,h2,ci2,stats2] = ttest(yC{1},yC{2});
+    stats.pairedtTest.p = p2;
+    stats.pairedtTest.h = h2;
+    stats.pairedtTest.stats = stats2;
+    stats.pairedtTest.ci = ci2;
+
+    % two-sample t-test.
+    [p2,h2,ci2,stats2] = ttest2(yC{1},yC{2});
+    stats.tTest.p = p2;
+    stats.tTest.h = h2;
+    stats.tTest.stats = stats2;
+    stats.tTest.ci = ci2;
 end
 
 % post-hocs
