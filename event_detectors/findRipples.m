@@ -123,7 +123,7 @@ elseif isnumeric(varargin{1}) && length(varargin{1})>2 % if first arg is filtere
     basepath = pwd;
     basename = basenameFromBasepath(basepath);
 elseif isstruct(varargin{1})
-    % Added by Pablo Abad to manage when first input if lfp file, not
+    % Added by Pablo Abad to manage when first input if lfp sctruct, not
     % filtered. This lfp channel should have 
     addRequired(p,'lfp',@isstruct);
     parse(p,varargin{:})

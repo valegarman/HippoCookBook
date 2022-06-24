@@ -28,7 +28,7 @@ addParameter(p,'index1',1, @isnumeric);
 addParameter(p,'inAxis',false, @islogical);
 addParameter(p,'saveFigure',true, @islogical);
 addParameter(p,'updateSessionFile',true, @islogical);
-addParameter(p,'force',true, @islogical);
+addParameter(p,'force',false, @islogical);
 addParameter(p,'hippoCookBook_path','HippoCookBook',@isstring);
 
 parse(p,varargin{:})
@@ -41,12 +41,12 @@ prevPath = pwd;
 cd(parameters.basepath);
 
 % if chanCoor in session folder
-if isempty(chanCoords) || exist([basenameFromBasepath '.chanCoords.channelInfo.mat'],'file')==2
+if isempty(chanCoords) && exist([basenameFromBasepath(pwd) '.chanCoords.channelInfo.mat'],'file')==2
     targetFile = dir('*chanCoords.channelInfo.mat'); load(targetFile.name);
 end
 
 % if not empty, and not in session folder...
-if ~isempty(chanCoords) || ~exist([basenameFromBasepath '.chanCoords.channelInfo.mat'],'file')==2
+if ~isempty(chanCoords) || ~exist([basenameFromBasepath(pwd) '.chanCoords.channelInfo.mat'],'file')==2
     save([basenameFromBasepath(pwd) '.chanCoords.channelInfo.mat'],'chanCoords');
 end
 
