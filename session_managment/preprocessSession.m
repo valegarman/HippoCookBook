@@ -63,6 +63,7 @@ addParameter(p,'digitalChannelsList',[],@isnumeric);
 addParameter(p,'manualThr',true,@islogical);
 addParameter(p,'bazler_ttl_channel',10,@isnumeric);
 addParameter(p,'anymaze_ttl_channel',[],@isnumeric);
+addParameter(p,'getDigitalInputBySubfolders',true,@islogical);
 
 % addParameter(p,'pullData',[],@isdir); To do... 
 parse(p,varargin{:});
@@ -80,6 +81,7 @@ digitalChannelsList = p.Results.digitalChannelsList;
 manualThr = p.Results.manualThr;
 bazler_ttl_channel = p.Results.bazler_ttl_channel;
 anymaze_ttl_channel = p.Results.anymaze_ttl_channel;
+getDigitalInputBySubfolders = p.Results.getDigitalInputBySubfolders;
 
 if ~exist('basepath') || isempty(basepath)
     basepath = uigetdir; % select folder
@@ -103,6 +105,12 @@ if isempty(dir([basename '.xml'])) && isempty(dir('global.xml'))
         xmlFile = dir('*amplifier*.xml');
         ii = ii + 1;
     end    
+    if isempty(xmlFile)
+        % Looking global.xml in general folder
+        cd(basepath)
+        cd ..
+        xmlFile = dir('*global*.xml');
+    end 
     if isempty(xmlFile)    
         [file, path] = uigetfile('*.xml','Select global xml file');
         copyfile(strcat(path,file),[basepath,filesep,basename '.xml']);
@@ -121,7 +129,9 @@ try
     if ~isempty(bazler_ttl_channel)
         session.analysisTags.bazler_ttl_channel = bazler_ttl_channel;
     end
-    
+    if ~isempty(anymaze_ttl_channel)
+        session.analysisTags.anymaze_ttl_channel = anymaze_ttl_channel;
+    end
     save([basepath filesep session.general.name,'.session.mat'],'session','-v7.3');
 catch
     warning('it seems that CellExplorer is not on your path');
@@ -148,9 +158,16 @@ if  ~isempty(analogChannelsList)
         warning('No analog pulses detected');
     end
 end
-if ~isempty(dir('*digitalIn.dat'))
+if ~isempty(dir('*digitalIn.dat')) 
     digitalIn = getDigitalIn('all','fs',session.extracellular.sr); 
 end
+
+if getDigitalInputBySubfolders
+    try
+        digitalIn = getDigitalInBySubfolders('all','fs',session.extracellular.sr);
+    end
+end
+
 % digitalIn = pap_getDigitalIn('all','fs',session.extracellular.sr);
 
 %% Remove stimulation artifacts

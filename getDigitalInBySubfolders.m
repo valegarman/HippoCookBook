@@ -1,4 +1,4 @@
-function [digitalIn] = pap_getDigitalIn(ch,varargin)
+function [digitalIn] = getDigitalInBySubfolders(ch,varargin)
 % [pul,var,dur] = getDigitalIn(ch,varargin)
 %
 % Find digitalIn.events.mat in different subfolders and creates a Session
@@ -50,7 +50,11 @@ lag = p.Results.periodLag;
 basepath = p.Results.basepath;
 saveMat = p.Results.saveMat;
 
-session = loadSession();
+try
+    session = loadSession();
+catch
+    disp('Not possible to run getDigitalIn because not session file found.')
+end
 
 %% In case digitalIn already exists
 if ~isempty(dir([basepath filesep session.general.name, '.digitalIn.events.mat']))
@@ -80,7 +84,7 @@ if exist([basepath filesep strcat(session.general.name, '.MergePoints.events.mat
         if ~isempty(dir([basepath filesep MergePoints.foldernames{ii} filesep '*.DigitalIn.events.mat']))
             cd([basepath filesep MergePoints.foldernames{ii}]);
             fprintf('DigitalIn found in %s folder \n', MergePoints.foldernames{ii});
-            tempDigitalIn{count} = getDigitalIn('all');
+            tempDigitalIn{count} = pap_getDigitalIn('all');
             digitalInFolder(count) = ii;
             count = count + 1;
         end
@@ -119,17 +123,15 @@ if exist('digitalInFolder','var')
     end
 
 
-
-            
     % Concatenating all variables timestamps
     for i=1:length(sumTsOn)
         num_channels(i) = length(sumTsOn{i});
     end
     num_channels = max(num_channels);
 
-    tsOn = cell(num_channels,1); tsOff = cell(num_channels,1);
-    tsDur = cell(num_channels,1); tsInts = cell(num_channels,1);
-    tsIntsPeriods = cell(num_channels,1);
+    tsOn = cell(1,num_channels); tsOff = cell(1,num_channels);
+    tsDur = cell(1,num_channels); tsInts = cell(1,num_channels);
+    tsIntsPeriods = cell(1,num_channels);
 
     for ii = 1:num_channels
         tsOn_aux = [];
@@ -146,11 +148,11 @@ if exist('digitalInFolder','var')
                 tsIntsPeriods_aux = [tsIntsPeriods_aux; sumTsIntsPeriods{jj}{ii}];
             end
         end
-        tsOn{ii} = tsOn_aux;
-        tsOff{ii} = tsOff_aux;
-        tsDur{ii} = tsDur_aux;
-        tsInts{ii} = tsInts_aux;
-        tsIntsPeriods{ii} = tsIntsPeriods_aux;
+        tsOn{1,ii} = tsOn_aux;
+        tsOff{1,ii} = tsOff_aux;
+        tsDur{1,ii} = tsDur_aux;
+        tsInts{1,ii} = tsInts_aux;
+        tsIntsPeriods{1,ii} = tsIntsPeriods_aux;
     end
 
 
@@ -167,9 +169,9 @@ if exist('digitalInFolder','var')
 
     if saveMat
         try
-            save([basepath filesep session.general.name,'.DigitalIn.events.mat'],'digitalIn');
+            save([basepath filesep session.general.name,'.digitalIn.events.mat'],'digitalIn');
         catch
-           save([basepath filesep session.general.name,'.DigitalIn.events.mat'],'digitalIn','-v7.3'); 
+           save([basepath filesep session.general.name,'.digitalIn.events.mat'],'digitalIn','-v7.3'); 
         end
     end
     
@@ -177,14 +179,3 @@ else
     digitalIn = [];
 
 end
-
-
-
-
-
-
-
-
-
-
-
