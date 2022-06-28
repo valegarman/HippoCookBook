@@ -147,7 +147,8 @@ clear lfp_avg lfp_avg_norm
 electrodes.cellsPerElectrode = zeros(size(electrodes.id));
 if ~isempty(spikes) || isfield(spikes,'maxWaveformCh1')
     ch = unique(spikes.maxWaveformCh1);
-    electrodes.cellsPerElectrode(ch) = histc(spikes.maxWaveformCh1(:), ch);
+    [~,ch_pos,~] = intersect(electrodes.id,ch);
+    electrodes.cellsPerElectrode(ch_pos) = histc(spikes.maxWaveformCh1(:), ch);
 end
 
 % load ID

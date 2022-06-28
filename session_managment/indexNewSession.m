@@ -217,6 +217,7 @@ catch
 end
 cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true,'excludeMetrics',{'deepSuperficial'});
 
+
 %% 11. Spatial modulation
 try
     getSessionTracking('convFact',tracking_pixel_cm,'roiTracking','manual');
