@@ -224,16 +224,21 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Computing SharpWaves
 %%%%%%%%%%%%%%%%%%%%%%%%%
-SW = findSharpWaves('ripples',ripples,'rippleChannel',rippleChannel,'SWChannel',SWChannel,...
-    'passband',passband,'SWpassband',SWpassband);
-
+try
+    SW = findSharpWaves('ripples',ripples,'rippleChannel',rippleChannel,'SWChannel',SWChannel,...
+        'passband',passband,'SWpassband',SWpassband);
+catch
+    disp('Not possible to compute Sharp Waves...');
+end
 %% OUTPUT
 if saveMat
     disp('Saving Ripples Results...');
     save([session.general.name , '.ripples.events.mat'],'ripples');
-    
-    disp('Saving SharpWaves Results...');
-    save([session.general.name , '.sharpwaves.events.mat'],'SW');
+    try
+        disp('Saving SharpWaves Results...');
+        save([session.general.name , '.sharpwaves.events.mat'],'SW');
+    catch
+    end
 end
 
 

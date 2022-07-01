@@ -64,6 +64,7 @@ addParameter(p,'manualThr',true,@islogical);
 addParameter(p,'bazler_ttl_channel',10,@isnumeric);
 addParameter(p,'anymaze_ttl_channel',[],@isnumeric);
 addParameter(p,'getDigitalInputBySubfolders',true,@islogical);
+addParameter(p,'anyMaze',false,@islogical);
 
 % addParameter(p,'pullData',[],@isdir); To do... 
 parse(p,varargin{:});
@@ -82,6 +83,7 @@ manualThr = p.Results.manualThr;
 bazler_ttl_channel = p.Results.bazler_ttl_channel;
 anymaze_ttl_channel = p.Results.anymaze_ttl_channel;
 getDigitalInputBySubfolders = p.Results.getDigitalInputBySubfolders;
+anyMaze = p.Results.anyMaze;
 
 if ~exist('basepath') || isempty(basepath)
     basepath = uigetdir; % select folder
@@ -244,10 +246,13 @@ end
 
 %% Get tracking positions 
 if getPos
-    getSessionTracking('convFact',tracking_pixel_cm,'roiTracking','manual'); 
+    getSessionTracking('convFact',tracking_pixel_cm,'roiTracking','manual','anyMaze',anyMaze); 
 end
 
 if sessionSummary
+    cd(basepath);
+    session = sessionTemplate(pwd,'showGUI',false);
+    save([basepath filesep session.general.name,'.session.mat'],'session','-v7.3');
     computeSessionSummary('digitalChannelsList',digitalChannelsList,'analogChannelsList',analogChannelsList);
 end
 
