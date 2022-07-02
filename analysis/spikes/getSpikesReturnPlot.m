@@ -31,6 +31,7 @@ addParameter(p,'skipStimulationPeriods',true,@islogical);
 addParameter(p,'excludeIntervals',[],@isnumeric);
 addParameter(p,'computeCellTypeAverages',true,@islogical);
 addParameter(p,'saveMat',true,@islogical);
+addParameter(p,'force',false,@islogical);
 
 parse(p, varargin{:});
 
@@ -43,6 +44,7 @@ plot_caxis = p.Results.plot_caxis;
 plot_logxyaxis = p.Results.plot_logxyaxis;
 computeCellTypeAverages = p.Results.computeCellTypeAverages;
 saveMat = p.Results.saveMat;
+force = p.Results.force;
 
 % Deal with inputs
 prevPath = pwd;

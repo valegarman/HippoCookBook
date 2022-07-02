@@ -23,5 +23,4 @@ processSession('analog_optogenetic_channels',65,'promt_hippo_layers',true,'manua
 % 5% Index session
 indexNewSession;
 
-% Once a database has been created, use _ to stack results for all sessions
-% an enjoy data analysis!
+% Once a 

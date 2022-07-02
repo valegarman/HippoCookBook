@@ -12,7 +12,6 @@ function [] = processSession(varargin)
 %  5. 'checkSleep'              Check sleep score
 %  6. 'powerProfiles'           Recompute power Profiles, considering bad channels now
 %  7. 'getHippocampalLayers'    Define semi-automatically hippocampal Layers
-
 %  8. 'eventsModulation'        Runs brain events modulation: i) Up and downs; ii) Ripples and iii) Theta intervals
 %  9. 'phaseModulation'         Computes phase modulation for theta, gamma and ripples
 % 10. 'cellMetrics'             Gets cell metrics (from Cell Explorer, and a few new)                       
@@ -74,9 +73,9 @@ cd(basepath);
 for ii = 1:length(excludeAnalysis)
     excludeAnalysis{ii} = num2str(excludeAnalysis{ii});
 end
-
+excludeAnalysis = lower(excludeAnalysis);
 %% 1. Runs sessionTemplate
-if ~any(ismember(excludeAnalysis, {'1','sessionTemplate'}))
+if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))
     try
         session = loadSession(basepath);
         session.channels = 1:session.extracellular.nChannels;
@@ -108,7 +107,7 @@ end
 
 
 %% 2. Remove previous cellinfo.spikes.mat and computes spikes again (manual clustered)
-if ~any(ismember(excludeAnalysis, {'2','loadSpikes'}))
+if ~any(ismember(excludeAnalysis, {'2',lower('loadSpikes'})))
     disp('Loading Spikes...')
     session = loadSession;
     if force_loadingSpikes
@@ -121,7 +120,7 @@ if ~any(ismember(excludeAnalysis, {'2','loadSpikes'}))
 end
 
 %% 3. Analog pulses detection
-if ~any(ismember(excludeAnalysis, {'3','cureAnalogPulses'}))
+if ~any(ismember(excludeAnalysis, {'3',lower('cureAnalogPulses')}))
     if forceAnalogPulses || isempty(dir([session.general.name,'_original.dat']))
         disp('Getting analog Pulses...')
         pulses = getAnalogPulses('analogChannelsList',analog_optogenetic_channels,'manualThr',manual_analog_pulses_threshold,'overwrite',force_analogPulsesDetection); % 1-index
@@ -139,14 +138,14 @@ end
 
 %% 4. Spike Features
 % 4.1 Light responses, if available
-if ~any(ismember(excludeAnalysis, {'4','spikesFeatures'}))
+if ~any(ismember(excludeAnalysis, {'4',lower('spikesFeatures')}))
     optogeneticResponses = getOptogeneticResponse('numRep',500,'force',true,'duration_round_decimal',1);
     % 4.2 ACG and waveform
     spikeFeatures;
 end
 
 %% 5. Check Sleep Score
-if ~any(ismember(excludeAnalysis, {'5','checkSleep'}))
+if ~any(ismember(excludeAnalysis, {'5',lower('checkSleep')}))
     targetFile = (dir('*optogeneticPulses.events.mat'));
     if ~isempty(targetFile)
         pulses = importdata(targetFile.name);
@@ -160,101 +159,111 @@ if ~any(ismember(excludeAnalysis, {'5','checkSleep'}))
 end
 
 %% 6. Power Profiles
-if ~any(ismember(excludeAnalysis, {'6','powerProfiles'}))
+if ~any(ismember(excludeAnalysis, {'6',lower('powerProfiles')}))
     powerProfile_theta = powerSpectrumProfile(theta_bandpass,'showfig',true,'forceDetect',true);
     powerProfile_gamma = powerSpectrumProfile(gamma_bandpass,'showfig',true,'forceDetect',true);
     powerProfile_hfo = powerSpectrumProfile(hfo_bandpass,'showfig',true,'forceDetect',true);
 end
 
 %% 7. Getting Hippocampal Layers
-if ~any(ismember(excludeAnalysis, {'7','getHippocampalLayers'}))
+if ~any(ismember(excludeAnalysis, {'7',lower('getHippocampalLayers')}))
     [hippocampalLayers] = getHippocampalLayers('force',true,'promt',promt_hippo_layers);
 end
 
 
 %% 8. Check Brain Events
-% Trying changes in detecUD_temp
-% 8.1 Up and downs
-UDStates = detectUD('plotOpt', true,'forceDetect',true','NREMInts','all');
-psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true);
+if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
+    % Trying changes in detecUD_temp
+    % 8.1 Up and downs
+    UDStates = detectUD('plotOpt', true,'forceDetect',true','NREMInts','all');
+    psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true);
 
-% 8.2 Ripples
-ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true);
-psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true);
+    % 8.2 Ripples
+    ripples = c('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true);
+    psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true);
 
-% 8.3 Theta intervals
-thetaEpochs = detectThetaEpochs('force',true);
+    % 8.3 Theta intervals
+    thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection);
+end
 
 %% 9. Phase Modulation
-% LFP-spikes modulation
-[phaseMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel);
-computeCofiringModulation;
+if ~any(ismember(excludeAnalysis, {'9',lower('phaseModulation')}))
+    % LFP-spikes modulation
+    [phaseMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel);
+    computeCofiringModulation;
+end
 
 %% 10. Cell metrics
 % Exclude manipulation intervals for computing CellMetrics
+if ~any(ismember(excludeAnalysis, {'10',lower('cellMetrics')}))
 
-session = assignBrainRegion;
+    session = assignBrainRegion;
 
-getACGPeak('force',true);
-
-try
-    if ~isempty(dir([session.general.name,'.optogeneticPulses.events.mat']))
-        file = dir([session.general.name,'.optogeneticPulses.events.mat']);
-        load(file.name);
+    try
+        if ~isempty(dir([session.general.name,'.optogeneticPulses.events.mat']))
+            file = dir([session.general.name,'.optogeneticPulses.events.mat']);
+            load(file.name);
+        end
+            excludeManipulationIntervals = optoPulses.stimulationEpochs;
+    catch
+        warning('Not possible to get manipulation periods. Running CellMetrics withouth excluding manipulation epochs');
     end
-        excludeManipulationIntervals = optoPulses.stimulationEpochs;
-catch
-    warning('Not possible to get manipulation periods. Running CellMetrics withouth excluding manipulation epochs');
+    cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true);
+
+    getACGPeak('force',true);
+
+    getAverageCCG('force',true);
+    
+    getSpikesReturnPlot('force',true);
 end
-cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true);
-
-getAverageCCG('force',true);
-
-getSpikesReturnPlot('force',true);
 
 %% 11. Spatial modulation
-try
-    getSessionTracking('convFact',tracking_pixel_cm,'roiTracking','manual');
-    getSessionArmChoice('task','alternation');
-    behaviour = getSessionLinearize('forceReload',false);  
-    firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',true);
-    placeFieldStats = bz_findPlaceFields1D('firingMaps',firingMaps,'maxSize',.75,'sepEdge',0.03); %% ,'maxSize',.75,'sepEdge',0.03
-    firingTrialsMap = firingMapPerTrial('force',true);
-    spatialModulation = getSpatialModulation('force',true);
-catch
-    warning('Not possible to run spatial modulation...');
+if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
+    try
+        spikes = loadSpikes;
+        getSessionTracking('convFact',tracking_pixel_cm,'roiTracking','manual');
+        getSessionArmChoice('task','alternation');
+        behaviour = getSessionLinearize('forceReload',false);  
+        firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',true);
+        placeFieldStats = bz_findPlaceFields1D('firingMaps',firingMaps,'maxSize',.75,'sepEdge',0.03); %% ,'maxSize',.75,'sepEdge',0.03
+        firingTrialsMap = firingMapPerTrial('force',true);
+        spatialModulation = getSpatialModulation('force',true);
+    catch
+        warning('Not possible to run spatial modulation...');
+    end
+
+    try 
+        behaviour = getSessionLinearize;
+        psth_lReward = spikesPsth([behaviour.events.lReward],'numRep',100,'saveMat',false,...
+            'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
+        psth_rReward = spikesPsth([behaviour.events.rReward],'numRep',100,'saveMat',false,...
+            'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
+        psth_reward = spikesPsth([behaviour.events.lReward; behaviour.events.rReward],'numRep',100,'saveMat',false,...
+            'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
+
+        psth_intersection = spikesPsth([behaviour.events.intersection],'numRep',100,'saveMat',false,...
+            'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
+        psth_startPoint = spikesPsth([behaviour.events.startPoint],'numRep',100,'saveMat',false,...
+            'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
+
+        behaviour.psth_lReward = psth_lReward;
+        behaviour.psth_rReward = psth_rReward;
+        behaviour.psth_reward = psth_reward;
+        behaviour.psth_intersection = psth_intersection;
+        behaviour.psth_startPoint = psth_startPoint; 
+        behavior = behaviour; % british to american :)
+        save([basenameFromBasepath(pwd) '.behavior.cellinfo.mat'],'behavior');
+    end
+
+    try
+        speedCorr = getSpeedCorr('numQuantiles',20,'force',true);
+    end
 end
-
-try 
-    behaviour = getSessionLinearize;
-    psth_lReward = spikesPsth([behaviour.events.lReward],'numRep',100,'saveMat',false,...
-        'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
-    psth_rReward = spikesPsth([behaviour.events.rReward],'numRep',100,'saveMat',false,...
-        'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
-    psth_reward = spikesPsth([behaviour.events.lReward; behaviour.events.rReward],'numRep',100,'saveMat',false,...
-        'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
-    
-    psth_intersection = spikesPsth([behaviour.events.intersection],'numRep',100,'saveMat',false,...
-        'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
-    psth_startPoint = spikesPsth([behaviour.events.startPoint],'numRep',100,'saveMat',false,...
-        'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
-
-    behaviour.psth_lReward = psth_lReward;
-    behaviour.psth_rReward = psth_rReward;
-    behaviour.psth_reward = psth_reward;
-    behaviour.psth_intersection = psth_intersection;
-    behaviour.psth_startPoint = psth_startPoint; 
-    behavior = behaviour; % british to american :)
-    save([basenameFromBasepath(pwd) '.behavior.cellinfo.mat'],'behavior');
-end
-
-try
-    speedCorr = getSpeedCorr('numQuantiles',20,'force',true);
-end
-
 
 %% 12. Summary per cell
-plotSummary;
+if ~any(ismember(excludeAnalysis, {'12',lower('summary')}))
+    plotSummary;
+end
 
 cd(prevPath);
 end
