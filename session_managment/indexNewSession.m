@@ -142,6 +142,7 @@ end
 plotProbe('force',true);
 
 session = sessionTemplate(basepath,'showGUI',true);
+
 %% 2. Remove previous cellinfo.spikes.mat and computes spikes again (manual clustered)
 disp('Loading Spikes...')
 if force_loadingSpikes

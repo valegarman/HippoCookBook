@@ -7,7 +7,6 @@ targetProject= 'All';
 
 HCB_directory = what('HippoCookBook'); 
 
-load([HCB_directory.path filesep 'indexedSessions.mat']);
 sessionsTable = readtable([HCB_directory.path filesep 'indexedSessions.csv']); % the variable is called allSessions
 
 for ii = 1:length(sessionsTable.SessionName)
@@ -17,9 +16,8 @@ for ii = 1:length(sessionsTable.SessionName)
         try
 
             %%% your code goes here...
-            thetaEpochs = detectThetaEpochs('force',true);
-            [phaseMod] = computePhaseModulation('rippleChannel',[],'SWChannel',[]);
-            computeCofiringModulation;
+            getAverageCCG('force',true);
+            plotSummary('checkUnits', false);
             %%%
             
             close all;

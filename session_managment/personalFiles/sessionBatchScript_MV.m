@@ -16,17 +16,8 @@ batch_sessionSummary('basepath','E:\data\fCck1','analogChannelsList',[],'digital
 batch_sessionSummary('basepath','G:\data\fNkx11','analogChannelsList',65,'digitalChannelsList',[]);
 
 
-
-
-
-preprocessSession('basepath','G:\data\fNkx11\fNkx11_201102_sess13','cleanArtifacts',({65,1}),'analogChannelsList',65);
-
-preprocessSession('basepath','D:\Dropbox\DATA\sharedRecordings\NewXmlAnimal\190222\rec1_220219_sess1');
-
-computeSessionSummary('basepath',pwd,'analogChannelsList',65,'digitalChannelsList',[]);
-
-% Index!
-indexNewSession('analogChannelsList',65,'promt_hippo_layers',true,'manual_analog_pulses_threshold',true,'bazler_ttl_channel',1);
+% After Spike sorting, got
+processSession('analog_optogenetic_channels',65,'promt_hippo_layers',true,'manual_analog_pulses_threshold',true,'bazler_ttl_channel',1);
  
 %% others
 editDatFile(pwd,[26460 inf],'option','zeroes');   % remove zeroes

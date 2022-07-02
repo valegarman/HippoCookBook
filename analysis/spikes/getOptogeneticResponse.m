@@ -24,8 +24,8 @@ function [optogeneticResponses] = getOptogeneticResponse(varargin)
 % optogeneticResponse
 %
 % Manu-BuzsakiLab 2021
-% To do: include different test for different durations stimuli
-% to do: include statistical test in figures (as with uLEDs)
+% Includes Stimulus-associated spike latency test (SALT) for positive
+% responses
 
 % Parse options
 p = inputParser;
@@ -45,6 +45,10 @@ addParameter(p,'minNumberOfPulses',200,@isnumeric);
 addParameter(p,'minDuration',0.004,@isnumeric); % 4 ms
 addParameter(p,'saveEventsFile',true,@islogical);
 addParameter(p,'duration_round_decimal',3,@isscalar);
+addParameter(p,'salt_baseline',[-0.25 -0.001],@isscalar);
+addParameter(p,'salt_time',[-0.250 0.250],@isscalar);
+addParameter(p,'salt_win',[0.01],@isscalar);
+addParameter(p,'salt_binSize',[0.001],@isscalar);
 
 parse(p, varargin{:});
 analogChannelsList = p.Results.analogChannelsList;
@@ -63,6 +67,10 @@ minNumberOfPulses = p.Results.minNumberOfPulses;
 minDuration = p.Results.minDuration;
 saveEventsFile = p.Results.saveEventsFile;
 duration_round_decimal = p.Results.duration_round_decimal;
+salt_baseline = p.Results.salt_baseline;
+salt_time = p.Results.salt_time;
+salt_win = p.Results.salt_win;
+salt_binSize = p.Results.salt_binSize;
 
 % Deal with inputs
 prevPath = pwd;
@@ -151,7 +159,6 @@ for i = 1:length(channels)
     indexes{i} = find(conditions(:,2) == channels(i));
     durations = conditions(find(conditions(:,2) == channels(i)),1);
     index{i} = find(diff(abs(durations)) < minDuration);
-    
 end
 
 for i = 1:length(index)
@@ -290,7 +297,39 @@ for ii = 1:length(spikes.UID)
             end
             optogeneticResponses.zscoreTest(ii,jj,1) = test;
             
-            % 3 ways test. If not boostrap, it would be 2 ways.
+            % Generating raster
+            rasterX = [];
+            rasterY = [];
+            for zz = 1:size(pul,1)
+                temp_spk = spikes.times{ii}(find(spikes.times{ii} - pul(zz,1)  > salt_time(1) & spikes.times{ii} - pul(zz,1)  < salt_time(2))) - pul(zz,1);
+                rasterX = [rasterX; temp_spk];
+                if ~isempty(temp_spk)
+                    rasterY = [rasterY; zz * ones(size((temp_spk)))];
+                end
+            end
+            [rasterHist3,c] = hist3([rasterY rasterX],{1:size(pul,1) salt_time(1):salt_binSize:salt_time(2)});
+            optogeneticResponses.raster.rasterCount{ii,jj} = rasterHist3;
+            optogeneticResponses.raster.rasterProb{ii,jj} = rasterHist3/sum(rasterHist3(:));
+            optogeneticResponses.raster.TrialsNumber{ii,jj} = c{1};
+            optogeneticResponses.raster.times{ii,jj} = c{2};
+            optogeneticResponses.raster.rasterTrials{ii,jj} = rasterY;
+            optogeneticResponses.raster.rasterSpikesTimes{ii,jj} = rasterX;
+            
+            time  = c{2};
+            % running salt
+            baseidx = dsearchn(time', salt_baseline');
+            tidx = dsearchn(time', [0; pulseDuration*2]);      
+            
+            st = length(baseidx(1):baseidx(2));
+            nmbn = round(salt_win/salt_binSize);
+            v = 1:nmbn:st;
+            if any((v + nmbn - 1) > st)
+                error('reduce window size or baseline duration')
+            end
+            
+            [optogeneticResponses.salt.p_value(ii,jj,1), optogeneticResponses.salt.I_statistics(ii,jj,1)] = salt(rasterHist3(:,baseidx(1):baseidx(2)),rasterHist3(:,tidx(1):tidx(2)),salt_binSize, salt_win);
+            
+            % multiple test test. If not boostrap, it would be 2 ways.
             if (optogeneticResponses.rateDuringPulse(ii,jj,1) > ci(2) || isnan(ci(2))) && optogeneticResponses.modulationSignificanceLevel(ii,jj,1)<0.01...
                     && mean(optogeneticResponses.responsecurveZ(ii,jj,t_duringPulse)) > 1.96
                 test = 1;
@@ -301,6 +340,31 @@ for ii = 1:length(spikes.UID)
                 test = 0;
             end
             optogeneticResponses.threeWaysTest(ii,jj,1) = test;
+            optogeneticResponses.threeWaysTest_and_salt(ii,jj,1) = test && optogeneticResponses.salt.p_value(ii,jj,1)<0.05;
+            
+            multipleTest = double([optogeneticResponses.rateDuringPulse(ii,jj,1) > ci(2) || isnan(ci(2)) optogeneticResponses.modulationSignificanceLevel(ii,jj,1)<0.01...
+                mean(optogeneticResponses.responsecurveZ(ii,jj,t_duringPulse)) > 1.96 optogeneticResponses.salt.p_value(ii,jj,1)<0.05]);
+            multipleTest_sign = -double([optogeneticResponses.rateDuringPulse(ii,jj,1) < ci(2) || isnan(ci(2)) optogeneticResponses.modulationSignificanceLevel(ii,jj,1)<0.01...
+                mean(optogeneticResponses.responsecurveZ(ii,jj,t_duringPulse)) < -1.96 optogeneticResponses.salt.p_value(ii,jj,1)<0.05]);
+            
+            if any(multipleTest_sign([1 3])==-1)
+                multipleTest([1 3]) = multipleTest_sign([1 3]);
+            end
+            
+            multipleTest_string = [];
+            for zz = 1:length(multipleTest)
+                switch multipleTest(zz)
+                    case -1
+                        multipleTest_string = strcat(multipleTest_string, '-');
+                    case 0
+                        multipleTest_string = strcat(multipleTest_string, '=');
+                    case 1
+                        multipleTest_string = strcat(multipleTest_string, '+');
+                end
+            end
+            optogeneticResponses.multipleTest(ii,jj,:) = multipleTest;
+            optogeneticResponses.multipleTest_string{ii,jj} = multipleTest_string;
+
         else
             optogeneticResponses.responsecurve(ii,jj,:) = nan; %nan(pulseDuration/binSize + 1,1);
             optogeneticResponses.responsecurveZ(ii,jj,:) = nan; %(pulseDuration/binSize + 1,1);
@@ -315,6 +379,21 @@ for ii = 1:length(spikes.UID)
             optogeneticResponses.isAnalog(ii,jj,1) = isAnalog;
             optogeneticResponses.isDigital(ii,jj,1) = ~isAnalog;
             optogeneticResponses.channelPulse(ii,jj,1) = channelPulse;
+            
+            optogeneticResponses.raster.rasterCount{ii,jj} = NaN;
+            optogeneticResponses.raster.rasterProb{ii,jj} = NaN;
+            optogeneticResponses.raster.TrialsNumber{ii,jj} = NaN;
+            optogeneticResponses.raster.times{ii,jj} = NaN;
+            optogeneticResponses.raster.rasterTrials{ii,jj} = NaN;
+            optogeneticResponses.raster.rasterSpikesTimes{ii,jj} = NaN;
+            
+            optogeneticResponses.salt.p_value(ii,jj,1) = NaN;
+            optogeneticResponses.salt.I_statistics(ii,jj,1) = NaN;
+            
+            optogeneticResponses.threeWaysTest_and_salt(ii,jj,1) = NaN;
+            
+            optogeneticResponses.multipleTest(ii,jj,:) = nan(1,4);
+            optogeneticResponses.multipleTest_string{ii,jj} = NaN;
         end
     end
     optogeneticResponses.timestamps = t;
@@ -341,6 +420,11 @@ optogeneticResponses.conditions = conditions;
 optogeneticResponses.conditionsLabels = {'durations','channels','numberOfPulses'};
 optogeneticResponses.nConditions = nConditions;
 optogeneticResponses.stimulationEpochs = stimulationEpochs;
+
+optogeneticResponses.salt_baseline = salt_baseline;
+optogeneticResponses.salt_time = salt_time;
+optogeneticResponses.salt_win = salt_win;
+optogeneticResponses.salt_binSize = salt_binSize;
 
 % Some metrics reponses
 responseMetrics = [];
@@ -381,7 +465,7 @@ end
 optogeneticResponses.responseMetrics = responseMetrics;
 
 if saveMat
-    disp('Saving results...');
+    disp(' Saving results...');
     filename = split(pwd,filesep); filename = filename{end};
     save([filename '.optogeneticResponse.cellinfo.mat'],'optogeneticResponses');
 end
@@ -429,15 +513,10 @@ if rasterPlot
             xlim([winSizePlot(1) winSizePlot(2)]); ylim([0 kk*1.1]);
             plot([0 dur],[kk*1.05 kk*1.05],'color',[0 0.6 0.6],'LineWidth',2);
             
-            if optogeneticResponses.threeWaysTest(jj,ii) == 0
-                title(num2str(jj),'FontWeight','normal','FontSize',10);
-            elseif optogeneticResponses.threeWaysTest(jj,ii) == -1
-                title([num2str(jj) '(-)'],'FontWeight','normal','FontSize',10);
-            elseif optogeneticResponses.threeWaysTest(jj,ii) == 1
-                title([num2str(jj) '(+)'],'FontWeight','normal','FontSize',10);
-            end
+            title([num2str(jj) ' (' optogeneticResponses.multipleTest_string{jj,ii} ')'],'FontWeight','normal','FontSize',10);
 
             if jj == 1
+                title([num2str(jj) ' (' optogeneticResponses.multipleTest_string{jj,ii} '), (Bootstrapping, kstest, zscore, salt)'],'FontWeight','normal','FontSize',10);
                 ylabel('Trial');
             elseif jj == size(spikes.UID,2)
                 xlabel('Time (s)');
