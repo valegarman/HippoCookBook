@@ -41,7 +41,7 @@ if loadLast
         warning('Not possible to reload project. Loading data from sessions...');
     end
 end
-keyboard;
+
 %% find indexed sessions
 if isempty(indexedSessionCSV_name)
     error('Need to provide the name of the index Project variable');
@@ -54,13 +54,12 @@ if isempty(analysis_project_path)
     analysis_project_path = indexedSessionCSV_path;
 end
 
-load([indexedSessionCSV_path filesep indexedSessionCSV_name]);
+sessionsTable = readtable([indexedSessionCSV_path filesep indexedSessionCSV_name,'.csv']); % the variable is called allSessions
 
-sessionNames = fieldnames(allSessions);
-for ii = 1:length(sessionNames)
-    sessions.basepaths{ii} = [data_path filesep allSessions.(sessionNames{ii}).path];
-    sessions.project{ii} = allSessions.(sessionNames{ii}).project;
+for ii = 1:length(sessionsTable.SessionName)
+    sessions.basepaths{ii} = [database_path filesep sessionsTable.Path{ii}];
 end
+sessions.project = sessionsTable.Project;
 
 disp('Projects found: '); 
 project_list = unique(sessions.project);
@@ -79,8 +78,8 @@ fprintf('Loading %3.i sessions... \n',length(sessions.basepaths)); %\n
 
 %% load cellexplorer results
 cell_metrics = loadCellMetricsBatch('basepaths',sessions.basepaths);
-cell_metrics = CellExplorer('metrics',cell_metrics);% run CELLEXPLORER when adding new data
 disp('Close when done exploring...');
+cell_metrics = CellExplorer('metrics',cell_metrics);% run CELLEXPLORER when adding new data
 
 %% collect data per session
 projectSessionResults = [];
@@ -129,9 +128,19 @@ for ii = 1:length(sessions.basepaths)
     clear slowOsciResponses
     
     % theta phase_locking
-    targetFile = dir('*.theta*PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+    targetFile = dir('*.theta_*PhaseLockingData.cellinfo.mat'); load(targetFile.name);
     projectSessionResults.thetaModulation{ii} = thetaMod;
     clear thetaMod
+    
+    % theta phase_locking
+    targetFile = dir('*.thetaREM*PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+    projectSessionResults.thetaREMModulation{ii} = thetaREMMod;
+    clear thetaREMMod
+    
+    % theta phase_locking
+    targetFile = dir('*.thetaRun*PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+    projectSessionResults.thetaRunModulation{ii} = thetaRunMod;
+    clear thetaRunMod
     
     % lgamma phase_locking
     targetFile = dir('*.lgamma*PhaseLockingData.cellinfo.mat'); load(targetFile.name);
@@ -160,8 +169,8 @@ for ii = 1:length(sessions.basepaths)
     end
     
     % spatial modulation
-    try spatialModulation = getSpatialModulation;
-        
+    targetFile = dir('*spatialModulation.cellinfo.mat');
+    try load(targetFile.name);
         projectSessionResults.spatialModulation{ii} = spatialModulation;
         clear spatialModulation
     catch
@@ -191,12 +200,14 @@ for ii = 1:length(sessions.basepaths)
         clear spikes
     end
 end
-
+keyboard;
 %% stack all results
 projectResults.optogeneticResponses = stackSessionResult(projectSessionResults.optogeneticResponses, projectSessionResults.numcells);
 projectResults.ripplesResponses = stackSessionResult(projectSessionResults.ripplesResponses, projectSessionResults.numcells);
 projectResults.averageCCG = stackSessionResult(projectSessionResults.averageCCG, projectSessionResults.numcells);
 projectResults.thetaModulation = stackSessionResult(projectSessionResults.thetaModulation, projectSessionResults.numcells);
+projectResults.thetaREMModulation = stackSessionResult(projectSessionResults.thetaREMModulation, projectSessionResults.numcells);
+projectResults.thetaRunModulation = stackSessionResult(projectSessionResults.thetaRunModulation, projectSessionResults.numcells);
 projectResults.lGammaModulation = stackSessionResult(projectSessionResults.lGammaModulation, projectSessionResults.numcells);
 projectResults.hGammaModulation = stackSessionResult(projectSessionResults.hGammaModulation, projectSessionResults.numcells);
 projectResults.ripplePhaseModulation = stackSessionResult(projectSessionResults.rippleMod, projectSessionResults.numcells);
