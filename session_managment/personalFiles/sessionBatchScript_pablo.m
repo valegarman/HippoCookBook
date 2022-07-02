@@ -255,3 +255,49 @@ updateExpFolder({'T:\fCamk8','Y:\fCamk8'},'J:\fCamk8');
 
 batch_preprocessSession('basepath','Z:\data\fVIP1','analysisPath','C:\data\fVIP1','cleanArtifacts',({[],[1]}),'analogChannelsList',[],'digitalChannelsList',1,'bazler_ttl_channel',10,'getPos',false);
 
+
+
+%% FL4
+changeFilesName('Z:\FLR\FL4\FL4_080322');
+changeFilesName('Z:\FLR\FL4\FL4_090322');
+changeFilesName('Z:\FLR\FL4\FL4_100322');
+changeFilesName('Z:\FLR\FL4\FL4_110322','socialParadigm',true);
+changeFilesName('basepath','Z:\FLR\FL4\FL4_170322','generalPath','Z:\FLR','socialParadigm',true);
+changeFilesName('basepath','Z:\FLR\FL4\FL4_180322','generalPath','Z:\FLR','socialParadigm',true);
+changeFilesName('basepath','Z:\FLR\FL4\FL4_210322','generalPath','Z:\FLR','socialParadigm',true);
+changeFilesName('basepath','Z:\FLR\FL4\FL4_220322','generalPath','Z:\FLR','socialParadigm',true);
+% updateExpFolder('Z:\FLR\FL4','D:\FLR\FL4');
+basepath = 'D:\FLR\FL4';
+cd(basepath);
+arrangeSessionFolder;
+createFiles('basepath',basepath);
+
+basepath = 'D:\FLR\FL4\FL4_080322_sess1';
+preprocessSession_pablo('basepath',basepath,'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'anymaze_ttl_channel',2,'getPos',true,'sessionSummary',true,'anyMaze',true);
+digitalChannelsList = [];
+analogChannelsList = [];
+computeSessionSummary_pablo('digitalChannelsList',digitalChannelsList,'analogChannelsList',analogChannelsList);
+batch_preprocessSession_pablo('basepath','D:\FLR\FL4','analysisPath','C:\FL4','cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'anymaze_ttl_channel',2);
+
+%% FL3
+batch_changeFilesName('basepath','Z:\FLR\FL3','generalPath','Z:\FLR','socialParadigm',true);
+% updateExpFolder('Z:\FLR\FL5','D:\FLR\FL5');
+basepath = 'D:\FLR\FL3';
+cd(basepath);
+arrangeSessionFolder;
+createFiles('basepath',basepath);
+batch_preprocessSession_pablo('basepath','D:\FLR\FL3','analysisPath','C:\FL3','cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'anymaze_ttl_channel',2);
+
+%% FL5
+batch_changeFilesName('basepath','Z:\FLR\FL5','generalPath','Z:\FLR','socialParadigm',true);
+% updateExpFolder('Z:\FLR\FL3','D:\FLR\FL3');
+basepath = 'D:\FLR\FL5';
+cd(basepath);
+arrangeSessionFolder;
+createFiles('basepath',basepath);
+batch_preprocessSession_pablo('basepath','D:\FLR\FL5','analysisPath','C:\FL5','cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'anymaze_ttl_channel',2);
+
+
+
+
+
