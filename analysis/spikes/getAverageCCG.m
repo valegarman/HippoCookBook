@@ -163,16 +163,17 @@ if useBrainRegions
             win = t_ccg >= winIndex(1) & t_ccg <= winIndex(2);
             ccgIndex = median(ccZMedian(:,win),2);
             
-            brainRegionCCG.(efields{ii}).medianCCG = ccMedian;
-            brainRegionCCG.(efields{ii}).ZmedianCCG = ccZMedian;
-            brainRegionCCG.(efields{ii}).meanCCG = ccMean;
-            brainRegionCCG.(efields{ii}).ZmeanCCG = ccZMean;
-            brainRegionCCG.(efields{ii}).binSize = binSize;
-            brainRegionCCG.(efields{ii}).winSize = winSize;
-            brainRegionCCG.(efields{ii}).timestamps = t_ccg;
-            brainRegionCCG.(efields{ii}).excludeIntervals = excludeIntervals;
-            brainRegionCCG.(efields{ii}).ccgIndex = ccgIndex;
-            brainRegionCCG.(efields{ii}).winIndex = winIndex;
+            brainRegionCCG.([efields{ii} '_medianCCG']) = ccMedian;
+            brainRegionCCG.([efields{ii} '_ZmedianCCG']) = ccZMedian;
+            brainRegionCCG.([efields{ii} '_meanCCG']) = ccMean;
+            brainRegionCCG.([efields{ii} '_ZmeanCCG']) = ccZMean;
+            brainRegionCCG.([efields{ii} '_ccgIndex']) = ccgIndex;
+            brainRegionCCG.binSize = binSize;
+            brainRegionCCG.winSize = winSize;
+            brainRegionCCG.timestamps = t_ccg;
+            brainRegionCCG.excludeIntervals = excludeIntervals;
+            brainRegionCCG.winIndex = winIndex;
+            brainRegionsCcgIndex.(efields{ii}) = ccgIndex;
         end
         
         % for CA1
@@ -204,16 +205,12 @@ if useBrainRegions
         win = t_ccg >= winIndex(1) & t_ccg <= winIndex(2);
         ccgIndex = median(ccZMedian(:,win),2);
 
-        brainRegionCCG.('CA1').medianCCG = ccMedian;
-        brainRegionCCG.('CA1').ZmedianCCG = ccZMedian;
-        brainRegionCCG.('CA1').meanCCG = ccMean;
-        brainRegionCCG.('CA1').ZmeanCCG = ccZMean;
-        brainRegionCCG.('CA1').binSize = binSize;
-        brainRegionCCG.('CA1').winSize = winSize;
-        brainRegionCCG.('CA1').timestamps = t_ccg;
-        brainRegionCCG.('CA1').excludeIntervals = excludeIntervals;
-        brainRegionCCG.('CA1').ccgIndex = ccgIndex;
-        brainRegionCCG.('CA1').winIndex = winIndex;
+        brainRegionCCG.('CA1_medianCCG') = ccMedian;
+        brainRegionCCG.('CA1_ZmedianCCG') = ccZMedian;
+        brainRegionCCG.('CA1_meanCCG') = ccMean;
+        brainRegionCCG.('CA1_ZmeanCCG') = ccZMean;
+        brainRegionCCG.('CA1_ccgIndex') = ccgIndex;
+        brainRegionsCcgIndex.('CA1') = ccgIndex;
         
         % for HPC
         cellsInRegion = ismember(cell_metrics.brainRegion,'CA1') | ismember(cell_metrics.brainRegion,'CA1sp')...
@@ -249,28 +246,25 @@ if useBrainRegions
         win = t_ccg >= winIndex(1) & t_ccg <= winIndex(2);
         ccgIndex = median(ccZMedian(:,win),2);
 
-        brainRegionCCG.('HIP').medianCCG = ccMedian;
-        brainRegionCCG.('HIP').ZmedianCCG = ccZMedian;
-        brainRegionCCG.('HIP').meanCCG = ccMean;
-        brainRegionCCG.('HIP').ZmeanCCG = ccZMean;
-        brainRegionCCG.('HIP').binSize = binSize;
-        brainRegionCCG.('HIP').winSize = winSize;
-        brainRegionCCG.('HIP').timestamps = t_ccg;
-        brainRegionCCG.('HIP').excludeIntervals = excludeIntervals;
-        brainRegionCCG.('HIP').ccgIndex = ccgIndex;
-        brainRegionCCG.('HIP').winIndex = winIndex;
+        brainRegionCCG.('HIP_medianCCG') = ccMedian;
+        brainRegionCCG.('HIP_ZmedianCCG') = ccZMedian;
+        brainRegionCCG.('HIP_meanCCG') = ccMean;
+        brainRegionCCG.('HIP_ZmeanCCG') = ccZMean;
+        brainRegionCCG.('HIP_ccgIndex') = ccgIndex;
+        brainRegionsCcgIndex.('HIP') = ccgIndex;
         
         % CCGIndex per region
-        efields = fieldnames(brainRegionCCG);
+        efields = fieldnames(brainRegionsCcgIndex);
         for jj = 1:size(spikes.UID,2)
             for ii = 1:length(efields)
-                ccgIndexRegion(jj,ii) = brainRegionCCG.(efields{ii}).ccgIndex(jj);
+                ccgIndexRegion(jj,ii) = brainRegionsCcgIndex.(efields{ii})(jj);
             end
         end
         brainRegionCCG.ccgIndexRegion = ccgIndexRegion;
         brainRegionCCG.absCcgIndexRegion = abs(ccgIndexRegion);
         brainRegionCCG.listOfRegions = efields;
         brainRegionCCG.listOfRegionsID = 1:length(efields);
+        brainRegionCCG.brainRegionsCcgIndex = brainRegionsCcgIndex;
         
         averageCCG.brainRegionCCG = brainRegionCCG;
     else
