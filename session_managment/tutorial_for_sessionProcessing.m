@@ -23,5 +23,11 @@ processSession('analog_optogenetic_channels',65,'promt_hippo_layers',true,'manua
 % 5% Index session
 indexNewSession;
 
-% Once a database has been created, use _ to stack results for all sessions
+% 6% Once a database has been created, use loadProjectResults to stack results for all sessions
 % an enjoy data analysis!
+[projectResults, projectSessionResults] = ...
+        loadProjectResults('project', 'InterneuronsLibrary',...
+        'analysis_project_path', 'C:\Users\valeg\Dropbox\ProjectsOnLine\interneuronsLibrary\data','loadLast',false);
+    
+    
+    

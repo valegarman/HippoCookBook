@@ -54,13 +54,12 @@ if isempty(analysis_project_path)
     analysis_project_path = indexedSessionCSV_path;
 end
 
-load([indexedSessionCSV_path filesep indexedSessionCSV_name]);
+sessionsTable = readtable([indexedSessionCSV_path filesep indexedSessionCSV_name,'.csv']); % the variable is called allSessions
 
-sessionNames = fieldnames(allSessions);
-for ii = 1:length(sessionNames)
-    sessions.basepaths{ii} = [data_path filesep allSessions.(sessionNames{ii}).path];
-    sessions.project{ii} = allSessions.(sessionNames{ii}).project;
+for ii = 1:length(sessionsTable.SessionName)
+    sessions.basepaths{ii} = [database_path filesep sessionsTable.Path{ii}];
 end
+sessions.project = sessionsTable.Project;
 
 disp('Projects found: '); 
 project_list = unique(sessions.project);
