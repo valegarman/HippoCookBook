@@ -1,8 +1,8 @@
-Narrow Interneuron,Pyramidal Cell,Unknown,Wide Interneuron
-626,1545,4,141
-601,1461,4,104
-24,71,0,36
-396,1226,3,58
-8,4,0,5
-489,1338,4,85
-65,77,0,13
+Brain region,Narrow Interneuron,Pyramidal Cell,Unknown,Wide Interneuron
+All cells,626,1545,4,141
+Hippocampus,601,1461,4,104
+Cortex,24,71,0,36
+CA1 SP,396,1226,3,58
+CA1 SLM,8,4,0,5
+CA1,489,1338,4,85
+CA3,65,77,0,13
