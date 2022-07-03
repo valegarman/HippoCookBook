@@ -51,9 +51,25 @@ unitsTable = cell2table(dataForTable,"VariableNames",["putativeCellType",...
     "geneticLine", "acgPeak", "troughtToPeak", "brainRegion", "lightResponse", "rateDuringRipples",...
     "preferedThetaphase", "thetaModulation", "sessionName"]);
 
-save('temp.mat','-V7.3');
-keyboard;
-writetable(unitsTable,[indexedSessionCSV_path filesep 'indexedSessionsMetrics.csv']); % the variable is called allSessions
+writetable(unitsTable,[indexedSessionCSV_path filesep 'session_managment' filesep 'sessionsMetrics' filesep...
+    'indexedSessionsMetrics.csv']); % the variable is called allSessions
+
+% make cell types table
+hippocampoRegions = {'CA1sp', 'DG', 'CA3' ,'CA1slm', 'CA1so', 'CA1sr', 'CA1', 'HIP'};
+CA1Regions = {'CA1sp', 'CA1slm', 'CA1so', 'CA1sr', 'CA1'};
+[X_all,cat] = hist(categorical(unitsTable.putativeCellType));
+[X_hip,cat] = hist(categorical(unitsTable.putativeCellType(ismember(unitsTable.brainRegion, hippocampoRegions))),cat);
+[X_PTLp,cat] = hist(categorical(unitsTable.putativeCellType(ismember(unitsTable.brainRegion, 'PTLp'))),cat);
+[X_CA1sp,cat] = hist(categorical(unitsTable.putativeCellType(ismember(unitsTable.brainRegion, 'CA1sp'))),cat);
+[X_CA1slmp,cat] = hist(categorical(unitsTable.putativeCellType(ismember(unitsTable.brainRegion, 'CA1slm'))),cat);
+[X_CA3,cat] = hist(categorical(unitsTable.putativeCellType(ismember(unitsTable.brainRegion, 'CA3'))),cat);
+[X_CA1,cat] = hist(categorical(unitsTable.putativeCellType(ismember(unitsTable.brainRegion, CA1Regions))),cat);
+
+cellTypesTable =  cell2table(num2cell([X_all' X_hip' X_PTLp' X_CA1sp' X_CA1slmp' X_CA3' X_CA1']'),'VariableNames',cat);
+writetable(cellTypesTable,[indexedSessionCSV_path filesep 'session_managment' filesep 'sessionsMetrics' filesep...
+    'indexedSessionsCellTypes.csv']); % the variable is called allSessions
+
+% brain regions
 
 
 % Lets do a push for git repository
