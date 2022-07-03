@@ -65,7 +65,8 @@ CA1Regions = {'CA1sp', 'CA1slm', 'CA1so', 'CA1sr', 'CA1'};
 [X_CA3,cat] = hist(categorical(unitsTable.putativeCellType(ismember(unitsTable.brainRegion, 'CA3'))),cat);
 [X_CA1,cat] = hist(categorical(unitsTable.putativeCellType(ismember(unitsTable.brainRegion, CA1Regions))),cat);
 
-cellTypesTable =  cell2table(num2cell([X_all' X_hip' X_PTLp' X_CA1sp' X_CA1slmp' X_CA3' X_CA1']'),'VariableNames',cat);
+rowNames = {'All cells' 'Hippocampus' 'Cortex' 'CA1 SP' 'CA1 SLM' 'CA1' 'CA3'};
+cellTypesTable =  cell2table(num2cell([X_all' X_hip' X_PTLp' X_CA1sp' X_CA1slmp' X_CA1' X_CA3']'),'VariableNames',cat,'RowNames',rowNames);
 writetable(cellTypesTable,[indexedSessionCSV_path filesep 'session_managment' filesep 'sessionsMetrics' filesep...
     'indexedSessionsCellTypes.csv']); % the variable is called allSessions
 
