@@ -53,9 +53,9 @@ for ii = 1:length(names)
             if isnumeric(toStack{exampleSession}.(names{ii}).(l2_names{jj})) &&  any(size(toStack{exampleSession}.(names{ii}).(l2_names{jj})) == numCells(exampleSession))
                 fprintf('Flattening %s... \n', l2_names{jj}); %\n
                 for mm = 1:length(toStack)
-                    if isstruct(toStack{mm})
+                    if isstruct(toStack{mm}) && isfield(toStack{mm}.(names{ii}),(l2_names{jj}))
                         toStack{mm}.([names{ii} '_' l2_names{jj}]) = toStack{mm}.(names{ii}).(l2_names{jj});
-                    elseif isnan(toStack{mm})
+                    elseif ~isfield(toStack{mm}.(names{ii}),(l2_names{jj})) || isnan(toStack{mm})  
                         example_data = nan*toStack{exampleSession}.([names{ii} '_' l2_names{jj}]);
                         size_ex = size(example_data);
                         size_sess = size_ex; 

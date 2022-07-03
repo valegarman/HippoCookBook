@@ -153,12 +153,12 @@ for ii = 1:length(sessions.basepaths)
     clear hgammaMod
     
     % sharp-wave phase_locking
-    try targetFile = dir('*.SW*PhaseLockingData.cellinfo.mat'); load(targetFile.name);
-        projectSessionResults.SWMod{ii} = SWMod;
-        clear SWMod
-    catch
-        projectSessionResults.SWMod{ii} = NaN;
-    end
+%     try targetFile = dir('*.SW*PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+%         projectSessionResults.SWMod{ii} = SWMod;
+%         clear SWMod
+%     catch
+%         projectSessionResults.SWMod{ii} = NaN;
+%     end
     
     % ripple phase_locking
     try targetFile = dir('*.ripple*PhaseLockingData.cellinfo.mat'); load(targetFile.name);
@@ -206,6 +206,8 @@ projectResults.optogeneticResponses = stackSessionResult(projectSessionResults.o
 projectResults.ripplesResponses = stackSessionResult(projectSessionResults.ripplesResponses, projectSessionResults.numcells);
 projectResults.averageCCG = stackSessionResult(projectSessionResults.averageCCG, projectSessionResults.numcells);
 projectResults.thetaModulation = stackSessionResult(projectSessionResults.thetaModulation, projectSessionResults.numcells);
+projectResults.thetaREMModulation = stackSessionResult(projectSessionResults.thetaREMModulation, projectSessionResults.numcells);
+projectResults.thetaRunModulation = stackSessionResult(projectSessionResults.thetaRunModulation, projectSessionResults.numcells);
 projectResults.lGammaModulation = stackSessionResult(projectSessionResults.lGammaModulation, projectSessionResults.numcells);
 projectResults.hGammaModulation = stackSessionResult(projectSessionResults.hGammaModulation, projectSessionResults.numcells);
 projectResults.ripplePhaseModulation = stackSessionResult(projectSessionResults.rippleMod, projectSessionResults.numcells);

@@ -17,7 +17,6 @@ for ii = 1:length(sessionsTable.SessionName)
 
             %%% your code goes here...
             getAverageCCG('force',true);
-            plotSummary('checkUnits', false);
             %%%
             
             close all;
