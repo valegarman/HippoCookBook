@@ -128,10 +128,10 @@ averageCCG.ccgIndex = ccgIndex;
 averageCCG.winIndex = winIndex;
 
 brainRegionCCG = [];
-if useBrainRegions
+if useBrainRegions && exist([basenameFromBasepath(basepath) '.cell_metrics.cellinfo.mat'])
     disp('Computing CCG by brain region');
     session = loadSession;
-    load([basenameFromBasepath '.cell_metrics.cellinfo.mat']);
+    load([basenameFromBasepath(basepath) '.cell_metrics.cellinfo.mat']);
     
     if isfield(session,'brainRegions')
         efields = fieldnames(session.brainRegions);
