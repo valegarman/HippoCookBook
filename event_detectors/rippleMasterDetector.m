@@ -102,6 +102,7 @@ addParameter(p,'eventSpikeThreshold',1,@isnumeric);
 addParameter(p,'force',false,@islogical);
 addParameter(p,'removeRipplesStimulation',true,@islogical);
 addParameter(p,'useCSD',false,@islogical);
+addParameter(p,'stdThreshold',1.5,@isnumeric);
 
 parse(p,varargin{:})
 
@@ -129,6 +130,7 @@ eventSpikeThreshold = p.Results.eventSpikeThreshold;
 force = p.Results.force;
 removeRipplesStimulation = p.Results.removeRipplesStimulation;
 useCSD = p.Results.useCSD;
+stdThreshold = p.Results.stdThreshold;
 
 %% Load Session Metadata and several variables if not provided
 % session = sessionTemplate(basepath,'showGUI',false);
@@ -163,7 +165,7 @@ if isempty(SWChannel)
     SWChannel = hippocampalLayers.bestShankLayers.radiatum;
 end
 
-if removeRipplesStimulation
+if removeRipplesStimulation && ~isempty(dir('*optogeneticPulses.events.mat'))
     targetFile = dir('*optogeneticPulses.events.mat'); load(targetFile.name);
     restrict_temp = SubtractIntervals([0 Inf],optoPulses.stimulationEpochs);
     restrict =  ConsolidateIntervals([restrict; restrict_temp]);
@@ -211,8 +213,13 @@ if removeRipplesStimulation
         warning('Not possible to remove ripples during stimulation epochs...');
     end
 end
-ripples = removeArtifactsFromEvents(ripples,'stdThreshold',1.5);
-ripples = eventSpikingTreshold(ripples,[],'spikingThreshold',eventSpikeThreshold);
+ripples = removeArtifactsFromEvents(ripples,'stdThreshold',stdThreshold);
+if isnumeric(eventSpikeThreshold) || eventSpikeThreshold
+    if islogical(eventSpikeThreshold)
+        eventSpikeThreshold = 1;
+    end
+    ripples = eventSpikingTreshold(ripples,[],'spikingThreshold',eventSpikeThreshold);
+end
 plotRippleChannel('rippleChannel',rippleChannel,'ripples',ripples); % to do, run this after ripple detection
 % EventExplorer(pwd, ripples)
 

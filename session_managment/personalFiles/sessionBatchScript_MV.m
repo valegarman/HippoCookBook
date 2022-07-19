@@ -10,6 +10,8 @@ batch_preprocessSession('basepath','X:\data\fCr1','analysisPath','F:\fCr1','clea
 
 batch_preprocessSession('basepath','G:\data\fPv4','cleanArtifacts',({65,[]}),'analogChannelsList',65,'digitalChannelsList',0);
 
+batch_preprocessSession('basepath','D:\Dropbox\DATA\anna_data\NY14')
+
 %3% Computing summary
 batch_sessionSummary('basepath','E:\data\fCck1','analogChannelsList',[],'digitalChannelsList',1);
 
