@@ -226,6 +226,7 @@ thetaEpochs.params.delta_bandpass = delta_bandpass;
 thetaEpochs.params.use_ratioThetaDelta = use_ratioThetaDelta;
 thetaEpochs.params.threshold_noise = threshold_noise;
 thetaEpochs.params.uselog10Power = uselog10Power;
+thetaEpochs.params.useCSD = useCSD;
 [thetaEpochs.idx.idx,thetaEpochs.idx.timestamps] = bz_INTtoIDX({thetaEpochs.intervals},'sf',1);
 [thetaEpochs.idx_nonTheta.idx,thetaEpochs.idx_nonTheta.timestamps] = ...
     bz_INTtoIDX({thetaEpochs.intervals_nonTheta},'sf',1);
