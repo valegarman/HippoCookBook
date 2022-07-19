@@ -24,6 +24,12 @@ if size(numCells,1) < size(numCells,2)
     numCells = numCells';
 end
 
+for mm = 1:length(toStack)
+    if isempty(toStack{mm})
+        toStack{mm} = NaN;
+    end
+end 
+
 names = fieldnames(toStack{exampleSession});
 clonned = zeros(size(toStack));
 % if nan, clon data of same size as numCells with nan values
@@ -32,12 +38,18 @@ for mm = 1:length(toStack)
         % find in example session, fields with size as in numCells
         for ii = 1:length(names)
             if isnumeric(toStack{exampleSession}.(names{ii})) %any(size(toStack{exampleSession}.(names{ii}))==numCells(exampleSession))
-                example_data = nan*toStack{exampleSession}.(names{ii});
-                size_ex = size(example_data);
-                size_sess = size_ex; 
-                size_sess(find(size_ex == numCells(exampleSession))) = numCells(mm);
-                toStack_clon{mm}.(names{ii}) = nan(size_sess);
+                if ischar(toStack{exampleSession}.(names{ii}))
+                    keyboard;
+                    toStack_clon{mm}.(names{ii}) = toStack{exampleSession}.(names{ii});
+                else
+                    example_data = nan*toStack{exampleSession}.(names{ii});
+                    size_ex = size(example_data);
+                    size_sess = size_ex; 
+                    size_sess(find(size_ex == numCells(exampleSession))) = numCells(mm);
+                    toStack_clon{mm}.(names{ii}) = nan(size_sess);
+                end
                 clonned(mm) = 1;
+                
             else % if not numeric
                 toStack_clon{mm}.(names{ii}) = nan(1);
             end
@@ -53,15 +65,26 @@ for ii = 1:length(names)
             if isnumeric(toStack{exampleSession}.(names{ii}).(l2_names{jj})) &&  any(size(toStack{exampleSession}.(names{ii}).(l2_names{jj})) == numCells(exampleSession))
                 fprintf('Flattening %s... \n', l2_names{jj}); %\n
                 for mm = 1:length(toStack)
-                    if isstruct(toStack{mm})
+                    if isstruct(toStack{mm}) && isfield(toStack{mm}.(names{ii}),(l2_names{jj}))
                         toStack{mm}.([names{ii} '_' l2_names{jj}]) = toStack{mm}.(names{ii}).(l2_names{jj});
-                    elseif isnan(toStack{mm})
+                    elseif isstruct(toStack{mm}) && ~isfield(toStack{mm}.(names{ii}),(l2_names{jj})) % if doesn't exist, create as nan matrix
                         example_data = nan*toStack{exampleSession}.([names{ii} '_' l2_names{jj}]);
                         size_ex = size(example_data);
                         size_sess = size_ex; 
                         size_sess(find(size_ex == numCells(exampleSession))) = numCells(mm);
-                        toStack_clon{mm}.([names{ii} '_' l2_names{jj}]) = nan(size_sess);
-                        clonned(mm) = 1;
+                        toStack{mm}.([names{ii} '_' l2_names{jj}]) = nan(size_sess);
+                    elseif isnan(toStack{mm}) % if nan, clone
+                        if ischar(toStack{exampleSession}.([names{ii} '_' l2_names{jj}]))
+                            toStack_clon{mm}.([names{ii} '_' l2_names{jj}]) = ...
+                                toStack{exampleSession}.([names{ii} '_' l2_names{jj}]);
+                        else
+                            example_data = nan*toStack{exampleSession}.([names{ii} '_' l2_names{jj}]);
+                            size_ex = size(example_data);
+                            size_sess = size_ex; 
+                            size_sess(find(size_ex == numCells(exampleSession))) = numCells(mm);
+                            toStack_clon{mm}.([names{ii} '_' l2_names{jj}]) = nan(size_sess);
+                        end
+                        clonned(mm) = 1;    
                     end
                 end
             elseif strcmpi('timestamps',l2_names{jj})
@@ -106,8 +129,8 @@ for ii = 1:length(names)
         elseif any(strcmpi(type_field,'logical')) && ~isempty(clonned) % unless a structure was clonned
             type_field = 'double';
         else
-            disp('hay'); keyboard;
-            error('More than one type of data per field!')
+            type_field = 'multiple';
+            warning('More than one type of data per field!')
         end
     end
     if length(unique(ndims_field)) > 1

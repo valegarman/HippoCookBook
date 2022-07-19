@@ -8,26 +8,27 @@ function [projectResults, projectSessionResults] =  loadProjectResults(varargin)
 %% Defaults and Parms
 p = inputParser;
 addParameter(p,'project','Undefined',@ischar);
-addParameter(p,'indexedProjects_path',[],@isstring);
-addParameter(p,'indexedProjects_name','indexedSessions',@isstring);
+addParameter(p,'indexedSessionCSV_path',[]);
+addParameter(p,'indexedSessionCSV_name','indexedSessions');
 addParameter(p,'data_path',database_path,@isstring);
 addParameter(p,'includeSpikes',true,@isstring);
 addParameter(p,'includeLFP',false,@isstring);
 addParameter(p,'analysis_project_path',[],@isfolder);
 addParameter(p,'loadLast',false,@islogical);
 addParameter(p,'saveMat',true,@islogical);
+addParameter(p,'saveSummaries',true,@islogical);
 
 parse(p,varargin{:});
 
 project = p.Results.project;
-indexedProjects_path = p.Results.indexedProjects_path;
-indexedProjects_name = p.Results.indexedProjects_name;
-data_path = p.Results.data_path;
+indexedSessionCSV_path = p.Results.indexedSessionCSV_path;
+indexedSessionCSV_name = p.Results.indexedSessionCSV_name;
 includeSpikes = p.Results.includeSpikes;
 includeLFP = p.Results.includeLFP;
 analysis_project_path = p.Results.analysis_project_path;
 loadLast = p.Results.loadLast;
 saveMat = p.Results.saveMat;
+saveSummaries = p.Results.saveSummaries;
 
 if loadLast
     projectFiles = dir([analysis_project_path filesep '*' project '.mat']);
@@ -43,24 +44,23 @@ if loadLast
 end
 
 %% find indexed sessions
-if isempty(indexedProjects_name)
+if isempty(indexedSessionCSV_name)
     error('Need to provide the name of the index Project variable');
 end
-if isempty(indexedProjects_path)
+if isempty(indexedSessionCSV_path)
     warning('Not included the path where the indexed Projects .mat variable is located. Trying to find it...');
-    indexedProjects_path = fileparts(which([indexedProjects_name,'.mat']));
+    indexedSessionCSV_path = fileparts(which([indexedSessionCSV_name,'.mat']));
 end
 if isempty(analysis_project_path)
-    analysis_project_path = indexedProjects_path;
+    analysis_project_path = indexedSessionCSV_path;
 end
 
-load([indexedProjects_path filesep indexedProjects_name]);
+sessionsTable = readtable([indexedSessionCSV_path filesep indexedSessionCSV_name,'.csv']); % the variable is called allSessions
 
-sessionNames = fieldnames(allSessions);
-for ii = 1:length(sessionNames)
-    sessions.basepaths{ii} = [data_path filesep allSessions.(sessionNames{ii}).path];
-    sessions.project{ii} = allSessions.(sessionNames{ii}).project;
+for ii = 1:length(sessionsTable.SessionName)
+    sessions.basepaths{ii} = [database_path filesep sessionsTable.Path{ii}];
 end
+sessions.project = sessionsTable.Project;
 
 disp('Projects found: '); 
 project_list = unique(sessions.project);
@@ -79,13 +79,19 @@ fprintf('Loading %3.i sessions... \n',length(sessions.basepaths)); %\n
 
 %% load cellexplorer results
 cell_metrics = loadCellMetricsBatch('basepaths',sessions.basepaths);
+% disp('Close when done exploring...');
 cell_metrics = CellExplorer('metrics',cell_metrics);% run CELLEXPLORER when adding new data
-disp('Close when done exploring...');
+close(gcf);
 
 %% collect data per session
+if saveSummaries
+    mkdir(analysis_project_path,'Summaries');
+    saveSummariespath = [analysis_project_path filesep 'Summaries' filesep];
+end
+
 projectSessionResults = [];
 for ii = 1:length(sessions.basepaths)
-    fprintf(' > %3.i/%3.i session \n',ii, length(sessions.basepaths)); %\n
+    fprintf(' > %3.i/%3.i sessions \n',ii, length(sessions.basepaths)); %\n
     cd(sessions.basepaths{ii});
     
     % get some useful fields
@@ -129,9 +135,19 @@ for ii = 1:length(sessions.basepaths)
     clear slowOsciResponses
     
     % theta phase_locking
-    targetFile = dir('*.theta*PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+    targetFile = dir('*.theta_*PhaseLockingData.cellinfo.mat'); load(targetFile.name);
     projectSessionResults.thetaModulation{ii} = thetaMod;
     clear thetaMod
+    
+    % theta phase_locking
+    targetFile = dir('*.thetaREM*PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+    projectSessionResults.thetaREMModulation{ii} = thetaREMMod;
+    clear thetaREMMod
+    
+    % theta phase_locking
+    targetFile = dir('*.thetaRun*PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+    projectSessionResults.thetaRunModulation{ii} = thetaRunMod;
+    clear thetaRunMod
     
     % lgamma phase_locking
     targetFile = dir('*.lgamma*PhaseLockingData.cellinfo.mat'); load(targetFile.name);
@@ -144,12 +160,12 @@ for ii = 1:length(sessions.basepaths)
     clear hgammaMod
     
     % sharp-wave phase_locking
-    try targetFile = dir('*.SW*PhaseLockingData.cellinfo.mat'); load(targetFile.name);
-        projectSessionResults.SWMod{ii} = SWMod;
-        clear SWMod
-    catch
-        projectSessionResults.SWMod{ii} = NaN;
-    end
+%     try targetFile = dir('*.SW*PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+%         projectSessionResults.SWMod{ii} = SWMod;
+%         clear SWMod
+%     catch
+%         projectSessionResults.SWMod{ii} = NaN;
+%     end
     
     % ripple phase_locking
     try targetFile = dir('*.ripple*PhaseLockingData.cellinfo.mat'); load(targetFile.name);
@@ -160,8 +176,8 @@ for ii = 1:length(sessions.basepaths)
     end
     
     % spatial modulation
-    try spatialModulation = getSpatialModulation;
-        
+    targetFile = dir('*spatialModulation.cellinfo.mat');
+    try load(targetFile.name);
         projectSessionResults.spatialModulation{ii} = spatialModulation;
         clear spatialModulation
     catch
@@ -185,10 +201,33 @@ for ii = 1:length(sessions.basepaths)
         projectSessionResults.behavior{ii} = NaN;
     end
     
+    % ACG peak
+    targetFile = dir('*.ACGPeak.cellinfo.mat'); load(targetFile.name);
+    projectSessionResults.acgPeak{ii} = acgPeak;
+    clear acgPeak
+    
+    % speedCorr
+    targetFile = dir('*.speedCorr.cellinfo.mat'); 
+    try load(targetFile.name);
+        projectSessionResults.speedCorr{ii} = speedCorr;
+        clear speedCorr
+    catch
+        projectSessionResults.speedCorr{ii} = NaN;
+    end
+    
     if includeLFP
         lfp = getLFP;
         projectSessionResults.lfp{ii} = spikes;
         clear spikes
+    end
+    
+    if saveSummaries
+        % findSummaries
+        summaryPngs = dir([sessions.basepaths{ii} filesep 'SummaryFigures' filesep 'Summary*.png']);
+        for jj = 1:length(summaryPngs)
+            copyfile([summaryPngs(jj).folder filesep summaryPngs(jj).name],...
+                [saveSummariespath  sessionsTable.SessionName{ii} '_' summaryPngs(jj).name]);
+        end
     end
 end
 
@@ -197,11 +236,16 @@ projectResults.optogeneticResponses = stackSessionResult(projectSessionResults.o
 projectResults.ripplesResponses = stackSessionResult(projectSessionResults.ripplesResponses, projectSessionResults.numcells);
 projectResults.averageCCG = stackSessionResult(projectSessionResults.averageCCG, projectSessionResults.numcells);
 projectResults.thetaModulation = stackSessionResult(projectSessionResults.thetaModulation, projectSessionResults.numcells);
+projectResults.thetaREMModulation = stackSessionResult(projectSessionResults.thetaREMModulation, projectSessionResults.numcells);
+projectResults.thetaRunModulation = stackSessionResult(projectSessionResults.thetaRunModulation, projectSessionResults.numcells);
 projectResults.lGammaModulation = stackSessionResult(projectSessionResults.lGammaModulation, projectSessionResults.numcells);
 projectResults.hGammaModulation = stackSessionResult(projectSessionResults.hGammaModulation, projectSessionResults.numcells);
 projectResults.ripplePhaseModulation = stackSessionResult(projectSessionResults.rippleMod, projectSessionResults.numcells);
 projectResults.behavior = stackSessionResult(projectSessionResults.behavior, projectSessionResults.numcells);
 projectResults.spatialModulation = stackSessionResult(projectSessionResults.spatialModulation, projectSessionResults.numcells);
+projectResults.speedCorr = stackSessionResult(projectSessionResults.speedCorr, projectSessionResults.numcells);
+projectResults.acgPeak = stackSessionResult(projectSessionResults.acgPeak, projectSessionResults.numcells);
+
 projectResults.cell_metrics = cell_metrics;
 
 % session, genetic line, experimentalSubject
@@ -236,6 +280,7 @@ for ii = 1:length(projectResults.expSubjectList)
 end
 
 if saveMat
+    disp('Saving data');
     save([analysis_project_path filesep datestr(datetime('now'),29) '_' project '.mat'],'projectSessionResults','projectResults','-v7.3');
 end
 end

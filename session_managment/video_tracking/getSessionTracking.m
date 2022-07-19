@@ -137,7 +137,7 @@ elseif anyMaze
 end
 %% Concatenate and sync timestamps
 if count > 1 % if traking
-    ts = []; subSessions = []; maskSessions = [];
+    ts = []; subSessions = []; maskSessions = []; originalts = [];
     if exist([basepath filesep strcat(basename,'.MergePoints.events.mat')],'file')
         load(strcat(basename,'.MergePoints.events.mat'));
         for ii = 1:length(trackFolder)
@@ -146,6 +146,10 @@ if count > 1 % if traking
                 subSessions = [subSessions; MergePoints.timestamps(trackFolder(ii),1:2)];
                 maskSessions = [maskSessions; ones(size(sumTs))*ii];
                 ts = [ts; sumTs];
+                if anyMaze
+                    sumOriginalTs = tempTracking{ii}.originalTimestamps + MergePoints.timestamps(trackFolder(ii),1);
+                    originalts = [originalts; sumOriginalTs];
+                end
             else
                 error('Folders name does not match!!');
             end
@@ -161,7 +165,8 @@ if count > 1 % if traking
 
     % Concatenating tracking fields...
     x = []; y = []; folder = []; samplingRate = []; description = [];
-    velocity = []; acceleration = [];
+    velocity = []; acceleration = []; 
+    avFrame = []; apparatus = []; zone = []; pixelsmetre = [];
     for ii = 1:size(tempTracking,2) 
         x = [x; tempTracking{ii}.position.x]; 
         y = [y; tempTracking{ii}.position.y]; 
@@ -170,6 +175,12 @@ if count > 1 % if traking
         folder{ii} = tempTracking{ii}.folder; 
         samplingRate = [samplingRate; tempTracking{ii}.samplingRate];  
         description{ii} = tempTracking{ii}.description;
+        if anyMaze
+            avFrame{ii} = tempTracking{ii}.avFrame;
+            apparatus{ii} = tempTracking{ii}.apparatus;
+            zone{ii} = tempTracking{ii}.zone;
+            pixelsmetre{ii} = tempTracking{ii}.pixelsmetre;
+        end
     end
 
     tracking.position.x = x;
@@ -186,6 +197,12 @@ if count > 1 % if traking
     speed.timestamps = ts;
     speed.folders = folder;
     
+    if anyMaze
+        tracking.avFrame = avFrame;
+        tracking.apparatus = apparatus;
+        tracking.zone = zone;
+        tracking.pixelsmetre = pixelsmetre;
+    end
 
 
     %% save tracking 

@@ -108,8 +108,15 @@ if (sum(missing))
 else
     % No missing data, get the MAP estimates from a single pass
     [x,y,vx,vy,ax,ay,mm] = kfilter(posx,posy,post,order,Q,R,0);
+    % append removed data as NaN
+    x = [removed;x];
+    y = [removed;y];
+    vx = [removed;vx];
+    vy = [removed;vy];
+    ax = [removed;ax];
+    ay = [removed;ay];
 end
-t = post;    
+t = post; 
 
 
 % This is the actual Kalman filter

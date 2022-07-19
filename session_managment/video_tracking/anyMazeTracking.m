@@ -50,7 +50,7 @@ end
 try
     cd ..
     session = loadSession();
-    if isfield(session.analysisTags,'anyMaze_ttl_channel')
+    if isfield(session.analysisTags,'anymaze_ttl_channel')
         anyMaze_ttl_channel = p.Results.anyMaze_ttl_channel;
     end
 end
@@ -87,6 +87,7 @@ end
     headY_column = strcmp(variableNames,'HeadPositionY');
     tailX_column = strcmp(variableNames,'TailPositionX');
     tailY_column = strcmp(variableNames,'TailPositionY');
+    inObject_column = strcmp(variableNames,'InObject');
     
     % YMaze
     inArm1_column = strcmp(variableNames,'InArm1');
@@ -146,6 +147,7 @@ timesamples = CSVArray(:,time_column);
 xPos = CSVArray(:,centreX_column);
 yPos = CSVArray(:,centreY_column);
 speed = CSVArray(:,speed_column);
+inObject = CSVArray(:,inObject_column);
 
 head_xPos = CSVArray(:,headX_column);
 head_yPos = CSVArray(:,headY_column);
@@ -278,12 +280,21 @@ else
 end
 
 %% CONVERT BOUNDING BOX AND CENTRE TO CM
-centre_x = centre.x*100/pixels_metre;
-centre_y = centre.y*100/pixels_metre;
-boundingbox.x = boundingbox.x*100/pixels_metre;
-boundingbox.y = boundingbox.y*100/pixels_metre;
-boundingbox.w = boundingbox.w*100/pixels_metre;
-boundingbox.h = boundingbox.h*100/pixels_metre;
+try
+    centre_x = centre.x*100/pixels_metre;
+    centre_y = centre.y*100/pixels_metre;
+    boundingbox.x = boundingbox.x*100/pixels_metre;
+    boundingbox.y = boundingbox.y*100/pixels_metre;
+    boundingbox.w = boundingbox.w*100/pixels_metre;
+    boundingbox.h = boundingbox.h*100/pixels_metre;
+catch
+    centre_x = str2num(centre.x.Text)*100/pixels_metre;
+    centre_y = str2num(centre.y.Text)*100/pixels_metre;
+    boundingbox.x = str2num(boundingbox.x.Text)*100/pixels_metre;
+    boundingbox.y = str2num(boundingbox.y.Text)*100/pixels_metre;
+    boundingbox.w = str2num(boundingbox.w.Text)*100/pixels_metre;
+    boundingbox.h = str2num(boundingbox.h.Text)*100/pixels_metre;
+end
 
 %%
 boundingbox_X = boundingbox.x + boundingbox.w;
@@ -305,45 +316,96 @@ if exist('zone','var')
     num_zones = length(zone);
     for i=1:num_zones
         if num_zones == 1
-            name_zones{i} = char(zone.name);
-            center_zones_x{i} = (zone.centre.x)*100/pixels_metre;
-            center_zones_y{i} = (zone.centre.y)*100/pixels_metre;
-            boundingbox_zones_x{i} = (zone.boundingbox.x)*100/pixels_metre;
-            boundingbox_zones_y{i} = (zone.boundingbox.y)*100/pixels_metre;
-            boundingbox_zones_w{i} = (zone.boundingbox.w)*100/pixels_metre;
-            boundingbox_zones_h{i} = (zone.boundingbox.h)*100/pixels_metre;
-            
-            
+            try
+                name_zones{i} = char(zone.name);
+                center_zones_x{i} = (zone.centre.x)*100/pixels_metre;
+                center_zones_y{i} = (zone.centre.y)*100/pixels_metre;
+                boundingbox_zones_x{i} = (zone.boundingbox.x)*100/pixels_metre;
+                boundingbox_zones_y{i} = (zone.boundingbox.y)*100/pixels_metre;
+                boundingbox_zones_w{i} = (zone.boundingbox.w)*100/pixels_metre;
+                boundingbox_zones_h{i} = (zone.boundingbox.h)*100/pixels_metre;
 
-            boundingbox_zones_X{i} = boundingbox_zones_x{i} + boundingbox_zones_w{i};
-            boundingbox_zones_Y{i} = boundingbox_zones_y{i} + boundingbox_zones_h{i};
 
-            boundingbox_zones_xmin{i} = boundingbox_zones_x{i};
-            boundingbox_zones_xmax{i} = boundingbox_zones_X{i};
-            boundingbox_zones_ymin{i} = boundingbox_zones_y{i};
-            boundingbox_zones_ymax{i} = boundingbox_zones_Y{i};
 
-            xMaze_zones{i} = [boundingbox_zones_xmin{i} boundingbox_zones_xmax{i}];
-            yMaze_zones{i} = [boundingbox_zones_ymin{i} boundingbox_zones_ymax{i}];
+                boundingbox_zones_X{i} = boundingbox_zones_x{i} + boundingbox_zones_w{i};
+                boundingbox_zones_Y{i} = boundingbox_zones_y{i} + boundingbox_zones_h{i};
+
+                boundingbox_zones_xmin{i} = boundingbox_zones_x{i};
+                boundingbox_zones_xmax{i} = boundingbox_zones_X{i};
+                boundingbox_zones_ymin{i} = boundingbox_zones_y{i};
+                boundingbox_zones_ymax{i} = boundingbox_zones_Y{i};
+
+                xMaze_zones{i} = [boundingbox_zones_xmin{i} boundingbox_zones_xmax{i}];
+                yMaze_zones{i} = [boundingbox_zones_ymin{i} boundingbox_zones_ymax{i}];
+            catch
+                name_zones{i} = char(zone.name.Text);
+                center_zones_x{i} = str2num(zone.centre.x.Text)*100/pixels_metre;
+                center_zones_y{i} = str2num(zone.centre.y.Text)*100/pixels_metre;
+                boundingbox_zones_x{i} = str2num(zone.boundingbox.x.Text)*100/pixels_metre;
+                boundingbox_zones_y{i} = str2num(zone.boundingbox.y.Text)*100/pixels_metre;
+                boundingbox_zones_w{i} = str2num(zone.boundingbox.w.Text)*100/pixels_metre;
+                boundingbox_zones_h{i} = str2num(zone.boundingbox.h.Text)*100/pixels_metre;
+
+
+
+                boundingbox_zones_X{i} = boundingbox_zones_x{i} + boundingbox_zones_w{i};
+                boundingbox_zones_Y{i} = boundingbox_zones_y{i} + boundingbox_zones_h{i};
+
+                boundingbox_zones_xmin{i} = boundingbox_zones_x{i};
+                boundingbox_zones_xmax{i} = boundingbox_zones_X{i};
+                boundingbox_zones_ymin{i} = boundingbox_zones_y{i};
+                boundingbox_zones_ymax{i} = boundingbox_zones_Y{i};
+
+                xMaze_zones{i} = [boundingbox_zones_xmin{i} boundingbox_zones_xmax{i}];
+                yMaze_zones{i} = [boundingbox_zones_ymin{i} boundingbox_zones_ymax{i}];
+            end
         else
-            name_zones{i} = zone(i).name;
-            center_zones_x{i} = (zone(i).centre.x)*100/pixels_metre;
-            center_zones_y{i} = (zone(i).centre.y)*100/pixels_metre;
-            boundingbox_zones_x{i} = (zone(i).boundingbox.x)*100/pixels_metre;
-            boundingbox_zones_y{i} = (zone(i).boundingbox.y)*100/pixels_metre;
-            boundingbox_zones_w{i} = (zone(i).boundingbox.w)*100/pixels_metre;
-            boundingbox_zones_h{i} = (zone(i).boundingbox.h)*100/pixels_metre;
+%             name_zones{i} = zone(i).name;
+%             center_zones_x{i} = (zone(i).centre.x)*100/pixels_metre;
+%             center_zones_y{i} = (zone(i).centre.y)*100/pixels_metre;
+%             boundingbox_zones_x{i} = (zone(i).boundingbox.x)*100/pixels_metre;
+%             boundingbox_zones_y{i} = (zone(i).boundingbox.y)*100/pixels_metre;
+%             boundingbox_zones_w{i} = (zone(i).boundingbox.w)*100/pixels_metre;
+%             boundingbox_zones_h{i} = (zone(i).boundingbox.h)*100/pixels_metre;
+            try
+                name_zones{i} = zone{i}.name;
+                center_zones_x{i} = (zone{i}.centre.x)*100/pixels_metre;
+                center_zones_y{i} = (zone{i}.centre.y)*100/pixels_metre;
+                boundingbox_zones_x{i} = (zone{i}.boundingbox.x)*100/pixels_metre;
+                boundingbox_zones_y{i} = (zone{i}.boundingbox.y)*100/pixels_metre;
+                boundingbox_zones_w{i} = (zone{i}.boundingbox.w)*100/pixels_metre;
+                boundingbox_zones_h{i} = (zone{i}.boundingbox.h)*100/pixels_metre;
 
-            boundingbox_zones_X{i} = boundingbox_zones_x{i} + boundingbox_zones_w{i};
-            boundingbox_zones_Y{i} = boundingbox_zones_y{i} + boundingbox_zones_h{i};
+                boundingbox_zones_X{i} = boundingbox_zones_x{i} + boundingbox_zones_w{i};
+                boundingbox_zones_Y{i} = boundingbox_zones_y{i} + boundingbox_zones_h{i};
 
-            boundingbox_zones_xmin{i} = boundingbox_zones_x{i};
-            boundingbox_zones_xmax{i} = boundingbox_zones_X{i};
-            boundingbox_zones_ymin{i} = boundingbox_zones_y{i};
-            boundingbox_zones_ymax{i} = boundingbox_zones_Y{i};
+                boundingbox_zones_xmin{i} = boundingbox_zones_x{i};
+                boundingbox_zones_xmax{i} = boundingbox_zones_X{i};
+                boundingbox_zones_ymin{i} = boundingbox_zones_y{i};
+                boundingbox_zones_ymax{i} = boundingbox_zones_Y{i};
 
-            xMaze_zones{i} = [boundingbox_zones_xmin{i} boundingbox_zones_xmax{i}];
-            yMaze_zones{i} = [boundingbox_zones_ymin{i} boundingbox_zones_ymax{i}];
+                xMaze_zones{i} = [boundingbox_zones_xmin{i} boundingbox_zones_xmax{i}];
+                yMaze_zones{i} = [boundingbox_zones_ymin{i} boundingbox_zones_ymax{i}];
+            catch
+                name_zones{i} = zone{i}.name;
+                center_zones_x{i} = str2num(zone{i}.centre.x.Text)*100/pixels_metre;
+                center_zones_y{i} = str2num(zone{i}.centre.y.Text)*100/pixels_metre;
+                boundingbox_zones_x{i} = str2num(zone{i}.boundingbox.x.Text)*100/pixels_metre;
+                boundingbox_zones_y{i} = str2num(zone{i}.boundingbox.y.Text)*100/pixels_metre;
+                boundingbox_zones_w{i} = str2num(zone{i}.boundingbox.w.Text)*100/pixels_metre;
+                boundingbox_zones_h{i} = str2num(zone{i}.boundingbox.h.Text)*100/pixels_metre;
+
+                boundingbox_zones_X{i} = boundingbox_zones_x{i} + boundingbox_zones_w{i};
+                boundingbox_zones_Y{i} = boundingbox_zones_y{i} + boundingbox_zones_h{i};
+
+                boundingbox_zones_xmin{i} = boundingbox_zones_x{i};
+                boundingbox_zones_xmax{i} = boundingbox_zones_X{i};
+                boundingbox_zones_ymin{i} = boundingbox_zones_y{i};
+                boundingbox_zones_ymax{i} = boundingbox_zones_Y{i};
+
+                xMaze_zones{i} = [boundingbox_zones_xmin{i} boundingbox_zones_xmax{i}];
+                yMaze_zones{i} = [boundingbox_zones_ymin{i} boundingbox_zones_ymax{i}];
+            end
         end
     end    
 else
@@ -384,7 +446,7 @@ pos = [xPos'; yPos']';
 art = find(sum(abs(diff(pos))>artifactThreshold,2))+1;  % remove artefacs as movement > 10cm/frame
 pos(art,:) = NaN;
 xt = linspace(0,size(pos,1)/fs,size(pos,1));            % kalman filter
-xt = timesamples;
+xt1 = timesamples;
 [t,x,y,vx,vy,ax,ay] = trajectory_kalman_filter(pos(:,1)',pos(:,2)',xt,0);
 art = find(sum(abs(diff([x y]))>artifactThreshold,2))+1;
 art = [art - 2 art - 1 art art + 1 art + 2];
@@ -392,6 +454,10 @@ x(art(:)) = NaN; y(art(:)) = NaN;
 F = fillmissing([x y],'linear');
 x = F(:,1); y = F(:,2);
 
+% Get velocity
+[~,~,~,vx,vy,ax,ay] = KalmanVel(x,y,xt,2);
+velocity = sqrt(vx.^2 + vy.^2);
+acceleration = sqrt(ax.^2 + ay.^2);
 %% Start in 0
 x = x-xMaze(1);
 y = y-yMaze(1);
@@ -403,6 +469,7 @@ boundingbox_ymax = boundingbox_ymax - yMaze(1);
 h2 = figure;
 freezeColors;
 scatter(x,y,3,t,'filled','MarkerEdgeColor','none','MarkerFaceAlpha',.5); colormap jet
+axis ij
 caxis([t(1) t(end)])
 xlabel('norm/cm'); ylabel('norm/cm'); colorbar;
 hold on;
@@ -413,12 +480,22 @@ for i=1:num_zones
     boundingbox_zones_xmax{i} = boundingbox_zones_xmax{i} - xMaze(1);
     boundingbox_zones_ymin{i} = boundingbox_zones_ymin{i} - yMaze(1);
     boundingbox_zones_ymax{i} = boundingbox_zones_ymax{i} - yMaze(1);
-    if strcmpi(apparatus_name,'Object Recognition') && ~strcmpi(zone{i}.name.Text,'OUT')
-        % Need to plot the zones as a circle
-        center = [center_zones_x{i} center_zones_y{i}];
-        radius = [boundingbox_zones_h{i}];
-        viscircles(center,radius/2);
-    end
+    
+%     try
+%         if strcmpi(apparatus_name,'Object Recognition') || strcmpi(apparatus_name,'Social Interaction') && ~strcmpi(zone{i}.name.Text,'OUT')
+%             % Need to plot the zones as a circle
+%             center = [center_zones_x{i} center_zones_y{i}];
+%             radius = [boundingbox_zones_h{i}];
+%             viscircles(center,radius/2);
+%         end
+%     catch
+%         if strcmpi(apparatus_name,'Object Recognition') || strcmpi(apparatus_name,'Social Interaction') && ~strcmpi(zone.name.Text,'OUT')
+%             % Need to plot the zones as a circle
+%             center = [center_zones_x{i} center_zones_y{i}];
+%             radius = [boundingbox_zones_h{i}];
+%             viscircles(center,radius/2);
+%         end
+%     end
         plot([boundingbox_zones_xmin{i} boundingbox_zones_xmin{i} boundingbox_zones_xmax{i} boundingbox_zones_xmax{i} boundingbox_zones_xmin{i}],[boundingbox_zones_ymin{i} boundingbox_zones_ymax{i}, boundingbox_zones_ymax{i}, boundingbox_zones_ymin{i} boundingbox_zones_ymin{i}],'b')
 end
 orxMaze = xMaze;
@@ -426,6 +503,7 @@ oryMaze = yMaze;
 xMaze = xMaze - xMaze(1);
 yMaze = yMaze - yMaze(1);
 xlim(xMaze); ylim(yMaze);
+
 
 mkdir('Behavior');
 saveas(h2,'Behavior\trajectory.png');
@@ -442,6 +520,7 @@ end
 if isempty(anyMazeTtl)
     digitalIn = getDigitalIn;
     anyMazeTtl = digitalIn.timestampsOn{anyMaze_ttl_channel};
+    anyMazeTtl_start = digitalIn.timestampsOn{1};
 end
 % match anymaze frames con ttl pulses
 if length(anyMazeTtl) == length(x)
@@ -507,7 +586,7 @@ tracking.position.x = x; % x filtered
 tracking.position.y = y; % y filtered
 tracking.position.z = [];
 tracking.description = 'AnyMaze Tracking';
-tracking.timestamps = anyMazeTtl;
+tracking.timestamps = anyMazeTtl';
 tracking.originalTimestamps = timesamples;
 tracking.folder = fbasename;
 tracking.sync.sync = sync;
@@ -522,7 +601,11 @@ tracking.avFrame.ySize = yMaze;
 % tracking.roi.roiTracking = roiTracking;
 % tracking.roi.roiLED = roiLED;
 if exist('apparatus_name','var')
+    if isempty(apparatus_name) 
+        apparatus_name = 'OpenField';
+    end
     tracking.apparatus.name = apparatus_name;
+    
 end
 tracking.apparatus.centre.x = centre_x - orxMaze(1);
 tracking.apparatus.centre.y = centre_y - oryMaze(1);
@@ -565,17 +648,38 @@ end
    
 if exist('zone','var')
     for i=1:num_zones
-        tracking.zone.name{i} = char(name_zones{i});
-        tracking.zone.centre.x{i} = center_zones_x{i};
-        tracking.zone.centre.y{i} = center_zones_y{i};
-        tracking.zone.boundingbox.x{i} = boundingbox_zones_x{i};
-        tracking.zone.boundingbox.y{i} = boundingbox_zones_y{i};
-        tracking.zone.boundingbox.w{i} = boundingbox_zones_w{i};
-        tracking.zone.boundingbox.h{i} = boundingbox_zones_h{i};      
+        try
+            tracking.zone.name{i} = char(name_zones{i});
+            tracking.zone.centre.x{i} = center_zones_x{i};
+            tracking.zone.centre.y{i} = center_zones_y{i};
+            tracking.zone.boundingbox.x{i} = boundingbox_zones_x{i};
+            tracking.zone.boundingbox.y{i} = boundingbox_zones_y{i};
+            tracking.zone.boundingbox.w{i} = boundingbox_zones_w{i};
+            tracking.zone.boundingbox.h{i} = boundingbox_zones_h{i};  
+            tracking.zone.xmin{i} = boundingbox_zones_xmin{i};
+            tracking.zone.xmax{i} = boundingbox_zones_xmax{i};
+            tracking.zone.ymin{i} = boundingbox_zones_ymin{i};
+            tracking.zone.ymax{i} = boundingbox_zones_ymax{i};
+        catch
+            tracking.zone.name{i} = char(name_zones{i}.Text);
+            tracking.zone.centre.x{i} = center_zones_x{i};
+            tracking.zone.centre.y{i} = center_zones_y{i};
+            tracking.zone.boundingbox.x{i} = boundingbox_zones_x{i};
+            tracking.zone.boundingbox.y{i} = boundingbox_zones_y{i};
+            tracking.zone.boundingbox.w{i} = boundingbox_zones_w{i};
+            tracking.zone.boundingbox.h{i} = boundingbox_zones_h{i};  
+            tracking.zone.xmin{i} = boundingbox_zones_xmin{i};
+            tracking.zone.xmax{i} = boundingbox_zones_xmax{i};
+            tracking.zone.ymin{i} = boundingbox_zones_ymin{i};
+            tracking.zone.ymax{i} = boundingbox_zones_ymax{i};
+        end
     end
 end
 
 tracking.pixelsmetre = pixels_metre;
+tracking.speed = speed; % speed from anyMaze
+tracking.velocity = velocity;% velocity computed from KalmanFilter
+tracking.acceleration = acceleration;% acceleration computed from KalmanFilter
 
 % Object Recognition
 if ~isempty(inObject1)

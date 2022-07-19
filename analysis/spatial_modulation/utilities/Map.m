@@ -229,12 +229,15 @@ else
 	map.count = Accumulate([x y],n,nBins);
 	map.time = Accumulate([x y],dt,nBins);
 	valid = map.time > minTime;
+    map.countUnSmooth = map.count';
+    map.timeUnSmooth = map.time';
 	map.count = Smooth(Interpolate2(map.x,map.y,map.count,valid,mode,maxDistance),smooth,'type',type(1:2))';
 	map.time = Smooth(Interpolate2(map.x,map.y,map.time,valid,mode,maxDistance),smooth,'type',type(1:2))';
 	if pointProcess,
+        map.zUnSmooth = map.countUnSmooth./(map.timeUnSmooth+eps);
 		map.z = map.count./(map.time+eps);
 	else
-		map.z = Accumulate([x y],z(:,2),nBins);
+		map.z = Accumulate([x y],z(:,2),nBins)';
 		map.z = Smooth(Interpolate2(map.x,map.y,map.z,valid,mode,maxDistance),smooth,'type',type(1:2)).';
 		map.z = map.z./(map.count+eps);
 	end

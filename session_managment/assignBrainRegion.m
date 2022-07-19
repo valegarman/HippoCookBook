@@ -105,7 +105,7 @@ if isnumeric(events)
         lfp_temp(:,:,e) = data(int32(events(e)+twin(1):events(e)+twin(2)),lfp.channels);
     end
 
-    lfp_avg = nanmean(lfp_temp,3)*-1;
+    lfp_avg = nanmean(lfp_temp,3);
     clear lfp data lfp_temp
     
     for ii = 1:size(lfp_avg,2)
@@ -243,7 +243,9 @@ for ii = 1:length(brainRegions_list)
 end
 
 if updateSession
-    session.(['old_brainRegions']) = session.brainRegions;
+    if isfield(session,'brainRegions')
+        session.(['old_brainRegions']) = session.brainRegions;
+    end
     session.brainRegions = brainRegions;
     save([basenameFromBasepath(pwd) '.session.mat'],'session');
 end

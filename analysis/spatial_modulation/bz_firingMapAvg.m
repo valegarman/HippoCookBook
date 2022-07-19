@@ -77,12 +77,12 @@ if isstruct(positions)
 end
 
 % number of conditions
-  if iscell(positions)
-     conditions = length(positions); 
-  elseif isvector(positions)
-     conditions = 1;
-  end
-  %%% TODO: conditions label
+if iscell(positions)
+ conditions = length(positions); 
+elseif isvector(positions)
+ conditions = 1;
+end
+%%% TODO: conditions label
   
 %% Calculate
 % Erase positions below speed threshold

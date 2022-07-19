@@ -376,8 +376,29 @@ for ii = 1:length(UID)
     axis tight
     xlabel('Time (s)'); ylabel('Rate (SD)');
     
-    % ripples 
+    % avCCG per region
     subplot(5,5,12)
+    hold on
+    b = bar(averageCCG.brainRegionCCG.listOfRegionsID, nanmean(averageCCG.brainRegionCCG.absCcgIndexRegion));
+    b.FaceColor = 'flat';
+    b.FaceAlpha = 0.5;
+    b.EdgeColor = 'none';
+    b.CData(:,:) = hsv(length(averageCCG.brainRegionCCG.listOfRegionsID));
+    ylabel('CCG Index');
+    set(gca,'TickDir','out','XTick',averageCCG.brainRegionCCG.listOfRegionsID,'XTickLabel',averageCCG.brainRegionCCG.listOfRegions,'XTickLabelRotation',45);                  
+    
+    if showTagCells
+        b.CData(:,:) = 0.7;
+        b2 = bar(averageCCG.brainRegionCCG.listOfRegionsID+0.1, averageCCG.brainRegionCCG.absCcgIndexRegion(UID(ii),:));
+        b2.FaceColor = 'flat';
+        b2.FaceAlpha = 0.5;
+        b2.EdgeColor = 'none';
+        b2.CData(:,:) = hsv(length(averageCCG.brainRegionCCG.listOfRegionsID));
+        ylabel('CCG Index');
+    end
+    
+    % ripples 
+    subplot(5,5,13)
     hold on
     t_win = ripplesResponses.timestamps > -0.25 & ripplesResponses.timestamps < 0.25;
     plotFill(ripplesResponses.timestamps(t_win),ripplesResponses.responsecurveZSmooth(all_ww,t_win),'color',ww_color,'style','filled');
@@ -406,7 +427,7 @@ for ii = 1:length(UID)
     xlabel('Ripple center (s)'); ylabel('Rate (SD)');
     
     % ripple phase
-    subplot(5,5,13)
+    subplot(5,5,14)
     hold on
     x_wave = 0:0.01:4*pi;
     y_wave = cos(x_wave)*2;
@@ -434,7 +455,7 @@ for ii = 1:length(UID)
     set(gca,'XTick',[0:2*pi:4*pi],'XTickLabel',{'0', '2\pi', '4\pi'});
 
     % theta
-    subplot(5,5,14)
+    subplot(5,5,15)
     hold on
     x_wave = 0:0.01:4*pi;
     y_wave = cos(x_wave)*2;
@@ -462,7 +483,7 @@ for ii = 1:length(UID)
             
     
     % lgamma
-    subplot(5,5,15)
+    subplot(5,5,16)
     hold on
     x_wave = 0:0.01:4*pi;
     y_wave = cos(x_wave)*2;
@@ -489,7 +510,7 @@ for ii = 1:length(UID)
     set(gca,'XTick',[0:2*pi:4*pi],'XTickLabel',{'0', '2\pi', '4\pi'});
     
     % hgamma
-    subplot(5,5,16)
+    subplot(5,5,17)
     hold on
     x_wave = 0:0.01:4*pi;
     y_wave = cos(x_wave)*2;
@@ -516,7 +537,7 @@ for ii = 1:length(UID)
     set(gca,'XTick',[0:2*pi:4*pi],'XTickLabel',{'0', '2\pi', '4\pi'});
     
     % speed
-    subplot(5,5,21)
+    subplot(5,5,22)
     if ~isempty(speedCorr)
         if size(speedVals,1) ~= length(all_nw)
             speedVals = speedVals';
@@ -546,7 +567,7 @@ for ii = 1:length(UID)
     end
     
     if ~isempty(behavior)
-        subplot(5,5,17)
+        subplot(5,5,18)
         hold on
         t_win = behavior.psth_reward.timestamps > -2 & behavior.psth_reward.timestamps < 2;
         plotFill(behavior.psth_reward.timestamps(t_win),behavior.psth_reward.responsecurveZSmooth(all_nw,t_win),'color',nw_color,'style','filled');
@@ -558,7 +579,7 @@ for ii = 1:length(UID)
         axis tight
         xlabel('Reward time (s)'); ylabel('Rate (SD)');
 
-        subplot(5,5,18)
+        subplot(5,5,19)
         hold on
         t_win = behavior.psth_intersection.timestamps > -2 & behavior.psth_intersection.timestamps < 2;
         plotFill(behavior.psth_intersection.timestamps(t_win),behavior.psth_intersection.responsecurveZSmooth(all_nw,t_win),'color',nw_color,'style','filled');
@@ -570,7 +591,7 @@ for ii = 1:length(UID)
         axis tight
         xlabel('Intersection time (s)'); ylabel('Rate (SD)');
 
-        subplot(5,5,22)
+        subplot(5,5,23)
         hold on
         t_win = behavior.psth_startPoint.timestamps > -2 & behavior.psth_startPoint.timestamps < 2;
         plotFill(behavior.psth_startPoint.timestamps(t_win),behavior.psth_startPoint.responsecurveZSmooth(all_nw,t_win),'color',nw_color,'style','filled');
@@ -582,7 +603,7 @@ for ii = 1:length(UID)
         axis tight
         xlabel('Start point time (s)'); ylabel('Rate (SD)');
     else
-        subplot(5,5,17)
+        subplot(5,5,18)
         axis off
         title('No psth behaviour data','FontWeight','normal');
     end
