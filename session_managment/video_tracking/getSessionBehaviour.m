@@ -89,6 +89,7 @@ startPoint = []; rReward = []; lReward = []; startDelay = []; endDelay = []; int
 startPointTrials = []; endDelayTrials = []; visitedArm = []; choice = []; expectedArm = [];
 recordings = []; recordingsTrial = []; description = [];
 direction = []; trialsDirection = []; events = [];
+subSessionMask = [];
 
 try
     for ii = 1:size(efields,1)
@@ -102,7 +103,7 @@ end
 
 % SubSessionsMask
 for ii=1:size(efields,1)
-    behaviorTemp.(efields{ii}).events.subSessionMask = tracking.events.subSessionsMask == ii;
+    behaviorTemp.(efields{ii}).events.subSessionMask = (tracking.events.subSessionsMask == ii)*ii;
     behaviorTemp.(efields{ii}).events.subSessionMask(behaviorTemp.(efields{ii}).events.subSessionMask == 0) = [];
 end
 
@@ -112,6 +113,7 @@ if size(tracking.events.subSessions,1) == size(efields,1)
         preRec = tracking.events.subSessions(ii,1);
         timestamps = [timestamps; behaviorTemp.(efields{ii}).timestamps + preRec];
 %         timestamps{ii} = behaviorTemp.(efields{ii}).timestamps + preRec;
+        subSessionMask = [subSessionMask;behaviorTemp.(efields{ii}).events.subSessionMask];
         x = [x; behaviorTemp.(efields{ii}).position.x];
         y = [y; behaviorTemp.(efields{ii}).position.y];
 %         x{ii} = behaviorTemp.(efields{ii}).position.x;
@@ -127,10 +129,10 @@ if size(tracking.events.subSessions,1) == size(efields,1)
             y_tail = [y_tail; behaviorTemp.(efields{ii}).tailposition.y];
         end
         if isfield(behaviorTemp.(efields{ii}),'zone')
-            zone = behaviorTemp.(efields{ii}).zone;
+            zone{ii} = behaviorTemp.(efields{ii}).zone;
         end
             
-        events = behaviorTemp.(efields{ii}).events;
+        events{ii} = behaviorTemp.(efields{ii}).events;
         
         lin = [lin; behaviorTemp.(efields{ii}).position.lin];
         try
@@ -167,9 +169,9 @@ count = 1;
 for ii = 1:length(efields)
 %         maps{count}(:,1) = timestamps(direction==directionList(jj) & recMask==ii);
 %         maps{count}(:,2) = lin(direction==directionList(jj) & recMask==ii);
-    maps{count}(:,1) = timestamps;
-    maps{count}(:,2) = x;
-    maps{count}(:,3) = y;
+    maps{count}(:,1) = timestamps(subSessionMask == ii);
+    maps{count}(:,2) = x(subSessionMask == ii);
+    maps{count}(:,3) = y(subSessionMask == ii);
     count = count + 1;
 end
 

@@ -57,7 +57,7 @@ end
 if ~isempty(exclude)
     listOfAnalysis(ismember(listOfAnalysis, exclude)) = [];
 end
-session = loadSession;
+session = sessionTemplate(pwd,'showGUI',false);
 session.channels = 1:session.extracellular.nChannels;
 save([basepath filesep session.general.name,'.session.mat'],'session','-v7.3');
 
@@ -73,6 +73,7 @@ try
     getuLEDsPulses();
 end
 cd(basepath);
+
 % SPIKES SUMMARY
 if any(ismember(listOfAnalysis,'spikes'))
     try
@@ -332,12 +333,23 @@ end
 % THETA AND GAMMA PHASE MODULATION
 if any(ismember(listOfAnalysis,'thetaModulation'))
     try
-        thetaEpochs = detectThetaEpochs;
+        thetaEpochs = detectThetaEpochs('force',true);
         computePhaseModulation('skipStimulationPeriods',skipStimulationPeriods);
     catch
         warning('It has not been possible to run theta and gamma mod code...');
     end
 end
+
+if any(ismember(listOfAnalysis,'lfpAnalysis'))
+    try
+        computePowerSpectrum();
+        computeCohgram('channel2',13);
+    catch
+        
+    end
+end
+
+
 
 % TMAZEBEHAVIOUR AND LINEARMAZEBEHAVIOUR
 % if any(ismember(listOfAnalysis,'tMazeBehaviour')) || any(ismember(listOfAnalysis,'linearMazeBehaviour'))
@@ -365,9 +377,10 @@ if any(ismember(listOfAnalysis,'openFieldBehaviour'))
         behaviour = getSessionBehaviour;
         % PLACE CELLS SUMMARY
         spikes = loadSpikes('getWaveformsFromDat',false);
-        nBins = (tracking.apparatus{1}.boundingbox.xmax - tracking.apparatus{1}.boundingbox.xmin)/pixelsPerCm;
-        firingMaps = firingMapAvg(behaviour,spikes,'nBins',nBins,'saveMat',true);
+        firingMaps = firingMapAvg_pablo(behaviour,spikes,'pixelsPerCm',pixelsPerCm,'saveMat',true);
         placeFieldStats = findPlaceFields2D('firingMaps',firingMaps);
+        spatialModulation = getSpatialModulation2D('force',true);
+        
 
     catch
         warning('It has not been possible to tun the behaviour code...');

@@ -130,6 +130,7 @@ try
     h1 = figure;
     plot(tracking.position.x, tracking.position.y, 'Color', [0.5 0.5 0.5])
     hold on;
+    axis ij;
     for ii = 1:length(tracking.zone.name)
         rectangle('Position',[tracking.zone.xmin{ii} tracking.zone.ymin{ii} tracking.zone.xmax{ii}-tracking.zone.xmin{ii} tracking.zone.ymax{ii}-tracking.zone.ymin{ii}],'EdgeColor','b');
         hold on;

@@ -112,6 +112,19 @@ indexNewSession('basepath',bpath,'promt_hippo_layers',true,'analogChannelsList',
 bpath = 'D:\data\fPv4\fPv4_210311_sess4';
 bpath = 'Z:\data\fPv4\fPv4_210311_sess4';
 indexNewSession('basepath',bpath,'promt_hippo_layers',true,'analogChannelsList',1,'bazler_ttl_channel',1,'manual_analog_pulses_threshold',true,'SWChannel',18);
-
-
 featureExtraction('SWChannel',48);
+
+
+%% SOCIAL PROJECT
+bpath = 'D:\FLR\FL4\FL4_080322_sess1';
+indexNewSession_pablo('basepath',bpath,'hippoCookBook_path','SocialProject','promt_hippo_layers',true,'anymaze_ttl_channel',2);
+
+
+
+
+
+
+
+
+
+
