@@ -51,6 +51,7 @@ if ~isempty(exclude)
     listOfAnalysis(ismember(listOfAnalysis, exclude)) = [];
 end
 session = loadSession;
+session = sessionTemplate(session);
 session.channels = 1:session.extracellular.nChannels;
 save([basepath filesep session.general.name,'.session.mat'],'session','-v7.3');
 
