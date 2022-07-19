@@ -279,6 +279,14 @@ analogChannelsList = [];
 computeSessionSummary_pablo('digitalChannelsList',digitalChannelsList,'analogChannelsList',analogChannelsList);
 batch_preprocessSession_pablo('basepath','D:\FLR\FL4','analysisPath','C:\FL4','cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'anymaze_ttl_channel',2);
 
+basepath = 'D:\FLR\FL4\FL4_080322_sess1';
+computeSessionSummary_pablo('basepath',basepath,'analogChannelsList',[],'digitalChannelsList',[]);
+
+basepath = 'D:\FLR\FL4\FL4_090322_sess2';
+computeSessionSummary_pablo('basepath',basepath,'analogChannelsList',[],'digitalChannelsList',[]);
+
+batch_sessionSummary_pablo('basepath','D:\FLR\FL4','analogChannelsList',[],'digitalChannelsList',[]);
+
 %% FL3
 batch_changeFilesName('basepath','Z:\FLR\FL3','generalPath','Z:\FLR','socialParadigm',true);
 % updateExpFolder('Z:\FLR\FL5','D:\FLR\FL5');
@@ -296,6 +304,24 @@ cd(basepath);
 arrangeSessionFolder;
 createFiles('basepath',basepath);
 batch_preprocessSession_pablo('basepath','D:\FLR\FL5','analysisPath','C:\FL5','cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'anymaze_ttl_channel',2);
+
+
+%% HPS22
+
+%% HPS23
+basepath = 'F:\data\HPS23';
+createFiles('basepath',basepath);
+batch_preprocessSession_pablo('basepath','F:\data\HPS23','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'anymaze_ttl_channel',2);
+
+basepath = 'F:\data\HPS23\HPS23_090621_sess9';
+computeSessionSummary_pablo('basepath',basepath,'analogChannelsList',[],'digitalChannelsList',[]);
+
+%% HPR21409
+
+basepath = 'I:\HPR21409\HPR21409_150921_sess1';
+createFiles('basepath',basepath);
+
+
 
 
 
