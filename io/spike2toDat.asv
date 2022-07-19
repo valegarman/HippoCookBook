@@ -78,16 +78,6 @@ if createLFP
         size(data,2),1, sr/srLFP);
 end
 
-% saving extraction info
-spike2tDatLog.channels = channels;
-spike2tDatLog.channels_group = channels_group;
-spike2tDatLog.nChannels = length(channels);
-spike2tDatLog.sr = sr;
-spike2tDatLog.filename = filename;
-spike2tDatLog.basepath = basepath;
-
-save([filename 'spike2tDatLog.generalInfo.mat'],'spike2tDatLog');
-
 cd(prevPath);
 end
 
