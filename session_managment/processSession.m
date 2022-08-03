@@ -44,6 +44,7 @@ addParameter(p,'bazler_ttl_channel',[],@isnumeric);
 addParameter(p,'forceAnalogPulses',false,@islogical);
 addParameter(p,'tracking_pixel_cm',0.1149,@isnumeric);
 addParameter(p,'excludeAnalysis',[]); % 
+addParameter(p,'useCSD_for_theta_detection',true,@islogical);
 
 parse(p,varargin{:})
 
@@ -65,6 +66,7 @@ bazler_ttl_channel = p.Results.bazler_ttl_channel;
 forceAnalogPulses = p.Results.forceAnalogPulses;
 tracking_pixel_cm = p.Results.tracking_pixel_cm;
 excludeAnalysis = p.Results.excludeAnalysis;
+useCSD_for_theta_detection = p.Results.useCSD_for_theta_detection;
 
 % Deal with inputs
 prevPath = pwd;
@@ -72,6 +74,9 @@ cd(basepath);
 
 for ii = 1:length(excludeAnalysis)
     excludeAnalysis{ii} = num2str(excludeAnalysis{ii});
+end
+if length(excludeAnalysis) == 0
+    excludeAnalysis = num2str(excludeAnalysis);
 end
 excludeAnalysis = lower(excludeAnalysis);
 %% 1. Runs sessionTemplate
@@ -107,7 +112,7 @@ end
 
 
 %% 2. Remove previous cellinfo.spikes.mat and computes spikes again (manual clustered)
-if ~any(ismember(excludeAnalysis, {'2',lower('loadSpikes'})))
+if ~any(ismember(excludeAnalysis, {'2',lower('loadSpikes')}))
     disp('Loading Spikes...')
     session = loadSession;
     if force_loadingSpikes
@@ -179,7 +184,7 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true);
 
     % 8.2 Ripples
-    ripples = c('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true);
+    ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true);
     psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true);
 
     % 8.3 Theta intervals
