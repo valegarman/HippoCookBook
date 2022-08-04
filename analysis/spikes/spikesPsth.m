@@ -278,7 +278,7 @@ end
 
 % PLOTS
 % 1. Rasters plot
-if rasterPlot && any(~isnan(psth.responsecurve))
+if rasterPlot && any(any(~isnan(psth.responsecurve)))
     t = psth.timestamps;
     st = timestamps;
     if length(st) > 5000 % if more than 5000
@@ -327,7 +327,7 @@ if rasterPlot && any(~isnan(psth.responsecurve))
     end
 end
 % 2. Rate plot
-if ratePlot && any(~isnan(psth.responsecurve))
+if ratePlot && any(any(~isnan(psth.responsecurve)))
     t = psth.timestamps;
     figure
     for ii = 1:nConditions;
