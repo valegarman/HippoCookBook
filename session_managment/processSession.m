@@ -41,7 +41,6 @@ addParameter(p,'analog_optogenetic_channels',[],@isnumeric);
 addParameter(p,'promt_hippo_layers',false,@islogical);
 addParameter(p,'manual_analog_pulses_threshold',false,@islogical);
 addParameter(p,'bazler_ttl_channel',[],@isnumeric);
-addParameter(p,'forceAnalogPulses',false,@islogical);
 addParameter(p,'tracking_pixel_cm',0.1149,@isnumeric);
 addParameter(p,'excludeAnalysis',[]); % 
 addParameter(p,'useCSD_for_theta_detection',true,@islogical);
@@ -63,7 +62,6 @@ analog_optogenetic_channels = p.Results.analog_optogenetic_channels;
 promt_hippo_layers = p.Results.promt_hippo_layers;
 manual_analog_pulses_threshold = p.Results.manual_analog_pulses_threshold;
 bazler_ttl_channel = p.Results.bazler_ttl_channel;
-forceAnalogPulses = p.Results.forceAnalogPulses;
 tracking_pixel_cm = p.Results.tracking_pixel_cm;
 excludeAnalysis = p.Results.excludeAnalysis;
 useCSD_for_theta_detection = p.Results.useCSD_for_theta_detection;
@@ -126,7 +124,7 @@ end
 
 %% 3. Analog pulses detection
 if ~any(ismember(excludeAnalysis, {'3',lower('cureAnalogPulses')}))
-    if forceAnalogPulses || isempty(dir([session.general.name,'_original.dat']))
+    if force_analogPulsesDetection || isempty(dir([session.general.name,'_original.dat']))
         disp('Getting analog Pulses...')
         pulses = getAnalogPulses('analogChannelsList',analog_optogenetic_channels,'manualThr',manual_analog_pulses_threshold,'overwrite',force_analogPulsesDetection); % 1-index
     else
