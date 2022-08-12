@@ -478,7 +478,7 @@ optogeneticResponses.responseMetrics = responseMetrics;
 if saveMat
     disp(' Saving results...');
     filename = split(pwd,filesep); filename = filename{end};
-    save([filename '.optogeneticResponse.cellinfo.mat'],'optogeneticResponses');
+    save([filename '.optogeneticResponse.cellinfo.mat'],'optogeneticResponses','-v7.3');
 end
 
 if saveEventsFile
