@@ -13,7 +13,6 @@ batch_preprocessSession('basepath','X:\data\fCr1','analysisPath','F:\fCr1','clea
 
 batch_preprocessSession('basepath','G:\data\fPv4','cleanArtifacts',({65,[]}),'analogChannelsList',65,'digitalChannelsList',0);
 
-<<<<<<< HEAD
 batch_preprocessSession('basepath','D:\Dropbox\DATA\anna_data\NY14');
 
 batch_preprocessSession('basepath','J:\fId3','analysisPath','C:\data\fId3','cleanArtifacts',({[],1}),'analogChannelsList',[],'digitalChannelsList',1,'bazler_ttl_channel',[]);
@@ -24,7 +23,6 @@ preprocessSession('basepath',pwd,'analogChannelsList',analogChannelsList,'spikeS
 
 =======
 batch_preprocessSession('basepath','E:\data\NY13')
->>>>>>> 6284d58f5ed7000f94defdc48a9049f45f9d9f64
 
 %3% Computing summary
 batch_sessionSummary('basepath','J:\fId3','analogChannelsList',[],'digitalChannelsList',1);
