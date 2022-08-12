@@ -18,7 +18,11 @@ batch_sessionSummary('basepath','G:\data\fPv4','cleanArtifacts',({65,[]}),'analo
 % 3% CLEAN SESSIONS MANUALLY BY PHY
 
 % 4% Processs individual sessions by by 'processSession'. Example:
+<<<<<<< HEAD
 processSession('digital_optogenetic_channels',[],'analog_optogenetic_channels',1,'promt_hippo_layers',true,'manual_analog_pulses_threshold',false);
+=======
+processSession('digital_optogenetic_channels',[],'analog_optogenetic_channels',1,'promt_hippo_layers',true,'manual_analog_pulses_threshold',true,'bazler_ttl_channel',[]);
+>>>>>>> 69e64621ff0ef7e79fae84f0eed3f39efbe07d4f
 
 % 5% Index session
 indexNewSession;
