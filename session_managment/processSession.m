@@ -142,7 +142,7 @@ end
 %% 4. Spike Features
 % 4.1 Light responses, if available
 if ~any(ismember(excludeAnalysis, {'4',lower('spikesFeatures')}))
-    optogeneticResponses = getOptogeneticResponse('numRep',500,'force',true);
+    optogeneticResponses = getOptogeneticResponse('numRep',100,'force',true);
     % 4.2 ACG and waveform
     spikeFeatures;
 end
