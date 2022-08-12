@@ -125,5 +125,5 @@ spikeFeatures('skipStimulationPeriods', true);
 
 file = dir([basenameFromBasepath(pwd),'.optogeneticPulses.events.mat']); load(file.name);
 SleepScoreMaster(pwd,'noPrompts',true,'ignoretime',optoPulses.stimulationEpochs, 'overwrite', true);
-% TheStateEditor_temp(session.general.name);
+TheStateEditor(session.general.name);
 bz_ThetaStates(pwd);
