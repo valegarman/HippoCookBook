@@ -108,7 +108,7 @@ if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))
     plotProbe('force',true); % choose probe
 end
 
-keyboard;
+
 %% 2. Remove previous cellinfo.spikes.mat and computes spikes again (manual clustered)
 if ~any(ismember(excludeAnalysis, {'2',lower('loadSpikes')}))
     disp('Loading Spikes...')
