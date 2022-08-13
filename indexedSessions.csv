@@ -50,3 +50,4 @@ fpv4_210319_sess12,fpv4,fpv4\fpv4_210319_sess12,c57b1/6,pv/ai32,"105µm (125µm)
 fcr1_220304_sess6,fcr1,fcr1\fcr1_220304_sess6,c57b1/6,vip/cr/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,48,PTLp CA1sp CA1so CA1slm CA1sr CA3,InterneuronsLibrary VIPcortex
 fcck1_220203_sess4,fcck1,fcck1\fcck1_220203_sess4,c57b1/6,vip/cck/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,55,PTLp CA1sp CA1so CA1slm CA1sr CA3,InterneuronsLibrary VIPcortex
 fcck1_220208_sess7,fcck1,fcck1\fcck1_220208_sess7,c57b1/6,vip/cck/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,62,PTLp CA1sp CA1so CA1slm CA1sr CA3 DG,InterneuronsLibrary VIPcortex
+fcr1_220303_sess5,fcr1,fcr1\fcr1_220303_sess5,c57b1/6,vip/cr/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,34,CA1sp PTLp CA1so CA3 CA1sr CA1slm,InterneuronsLibrary VIPcortex
