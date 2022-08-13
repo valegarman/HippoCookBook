@@ -16,9 +16,8 @@ for ii = 1:length(sessionsTable.SessionName)
         try
 
             %%% your code goes here...
-            clear session brainRegions
+            clear session
             session = loadSession;
-            fn = fieldnames(session.brainRegions);
             brainRegions = cell(0);
             for jj = 1:length(fn)
                 brainRegions{1,length(brainRegions)+1} = fn{jj};
@@ -26,7 +25,6 @@ for ii = 1:length(sessionsTable.SessionName)
             end    
             brainRegions(end) = [];
             
-            sessionsTable.brainRegions{ii} = [brainRegions{:}];
             
             %%%
             

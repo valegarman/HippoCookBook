@@ -1,50 +1,52 @@
 SessionName,Subject,Path,Strain,GeneticLine,Optogenetics,Behavior,numCells,brainRegions,Project
-fnkx9_200818_sess2,fnkx9,fNkx9\fNkx9_200818_sess2,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,66,PTLp CA1,InterneuronsLibrary
-fnkx8_200911_sess19,fnkx8,fNkx8\fNkx8_200911_sess19,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,96,CA1 CA3,InterneuronsLibrary
-fnkx8_200817_sess1,fnkx8,fNkx8\fNkx8_200817_sess1,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,26,CA1 CA3,InterneuronsLibrary
-fnkx8_200818_sess2,fnkx8,fNkx8\fNkx8_200818_sess2,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,40,CA1 CA3,InterneuronsLibrary
-fnkx8_200819_sess3,fnkx8,fNkx8\fNkx8_200819_sess3,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,43,CA1 CA3,InterneuronsLibrary
-fnkx8_200825_sess7,fnkx8,fNkx8\fNkx8_200825_sess7,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,78,CA1 CA3,InterneuronsLibrary
-fnkx8_200826_sess8,fnkx8,fNkx8\fNkx8_200826_sess8,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,71,CA1 CA3,InterneuronsLibrary
-fnkx8_200828_sess10,fnkx8,fNkx8\fNkx8_200828_sess10,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,68,CA1 CA3,InterneuronsLibrary
-fnkx9_200825_sess7,fnkx9,fNkx9\fNkx9_200825_sess7,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,66,CA1 CA3,InterneuronsLibrary
-fnkx9_200826_sess8,fnkx9,fNkx9\fNkx9_200826_sess8,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,47,CA1 CA3,InterneuronsLibrary
-fnkx9_200827_sess9,fnkx9,fNkx9\fNkx9_200827_sess9,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,30,CA1 CA3,InterneuronsLibrary
-fnkx9_200828_sess10,fnkx9,fNkx9\fNkx9_200828_sess10,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,26,CA1 CA3,InterneuronsLibrary
-fnkx9_200909_sess17,fnkx9,fNkx9\fNkx9_200909_sess17,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,46,CA1 CA3,InterneuronsLibrary
-fnkx8_200831_sess11,fnkx8,fNkx8\fNkx8_200831_sess11,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,75,CA1 CA3,InterneuronsLibrary
-fnkx8_200901_sess12,fnkx8,fNkx8\fNkx8_200901_sess12,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,95,CA1 CA3,InterneuronsLibrary
-fnkx8_200903_sess14,fnkx8,fNkx8\fNkx8_200903_sess14,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,93,CA1 CA3,InterneuronsLibrary
-fnkx8_200902_sess13,fnkx8,fNkx8\fNkx8_200902_sess13,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,84,CA1 CA3,InterneuronsLibrary
-fnkx8_200910_sess18,fnkx8,fNkx8\fNkx8_200910_sess18,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,123,CA1 CA3,InterneuronsLibrary
-fnkx9_200821_sess5,fnkx9,fNkx9\fNkx9_200821_sess5,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,32,PTLp CA1 CA3,InterneuronsLibrary
-fnkx9_200824_sess6,fnkx9,fNkx9\fNkx9_200824_sess6,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,40,CA1 CA3,InterneuronsLibrary
-fnkx11_201029_sess11,fnkx11,fNkx11\fNkx11_201029_sess11,c57b1/6,id2/nkx2.1/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,44,CA1 CA3,InterneuronsLibrary
-fnkx11_201030_sess12,fnkx11,fNkx11\fNkx11_201030_sess12,c57b1/6,id2/nkx2.1/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,40,CA1 CA3,InterneuronsLibrary
-fnkx8_200908_sess16,fnkx8,fNkx8\fNkx8_200908_sess16,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,39,CA1 CA3,InterneuronsLibrary
-fnkx11_201103_sess14,fnkx11,fNkx11\fNkx11_201103_sess14,c57b1/6,id2/nkx2.1/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,19,CA1 CA3,InterneuronsLibrary
-fnkx11_201104_sess15,fnkx11,fNkx11\fNkx11_201104_sess15,c57b1/6,id2/nkx2.1/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,18,CA1 CA3,InterneuronsLibrary
-fnkx11_201110_sess19,fnkx11,fNkx11\fNkx11_201110_sess19,c57b1/6,id2/nkx2.1/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,24,CA1 CA3,InterneuronsLibrary
-fnkx11_201015_sess1,fnkx11,fNkx11\fNkx11_201015_sess1,c57b1/6,id2/nkx2.1/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,30,PTLp CA1,InterneuronsLibrary
-fsst1_190531_sess32,fsst1,fSst1\fSst1_190531_sess32,c57b1/6,sst/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,61,CA1,InterneuronsLibrary
+fnkx9_200818_sess2,fnkx9,fNkx9\fNkx9_200818_sess2,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,66,PTLp CA1sp CA1so CA1slm CA1sr CA3 DG,InterneuronsLibrary
+fnkx8_200911_sess19,fnkx8,fNkx8\fNkx8_200911_sess19,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,96,PTLp CA1sp CA1sr CA1slm CA3 DG,InterneuronsLibrary
+fnkx8_200817_sess1,fnkx8,fNkx8\fNkx8_200817_sess1,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,26,PTLp CA1so CA1sp CA1sr CA1slm CA3 DG,InterneuronsLibrary
+fnkx8_200818_sess2,fnkx8,fNkx8\fNkx8_200818_sess2,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,40,PTLp CA1sp CA1sr CA1so CA1slm CA3 DG,InterneuronsLibrary
+fnkx8_200819_sess3,fnkx8,fNkx8\fNkx8_200819_sess3,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,43,PTLp CA1so CA1sp CA1sr CA1slm CA3 DG,InterneuronsLibrary
+fnkx8_200825_sess7,fnkx8,fNkx8\fNkx8_200825_sess7,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,78,PTLp CA1sp CA1so CA1sr CA1slm CA3 DG,InterneuronsLibrary
+fnkx8_200826_sess8,fnkx8,fNkx8\fNkx8_200826_sess8,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,71,PTLp CA1sp CA1sr CA1slm CA3 DG,InterneuronsLibrary
+fnkx8_200828_sess10,fnkx8,fNkx8\fNkx8_200828_sess10,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,68,PTLp CA1sp CA1so CA1sr CA1slm CA3 DG,InterneuronsLibrary
+fnkx9_200825_sess7,fnkx9,fNkx9\fNkx9_200825_sess7,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,66,PTLp CA1sp CA1so CA3 DG CA1slm CA1sr,InterneuronsLibrary
+fnkx9_200826_sess8,fnkx9,fNkx9\fNkx9_200826_sess8,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,47,PTLp CA1sp CA3 DG CA1slm CA1sr,InterneuronsLibrary
+fnkx9_200827_sess9,fnkx9,fNkx9\fNkx9_200827_sess9,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,30,PTLp CA1sp CA1so CA3 DG CA1slm CA1sr,InterneuronsLibrary
+fnkx9_200828_sess10,fnkx9,fNkx9\fNkx9_200828_sess10,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,26,PTLp CA1sp CA1so CA3 DG CA1slm CA1sr,InterneuronsLibrary
+fnkx9_200909_sess17,fnkx9,fNkx9\fNkx9_200909_sess17,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,46,PTLp CA1so CA1sp CA1sr CA1slm CA3 DG,InterneuronsLibrary
+fnkx8_200831_sess11,fnkx8,fNkx8\fNkx8_200831_sess11,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,75,PTLp CA1sp CA1so DG CA3 CA1slm CA1sr,InterneuronsLibrary
+fnkx8_200901_sess12,fnkx8,fNkx8\fNkx8_200901_sess12,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,95,PTLp CA1sp CA1so CA1slm CA1sr CA3 DG,InterneuronsLibrary
+fnkx8_200903_sess14,fnkx8,fNkx8\fNkx8_200903_sess14,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,93,PTLp CA1sp CA1so CA3 DG CA1slm CA1sr,InterneuronsLibrary
+fnkx8_200902_sess13,fnkx8,fNkx8\fNkx8_200902_sess13,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,84,PTLp CA1so CA1sp CA1sr CA1slm CA3 DG,InterneuronsLibrary
+fnkx8_200910_sess18,fnkx8,fNkx8\fNkx8_200910_sess18,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,123,PTLp CA1sp CA1so CA3 DG CA1slm CA1sr,InterneuronsLibrary
+fnkx9_200821_sess5,fnkx9,fNkx9\fNkx9_200821_sess5,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,32,PTLp CA1so CA1sp CA3 DG CA1slm CA1sr,InterneuronsLibrary
+fnkx9_200824_sess6,fnkx9,fNkx9\fNkx9_200824_sess6,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,40,PTLp CA1sp CA1so CA3 DG CA1slm CA1sr,InterneuronsLibrary
+fnkx11_201029_sess11,fnkx11,fNkx11\fNkx11_201029_sess11,c57b1/6,id2/nkx2.1/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,44,PTLp CA1so CA1sp CA1sr CA1slm CA3 DG,InterneuronsLibrary
+fnkx11_201030_sess12,fnkx11,fNkx11\fNkx11_201030_sess12,c57b1/6,id2/nkx2.1/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,40,PTLp CA1sp CA1so CA1slm CA3 DG,InterneuronsLibrary
+fnkx8_200908_sess16,fnkx8,fNkx8\fNkx8_200908_sess16,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,39,PTLp CA1so CA1sp CA1sr CA1slm CA3 DG,InterneuronsLibrary
+fnkx11_201103_sess14,fnkx11,fNkx11\fNkx11_201103_sess14,c57b1/6,id2/nkx2.1/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,19,PTLp CA1sp CA1so CA1slm CA3 DG,InterneuronsLibrary
+fnkx11_201104_sess15,fnkx11,fNkx11\fNkx11_201104_sess15,c57b1/6,id2/nkx2.1/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,18,PTLp CA1sp CA1so CA1slm CA1sr CA3 DG,InterneuronsLibrary
+fnkx11_201110_sess19,fnkx11,fNkx11\fNkx11_201110_sess19,c57b1/6,id2/nkx2.1/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,24,PTLp CA1sp CA1so CA3 DG CA1slm CA1sr,InterneuronsLibrary
+fnkx11_201015_sess1,fnkx11,fNkx11\fNkx11_201015_sess1,c57b1/6,id2/nkx2.1/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,30,PTLp CA1sp CA1so CA1slm CA1sr CA3 DG,InterneuronsLibrary
+fsst1_190531_sess32,fsst1,fSst1\fSst1_190531_sess32,c57b1/6,sst/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,61,CA1sp CA1so,InterneuronsLibrary
 fsst1_190603_sess33,sst1,fSst1\fSst1_190603_sess33,c57b1/6,sst/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,73,CA1,InterneuronsLibrary
-fsst1_190606_sess36,fsst1,fSst1\fSst1_190606_sess36,c57b1/6,sst/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,42,CA1,InterneuronsLibrary
-fpv3_210305_sess5,fpv3,fPv3\fPV3_210305_sess5,c57b1/6,pv/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,17,CA1 CA3,InterneuronsLibrary
-fsst1_190604_sess34,fsst1,fSst1\fSst1_190604_sess34,c57b1/6,sst/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,53,CA1,InterneuronsLibrary
-fpv3_210304_sess4,fpv3,fPv3\fPV3_210304_sess4,c57b1/6,pv/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,22,CA1 CA3,InterneuronsLibrary
-fpv3_210301_sess1,fpv3,fPv3\fPV3_210301_sess1,c57b1/6,pv/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,16,PTLp CA1 CA3,InterneuronsLibrary
-fnkx8_200915_sess21,fnkx8,fNkx8\fNkx8_200915_sess21,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,83,CA1 CA3,InterneuronsLibrary
-fpv4_210308_sess1,fpv4,fPv4\fPv4_210308_sess1,c57b1/6,pv/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,71,PTLp CA1 CA3,InterneuronsLibrary
-fpv4_210310_sess3,fpv4,fPv4\fPv4_210310_sess3,c57b1/6,pv/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,58,PTLp CA1 CA3,InterneuronsLibrary
-fnkx8_200909_sess17,fnkx8,fnkx8\fnkx8_200909_sess17,c57b1/6,id2/dlx/ai80,"105µm (125µm), NA 0.22 etched cone shaped (Thorlabs, FG105LCA) ",tmaze,49,CA1 CA3,InterneuronsLibrary
-fpv4_210309_sess2,fpv4,fpv4\fpv4_210309_sess2,c57b1/6,pv/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,59,PTLp CA1 CA3,InterneuronsLibrary
-fnkx11_201016_sess2,fnkx11,fnkx11\fnkx11_201016_sess2,c57b1/6,id2/nkx2.1/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,42,PTLp CA1,InterneuronsLibrary
-fnkx11_201019_sess3,fnkx11,fnkx11\fnkx11_201019_sess3,c57b1/6,id2/nkx2.1/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,23,PTLp CA1,InterneuronsLibrary
-fnkx11_201022_sess6,fnkx11,fnkx11\fnkx11_201022_sess6,c57b1/6,id2/nkx2.1/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,20,PTLp CA1,InterneuronsLibrary
-fpv3_210302_sess2,fpv3,fpv3\fpv3_210302_sess2,c57b1/6,pv/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,15,PTLp CA1 CA3,InterneuronsLibrary
-fpv4_210311_sess4,fpv4,fpv4\fpv4_210311_sess4,c57b1/6,pv/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,62,PTLp CA1 CA3,InterneuronsLibrary
-fnkx9_200820_sess4,fnkx9,fnkx9\fnkx9_200820_sess4,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,54,PTLp CA1 CA3,InterneuronsLibrary
+fsst1_190606_sess36,fsst1,fSst1\fSst1_190606_sess36,c57b1/6,sst/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,42,CA1sp CA1so CA1sr,InterneuronsLibrary
+fpv3_210305_sess5,fpv3,fPv3\fPV3_210305_sess5,c57b1/6,pv/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,17,PTLp CA1sp CA1so CA1sr CA1slm CA3 DG,InterneuronsLibrary
+fsst1_190604_sess34,fsst1,fSst1\fSst1_190604_sess34,c57b1/6,sst/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,53,CA1sp CA1sr CA1so,InterneuronsLibrary
+fpv3_210304_sess4,fpv3,fPv3\fPV3_210304_sess4,c57b1/6,pv/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,22,PTLp CA1sp CA1so CA1sr CA1slm CA3 DG,InterneuronsLibrary
+fpv3_210301_sess1,fpv3,fPv3\fPV3_210301_sess1,c57b1/6,pv/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,16,PTLp CA1sp CA1so CA3 DG CA1sr CA1slm,InterneuronsLibrary
+fnkx8_200915_sess21,fnkx8,fNkx8\fNkx8_200915_sess21,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,83,PTLp CA1sp CA1so CA1slm CA3 DG CA1sr,InterneuronsLibrary
+fpv4_210308_sess1,fpv4,fPv4\fPv4_210308_sess1,c57b1/6,pv/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,71,PTLp CA1sp CA1so CA3 DG CA1sr CA1slm,InterneuronsLibrary
+fpv4_210310_sess3,fpv4,fPv4\fPv4_210310_sess3,c57b1/6,pv/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,58,PTLp CA1sp CA1so CA1sr CA3 DG,InterneuronsLibrary
+fnkx8_200909_sess17,fnkx8,fnkx8\fnkx8_200909_sess17,c57b1/6,id2/dlx/ai80,"105µm (125µm), NA 0.22 etched cone shaped (Thorlabs, FG105LCA) ",tmaze,49,PTLp CA1sp CA3 CA1slm CA1sr DG,InterneuronsLibrary
+fpv4_210309_sess2,fpv4,fpv4\fpv4_210309_sess2,c57b1/6,pv/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,59,PTLp CA1sp CA1so CA1sr CA3 DG,InterneuronsLibrary
+fnkx11_201016_sess2,fnkx11,fnkx11\fnkx11_201016_sess2,c57b1/6,id2/nkx2.1/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,42,PTLp CA1sp CA1so CA1slm CA3 DG CA1sr,InterneuronsLibrary
+fnkx11_201019_sess3,fnkx11,fnkx11\fnkx11_201019_sess3,c57b1/6,id2/nkx2.1/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,23,PTLp CA1sp CA1so CA1slm CA1sr CA3 DG,InterneuronsLibrary
+fnkx11_201022_sess6,fnkx11,fnkx11\fnkx11_201022_sess6,c57b1/6,id2/nkx2.1/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,20,PTLp CA1sp CA1so CA1slm CA1sr CA3 DG,InterneuronsLibrary
+fpv3_210302_sess2,fpv3,fpv3\fpv3_210302_sess2,c57b1/6,pv/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,15,PTLp CA1sp CA1so CA1slm CA1sr CA3 DG,InterneuronsLibrary
+fpv4_210311_sess4,fpv4,fpv4\fpv4_210311_sess4,c57b1/6,pv/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,62,PTLp CA1sp CA1so CA1sr CA3 DG,InterneuronsLibrary
+fnkx9_200820_sess4,fnkx9,fnkx9\fnkx9_200820_sess4,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,54,PTLp CA1sp CA1so CA1slm CA1sr CA3 DG,InterneuronsLibrary
 fsst1_190605_sess35,fsst1,fsst1\fsst1_190605_sess35,c57b1/6,sst/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,38,CA1sp CA1sr,InterneuronsLibrary
 fpv4_210318_sess11,fpv4,fpv4\fpv4_210318_sess11,c57b1/6,pv/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,39,PTLp CA1sp CA1so CA1slm CA1sr CA3,InterneuronsLibrary
 fpv4_210319_sess12,fpv4,fpv4\fpv4_210319_sess12,c57b1/6,pv/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,23,PTLp CA1sp CA3 CA1so CA1sr,InterneuronsLibrary
 fcr1_220304_sess6,fcr1,fcr1\fcr1_220304_sess6,c57b1/6,vip/cr/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,48,PTLp CA1sp CA1so CA1slm CA1sr CA3,InterneuronsLibrary VIPcortex
+fcck1_220203_sess4,fcck1,fcck1\fcck1_220203_sess4,c57b1/6,vip/cck/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,55,PTLp CA1sp CA1so CA1slm CA1sr CA3,InterneuronsLibrary VIPcortex
+fcck1_220208_sess7,fcck1,fcck1\fcck1_220208_sess7,c57b1/6,vip/cck/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,62,PTLp CA1sp CA1so CA1slm CA1sr CA3 DG,InterneuronsLibrary VIPcortex
