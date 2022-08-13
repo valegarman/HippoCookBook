@@ -3,6 +3,8 @@ function [projectResults, projectSessionResults] =  loadProjectResults(varargin)
 %   Load and stack all results for a given project
 %
 % MV 2022
+%
+% TO DO: Improve multiple projects managment
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Defaults and Parms
