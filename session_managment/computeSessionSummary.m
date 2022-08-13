@@ -51,6 +51,7 @@ if ~isempty(exclude)
     listOfAnalysis(ismember(listOfAnalysis, exclude)) = [];
 end
 session = loadSession;
+session = sessionTemplate(session);
 session.channels = 1:session.extracellular.nChannels;
 save([basepath filesep session.general.name,'.session.mat'],'session','-v7.3');
 
@@ -279,7 +280,7 @@ if any(ismember(listOfAnalysis,'downStates'))
         saveas(gcf,'SummaryFigures\downUpStatesCSD.png');
         
         % PSTH
-        psthUD = spikesPsth([],'eventType','slowOscillations','numRep',100);
+        psthUD = spikesPsth([],'eventType','slowOscillations','numRep',100,'min_pulsesNumber',10);
     catch
         warning('Error on Psth and CSD from down-states!');
     end
@@ -305,7 +306,7 @@ if any(ismember(listOfAnalysis,'ripples'))
             cmax = max(max(csd.data)); 
             subplot(1,size(shanks,2),jj);
             contourf(taxis,1:size(csd.data,2),csd.data',40,'LineColor','none');hold on;
-            set(gca,'YDir','reverse'); xlabel('time (s)'); ylabel('channel'); title(strcat('DOWN-UP, Shank #',num2str(jj)),'FontWeight','normal'); 
+            set(gca,'YDir','reverse'); xlabel('time (s)'); ylabel('channel'); title(strcat('Ripples, Shank #',num2str(jj)),'FontWeight','normal'); 
             colormap jet; caxis([-cmax cmax]);
             hold on
             for kk = 1:size(lfpAvg.data,2)
@@ -315,7 +316,7 @@ if any(ismember(listOfAnalysis,'ripples'))
         saveas(gcf,'SummaryFigures\ripplesCSD.png');
         
         % PSTH
-        psthRipples = spikesPsth([],'eventType','ripples','numRep',100);
+        psthRipples = spikesPsth([],'eventType','ripples','numRep',100,'min_pulsesNumber',10);
         
     catch
         warning('Error on Psth and CSD from ripples! ');

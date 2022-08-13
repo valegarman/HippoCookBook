@@ -6,17 +6,17 @@ plotProbe('force',true);
 %2. check hippocampal layers, if not good run:
 [hippocampalLayers] = getHippocampalLayers('force',true,'promt',true);
 
-%3. assing layers
-session = assignBrainRegion;
-
-%4. get ACG peak
-getACGPeak('force',true);
-
-%5. Loot at ripples, if not good run:
+%3. Loot at ripples, if not good run:
 SWChannel = []; 
 rippleChannel = [];
 ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'useCSD',false);
 psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true);
+
+%4. assing layers
+session = assignBrainRegion;
+
+%5. get ACG peak
+getACGPeak('force',true);
 
 %6. Loot at thetaEpochs, if not good run:
 SWChannel = []; 
@@ -24,7 +24,8 @@ rippleChannel = [];
 [phaseMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel);
 computeCofiringModulation;
 
-%7. Speed correlations
+%7. Speed correla
+tions
 speedCorr = getSpeedCorr('force',true);
 
 %8. Re-ran processCellMetrics
@@ -39,7 +40,7 @@ catch
     warning('Not possible to get manipulation periods. Running CellMetrics withouth excluding manipulation epochs');
 end
 
-cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true,...
+cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',false,...
     'forceReloadWaveformBasedMetrics',false);
 
 %9. Make summary
@@ -124,5 +125,5 @@ spikeFeatures('skipStimulationPeriods', true);
 
 file = dir([basenameFromBasepath(pwd),'.optogeneticPulses.events.mat']); load(file.name);
 SleepScoreMaster(pwd,'noPrompts',true,'ignoretime',optoPulses.stimulationEpochs, 'overwrite', true);
-% TheStateEditor_temp(session.general.name);
+TheStateEditor(session.general.name);
 bz_ThetaStates(pwd);

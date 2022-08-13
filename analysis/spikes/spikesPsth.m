@@ -218,36 +218,38 @@ end
 % Some metrics reponses
 responseMetrics = [];
 t = psth.timestamps;
-for ii = 1:length(spikes.UID)
-    for jj = 1:nConditions
-        t_duringPulse = t > 0 & t < 0.1; 
-        responseMetrics.maxResponse(ii,jj) = max(squeeze(psth.responsecurve(ii,jj,t_duringPulse)));
-        responseMetrics.minResponse(ii,jj) = min(squeeze(psth.responsecurve(ii,jj,t_duringPulse)));
-        responseMetrics.maxResponseZ(ii,jj) = max(squeeze(psth.responsecurveZ(ii,jj,t_duringPulse)));
-        responseMetrics.minResponseZ(ii,jj) = min(squeeze(psth.responsecurveZ(ii,jj,t_duringPulse)));
-        
-        responseCurveZ = squeeze(psth.responsecurveZSmooth(ii,jj,:));
-        responseCurveZ(t<0) = 0;
-        
-        targetSD = -2;
-        temp = [t(find(diff(responseCurveZ<targetSD) == 1)+1); NaN]; responseMetrics.latencyNeg2SD(ii,jj) = temp(1);
-        temp = [t(find(diff(responseCurveZ<targetSD) == -1)+1); NaN]; responseMetrics.recoveryNeg2SD(ii,jj) = temp(1) - 0.1;
-        responseMetrics.responseDurationNeg2SD(ii,jj) = temp(1) - responseMetrics.latencyNeg2SD(ii,jj);
-        
-        targetSD = -1.5;
-        temp = [t(find(diff(responseCurveZ<targetSD) == 1)+1); NaN]; responseMetrics.latencyNeg1_5SD(ii,jj) = temp(1);
-        temp = [t(find(diff(responseCurveZ<targetSD) == -1)+1); NaN]; responseMetrics.recoveryNeg1_5SD(ii,jj) = temp(1) - 0.1;
-        responseMetrics.responseDurationNeg1_5SD(ii,jj) = temp(1) - responseMetrics.latencyNeg1_5SD(ii,jj);
-        
-        targetSD = -1;
-        temp = [t(find(diff(responseCurveZ<targetSD) == 1)+1); NaN]; responseMetrics.latencyNeg1SD(ii,jj) = temp(1);
-        temp = [t(find(diff(responseCurveZ<targetSD) == -1)+1); NaN]; responseMetrics.recoveryNeg1SD(ii,jj) = temp(1) - 0.1;
-        responseMetrics.responseDurationNeg1SD(ii,jj) = temp(1) - responseMetrics.latencyNeg1SD(ii,jj);
-        
-        targetSD = -.5;
-        temp = [t(find(diff(responseCurveZ<targetSD) == 1)+1); NaN]; responseMetrics.latencyNeg_5SD(ii,jj) = temp(1);
-        temp = [t(find(diff(responseCurveZ<targetSD) == -1)+1); NaN]; responseMetrics.recoveryNeg_5SD(ii,jj) = temp(1) - 0.1;
-        responseMetrics.responseDurationNeg_5SD(ii,jj) = temp(1) - responseMetrics.latencyNeg_5SD(ii,jj);
+if any(~isnan(psth.responsecurve))
+    for ii = 1:length(spikes.UID)
+        for jj = 1:nConditions
+            t_duringPulse = t > 0 & t < 0.1; 
+            responseMetrics.maxResponse(ii,jj) = max(squeeze(psth.responsecurve(ii,jj,t_duringPulse)));
+            responseMetrics.minResponse(ii,jj) = min(squeeze(psth.responsecurve(ii,jj,t_duringPulse)));
+            responseMetrics.maxResponseZ(ii,jj) = max(squeeze(psth.responsecurveZ(ii,jj,t_duringPulse)));
+            responseMetrics.minResponseZ(ii,jj) = min(squeeze(psth.responsecurveZ(ii,jj,t_duringPulse)));
+
+            responseCurveZ = squeeze(psth.responsecurveZSmooth(ii,jj,:));
+            responseCurveZ(t<0) = 0;
+
+            targetSD = -2;
+            temp = [t(find(diff(responseCurveZ<targetSD) == 1)+1); NaN]; responseMetrics.latencyNeg2SD(ii,jj) = temp(1);
+            temp = [t(find(diff(responseCurveZ<targetSD) == -1)+1); NaN]; responseMetrics.recoveryNeg2SD(ii,jj) = temp(1) - 0.1;
+            responseMetrics.responseDurationNeg2SD(ii,jj) = temp(1) - responseMetrics.latencyNeg2SD(ii,jj);
+
+            targetSD = -1.5;
+            temp = [t(find(diff(responseCurveZ<targetSD) == 1)+1); NaN]; responseMetrics.latencyNeg1_5SD(ii,jj) = temp(1);
+            temp = [t(find(diff(responseCurveZ<targetSD) == -1)+1); NaN]; responseMetrics.recoveryNeg1_5SD(ii,jj) = temp(1) - 0.1;
+            responseMetrics.responseDurationNeg1_5SD(ii,jj) = temp(1) - responseMetrics.latencyNeg1_5SD(ii,jj);
+
+            targetSD = -1;
+            temp = [t(find(diff(responseCurveZ<targetSD) == 1)+1); NaN]; responseMetrics.latencyNeg1SD(ii,jj) = temp(1);
+            temp = [t(find(diff(responseCurveZ<targetSD) == -1)+1); NaN]; responseMetrics.recoveryNeg1SD(ii,jj) = temp(1) - 0.1;
+            responseMetrics.responseDurationNeg1SD(ii,jj) = temp(1) - responseMetrics.latencyNeg1SD(ii,jj);
+
+            targetSD = -.5;
+            temp = [t(find(diff(responseCurveZ<targetSD) == 1)+1); NaN]; responseMetrics.latencyNeg_5SD(ii,jj) = temp(1);
+            temp = [t(find(diff(responseCurveZ<targetSD) == -1)+1); NaN]; responseMetrics.recoveryNeg_5SD(ii,jj) = temp(1) - 0.1;
+            responseMetrics.responseDurationNeg_5SD(ii,jj) = temp(1) - responseMetrics.latencyNeg_5SD(ii,jj);
+        end
     end
 end
 
@@ -276,7 +278,7 @@ end
 
 % PLOTS
 % 1. Rasters plot
-if rasterPlot
+if rasterPlot && any(any(~isnan(psth.responsecurve)))
     t = psth.timestamps;
     st = timestamps;
     if length(st) > 5000 % if more than 5000
@@ -325,7 +327,7 @@ if rasterPlot
     end
 end
 % 2. Rate plot
-if ratePlot
+if ratePlot && any(any(~isnan(psth.responsecurve)))
     t = psth.timestamps;
     figure
     for ii = 1:nConditions;

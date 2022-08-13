@@ -116,6 +116,7 @@ for unit = 1:length(firingMaps.rateMaps)
     for c = 1:length(firingMaps.rateMaps{1})
         % Default values
         mapStats{unit,1}{c}.x = NaN;
+        mapStats{unit,1}{c}.y = NaN;
         mapStats{unit,1}{c}.field = [];
         mapStats{unit,1}{c}.size = 0;
         mapStats{unit,1}{c}.peak = 0;
@@ -199,7 +200,8 @@ for unit = 1:length(firingMaps.rateMaps)
                     field1ini = 1; 
                 end
                 field1end = find(diff(field)==-1);
-                [~,idxBetwFields] = min([abs(field1ini-field0end),abs(field0ini-field1end)]);
+%                 [~,idxBetwFields] = min([abs(field1ini-field0end),abs(field0ini-field1end)]);
+                [~,idxBetwFields] = min([abs(field1ini-field0end);abs(field0ini-field1end)]);
                 if idxBetwFields == 1
                     if ~any(z(field1end:field0ini)<peak*threshold)
                         good2ndPF = false; 
@@ -311,22 +313,25 @@ end
 % ==========
 %   PLOT    
 % ==========
-sizeMazeX = size(firingMaps.rateMaps{1}{1},1);
-sizeMazeY = size(firingMaps.rateMaps{1}{1},2);
-if isfield(firingMaps, 'cmBin')
-    xtrack = linspace(0, sizeMazeX * firingMaps.cmBin, sizeMazeX);
-    ytrack = linspace(0, sizeMazeY * firingMaps.cmBin, sizeMazeY);
-else
-    xtrack = linspace(0, sizeMazeX, sizeMazeX);
-    ytrack = linspace(0, sizeMazeY, sizeMazeY);
+for i = 1:length(firingMaps.rateMaps{1})
+    sizeMazeX{i} = size(firingMaps.rateMaps{1}{i},1);
+    sizeMazeY{i} = size(firingMaps.rateMaps{1}{i},2);
+    if isfield(firingMaps, 'cmBin')
+        xtrack{i} = linspace(0, sizeMazeX{i} * firingMaps.cmBin{i}, sizeMazeX{i});
+        ytrack{i} = linspace(0, sizeMazeY{i} * firingMaps.cmBin{i}, sizeMazeY{i});
+    else
+        xtrack{i} = linspace(0, sizeMazeX{i}, sizeMazeX{i});
+        ytrack{i} = linspace(0, sizeMazeY{i}, sizeMazeY{i});
+    end
 end
+
 mkdir(basepath,'SummaryFigures');
 for c = 1:length(firingMaps.rateMaps{1})
     figure;
     set(gcf,'Position',[100 -100 2500 1200])
     for unit = 1:size(firingMaps.UID,2)
         subplot(7,ceil(size(firingMaps.UID,2)/7),unit); % autocorrelogram
-        imagesc(xtrack,ytrack,firingMaps.rateMaps{unit}{c});
+        imagesc(xtrack{c},ytrack{c},firingMaps.rateMaps{unit}{c});
         if sum(sum(firingMaps.rateMaps{unit}{c}))>0
             hold on
             for ii = 1:size(mapStats{unit}{c}.field,2)
@@ -346,12 +351,13 @@ for c = 1:length(firingMaps.rateMaps{1})
             ylabel('Track (cm)');
             xlabel('Track (cm)');
         end
-        axis xy
+        axis ij
         title(num2str(unit),'FontWeight','normal','FontSize',10);
     end
-    saveas(gcf,[basepath,filesep,'SummaryFigures',filesep ,'firingMap_' num2str(c) '.png'],'png');
+    saveas(gcf,[basepath,filesep,'SummaryFigures',filesep ,'firingField_' num2str(c) '.png'],'png');
 end
 close all;
+
 
 % for unit = 1:length(firingMaps.rateMaps)
 %     figure;

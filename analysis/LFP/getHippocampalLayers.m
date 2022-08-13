@@ -73,7 +73,7 @@ if isempty(lfp)
     end
 end
 
-if removeRipplesStimulation
+if removeRipplesStimulation && ~isempty(dir('*optogeneticPulses.events.mat'))
     targetFile = dir('*optogeneticPulses.events.mat'); load(targetFile.name);
     restrict_temp = SubtractIntervals([0 Inf],optoPulses.stimulationEpochs);
     restrict =  ConsolidateIntervals([restrict; restrict_temp]);

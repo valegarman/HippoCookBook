@@ -3,6 +3,8 @@ function [projectResults, projectSessionResults] =  loadProjectResults(varargin)
 %   Load and stack all results for a given project
 %
 % MV 2022
+%
+% TO DO: Improve multiple projects managment
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Defaults and Parms
@@ -64,13 +66,23 @@ sessions.project = sessionsTable.Project;
 
 disp('Projects found: '); 
 project_list = unique(sessions.project);
+project_list_temp = cell(0);
+for jj = 1:length(project_list)
+    project_list_temp{1,length(project_list_temp)+1} = project_list{jj};
+    project_list_temp{1,length(project_list_temp)+1} = ' ';
+end    
+project_list_temp(end) = [];
+project_list = unique(split([project_list_temp{:}],' '));
+
 for ii = 1:length(project_list)
     fprintf(' %3.i/ %s \n',ii,project_list{ii}); %\n
 end
+fprintf('Taking all sessions from project "%s" \n',project)
+
 if ~strcmpi(project,'Undefined') 
     if ~isempty(ismember(project_list, project))
-        sessions.basepaths = sessions.basepaths(strcmpi(sessions.project, project));
-        sessions.project = sessions.project(strcmpi(sessions.project, project));
+        sessions.basepaths = sessions.basepaths(contains(sessions.project, project));
+        sessions.project = sessions.project(contains(sessions.project, project));
     else
         error('Project name not recognized!');
     end

@@ -360,24 +360,52 @@ if exist('zone','var')
                 yMaze_zones{i} = [boundingbox_zones_ymin{i} boundingbox_zones_ymax{i}];
             end
         else
-            name_zones{i} = zone(i).name;
-            center_zones_x{i} = (zone(i).centre.x)*100/pixels_metre;
-            center_zones_y{i} = (zone(i).centre.y)*100/pixels_metre;
-            boundingbox_zones_x{i} = (zone(i).boundingbox.x)*100/pixels_metre;
-            boundingbox_zones_y{i} = (zone(i).boundingbox.y)*100/pixels_metre;
-            boundingbox_zones_w{i} = (zone(i).boundingbox.w)*100/pixels_metre;
-            boundingbox_zones_h{i} = (zone(i).boundingbox.h)*100/pixels_metre;
+%             name_zones{i} = zone(i).name;
+%             center_zones_x{i} = (zone(i).centre.x)*100/pixels_metre;
+%             center_zones_y{i} = (zone(i).centre.y)*100/pixels_metre;
+%             boundingbox_zones_x{i} = (zone(i).boundingbox.x)*100/pixels_metre;
+%             boundingbox_zones_y{i} = (zone(i).boundingbox.y)*100/pixels_metre;
+%             boundingbox_zones_w{i} = (zone(i).boundingbox.w)*100/pixels_metre;
+%             boundingbox_zones_h{i} = (zone(i).boundingbox.h)*100/pixels_metre;
+            try
+                name_zones{i} = zone{i}.name;
+                center_zones_x{i} = (zone{i}.centre.x)*100/pixels_metre;
+                center_zones_y{i} = (zone{i}.centre.y)*100/pixels_metre;
+                boundingbox_zones_x{i} = (zone{i}.boundingbox.x)*100/pixels_metre;
+                boundingbox_zones_y{i} = (zone{i}.boundingbox.y)*100/pixels_metre;
+                boundingbox_zones_w{i} = (zone{i}.boundingbox.w)*100/pixels_metre;
+                boundingbox_zones_h{i} = (zone{i}.boundingbox.h)*100/pixels_metre;
 
-            boundingbox_zones_X{i} = boundingbox_zones_x{i} + boundingbox_zones_w{i};
-            boundingbox_zones_Y{i} = boundingbox_zones_y{i} + boundingbox_zones_h{i};
+                boundingbox_zones_X{i} = boundingbox_zones_x{i} + boundingbox_zones_w{i};
+                boundingbox_zones_Y{i} = boundingbox_zones_y{i} + boundingbox_zones_h{i};
 
-            boundingbox_zones_xmin{i} = boundingbox_zones_x{i};
-            boundingbox_zones_xmax{i} = boundingbox_zones_X{i};
-            boundingbox_zones_ymin{i} = boundingbox_zones_y{i};
-            boundingbox_zones_ymax{i} = boundingbox_zones_Y{i};
+                boundingbox_zones_xmin{i} = boundingbox_zones_x{i};
+                boundingbox_zones_xmax{i} = boundingbox_zones_X{i};
+                boundingbox_zones_ymin{i} = boundingbox_zones_y{i};
+                boundingbox_zones_ymax{i} = boundingbox_zones_Y{i};
 
-            xMaze_zones{i} = [boundingbox_zones_xmin{i} boundingbox_zones_xmax{i}];
-            yMaze_zones{i} = [boundingbox_zones_ymin{i} boundingbox_zones_ymax{i}];
+                xMaze_zones{i} = [boundingbox_zones_xmin{i} boundingbox_zones_xmax{i}];
+                yMaze_zones{i} = [boundingbox_zones_ymin{i} boundingbox_zones_ymax{i}];
+            catch
+                name_zones{i} = zone{i}.name;
+                center_zones_x{i} = str2num(zone{i}.centre.x.Text)*100/pixels_metre;
+                center_zones_y{i} = str2num(zone{i}.centre.y.Text)*100/pixels_metre;
+                boundingbox_zones_x{i} = str2num(zone{i}.boundingbox.x.Text)*100/pixels_metre;
+                boundingbox_zones_y{i} = str2num(zone{i}.boundingbox.y.Text)*100/pixels_metre;
+                boundingbox_zones_w{i} = str2num(zone{i}.boundingbox.w.Text)*100/pixels_metre;
+                boundingbox_zones_h{i} = str2num(zone{i}.boundingbox.h.Text)*100/pixels_metre;
+
+                boundingbox_zones_X{i} = boundingbox_zones_x{i} + boundingbox_zones_w{i};
+                boundingbox_zones_Y{i} = boundingbox_zones_y{i} + boundingbox_zones_h{i};
+
+                boundingbox_zones_xmin{i} = boundingbox_zones_x{i};
+                boundingbox_zones_xmax{i} = boundingbox_zones_X{i};
+                boundingbox_zones_ymin{i} = boundingbox_zones_y{i};
+                boundingbox_zones_ymax{i} = boundingbox_zones_Y{i};
+
+                xMaze_zones{i} = [boundingbox_zones_xmin{i} boundingbox_zones_xmax{i}];
+                yMaze_zones{i} = [boundingbox_zones_ymin{i} boundingbox_zones_ymax{i}];
+            end
         end
     end    
 else
@@ -441,6 +469,7 @@ boundingbox_ymax = boundingbox_ymax - yMaze(1);
 h2 = figure;
 freezeColors;
 scatter(x,y,3,t,'filled','MarkerEdgeColor','none','MarkerFaceAlpha',.5); colormap jet
+axis ij
 caxis([t(1) t(end)])
 xlabel('norm/cm'); ylabel('norm/cm'); colorbar;
 hold on;
@@ -475,6 +504,7 @@ xMaze = xMaze - xMaze(1);
 yMaze = yMaze - yMaze(1);
 xlim(xMaze); ylim(yMaze);
 
+
 mkdir('Behavior');
 saveas(h2,'Behavior\trajectory.png');
 if ~verbose
@@ -490,6 +520,7 @@ end
 if isempty(anyMazeTtl)
     digitalIn = getDigitalIn;
     anyMazeTtl = digitalIn.timestampsOn{anyMaze_ttl_channel};
+    anyMazeTtl_start = digitalIn.timestampsOn{1};
 end
 % match anymaze frames con ttl pulses
 if length(anyMazeTtl) == length(x)
@@ -555,7 +586,7 @@ tracking.position.x = x; % x filtered
 tracking.position.y = y; % y filtered
 tracking.position.z = [];
 tracking.description = 'AnyMaze Tracking';
-tracking.timestamps = anyMazeTtl;
+tracking.timestamps = anyMazeTtl';
 tracking.originalTimestamps = timesamples;
 tracking.folder = fbasename;
 tracking.sync.sync = sync;
@@ -570,7 +601,11 @@ tracking.avFrame.ySize = yMaze;
 % tracking.roi.roiTracking = roiTracking;
 % tracking.roi.roiLED = roiLED;
 if exist('apparatus_name','var')
+    if isempty(apparatus_name) 
+        apparatus_name = 'OpenField';
+    end
     tracking.apparatus.name = apparatus_name;
+    
 end
 tracking.apparatus.centre.x = centre_x - orxMaze(1);
 tracking.apparatus.centre.y = centre_y - oryMaze(1);
@@ -613,17 +648,31 @@ end
    
 if exist('zone','var')
     for i=1:num_zones
-        tracking.zone.name{i} = char(name_zones{i});
-        tracking.zone.centre.x{i} = center_zones_x{i};
-        tracking.zone.centre.y{i} = center_zones_y{i};
-        tracking.zone.boundingbox.x{i} = boundingbox_zones_x{i};
-        tracking.zone.boundingbox.y{i} = boundingbox_zones_y{i};
-        tracking.zone.boundingbox.w{i} = boundingbox_zones_w{i};
-        tracking.zone.boundingbox.h{i} = boundingbox_zones_h{i};  
-        tracking.zone.xmin{i} = boundingbox_zones_xmin{i};
-        tracking.zone.xmax{i} = boundingbox_zones_xmax{i};
-        tracking.zone.ymin{i} = boundingbox_zones_ymin{i};
-        tracking.zone.ymax{i} = boundingbox_zones_ymax{i};
+        try
+            tracking.zone.name{i} = char(name_zones{i});
+            tracking.zone.centre.x{i} = center_zones_x{i};
+            tracking.zone.centre.y{i} = center_zones_y{i};
+            tracking.zone.boundingbox.x{i} = boundingbox_zones_x{i};
+            tracking.zone.boundingbox.y{i} = boundingbox_zones_y{i};
+            tracking.zone.boundingbox.w{i} = boundingbox_zones_w{i};
+            tracking.zone.boundingbox.h{i} = boundingbox_zones_h{i};  
+            tracking.zone.xmin{i} = boundingbox_zones_xmin{i};
+            tracking.zone.xmax{i} = boundingbox_zones_xmax{i};
+            tracking.zone.ymin{i} = boundingbox_zones_ymin{i};
+            tracking.zone.ymax{i} = boundingbox_zones_ymax{i};
+        catch
+            tracking.zone.name{i} = char(name_zones{i}.Text);
+            tracking.zone.centre.x{i} = center_zones_x{i};
+            tracking.zone.centre.y{i} = center_zones_y{i};
+            tracking.zone.boundingbox.x{i} = boundingbox_zones_x{i};
+            tracking.zone.boundingbox.y{i} = boundingbox_zones_y{i};
+            tracking.zone.boundingbox.w{i} = boundingbox_zones_w{i};
+            tracking.zone.boundingbox.h{i} = boundingbox_zones_h{i};  
+            tracking.zone.xmin{i} = boundingbox_zones_xmin{i};
+            tracking.zone.xmax{i} = boundingbox_zones_xmax{i};
+            tracking.zone.ymin{i} = boundingbox_zones_ymin{i};
+            tracking.zone.ymax{i} = boundingbox_zones_ymax{i};
+        end
     end
 end
 

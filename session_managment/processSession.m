@@ -41,9 +41,9 @@ addParameter(p,'analog_optogenetic_channels',[],@isnumeric);
 addParameter(p,'promt_hippo_layers',false,@islogical);
 addParameter(p,'manual_analog_pulses_threshold',false,@islogical);
 addParameter(p,'bazler_ttl_channel',[],@isnumeric);
-addParameter(p,'forceAnalogPulses',false,@islogical);
 addParameter(p,'tracking_pixel_cm',0.1149,@isnumeric);
 addParameter(p,'excludeAnalysis',[]); % 
+addParameter(p,'useCSD_for_theta_detection',true,@islogical);
 
 parse(p,varargin{:})
 
@@ -62,9 +62,9 @@ analog_optogenetic_channels = p.Results.analog_optogenetic_channels;
 promt_hippo_layers = p.Results.promt_hippo_layers;
 manual_analog_pulses_threshold = p.Results.manual_analog_pulses_threshold;
 bazler_ttl_channel = p.Results.bazler_ttl_channel;
-forceAnalogPulses = p.Results.forceAnalogPulses;
 tracking_pixel_cm = p.Results.tracking_pixel_cm;
 excludeAnalysis = p.Results.excludeAnalysis;
+useCSD_for_theta_detection = p.Results.useCSD_for_theta_detection;
 
 % Deal with inputs
 prevPath = pwd;
@@ -72,6 +72,9 @@ cd(basepath);
 
 for ii = 1:length(excludeAnalysis)
     excludeAnalysis{ii} = num2str(excludeAnalysis{ii});
+end
+if length(excludeAnalysis) == 0
+    excludeAnalysis = num2str(excludeAnalysis);
 end
 excludeAnalysis = lower(excludeAnalysis);
 %% 1. Runs sessionTemplate
@@ -105,9 +108,12 @@ if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))
     plotProbe('force',true); % choose probe
 end
 
+<<<<<<< HEAD
+=======
 
+>>>>>>> db120dd17a58e5fea8875a1893972dc299d76523
 %% 2. Remove previous cellinfo.spikes.mat and computes spikes again (manual clustered)
-if ~any(ismember(excludeAnalysis, {'2',lower('loadSpikes'})))
+if ~any(ismember(excludeAnalysis, {'2',lower('loadSpikes')}))
     disp('Loading Spikes...')
     session = loadSession;
     if force_loadingSpikes
@@ -121,7 +127,7 @@ end
 
 %% 3. Analog pulses detection
 if ~any(ismember(excludeAnalysis, {'3',lower('cureAnalogPulses')}))
-    if forceAnalogPulses || isempty(dir([session.general.name,'_original.dat']))
+    if force_analogPulsesDetection || isempty(dir([session.general.name,'_original.dat']))
         disp('Getting analog Pulses...')
         pulses = getAnalogPulses('analogChannelsList',analog_optogenetic_channels,'manualThr',manual_analog_pulses_threshold,'overwrite',force_analogPulsesDetection); % 1-index
     else
@@ -139,7 +145,7 @@ end
 %% 4. Spike Features
 % 4.1 Light responses, if available
 if ~any(ismember(excludeAnalysis, {'4',lower('spikesFeatures')}))
-    optogeneticResponses = getOptogeneticResponse('numRep',500,'force',true,'duration_round_decimal',1);
+    optogeneticResponses = getOptogeneticResponse('numRep',100,'force',true);
     % 4.2 ACG and waveform
     spikeFeatures;
 end
@@ -179,7 +185,7 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true);
 
     % 8.2 Ripples
-    ripples = c('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true);
+    ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true);
     psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true);
 
     % 8.3 Theta intervals

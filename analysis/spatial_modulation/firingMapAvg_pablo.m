@@ -1,6 +1,4 @@
-
-
-function [firingMaps] = firingMapAvg(positions,spikes,varargin)
+function [firingMaps] = firingMapAvg_pablo(positions,spikes,varargin)
 
 % USAGE
 % [firingMaps] = bz_firingMapAvg(positions,spikes,varargin)
@@ -61,6 +59,8 @@ addParameter(p,'CellInspector',false,@islogical);
 addParameter(p,'mode','discard',@isstr);
 addParameter(p,'maxDistance',5,@isnumeric);
 addParameter(p,'orderKalmanVel',2,@isnumeric);
+addParameter(p,'pixelsPerCm',2.5,@isnumeric);
+addParameter(p,'plt',true,@islogical);
 
 parse(p,varargin{:});
 smooth = p.Results.smooth;
@@ -73,6 +73,8 @@ CellInspector = p.Results.CellInspector;
 mode = p.Results.mode;
 maxDistance = p.Results.maxDistance;
 order = p.Results.orderKalmanVel;
+pixelsPerCm = p.Results.pixelsPerCm;
+plt = p.Results.plt;
 
 if isstruct(positions)
     positions = positions.maps;
@@ -86,6 +88,21 @@ elseif isvector(positions)
 end
 %%% TODO: conditions label
   
+session = loadSession(pwd);
+%% Getting nBins 
+try
+    if ~isempty(dir([session.general.name,'.Tracking.Behavior.mat']))
+        file = dir([session.general.name,'.Tracking.Behavior.mat']);
+        load(file.name);
+    end
+    nBins = cell(1,length(tracking.folders));
+    for i = 1:length(tracking.folders)
+        nBins{i} = round(tracking.apparatus{i}.boundingbox.xmax - tracking.apparatus{i}.boundingbox.xmin)/pixelsPerCm;
+    end
+catch
+    disp('Not possible to compute nBins based on apparatus ...');
+end
+
 %% Calculate
 % Erase positions below speed threshold
 for iCond = 1:size(positions,2)
@@ -113,11 +130,13 @@ end
 for unit = 1:length(spikes.times)
     for c = 1:conditions
         map{unit}{c} = Map(positions{c},spikes.times{unit},'smooth',smooth,'minTime',minTime,...
-            'nBins',nBins,'maxGap',maxGap,'mode',mode,'maxDistance',maxDistance);
+            'nBins',nBins{c},'maxGap',maxGap,'mode',mode,'maxDistance',maxDistance);
     end
 end
 
-cmBin = (max(positions{1}(:,2))-min(positions{1}(:,2)))/nBins;
+for c = 1:conditions
+    cmBin{c} = (max(positions{c}(:,2))-min(positions{c}(:,2)))/nBins{c};
+end
 %%% TODO: pass rest of inputs to Map
 
 %% restructure into cell info data type
@@ -147,9 +166,50 @@ for unit = 1:length(spikes.times)
     firingMaps.rateMaps{unit,1}{c} = map{unit}{c}.z;
     firingMaps.countMaps{unit,1}{c} = map{unit}{c}.count;
     firingMaps.occupancy{unit,1}{c} = map{unit}{c}.time;
+    firingMaps.rateMapsUnSmooth{unit,1}{c} = map{unit}{c}.zUnSmooth;
+    firingMaps.countMapsUnSmooth{unit,1}{c} = map{unit}{c}.countUnSmooth;
+    firingMaps.occupancyUnSmooth{unit,1}{c} = map{unit}{c}.timeUnSmooth;
     end
 end
 
+% PLOTTING
+for i = 1:length(firingMaps.rateMaps{1})
+    sizeMazeX{i} = size(firingMaps.rateMaps{1}{i},1);
+    sizeMazeY{i} = size(firingMaps.rateMaps{1}{i},2);
+    if isfield(firingMaps, 'cmBin')
+        xtrack{i} = linspace(0, sizeMazeX{i} * firingMaps.cmBin{i}, sizeMazeX{i});
+        ytrack{i} = linspace(0, sizeMazeY{i} * firingMaps.cmBin{i}, sizeMazeY{i});
+    else
+        xtrack{i} = linspace(0, sizeMazeX{i}, sizeMazeX{i});
+        ytrack{i} = linspace(0, sizeMazeY{i}, sizeMazeY{i});
+    end
+end
+
+if plt
+    for c = 1:length(firingMaps.rateMaps{1})
+        figure,
+        set(gcf,'Position',[100 -100 2500 1200]);
+        for unit = 1:size(firingMaps.UID,2)
+            subplot(7,ceil(size(firingMaps.UID,2)/7),unit);
+            plot(positions{c}(:,2),positions{c}(:,3),'color',[0.7 0.7 0.7]);
+            hold on;
+            
+            t = positions{c}(:,1);
+            dt = diff(t);dt(end+1)=dt(end);dt(dt>maxGap) = maxGap;
+            n = CountInIntervals(spikes.times{unit},[t t+dt]);
+            scatter(positions{c}(n > 0 ,2),positions{c}(n > 0,3),1,'MarkerEdgeColor',[1 0 0], 'MarkerFaceColor',[0.9 0 0]);
+            axis ij;
+            xlim(round(tracking.avFrame{c}.xSize)); ylim(round(tracking.avFrame{c}.ySize));
+            if unit == 1
+                ylabel('Track (cm)');
+                xlabel('Track (cm)');
+            end
+            title(num2str(unit),'FontWeight','normal','FontSize',10);
+        end
+        saveas(gcf,[pwd,filesep,'SummaryFigures',filesep ,'firingMap_' num2str(c) '.png'],'png');
+    end
+end
+close all;
 if saveMat
    save([firingMaps.sessionName '.firingMapsAvg.cellinfo.mat'],'firingMaps'); 
 end
