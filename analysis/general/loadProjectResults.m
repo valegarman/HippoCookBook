@@ -255,7 +255,7 @@ projectResults.hGammaModulation = stackSessionResult(projectSessionResults.hGamm
 projectResults.ripplePhaseModulation = stackSessionResult(projectSessionResults.rippleMod, projectSessionResults.numcells);
 projectResults.behavior = stackSessionResult(projectSessionResults.behavior, projectSessionResults.numcells);
 projectResults.spatialModulation = stackSessionResult(projectSessionResults.spatialModulation, projectSessionResults.numcells);
-projectResults.speedCorr = stackSessionResult(projectSessionResults.speedCorr, projectSessionResults.numcells);
+% projectResults.speedCorr = stackSessionResult(projectSessionResults.speedCorr, projectSessionResults.numcells);
 projectResults.acgPeak = stackSessionResult(projectSessionResults.acgPeak, projectSessionResults.numcells);
 
 projectResults.cell_metrics = cell_metrics;
