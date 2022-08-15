@@ -84,7 +84,7 @@ optogenetics(end) = [];
 
 behav = cell(0); 
 for i = 1:length(session.epochs)
-    if strcmpi(session.epochs{i}.behavioralParadigm, 'Maze')
+    if contains(session.epochs{i}.behavioralParadigm, 'Maze')
         behav{1, length(behav)+1} = lower(session.epochs{i}.environment);
         behav{1, length(behav)+1} = ' ';
     end
