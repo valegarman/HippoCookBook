@@ -161,34 +161,40 @@ if doPlot
         set(gcf,'Position',[100 100 900 400]);
 
         subplot(1,3,1);
-        contourf(spikesReturnPlot.centers,spikesReturnPlot.centers,spikesReturnPlot.PyramidalCell.hist_prob,40,'LineColor','none');
-        axis square
-        ylim(plot_logxyaxis); xlim(plot_logxyaxis); 
-        LogScale('xy',10);
-        set(gca,'TickDir','out'); colormap(flip(gray));
-        title('Pyramidal cells','FontWeight','normal','FontSize',10,'Color',[.8 .2 .2]);
-        ylabel('ISI n+1 (s)');
-        xlabel('ISI (s)');
+        if isfield(spikesReturnPlot,'PyramidalCell')
+            contourf(spikesReturnPlot.centers,spikesReturnPlot.centers,spikesReturnPlot.PyramidalCell.hist_prob,40,'LineColor','none');
+            axis square
+            ylim(plot_logxyaxis); xlim(plot_logxyaxis); 
+            LogScale('xy',10);
+            set(gca,'TickDir','out'); colormap(flip(gray));
+            title('Pyramidal cells','FontWeight','normal','FontSize',10,'Color',[.8 .2 .2]);
+            ylabel('ISI n+1 (s)');
+            xlabel('ISI (s)');
+        end
         
         subplot(1,3,2);
-        contourf(spikesReturnPlot.centers,spikesReturnPlot.centers,spikesReturnPlot.NarrowInterneuron.hist_prob,40,'LineColor','none');
-        axis square
-        ylim(plot_logxyaxis); xlim(plot_logxyaxis); 
-        LogScale('xy',10);
-        set(gca,'TickDir','out'); colormap(flip(gray));
-        title('Narrow Waveform Int','FontWeight','normal','FontSize',10,'Color',[.2 .2 .8]);
-        ylabel('ISI n+1 (s)');
-        xlabel('ISI (s)');
+        if isfield(spikesReturnPlot,'NarrowInterneuron')
+            contourf(spikesReturnPlot.centers,spikesReturnPlot.centers,spikesReturnPlot.NarrowInterneuron.hist_prob,40,'LineColor','none');
+            axis square
+            ylim(plot_logxyaxis); xlim(plot_logxyaxis); 
+            LogScale('xy',10);
+            set(gca,'TickDir','out'); colormap(flip(gray));
+            title('Narrow Waveform Int','FontWeight','normal','FontSize',10,'Color',[.2 .2 .8]);
+            ylabel('ISI n+1 (s)');
+            xlabel('ISI (s)');
+        end
         
         subplot(1,3,3);
-        contourf(spikesReturnPlot.centers,spikesReturnPlot.centers,spikesReturnPlot.WideInterneuron.hist_prob,40,'LineColor','none');
-        axis square
-        ylim(plot_logxyaxis); xlim(plot_logxyaxis); 
-        LogScale('xy',10);
-        set(gca,'TickDir','out'); colormap(flip(gray));
-        title('Wide Waveform Int','FontWeight','normal','FontSize',10,'Color',[.2 .8 .8]);
-        ylabel('ISI n+1 (s)');
-        xlabel('ISI (s)');
+        if isfield(spikesReturnPlot,'WideInterneuron')
+            contourf(spikesReturnPlot.centers,spikesReturnPlot.centers,spikesReturnPlot.WideInterneuron.hist_prob,40,'LineColor','none');
+            axis square
+            ylim(plot_logxyaxis); xlim(plot_logxyaxis); 
+            LogScale('xy',10);
+            set(gca,'TickDir','out'); colormap(flip(gray));
+            title('Wide Waveform Int','FontWeight','normal','FontSize',10,'Color',[.2 .8 .8]);
+            ylabel('ISI n+1 (s)');
+            xlabel('ISI (s)');
+        end
         saveas(gcf,['SummaryFigures\spikesReturnPlot_cellType.png']); 
             
     end
