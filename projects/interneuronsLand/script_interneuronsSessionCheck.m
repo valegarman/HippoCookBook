@@ -25,7 +25,6 @@ rippleChannel = [];
 computeCofiringModulation;
 
 %7. Speed correla
-tions
 speedCorr = getSpeedCorr('force',true);
 
 %8. Re-ran processCellMetrics
@@ -40,17 +39,16 @@ catch
     warning('Not possible to get manipulation periods. Running CellMetrics withouth excluding manipulation epochs');
 end
 
-cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',false,...
+cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true,...
     'forceReloadWaveformBasedMetrics',false);
 
 %9. Make summary
 plotSummary;
 
 %% Steps if cell is cleanned on phy
-spikes = loadSpikes('forceReload',force_loadingSpikes);
+spikes = loadSpikes('forceReload',true);
 spikeFeatures;
-getAverageCCG('force',true);
-optogeneticResponses = getOptogeneticResponse('numRep',500,'force',true,'duration_round_decimal',1);
+optogeneticResponses = getOptogeneticResponse('numRep',500,'force',true);
 
 psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true);
 
@@ -89,7 +87,8 @@ save([basenameFromBasepath(pwd) '.behavior.cellinfo.mat'],'behavior');
     
 speedCorr = getSpeedCorr('numQuantiles',20,'force',true);
 
-getACGPeak('force',true);
+getSpikesReturnPlot('force',true);
+
 session = loadSession;
 try
     if ~isempty(dir([session.general.name,'.optogeneticPulses.events.mat']))
@@ -103,6 +102,11 @@ end
 
 cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true,...
     'forceReloadWaveformBasedMetrics',false);
+
+getAverageCCG('force',true);
+
+getACGPeak('force',true);
+
 plotSummary;
 
 

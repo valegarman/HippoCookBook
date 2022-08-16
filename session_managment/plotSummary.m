@@ -200,7 +200,7 @@ for ii = 1:length(UID)
         yyaxis right
         plot(t(t>winSizePlot_opto(1) & t<winSizePlot_opto(2)), resp(t>winSizePlot_opto(1) & t<winSizePlot_opto(2)),'k','LineWidth',2);
         ylabel('Rate (Hz)'); 
-        title([basenameFromBasepath(pwd),' UID: ', num2str(UID(ii)),' (', num2str(ii),'/',num2str(length(UID)),' CluID: ',num2str(spikes.cluID(UID)),')'],'FontWeight','normal');
+        title([basenameFromBasepath(pwd),' UID: ', num2str(UID(ii)),' (', num2str(ii),'/',num2str(length(UID)),' CluID: ',num2str(spikes.cluID(UID(ii))),')'],'FontWeight','normal');
     else
         axis off
         title('No light responsive cells','FontWeight','normal');
@@ -684,7 +684,7 @@ if checkUnits && showTagCells
     optogenetic_responses.checkedCells = checkedCells;
     
     optogeneticResponses = optogenetic_responses;
-    save([basenameFromBasepath(pwd) '.optogeneticResponse.cellinfo.mat'],'optogeneticResponses');
+    save([basenameFromBasepath(pwd) '.optogeneticResponse.cellinfo.mat'],'optogeneticResponses','-V7.3');
 end
 
 cd(prevPath);
