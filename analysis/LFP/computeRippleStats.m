@@ -169,6 +169,7 @@ end
     h = figure;
     subplot(3,2,1)
     computeWavelet(mean(maps.ripples_raw), maps.timestamps, [80 300]);
+    title(['Ch: ' num2str(ripples.detectorinfo.detectionchannel)],'FontWeight','normal');
 
     subplot(3,2,2)
     scatter(data.spectralEntropy, data.fastRippleIndex,10,[.7 .7 .7],"filled");
