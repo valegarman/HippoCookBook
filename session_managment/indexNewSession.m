@@ -76,11 +76,15 @@ sessionsTable = readtable([indexedSessionCSV_path filesep indexedSessionCSV_name
 % new table entry
 
 optogenetics = cell(0);
-for ii = 1:length(session.animal.opticFiberImplants)
-    optogenetics{1, length(optogenetics)+1} = session.animal.opticFiberImplants{ii}.opticFiber;
-    optogenetics{1, length(optogenetics)+1} = ' ';
+if ~strcmpi(session.extracellular.chanCoords.layout,'uLED-12LED-32Ch-4Shanks')
+    for ii = 1:length(session.animal.opticFiberImplants)
+        optogenetics{1, length(optogenetics)+1} = session.animal.opticFiberImplants{ii}.opticFiber;
+        optogenetics{1, length(optogenetics)+1} = ' ';
+    end
+    optogenetics(end) = [];
+else
+    optogenetics = {session.extracellular.chanCoords.layout};
 end
-optogenetics(end) = [];
 
 behav = cell(0); 
 for i = 1:length(session.epochs)
