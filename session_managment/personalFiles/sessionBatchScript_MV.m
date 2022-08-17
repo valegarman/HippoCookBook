@@ -1,7 +1,7 @@
 %% sessionBatchScript
 
 %1% Transfer files and organize session's folder
-updateExpFolder({'U:\fCr1', 'Y:\fCr1'},'X:\data\fCr1');
+updateExpFolder({'V:\data\fPv5', 'Y:\fPv5'},'E:\data\fPv5');
 
 updateExpFolder({'V:\data\fCck1', 'Y:\fCck1'},'E:\data\fCck1');
 
