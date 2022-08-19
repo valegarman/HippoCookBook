@@ -18,7 +18,10 @@ batch_sessionSummary('basepath','G:\data\fPv4','cleanArtifacts',({65,[]}),'analo
 % 3% CLEAN SESSIONS MANUALLY BY PHY
 
 % 4% Processs individual sessions by by 'processSession'. Example:
-processSession('digital_optogenetic_channels',[],'analog_optogenetic_channels',1,'promt_hippo_layers',true,'manual_analog_pulses_threshold',true);
+processSession('digital_optogenetic_channels',[],'analog_optogenetic_channels',1,'promt_hippo_layers',true,'manual_analog_pulses_threshold',false);
+
+processSession('digital_optogenetic_channels',[],'analog_optogenetic_channels',1,'promt_hippo_layers',true,'excludeAnalysis',{'3'});
+
 
 
 % 5% Index session
