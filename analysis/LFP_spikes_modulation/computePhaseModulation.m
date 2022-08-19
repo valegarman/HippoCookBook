@@ -92,7 +92,14 @@ end
 
 if skipStimulationPeriods
     try
-        optogenetic_responses = getOptogeneticResponse;
+        try 
+            targetFile = dir('*optogeneticPulses*');
+            optogenetic_responses = importdata(targetFile.name);
+        catch
+            warning('Could not open optogeneticPulses file... trying to open optogeneticResponses...');
+            optogenetic_responses = getOptogeneticResponse;
+        end
+        excludeIntervals = [excludeIntervals; optogenetic_responses.stimulationEpochs];
     catch
         warning('Skip stimulation periods not possible...');
     end

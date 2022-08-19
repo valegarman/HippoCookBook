@@ -149,10 +149,10 @@ for jj = 1 : length(analogChannelsList)
     end
     
     if ~manualThr
-        thr = 125*median(d(1:100:end)/0.6745); % computing threshold
+        thr = 75*median(d(1:100:end)/0.6745); % computing threshold
         if thr == 0 || ~any(d>thr)
             disp('Trying 5*std threshold...');
-            thr = 4.5 * std(double(d));
+            thr = 3 * std(double(d));
         end
     else
         h2 = figure;

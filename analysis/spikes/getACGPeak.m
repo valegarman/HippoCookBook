@@ -66,7 +66,8 @@ end
 all_pyr = ismember(cell_metrics.putativeCellType,'Pyramidal Cell');
 all_nw = ismember(cell_metrics.putativeCellType,'Narrow Interneuron');
 all_ww = ismember(cell_metrics.putativeCellType,'Wide Interneuron');
-optoTagged = find(optogenetic_responses.threeWaysTest(:,optogenetic_responses.pulseDuration==lightPulseDuration)==1);
+%optoTagged = find(optogenetic_responses.threeWaysTest(:,optogenetic_responses.pulseDuration==lightPulseDuration)==1);
+optoTagged = any((optogenetic_responses.threeWaysTest==1)')';
 
 optoPyr = zeros(1,length(UID));
 for i = 1:length(optoTagged)
