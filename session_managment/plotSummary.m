@@ -596,7 +596,7 @@ for ii = 1:length(UID)
         xlabel('Reward time (s)'); ylabel('Rate (SD)');
 
         
-        if ~isnan(behavior.psth_intersection) && isfield(behavior,'psth_intersection')
+        if isfield(behavior,'psth_intersection') && isstruct(behavior.psth_intersection)
             subplot(5,5,19)
             hold on
             t_win = behavior.psth_intersection.timestamps > -2 & behavior.psth_intersection.timestamps < 2;
@@ -610,7 +610,7 @@ for ii = 1:length(UID)
             xlabel('Intersection time (s)'); ylabel('Rate (SD)');
         end
         
-        if ~isnan(behavior.psth_startPoint) && isfield(behavior,'psth_startPoint')
+        if isfield(behavior,'psth_startPoint') && isstruct(behavior.psth_intersection)
             subplot(5,5,23)
             hold on
             t_win = behavior.psth_startPoint.timestamps > -2 & behavior.psth_startPoint.timestamps < 2;
