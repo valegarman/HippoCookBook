@@ -119,7 +119,7 @@ if showFig
     plotFill(acg_time,acg_smoothed_norm(:,all_pyr),'Color',pyr_color);
     plotFill(acg_time,acg_smoothed_norm(:,all_nw),'Color',nw_color);
     plotFill(acg_time,acg_smoothed_norm(:,all_ww),'Color',ww_color);
-    if ~isempty(optoTagged)
+    if ~isempty(find(optoTagged))
         plot(acg_time,acg_smoothed_norm(:,optoTagged),'Color',cell_color);
     end
     if ~isempty(optoPyr)

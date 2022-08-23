@@ -106,7 +106,7 @@ if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))
 
     session = sessionTemplate(basepath,'showGUI',true);
 
-    plotProbe('force',true); % choose probe
+    selectProbe('force',true); % choose probe
 end
 
 %% 2. Remove previous cellinfo.spikes.mat and computes spikes again (manual clustered)
@@ -200,7 +200,7 @@ end
 % Exclude manipulation intervals for computing CellMetrics
 if ~any(ismember(excludeAnalysis, {'10',lower('cellMetrics')}))
 
-    session = assignBrainRegion;
+    session = assignBrainRegion('showPowerProfile','hfo','showEvent','slowOscilations','eventTwin',[-.5 .5]);
 
     try
         if ~isempty(dir([session.general.name,'.optogeneticPulses.events.mat']))

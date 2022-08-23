@@ -50,7 +50,7 @@ saveMat = p.Results.saveMat;
 showPowerProfile = p.Results.showPowerProfile;
 
 % dealing with inputs 
-listOfRegions = {'Select region','CA1','CA3','PTLp','CA1sp','CA1so','CA1sr','CA1slm','DG','Not assigned'};
+listOfRegions = {'Select region','CA1','CA3','PTLp','CA1sp','CA1so','CA1sr','CA1slm','DG','PTLp1','PTLp2_3','PTLp4','PTLp5','PTLp6','PTLp6a','PTLp6b','Not assigned'};
 listOfColors = hsv(length(listOfRegions)+10);
 listOfColors = listOfColors(randperm(length(listOfColors)),:);
 

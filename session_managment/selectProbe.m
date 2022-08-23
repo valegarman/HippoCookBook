@@ -1,5 +1,5 @@
-function chanCoords = plotProbe(varargin)
-%        chanCoords = plotProbe(varargin)
+function chanCoords = selectProbe(varargin)
+%        chanCoords = selectProbe(varargin)
 %
 % Plot probe and returns channel coordinates from basepath
 %
@@ -52,7 +52,7 @@ end
 
 % if empty or force
 if parameters.force || isempty(chanCoords)
-    listOfProbes = {'Select probe...','A5x12-16-Buz-lin-5mm-100-200-160-177', 'CambridgeNeurotech-E1-64ch', 'uLED-12LED-32Ch-4Shanks', 'Not included'};
+    listOfProbes = {'Select probe...','A5x12-16-Buz-lin-5mm-100-200-160-177', 'CambridgeNeurotech-E1-64ch', 'uLED-12LED-32Ch-4Shanks','DiagnosticBiochip-128-6-128ch', 'Not included'};
         
     fig = figure;
     set(fig, 'MenuBar', 'none');
@@ -85,6 +85,10 @@ if parameters.force || isempty(chanCoords)
             coord_path = dir([directory.path filesep 'session_files'...
                 filesep 'probes_coordinates' filesep ...
                 'electrodes_coordinates_uLED-12LED-32Ch-4Shanks.chanCoords.channelInfo.mat']);
+        case lower('DiagnosticBiochip-128-6-128ch')
+            coord_path = dir([directory.path filesep 'session_files'...
+                filesep 'probes_coordinates' filesep ...
+                'electrodes_coordinates_DiagnosticBiochip-128-6-128ch.chanCoords.channelInfo.mat']);
         otherwise
             error('Probe not supported yet...');
     end
