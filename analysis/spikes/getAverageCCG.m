@@ -42,6 +42,7 @@ addParameter(p,'excludeIntervals',[],@isnumeric);
 addParameter(p,'winIndex',[-.01 .01],@isnumeric);
 addParameter(p,'interp0',[-.01 .01],@isnumeric);
 addParameter(p,'useBrainRegions',true,@islogical);
+addParameter(p,'useDistinctShanks',true,@islogical);
 
 parse(p, varargin{:});
 basepath = p.Results.basepath;
@@ -57,6 +58,7 @@ excludeIntervals = p.Results.excludeIntervals;
 winIndex = p.Results.winIndex;
 interp0 = p.Results.interp0;
 useBrainRegions = p.Results.useBrainRegions;
+useDistinctShanks = p.Results.useDistinctShanks;
 
 % Deal with inputs
 prevPath = pwd;
@@ -276,6 +278,11 @@ if useBrainRegions && exist([basenameFromBasepath(basepath) '.cell_metrics.celli
     else
         warning('Brain regions have not been defined yet...');
     end
+end
+
+keyboard;
+session = loadSession;
+if useDistinctShanks && exist([basenameFromBasepath(basepath) '.cell_metrics.cellinfo.mat'])
 end
 
 if saveMat
