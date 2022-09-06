@@ -63,3 +63,4 @@ fpv3_210318_sess14,fpv3,fpv3\fpv3_210318_sess14,c57b1/6,pv/ai32,"105µm (125µm)
 fpv3_210308_sess6,fpv3,fpv3\fpv3_210308_sess6,c57b1/6,pv/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,11,PTLp CA1sp CA1so CA1sr CA3,InterneuronsLibrary
 fpv3_210317_sess13,fpv3,fpv3\fpv3_210317_sess13,c57b1/6,pv/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,30,PTLp CA1so CA1sp CA1slm CA1sr CA3,InterneuronsLibrary
 fpv3_210311_sess9,fpv3,fpv3\fpv3_210311_sess9,unknown,,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,22,PTLp CA1sp CA1so CA1sr CA1slm CA3,InterneuronsLibrary
+fid2dlx1_191120_sess3,fid2dlx1,fid2dlx1\fid2dlx1_191120_sess3,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,25,PTLp6 PTLp5 PTLp2_3 PTLp4 PTLp1,InterneuronsLibrary neuroGli2d
