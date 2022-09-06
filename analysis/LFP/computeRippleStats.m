@@ -56,7 +56,7 @@ addParameter(p,'saveSummary',true,@islogical);
 addParameter(p,'saveMat',false,@islogical);
 addParameter(p,'durations',[-0.075 0.075], @isnumeric);
 addParameter(p,'ripples',[], @isstruct);
-addParameter(p,'rippleChannel',[], @isstruct);
+addParameter(p,'rippleChannel',[], @isnumeric);
 addParameter(p,'plotOpt',[], @islogical);
 
 parse(p,varargin{:})

@@ -280,11 +280,6 @@ if useBrainRegions && exist([basenameFromBasepath(basepath) '.cell_metrics.celli
     end
 end
 
-keyboard;
-session = loadSession;
-if useDistinctShanks && exist([basenameFromBasepath(basepath) '.cell_metrics.cellinfo.mat'])
-end
-
 if saveMat
     disp('Saving results...');
     filename = split(pwd,filesep); filename = filename{end};
