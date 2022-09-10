@@ -45,6 +45,7 @@ addParameter(p,'bazler_ttl_channel',[],@isnumeric);
 addParameter(p,'tracking_pixel_cm',0.1149,@isnumeric);
 addParameter(p,'excludeAnalysis',[]); % 
 addParameter(p,'useCSD_for_theta_detection',true,@islogical);
+addParameter(p,'profileType','hippocampus',@ischar); % options, 'hippocampus' and 'cortex'
 
 parse(p,varargin{:})
 
@@ -66,6 +67,7 @@ bazler_ttl_channel = p.Results.bazler_ttl_channel;
 tracking_pixel_cm = p.Results.tracking_pixel_cm;
 excludeAnalysis = p.Results.excludeAnalysis;
 useCSD_for_theta_detection = p.Results.useCSD_for_theta_detection;
+profileType = p.Results.profileType;
 
 % Deal with inputs
 prevPath = pwd;
@@ -199,8 +201,11 @@ end
 %% 10. Cell metrics
 % Exclude manipulation intervals for computing CellMetrics
 if ~any(ismember(excludeAnalysis, {'10',lower('cellMetrics')}))
-
-    session = assignBrainRegion('showPowerProfile','theta','showEvent','ripples','eventTwin',[-0.05 0.05]); % hfo slowOscilations [-.5 .5]
+    if strcmpi(profileType,'hippocampus')
+        session = assignBrainRegion('showPowerProfile','theta','showEvent','ripples','eventTwin',[-0.05 0.05]); % hfo slowOscilations [-.5 .5]
+    elseif strcmpi(profileType,'cortex')
+        session = assignBrainRegion('showPowerProfile','hfo','showEvent','slowOscilations','eventTwin',[-.5 .5]); % hfo slowOscilations [-.5 .5]
+    end
 
     try
         if ~isempty(dir([session.general.name,'.optogeneticPulses.events.mat']))
