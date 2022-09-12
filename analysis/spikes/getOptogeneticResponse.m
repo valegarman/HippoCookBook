@@ -151,7 +151,8 @@ for ii = 1:size(conditions,1)
     conditions(ii,3) = length(find(pulses.duration==conditions(ii,1) & pulses.channel == conditions(ii,2)));
 end
 notEnoughtPulses = conditions(:,3)<minNumberOfPulses;
-conditions(notEnoughtPulses,:) = [];
+conditions(notEnoughtPulses,:) = []; % removing groups of pulses with less number of pulses than defined in 'notEnoughtPulses'
+conditions(conditions(:,1)==0,:) = []; % removing pulses with duration shorter than decimal round
 nConditions = size(conditions,1);
 
 %% Merge durations that are close enough to be the same pulse duration
@@ -164,7 +165,7 @@ end
 for i = 1:length(index)
     if ~isempty(index{i})
         for j = 1:length(index{i})
-             indexToMerge{i}(j) = find(conditions(:,3) == max(conditions(index{i}(j),3), conditions(index{i}(j)+1,3)));
+             indexToMerge{i}(j) = find(conditions(:,3) == max(conditions(index{i}(j),3), conditions(index{i}(j)+1,3)),1);
         end
     else
         indexToMerge{i} = [];
