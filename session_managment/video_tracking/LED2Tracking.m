@@ -62,7 +62,7 @@ addParameter(p,'verbose',false,@islogical);
 addParameter(p,'thresh',.98,@isnumeric)
 addParameter(p,'bazlerTTL',[],@isnumeric)
 addParameter(p,'saveMat',true,@islogical);
-addParameter(p,'bazler_ttl_channel',10,@isnumeric);
+addParameter(p,'basler_ttl_channel',[],@isnumeric);
 
 % addParameter(p,'RGBChannel',[],@isstr);
 
@@ -79,7 +79,7 @@ verbose = p.Results.verbose;
 thresh = p.Results.thresh;
 bazlerTtl = p.Results.bazlerTTL;
 saveMat = p.Results.saveMat;
-bazler_ttl_channel = p.Results.bazler_ttl_channel;
+basler_ttl_channel = p.Results.basler_ttl_channel;
 % RGBChannel = p.Results.RGBChannel;
 
 %% Deal with inputs
@@ -90,12 +90,16 @@ if ~isempty(dir([basepath filesep '*Tracking.Behavior.mat'])) || forceReload
     return
 end
 
-% Dealing with bazler_ttl_channel
-try
+% Dealing with basler_ttl_channel
+if isempty(basler_ttl_channel)
     cd ..
     session = loadSession();
     if isfield(session.analysisTags,'bazler_ttl_channel')
-        bazler_ttl_channel = session.analysisTags.bazler_ttl_channel;
+        basler_ttl_channel = session.analysisTags.bazler_ttl_channel;
+    else
+        warning('Basler TTL was not defined!!');
+        tracking = [];
+        return
     end
 end
 cd(basepath)
@@ -158,7 +162,7 @@ elseif isempty(roiTracking)
 elseif ischar(roiTracking) && strcmpi(roiTracking,'manual')
     disp('Draw ROI for tracking...');
     h1 = figure;
-    imshow(average_frame);
+    imagesc(average_frame); colormap gray; caxis([0 4*mean(average_frame(:))]);
     title('Draw ROI for tracking... (include all posible locations)','FontWeight','normal');
     roi = drawpolygon;
     roiTracking = [roi.Position; roi.Position(1,:)];
@@ -325,7 +329,7 @@ end
 % Alternation, 5. Home Delay, 6. Is alternation forzed?
 if isempty(bazlerTtl)
     digitalIn = getDigitalIn;
-    bazlerTtl = digitalIn.timestampsOn{bazler_ttl_channel};
+    bazlerTtl = digitalIn.timestampsOn{basler_ttl_channel};
 end
 % match basler frames con ttl pulses
 if length(bazlerTtl) == length(x)
