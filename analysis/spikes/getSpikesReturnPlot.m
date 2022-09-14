@@ -131,7 +131,10 @@ if doPlot
         if ~isempty(plot_caxis)
             caxis(plot_caxis);
         else
-            caxis([0 max(max(squeeze(spikesReturnPlot.hist_prob(jj,:,:))))]);
+            try 
+                caxis([0 max(max(squeeze(spikesReturnPlot.hist_prob(jj,:,:))))]);
+            catch
+            end
         end
         axis square
         ylim(plot_logxyaxis); xlim(plot_logxyaxis); 

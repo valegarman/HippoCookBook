@@ -100,7 +100,7 @@ addParameter(p,'rippleStats',true,@islogical);
 addParameter(p,'debug',false,@islogical);
 addParameter(p,'eventSpikeThreshold',1,@isnumeric);
 addParameter(p,'force',false,@islogical);
-addParameter(p,'removeRipplesStimulation',true,@islogical);
+addParameter(p,'removeOptogeneticStimulation',true,@islogical);
 addParameter(p,'useCSD',false,@islogical);
 addParameter(p,'stdThreshold',1.5,@isnumeric);
 
@@ -128,7 +128,7 @@ rippleStats = p.Results.rippleStats;
 debug = p.Results.debug;
 eventSpikeThreshold = p.Results.eventSpikeThreshold;
 force = p.Results.force;
-removeRipplesStimulation = p.Results.removeRipplesStimulation;
+removeOptogeneticStimulation = p.Results.removeOptogeneticStimulation;
 useCSD = p.Results.useCSD;
 stdThreshold = p.Results.stdThreshold;
 
@@ -165,7 +165,7 @@ if isempty(SWChannel)
     SWChannel = hippocampalLayers.bestShankLayers.radiatum;
 end
 
-if removeRipplesStimulation && ~isempty(dir('*optogeneticPulses.events.mat'))
+if removeOptogeneticStimulation && ~isempty(dir('*optogeneticPulses.events.mat'))
     targetFile = dir('*optogeneticPulses.events.mat'); load(targetFile.name);
     restrict_temp = SubtractIntervals([0 Inf],optoPulses.stimulationEpochs);
     restrict =  ConsolidateIntervals([restrict; restrict_temp]);
@@ -181,7 +181,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%
 ripples = findRipples(rippleChannel,'thresholds',thresholds,'passband',passband,...
     'EMGThresh',EMGThresh,'durations',durations, 'saveMat',false,'restrict',restrict,'frequency',frequency);
-if removeRipplesStimulation
+if removeOptogeneticStimulation
     try
         % Remove ripples durting stimulation artifacts
         if ~isempty(dir('*.optogeneticPulses.events.mat'))
