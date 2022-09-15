@@ -28,6 +28,8 @@ for ii = 1:length(sessionsTable.SessionName)
             
             sessionsTable.brainRegions{ii} = [brainRegions{:}];
             
+            sessionsTable.Project{ii} = session.general.projects;
+            
             %%%
             
             close all;
@@ -36,3 +38,6 @@ for ii = 1:length(sessionsTable.SessionName)
         end
     end
 end
+
+%%% your code goes here...
+writetable(sessionsTable,[HCB_directory.path filesep 'indexedSessions.csv']); % the variable is called allSessions
