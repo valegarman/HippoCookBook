@@ -166,6 +166,8 @@ for ii = 1:length(efields)
             maps{count}(:,1) = timestamps(direction == directionList(jj) & recMask == ii);
             maps{count}(:,2) = lin(direction == directionList(jj) & recMask==ii);
             description{count} = behaviorTemp.(efields{ii}).description;
+            zone{count} = behaviorTemp.(efields{ii}).zone;
+            avFrame{count} = tracking.avFrame{ii};
             count = count+1;
         end
     elseif strcmpi(behaviorTemp.(efields{ii}).description,'Open Field') && any(isnan(behaviorTemp.(efields{ii}).position.lin))
@@ -173,6 +175,8 @@ for ii = 1:length(efields)
         maps{count}(:,2) = x(subSessionMask == ii);
         maps{count}(:,3) = y(subSessionMask == ii);
         description{count} = behaviorTemp.(efields{ii}).description;
+        zone{count} = behaviorTemp.(efields{ii}).zone;
+        avFrame{count} = tracking.avFrame{ii};
         count = count + 1;
     else
         disp('Error while running getSessionBehavior. Quitting...');
@@ -194,6 +198,7 @@ end
 behavior.maps = maps;
 
 behavior.description = description;
+behavior.avFrame = avFrame;
 
 for ii = 1:length(events)
     if isfield(events{ii},'entry') && isfield(events{ii},'exit')

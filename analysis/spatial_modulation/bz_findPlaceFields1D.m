@@ -92,6 +92,7 @@ addParameter(p,'saveMat', true, @islogical);
 
 parse(p,varargin{:});
 basepath = p.Results.basepath;
+
 firingMaps = p.Results.firingMapsAvg;
 % Get session info
 
@@ -248,9 +249,6 @@ placeFieldStats.mapStats = mapStats;
 if saveMat
    save([basepath,filesep,placeFieldStats.sessionName '.placeFields.cellinfo.mat'],'placeFieldStats'); 
 end
-
- 
-    
 
 % ==========
 %   PLOT    

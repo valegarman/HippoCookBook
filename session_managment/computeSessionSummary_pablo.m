@@ -52,7 +52,7 @@ prevPath = pwd;
 cd(basepath);
 
 if ischar(listOfAnalysis) && strcmpi(listOfAnalysis,'all')
-    listOfAnalysis = {'spikes', 'analogPulses', 'digitalPulses', 'hippocampalLayers','downStates', 'ripples', 'tMazeBehaviour','linearMazeBehaviour','thetaModulation','openFieldBehaviour'};
+    listOfAnalysis = {'spikes', 'analogPulses', 'digitalPulses', 'hippocampalLayers','downStates', 'ripples', 'tMazeBehaviour','linearMazeBehaviour','thetaModulation','openFieldBehaviour','YMazeBehaviour'};
 end
 if ~isempty(exclude)
     listOfAnalysis(ismember(listOfAnalysis, exclude)) = [];
@@ -340,52 +340,63 @@ if any(ismember(listOfAnalysis,'thetaModulation'))
     end
 end
 
-if any(ismember(listOfAnalysis,'lfpAnalysis'))
-    try
-        computePowerSpectrum();
-        computeCohgram('channel2',13);
-    catch
-        
-    end
-end
-
-
-
-% TMAZEBEHAVIOUR AND LINEARMAZEBEHAVIOUR
-% if any(ismember(listOfAnalysis,'tMazeBehaviour')) || any(ismember(listOfAnalysis,'linearMazeBehaviour'))
-%    try 
-%         tracking = getSessionTracking('convFact',tracking_pixel_cm,'roiTracking','manual','anyMaze',anyMaze); 
-%         if any(ismember(listOfAnalysis,'tMazeBehaviour'))
-%             getSessionArmChoice('task','alternation');
-%         end
-%         behaviour = getSessionLinearize;
-% 
-%         % PLACE CELLS SUMMARY
-%         spikes = loadSpikes('getWaveformsFromDat',false);
-%         firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',true);
-%         placeFieldStats = bz_findPlaceFields1D('firingMaps',firingMaps);
-%         firingTrialsMap = firingMapPerTrial;
-%    catch
-%        warning('It has not been possible to run the behaviour code...');
-%    end
-% end
-
-% OPENFIELDBEHAVIOUR
-if any(ismember(listOfAnalysis,'openFieldBehaviour'))
-    try
-        tracking = getSessionTracking('convFact',tracking_pixel_cm,'roiTracking','manual','anyMaze',anyMaze);
-        behaviour = getSessionBehaviour;
+% TMAZEBEHAVIOUR AND LINEARMAZEBEHAVIOUR AND OPENFIELDBEHAVIOUR AND YMAZE
+% BEHAVIOUR
+if any(ismember(listOfAnalysis,'tMazeBehaviour')) || any(ismember(listOfAnalysis,'linearMazeBehaviour')) || any(ismember(listOfAnalysis,'openFieldBehaviour')) || any(ismember(listOfAnalysis,'YMazeBehaviour'))
+   try 
+        tracking = getSessionTracking('convFact',tracking_pixel_cm,'roiTracking','manual','anyMaze',anyMaze); 
+        if any(ismember(listOfAnalysis,'tMazeBehaviour'))
+            try
+                getSessionArmChoice('task','alternation');
+            catch
+            end
+        end
+        behavior = getSessionBehavior;
         % PLACE CELLS SUMMARY
         spikes = loadSpikes('getWaveformsFromDat',false);
-        firingMaps = firingMapAvg_pablo(behaviour,spikes,'pixelsPerCm',pixelsPerCm,'saveMat',true);
-        placeFieldStats = findPlaceFields2D('firingMaps',firingMaps);
-        spatialModulation = getSpatialModulation2D('force',true);
+        firingMaps = firingMapAvg_pablo(behavior,spikes,'pixelsPerCm',pixelsPerCm,'saveMat',true);
+        placeFieldStats = computeFindPlaceFields('firingMaps',firingMaps,'useColorBar',false);
+        firingTrialsMap = firingMapPerTrial_pablo;
+        spatialModulation = computeSpatialModulation;
         
+%         placeFieldStats = bz_findPlaceFields1D('firingMaps',firingMaps);
+%         placeFieldStats = findPlaceFields2D('firingMaps',firingMaps,'useColorBar',false);
+%         spatialModulation = getSpatialModulation2D();
+%           firingTrialsMap = firingMapPerTrial;
+% spatialModulation = getSpatialModulation();
 
-    catch
-        warning('It has not been possible to tun the behaviour code...');
-    end
+   catch
+       warning('It has not been possible to run the behaviour code...');
+   end
 end
+
+% OPENFIELDBEHAVIOUR
+% if any(ismember(listOfAnalysis,'openFieldBehaviour'))
+%     try
+%         tracking = getSessionTracking('convFact',tracking_pixel_cm,'roiTracking','manual','anyMaze',anyMaze);
+%         behaviour = getSessionLinearize;
+%         behaviour = getSessionLinearize_pablo;
+%         behavior = getSessionBehaviour;
+%         [tracking,behavior] = checkTracking();
+%         % PLACE CELLS SUMMARY
+%         spikes = loadSpikes('getWaveformsFromDat',false);
+%         firingMaps = firingMapAvg_pablo(behavior,spikes,'pixelsPerCm',pixelsPerCm,'saveMat',true);
+%         placeFieldStats = findPlaceFields2D('firingMaps',firingMaps,'useColorBar',false);
+%         spatialModulation = getSpatialModulation2D();
+%     catch
+%         warning('It has not been possible to tun the behaviour code...');
+%     end
+% end
+
+% LFP ANALYSIS
+% if any(ismember(listOfAnalysis,'lfpAnalysis'))
+%     try
+%         computePowerSpectrum();
+%         computeCohgram('channel2',13);
+%     catch
+%         disp('Not possible to run lfpAnalysis...');
+%     end
+% end
     
 cd(prevPath);
 end

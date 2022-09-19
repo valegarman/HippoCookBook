@@ -124,7 +124,7 @@ elseif anyMaze
         for ii = 1:size(MergePoints.foldernames,2)
             if ~isempty(dir([basepath filesep MergePoints.foldernames{ii} filesep '*.csv*']))
                 cd([basepath filesep MergePoints.foldernames{ii}]);
-                fprintf('Computing tracking in %s foler \n',MergePoints.foldernames{ii});
+                fprintf('Computing tracking in %s folder \n',MergePoints.foldernames{ii});
                 tempTracking{count} = anyMazeTracking([],[]);
                 trackFolder(count) = ii;
                 count = count + 1;
