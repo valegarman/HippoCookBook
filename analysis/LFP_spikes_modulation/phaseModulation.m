@@ -52,8 +52,8 @@ function [PhaseLockingData] = phaseModulation(varargin)
 
 %% defaults
 p = inputParser;
-addRequired(p,'spikes',@bz_isCellInfo);
-addRequired(p,'lfp',@bz_isLFP);
+addRequired(p,'spikes',@isstruct);
+addRequired(p,'lfp',@isstruct);
 addRequired(p,'passband',@isnumeric)
 addParameter(p,'intervals',[0 inf],@isnumeric)
 addParameter(p,'samplingRate',1250,@isnumeric)

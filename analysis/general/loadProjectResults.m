@@ -3,6 +3,8 @@ function [projectResults, projectSessionResults] =  loadProjectResults(varargin)
 %   Load and stack all results for a given project
 %
 % MV 2022
+%
+% TO DO: Improve multiple projects managment
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Defaults and Parms
@@ -64,13 +66,23 @@ sessions.project = sessionsTable.Project;
 
 disp('Projects found: '); 
 project_list = unique(sessions.project);
+project_list_temp = cell(0);
+for jj = 1:length(project_list)
+    project_list_temp{1,length(project_list_temp)+1} = project_list{jj};
+    project_list_temp{1,length(project_list_temp)+1} = ' ';
+end    
+project_list_temp(end) = [];
+project_list = unique(split([project_list_temp{:}],' '));
+
 for ii = 1:length(project_list)
     fprintf(' %3.i/ %s \n',ii,project_list{ii}); %\n
 end
+fprintf('Taking all sessions from project "%s" \n',project)
+
 if ~strcmpi(project,'Undefined') 
     if ~isempty(ismember(project_list, project))
-        sessions.basepaths = sessions.basepaths(strcmpi(sessions.project, project));
-        sessions.project = sessions.project(strcmpi(sessions.project, project));
+        sessions.basepaths = sessions.basepaths(contains(sessions.project, project));
+        sessions.project = sessions.project(contains(sessions.project, project));
     else
         error('Project name not recognized!');
     end
@@ -114,6 +126,9 @@ for ii = 1:length(sessions.basepaths)
     
     % optogenetic responses
     targetFile = dir('*.optogeneticResponse.cellinfo.mat'); load(targetFile.name);
+    if ~isfield(optogeneticResponses,'checkedCells')
+        optogeneticResponses.checkedCells = zeros(length(optogeneticResponses.bootsTrapRate(:,1)),1);
+    end
     projectSessionResults.optogeneticResponses{ii} = optogeneticResponses;
     clear optogeneticResponses
     
@@ -229,8 +244,8 @@ for ii = 1:length(sessions.basepaths)
                 [saveSummariespath  sessionsTable.SessionName{ii} '_' summaryPngs(jj).name]);
         end
     end
+    
 end
-
 %% stack all results
 projectResults.optogeneticResponses = stackSessionResult(projectSessionResults.optogeneticResponses, projectSessionResults.numcells);
 projectResults.ripplesResponses = stackSessionResult(projectSessionResults.ripplesResponses, projectSessionResults.numcells);
@@ -241,9 +256,11 @@ projectResults.thetaRunModulation = stackSessionResult(projectSessionResults.the
 projectResults.lGammaModulation = stackSessionResult(projectSessionResults.lGammaModulation, projectSessionResults.numcells);
 projectResults.hGammaModulation = stackSessionResult(projectSessionResults.hGammaModulation, projectSessionResults.numcells);
 projectResults.ripplePhaseModulation = stackSessionResult(projectSessionResults.rippleMod, projectSessionResults.numcells);
-projectResults.behavior = stackSessionResult(projectSessionResults.behavior, projectSessionResults.numcells);
+projectResults.slowOsciResponses = stackSessionResult(projectSessionResults.slowOsciResponses, projectSessionResults.numcells);
+% projectResults.behavior =
+% stackSessionResult(projectSessionResults.behavior, projectSessionResults.numcells); 
 projectResults.spatialModulation = stackSessionResult(projectSessionResults.spatialModulation, projectSessionResults.numcells);
-projectResults.speedCorr = stackSessionResult(projectSessionResults.speedCorr, projectSessionResults.numcells);
+% projectResults.speedCorr = stackSessionResult(projectSessionResults.speedCorr, projectSessionResults.numcells);
 projectResults.acgPeak = stackSessionResult(projectSessionResults.acgPeak, projectSessionResults.numcells);
 
 projectResults.cell_metrics = cell_metrics;

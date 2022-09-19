@@ -246,7 +246,11 @@ end
 
 %% Get tracking positions 
 if getPos
-    getSessionTracking('convFact',tracking_pixel_cm,'roiTracking','manual','anyMaze',anyMaze); 
+    try 
+        getSessionTracking('convFact',tracking_pixel_cm,'roiTracking','manual','anyMaze',anyMaze); 
+    catch
+        warning('Tracking extraction was not possible. Skipping...')
+    end
 end
 
 if sessionSummary

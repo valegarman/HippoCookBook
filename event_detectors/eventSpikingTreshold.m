@@ -88,15 +88,15 @@ if figOpt
     figure
     subplot(1,3,[1 2])
     hold on
-    imagesc(t_event,1:length(eventPopResponse),eventPopResponse(idx,:),[-3 3]); colormap(jet);
+    imagesc(t_event,1:size(eventPopResponse,1),eventPopResponse(idx,:),[-3 3]); colormap(jet);
     plot([t_event([1 end])], length(find(eventResponse<spikingThreshold))* ones(2,1) ,'r','LineWidth',1); axis tight;
     ylabel('Events'); xlabel('Time (s)'); set(gca,'YDir','normal','TickDir','out');
 
     subplot(1,3,3)
     hold on
-    plot(eventResponse(idx),1:length(eventPopResponse)); 
-    plot([spikingThreshold spikingThreshold], [1 length(eventPopResponse)],'r');
-    xlabel('Response (SD)'); ylim([1 length(eventPopResponse)]); set(gca,'YDir','normal','TickDir','out');
+    plot(eventResponse(idx),1:size(eventPopResponse,1)); 
+    plot([spikingThreshold spikingThreshold], [1 size(eventPopResponse,1)],'r');
+    xlabel('Response (SD)'); ylim([1 size(eventPopResponse,1)]); set(gca,'YDir','normal','TickDir','out');
     try 
         saveas(gcf,'SummaryFigures\eventSpikingThreshold.png');
     end

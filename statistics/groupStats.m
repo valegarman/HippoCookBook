@@ -316,20 +316,6 @@ if length(yC) == 2
     stats.mannWhitney_U.p = p2;
     stats.mannWhitney_U.h = h2;
     stats.mannWhitney_U.stats = stats2;
-    
-    % Wilcoxon signed rank test for paired observation
-    [p2,h2,stats2] = signrank(yC{1},yC{2});
-    stats.wilconxonSignedRank.p = p2;
-    stats.wilconxonSignedRank.h = h2;
-    stats.wilconxonSignedRank.stats = stats2;
-    stats.wilconxonSignedRank.testName = 'Wilcoxon paired signed-rank test';
-
-    % paired-sample t-test.
-    [p2,h2,ci2,stats2] = ttest(yC{1},yC{2});
-    stats.pairedtTest.p = p2;
-    stats.pairedtTest.h = h2;
-    stats.pairedtTest.stats = stats2;
-    stats.pairedtTest.ci = ci2;
 
     % two-sample t-test.
     [p2,h2,ci2,stats2] = ttest2(yC{1},yC{2});
@@ -337,6 +323,32 @@ if length(yC) == 2
     stats.tTest.h = h2;
     stats.tTest.stats = stats2;
     stats.tTest.ci = ci2;
+    
+    if length(yC{1})==length(yC{2})
+        % Wilcoxon signed rank test for paired observation
+        [p2,h2,stats2] = signrank(yC{1},yC{2});
+        stats.wilconxonSignedRank.p = p2;
+        stats.wilconxonSignedRank.h = h2;
+        stats.wilconxonSignedRank.stats = stats2;
+        stats.wilconxonSignedRank.testName = 'Wilcoxon paired signed-rank test';
+
+        % paired-sample t-test.
+        [p2,h2,ci2,stats2] = ttest(yC{1},yC{2});
+        stats.pairedtTest.p = p2;
+        stats.pairedtTest.h = h2;
+        stats.pairedtTest.stats = stats2;
+        stats.pairedtTest.ci = ci2;
+    else
+        stats.wilconxonSignedRank.p = NaN;
+        stats.wilconxonSignedRank.h = NaN;
+        stats.wilconxonSignedRank.stats = NaN;
+        stats.wilconxonSignedRank.testName = 'Not possible to run wilcoxon paired signed-rank test';
+        
+        stats.pairedtTest.p = NaN;
+        stats.pairedtTest.h = NaN;
+        stats.pairedtTest.stats = NaN;
+        stats.pairedtTest.ci = NaN;
+    end
 end
 
 % post-hocs

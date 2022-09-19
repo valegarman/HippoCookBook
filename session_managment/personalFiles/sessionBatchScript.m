@@ -1,21 +1,15 @@
 %% sessionBatchScript
 
 %1% Transfer files and organize session's folder
-updateExpFolder({'U:\fCr1', 'Y:\fCr1'},'X:\data\fCr1');
-
-updateExpFolder({'V:\data\fCck1', 'Y:\fCck1'},'E:\data\fCck1');
+updateExpFolder({'V:\data\fPv5','Y:\fPv5'},'E:\data\fPv5');
 
 %2% Preprocessing
-batch_preprocessSession('basepath','X:\data\fCr1','analysisPath','F:\fCr1','cleanArtifacts',({[],1}),'analogChannelsList',[],'digitalChannelsList',1);
+% batch_preprocessSession('basepath','X:\data\fCr1','analysisPath','F:\fCr1','cleanArtifacts',({[],1}),'analogChannelsList',[],'digitalChannelsList',1);
 
-batch_preprocessSession('basepath','G:\data\fPv4','cleanArtifacts',({65,[]}),'analogChannelsList',65,'digitalChannelsList',0);
+batch_preprocessSession('basepath','E:\data\fPv5','cleanArtifacts',({[],1}),'analogChannelsList',[],'digitalChannelsList',1);
 
 %3% Computing summary
-batch_sessionSummary('basepath','E:\data\fCck1','analogChannelsList',[],'digitalChannelsList',1);
-
-batch_sessionSummary('basepath','G:\data\fNkx11','analogChannelsList',65,'digitalChannelsList',[]);
-
-
+batch_sessionSummary('basepath','E:\data\fPv5','analogChannelsList',[],'digitalChannelsList',1);
 
 
 

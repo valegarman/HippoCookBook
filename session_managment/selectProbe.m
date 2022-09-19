@@ -1,5 +1,5 @@
-function chanCoords = plotProbe(varargin)
-%        chanCoords = plotProbe(varargin)
+function chanCoords = selectProbe(varargin)
+%        chanCoords = selectProbe(varargin)
 %
 % Plot probe and returns channel coordinates from basepath
 %
@@ -52,7 +52,7 @@ end
 
 % if empty or force
 if parameters.force || isempty(chanCoords)
-    listOfProbes = {'Select probe...','A5x12-16-Buz-lin-5mm-100-200-160-177', 'CambridgeNeurotech-E1-64ch', 'Not included'};
+    listOfProbes = {'Select probe...','A5x12-16-Buz-lin-5mm-100-200-160-177', 'CambridgeNeurotech-E1-64ch', 'CambridgeNeurotech-H2-64ch', 'uLED-12LED-32Ch-4Shanks','DiagnosticBiochip-128-6-128ch', 'Not included'};
         
     fig = figure;
     set(fig, 'MenuBar', 'none');
@@ -81,6 +81,18 @@ if parameters.force || isempty(chanCoords)
             coord_path = dir([directory.path filesep 'session_files'...
                 filesep 'probes_coordinates' filesep ...
                 'electrodes_coordinates_CambridgeNeurotech-E1-64ch.chanCoords.channelInfo.mat']);
+        case lower('uLED-12LED-32Ch-4Shanks')
+            coord_path = dir([directory.path filesep 'session_files'...
+                filesep 'probes_coordinates' filesep ...
+                'electrodes_coordinates_uLED-12LED-32Ch-4Shanks.chanCoords.channelInfo.mat']);
+        case lower('DiagnosticBiochip-128-6-128ch')
+            coord_path = dir([directory.path filesep 'session_files'...
+                filesep 'probes_coordinates' filesep ...
+                'electrodes_coordinates_DiagnosticBiochip-128-6-128ch.chanCoords.channelInfo.mat']);
+        case lower('CambridgeNeurotech-H2-64ch')
+            coord_path = dir([directory.path filesep 'session_files'...
+                filesep 'probes_coordinates' filesep ...
+                'electrodes_coordinates_CambridgeNeurotech-H2-64ch.chanCoords.channelInfo.mat']);
         otherwise
             error('Probe not supported yet...');
     end
@@ -90,8 +102,8 @@ end
 
 if parameters.updateSessionFile
     session = loadSession(parameters.basepath);
-    session.animal.probeImplants{1}.probe = 'CambridgeNeurotech-E1-64c';
-    session.animal.probeImplants{1}.layout = 'CambridgeNeurotech-E1-64c';
+    session.animal.probeImplants{1}.probe = probe_type;
+    session.animal.probeImplants{1}.layout = probe_type;
     session.extracellular.chanCoords = chanCoords;
     save([parameters.basepath filesep session.general.name,'.session.mat'],'session','-v7.3');
 end

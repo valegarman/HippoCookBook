@@ -151,7 +151,8 @@ for ii = 1:size(conditions,1)
     conditions(ii,3) = length(find(pulses.duration==conditions(ii,1) & pulses.channel == conditions(ii,2)));
 end
 notEnoughtPulses = conditions(:,3)<minNumberOfPulses;
-conditions(notEnoughtPulses,:) = [];
+conditions(notEnoughtPulses,:) = []; % removing groups of pulses with less number of pulses than defined in 'notEnoughtPulses'
+conditions(conditions(:,1)==0,:) = []; % removing pulses with duration shorter than decimal round
 nConditions = size(conditions,1);
 
 %% Merge durations that are close enough to be the same pulse duration
@@ -164,7 +165,7 @@ end
 for i = 1:length(index)
     if ~isempty(index{i})
         for j = 1:length(index{i})
-             indexToMerge{i}(j) = find(conditions(:,3) == max(conditions(index{i}(j),3), conditions(index{i}(j)+1,3)));
+             indexToMerge{i}(j) = find(conditions(:,3) == max(conditions(index{i}(j),3), conditions(index{i}(j)+1,3)),1);
         end
     else
         indexToMerge{i} = [];
@@ -307,28 +308,39 @@ for ii = 1:length(spikes.UID)
                     rasterY = [rasterY; zz * ones(size((temp_spk)))];
                 end
             end
-            [rasterHist3,c] = hist3([rasterY rasterX],{1:size(pul,1) salt_time(1):salt_binSize:salt_time(2)});
-            optogeneticResponses.raster.rasterCount{ii,jj} = rasterHist3;
-            optogeneticResponses.raster.rasterProb{ii,jj} = rasterHist3/sum(rasterHist3(:));
-            optogeneticResponses.raster.TrialsNumber{ii,jj} = c{1};
-            optogeneticResponses.raster.times{ii,jj} = c{2};
-            optogeneticResponses.raster.rasterTrials{ii,jj} = rasterY;
-            optogeneticResponses.raster.rasterSpikesTimes{ii,jj} = rasterX;
-            
-            time  = c{2};
-            % running salt
-            baseidx = dsearchn(time', salt_baseline');
-            tidx = dsearchn(time', [0; pulseDuration*2]);      
-            
-            st = length(baseidx(1):baseidx(2));
-            nmbn = round(salt_win/salt_binSize);
-            v = 1:nmbn:st;
-            if any((v + nmbn - 1) > st)
-                error('reduce window size or baseline duration')
+            if ~isempty(rasterX)
+                [rasterHist3,c] = hist3([rasterY rasterX],{1:size(pul,1) salt_time(1):salt_binSize:salt_time(2)});
+                optogeneticResponses.raster.rasterCount{ii,jj} = rasterHist3;
+                optogeneticResponses.raster.rasterProb{ii,jj} = rasterHist3/sum(rasterHist3(:));
+                optogeneticResponses.raster.TrialsNumber{ii,jj} = c{1};
+                optogeneticResponses.raster.times{ii,jj} = c{2};
+                optogeneticResponses.raster.rasterTrials{ii,jj} = rasterY;
+                optogeneticResponses.raster.rasterSpikesTimes{ii,jj} = rasterX;
+
+                time  = c{2};
+                % running salt
+                baseidx = dsearchn(time', salt_baseline');
+                tidx = dsearchn(time', [0; pulseDuration*2]);      
+
+                st = length(baseidx(1):baseidx(2));
+                nmbn = round(salt_win/salt_binSize);
+                v = 1:nmbn:st;
+                if any((v + nmbn - 1) > st)
+                    error('reduce window size or baseline duration')
+                end
+
+                [optogeneticResponses.salt.p_value(ii,jj,1), optogeneticResponses.salt.I_statistics(ii,jj,1)] = salt(rasterHist3(:,baseidx(1):baseidx(2)),rasterHist3(:,tidx(1):tidx(2)),salt_binSize, salt_win);
+            else
+                optogeneticResponses.raster.rasterCount{ii,jj} = NaN;
+                optogeneticResponses.raster.rasterProb{ii,jj} = NaN;
+                optogeneticResponses.raster.TrialsNumber{ii,jj} = NaN;
+                optogeneticResponses.raster.times{ii,jj} = NaN;
+                optogeneticResponses.raster.rasterTrials{ii,jj} = NaN;
+                optogeneticResponses.raster.rasterSpikesTimes{ii,jj} = NaN;
+                optogeneticResponses.salt.p_value(ii,jj,1) = NaN;
+                optogeneticResponses.salt.I_statistics(ii,jj,1) = NaN;
             end
-            
-            [optogeneticResponses.salt.p_value(ii,jj,1), optogeneticResponses.salt.I_statistics(ii,jj,1)] = salt(rasterHist3(:,baseidx(1):baseidx(2)),rasterHist3(:,tidx(1):tidx(2)),salt_binSize, salt_win);
-            
+                        
             % multiple test test. If not boostrap, it would be 2 ways.
             if (optogeneticResponses.rateDuringPulse(ii,jj,1) > ci(2) || isnan(ci(2))) && optogeneticResponses.modulationSignificanceLevel(ii,jj,1)<0.01...
                     && mean(optogeneticResponses.responsecurveZ(ii,jj,t_duringPulse)) > 1.96
@@ -467,7 +479,7 @@ optogeneticResponses.responseMetrics = responseMetrics;
 if saveMat
     disp(' Saving results...');
     filename = split(pwd,filesep); filename = filename{end};
-    save([filename '.optogeneticResponse.cellinfo.mat'],'optogeneticResponses');
+    save([filename '.optogeneticResponse.cellinfo.mat'],'optogeneticResponses','-v7.3');
 end
 
 if saveEventsFile

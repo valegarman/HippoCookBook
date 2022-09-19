@@ -1,4 +1,5 @@
 
+
 function [] = processSession(varargin)
 
 % [] = indexSession_InterneuronsLibrary(varargin)
@@ -41,9 +42,13 @@ addParameter(p,'analog_optogenetic_channels',[],@isnumeric);
 addParameter(p,'promt_hippo_layers',false,@islogical);
 addParameter(p,'manual_analog_pulses_threshold',false,@islogical);
 addParameter(p,'bazler_ttl_channel',[],@isnumeric);
-addParameter(p,'forceAnalogPulses',false,@islogical);
+addParameter(p,'leftArmTtl_channel',2,@isnumeric)
+addParameter(p,'rightArmTtl_channel',3,@isnumeric)
+addParameter(p,'homeDelayTtl_channel',4,@isnumeric)
 addParameter(p,'tracking_pixel_cm',0.1149,@isnumeric);
 addParameter(p,'excludeAnalysis',[]); % 
+addParameter(p,'useCSD_for_theta_detection',true,@islogical);
+addParameter(p,'profileType','hippocampus',@ischar); % options, 'hippocampus' and 'cortex'
 
 parse(p,varargin{:})
 
@@ -62,9 +67,13 @@ analog_optogenetic_channels = p.Results.analog_optogenetic_channels;
 promt_hippo_layers = p.Results.promt_hippo_layers;
 manual_analog_pulses_threshold = p.Results.manual_analog_pulses_threshold;
 bazler_ttl_channel = p.Results.bazler_ttl_channel;
-forceAnalogPulses = p.Results.forceAnalogPulses;
+leftArmTtl_channel = p.Results.leftArmTtl_channel;
+rightArmTtl_channel = p.Results.rightArmTtl_channel;
+homeDelayTtl_channel = p.Results.homeDelayTtl_channel;
 tracking_pixel_cm = p.Results.tracking_pixel_cm;
 excludeAnalysis = p.Results.excludeAnalysis;
+useCSD_for_theta_detection = p.Results.useCSD_for_theta_detection;
+profileType = p.Results.profileType;
 
 % Deal with inputs
 prevPath = pwd;
@@ -72,6 +81,9 @@ cd(basepath);
 
 for ii = 1:length(excludeAnalysis)
     excludeAnalysis{ii} = num2str(excludeAnalysis{ii});
+end
+if length(excludeAnalysis) == 0
+    excludeAnalysis = num2str(excludeAnalysis);
 end
 excludeAnalysis = lower(excludeAnalysis);
 %% 1. Runs sessionTemplate
@@ -89,12 +101,25 @@ if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))
         if ~isfield(session.analysisTags,'analog_optogenetic_channels')
             session.analysisTags.analog_optogenetic_channels = analog_optogenetic_channels;
         end
+
         if isempty(rejectChannels)
             rejectChannels = session.channelTags.Bad.channels; % 1-index
         end
         if ~isfield(session.analysisTags,'bazler_ttl_channel')
             session.analysisTags.bazler_ttl_channel = bazler_ttl_channel;
         end
+        
+        if ~isfield(session.analysisTags,'leftArmTtl_channel')
+            session.analysisTags.leftArmTtl_channel = leftArmTtl_channel;
+        end
+        if ~isfield(session.analysisTags,'rightArmTtl_channel')
+            session.analysisTags.rightArmTtl_channel = rightArmTtl_channel;
+        end
+        if ~isfield(session.analysisTags,'homeDelayTtl_channel')
+            session.analysisTags.homeDelayTtl_channel = homeDelayTtl_channel;
+        end
+        
+        
         save([basepath filesep session.general.name,'.session.mat'],'session','-v7.3');
     catch
         warning('it seems that CellExplorer is not on your path');
@@ -102,12 +127,11 @@ if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))
 
     session = sessionTemplate(basepath,'showGUI',true);
 
-    plotProbe('force',true); % choose probe
+    selectProbe('force',true); % choose probe
 end
 
-
 %% 2. Remove previous cellinfo.spikes.mat and computes spikes again (manual clustered)
-if ~any(ismember(excludeAnalysis, {'2',lower('loadSpikes'})))
+if ~any(ismember(excludeAnalysis, {'2',lower('loadSpikes')}))
     disp('Loading Spikes...')
     session = loadSession;
     if force_loadingSpikes
@@ -121,7 +145,7 @@ end
 
 %% 3. Analog pulses detection
 if ~any(ismember(excludeAnalysis, {'3',lower('cureAnalogPulses')}))
-    if forceAnalogPulses || isempty(dir([session.general.name,'_original.dat']))
+    if force_analogPulsesDetection || isempty(dir([session.general.name,'_original.dat']))
         disp('Getting analog Pulses...')
         pulses = getAnalogPulses('analogChannelsList',analog_optogenetic_channels,'manualThr',manual_analog_pulses_threshold,'overwrite',force_analogPulsesDetection); % 1-index
     else
@@ -139,7 +163,7 @@ end
 %% 4. Spike Features
 % 4.1 Light responses, if available
 if ~any(ismember(excludeAnalysis, {'4',lower('spikesFeatures')}))
-    optogeneticResponses = getOptogeneticResponse('numRep',500,'force',true,'duration_round_decimal',1);
+    optogeneticResponses = getOptogeneticResponse('numRep',500,'force',true);
     % 4.2 ACG and waveform
     spikeFeatures;
 end
@@ -179,7 +203,7 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true);
 
     % 8.2 Ripples
-    ripples = c('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true);
+    ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'removeOptogeneticStimulation',true); % [1.5 3.5]
     psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true);
 
     % 8.3 Theta intervals
@@ -196,8 +220,11 @@ end
 %% 10. Cell metrics
 % Exclude manipulation intervals for computing CellMetrics
 if ~any(ismember(excludeAnalysis, {'10',lower('cellMetrics')}))
-
-    session = assignBrainRegion;
+    if strcmpi(profileType,'hippocampus')
+        session = assignBrainRegion('showPowerProfile','theta','showEvent','ripples','eventTwin',[-0.05 0.05]); % hfo slowOscilations [-.5 .5]
+    elseif strcmpi(profileType,'cortex')
+        session = assignBrainRegion('showPowerProfile','hfo','showEvent','slowOscilations','eventTwin',[-.5 .5]); % hfo slowOscilations [-.5 .5]
+    end
 
     try
         if ~isempty(dir([session.general.name,'.optogeneticPulses.events.mat']))

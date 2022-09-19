@@ -2,7 +2,7 @@ function dp = database_path
 % return dropbox folder path
     switch getenv('computername')
         case 'MANULAPTOP'
-            dp = 'Z:\data';
+            dp = 'W:\Buzsakilabspace\Datasets\ValeroM';
         case 'MANUPC'
             dp = 'X:\data';
         case 'MANUXPS'
