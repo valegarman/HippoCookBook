@@ -69,7 +69,7 @@ if ~isempty(dir('*Linearized.Behavior.mat')) && ~forceReload
     load(file.name);
     return
 end
-%
+
 cd(basepath);
 if isempty(tracking)
     tracking = LED2Tracking;
@@ -242,12 +242,14 @@ end
 plot(mazeVirtual(:,1), mazeVirtual(:,2),'k-');
     
 % interpolate events
-rReward = digitalIn.timestampsOn{4};
+% rReward = digitalIn.timestampsOn{4};
+rReward = armChoice.timestamps(armChoice.visitedArm==1);
 for ii = 1:length(rReward)
     [~,idx] = min(abs(rReward(ii) - t));
     p3 = plot(x(idx),y(idx),'o','MarkerFaceColor',[.8 .5 .1],'MarkerEdgeColor','k');
 end
-lReward = digitalIn.timestampsOn{3};
+% lReward = digitalIn.timestampsOn{3};
+lReward = armChoice.timestamps(armChoice.visitedArm==0);
 for ii = 1:length(lReward)
     [~,idx] = min(abs(lReward(ii) - t));
     p4 = plot(x(idx),y(idx),'o','MarkerFaceColor',[.1 .5 .8],'MarkerEdgeColor','k');

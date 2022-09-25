@@ -16,8 +16,8 @@ addParameter(p,'hippoCookBook_path','HippoCookBook',@isstring);
 addParameter(p,'removeDatFiles',true,@islogical);
 addParameter(p,'removeDat',false,@islogical);
 addParameter(p,'copyFiles',true,@islogical);
-addParameter(p,'driveStorage_path',[],@isdir);
-addParameter(p,'driveStorage_name','packrat',@isstring);
+addParameter(p,'driveStorage_path','W:\Buzsakilabspace\Datasets\ValeroM',@isdir);
+addParameter(p,'driveStorage_name','Research',@isstring);
 
 parse(p,varargin{:})
 
@@ -76,15 +76,19 @@ sessionsTable = readtable([indexedSessionCSV_path filesep indexedSessionCSV_name
 % new table entry
 
 optogenetics = cell(0);
-for ii = 1:length(session.animal.opticFiberImplants)
-    optogenetics{1, length(optogenetics)+1} = session.animal.opticFiberImplants{ii}.opticFiber;
-    optogenetics{1, length(optogenetics)+1} = ' ';
+if ~strcmpi(session.extracellular.chanCoords.layout,'uLED-12LED-32Ch-4Shanks')
+    for ii = 1:length(session.animal.opticFiberImplants)
+        optogenetics{1, length(optogenetics)+1} = session.animal.opticFiberImplants{ii}.opticFiber;
+        optogenetics{1, length(optogenetics)+1} = ' ';
+    end
+    optogenetics(end) = [];
+else
+    optogenetics = {session.extracellular.chanCoords.layout};
 end
-optogenetics(end) = [];
 
 behav = cell(0); 
 for i = 1:length(session.epochs)
-    if strcmpi(session.epochs{i}.behavioralParadigm, 'Maze')
+    if contains(session.epochs{i}.behavioralParadigm, 'Maze')
         behav{1, length(behav)+1} = lower(session.epochs{i}.environment);
         behav{1, length(behav)+1} = ' ';
     end

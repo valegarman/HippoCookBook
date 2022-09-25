@@ -5,7 +5,7 @@
 %   'updateExpFolder({recordingPC_1, recordingPC_2, etc}, 'analysis unit')',
 %   Example:
 
-updateExpFolder({'V:\data\fCck1', 'Y:\fCck1'},'E:\data\fCck1');
+updateExpFolder({'V:\data\fCck1', 'Y:\fCck1'},'J:\data\fCck1');
 
 % 2% Then, preprocess session (includes artifacts removal, median signal
 %   removal, LFP and Kilosort, and running computeSessionSummary by 'batch_preprocessSession('basepath','sessionBasepath').
@@ -18,8 +18,7 @@ batch_sessionSummary('basepath','G:\data\fPv4','cleanArtifacts',({65,[]}),'analo
 % 3% CLEAN SESSIONS MANUALLY BY PHY
 
 % 4% Processs individual sessions by by 'processSession'. Example:
-processSession('digital_optogenetic_channels',[],'analog_optogenetic_channels',1,'promt_hippo_layers',true,'manual_analog_pulses_threshold',true);
-
+processSession('digital_optogenetic_channels',[],'analog_optogenetic_channels',1,'promt_hippo_layers',true,'manual_analog_pulses_threshold',false);
 
 % 5% Index session
 indexNewSession;
@@ -27,8 +26,6 @@ indexNewSession;
 % 6% Once a database has been created, use loadProjectResults to stack results for all sessions
 % an enjoy data analysis!
 [projectResults, projectSessionResults] = ...
-        loadProjectResults('project', 'InterneuronsLibrary',...
-        'analysis_project_path', 'C:\Users\valeg\Dropbox\ProjectsOnLine\interneuronsLibrary\data','loadLast',false);
-    
-    
+        loadProjectResults('project', 'neuroGli2d',...
+        'analysis_project_path', 'C:\Users\valeg\Dropbox\ProjectsOnLine\neuroGli2d\Data','loadLast',false);
     

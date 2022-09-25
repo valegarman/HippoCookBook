@@ -29,6 +29,7 @@ addParameter(p,'showTagCells',true, @islogical);
 addParameter(p,'lightPulseDuration',0.1, @isnumeric);
 addParameter(p,'checkUnits',true, @islogical);
 addParameter(p,'use_deltaThetaEpochs',true, @islogical);
+addParameter(p,'cells_responsive_to_any_pulse',true, @islogical);
 
 parse(p,varargin{:})
 
@@ -39,6 +40,7 @@ showTagCells = p.Results.showTagCells;
 lightPulseDuration = p.Results.lightPulseDuration;
 checkUnits = p.Results.checkUnits;
 use_deltaThetaEpochs = p.Results.use_deltaThetaEpochs;
+cells_responsive_to_any_pulse = p.Results.cells_responsive_to_any_pulse;
 
 % dealing with inputs 
 prevPath = pwd;
@@ -51,7 +53,11 @@ end
 
 if showTagCells
     optogenetic_responses = getOptogeneticResponse;
-    UID = find(optogenetic_responses.threeWaysTest(:,optogenetic_responses.pulseDuration==lightPulseDuration)==1);
+    if ~cells_responsive_to_any_pulse
+        UID = find(optogenetic_responses.threeWaysTest(:,optogenetic_responses.pulseDuration==lightPulseDuration)==1);
+    else
+        UID = find(any((optogenetic_responses.threeWaysTest==1)',1)');
+    end
     
     clear optogenetic_responses
 end
@@ -177,7 +183,13 @@ for ii = 1:length(UID)
     
     subplot(5,5,2)
     if showTagCells
-        st = optogenetic_responses.pulses.timestamps(optogenetic_responses.pulses.duration==0.1);
+        if ~cells_responsive_to_any_pulse
+            st = optogenetic_responses.pulses.timestamps(optogenetic_responses.pulses.duration==0.1);
+        else
+            [~,maxCh] = max(optogenetic_responses.rateDuringPulse(UID(ii),:));
+            st = optogenetic_responses.pulses.timestamps(optogenetic_responses.channels(maxCh)==optogenetic_responses.pulses.channel);
+        end
+        
         rast_x = []; rast_y = [];
         for kk = 1:length(st)
             temp_rast = spikes.times{UID(ii)} - st(kk);
@@ -187,7 +199,11 @@ for ii = 1:length(UID)
         end
 
         % spikeResponse = [spikeResponse; zscore(squeeze(stccg(:,end,jj)))'];
-        resp = squeeze(optogenetic_responses.responsecurveSmooth(UID(ii),find(optogenetic_responses.pulseDuration==0.1),:));
+        if ~cells_responsive_to_any_pulse
+            resp = squeeze(optogenetic_responses.responsecurveSmooth(UID(ii),find(optogenetic_responses.pulseDuration==0.1),:));
+        else
+            resp = squeeze(optogenetic_responses.responsecurveSmooth(UID(ii),maxCh,:));
+        end
         t = optogenetic_responses.timestamps;
         yyaxis left
         hold on
@@ -200,7 +216,7 @@ for ii = 1:length(UID)
         yyaxis right
         plot(t(t>winSizePlot_opto(1) & t<winSizePlot_opto(2)), resp(t>winSizePlot_opto(1) & t<winSizePlot_opto(2)),'k','LineWidth',2);
         ylabel('Rate (Hz)'); 
-        title([basenameFromBasepath(pwd),' UID: ', num2str(UID(ii)),' (', num2str(ii),'/',num2str(length(UID)),' CluID: ',num2str(spikes.cluID(UID)),')'],'FontWeight','normal');
+        title([basenameFromBasepath(pwd),' UID: ', num2str(UID(ii)),' (', num2str(ii),'/',num2str(length(UID)),' CluID: ',num2str(spikes.cluID(UID(ii))),')'],'FontWeight','normal');
     else
         axis off
         title('No light responsive cells','FontWeight','normal');
@@ -579,29 +595,34 @@ for ii = 1:length(UID)
         axis tight
         xlabel('Reward time (s)'); ylabel('Rate (SD)');
 
-        subplot(5,5,19)
-        hold on
-        t_win = behavior.psth_intersection.timestamps > -2 & behavior.psth_intersection.timestamps < 2;
-        plotFill(behavior.psth_intersection.timestamps(t_win),behavior.psth_intersection.responsecurveZSmooth(all_nw,t_win),'color',nw_color,'style','filled');
-        plotFill(behavior.psth_intersection.timestamps(t_win),behavior.psth_intersection.responsecurveZSmooth(all_ww,t_win),'color',ww_color,'style','filled');
-        plotFill(behavior.psth_intersection.timestamps(t_win),behavior.psth_intersection.responsecurveZSmooth(all_pyr,t_win),'color',pyr_color,'style','filled');
-        if showTagCells
-            plot(behavior.psth_intersection.timestamps(t_win),smooth(behavior.psth_intersection.responsecurveZSmooth(UID(ii),t_win),10),'color',cell_color,'LineWidth',1.5);
+        
+        if isfield(behavior,'psth_intersection') && isstruct(behavior.psth_intersection)
+            subplot(5,5,19)
+            hold on
+            t_win = behavior.psth_intersection.timestamps > -2 & behavior.psth_intersection.timestamps < 2;
+            plotFill(behavior.psth_intersection.timestamps(t_win),behavior.psth_intersection.responsecurveZSmooth(all_nw,t_win),'color',nw_color,'style','filled');
+            plotFill(behavior.psth_intersection.timestamps(t_win),behavior.psth_intersection.responsecurveZSmooth(all_ww,t_win),'color',ww_color,'style','filled');
+            plotFill(behavior.psth_intersection.timestamps(t_win),behavior.psth_intersection.responsecurveZSmooth(all_pyr,t_win),'color',pyr_color,'style','filled');
+            if showTagCells
+                plot(behavior.psth_intersection.timestamps(t_win),smooth(behavior.psth_intersection.responsecurveZSmooth(UID(ii),t_win),10),'color',cell_color,'LineWidth',1.5);
+            end
+            axis tight
+            xlabel('Intersection time (s)'); ylabel('Rate (SD)');
         end
-        axis tight
-        xlabel('Intersection time (s)'); ylabel('Rate (SD)');
-
-        subplot(5,5,23)
-        hold on
-        t_win = behavior.psth_startPoint.timestamps > -2 & behavior.psth_startPoint.timestamps < 2;
-        plotFill(behavior.psth_startPoint.timestamps(t_win),behavior.psth_startPoint.responsecurveZSmooth(all_nw,t_win),'color',nw_color,'style','filled');
-        plotFill(behavior.psth_startPoint.timestamps(t_win),behavior.psth_startPoint.responsecurveZSmooth(all_ww,t_win),'color',ww_color,'style','filled');
-        plotFill(behavior.psth_startPoint.timestamps(t_win),behavior.psth_startPoint.responsecurveZSmooth(all_pyr,t_win),'color',pyr_color,'style','filled');
-        if showTagCells
-        	plot(behavior.psth_startPoint.timestamps(t_win),smooth(behavior.psth_startPoint.responsecurveZSmooth(UID(ii),t_win),10),'color',cell_color,'LineWidth',1.5);
+        
+        if isfield(behavior,'psth_startPoint') && isstruct(behavior.psth_intersection)
+            subplot(5,5,23)
+            hold on
+            t_win = behavior.psth_startPoint.timestamps > -2 & behavior.psth_startPoint.timestamps < 2;
+            plotFill(behavior.psth_startPoint.timestamps(t_win),behavior.psth_startPoint.responsecurveZSmooth(all_nw,t_win),'color',nw_color,'style','filled');
+            plotFill(behavior.psth_startPoint.timestamps(t_win),behavior.psth_startPoint.responsecurveZSmooth(all_ww,t_win),'color',ww_color,'style','filled');
+            plotFill(behavior.psth_startPoint.timestamps(t_win),behavior.psth_startPoint.responsecurveZSmooth(all_pyr,t_win),'color',pyr_color,'style','filled');
+            if showTagCells
+                plot(behavior.psth_startPoint.timestamps(t_win),smooth(behavior.psth_startPoint.responsecurveZSmooth(UID(ii),t_win),10),'color',cell_color,'LineWidth',1.5);
+            end
+            axis tight
+            xlabel('Start point time (s)'); ylabel('Rate (SD)');
         end
-        axis tight
-        xlabel('Start point time (s)'); ylabel('Rate (SD)');
     else
         subplot(5,5,18)
         axis off
@@ -684,7 +705,7 @@ if checkUnits && showTagCells
     optogenetic_responses.checkedCells = checkedCells;
     
     optogeneticResponses = optogenetic_responses;
-    save([basenameFromBasepath(pwd) '.optogeneticResponse.cellinfo.mat'],'optogeneticResponses');
+    save([basenameFromBasepath(pwd) '.optogeneticResponse.cellinfo.mat'],'optogeneticResponses','-V7.3');
 end
 
 cd(prevPath);

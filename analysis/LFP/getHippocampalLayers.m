@@ -405,7 +405,7 @@ if promt
     text(2, numRipples_zscore(2),'# Ripples score','color',[.5 .5 .9],'FontSize',12);
     
     plot(score,'color',[.4 .9 .4],'LineWidth',2);
-    text(4, score(4),'Total score','color',[.4 .9 .4],'FontSize',12);
+    text(1, score(1),'Total score','color',[.4 .9 .4],'FontSize',12);
     
     xlabel('Shanks');     
     

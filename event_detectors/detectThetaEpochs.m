@@ -43,7 +43,6 @@ addParameter(p,'use_ratioThetaDelta',true,@islogical);
 addParameter(p,'threshold_noise',2.5,@isnumeric);
 addParameter(p,'uselog10Power',true,@islogical);
 addParameter(p,'powerThreshold_nonTheta',.5,@isnumeric);
-addParameter(p,'discardRipples',true,@islogical);
 
 parse(p,varargin{:})
 basepath = p.Results.basepath;
@@ -62,7 +61,6 @@ use_ratioThetaDelta = p.Results.use_ratioThetaDelta;
 threshold_noise =p.Results.threshold_noise;
 uselog10Power = p.Results.uselog10Power;
 powerThreshold_nonTheta = p.Results.powerThreshold_nonTheta;
-discardRipples = p.Results.discardRipples;
 
 % Deal with inputs
 prevBasepath = pwd;
@@ -332,6 +330,7 @@ if plotting
     imagesc(t,f,S_det',[-1.5 1.5]);
     ylim([1.5 50]);
     set(gca,'TickDir','out'); ylabel('Freq [Hz]'); xlabel('Time [s]');
+    title(['Channel to detect theta epochs: ' num2str(channel)],'FontWeight','normal');
 
     subplot(3,3,[4 5])
     t_theta = sum(diff(thetaEpochs.intervals')) * diff(t);

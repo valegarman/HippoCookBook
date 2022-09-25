@@ -1,4 +1,4 @@
-function [behaviour] = getBehaviourOpenField(varargin)
+function [behavior] = getBehaviourOpenField(varargin)
 % Creates behaviour for Open Field recordings
 %
 % USAGE
@@ -90,16 +90,6 @@ x = tracking.position.x;
 y = tracking.position.y;
 t = tracking.timestamps;
 
-if isfield(tracking,'headposition')
-    x_head = tracking.headposition.x;
-    y_head = tracking.headposition.y;
-end
-
-if isfield(tracking,'tailposition')
-    x_tail = tracking.tailposition.x;
-    y_tail = tracking.tailposition.y;
-end
-
 if isfield(tracking,'zone')
     zone = tracking.zone;
 end
@@ -115,30 +105,46 @@ maps{1}(:,3) = tracking.position.y;
 
 %% Get events (animal entering a zone)
 try
-    
-    for ii = 1:length(tracking.zone.name)
-        xv{ii} = [tracking.zone.xmin{ii} tracking.zone.xmax{ii} tracking.zone.xmax{ii} tracking.zone.xmin{ii} tracking.zone.xmin{ii}];
-        yv{ii} = [tracking.zone.ymin{ii} tracking.zone.ymin{ii} tracking.zone.ymax{ii} tracking.zone.ymax{ii} tracking.zone.ymin{ii}];
-        [in{ii},on{ii}] = inpolygon(tracking.position.x,tracking.position.y, xv{ii}, yv{ii});
-        a{ii} = diff(in{ii});
-        entry_sample{ii} = find(a{ii} == 1)+1;
-        exit_sample{ii} = find(a{ii} == -1)+1;
-        entry_ts{ii} = t(entry_sample{ii});
-        exit_ts{ii} = t(exit_sample{ii});
+    for ii = 1:length(tracking.zone.bndgbox)
+        if ~strcmpi(tracking.zone.bndgbox{ii}.name,'Main')
+            xv{ii} = [tracking.zone.xmin{ii} tracking.zone.xmax{ii} tracking.zone.xmax{ii} tracking.zone.xmin{ii} tracking.zone.xmin{ii}];
+            yv{ii} = [tracking.zone.ymin{ii} tracking.zone.ymin{ii} tracking.zone.ymax{ii} tracking.zone.ymax{ii} tracking.zone.ymin{ii}];
+            [in{ii},on{ii}] = inpolygon(tracking.position.x,tracking.position.y, xv{ii}, yv{ii});
+            a{ii} = diff(in{ii});
+            entry.(tracking.zone.name{ii}).sample = find(a{ii} == 1)+1;
+            entry.(tracking.zone.name{ii}).ts = t(entry.(tracking.zone.name{ii}).sample);
+            exit.(tracking.zone.name{ii}).sample = find(a{ii} == -1)+1;
+            exit.(tracking.zone.name{ii}).ts = t(exit.(tracking.zone.name{ii}).sample);
+    %         entry_sample{ii} = find(a{ii} == 1)+1;
+    %         exit_sample{ii} = find(a{ii} == -1)+1;
+    %         entry_ts{ii} = t(entry_sample{ii});
+    %         exit_ts{ii} = t(exit_sample{ii});
+        end
     end
     
     h1 = figure;
     plot(tracking.position.x, tracking.position.y, 'Color', [0.5 0.5 0.5])
     hold on;
     axis ij;
-    for ii = 1:length(tracking.zone.name)
-        rectangle('Position',[tracking.zone.xmin{ii} tracking.zone.ymin{ii} tracking.zone.xmax{ii}-tracking.zone.xmin{ii} tracking.zone.ymax{ii}-tracking.zone.ymin{ii}],'EdgeColor','b');
-        hold on;
-        scatter(tracking.position.x(in{ii}),tracking.position.y(in{ii}),3,'k');
-        hold on;
-        scatter(tracking.position.x(entry_sample{ii}),tracking.position.y(entry_sample{ii}),15,'g');
-        scatter(tracking.position.x(exit_sample{ii}),tracking.position.y(exit_sample{ii}),15,'r');  
+    plot(tracking.apparatus.bndgbox,'FaceAlpha',0);
+    for ii = 1:length(tracking.zone.bndgbox)
+        plot(tracking.zone.bndgbox{ii}.bndgbox,'FaceAlpha',0);
+%         rectangle('Position',[tracking.zone.xmin{ii} tracking.zone.ymin{ii} tracking.zone.xmax{ii}-tracking.zone.xmin{ii} tracking.zone.ymax{ii}-tracking.zone.ymin{ii}],'EdgeColor','b');
+%         hold on;
+        try
+            scatter(tracking.position.x(in{ii}),tracking.position.y(in{ii}),3,'k');
+            hold on;
+            scatter(tracking.position.x(entry.(tracking.zone.name{ii}).sample),tracking.position.y(entry.(tracking.zone.name{ii}).sample),15,'g');
+            scatter(tracking.position.x(exit.(tracking.zone.name{ii}).sample),tracking.position.y(exit.(tracking.zone.name{ii}).sample),15,'r'); 
+
+    %         scatter(tracking.position.x(entry_sample{ii}),tracking.position.y(entry_sample{ii}),15,'g');
+    %         scatter(tracking.position.x(exit_sample{ii}),tracking.position.y(exit_sample{ii}),15,'r'); 
+        catch
+            disp('No zones to plot...');
+        end
     end    
+    xlim(tracking.avFrame.xSize);
+    ylim(tracking.avFrame.ySize);
     mkdir('Behavior');
     saveas(h1,'Behavior\Behavior_inZone.png');
     close(h1);
@@ -147,47 +153,60 @@ catch
 end
 
 %% Output
-behaviour.timestamps = tracking.timestamps;
+behavior.masks = [];
+behavior.events = [];
+behavior.trials = [];
 
-behaviour.position.lin = [];
-behaviour.position.x = tracking.position.x;
-behaviour.position.y = tracking.position.y;
+behavior.timestamps = tracking.timestamps;
 
-if exist('x_head','var') && ~isempty(x_head)
-    behaviour.headposition.x = x_head;
-    behaviour.headposition.y = y_head;
-end
-
-if exist('x_tail','var') && ~isempty(x_tail)
-    behaviour.tailposition.x = x_tail;
-    behaviour.tailposition.y = y_tail;
-end
+behavior.position.lin = nan(length(behavior.timestamps),1);
+behavior.position.x = tracking.position.x;
+behavior.position.y = tracking.position.y;
 
 if exist('zone','var') && ~isempty(zone)
-    behaviour.zone = zone;
+    behavior.zone = zone;
 end
 
-behaviour.maps = maps;
+behavior.masks.arm = NaN;
+behavior.masks.direction = nan(length(behavior.timestamps),1);
+behavior.masks.trials = nan(length(behavior.timestamps),1);
+behavior.masks.trialsDirection = NaN;
+
+behavior.maps = maps;
 
 % behaviour.description = 'Open Field';
 try
-    behaviour.description = tracking.apparatus.name;
+    behavior.description = tracking.apparatus.name;
 catch
-    behaviour.description = 'Open Field';
+    behavior.description = 'Open Field';
 end
 
-if exist('entry_sample','var')
+behavior.events.startPoint = NaN;
+behavior.events.rReward = NaN;
+behavior.events.lReward = NaN;
+behavior.events.startDelay = NaN;
+behavior.events.endDelay = NaN;
+behavior.events.intersection = NaN;
+
+behavior.trials.startPoint = [NaN NaN];
+behavior.trials.endDelay = NaN;
+behavior.trials.visitedArm = NaN;
+behavior.trials.choice = NaN;
+behavior.trials.expectedArm = NaN;
+
+if exist('entry','var')
     try
-        behaviour.events.entry_sample = entry_sample;
-        behaviour.events.exit_sample = exit_sample;
-        behaviour.events.entry_ts = entry_ts;
-        behaviour.events.exit_ts = exit_ts;
+        behavior.events.entry_sample = entry_sample;
+        behavior.events.exit_sample = exit_sample;
+        behavior.events.entry_ts = entry_ts;
+        behavior.events.exit_ts = exit_ts;
     catch
     end
 end
+
 if saveMat
     C = strsplit(basepath,'\');
-    save([C{end} '.OpenField.Behavior.mat'], 'behaviour');
+    save([C{end} '.OpenField.Behavior.mat'], 'behavior');
 end
 
 end

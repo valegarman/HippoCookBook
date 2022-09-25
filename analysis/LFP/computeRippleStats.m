@@ -56,7 +56,7 @@ addParameter(p,'saveSummary',true,@islogical);
 addParameter(p,'saveMat',false,@islogical);
 addParameter(p,'durations',[-0.075 0.075], @isnumeric);
 addParameter(p,'ripples',[], @isstruct);
-addParameter(p,'rippleChannel',[], @isstruct);
+addParameter(p,'rippleChannel',[], @isnumeric);
 addParameter(p,'plotOpt',[], @islogical);
 
 parse(p,varargin{:})
@@ -169,6 +169,7 @@ end
     h = figure;
     subplot(3,2,1)
     computeWavelet(mean(maps.ripples_raw), maps.timestamps, [80 300]);
+    title(['Ch: ' num2str(ripples.detectorinfo.detectionchannel)],'FontWeight','normal');
 
     subplot(3,2,2)
     scatter(data.spectralEntropy, data.fastRippleIndex,10,[.7 .7 .7],"filled");

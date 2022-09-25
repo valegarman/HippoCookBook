@@ -42,6 +42,7 @@ addParameter(p,'excludeIntervals',[],@isnumeric);
 addParameter(p,'winIndex',[-.01 .01],@isnumeric);
 addParameter(p,'interp0',[-.01 .01],@isnumeric);
 addParameter(p,'useBrainRegions',true,@islogical);
+addParameter(p,'useDistinctShanks',true,@islogical);
 
 parse(p, varargin{:});
 basepath = p.Results.basepath;
@@ -57,6 +58,7 @@ excludeIntervals = p.Results.excludeIntervals;
 winIndex = p.Results.winIndex;
 interp0 = p.Results.interp0;
 useBrainRegions = p.Results.useBrainRegions;
+useDistinctShanks = p.Results.useDistinctShanks;
 
 % Deal with inputs
 prevPath = pwd;
@@ -75,7 +77,13 @@ end
 
 if skipStimulationPeriods
     try
-        optogenetic_responses = getOptogeneticResponse;
+        try 
+            targetFile = dir('*optogeneticPulses*');
+            optogenetic_responses = importdata(targetFile.name);
+        catch
+            warning('Could not open optogeneticPulses file... trying to open optogeneticResponses...');
+            optogenetic_responses = getOptogeneticResponse;
+        end
         excludeIntervals = [excludeIntervals; optogenetic_responses.stimulationEpochs];
     catch
         warning('Skip stimulation periods not possible...');

@@ -92,7 +92,14 @@ end
 
 if skipStimulationPeriods
     try
-        optogenetic_responses = getOptogeneticResponse;
+        try 
+            targetFile = dir('*optogeneticPulses*');
+            optogenetic_responses = importdata(targetFile.name);
+        catch
+            warning('Could not open optogeneticPulses file... trying to open optogeneticResponses...');
+            optogenetic_responses = getOptogeneticResponse;
+        end
+        excludeIntervals = [excludeIntervals; optogenetic_responses.stimulationEpochs];
     catch
         warning('Skip stimulation periods not possible...');
     end
@@ -250,6 +257,7 @@ end
 %% Plotting
 if plotting
     % Ripple Modulation
+    try
     if ismember('rippleModulation',bandsToCompute)
         figure,
         set(gcf,'Position',get(0,'ScreenSize'))
@@ -437,7 +445,7 @@ if plotting
         end
         saveas(gcf,['SummaryFigures\thetaREM_',num2str(theta_passband(1)),'-',num2str(theta_passband(end)),'_PhaseModulation.png']);
     end
-
+    end
 
 end
 
