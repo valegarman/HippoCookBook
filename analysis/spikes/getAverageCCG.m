@@ -29,16 +29,17 @@ function [averageCCG] = getAverageCCG(varargin)
 
 % Parse options
 p = inputParser;
-addParameter(p,'spikes',[],@isstruct);
+addParameter(p,'spikes',[]);
 addParameter(p,'basepath',pwd,@ischar);
 addParameter(p,'binSize',0.005,@isnumeric);
 addParameter(p,'winSize',0.6,@isnumeric);
 addParameter(p,'plotOpt',true,@islogical);
-addParameter(p,'winSizePlot',[-.3 .3],@islogical);
+addParameter(p,'winSizePlot',[-.3 .3],@isnumeric);
 addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'force',false,@islogical);
 addParameter(p,'skipStimulationPeriods',true,@islogical);
 addParameter(p,'excludeIntervals',[],@isnumeric);
+addParameter(p,'includeIntervals',[0 Inf],@isnumeric);
 addParameter(p,'winIndex',[-.01 .01],@isnumeric);
 addParameter(p,'interp0',[-.01 .01],@isnumeric);
 addParameter(p,'useBrainRegions',true,@islogical);
@@ -55,6 +56,7 @@ saveMat = p.Results.saveMat;
 force = p.Results.force;
 skipStimulationPeriods = p.Results.skipStimulationPeriods;
 excludeIntervals = p.Results.excludeIntervals;
+includeIntervals = p.Results.includeIntervals;
 winIndex = p.Results.winIndex;
 interp0 = p.Results.interp0;
 useBrainRegions = p.Results.useBrainRegions;
@@ -97,6 +99,15 @@ if ~isempty(excludeIntervals)
         spikes.times{ii} = spikes.times{ii}(~status);
     end
 end
+
+if includeIntervals(1)>0 || includeIntervals(2)<Inf
+    warning('Including intervals...');
+    for ii = 1:length(spikes.times)
+        [status] = InIntervals(spikes.times{ii},includeIntervals);
+        spikes.times{ii} = spikes.times{ii}(status);
+    end
+end
+
 % do ccg
 [allCcg, t_ccg] = CCG(spikes.times,[],'binSize',binSize,'duration',winSize);
 indCell = [1:size(allCcg,2)];
@@ -146,6 +157,7 @@ if useBrainRegions && exist([basenameFromBasepath(basepath) '.cell_metrics.celli
         for ii =  1: length(efields)
             cellsInRegion = ismember(cell_metrics.brainRegion,efields{ii});
             
+            clear cellsID ccMedian ccZMedian ccMean ccZMean
             for jj = 1 : length(spikes.times)
                 cellsID = indCell(indCell~=jj & cellsInRegion);
                 
@@ -187,7 +199,8 @@ if useBrainRegions && exist([basenameFromBasepath(basepath) '.cell_metrics.celli
         % for CA1
         cellsInRegion = ismember(cell_metrics.brainRegion,'CA1') | ismember(cell_metrics.brainRegion,'CA1sp')...
             | ismember(cell_metrics.brainRegion,'CA1so') | ismember(cell_metrics.brainRegion,'CA1slm') | ismember(cell_metrics.brainRegion,'CA1sr');
-            
+        
+        clear cellsID ccMedian ccZMedian ccMean ccZMean
         for jj = 1 : length(spikes.times)
             cellsID = indCell(indCell~=jj & cellsInRegion);
 
@@ -228,7 +241,8 @@ if useBrainRegions && exist([basenameFromBasepath(basepath) '.cell_metrics.celli
             | ismember(cell_metrics.brainRegion,'CA2') | ismember(cell_metrics.brainRegion,'CA2slm') | ismember(cell_metrics.brainRegion,'CA2so') ...
             | ismember(cell_metrics.brainRegion,'CA2sp') | ismember(cell_metrics.brainRegion,'CA2sr') | ismember(cell_metrics.brainRegion,'DG') ...
             | ismember(cell_metrics.brainRegion,'HIP') | ismember(cell_metrics.brainRegion,'HPF');
-            
+        
+        clear cellsID ccMedian ccZMedian ccMean ccZMean
         for jj = 1 : length(spikes.times)
             cellsID = indCell(indCell~=jj & cellsInRegion);
 
@@ -280,9 +294,66 @@ if useBrainRegions && exist([basenameFromBasepath(basepath) '.cell_metrics.celli
     end
 end
 
-keyboard;
 session = loadSession;
-if useDistinctShanks && exist([basenameFromBasepath(basepath) '.cell_metrics.cellinfo.mat'])
+if useDistinctShanks && length(session.extracellular.electrodeGroups.channels)>1 % if more than 1 shanks
+   
+    for ii =  1: length(session.extracellular.electrodeGroups.channels)
+        cellsInShank = ismember(spikes.shankID,ii);
+        
+        clear cellsID ccMedian ccZMedian ccMean ccZMean
+        for jj = 1 : length(spikes.times)
+            cellsID = indCell(indCell~=jj & cellsInShank);
+
+            ccMedian(jj,:) = nanmedian(squeeze(allCcg(:,jj,cellsID)),2); %
+            ccZMedian(jj,:) = nanmedian(zscore(squeeze(allCcg(:,jj,cellsID))',[],2)); % zCCG
+
+            ccMean(jj,:) = nanmean(squeeze(allCcg(:,jj,cellsID)),2); % zCCG
+            ccZMean(jj,:) = nanmean(zscore(squeeze(allCcg(:,jj,cellsID))',[],2)); % zCCG
+        end
+        
+        if interp0
+            artifactSamples = find(t_ccg == 0);
+            x_axis = 1:length(t_ccg);
+            x_axis(artifactSamples) = [];
+            for jj = 1:size(ccMedian,1)
+                ccMedian(jj,artifactSamples) = interp1(x_axis,ccMedian(jj,x_axis),artifactSamples);
+                ccZMedian(jj,artifactSamples) = interp1(x_axis,ccZMedian(jj,x_axis),artifactSamples);
+                ccMean(jj,artifactSamples) = interp1(x_axis,ccMean(jj,x_axis),artifactSamples);
+                ccZMean(jj,artifactSamples) = interp1(x_axis,ccZMean(jj,x_axis),artifactSamples);
+            end
+        end
+
+        win = t_ccg >= winIndex(1) & t_ccg <= winIndex(2);
+        ccgIndex = median(ccZMedian(:,win),2);
+
+        shanksCCG.(['shank_' num2str(ii) '_medianCCG']) = ccMedian;
+        shanksCCG.(['shank_' num2str(ii)  '_ZmedianCCG']) = ccZMedian;
+        shanksCCG.(['shank_' num2str(ii)  '_meanCCG']) = ccMean;
+        shanksCCG.(['shank_' num2str(ii)  '_ZmeanCCG']) = ccZMean;
+        shanksCCG.(['shank_' num2str(ii)  '_ccgIndex']) = ccgIndex;
+        shanksCCG.binSize = binSize;
+        shanksCCG.winSize = winSize;
+        shanksCCG.timestamps = t_ccg;
+        shanksCCG.excludeIntervals = excludeIntervals;
+        shanksCCG.winIndex = winIndex;
+        shanksCCGIndex.(['shank_' num2str(ii)]) = ccgIndex;
+    end
+    
+    % CCGIndex per region
+    clear ccgIndexShanks
+    efields = fieldnames(shanksCCGIndex);
+    for jj = 1:size(spikes.UID,2)
+        for ii = 1:length(efields)
+            ccgIndexShanks(jj,ii) = shanksCCGIndex.(efields{ii})(jj);
+        end
+    end
+    shanksCCG.ccgIndexShanks = ccgIndexShanks;
+    shanksCCG.absCcgIndexShanks = abs(ccgIndexShanks);
+    shanksCCG.listOfShanks = efields;
+    shanksCCG.listOfShankssID = 1:length(efields);
+    shanksCCG.CcgIndexPerShank = shanksCCGIndex;
+
+    averageCCG.shanksCCG = shanksCCG;
 end
 
 if saveMat
@@ -352,6 +423,34 @@ if plotOpt
         end
         saveas(gcf,['SummaryFigures\CCGAvgPerRegion.png']); 
     end
+    
+    % by shank
+    if isfield(averageCCG,'shanksCCG')
+        
+        % brainRegions colors
+        brColors = parula(length(averageCCG.shanksCCG.listOfShankssID));
+        
+        figure;
+        set(gcf,'Position',[200 -500 2500 1200]);
+        for jj = 1:size(spikes.UID,2)
+            subplot(7,ceil(size(spikes.UID,2)/7),jj);
+            hold on
+            b = bar(averageCCG.shanksCCG.listOfShankssID, averageCCG.shanksCCG.absCcgIndexShanks(jj,:));
+            b.FaceColor = 'flat';
+            b.CData = brColors;
+            
+            set(gca,'TickDir','out','XTick',averageCCG.shanksCCG.listOfShankssID,'XTickLabel',averageCCG.shanksCCG.listOfShanks,'XTickLabelRotation',45);
+            title(num2str(jj),'FontWeight','normal','FontSize',10);
+            
+            plot(spikes.shankID(jj), averageCCG.shanksCCG.absCcgIndexShanks(jj,spikes.shankID(jj))+0.2,'.','MarkerSize',10,'Color',[.5 .5 .5]);
+            text(spikes.shankID(jj), averageCCG.shanksCCG.absCcgIndexShanks(jj,spikes.shankID(jj))+0.4,'cell','Color',[.5 .5 .5]);
+            
+            if jj == 1
+                ylabel('CCG Index');
+            end
+        end
+    end
+    
 end
 
 cd(prevPath);
