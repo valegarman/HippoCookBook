@@ -61,6 +61,7 @@ addParameter(p,'dataSize',3,@isnumeric);
 addParameter(p,'posOffset',0,@isnumeric);
 addParameter(p,'fillAlpha',.5,@isnumeric);
 addParameter(p,'FaceEdge',[],@isnumeric);
+addParameter(p,'roundPlotSize',15,@isnumeric);
 
 parse(p,varargin{:});
 color = p.Results.color;
@@ -81,6 +82,7 @@ dataSize = p.Results.dataSize;
 posOffset = p.Results.posOffset;
 fillAlpha = p.Results.fillAlpha;
 FaceEdge = p.Results.FaceEdge;
+roundPlotSize = p.Results.roundPlotSize;
 
 
 % Dealing with inputs
@@ -453,7 +455,7 @@ if doPlot
                 plot(pos(ii)+ posData, y(group==ind(ii)),'o','color',[1 1 1],...
                        'MarkerFaceColor','k','MarkerEdgeColor','none','MarkerSize',dataSize);
             end
-            plot(pos(ii)-0.1, m,'o','MarkerFaceColor',color(ii,:),'MarkerEdgeColor',color(ii,:),'MarkerSize',15);
+            plot(pos(ii)-0.1, m,'o','MarkerFaceColor',color(ii,:),'MarkerEdgeColor',color(ii,:),'MarkerSize',roundPlotSize);
             plot([pos(ii)-0.1 pos(ii)-0.1], [m-s1 m+s2],'-','MarkerFaceColor',color(ii,:),'MarkerEdgeColor',color(ii,:),...
                 'MarkerSize',dataSize,'color',color(ii,:),'LineWidth',2)
         end
@@ -487,7 +489,7 @@ if doPlot
                 plot(pos(ii)+ posData, y(group==ind(ii)),'o','color',[1 1 1],...
                        'MarkerFaceColor','k','MarkerEdgeColor','none','MarkerSize',dataSize);
             end
-            plot(pos(ii)-0.1, m,'o','MarkerFaceColor',color(ii,:),'MarkerEdgeColor',color(ii,:),'MarkerSize',15);
+            plot(pos(ii)-0.1, m,'o','MarkerFaceColor',color(ii,:),'MarkerEdgeColor',color(ii,:),'MarkerSize',roundPlotSize);
             plot([pos(ii)-0.1 pos(ii)-0.1], [s1 s2],'-','MarkerFaceColor',color(ii,:),'MarkerEdgeColor',color(ii,:),...
                 'MarkerSize',dataSize,'color',color(ii,:),'LineWidth',2)
         end
@@ -511,7 +513,7 @@ if doPlot
         for ii = 1:length(pos)
             plot([pos(ii) pos(ii)], [stats.descriptive.q25(ii) stats.descriptive.q75(ii)],'color',color(1,:));
         end
-        plot(pos, stats.descriptive.median,'o','color', color(1,:),'MarkerFaceColor',[1 1 1],'MarkerEdgeColor',color(1,:),'MarkerSize',15);
+        plot(pos, stats.descriptive.median,'o','color', color(1,:),'MarkerFaceColor',[1 1 1],'MarkerEdgeColor',color(1,:),'MarkerSize',roundPlotSize);
         xlim([.5 max(pos)+.5]);
         set(gca,'xtick',[]);
         if strcmpi(orientation, 'horizontal')
@@ -531,7 +533,7 @@ if doPlot
         for ii = 1:length(pos)
             plot([pos(ii) pos(ii)], [stats.descriptive.mean(ii)-stats.descriptive.SEM(ii) stats.descriptive.mean(ii)+stats.descriptive.SEM(ii)],'color',color(1,:));
         end
-        plot(pos, stats.descriptive.mean,'o','color', color(1,:),'MarkerFaceColor',[1 1 1],'MarkerEdgeColor',color(1,:),'MarkerSize',15);
+        plot(pos, stats.descriptive.mean,'o','color', color(1,:),'MarkerFaceColor',[1 1 1],'MarkerEdgeColor',color(1,:),'MarkerSize',roundPlotSize);
         xlim([.5 max(pos)+.5]);
         set(gca,'xtick',[]);
         if strcmpi(orientation, 'horizontal')

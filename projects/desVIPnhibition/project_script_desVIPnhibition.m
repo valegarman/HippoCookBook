@@ -1,35 +1,21 @@
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% project_script_interneuronsLibrary
+% project_script_desVIPnhibition
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% MV 2022
-% figures in figures_script_neuroGli2d
+% MV & PA 2022
+% figures in figures_script_interneuronsLibrary
 
 % CHAPTER_0: GET DATA
 for z = 1
     clear; close all
-    analysis_project_path = adapt_filesep([dropbox_path filesep 'ProjectsOnLine\neuroGli2d\data']);
+    analysis_project_path = adapt_filesep([dropbox_path filesep 'ProjectsOnLine\desVIPnhibition\data']);
     [projectResults, projectSessionResults] = ...
-        loadProjectResults('project', 'neuroGli2d','analysis_project_path', analysis_project_path,'loadLast',true);
+        loadProjectResults('project', 'desVIPnhibition','analysis_project_path', analysis_project_path,'loadLast',true);
     
     % general
-    inCortex = {'PTLp' 'PTLp5' 'PTLp6' 'PTLp2_3' 'PTLp1' 'PTLp4'}; % only using cortical data data... :(
-    
-    is_pyr = strcmpi(projectResults.cell_metrics.putativeCellType,'Pyramidal Cell') & ismember(projectResults.cell_metrics.brainRegion,inCortex);
-    is_int = (strcmpi(projectResults.cell_metrics.putativeCellType,'Narrow Interneuron')...
-        | strcmpi(projectResults.cell_metrics.putativeCellType,'Wide Interneuron')) & ismember(projectResults.cell_metrics.brainRegion,inCortex);
-    is_nw = strcmpi(projectResults.cell_metrics.putativeCellType,'Narrow Interneuron') & ismember(projectResults.cell_metrics.brainRegion,inCortex);
-    is_ww = strcmpi(projectResults.cell_metrics.putativeCellType,'Wide Interneuron') & ismember(projectResults.cell_metrics.brainRegion,inCortex);
-    
-    color_id2dlx = [255 180 40]/255;
-    color_id2dlx_dark = [155 90 20]/255;
-    
-    color_ww = [.3 .9 .3];
-    color_ww_dark = [.2 .6 .2];
-    
-    color_nw = [.3 .3 .9];
-    color_nw_dark = [.2 .2 .6];
+    is_pyr = strcmpi(projectResults.cell_metrics.putativeCellType,'Pyramidal Cell');
+    is_int = strcmpi(projectResults.cell_metrics.putativeCellType,'Narrow Interneuron') | strcmpi(projectResults.cell_metrics.putativeCellType,'Wide Interneuron');
     
     color_pyr = [.8 .5 .5];
     color_pyr_dark = [.6 .2 .2];
@@ -81,137 +67,54 @@ for z = 1
                 interp1(x_axis,projectResults.averageCCG.ZmeanCCG(jj,x_axis),artifactSamples{ii});
         end
     end
-    
-    projectResults.acgPeak.peakTime = (projectResults.acgPeak.acg_time(1,projectResults.acgPeak.acgPeak_sample));
-    % projectResults.ripplesResponses.peakResponseZ_norm = ZeroToOne(projectResults.ripplesResponses.peakResponseZ);
+
 end
 
-% CHAPTER_1: ID2 Interneurons
+% CHAPTER_0: CR AND CCK RESPONSES
 for z = 1
-    % ID2/Dlx cells features
-    targetSessCells = strcmpi(strrep(projectResults.geneticLine,' ',''),'id2/dlx/ai80') & ismember(projectResults.cell_metrics.brainRegion,inCortex);
-    allTargetSessCells.id2 = targetSessCells;
-    
-    name_cells = 'ID2+/DLX+';
-    color_cells = color_id2dlx;
-    color_cells_dark = color_id2dlx_dark;
-    
-    % 1.1 Light responses
+    % CR/VIP and CCK/VIP
     ts = projectResults.optogeneticResponses.timestamps;
-    responsive_cells = any(projectResults.optogeneticResponses.threeWaysTest'==1) & targetSessCells & (projectResults.optogeneticResponses.checkedCells==1)';
-    responsive_cells([894 789 826]) = 0;
-    delayed_responsive_cells = [894 789 826]
     
-    allResponsive_cells.id2 = responsive_cells;
+    targetSessCells = strcmpi(projectResults.geneticLine,'vip/cr/ai80');    
     [~,optimal_pulse] = max(projectResults.optogeneticResponses.rateDuringPulse');
-    sessions_pyr = ~any(projectResults.optogeneticResponses.threeWaysTest') & targetSessCells & is_pyr;
-    sessions_int = ~any(projectResults.optogeneticResponses.threeWaysTest') & targetSessCells & is_int;
-    all_pyr.id2 = sessions_pyr;
-    all_int.id2 = sessions_int;
+    sessions_pyr_cr = ~any(projectResults.optogeneticResponses.threeWaysTest') & targetSessCells & is_pyr;
+    sessions_int_cr = ~any(projectResults.optogeneticResponses.threeWaysTest') & targetSessCells & is_int;
     
-    sessions_pyr_l5 = sessions_pyr & strcmpi(projectResults.cell_metrics.brainRegion,'PTLp5');
-    sessions_pyr_l6 = sessions_pyr & strcmpi(projectResults.cell_metrics.brainRegion,'PTLp6');
-    sessions_pyr_l4 = sessions_pyr & strcmpi(projectResults.cell_metrics.brainRegion,'PTLp4');
-    sessions_pyr_ll23 = sessions_pyr & strcmpi(projectResults.cell_metrics.brainRegion,'PTLp2_3');
-    
-    sessions_int_l5 = sessions_int & strcmpi(projectResults.cell_metrics.brainRegion,'PTLp5');
-    sessions_int_l6 = sessions_int & strcmpi(projectResults.cell_metrics.brainRegion,'PTLp6');
-    sessions_int_l4 = sessions_int & strcmpi(projectResults.cell_metrics.brainRegion,'PTLp4');
-    sessions_int_l123 = sessions_int & strcmpi(projectResults.cell_metrics.brainRegion,'PTLp2_3');
-    
-    
+    targetSessCells = strcmpi(projectResults.geneticLine,'vip/cck/ai80');    
+    [~,optimal_pulse] = max(projectResults.optogeneticResponses.rateDuringPulse');
+    sessions_pyr_cck = ~any(projectResults.optogeneticResponses.threeWaysTest') & targetSessCells & is_pyr;
+    sessions_int_cck = ~any(projectResults.optogeneticResponses.threeWaysTest') & targetSessCells & is_int;
     
     figure % 2.5 x 7
-    subplot(4,1,[1 2])
-    imagesc_ranked(ts,[], squeeze(nanmean(projectResults.optogeneticResponses.responsecurveZSmooth(responsive_cells,post_opt,:),2)),[-2 2],...
-        projectResults.optogeneticResponses.rateZDuringPulse(responsive_cells,post_opt));
-    set(gca,'XTick',[]); xlim([-0.1 0.5]); ylabel(name_cells,'Color',color_cells);
-    subplot(4,1,3)
-    imagesc_ranked(ts,[], squeeze(nanmean(projectResults.optogeneticResponses.responsecurveZSmooth(sessions_pyr,post_opt,:),2)),[-2 2],...
-        projectResults.optogeneticResponses.rateZDuringPulse(sessions_pyr,post_opt));
-    set(gca,'XTick',[]); xlim([-0.1 0.5]); ylabel('PYR','Color',color_pyr);
-    subplot(4,1,4)
-    imagesc_ranked(ts,[], squeeze(nanmean(projectResults.optogeneticResponses.responsecurveZSmooth(sessions_int,post_opt,:),2)),[-2 2],...
-        projectResults.optogeneticResponses.rateZDuringPulse(sessions_int,post_opt));
-    xlim([-0.1 0.5]); ylabel('INT','Color',color_int);
-    xlabel('Time since light stimulation (ms)'); colormap parula
+    subplot(2,2,[1])
+    imagesc_ranked(ts,[], squeeze(nanmean(projectResults.optogeneticResponses.responsecurveZSmooth(sessions_pyr_cr,post_opt,:),2)),[-2.5 2.5],...
+        projectResults.optogeneticResponses.rateZDuringPulse(sessions_pyr_cr,post_opt));
+    set(gca,'XTick',[]); xlim([-0.05 0.3]); ylabel('PYR','Color',color_pyr); 
+    title('CR+/VIP+','FontWeight','normal');
+    subplot(2,2,3)
+    imagesc_ranked(ts,[], squeeze(nanmean(projectResults.optogeneticResponses.responsecurveZSmooth(sessions_int_cr,post_opt,:),2)),[-2.5 2.5],...
+        projectResults.optogeneticResponses.rateZDuringPulse(sessions_int_cr,post_opt));
+    xlim([-0.05 0.3]); ylabel('INT','Color',color_int);
+    xlabel('Time since light stimulation (s)'); colormap jet
     
-    figure % 2.5 x 7
-    subplot(4,1,[1])
-    imagesc_ranked(ts,[], squeeze(nanmean(projectResults.optogeneticResponses.responsecurveZSmooth(responsive_cells,post_opt,:),2)),[-2 2],...
-        projectResults.optogeneticResponses.rateZDuringPulse(responsive_cells,post_opt));
-    set(gca,'XTick',[]); xlim([-0.1 0.5]); ylabel(name_cells,'Color',color_cells);
-    subplot(4,1,[2])
-    imagesc_ranked(ts,[], squeeze(nanmean(projectResults.optogeneticResponses.responsecurveZSmooth(delayed_responsive_cells,post_opt,:),2)),[-2 2],...
-        projectResults.optogeneticResponses.rateZDuringPulse(delayed_responsive_cells,post_opt));
-    set(gca,'XTick',[]); xlim([-0.1 0.5]); ylabel('Delayed');
-    subplot(4,1,3)
-    imagesc_ranked(ts,[], squeeze(nanmean(projectResults.optogeneticResponses.responsecurveZSmooth(sessions_pyr,post_opt,:),2)),[-2 2],...
-        projectResults.optogeneticResponses.rateZDuringPulse(sessions_pyr,post_opt));
-    set(gca,'XTick',[]); xlim([-0.1 0.5]); ylabel('PYR','Color',color_pyr);
-    subplot(4,1,4)
-    imagesc_ranked(ts,[], squeeze(nanmean(projectResults.optogeneticResponses.responsecurveZSmooth(sessions_int,post_opt,:),2)),[-2 2],...
-        projectResults.optogeneticResponses.rateZDuringPulse(sessions_int,post_opt));
-    xlim([-0.1 0.5]); ylabel('INT','Color',color_int);
-    xlabel('Time since light stimulation (ms)'); colormap parula
+    subplot(2,2,[2])
+    imagesc_ranked(ts,[], squeeze(nanmean(projectResults.optogeneticResponses.responsecurveZSmooth(sessions_pyr_cck,post_opt,:),2)),[-2.5 2.5],...
+        projectResults.optogeneticResponses.rateZDuringPulse(sessions_pyr_cck,post_opt));
+    set(gca,'XTick',[]); xlim([-0.05 0.3]); ylabel('PYR','Color',color_pyr); ylim([0.5 60]);
+    title('CCK+/VIP+','FontWeight','normal');
+    subplot(2,2,4)
+    imagesc_ranked(ts,[], squeeze(nanmean(projectResults.optogeneticResponses.responsecurveZSmooth(sessions_int_cck,post_opt,:),2)),[-2.5 2.5],...
+        projectResults.optogeneticResponses.rateZDuringPulse(sessions_int_cck,post_opt));
+    xlim([-0.05 0.3]); ylabel('INT','Color',color_int);
+    xlabel('Time since light stimulation (s)'); colormap jet
     
+
     % 
-    [gs] = groupStats({projectResults.optogeneticResponses.rateZDuringPulse(sessions_pyr,post_opt), projectResults.optogeneticResponses.rateZDuringPulse(sessions_int,post_opt),...
-        projectResults.optogeneticResponses.rateZDuringPulse(responsive_cells,post_opt)},[],'color',[color_pyr; color_int; color_cells],'plotData',true,'plotType','symRoundPlot','labelSummary',false);
+    [gs] = groupStats({projectResults.optogeneticResponses.rateZDuringPulse(sessions_pyr_cr,post_opt), projectResults.optogeneticResponses.rateZDuringPulse(sessions_int_cr,post_opt),...
+        projectResults.optogeneticResponses.rateZDuringPulse(sessions_pyr_cck,post_opt), projectResults.optogeneticResponses.rateZDuringPulse(sessions_int_cck,post_opt)},[1 1 2 2; 1 2 1 2],...
+        'color',[color_pyr_dark; color_int_dark; color_pyr_light; color_int_light],'plotData',true,'plotType','roundPlot','labelSummary',false,'roundPlotSize',10);
     ylabel('Light responses (SD)');    
-    set(gca,'XTick',[1 2 3],'XTickLabel',{'PYR','INT',name_cells},'XTickLabelRotation',45);
-    
-    % 1.1.1 FRACTIONS OF MODULATION PER LAYER
-    modulationLayer.total.pyr.frac_downMod = length(find(projectResults.optogeneticResponses.bootsTrapTest(sessions_pyr,post_opt) == -1))/length(find(sessions_pyr));
-    modulationLayer.total.pyr.frac_NoMod = length(find(projectResults.optogeneticResponses.bootsTrapTest(sessions_pyr,post_opt) == 0))/length(find(sessions_pyr));
-    modulationLayer.total.pyr.frac_upMod = length(find(projectResults.optogeneticResponses.bootsTrapTest(sessions_pyr,post_opt) == 1))/length(find(sessions_pyr));
-    
-    modulationLayer.total.int.frac_downMod = length(find(projectResults.optogeneticResponses.bootsTrapTest(sessions_int,post_opt) == -1))/length(find(sessions_int));
-    modulationLayer.total.int.frac_NoMod = length(find(projectResults.optogeneticResponses.bootsTrapTest(sessions_int,post_opt) == 0))/length(find(sessions_int));
-    modulationLayer.total.int.frac_upMod = length(find(projectResults.optogeneticResponses.bootsTrapTest(sessions_int,post_opt) == 1))/length(find(sessions_int));
-    
-    modulationLayer.layerV.pyr.frac_downMod = length(find(projectResults.optogeneticResponses.bootsTrapTest(sessions_pyr_l5,post_opt) == -1))/length(find(sessions_pyr_l5));
-    modulationLayer.layerV.pyr.frac_NoMod = length(find(projectResults.optogeneticResponses.bootsTrapTest(sessions_pyr_l5,post_opt) == 0))/length(find(sessions_pyr_l5));
-    modulationLayer.layerV.pyr.frac_upMod = length(find(projectResults.optogeneticResponses.bootsTrapTest(sessions_pyr_l5,post_opt) == 1))/length(find(sessions_pyr_l5));
-    
-    modulationLayer.layerV.int.frac_downMod = length(find(projectResults.optogeneticResponses.bootsTrapTest(sessions_int_l5,post_opt) == -1))/length(find(sessions_int_l5));
-    modulationLayer.layerV.int.frac_NoMod = length(find(projectResults.optogeneticResponses.bootsTrapTest(sessions_int_l5,post_opt) == 0))/length(find(sessions_int_l5));
-    modulationLayer.layerV.int.frac_upMod = length(find(projectResults.optogeneticResponses.bootsTrapTest(sessions_int_l5,post_opt) == 1))/length(find(sessions_int_l5));
-    
-    modulationLayer.layerIV.pyr.frac_downMod = length(find(projectResults.optogeneticResponses.bootsTrapTest(sessions_pyr_l4,post_opt) == -1))/length(find(sessions_pyr_l4));
-    modulationLayer.layerIV.pyr.frac_NoMod = length(find(projectResults.optogeneticResponses.bootsTrapTest(sessions_pyr_l4,post_opt) == 0))/length(find(sessions_pyr_l4));
-    modulationLayer.layerIV.pyr.frac_upMod = length(find(projectResults.optogeneticResponses.bootsTrapTest(sessions_pyr_l4,post_opt) == 1))/length(find(sessions_pyr_l4));
-    
-    modulationLayer.layerIV.int.frac_downMod = length(find(projectResults.optogeneticResponses.bootsTrapTest(sessions_int_l4,post_opt) == -1))/length(find(sessions_int_l4));
-    modulationLayer.layerIV.int.frac_NoMod = length(find(projectResults.optogeneticResponses.bootsTrapTest(sessions_int_l4,post_opt) == 0))/length(find(sessions_int_l4));
-    modulationLayer.layerIV.int.frac_upMod = length(find(projectResults.optogeneticResponses.bootsTrapTest(sessions_int_l4,post_opt) == 1))/length(find(sessions_int_l4));
-    
-    modulationLayer.layerVI.pyr.frac_downMod = length(find(projectResults.optogeneticResponses.bootsTrapTest(sessions_pyr_l6,post_opt) == -1))/length(find(sessions_pyr_l6));
-    modulationLayer.layerVI.pyr.frac_NoMod = length(find(projectResults.optogeneticResponses.bootsTrapTest(sessions_pyr_l6,post_opt) == 0))/length(find(sessions_pyr_l6));
-    modulationLayer.layerVI.pyr.frac_upMod = length(find(projectResults.optogeneticResponses.bootsTrapTest(sessions_pyr_l6,post_opt) == 1))/length(find(sessions_pyr_l6));
-    
-    modulationLayer.layerVI.int.frac_downMod = length(find(projectResults.optogeneticResponses.bootsTrapTest(sessions_int_l6,post_opt) == -1))/length(find(sessions_int_l6));
-    modulationLayer.layerVI.int.frac_NoMod = length(find(projectResults.optogeneticResponses.bootsTrapTest(sessions_int_l6,post_opt) == 0))/length(find(sessions_int_l6));
-    modulationLayer.layerVI.int.frac_upMod = length(find(projectResults.optogeneticResponses.bootsTrapTest(sessions_int_l6,post_opt) == 1))/length(find(sessions_int_l6));
-    
-    modulationLayer.layerII_III.pyr.frac_downMod = length(find(projectResults.optogeneticResponses.bootsTrapTest(sessions_pyr_ll23,post_opt) == -1))/length(find(sessions_pyr_ll23));
-    modulationLayer.layerII_III.pyr.frac_NoMod = length(find(projectResults.optogeneticResponses.bootsTrapTest(sessions_pyr_ll23,post_opt) == 0))/length(find(sessions_pyr_ll23));
-    modulationLayer.layerII_III.pyr.frac_upMod = length(find(projectResults.optogeneticResponses.bootsTrapTest(sessions_pyr_ll23,post_opt) == 1))/length(find(sessions_pyr_ll23));
-    
-    modulationLayer.layerII_III.int.frac_downMod = length(find(projectResults.optogeneticResponses.bootsTrapTest(sessions_int_l123,post_opt) == -1))/length(find(sessions_int_l123));
-    modulationLayer.layerII_III.int.frac_NoMod = length(find(projectResults.optogeneticResponses.bootsTrapTest(sessions_int_l123,post_opt) == 0))/length(find(sessions_int_l123));
-    modulationLayer.layerII_III.int.frac_upMod = length(find(projectResults.optogeneticResponses.bootsTrapTest(sessions_int_l123,post_opt) == 1))/length(find(sessions_int_l123));
-    
-    figure
-    hold on
-    bar([1 2.5 3.5 4.5],[1 1 1 1],'EdgeColor','none','FaceColor',[.8 .8 .5]);
-    bar([1 2.5 3.5 4.5],[modulationLayer.total.pyr.frac_downMod modulationLayer.layerII_III.pyr.frac_downMod modulationLayer.layerV.pyr.frac_downMod modulationLayer.layerVI.pyr.frac_downMod] + ...
-        [modulationLayer.total.pyr.frac_NoMod modulationLayer.layerII_III.pyr.frac_NoMod modulationLayer.layerV.pyr.frac_NoMod modulationLayer.layerVI.pyr.frac_NoMod],...
-        'EdgeColor','none','FaceColor',[.7 .7 .7]); 
-    bar([1 2.5 3.5 4.5],[modulationLayer.total.pyr.frac_downMod modulationLayer.layerII_III.pyr.frac_downMod modulationLayer.layerV.pyr.frac_downMod modulationLayer.layerVI.pyr.frac_downMod],...
-        'EdgeColor','none','FaceColor',[.7 .7 1]);
-    set(gca,'XTick',[1 2.5 3.5 4.5],'XTickLabel',{'All layers', 'I-II/III', 'V', 'VI'},'XTickLabelRotation',45,'YTick',[0 0.5 1]);
-    ylabel('Fraction of units');
+    set(gca,'XTick',[1 2 3 4],'XTickLabel',{'PYR CR+/VIP+','INT CR+/VIP+','PYR CCK+/VIP+','INT CCK+/VIP+'},'XTickLabelRotation',45);
     
     % 1.2 INTRINSIC FEATURES
     % A) SPIKE WIDTH
@@ -410,7 +313,7 @@ for z = 1
     set(gca,'XTick',[1 2 3],'XTickLabel',{'PYR','INT',name_cells},'XTickLabelRotation',45);
     
     
-    % 1.4 DOWN STATES
+    % 1.4 RIPPLES FIRING
     win_resp = [-0.025 0.025];
     ts_ripples = projectResults.ripplesResponses.timestamps;
     

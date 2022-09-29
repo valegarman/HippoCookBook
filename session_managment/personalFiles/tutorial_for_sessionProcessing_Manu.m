@@ -27,5 +27,5 @@ indexNewSession;
 % an enjoy data analysis!
 [projectResults, projectSessionResults] = ...
         loadProjectResults('project', 'neuroGli2d',...
-        'analysis_project_path', 'C:\Users\valeg\Dropbox\ProjectsOnLine\interneuronsLibrary\data','loadLast',false);
+        'analysis_project_path', 'C:\Users\valeg\Dropbox\ProjectsOnLine\neuroGli2d\data','loadLast',false);
     
