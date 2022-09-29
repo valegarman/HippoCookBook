@@ -29,7 +29,7 @@ addParameter(p,'showTagCells',true, @islogical);
 addParameter(p,'lightPulseDuration',0.1, @isnumeric);
 addParameter(p,'checkUnits',true, @islogical);
 addParameter(p,'use_deltaThetaEpochs',true, @islogical);
-addParameter(p,'cells_responsive_to_any_pulse',false, @islogical);
+addParameter(p,'cells_responsive_to_any_pulse',true, @islogical);
 
 parse(p,varargin{:})
 
@@ -56,7 +56,7 @@ if showTagCells
     if ~cells_responsive_to_any_pulse
         UID = find(optogenetic_responses.threeWaysTest(:,optogenetic_responses.pulseDuration==lightPulseDuration)==1);
     else
-        UID = find(any((optogenetic_responses.threeWaysTest==1)')');
+        UID = find(any((optogenetic_responses.threeWaysTest==1)',1)');
     end
     
     clear optogenetic_responses

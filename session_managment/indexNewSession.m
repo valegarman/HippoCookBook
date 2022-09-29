@@ -16,8 +16,8 @@ addParameter(p,'hippoCookBook_path','HippoCookBook',@isstring);
 addParameter(p,'removeDatFiles',true,@islogical);
 addParameter(p,'removeDat',false,@islogical);
 addParameter(p,'copyFiles',true,@islogical);
-addParameter(p,'driveStorage_path',[],@isdir);
-addParameter(p,'driveStorage_name','packrat',@isstring);
+addParameter(p,'driveStorage_path','W:\Buzsakilabspace\Datasets\ValeroM',@isdir);
+addParameter(p,'driveStorage_name','Research',@isstring);
 
 parse(p,varargin{:})
 

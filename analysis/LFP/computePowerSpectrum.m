@@ -162,20 +162,27 @@ S = log10(S); % in Db
 S_det = detrend(S',2)';
 
 
-figure,
+figure('units','normalized','outerposition',[0 0 1 1]);
 subplot(3,3,[1 2])
 imagesc(t,f,S_det',[-1.5 1.5]);
 ylim([1.5 200]);
 set(gca,'TickDir','out'); ylabel('Freq [Hz]'); xlabel('Time [s]');
-colormap jet
+colormap jet, colorbar;
+cb = colorbar;
+cb.Label.String = 'log10 (Db)';
+title('Whole Recording');
+
 
 subplot(3,3,[4 5])
 try
     t_theta = sum(diff(thetaEpochs.intervals')) * diff(t);
     imagesc([0 t_theta],f,S_det(InIntervals(t,thetaEpochs.intervals),:)',[-1.5 1.5]);
     ylim([1.5 200]);
-    set(gca,'TickDir','out'); ylabel('Theta epochs [Freq, Hz]');
-    colormap jet
+    set(gca,'TickDir','out'); ylabel('[Freq, Hz]');
+    colormap jet; colorbar;
+    cb = colorbar;
+    cb.Label.String = 'log10 (Db)';
+    title('Theta epochs');
 end
     
 subplot(3,3,[7 8])
@@ -183,8 +190,11 @@ try
     t_non_theta = sum(diff(thetaEpochs.intervals_nonTheta')) * diff(t);
     imagesc([0 t_non_theta],f,S_det(InIntervals(t,thetaEpochs.intervals_nonTheta),:)',[-1.5 1.5]);
     ylim([1.5 200]);
-    set(gca,'TickDir','out'); ylabel('Non-Theta epochs [Freq, Hz]');
-    colormap jet
+    set(gca,'TickDir','out'); ylabel('[Freq, Hz]');
+    colormap jet, colorbar;
+    cb = colorbar;
+    cb.Label.String = 'log10 (Db)';
+    title('Non-Theta epochs')
 end
 
 subplot(2,3,[3 6])
@@ -194,7 +204,8 @@ try
     plotFill(f,S_det(InIntervals(t,thetaEpochs.intervals_nonTheta),:),'color', [.2 .2 .8],'lineStyle', '-'); xlim([1 200]);
     ax = axis;
     fill([theta_bandpass flip(theta_bandpass)],[ax([3 3 4 4])],[.8 .5 .5],'EdgeColor','none','FaceAlpha',.1);
-    ylabel('Full recording [Freq, Hz]'); xlabel('Freq [Hz]');   
+    ylabel('[Freq, Hz]'); xlabel('Freq [Hz]');   
+    title('Full recording');
 end 
 % if saveSummary
 %     mkdir('SummaryFigures'); % create folder
@@ -223,14 +234,20 @@ figure('units','normalized','outerposition',[0 0 1 1]);
 subplot(3,3,[1 2])
 imagesc([0 t_openField1],f,S_det(InIntervals(t,t_openField{1}),:)',[-1.5 1.5]);
 ylim([1.5 200]);
-set(gca,'TickDir','out'); ylabel('Open Field 1 [Freq, Hz]');
-colormap jet, colorbar
+set(gca,'TickDir','out'); ylabel('[Freq, Hz]');
+colormap jet, colorbar,
+cb = colorbar;
+cb.Label.String = 'log10 (Db)';
+title('Open Field 1');
 
 subplot(3,3,[4 5])
 imagesc([0 t_openField2],f,S_det(InIntervals(t,t_openField{2}),:)',[-1.5 1.5]);
 ylim([1.5 200]);
-set(gca,'TickDir','out'); ylabel('Open Field 2 [Freq, Hz]');
-colormap jet, colorbar
+set(gca,'TickDir','out'); ylabel('[Freq, Hz]');
+colormap jet, colorbar;
+cb = colorbar;
+cb.Label.String = 'log10 (Db)';
+title('Open Field 2');
 
 subplot(3,3,7)
 plot(tracking.position.x(InIntervals(tracking.timestamps,t_openField{1})),tracking.position.y(InIntervals(tracking.timestamps,t_openField{1})));
@@ -249,8 +266,8 @@ plotFill(f,S_det(InIntervals(t,t_openField{1}),:),'color',[.8 .8 .8], 'lineStyle
 plotFill(f,S_det(InIntervals(t,t_openField{2}),:),'color',[1 0 0], 'lineStyle','-'); xlim([1 200]);
 ax = axis;
 fill([theta_bandpass flip(theta_bandpass)],[ax([3 3 4 4])],[.8 .5 .5],'EdgeColor','none','FaceAlpha',.1);
-ylabel('OpenField1 - OpenField2 [Freq, Hz]'); xlabel('Freq [Hz]');
-
+ylabel('[Freq, Hz]'); xlabel('Freq [Hz]');
+title('Open Field1 - Open Field 2');
 if saveSummary
     mkdir('SummaryFigures'); % create folder
     saveas(gcf,'SummaryFigures\PowerSpectrum_OpenField.png');
@@ -276,14 +293,20 @@ figure('units','normalized','outerposition',[0 0 1 1]);
 subplot(3,3,[1 2])
 imagesc([0 t_YMaze1],f,S_det(InIntervals(t,t_YMaze{1}),:)',[-1.5 1.5]);
 ylim([1.5 200]);
-set(gca,'TickDir','out'); ylabel('YMaze 1 [Freq, Hz]');
-colormap jet, colorbar
+set(gca,'TickDir','out'); ylabel('[Freq, Hz]');
+colormap jet, colorbar,
+cb = colorbar;
+cb.Label.String = 'log10 (Db)';
+title('YMaze 1');
 
 subplot(3,3,[4 5])
 imagesc([0 t_YMaze2],f,S_det(InIntervals(t,t_YMaze{2}),:)',[-1.5 1.5]);
 ylim([1.5 200]);
-set(gca,'TickDir','out'); ylabel('YMaze 2 [Freq, Hz]');
-colormap jet, colorbar
+set(gca,'TickDir','out'); ylabel('[Freq, Hz]');
+colormap jet, colorbar;
+cb = colorbar;
+cb.Label.String = 'log10 (Db)';
+title('YMaze 2');
 
 subplot(3,3,7)
 plot(tracking.position.x(InIntervals(tracking.timestamps,t_YMaze{1})),tracking.position.y(InIntervals(tracking.timestamps,t_YMaze{1})));
@@ -302,7 +325,8 @@ plotFill(f,S_det(InIntervals(t,t_YMaze{1}),:),'color',[.8 .8 .8], 'lineStyle','-
 plotFill(f,S_det(InIntervals(t,t_YMaze{2}),:),'color',[1 0 0], 'lineStyle','-'); xlim([1 200]);
 ax = axis;
 fill([theta_bandpass flip(theta_bandpass)],[ax([3 3 4 4])],[.8 .5 .5],'EdgeColor','none','FaceAlpha',.1);
-ylabel('YMaze1 - YMaze2 [Freq, Hz]'); xlabel('Freq [Hz]');
+ylabel('[Freq, Hz]'); xlabel('Freq [Hz]');
+title('YMaze 1 - YMaze 2');
 
 if saveSummary
     mkdir('SummaryFigures'); % create folder

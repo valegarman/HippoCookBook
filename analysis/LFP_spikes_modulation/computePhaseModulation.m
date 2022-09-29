@@ -257,6 +257,7 @@ end
 %% Plotting
 if plotting
     % Ripple Modulation
+    try
     if ismember('rippleModulation',bandsToCompute)
         figure,
         set(gcf,'Position',get(0,'ScreenSize'))
@@ -444,7 +445,7 @@ if plotting
         end
         saveas(gcf,['SummaryFigures\thetaREM_',num2str(theta_passband(1)),'-',num2str(theta_passband(end)),'_PhaseModulation.png']);
     end
-
+    end
 
 end
 

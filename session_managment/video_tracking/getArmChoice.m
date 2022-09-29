@@ -14,6 +14,11 @@ function [armChoice] = getArmChoice(varargin)
 %                                 5. Home Delay,        6. Is alternation forzed?
 %                                 7. 0 is cue left, 1 is cue right (for
 %                                       cueSide task)
+%                               NOTE: After Maze reconstruction, convention
+%                               changed (09/12/2022):
+%                                 1. Basler             2. Left alternation
+%                                 3. Right alternation  4. Home delay
+%                                 5. Opto
 %                               If not called, look for it.
 % task                          'alternation' and 'cudeSide'
 % force                         Force detection (boolean, default false)
@@ -42,11 +47,17 @@ addParameter(p,'digitalIn',[],@ischar);
 addParameter(p,'task',[]);
 addParameter(p,'force',false,@islogical)
 addParameter(p,'verbose',false,@islogical)
+addParameter(p,'leftArmTtl_channel',2,@isnumeric)
+addParameter(p,'rightArmTtl_channel',3,@isnumeric)
+addParameter(p,'homeDelayTtl_channel',4,@isnumeric)
+
 parse(p,varargin{:});
 digitalIn = p.Results.digitalIn;
 task = p.Results.task;
 force = p.Results.force;
-verbose = p.Results.verbose;
+leftArmTtl_channel = p.Results.leftArmTtl_channel;
+rightArmTtl_channel = p.Results.rightArmTtl_channel;
+homeDelayTtl_channel = p.Results.homeDelayTtl_channel;
 
 if ~isempty(dir('*.ArmChoice.Events.mat')) && ~force 
     disp('Arm choice already computed! Loading file.');
@@ -180,15 +191,15 @@ if strcmpi(task,'cueSide')
 elseif strcmpi(task,'alternation')
     % score for alternation task
     if isfield(digitalIn,'timestampsOn') && size(digitalIn.timestampsOn,2)>= 5
-        armChoice.timestamps = [digitalIn.timestampsOn{3}; digitalIn.timestampsOn{4}]; 
+        armChoice.timestamps = [digitalIn.timestampsOn{leftArmTtl_channel}; digitalIn.timestampsOn{rightArmTtl_channel}]; 
         % 0 is left, 1 is right
-        armChoice.visitedArm = [zeros(size(digitalIn.timestampsOn{3})); ones(size(digitalIn.timestampsOn{4}))];
-        armChoice.delay.timestamps = digitalIn.ints{5};
-        if size(armChoice.visitedArm,1) < size(digitalIn.timestampsOn{5},1) - 10
+        armChoice.visitedArm = [zeros(size(digitalIn.timestampsOn{leftArmTtl_channel})); ones(size(digitalIn.timestampsOn{rightArmTtl_channel}))];
+        armChoice.delay.timestamps = digitalIn.ints{homeDelayTtl_channel};
+        if size(armChoice.visitedArm,1) < size(digitalIn.timestampsOn{homeDelayTtl_channel},1) - 10
             warning('There was problem with one of the sensors! Triying to fix it!')
-            leftArmSensor = digitalIn.timestampsOn{3};
-            rightArmSensor = digitalIn.timestampsOn{4};
-            delaySensor = digitalIn.timestampsOn{5};
+            leftArmSensor = digitalIn.timestampsOn{leftArmTtl_channel};
+            rightArmSensor = digitalIn.timestampsOn{rightArmTtl_channel};
+            delaySensor = digitalIn.timestampsOn{homeDelayTtl_channel};
             if size(leftArmSensor,1) < size(rightArmSensor,1) -10
                 warning('Estimating left-arm sensor times...');
                 for ii = 2:length(delaySensor)-1
