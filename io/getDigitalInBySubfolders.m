@@ -57,9 +57,9 @@ catch
 end
 
 %% In case digitalIn already exists
-if ~isempty(dir([basepath filesep sessionInfo.FileName, '.digitalIn.events.mat']))
+if ~isempty(dir([basepath filesep session.general.name, '.digitalIn.events.mat']))
     disp('digitalIn.events.mat found. Loading file')
-    file = dir([basepath filesep sessionInfo.FileName, '.digitalIn.events.mat']);
+    file = dir([basepath filesep session.general.name, '.digitalIn.events.mat']);
     if isstr(ch)
         load(file.name);
     elseif isnumeric(ch)
@@ -77,14 +77,15 @@ if ~isempty(dir([basepath filesep sessionInfo.FileName, '.digitalIn.events.mat']
     return
 end
 
-if exist([basepath filesep strcat(sessionInfo.session.name, '.MergePoints.events.mat')],'file')
-    load(strcat(sessionInfo.session.name,'.MergePoints.events.mat'));
+if exist([basepath filesep strcat(session.general.name, '.MergePoints.events.mat')],'file')
+    load(strcat(session.general.name,'.MergePoints.events.mat'));
     count = 1;
     for ii=1:size(MergePoints.foldernames,2)
         if ~isempty(dir([basepath filesep MergePoints.foldernames{ii} filesep '*.DigitalIn.events.mat']))
             cd([basepath filesep MergePoints.foldernames{ii}]);
             fprintf('DigitalIn found in %s folder \n', MergePoints.foldernames{ii});
-            tempDigitalIn{count} = bz_getDigitalIn('all');
+%             tempDigitalIn{count} = bz_getDigitalIn('all');
+            tempDigitalIn{count} = getDigitalIn('all');
             digitalInFolder(count) = ii;
             count = count + 1;
         end
@@ -99,8 +100,8 @@ end
 ts = []; subSessions = []; maskSessions = [];
 
 if exist('digitalInFolder','var')
-    if exist([basepath filesep strcat(sessionInfo.session.name,'.MergePoints.events.mat')],'file')
-        load(strcat(sessionInfo.session.name, '.MergePoints.events.mat'));
+    if exist([basepath filesep strcat(session.general.name,'.MergePoints.events.mat')],'file')
+        load(strcat(session.general.name, '.MergePoints.events.mat'));
         for ii=1:length(digitalInFolder)
             if strcmpi(MergePoints.foldernames{digitalInFolder(ii)},tempDigitalIn{ii}.folder)
                 if isfield(tempDigitalIn{ii},'timestampsOn')
@@ -146,7 +147,7 @@ if exist('digitalInFolder','var')
                 tsOn_aux = [tsOn_aux sumTsOn{jj}{ii}];
                 tsOff_aux = [tsOff_aux sumTsOff{jj}{ii}];
                 tsDur_aux = [tsDur_aux sumTsDur{jj}{ii}];
-                tsInts_aux = [tsInts_aux sumTsInts{jj}{ii}];
+                tsInts_aux = [tsInts_aux; sumTsInts{jj}{ii}];
                 tsIntsPeriods_aux = [tsIntsPeriods_aux; sumTsIntsPeriods{jj}{ii}];
             end
         end
@@ -171,9 +172,9 @@ if exist('digitalInFolder','var')
 
     if saveMat
         try
-            save([basepath filesep sessionInfo.FileName,'.digitalIn.events.mat'],'digitalIn');
+            save([basepath filesep session.general.name,'.digitalIn.events.mat'],'digitalIn');
         catch
-           save([basepath filesep sessionInfo.FileName,'.digitalIn.events.mat'],'digitalIn','-v7.3'); 
+           save([basepath filesep session.general.name,'.digitalIn.events.mat'],'digitalIn','-v7.3'); 
         end
     end
     

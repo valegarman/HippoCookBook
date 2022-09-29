@@ -1,5 +1,5 @@
 function [spatialModulation] = getSpatialModulation2D(varargin)
-% [spatialModulation] = getSpatialModulation(varargin)
+% [spatialModulation] = getSpatialModulation2D(varargin)
 %
 % Get spatial modulation structure
 %
@@ -15,7 +15,7 @@ function [spatialModulation] = getSpatialModulation2D(varargin)
 % OUTPUTS
 % spatialModulation
 %
-% Pablo Abad 2022. Based on MV-BuzsakiLab 2022
+% Pablo Abad 2022. Based on getSpatialModulation by MV-BuzsakiLab 2022
 %
 % to do: For now it only uses the biggest field if a neuron has more than
 % one field. 
@@ -27,11 +27,15 @@ addParameter(p,'basepath',pwd,@ischar);
 addParameter(p,'behaviour',[],@isstruct);
 addParameter(p,'spikes',[],@isstruct);
 addParameter(p,'placeFieldStats',[],@isstruct);
-addParameter(p,'firingTrialsMap',[],@isstruct);
 addParameter(p,'saveMat', true, @islogical);
 addParameter(p,'plotOpt', true, @islogical);
 addParameter(p,'force', false, @islogical);
+addParameter(p,'useColorBar',true,@islogical);
 addParameter(p,'minTime',0.5,@isnumeric);
+addParameter(p,'periodic',false,@islogical);
+addParameter(p,'spikeShuffling',false,@islogical);
+addParameter(p,'numRand',1000,@isnumeric);
+
 
 parse(p, varargin{:});
 firingMaps = p.Results.firingMaps;
@@ -41,13 +45,19 @@ spikes = p.Results.spikes;
 placeFieldStats = p.Results.placeFieldStats;
 saveMat = p.Results.saveMat;
 plotOpt = p.Results.plotOpt;
-firingTrialsMap = p.Results.firingTrialsMap;
 force = p.Results.force;
+useColorBar = p.Results.useColorBar;
 minTime = p.Results.minTime;
+periodic = p.Results.periodic;
+spikeShuffling = p.Results.spikeShuffling;
+numRand = p.Results.numRand;
+
 
 % Deal with inputs
 prevPath = pwd;
 cd(basepath);
+
+session = loadSession(basepath);
 
 filename = basenameFromBasepath(pwd);
 if ~isempty(dir([basenameFromBasepath(pwd) '.spatialModulation.cellinfo.mat'])) && ~force
@@ -82,7 +92,7 @@ if isempty(placeFieldStats)
         load([basenameFromBasepath(pwd) '.placeFields.cellinfo.mat']);
     else
         try
-            placeFieldStats = bz_findPlaceFields1D('firingMaps',firingMaps,'maxSize',.75,'sepEdge',0.03); %
+            placeFieldStats = findPlaceFields1D('firingMaps',firingMaps,'useColorBar',useColorBar); %
         catch
             error('Place fields could not be obtained.')
         end
@@ -101,17 +111,23 @@ for jj = 1:length(firingMaps.rateMaps{1})
         spatialModulation.(['map_' num2str(jj) '_countMaps']){ii} = firingMaps.countMaps{ii}{jj};
         spatialModulation.(['map_' num2str(jj) '_occupancy']){ii} = firingMaps.occupancy{ii}{jj};
         spatialModulation.(['map_' num2str(jj) '_rateMapsZ']){ii} = zscor_xnan(firingMaps.rateMaps{ii}{jj});
+        spatialModulation.(['map_' num2str(jj) '_rateMapsUnSmooth']){ii} = firingMaps.rateMapsUnSmooth{ii}{jj};
+        spatialModulation.(['map_' num2str(jj) '_countMapsUnSmooth']){ii} = firingMaps.countMapsUnSmooth{ii}{jj};
+        spatialModulation.(['map_' num2str(jj) '_occupancyMapsUnSmooth']){ii} = firingMaps.occupancyUnSmooth{ii}{jj};
     end
     spatialModulation.(['map_' num2str(jj) '_timestamps'])...
         = 0:firingMaps.cmBin{jj}:firingMaps.cmBin{jj}*(length(firingMaps.rateMaps{1}{jj})-1);
 end
 
 %% compute statistics
-
 % 1 Spatial corr
 try
     for ii = 1:length(firingMaps.UID)
         maps_pairs = nchoosek(1:length(firingMaps.rateMaps{ii}), 2);
+        for jj = 1:size(maps_pairs)
+            sameParadigm(jj) = strcmpi(behaviour.description{maps_pairs(jj,1)}, behaviour.description{maps_pairs(jj,2)});
+        end
+        maps_pairs(find(sameParadigm == 0),:) = [];
         for jj = 1:size(maps_pairs,1) % for each pairs of maps
             % 1 Spatial corr 2D
             % Finding position bins where animal spent more than minTime

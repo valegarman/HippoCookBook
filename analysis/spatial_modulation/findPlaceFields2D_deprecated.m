@@ -1,4 +1,4 @@
-function [placeFieldStats] = findPlaceFields2D(varargin)
+function [placeFieldStats] = findPlaceFields2D_deprecated(varargin)
 %   [placeFieldStats] = findPlaceFields2D(firingMaps)
 %   Find place fields from 2D firing maps. Reads the output of firingMapAvg 
 %
@@ -16,13 +16,13 @@ function [placeFieldStats] = findPlaceFields2D(varargin)
 %                   ouput structure from bz_firingMapAvg. If not provided,
 %                   it loads it from 'basepath' or current folder
 %     'basepath'    full path where session is located (default pwd)
-%             
+%                   e.g. /mnt/Data/buddy140_060813_reo/buddy140_060813_reo
 %     'threshold'   values above threshold*peak belong to the field
 %                   (default = 0.2)
 %     'minSize'     fields smaller than this percentage of the maze size 
-%                   are considered spurious and ignored (default = 0.02)
+%                   are considered spurious and ignored (default = 0.05)
 %     'maxSize'     fields larger than this percentage of the maze size 
-%                   are considered noise and ignored (default = 0.60)
+%                   are considered noise and ignored (default = 0.50)
 %     'sepEdge'     fields with maximum Firing Rate closer to the edges less
 %                   than this percentage of the maze size are ignored
 %                   (default = 0.0)
@@ -56,79 +56,74 @@ function [placeFieldStats] = findPlaceFields2D(varargin)
 %         .verbose
 %         .saveMat
 %       .mapStats       Statistics of the Firing Map
-%         .x            abscissa of the maximum value (in bins)
-%         .y            ordinate of the maximum value (in bins)
-%         peak          in-field maximum value
-%         mean          in-field mean value
-%         size          field size (in bins)
-%         field         field (1 = bin in field, 0 = bin not in field)
-%         fieldX        field x boundaries (in bins)
-%         fieldY        field y boundaries (in bins)
-%         specificity   spatial specificity (Skaggs et al., 1993)       
-%
-%       For 1D circular data:
-%   
-%       stats.m             mean angle
-%       stats.mode          distribution mode (in bins)
-%       stats.r             mean resultant length
-%       stats.k             von Mises concentration
+%         .x
+%         .field
+%         .size
+%         .peak
+%         .mean
+%         .fieldX
+%         .specificity
+%         .m
+%         .r
+%         .mode
+%         .k
+%         .y
+%         .fieldY
 %
 %    =========================================================================
 %
-% Pablo Abad 2021. Based in bz_findPlaceFields1D by Antonio FR, 10/2019 and
-% MapStats by Michael Zugaro.
+% Pablo Abad 2021. Based in bz_findPlaceFields1D by Antonio FR, 10/2019
 
 %%%%%%%%%%%%%%  WORK IN PROGRESS
 
 % Parse inputs 
 p=inputParser;
 addParameter(p,'basepath',pwd,@isstr);
-addParameter(p,'firingMapsAvg',[],@isstruct);
+addParameter(p,'firingMapsAvg',{},@isstruct);
 addParameter(p,'threshold',0.2,@isnumeric);
-addParameter(p,'minSize',0.02,@isnumeric);
-addParameter(p,'minPeak',1,@isnumeric);
-addParameter(p,'type','ll',@isstr);
+addParameter(p,'minSize',0.05,@isnumeric);
+addParameter(p,'maxSize',0.60,@isnumeric);
+addParameter(p,'minPeak',2,@isnumeric);
+addParameter(p,'minPeak2nd',0.6,@isnumeric);
+% addParameter(p,'sepEdge',0.05,@isnumeric);
+addParameter(p,'sepEdge',0,@isnumeric);
 addParameter(p,'verbose','off',@isstr);
 addParameter(p,'saveMat', true, @islogical);
-addParameter(p,'useColorBar',true,@islogical);
+addParameter(p,'spatialCorrelationAnalysis',false,@islogical);
+addParameter(p,'skaggsAnalysis',false,@islogical);
+addParameter(p,'borderAnalysis',false,@islogical);
+addParameter(p,'gridAnalysis',false,@islogical);
 
 
 parse(p,varargin{:});
 basepath = p.Results.basepath;
 firingMaps = p.Results.firingMapsAvg;
-threshold = p.Results.threshold;
-minSize = p.Results.minSize;
-minPeak = p.Results.minPeak;
-type = p.Results.type;
-verbose = p.Results.verbose;
-saveMat = p.Results.saveMat;
-useColorBar = p.Results.useColorBar;
-
 % Get session info
-basename = basenameFromBasepath(basepath);
-session = loadSession(basepath);
 
+basename = basenameFromBasepath(basepath);
+% load([basepath filesep basename '.sessionInfo.mat']);
 % Default firingMapsAvg
 if isempty(firingMaps)
     firingMaps = load([basepath filesep basename '.firingMapsAvg.cellinfo.mat']);
     firingMaps = firingMaps.firingMaps;
 end
-
-%% Find place fields
-% Determine the field as the connex area around the peak where the value or
-% rate is > threshold*peak
-% There can be two or more fields
+sizeMaze = size(firingMaps.rateMaps{1}{1},1) * size(firingMaps.rateMaps{1}{1},2);
+threshold = p.Results.threshold;
+minSize = p.Results.minSize * sizeMaze;
+maxSize = p.Results.maxSize * sizeMaze;
+sepEdge = p.Results.sepEdge * sizeMaze;
+minPeak = p.Results.minPeak;
+minPeak2nd = p.Results.minPeak2nd;
+verbose = p.Results.verbose;
+saveMat = p.Results.saveMat;
+% Find place fields
 
 for unit = 1:length(firingMaps.rateMaps)     
     for c = 1:length(firingMaps.rateMaps{1})
-        % Are X and/or Y circular ?
-        circX = size(firingMaps.rateMaps{unit,1}{c},2) > 1 && strcmp(type(1),'c');
-        circY = size(firingMaps.rateMaps{unit,1}{c},1) > 1 && ((size(firingMaps.rateMaps{unit,1}{c},2) > 1 && strcmp(type(2),'c')) || strcmp(type(1),'c'));
-        
         % Default values
         mapStats{unit,1}{c}.x = NaN;
         mapStats{unit,1}{c}.y = NaN;
-        mapStats{unit,1}{c}.field = logical(zeros(0,0,0));
+        mapStats{unit,1}{c}.field = [];
         mapStats{unit,1}{c}.size = 0;
         mapStats{unit,1}{c}.peak = 0;
         mapStats{unit,1}{c}.mean = 0;
@@ -139,88 +134,110 @@ for unit = 1:length(firingMaps.rateMaps)
         mapStats{unit,1}{c}.r = nan;
         mapStats{unit,1}{c}.mode = nan;
         mapStats{unit,1}{c}.k = nan;
-        
-        z = firingMaps.rateMaps{unit,1}{c};
-        x = 1:size(firingMaps.rateMaps{unit,1}{c},1);
-        y = 1:size(firingMaps.rateMaps{unit,1}{c},2);
-        
-        nDims = sum(size(z) >=2);
+
+        % Determine the field as the connex area around the peak where the value or rate is > threshold*peak
+        % There can be two or more fields
+        z = firingMaps.rateMaps{unit}{c};
+        x = 1:size(firingMaps.rateMaps{unit}{c},1);
+        y = 1:size(firingMaps.rateMaps{unit}{c},2);
         
         % Maximum FR along maze
         maxFR = max(max(z));
-        
+
+        % If there is no firing rate, go to next unit
         if maxFR == 0
-            mapStats{unit,1}{c}.field = logical(zeros(size(z)));
-            continue;
+          mapStats{unit,1}{c}.field = logical(zeros(size(z)));
+          continue;
         end
-        
-        % Each time we find a field, we will remove it from the map; make a
-        % copy first
+
+        nBinsX = max([1 length(x)]);	% minimum number of bins is 1
+        nBinsY = max([1 length(y)]); 
+        circX = 0; circY = 0;
+        % Each time we find a field, we will remove it from the map; make a copy first
         % Try to find more fields until no remaining bin exceeds min value
-        i = 1;
+        i=1;
         while true
-            % are there any candidate (unvisited) peaks left?
+            % Are there any candidate (unvisited) peaks left?
             [peak,idx] = max(z(:));
-            if peak < minPeak
+            
+            % If separation from edges is less than sepEdge, go to next unit
+%             if (idx < sepEdge) || (idx > sizeMaze-sepEdge)
+%                 continue;
+%             end
+            % If FR peak of 1st PF is less than minPeak, go to next unit
+            % If FR peak of 2nd PF is less than minPeak2nd of maximum FR,
+            % go to next unit
+            if peak < ((i==1)*minPeak + (i>1)*maxFR*minPeak2nd)
                 break;
             end
             % Determine coordinates of largest candidate peak
             [y,x] = ind2sub(size(z),idx);
             % Find field (using min threshold for inclusion)
-            field1 = FindField(z,x,y,peak*threshold,circX,circY);
+            field1 = FindFieldHelper(z,x,y,peak*threshold,circX,circY);
             size1 = sum(field1(:));
             % Does this field include two coalescent subfields?
-            % To answer this question, we simply re-run the same
-            % field-searching procedure on the field.
-            % We then either keep the original field or choose the subfield
-            % if the latter is less than 1/2 the size of the former
+            % To answer this question, we simply re-run the same field-searching procedure on the field
+            % we then either keep the original field or choose the subfield if the latter is less than
+            % 1/2 the size of the former
             m = peak*threshold;
-            field2 = FindField(z-m,x,y,(peak-m)*threshold,circX,circY);
+            field2 = FindFieldHelper(z-m,x,y,(peak-m)*threshold,circX,circY);
             size2 = sum(field2(:));
-            if size2 < 1/2*size1
+            if size2< 1/2*size1
                 field = field2;
-                tc = ' '; sc = '*'; % for debugging messages
+                tc = ' ';sc = '*'; % for debugging messages
             else
                 field = field1;
-                tc = '*';sc = ' ';
+                tc = '*';sc = ' '; % for debugging messages
             end
-            % Display debugging info
-            if strcmpi(verbose,'on')
-                disp([int2zstr(i,2) ') peak  ' num2str(peak) ' @ (' int2str(x) ',' int2str(y) ')']);
-                disp([' ' tc ' field size       ' int2str(size1)]);
-                disp([' ' sc ' subfield size    ' int2str(size2)]);
-                disp(' ');
-                if showFig
-                    figure;
-                    if nDims == 1,
-                        plot(z);hold on;
-                        PlotIntervals(ToIntervals(field1),'rectangles');
-                        PlotIntervals(ToIntervals(field2),'bars');
-                        ylabel(tc);
-                    else
-                        subplot(3,1,1);imagesc(z);xlabel('Data');
-                        subplot(3,1,2);imagesc(field1);clim([0 1]);xlabel('Field');
-                        subplot(3,1,3);imagesc(field2);clim([0 1]);ylabel(tc);xlabel('Subfield');
+            
+            % If rate map between place fields doesn't go below threshold,
+            % discard new place field
+            good2ndPF = true;
+            if i>1
+                field0ini = find(diff(isnan(z))==1); 
+                if length(field0ini)>1
+                    field0ini = field0ini(2); 
+                end
+                field0end = find(diff(isnan(z))==-1); 
+                if length(field0end)>1
+                    field0end = field0end(2); 
+                end
+                field1ini = find(diff(field)==1); 
+                if isempty(field1ini)
+                    field1ini = 1; 
+                end
+                field1end = find(diff(field)==-1);
+%                 [~,idxBetwFields] = min([abs(field1ini-field0end),abs(field0ini-field1end)]);
+                [~,idxBetwFields] = min([abs(field1ini-field0end);abs(field0ini-field1end)]);
+                if idxBetwFields == 1
+                    if ~any(z(field1end:field0ini)<peak*threshold)
+                        good2ndPF = false; 
+                    end
+                else
+                    if ~any(z(field0end:field1ini)<peak*threshold)
+                        good2ndPF = false; 
                     end
                 end
             end
+            
             fieldSize = sum(field(:));
             % Keep this field if its size is sufficient
-            if fieldSize > minSize && fieldSize < size(z,1)*size(z,2)
-                mapStats{unit,1}{c}.field(:,:,i) = field;
+            if (fieldSize > minSize) && (fieldSize < maxSize) && good2ndPF
+                mapStats{unit,1}{c}.field{i}(:,:) = field;
                 mapStats{unit,1}{c}.size(i) = fieldSize;
                 mapStats{unit,1}{c}.peak(i) = peak;
                 mapStats{unit,1}{c}.mean(i) = mean(z(field));
                 idx = find(field & z == peak);
-                [mapStats{unit,1}{c}.y(i), mapStats{unit}{c}.x(i)] = ind2sub(size(z),idx(1));
+                [mapStats{unit,1}{c}.y(i),mapStats{unit,1}{c}.x(i)] = ind2sub(size(z),idx(1));
                 [x,y] = FieldBoundaries(field,circX,circY);
                 [mapStats{unit,1}{c}.fieldX(i,:),mapStats{unit,1}{c}.fieldY(i,:)] = FieldBoundaries(field,circX,circY);
-                i = i+1;
             end
+            i = i + 1;
+            
             % Mark field bins as visited
             z(field) = NaN;
-            if all(isnan(z))
-                break;
+            if all(isnan(z)) 
+                break
             end
         end
     end
@@ -229,8 +246,6 @@ end
 %% SPECIFICITY
 % Compute the spatial specificity of the map, based on the formula proposed
 % by Skaggs et al. (1993).
-% specificity = SUM {p(i).lambda(i)/lambda.log2(lambda(i)/lambda)}
-
 for unit = 1:length(firingMaps.rateMaps)     
     for c = 1:length(firingMaps.rateMaps{1})
         if ~any(any(isnan(firingMaps.occupancy{unit}{c})))
@@ -267,7 +282,6 @@ for unit = 1:length(firingMaps.rateMaps)
     end
 end
     
-
 % =================
 %   WRITE OUTPUT    
 % =================
@@ -283,9 +297,13 @@ catch
    %warning('spikes.region is missing') 
 end
 
+placeFieldStats.params.sizeMaze = sizeMaze;
 placeFieldStats.params.threshold = threshold;
 placeFieldStats.params.minSize = minSize;
+placeFieldStats.params.maxSize = maxSize;
+placeFieldStats.params.sepEdge = sepEdge;
 placeFieldStats.params.minPeak = minPeak;
+placeFieldStats.params.minPeak2nd = minPeak2nd;
 placeFieldStats.params.verbose = verbose;
 placeFieldStats.params.saveMat = saveMat;
 
@@ -322,7 +340,7 @@ for c = 1:length(firingMaps.rateMaps{1})
         imagesc(xtrack{c},ytrack{c},firingMaps.rateMaps{unit}{c});
         if sum(sum(firingMaps.rateMaps{unit}{c}))>0
             hold on
-            for ii = 1:size(mapStats{unit}{c}.field,3)
+            for ii = 1:size(mapStats{unit}{c}.field,2)
                 try
 %                 plot(xtrack(find(mapStats{unit}{c}.field{ii}(:,:))),firingMaps.rateMaps{unit}{c}(mapStats{unit}{c}.field{ii}(:,:)==1),'linewidth',2)
 %                 plot([1 1]*xtrack(mapStats{unit}{c}.x(ii)),[0 firingMaps.rateMaps{unit}{c}(mapStats{unit}{c}.x(ii))],'--k')
@@ -333,64 +351,16 @@ for c = 1:length(firingMaps.rateMaps{1})
 %             ylim([0 10]);
         end
         colormap(jet(15));
-        axis square
-        if useColorBar
-            c1 = colorbar;
-            ylabel(c1,'FR (Hz)');
-        end       
+        c1 = colorbar;
+        ylabel(c1,'FR (Hz)');
         if unit == 1
             ylabel('Track (cm)');
             xlabel('Track (cm)');
         end
         axis ij
-        ax = gca;
-        ax.TitleFontSizeMultiplier = 1;
         title(num2str(unit),'FontWeight','normal','FontSize',10);
     end
     saveas(gcf,[basepath,filesep,'SummaryFigures',filesep ,'firingField_' num2str(c) '.png'],'png');
-end
-close all;
-
-
-% ==========
-%   PLOT 2 : Filtering for unvisited bins    
-% ==========
-
-mkdir(basepath,'SummaryFigures');
-for c = 1:length(firingMaps.rateMapsUnvisited{1})
-    figure;
-    set(gcf,'Position',[100 -100 2500 1200])
-    for unit = 1:size(firingMaps.UID,2)
-        subplot(7,ceil(size(firingMaps.UID,2)/7),unit); % autocorrelogram
-        imagesc(xtrack{c},ytrack{c},firingMaps.rateMapsUnvisited{unit}{c});
-        if sum(sum(firingMaps.rateMapsUnvisited{unit}{c}))>0
-            hold on
-            for ii = 1:size(mapStats{unit}{c}.field,3)
-                try
-%                 plot(xtrack(find(mapStats{unit}{c}.field{ii}(:,:))),firingMaps.rateMaps{unit}{c}(mapStats{unit}{c}.field{ii}(:,:)==1),'linewidth',2)
-%                 plot([1 1]*xtrack(mapStats{unit}{c}.x(ii)),[0 firingMaps.rateMaps{unit}{c}(mapStats{unit}{c}.x(ii))],'--k')
-                end
-            end
-        end
-        if max(max(firingMaps.rateMapsUnvisited{unit}{c})) < 10
-%             ylim([0 10]);
-        end
-        colormap(jet(15));
-        axis square
-        if useColorBar
-            c1 = colorbar;
-            ylabel(c1,'FR (Hz)');
-        end       
-        if unit == 1
-            ylabel('Track (cm)');
-            xlabel('Track (cm)');
-        end
-        axis ij
-        ax = gca;
-        ax.TitleFontSizeMultiplier = 1;
-        title(num2str(unit),'FontWeight','normal','FontSize',10);
-    end
-    saveas(gcf,[basepath,filesep,'SummaryFigures',filesep ,'firingFieldUnvisited_' num2str(c) '.png'],'png');
 end
 close all;
 
@@ -457,3 +427,4 @@ if circY && y(1) == 1 && y(2) == size(field,1),
 	end
 end
 end
+

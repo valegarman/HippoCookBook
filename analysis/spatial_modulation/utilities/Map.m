@@ -207,7 +207,7 @@ else
 end
 
 % Computations
-if isempty(y),
+if isempty(y)
 	% 1D (only x)
 	map.x = linspace(0,1,nBinsX);
 	map.count = Accumulate(x,n,nBinsX);
@@ -215,7 +215,7 @@ if isempty(y),
 	valid = map.time > minTime;
 	map.count = Smooth(Interpolate1(map.x,map.count,valid,mode,maxDistance),smooth,'type',type(1))';
 	map.time = Smooth(Interpolate1(map.x,map.time,valid,mode,maxDistance),smooth,'type',type(1))';
-	if pointProcess,
+	if pointProcess
 		map.z = map.count./(map.time+eps);
 	else
 		map.z = Accumulate(x,z(:,2),nBinsX);
@@ -233,7 +233,7 @@ else
     map.timeUnSmooth = map.time';
 	map.count = Smooth(Interpolate2(map.x,map.y,map.count,valid,mode,maxDistance),smooth,'type',type(1:2))';
 	map.time = Smooth(Interpolate2(map.x,map.y,map.time,valid,mode,maxDistance),smooth,'type',type(1:2))';
-	if pointProcess,
+	if pointProcess
         map.zUnSmooth = map.countUnSmooth./(map.timeUnSmooth+eps);
 		map.z = map.count./(map.time+eps);
 	else

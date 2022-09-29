@@ -69,7 +69,7 @@ if ~isempty(dir('*Linearized.Behavior.mat')) && ~forceReload
     load(file.name);
     return
 end
-%
+
 cd(basepath);
 if isempty(tracking)
     tracking = LED2Tracking;
