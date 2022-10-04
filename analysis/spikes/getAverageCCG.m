@@ -294,7 +294,6 @@ if useBrainRegions && exist([basenameFromBasepath(basepath) '.cell_metrics.celli
     end
 end
 
-<<<<<<< HEAD
 session = loadSession;
 if useDistinctShanks && length(session.extracellular.electrodeGroups.channels)>1 % if more than 1 shanks
    
@@ -357,8 +356,6 @@ if useDistinctShanks && length(session.extracellular.electrodeGroups.channels)>1
     averageCCG.shanksCCG = shanksCCG;
 end
 
-=======
->>>>>>> 071e1a3120cd7427b4ddabc3a8a0c73253e501cf
 if saveMat
     disp('Saving results...');
     filename = split(pwd,filesep); filename = filename{end};

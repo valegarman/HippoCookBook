@@ -1,5 +1,5 @@
 
-function uLEDPulses = combineULEDPulses(varargin)
+function uLEDPulses = getULEDPulses(varargin)
 % combine analogPulses and digitalPulses an create a common structure
 % containing uLEDPulses with its channel layout.
 %

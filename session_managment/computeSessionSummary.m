@@ -71,8 +71,8 @@ cd(basepath);
 if any(ismember(listOfAnalysis,'spikes'))
     try
        spikes = loadSpikes('forceReload',false);
-       spikeFeatures();
-       getAverageCCG;
+       spikeFeatures('skipStimulationPeriods',false);
+       getAverageCCG('skipStimulationPeriods',false);
        clear spikes;
     catch
         warning('Error on Spike-waveform, autocorrelogram and cluster location! ');
