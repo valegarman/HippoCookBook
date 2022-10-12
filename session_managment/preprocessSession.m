@@ -1,3 +1,4 @@
+
 function  preprocessSession(varargin)
 
 %         bz_PreprocessSession(varargin)
@@ -247,7 +248,7 @@ end
 %% Get tracking positions 
 if getPos
     try 
-        getSessionTracking('convFact',tracking_pixel_cm,'roiTracking','manual','anyMaze',anyMaze); 
+        getSessionTracking('convFact',tracking_pixel_cm,'roiTracking','manual','anyMaze',anyMaze,'forceReload',false); 
     catch
         warning('Tracking extraction was not possible. Skipping...')
     end
