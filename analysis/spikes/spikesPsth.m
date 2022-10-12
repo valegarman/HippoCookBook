@@ -48,6 +48,8 @@ addParameter(p,'event_ints',[-0.02 0.02],@isnumeric);
 addParameter(p,'baseline_ints',[-0.5 -0.46],@isnumeric);
 addParameter(p,'min_pulsesNumber',100,@isnumeric);
 addParameter(p,'win_Z',[],@isnumeric);
+addParameter(p,'win_raster',[-.5 .5],@isnumeric);
+addParameter(p,'binSize_raster',[0.001],@isnumeric);
 
 parse(p, timestamps,varargin{:});
 
@@ -67,6 +69,8 @@ event_ints = p.Results.event_ints;
 baseline_ints = p.Results.baseline_ints;
 min_pulsesNumber = p.Results.min_pulsesNumber;
 win_Z = p.Results.win_Z;
+win_raster = p.Results.win_raster;
+binSize_raster = p.Results.binSize_raster;
 
 %% Session Template
 % Deal with inputs
@@ -198,6 +202,36 @@ for ii = 1:length(spikes.UID)
                 test = 0;
             end
             psth.threeWaysTest(ii,jj,1) = test;
+            
+            % raster plot
+            rasterX = [];
+            rasterY = [];
+            for zz = 1:size(timestamps,1)
+                temp_spk = spikes.times{ii}(find(spikes.times{ii} - timestamps(zz,1)  > win_raster(1) & spikes.times{ii} - timestamps(zz,1)  < win_raster(2))) - timestamps(zz,1);
+                rasterX = [rasterX; temp_spk];
+                if ~isempty(temp_spk)
+                    rasterY = [rasterY; zz * ones(size((temp_spk)))];
+                end
+            end
+            
+            if ~isempty(rasterX)
+                [rasterHist3,c] = hist3([rasterY rasterX],{1:size(timestamps,1) win_raster(1):binSize_raster:win_raster(2)});
+                
+                psth.raster.rasterCount{ii,jj} = rasterHist3;
+                psth.raster.rasterProb{ii,jj} = rasterHist3/sum(rasterHist3(:));
+                psth.raster.TrialsNumber{ii,jj} = c{1};
+                psth.raster.times{ii,jj} = c{2};
+                psth.raster.rasterTrials{ii,jj} = rasterY;
+                psth.raster.rasterSpikesTimes{ii,jj} = rasterX;
+            else
+                psth.raster.rasterCount{ii,jj} = NaN;
+                psth.raster.rasterProb{ii,jj} = NaN;
+                psth.raster.TrialsNumber{ii,jj} = NaN;
+                psth.raster.times{ii,jj} = NaN;
+                psth.raster.rasterTrials{ii,jj} = NaN;
+                psth.raster.rasterSpikesTimes{ii,jj} = NaN;
+            end
+            
         else
             %psth.responsecurve(ii,jj,:) = nan(duration/binSize + 1,1);
             %psth.responsecurveZ(ii,jj,:) = nan(duration/binSize + 1,1);

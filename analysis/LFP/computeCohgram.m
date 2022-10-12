@@ -28,7 +28,8 @@ function [powerSpectrum] = computeCohgram(varargin)
 % Parse options
 p = inputParser;
 addParameter(p,'basepath',pwd,@isstruct);
-addParameter(p,'lfp',[],@isstruct);
+addParameter(p,'lfp1',[],@isstruct);
+addParameter(p,'lfp2',[],@isstruct);
 addParameter(p,'saveSummary',true,@islogical);
 addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'force',false,@islogical);
@@ -53,7 +54,8 @@ addParameter(p,'useThetaChannel',false,@islogical);
 
 parse(p,varargin{:})
 basepath = p.Results.basepath;
-lfp = p.Results.lfp;
+lfp1 = p.Results.lfp1;
+lfp2 = p.Results.lfp2;
 saveMat = p.Results.saveMat;
 saveSummary = p.Results.saveSummary;
 force = p.Results.force;
@@ -126,11 +128,13 @@ if isempty(channel1)
     end
 end
 
-if isempty(lfp) && ~useCSD
-    lfp = getLFP(channel,'noPrompts',true);
+if isempty(lfp1) && isempty(lfp2) && ~useCSD
+    lfp1 = getLFP(channel1,'noPrompts',true);
+    lfp2 = getLFP(channel2,'noPrompts',true);
 elseif useCSD
     disp('Computing CSD...');
-    lfp = computeCSD(lfp,'channels',channel);
+    lfp1 = computeCSD(lfp1,'channels',channel);
+    lfp2 = computeCSD(lfp2,'channels',channel);
 else
     warning('CSD estimation not possible. Using LFP...');
 end
@@ -157,50 +161,53 @@ if ~isempty(dir([session.general.name,'.thetaEpochs.states.mat']))
 end
     
 
-samplingRate = lfp.samplingRate;
-params.Fs = lfp.samplingRate; params.fpass = [1 200]; params.tapers = [3 5]; params.pad = 1;
-[S,t,f] = mtspecgramc_fast(single(lfp.data), [2 1], params); S(S == 0) = NaN;
-S = log10(S); % in Db
-S_det = detrend(S',2)';
+params.Fs = lfp1.samplingRate; params.fpass = [1 200]; params.tapers = [3 5]; params.pad = 1;
+[coherogram,phase,S12,S1,S2,t,f] = cohgramc(single(lfp1.data),single(lfp2.data),[2 1], params);
+S12 = log10(S12); % in Db
+S1 = log10(S1); % in Db
+S2 = log10(S2);
+S12_det = detrend(S12',2)';
+S1_det = detrend(S1',2)';
+S2_det = detrend(S2',2)';
 
 
-figure,
-subplot(3,3,[1 2])
-imagesc(t,f,S_det',[-1.5 1.5]);
+
+figure('units','normalized','outerposition',[0 0 1 1]);
+subplot(2,5,[1 2 3])
+imagesc(t,f,coherogram',[-1.5 1.5]);
 ylim([1.5 200]);
 set(gca,'TickDir','out'); ylabel('Freq [Hz]'); xlabel('Time [s]');
-colormap jet
+colormap jet, colorbar, 
+cb = colorbar;
+cb.Label.String = 'Coherence r';
+title(['Whole Recording, Ch:', num2str(channel1),' Ch:',num2str(channel2)])
 
-subplot(3,3,[4 5])
-try
-    t_theta = sum(diff(thetaEpochs.intervals')) * diff(t);
-    imagesc([0 t_theta],f,S_det(InIntervals(t,thetaEpochs.intervals),:)',[-1.5 1.5]);
-    ylim([1.5 200]);
-    set(gca,'TickDir','out'); ylabel('Theta epochs [Freq, Hz]');
-    colormap jet
-end
-    
-subplot(3,3,[7 8])
-try
-    t_non_theta = sum(diff(thetaEpochs.intervals_nonTheta')) * diff(t);
-    imagesc([0 t_non_theta],f,S_det(InIntervals(t,thetaEpochs.intervals_nonTheta),:)',[-1.5 1.5]);
-    ylim([1.5 200]);
-    set(gca,'TickDir','out'); ylabel('Non-Theta epochs [Freq, Hz]');
-    colormap jet
-end
+subplot(2,5,[6 7 8])
+imagesc(t,f,phase',[-1.5 1.5]);
+ylim([1.5 200]);
+set(gca,'TickDir','out'); ylabel('Freq [Hz]'); xlabel('Time [s]');
+colormap jet, colorbar, 
+cb = colorbar;
+cb.Label.String = 'Phase Coherence';
+title(['Whole Recording, Ch:', num2str(channel1),' Ch:',num2str(channel2)])
 
-subplot(2,3,[3 6])
-try
-    plotFill(f,S_det,'color', [.8 .8 .8],'lineStyle', '--'); xlim([1 200]);
-    plotFill(f,S_det(InIntervals(t,thetaEpochs.intervals),:),'color', [.8 .2 .2],'lineStyle', '-'); xlim([1 200]);
-    plotFill(f,S_det(InIntervals(t,thetaEpochs.intervals_nonTheta),:),'color', [.2 .2 .8],'lineStyle', '-'); xlim([1 200]);
-    ax = axis;
-    fill([theta_bandpass flip(theta_bandpass)],[ax([3 3 4 4])],[.8 .5 .5],'EdgeColor','none','FaceAlpha',.1);
-    ylabel('Full recording [Freq, Hz]'); xlabel('Freq [Hz]');   
-end 
+subplot(2,5,[4 9])
+plotFill(f,coherogram,'color', [.8 .8 .8],'lineStyle', '-'); xlim([1 200]);
+ax = axis;
+fill([theta_bandpass flip(theta_bandpass)],[ax([3 3 4 4])],[.8 .5 .5],'EdgeColor','none','FaceAlpha',.1);
+ylabel('[Coherence,r]'); xlabel('Freq [Hz]'); 
+title('Whole Recording');
+
+subplot(2,5,[5 10])
+plotFill(f,phase,'color', [.8 .8 .8],'lineStyle', '-'); xlim([1 200]);
+ax = axis;
+fill([theta_bandpass flip(theta_bandpass)],[ax([3 3 4 4])],[.8 .5 .5],'EdgeColor','none','FaceAlpha',.1);
+ylabel('[Phase Coherence]'); xlabel('Freq [Hz]'); 
+title('Whole Recording');
+
 % if saveSummary
 %     mkdir('SummaryFigures'); % create folder
-%     saveas(gcf,'SummaryFigures\PowerSpectrum_WholeRecording.png');
+%     saveas(gcf,'SummaryFigures\Coherence_WholeRecording.png');
 % end 
 
 %% Computing for Baseline vs Drug condition
@@ -222,40 +229,73 @@ t_openField2 = sum(diff(t_openField{2}')) * diff(t);
 
 
 figure('units','normalized','outerposition',[0 0 1 1]);
-subplot(3,3,[1 2])
-imagesc([0 t_openField1],f,S_det(InIntervals(t,t_openField{1}),:)',[-1.5 1.5]);
+subplot(5,4,[1 2])
+imagesc([0 t_openField1],f,coherogram(InIntervals(t,t_openField{1}),:)',[-1.5 1.5]);
 ylim([1.5 200]);
-set(gca,'TickDir','out'); ylabel('Open Field 1 [Freq, Hz]');
-colormap jet, colorbar
+set(gca,'TickDir','out'); ylabel('Freq (Hz)');
+colormap jet, colorbar; 
+cb = colorbar;
+cb.Label.String = 'Coherence r';
+title('Open Field 1');
 
-subplot(3,3,[4 5])
-imagesc([0 t_openField2],f,S_det(InIntervals(t,t_openField{2}),:)',[-1.5 1.5]);
+subplot(5,4,[5 6])
+imagesc([0 t_openField2],f,coherogram(InIntervals(t,t_openField{2}),:)',[-1.5 1.5]);
 ylim([1.5 200]);
-set(gca,'TickDir','out'); ylabel('Open Field 2 [Freq, Hz]');
-colormap jet, colorbar
+set(gca,'TickDir','out'); ylabel('Freq (Hz)');
+colormap jet, colorbar;
+cb = colorbar;
+cb.Label.String = 'Coherence r';
+title('Open Field 2');
 
-subplot(3,3,7)
+subplot(5,4,[9 10])
+imagesc([0 t_openField1],f,phase(InIntervals(t,t_openField{1}),:)',[-1.5 1.5]);
+ylim([1.5 200]);
+set(gca,'TickDir','out'); ylabel('Freq (Hz)');
+colormap jet, colorbar; 
+cb = colorbar;
+cb.Label.String = 'Phase Coherence';
+title('Open Field 1');
+
+subplot(5,4,[13 14])
+imagesc([0 t_openField2],f,phase(InIntervals(t,t_openField{2}),:)',[-1.5 1.5]);
+ylim([1.5 200]);
+set(gca,'TickDir','out'); ylabel('Freq (Hz)');
+colormap jet, colorbar; 
+cb = colorbar;
+cb.Label.String = 'Phase Coherence';
+title('Open Field 2');
+
+subplot(5,4,[17])
 plot(tracking.position.x(InIntervals(tracking.timestamps,t_openField{1})),tracking.position.y(InIntervals(tracking.timestamps,t_openField{1})));
 axis ij
 title('Open Field 1');
 xlabel('norm/cm'); ylabel('norm/cm');
 
-subplot(3,3,8)
+subplot(5,4,[18])
 plot(tracking.position.x(InIntervals(tracking.timestamps,t_openField{2})),tracking.position.y(InIntervals(tracking.timestamps,t_openField{2})));
 axis ij
 title('Open Field 2');
 xlabel('norm/cm'); ylabel('norm/cm');
 
-subplot(3,3,[3 6 9])
-plotFill(f,S_det(InIntervals(t,t_openField{1}),:),'color',[.8 .8 .8], 'lineStyle','-'); xlim([1 200]);
-plotFill(f,S_det(InIntervals(t,t_openField{2}),:),'color',[1 0 0], 'lineStyle','-'); xlim([1 200]);
+subplot(5,4,[3 7 11 15 19])
+plotFill(f,coherogram(InIntervals(t,t_openField{1}),:),'color',[.8 .8 .8], 'lineStyle','-'); xlim([1 200]);
+plotFill(f,coherogram(InIntervals(t,t_openField{2}),:),'color',[1 0 0], 'lineStyle','-'); xlim([1 200]);
 ax = axis;
 fill([theta_bandpass flip(theta_bandpass)],[ax([3 3 4 4])],[.8 .5 .5],'EdgeColor','none','FaceAlpha',.1);
-ylabel('OpenField1 - OpenField2 [Freq, Hz]'); xlabel('Freq [Hz]');
+ylabel('[Coherence,r]'); xlabel('Freq [Hz]');
+title('Open Field 1 - Open Field 2');
+
+subplot(5,4,[4 8 12 16 20])
+plotFill(f,phase(InIntervals(t,t_openField{1}),:),'color',[.8 .8 .8], 'lineStyle','-'); xlim([1 200]);
+plotFill(f,phase(InIntervals(t,t_openField{2}),:),'color',[1 0 0], 'lineStyle','-'); xlim([1 200]);
+ax = axis;
+fill([theta_bandpass flip(theta_bandpass)],[ax([3 3 4 4])],[.8 .5 .5],'EdgeColor','none','FaceAlpha',.1);
+ylabel('[Phase Coherence]'); xlabel('Freq [Hz]');
+title('Open Field 1 - Open Field 2');
 
 if saveSummary
     mkdir('SummaryFigures'); % create folder
-    saveas(gcf,'SummaryFigures\PowerSpectrum_OpenField.png');
+    saveas(gcf,'SummaryFigures\Coherence_OpenField.png');
 end
 
 
@@ -273,42 +313,74 @@ end
 t_YMaze1 = sum(diff(t_YMaze{1}')) * diff(t);
 t_YMaze2 = sum(diff(t_YMaze{2}')) * diff(t);
 
-
 figure('units','normalized','outerposition',[0 0 1 1]);
-subplot(3,3,[1 2])
-imagesc([0 t_YMaze1],f,S_det(InIntervals(t,t_YMaze{1}),:)',[-1.5 1.5]);
+subplot(5,4,[1 2])
+imagesc([0 t_YMaze1],f,coherogram(InIntervals(t,t_YMaze{1}),:)',[-1.5 1.5]);
 ylim([1.5 200]);
-set(gca,'TickDir','out'); ylabel('YMaze 1 [Freq, Hz]');
-colormap jet, colorbar
+set(gca,'TickDir','out'); ylabel('Freq (Hz)');
+colormap jet, colorbar; 
+cb = colorbar;
+cb.Label.String = 'Coherence r';
+title('YMaze 1');
 
-subplot(3,3,[4 5])
-imagesc([0 t_YMaze2],f,S_det(InIntervals(t,t_YMaze{2}),:)',[-1.5 1.5]);
+subplot(5,4,[5 6])
+imagesc([0 t_YMaze2],f,coherogram(InIntervals(t,t_YMaze{2}),:)',[-1.5 1.5]);
 ylim([1.5 200]);
-set(gca,'TickDir','out'); ylabel('YMaze 2 [Freq, Hz]');
-colormap jet, colorbar
+set(gca,'TickDir','out'); ylabel('Freq (Hz)');
+colormap jet, colorbar;
+cb = colorbar;
+cb.Label.String = 'Coherence r';
+title('YMaze 2');
 
-subplot(3,3,7)
+subplot(5,4,[9 10])
+imagesc([0 t_YMaze1],f,phase(InIntervals(t,t_YMaze{1}),:)',[-1.5 1.5]);
+ylim([1.5 200]);
+set(gca,'TickDir','out'); ylabel('Freq (Hz)');
+colormap jet, colorbar; 
+cb = colorbar;
+cb.Label.String = 'Phase Coherence';
+title('YMaze 1');
+
+subplot(5,4,[13 14])
+imagesc([0 t_YMaze2],f,phase(InIntervals(t,t_YMaze{2}),:)',[-1.5 1.5]);
+ylim([1.5 200]);
+set(gca,'TickDir','out'); ylabel('Freq (Hz)');
+colormap jet, colorbar; 
+cb = colorbar;
+cb.Label.String = 'Phase Coherence';
+title('YMaze 2');
+
+subplot(5,4,[17])
 plot(tracking.position.x(InIntervals(tracking.timestamps,t_YMaze{1})),tracking.position.y(InIntervals(tracking.timestamps,t_YMaze{1})));
 axis ij
 title('YMaze 1');
 xlabel('norm/cm'); ylabel('norm/cm');
 
-subplot(3,3,8)
+subplot(5,4,[18])
 plot(tracking.position.x(InIntervals(tracking.timestamps,t_YMaze{2})),tracking.position.y(InIntervals(tracking.timestamps,t_YMaze{2})));
 axis ij
 title('YMaze 2');
 xlabel('norm/cm'); ylabel('norm/cm');
 
-subplot(3,3,[3 6 9])
-plotFill(f,S_det(InIntervals(t,t_YMaze{1}),:),'color',[.8 .8 .8], 'lineStyle','-'); xlim([1 200]);
-plotFill(f,S_det(InIntervals(t,t_YMaze{2}),:),'color',[1 0 0], 'lineStyle','-'); xlim([1 200]);
+subplot(5,4,[3 7 11 15 19])
+plotFill(f,coherogram(InIntervals(t,t_YMaze{1}),:),'color',[.8 .8 .8], 'lineStyle','-'); xlim([1 200]);
+plotFill(f,coherogram(InIntervals(t,t_YMaze{2}),:),'color',[1 0 0], 'lineStyle','-'); xlim([1 200]);
 ax = axis;
 fill([theta_bandpass flip(theta_bandpass)],[ax([3 3 4 4])],[.8 .5 .5],'EdgeColor','none','FaceAlpha',.1);
-ylabel('YMaze1 - YMaze2 [Freq, Hz]'); xlabel('Freq [Hz]');
+ylabel('[Coherence,r]'); xlabel('Freq [Hz]');
+title('YMaze 1 - YMazed 2');
+
+subplot(5,4,[4 8 12 16 20])
+plotFill(f,phase(InIntervals(t,t_YMaze{1}),:),'color',[.8 .8 .8], 'lineStyle','-'); xlim([1 200]);
+plotFill(f,phase(InIntervals(t,t_YMaze{2}),:),'color',[1 0 0], 'lineStyle','-'); xlim([1 200]);
+ax = axis;
+fill([theta_bandpass flip(theta_bandpass)],[ax([3 3 4 4])],[.8 .5 .5],'EdgeColor','none','FaceAlpha',.1);
+ylabel('[Phase Coherence]'); xlabel('Freq [Hz]');
+title('YMaze 1 - YMaze 2');
 
 if saveSummary
     mkdir('SummaryFigures'); % create folder
-    saveas(gcf,'SummaryFigures\PowerSpectrum_YMaze.png');
+    saveas(gcf,'SummaryFigures\Coherence_YMaze.png');
 end
 
 close all;
@@ -316,7 +388,7 @@ close all;
 
 
 %% OUTPUT
-powerSpectrum = [];
+cohgram = [];
 % Subfolders analysis
 if useSubFolders
     if ~isempty(dir([session.general.name,'.MergePoints.events.mat']))
@@ -326,23 +398,25 @@ if useSubFolders
     end
     
     for ii = 1:length(MergePoints.foldernames)
-        powerSpectrum.(MergePoints.foldernames{ii}).S = S_det(InIntervals(t,MergePoints.timestamps(ii,:)));
-        powerSpectrum.(MergePoints.foldernames{ii}).t = t(InIntervals(t,MergePoints.timestamps(ii,:)));
-        powerSpectrum.(MergePoints.foldernames{ii}).f = f;
+        cohgram.(MergePoints.foldernames{ii}).coherogram = coherogram(InIntervals(t,MergePoints.timestamps(ii,:)));
+        cohgram.(MergePoints.foldernames{ii}).phase = phase(InIntervals(t,MergePoints.timestamps(ii,:)));
+        cohgram.(MergePoints.foldernames{ii}).t = t(InIntervals(t,MergePoints.timestamps(ii,:)));
+        cohgram.(MergePoints.foldernames{ii}).f = f;
     end
 end
 
-powerSpectrum.t = t;
-powerSpectrum.f = f;
-powerSpectrum.S = S_det;
-powerSpectrum.processinginfo.function = 'computePowerSpectrum';
-powerSpectrum.processinginfo.params.frange = passband;
+cohgram.t = t;
+cohgram.f = f;
+cohgram.coherogram = coherogram;
+cohgram.phase = phase;
+cohgram.processinginfo.function = 'computeCohgram';
+cohgram.processinginfo.params.frange = passband;
 
 
 if saveMat
     disp('Saving...');
     filename = split(pwd,filesep); filename = filename{end};
-    save([filename '.powerSpectrum.states.mat'],'powerSpectrum');
+    save([filename '.cohgram.states.mat'],'cohgram');
 end
 
 cd(prevBasepath);

@@ -1,5 +1,5 @@
 
-function [behaviour] = getSessionBehaviour(varargin)
+function [behavior] = getSessionBehavior(varargin)
 % Compute beahviour over all session subfolders for OpenField recordings.
 %
 % USAGE
@@ -23,7 +23,7 @@ addParameter(p,'basepath',pwd,@isstr);
 addParameter(p,'forceReload',false,@islogical)
 addParameter(p,'verbose',false,@islogical)
 addParameter(p,'saveMat',true,@islogical)
-addParameter(p,'maze','OpenField',@ischar)
+addParameter(p,'maze',[],@ischar)
 parse(p,varargin{:});
 forceReload = p.Results.forceReload;
 basepath = p.Results.basepath;
@@ -40,6 +40,7 @@ if ~isempty(dir([basepath filesep session.general.name '.Behavior.mat'])) || for
     load(file.name);
     return
 end
+
 
 % if isempty(maze)
 %     fileTarget = dir('*SessionArmChoice*');
@@ -69,11 +70,15 @@ for ii = 1:size(sess,1)
         end
         
         if strcmpi(tracking.apparatus.name,'yMaze') || strcmpi(tracking.apparatus.name,'YMaze Apparatus')
-            behaviorTemp.(sess(ii).name)= getBehaviorYMaze; %% I need to create this function for the Ymaze paradigm
+            behaviorTemp.(sess(ii).name)= getBehaviourYMaze; %% I need to create this function for the Ymaze paradigm
         elseif strcmpi(tracking.apparatus.name,'Open Field') || strcmpi(tracking.apparatus.name,'OpenField') || strcmpi(tracking.apparatus.name,'Social Interaction')
-            behaviorTemp.(sess(ii).name)= getBehaviourOpenField;
+            behaviorTemp.(sess(ii).name) = getBehaviourOpenField;
+        elseif strcmpi(tracking.apparatus.name,'Linear Track  N-S')
+            behaviorTemp.(sess(ii).name) = linearizeLinearMaze_pablo('verbose',verbose);
+        elseif strcmpi(tracking.apparatus.name,'TMaze')
+            behaviorTemp.(sess(ii).name) = linearizeArmChoice('verbose',verbose);
         end
-        trackFolder(count) = ii; 
+        behaviorFolder(count) = ii; 
         count = count + 1;
     end
 end
@@ -116,119 +121,127 @@ if size(tracking.events.subSessions,1) == size(efields,1)
         subSessionMask = [subSessionMask;behaviorTemp.(efields{ii}).events.subSessionMask];
         x = [x; behaviorTemp.(efields{ii}).position.x];
         y = [y; behaviorTemp.(efields{ii}).position.y];
-%         x{ii} = behaviorTemp.(efields{ii}).position.x;
-%         y{ii} = behaviorTemp.(efields{ii}.position.y);
-        if isfield(behaviorTemp.(efields{ii}),'headposition')
-            x_head = [x_head; behaviorTemp.(efields{ii}).headposition.x];
-            y_head = [y_head; behaviorTemp.(efields{ii}).headposition.y];
-%             x_head{ii} = behaviorTemp.(efields{ii}).headposition.x];
-%             y_head{ii} = behaviorTemp.(efields{ii}).headposition.y];
-        end
-        if isfield(behaviorTemp.(efields{ii}),'tailposition')
-            x_tail = [x_tail; behaviorTemp.(efields{ii}).tailposition.x];
-            y_tail = [y_tail; behaviorTemp.(efields{ii}).tailposition.y];
-        end
         if isfield(behaviorTemp.(efields{ii}),'zone')
             zone{ii} = behaviorTemp.(efields{ii}).zone;
         end
             
-        events{ii} = behaviorTemp.(efields{ii}).events;
+%         events{ii} = behaviorTemp.(efields{ii}).events;
         
         lin = [lin; behaviorTemp.(efields{ii}).position.lin];
         try
-        armMask = [armMask; behaviorTemp.(efields{ii}).masks.arm];
-        trialMask = [trialMask; behaviorTemp.(efields{ii}).masks.trials];
-        recMask = [recMask; ii * ones(size(behaviorTemp.(efields{ii}).masks.trials))];
-        startPoint = [startPoint; behaviorTemp.(efields{ii}).events.startPoint + preRec];
-        rReward = [rReward; behaviorTemp.(efields{ii}).events.rReward + preRec];
-        lReward = [lReward; behaviorTemp.(efields{ii}).events.lReward + preRec];
-        startDelay = [startDelay; behaviorTemp.(efields{ii}).events.startDelay + preRec];
-        endDelay = [endDelay; behaviorTemp.(efields{ii}).events.endDelay + preRec];
-        intersection = [intersection; behaviorTemp.(efields{ii}).events.intersection + preRec];
-        recordings = [recordings; preRec];
-        startPointTrials = [startPointTrials; behaviorTemp.(efields{ii}).trials.startPoint + preRec];
-        endDelayTrials = [endDelayTrials; behaviorTemp.(efields{ii}).trials.endDelay + preRec];
-        visitedArm = [visitedArm; behaviorTemp.(efields{ii}).trials.visitedArm];
-        choice = [choice; behaviorTemp.(efields{ii}).trials.choice];
-        expectedArm = [expectedArm; behaviorTemp.(efields{ii}).trials.expectedArm];
-        direction = [direction; behaviorTemp.(efields{ii}).masks.direction];
-        trialsDirection = [trialsDirection; behaviorTemp.(efields{ii}).masks.trialsDirection'];
-        recordingsTrial = [recordingsTrial; ii*ones(size(behaviorTemp.(efields{ii}).trials.startPoint,1),1)];
+            armMask = [armMask; behaviorTemp.(efields{ii}).masks.arm];
+            trialMask = [trialMask; behaviorTemp.(efields{ii}).masks.trials];
+            recMask = [recMask; ii * ones(size(behaviorTemp.(efields{ii}).masks.trials))];
+            startPoint = [startPoint; behaviorTemp.(efields{ii}).events.startPoint + preRec];
+            rReward = [rReward; behaviorTemp.(efields{ii}).events.rReward + preRec];
+            lReward = [lReward; behaviorTemp.(efields{ii}).events.lReward + preRec];
+            startDelay = [startDelay; behaviorTemp.(efields{ii}).events.startDelay + preRec];
+            endDelay = [endDelay; behaviorTemp.(efields{ii}).events.endDelay + preRec];
+            intersection = [intersection; behaviorTemp.(efields{ii}).events.intersection + preRec];
+            recordings = [recordings; preRec];
+            startPointTrials = [startPointTrials; behaviorTemp.(efields{ii}).trials.startPoint + preRec];
+            endDelayTrials = [endDelayTrials; behaviorTemp.(efields{ii}).trials.endDelay + preRec];
+            visitedArm = [visitedArm; behaviorTemp.(efields{ii}).trials.visitedArm];
+            choice = [choice; behaviorTemp.(efields{ii}).trials.choice];
+            expectedArm = [expectedArm; behaviorTemp.(efields{ii}).trials.expectedArm];
+            direction = [direction; behaviorTemp.(efields{ii}).masks.direction];
+            trialsDirection = [trialsDirection; behaviorTemp.(efields{ii}).masks.trialsDirection'];
+            recordingsTrial = [recordingsTrial; ii*ones(size(behaviorTemp.(efields{ii}).trials.startPoint,1),1)];
         catch
         end
-        description{ii} = behaviorTemp.(efields{ii}).description;
+%         description{ii} = behaviorTemp.(efields{ii}).description;
     end
 else
     warning('Number of behavioral recordings do not match!')
 end
 
-
 % generate maps, one for each arm and for each recording
 maps = [];
+directionList = unique(direction);
+directionList(find(isnan(directionList))) = [];
 count = 1;
 for ii = 1:length(efields)
-%         maps{count}(:,1) = timestamps(direction==directionList(jj) & recMask==ii);
-%         maps{count}(:,2) = lin(direction==directionList(jj) & recMask==ii);
-    maps{count}(:,1) = timestamps(subSessionMask == ii);
-    maps{count}(:,2) = x(subSessionMask == ii);
-    maps{count}(:,3) = y(subSessionMask == ii);
-    count = count + 1;
+    if strcmpi(behaviorTemp.(efields{ii}).description,'Linear Track  N-S') && ~any(find(isnan(behaviorTemp.(efields{ii}).position.lin)))
+        for jj = 1:length(directionList)
+            maps{count}(:,1) = timestamps(direction == directionList(jj) & recMask == ii);
+            maps{count}(:,2) = lin(direction == directionList(jj) & recMask==ii);
+            description{count} = behaviorTemp.(efields{ii}).description;
+            count = count+1;
+        end
+    elseif strcmpi(behaviorTemp.(efields{ii}).description,'Open Field') && any(isnan(behaviorTemp.(efields{ii}).position.lin))
+        maps{count}(:,1) = timestamps(subSessionMask == ii);
+        maps{count}(:,2) = x(subSessionMask == ii);
+        maps{count}(:,3) = y(subSessionMask == ii);
+        description{count} = behaviorTemp.(efields{ii}).description;
+        count = count + 1;
+    else
+        disp('Error while running getSessionBehavior. Quitting...');
+        return;
+    end
 end
 
 % populate behavior
-behaviour.timestamps = timestamps;
+behavior.timestamps = timestamps;
 
-behaviour.position.lin = lin;
-behaviour.position.x = x;
-behaviour.position.y = y;
-
-if exist('x_head','var') && ~isempty(x_head)
-    behaviour.headposition.x = x_head;
-    behaviour.headposition.y = y_head;
-end
-
-if exist('x_tail','var') && ~isempty(x_tail)
-    behaviour.tailposition.x = x_tail;
-    behaviour.tailposition.y = y_tail;
-end
+behavior.position.lin = lin;
+behavior.position.x = x;
+behavior.position.y = y;
 
 if exist('zone','var') && ~isempty(zone)
-    behaviour.zone = zone;
+    behavior.zone = zone;
 end
 
-behaviour.maps = maps;
+behavior.maps = maps;
 
-behaviour.description = description;
+behavior.description = description;
 
-behaviour.events = events;
+for ii = 1:length(events)
+    if isfield(events{ii},'entry') && isfield(events{ii},'exit')
+        flds = fields(events{ii});
+        rmv = find(ismember(flds,{'exit','entry'}) == 0);
+        flds{rmv} = [];
+        preRec = tracking.events.subSessions(ii,1);
+        for jj = 1:length(flds)
+            if ~isempty(flds{jj})
+                events{ii}.(flds{jj}).leftArm.ts = events{ii}.(flds{jj}).leftArm.ts + preRec;
+                events{ii}.(flds{jj}).rightArm.ts = events{ii}.(flds{jj}).rightArm.ts + preRec;
+                events{ii}.(flds{jj}).stemArm.ts = events{ii}.(flds{jj}).stemArm.ts + preRec;
+                events{ii}.(flds{jj}).centerArm.ts = events{ii}.(flds{jj}).centerArm.ts + preRec;
+            end
+        end
+    end
+end
+
+
+% behavior.events = events;
 
 try
-    behaviour.masks.arm = armMask;
-    behaviour.masks.trials = trialMask;
-    behaviour.masks.direction = direction;
-    behaviour.masks.trialsDirection = trialsDirection;
-    behaviour.masks.recording = recMask;
+    behavior.masks.arm = armMask;
+    behavior.masks.trials = trialMask;
+    behavior.masks.direction = direction;
+    behavior.masks.trialsDirection = trialsDirection;
+    behavior.masks.recording = recMask;
 
-    behaviour.events.startPoint = startPoint;
-    behaviour.events.rReward = rReward;
-    behaviour.events.lReward = lReward;
-    behaviour.events.startDelay = startDelay;
-    behaviour.events.endDelay = endDelay;
-    behaviour.events.intersection = intersection;
-    behaviour.events.recordings = recordings;
+    behavior.events.startPoint = startPoint;
+    behavior.events.rReward = rReward;
+    behavior.events.lReward = lReward;
+    behavior.events.startDelay = startDelay;
+    behavior.events.endDelay = endDelay;
+    behavior.events.intersection = intersection;
+    behavior.events.recordings = recordings;
 
-    behaviour.trials.startPoint = startPointTrials;
-    behaviour.trials.endDelay = endDelayTrials;
-    behaviour.trials.visitedArm = visitedArm;
-    behaviour.trials.choice = choice;
-    behaviour.trials.expectedArm = expectedArm;
-    behaviour.trials.recordings = recordingsTrial;
+    behavior.trials.startPoint = startPointTrials;
+    behavior.trials.endDelay = endDelayTrials;
+    behavior.trials.visitedArm = visitedArm;
+    behavior.trials.choice = choice;
+    behavior.trials.expectedArm = expectedArm;
+    behavior.trials.recordings = recordingsTrial;
 catch
 end
 
 if saveMat
     C = strsplit(basepath,'\');
-    save([C{end} '.Behavior.mat'], 'behaviour');
+    save([C{end} '.Behavior.mat'], 'behavior');
 end
 
 

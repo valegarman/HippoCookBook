@@ -46,17 +46,17 @@ filename = p.Results.filename;
 lag = p.Results.periodLag;
 
 if ~isempty(dir('*DigitalIn.events.mat'))
-    disp('Pulses already detected! Loading file.');
+    disp('Digital pulses already detected! Loading file.');
     file = dir('*DigitalIn.events.mat');
     load(file.name);
     
-    if ~isempty(digitalIn)
-        for ii = 1:size(digitalIn.ints,2)
-            if size(digitalIn.ints{ii},1) ~= size(digitalIn.timestampsOff{ii},1)
-                digitalIn.ints{ii} = digitalIn.ints{ii}';
-            end
-        end
-    end
+%     if ~isempty(digitalIn)
+%         for ii = 1:size(digitalIn.ints,2)
+%             if size(digitalIn.ints{ii},1) ~= size(digitalIn.timestampsOff{ii},1)
+%                 digitalIn.ints{ii} = digitalIn.ints{ii}';
+%             end
+%         end
+%     end
     try
         if ~isfield(digitalIn,'folder')
             [~,fbasename,~] = fileparts(pwd);

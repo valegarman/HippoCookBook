@@ -203,7 +203,11 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true);
 
     % 8.2 Ripples
+<<<<<<< HEAD
     ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'removeOptogeneticStimulation',true, 'thresholds',[1 1.5]); % [1.5 3.5]
+=======
+    ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'removeOptogeneticStimulation',true); % [1.5 3.5]
+>>>>>>> 310a40d3e12bdf2677c6f51f8f43af25c9899590
     psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true);
 
     % 8.3 Theta intervals
