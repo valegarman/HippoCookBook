@@ -15,6 +15,8 @@ function chanCoords = selectProbe(varargin)
 % 'saveFigure'          - Default, true
 % 'force'               - Default, false. If force, promt user to choose
 %                           probe
+% 'showTetrodes'        - Default: false. If true shows different channel
+%                           maps for tetrodes (Pablo Abad)
 %
 %% Manuel Valero 2022
 
@@ -30,11 +32,13 @@ addParameter(p,'saveFigure',true, @islogical);
 addParameter(p,'updateSessionFile',true, @islogical);
 addParameter(p,'force',false, @islogical);
 addParameter(p,'hippoCookBook_path','HippoCookBook',@isstring);
+addParameter(p,'showTetrodes',false,@islogical);
 
 parse(p,varargin{:})
 
 parameters = p.Results;
 chanCoords = p.Results.chanCoords;
+showTetrodes = p.Results.showTetrodes;
 
 % dealing with inputs 
 prevPath = pwd;
@@ -52,8 +56,11 @@ end
 
 % if empty or force
 if parameters.force || isempty(chanCoords)
-    listOfProbes = {'Select probe...','A5x12-16-Buz-lin-5mm-100-200-160-177', 'CambridgeNeurotech-E1-64ch', 'CambridgeNeurotech-H2-64ch', 'uLED-12LED-32Ch-4Shanks','DiagnosticBiochip-128-6-128ch', 'Not included'};
-        
+    if ~showTetrodes
+        listOfProbes = {'Select probe...','A5x12-16-Buz-lin-5mm-100-200-160-177', 'CambridgeNeurotech-E1-64ch', 'CambridgeNeurotech-H2-64ch', 'uLED-12LED-32Ch-4Shanks','DiagnosticBiochip-128-6-128ch', 'Buzsaki64(64 ch, 8 shanks, staggered)','Not included'};
+    else
+        listOfProbes = {'Select probe...','A5x12-16-Buz-lin-5mm-100-200-160-177', 'CambridgeNeurotech-E1-64ch', 'CambridgeNeurotech-H2-64ch', 'uLED-12LED-32Ch-4Shanks','DiagnosticBiochip-128-6-128ch', 'Buzsaki64(64 ch, 8 shanks, staggered)', 'NeuroNexus-A8x1-tet-2mm-200-121(32ch,8 shanks,tetrode)','Tetrodes-32ch(8t-4c)-C57-4','Not included'};
+    end
     fig = figure;
     set(fig, 'MenuBar', 'none');
     set(fig, 'ToolBar', 'none');
@@ -93,6 +100,18 @@ if parameters.force || isempty(chanCoords)
             coord_path = dir([directory.path filesep 'session_files'...
                 filesep 'probes_coordinates' filesep ...
                 'electrodes_coordinates_CambridgeNeurotech-H2-64ch.chanCoords.channelInfo.mat']);
+        case lower('NeuroNexus-A8x1-tet-2mm-200-121(32ch,8 shanks,tetrode)')
+            coord_path = dir([directory.path filesep 'session_files' ...
+                filesep 'probes_coordinates' filesep ...
+                'electrodes_coordinates_NeuroNexus-A8x1-tet-2mm-200-121(32ch,8shanks,tetrode).chanCoords.channelInfo.mat']);
+        case lower('Tetrodes-32ch(8t-4c)-C57-4')
+            coord_path = dir([directory.path filesep 'session_files'...
+                filesep 'probes_coordinates' filesep ...
+                'electrodes_coordinates_Tetrodes-32ch(8t-4c)-C57-4.chanCoords.channelInfo.mat']);
+        case lower('Buzsaki64(64 ch, 8 shanks, staggered)')
+            coord_path = dir([directory.path filesep 'session_files'...
+                filesep 'probes_coordinates' filesep ...
+                'electrodes_coordinates_Buzsaki64(64 ch, 8 shanks, staggered).chanCoords.channelInfo.mat']);
         otherwise
             error('Probe not supported yet...');
     end
@@ -116,7 +135,7 @@ else
 end
 
 if ~parameters.inAxis
-    figure
+    figure('units','normalized','outerposition',[0 0 1 1])
 end
 hold on
 plot(chanCoords.x, chanCoords.y,'.','MarkerSize',10,'color',[.8 .8 .8]);

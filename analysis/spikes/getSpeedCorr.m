@@ -75,14 +75,19 @@ for j = 1:length(spikes.UID)
     try
         a    = Frequency(spikes.times{j},'binSize', dt,  'smooth', 10);
         
-        valid_idx1 = InIntervals(a(:,1),behavior.trials.startPoint);
-        valid_idx2 = InIntervals(behavior.timestamps,behavior.trials.startPoint);
-        
-        valid_idx2(speed < threshold) = 0;
-        fr = a(:,2);
-        fr(~valid_idx1) = NaN;
-        vel = speed;
-        vel(~valid_idx2) = NaN;
+        if trials
+            valid_idx1 = InIntervals(a(:,1),behavior.trials.startPoint);
+            valid_idx2 = InIntervals(behavior.timestamps,behavior.trials.startPoint);
+
+            valid_idx2(speed < threshold) = 0;
+            fr = a(:,2);
+            fr(~valid_idx1) = NaN;
+            vel = speed;
+            vel(~valid_idx2) = NaN;
+        else
+            fr = a(:,2);
+            vel = speed;
+        end
         
         [n,b] = histc(behavior.timestamps, a(:,1));
         vel(b==0) = [];
@@ -107,10 +112,9 @@ running(running<threshold) = NaN;
 Y        = quantileranks(running, numQuantiles);
 prc_vals = prctile(running,1:(100/numQuantiles):100);
 
-trialsNumber = size(behavior.trials.startPoint,1);
-trialType = unique(behavior.trials.visitedArm);
-
 if trials   
+    trialsNumber = size(behavior.trials.startPoint,1);
+    trialType = unique(behavior.trials.visitedArm);
     speed_val = zeros(numQuantiles,length(spikes.times),length(trialType));
     speed_fr_corr = zeros(length(spikes.times),length(trialType));
     ls = zeros(length(spikes.times),3,length(trialType));
@@ -354,7 +358,7 @@ speedCorrs.leastSquares  = ls;
 if saveMat
     save([basename, '.speedCorrs.cellinfo.mat'], 'speedCorrs');
 end
-
+close all;
 cd(prevPath);
 
 end

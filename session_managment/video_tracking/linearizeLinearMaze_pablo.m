@@ -323,12 +323,15 @@ behavior.events.lReward = lReward;
 behavior.events.startDelay = NaN;
 behavior.events.endDelay = NaN;
 behavior.events.intersection = NaN;
+behavior.events.entry.ts = NaN;
+behavior.events.exit.ts = NaN;
 
 behavior.trials.startPoint = trials0;
 behavior.trials.endDelay = NaN;
 behavior.trials.visitedArm = armChoice.visitedArm;
 behavior.trials.choice = NaN;
 behavior.trials.expectedArm = NaN;
+
 
 if saveMat
     C = strsplit(basepath,'\');

@@ -50,7 +50,7 @@ function [firingMaps] = firingMapAvg_pablo(positions,spikes,varargin)
 %% parse inputs
 p=inputParser;
 addParameter(p,'smooth',2,@isnumeric);
-addParameter(p,'speedThresh',0.1,@isnumeric);
+addParameter(p,'speedThresh',0.02,@isnumeric);
 addParameter(p,'nBins',50,@isnumeric);
 addParameter(p,'maxGap',0.1,@isnumeric);
 addParameter(p,'minTime',0,@isnumeric);
@@ -62,10 +62,13 @@ addParameter(p,'orderKalmanVel',2,@isnumeric);
 addParameter(p,'pixelsPerCm',2.5,@isnumeric);
 addParameter(p,'plt',true,@islogical);
 addParameter(p,'positionFilter',true,@islogical);
+addParameter(p,'tint',true,@islogical);
+addParameter(p,'nPix2BinBy',[],@isnumeric);
+
 
 parse(p,varargin{:});
 smooth = p.Results.smooth;
-speedThresh = p.Results.speedThresh;
+speedThresh = p.Results.speedThresh*100; % To convert to cm because speed is in cm/s
 nBins = p.Results.nBins;
 maxGap = p.Results.maxGap;
 minTime = p.Results.minTime;
@@ -77,6 +80,8 @@ order = p.Results.orderKalmanVel;
 pixelsPerCm = p.Results.pixelsPerCm;
 plt = p.Results.plt;
 positionFilter = p.Results.positionFilter;
+tint = p.Results.tint;
+nPix2BinBy = p.Results.nPix2BinBy;
 
 if isstruct(positions)
     positions = positions.maps;
@@ -99,6 +104,10 @@ try
     end
     behavior = getSessionBehavior();
     nBins = cell(1,length(behavior.maps));
+    nPix2BinBy = cell(1,length(behavior.maps));
+    Fs_tracking = cell(1,length(behavior.maps));
+    bndbox = cell(1,length(behavior.maps));
+    pixelsmetre = cell(1,length(behavior.maps));
     for i = 1:length(tracking.folders)
         fld{i} = find(ismember(behavior.description,tracking.apparatus{i}.name));
     end
@@ -106,12 +115,13 @@ try
     for ii = 1:length(fld)
         for jj = 1:length(fld{ii})
             nBins{count} = round(round(tracking.apparatus{ii}.boundingbox.xmax - tracking.apparatus{ii}.boundingbox.xmin)/pixelsPerCm);
+            nPix2BinBy{count} = (tracking.pixelsmetre{ii}*pixelsPerCm)/100;
+            Fs_tracking{count} = tracking.samplingRate(ii);
+            bndbox{count} = tracking.apparatus{ii}.boundingbox;
+            pixelsmetre{count} = tracking.pixelsmetre{ii};
             count = count + 1;
         end
     end
-%     for i = 1:length(tracking.folders)
-%         nBins{i} = round(round(tracking.apparatus{i}.boundingbox.xmax - tracking.apparatus{i}.boundingbox.xmin)/pixelsPerCm);
-%     end
 
     % Check if bin size is different for same conditions
     uniqueParadigms = unique(behavior.description);
@@ -126,7 +136,7 @@ try
                 nBins{sameParadigm(indx)} = nBins{sameParadigm(ind)};
             end
         end
-    end
+    end  
 catch
     disp('Not possible to compute nBins based on apparatus ...');
 end
@@ -151,30 +161,39 @@ for iCond = 1:size(positions,2)
     v = sqrt(vx.^2+vy.^2);
     
     % Compute timestamps where speed is under threshold
-    positions{iCond}(v<speedThresh,:) = [];
+    positions{iCond}(v<speedThresh,:) = []; % v is in cm/s but speedThresh is in m ( so multiply by 100)
 end
 
 % get firign rate maps
 for unit = 1:length(spikes.times)
     for c = 1:conditions
-        map{unit}{c} = Map_pablo(positions{c},spikes.times{unit},'smooth',smooth,'minTime',minTime,...
-            'nBins',round(nBins{c}),'maxGap',maxGap,'mode',mode,'maxDistance',maxDistance);
-        if positionFilter && ~isempty(map{unit}{c}.y)
-            nonVisitedBins = find(map{unit}{c}.timeUnSmooth == 0);
-            
-            countUnvisited = map{unit}{c}.count; 
-            countUnvisited(nonVisitedBins) = 0;
-            
-            timeUnvisited = map{unit}{c}.time;
-            timeUnvisited(nonVisitedBins) = 0;
-            
-            
-            zUnvisited = map{unit}{c}.z;
-            zUnvisited(nonVisitedBins) = 0;
-            
-            map{unit}{c}.countUnvisited = countUnvisited;
-            map{unit}{c}.timeUnvisited = timeUnvisited;
-            map{unit}{c}.zUnvisited = zUnvisited;
+        if size(positions{c},2) == 2 || ~tint % is linearize 
+            map{unit}{c} = Map_pablo(positions{c},spikes.times{unit},'smooth',smooth,'minTime',minTime,...
+                'nBins',round(nBins{c}),'maxGap',maxGap,'mode',mode,'maxDistance',maxDistance);
+            if positionFilter && ~isempty(map{unit}{c}.y)
+                nonVisitedBins = find(map{unit}{c}.timeUnSmooth == 0);
+
+                countUnvisited = map{unit}{c}.count; 
+                countUnvisited(nonVisitedBins) = 0;
+
+                timeUnvisited = map{unit}{c}.time;
+                timeUnvisited(nonVisitedBins) = 0;
+
+
+                zUnvisited = map{unit}{c}.z;
+                zUnvisited(nonVisitedBins) = 0;
+
+                map{unit}{c}.countUnvisited = countUnvisited;
+                map{unit}{c}.timeUnvisited = timeUnvisited;
+                map{unit}{c}.zUnvisited = zUnvisited;
+            end
+        elseif size(positions{c},2) == 3 % is 2D
+            % tint-based analysis
+            % Binned of spike times and position
+            [n,bin] = histc(spikes.times{unit},positions{c}(:,1));
+            bin = bin (bin > 0);
+%             bin = unique(bin);
+            map{unit}{c} = MapTint(positions{c},bin,'bndbox',bndbox{c},'binsize',nPix2BinBy{c},'pixelsmetre',pixelsmetre{c});
         end
     end
 end
@@ -215,6 +234,9 @@ for unit = 1:length(spikes.times)
         firingMaps.rateMapsUnSmooth{unit,1}{c} = map{unit}{c}.zUnSmooth;
         firingMaps.countMapsUnSmooth{unit,1}{c} = map{unit}{c}.countUnSmooth;
         firingMaps.occupancyUnSmooth{unit,1}{c} = map{unit}{c}.timeUnSmooth;
+        if isfield(map{unit}{c},'timeUnSmoothSec')
+            firingMaps.occupancyUnSmoothSec{unit,1}{c} = map{unit}{c}.timeUnSmoothSec;
+        end
         if isfield(map{unit}{c},'zUnvisited')
             firingMaps.rateMapsUnvisited{unit,1}{c} = map{unit}{c}.zUnvisited;
             firingMaps.countMapsUnvisited{unit,1}{c} = map{unit}{c}.countUnvisited;
@@ -223,6 +245,12 @@ for unit = 1:length(spikes.times)
             firingMaps.rateMapsUnvisited{unit,1}{c} = [];
             firingMaps.countMapsUnvisited{unit,1}{c} = [];
             firingMaps.occupancyUnvisited{unit,1}{c} = [];
+        end
+        try
+            firingMaps.bndbox{unit,1}{c} = map{unit}{c}.bndbox;
+            firingMaps.var2binby{unit,1}{c} = map{unit}{c}.var2binby;
+            firingMaps.binsize{unit,1}{c} = map{unit}{c}.binsize;
+            firingMaps.pixelsmetre{unit,1}{c} = map{unit}{c}.pixelsmetre;
         end
     end
 end
@@ -242,30 +270,28 @@ end
 
 if plt
     for c = 1:length(firingMaps.rateMaps{1})
-        figure,
-        set(gcf,'Position',[100 -100 2500 1200]);
-        for unit = 1:size(firingMaps.UID,2)
-            subplot(7,ceil(size(firingMaps.UID,2)/7),unit);
-            if size(positions{c},2) == 3
-                plot(positions{c}(:,2),positions{c}(:,3),'color',[0.7 0.7 0.7]);
-                hold on;
-                t = positions{c}(:,1);
-                dt = diff(t);dt(end+1)=dt(end);dt(dt>maxGap) = maxGap;
-                n = CountInIntervals(spikes.times{unit},[t t+dt]);
-                scatter(positions{c}(n > 0 ,2),positions{c}(n > 0,3),1,'MarkerEdgeColor',[1 0 0], 'MarkerFaceColor',[0.9 0 0]);
-                axis ij;
-                axis square;
-                xlim(round(behavior.avFrame{c}.xSize)); ylim(round(behavior.avFrame{c}.ySize));
-                if unit == 1
-                    ylabel('Track (cm)');
-                    xlabel('Track (cm)');
-                end
-                title(num2str(unit),'FontWeight','normal','FontSize',10);
-            else
-                close all;
+        if size(positions{c},2) == 3
+            figure,
+            set(gcf,'Position',[100 -100 2500 1200]);
+            for unit = 1:size(firingMaps.UID,2)
+                subplot(7,ceil(size(firingMaps.UID,2)/7),unit);
+                    plot(positions{c}(:,2),positions{c}(:,3),'color',[0.7 0.7 0.7]);
+                    hold on;
+                    t = positions{c}(:,1);
+                    dt = diff(t);dt(end+1)=dt(end);dt(dt>maxGap) = maxGap;
+                    n = CountInIntervals(spikes.times{unit},[t t+dt]);
+                    scatter(positions{c}(n > 0 ,2),positions{c}(n > 0,3),1,'MarkerEdgeColor',[1 0 0], 'MarkerFaceColor',[0.9 0 0]);
+                    axis ij;
+                    axis square;
+                    xlim(round(behavior.avFrame{c}.xSize)); ylim(round(behavior.avFrame{c}.ySize));
+                    if unit == 1
+                        ylabel('Track (cm)');
+                        xlabel('Track (cm)');
+                    end
+                    title(num2str(unit),'FontWeight','normal','FontSize',10);
             end
+            saveas(gcf,[pwd,filesep,'SummaryFigures',filesep ,'firingMap_' num2str(c) '.png'],'png');
         end
-        saveas(gcf,[pwd,filesep,'SummaryFigures',filesep ,'firingMap_' num2str(c) '.png'],'png');
     end
 end
 close all;

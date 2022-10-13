@@ -189,7 +189,12 @@ if exist('entry','var')
         behaviour.events.entry = entry;
         behaviour.events.exit = exit;
     catch
+        behavior.events.entry.ts = NaN;
+        behavior.events.exit.ts = NaN;
     end
+else
+    behavior.events.entry.ts = NaN;
+    behavior.events.exit.ts = NaN;
 end
 if saveMat
     C = strsplit(basepath,'\');
