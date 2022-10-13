@@ -6,6 +6,7 @@
 %   Example:
 
 updateExpFolder({'V:\data\fVIP2', 'Y:\fVIP2'},'E:\data\fVIP2');
+updateExpFolder({'V:\data\fSst4', 'Y:\fSst4'},'G:\data\fSst4');
 
 % 2% Then, preprocess session (includes artifacts removal, median signal
 %   removal, LFP and Kilosort, and running computeSessionSummary by 'batch_preprocessSession('basepath','sessionBasepath').
@@ -21,7 +22,7 @@ batch_sessionSummary('basepath','G:\data\fPv4','cleanArtifacts',({65,[]}),'analo
 processSession('digital_optogenetic_channels',1,'analog_optogenetic_channels',[],'promt_hippo_layers',true,'manual_analog_pulses_threshold',true);
 
 
-% 5% Index session
+% 5% Index session 
 indexNewSession;
 
 % 6% Once a database has been created, use loadProjectResults to stack results for all sessions

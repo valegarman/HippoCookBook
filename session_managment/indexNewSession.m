@@ -72,7 +72,7 @@ if isempty(project)
     project = session.general.projects;
 end
 % updated indexedSession table
-sessionsTable = readtable([indexedSessionCSV_path filesep indexedSessionCSV_name,'.csv']); % the variable is called allSessions
+sessionsTable = readtable([indexedSessionCSV_path filesep indexedSessionCSV_name,'.csv'],'PreserveVariableNames',true); % the variable is called allSessions
 % new table entry
 
 optogenetics = cell(0);
