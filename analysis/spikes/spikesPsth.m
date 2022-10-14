@@ -307,7 +307,7 @@ end
 
 if saveMat
     disp('Saving results...');
-    save([basenameFromBasepath(pwd) '.' eventType '_psth.cellinfo.mat'],'psth');
+    save([basenameFromBasepath(pwd) '.' eventType '_psth.cellinfo.mat'],'psth','-v7.3');
 end
 
 % PLOTS
