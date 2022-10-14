@@ -25,14 +25,10 @@ ResampleBinary(strcat(basenameFromBasepath(pwd),'.dat'),strcat(basenameFromBasep
 preprocessSession('basepath',pwd,'analogChannelsList',analogChannelsList,'spikeSort',spikeSort,'getPos',getPos, 'cleanArtifacts',cleanArtifacts,...
                     'medianSubstr',medianSubstr,'tracking_pixel_cm',tracking_pixel_cm,'sessionSummary',sessionSummary,'digitalChannelsList',digitalChannelsList,'bazler_ttl_channel',bazler_ttl_channel);
 
-<<<<<<< HEAD
 
-=======
 batch_preprocessSession('basepath','E:\data\NY13')
-=======
 batch_preprocessSession('basepath','E:\iEEG\NY11')
 SleepScoreMaster(pwd,'noPrompts',true)
->>>>>>> 69e64621ff0ef7e79fae84f0eed3f39efbe07d4f
 
 %3% Computing summary
 batch_sessionSummary('basepath','J:\fId3','analogChannelsList',[],'digitalChannelsList',1);

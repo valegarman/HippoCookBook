@@ -76,7 +76,7 @@ for ii = 1:size(sess,1)
         elseif strcmpi(tracking.apparatus.name,'Linear Track  N-S')
             behaviorTemp.(sess(ii).name) = linearizeLinearMaze_pablo('verbose',verbose);
         elseif strcmpi(tracking.apparatus.name,'TMaze')
-            behaviorTemp.(sess(ii).name) = linearizeArmChoice('verbose',verbose);
+            behaviorTemp.(sess(ii).name) = linearizeArmChoice_pablo('verbose',verbose);
         end
         behaviorFolder(count) = ii; 
         count = count + 1;
@@ -95,6 +95,7 @@ startPointTrials = []; endDelayTrials = []; visitedArm = []; choice = []; expect
 recordings = []; recordingsTrial = []; description = [];
 direction = []; trialsDirection = []; events = [];
 subSessionMask = [];
+entry = []; exit = [];
 
 try
     for ii = 1:size(efields,1)
@@ -127,6 +128,7 @@ if size(tracking.events.subSessions,1) == size(efields,1)
             
 %         events{ii} = behaviorTemp.(efields{ii}).events;
         
+        
         lin = [lin; behaviorTemp.(efields{ii}).position.lin];
         try
             armMask = [armMask; behaviorTemp.(efields{ii}).masks.arm];
@@ -147,6 +149,9 @@ if size(tracking.events.subSessions,1) == size(efields,1)
             direction = [direction; behaviorTemp.(efields{ii}).masks.direction];
             trialsDirection = [trialsDirection; behaviorTemp.(efields{ii}).masks.trialsDirection'];
             recordingsTrial = [recordingsTrial; ii*ones(size(behaviorTemp.(efields{ii}).trials.startPoint,1),1)];
+            entry = [entry; behaviorTemp.(efields{ii}).events.entry.ts + preRec];
+            exit = [exit; behaviorTemp.(efields{ii}).events.exit.ts + preRec];
+            
         catch
         end
 %         description{ii} = behaviorTemp.(efields{ii}).description;
@@ -178,6 +183,14 @@ for ii = 1:length(efields)
         zone{count} = behaviorTemp.(efields{ii}).zone;
         avFrame{count} = tracking.avFrame{ii};
         count = count + 1;
+    elseif strcmpi(behaviorTemp.(efields{ii}).description,'Social Interaction') && any(isnan(behaviorTemp.(efields{ii}).position.lin))
+        maps{count}(:,1) = timestamps(subSessionMask == ii);
+        maps{count}(:,2) = x(subSessionMask == ii);
+        maps{count}(:,3) = y(subSessionMask == ii);
+        description{count} = behaviorTemp.(efields{ii}).description;
+        zone{count} = behaviorTemp.(efields{ii}).zone;
+        avFrame{count} = tracking.avFrame{ii};
+        count = count + 1;
     else
         disp('Error while running getSessionBehavior. Quitting...');
         return;
@@ -200,24 +213,42 @@ behavior.maps = maps;
 behavior.description = description;
 behavior.avFrame = avFrame;
 
-for ii = 1:length(events)
-    if isfield(events{ii},'entry') && isfield(events{ii},'exit')
-        flds = fields(events{ii});
-        rmv = find(ismember(flds,{'exit','entry'}) == 0);
-        flds{rmv} = [];
-        preRec = tracking.events.subSessions(ii,1);
-        for jj = 1:length(flds)
-            if ~isempty(flds{jj})
-                events{ii}.(flds{jj}).leftArm.ts = events{ii}.(flds{jj}).leftArm.ts + preRec;
-                events{ii}.(flds{jj}).rightArm.ts = events{ii}.(flds{jj}).rightArm.ts + preRec;
-                events{ii}.(flds{jj}).stemArm.ts = events{ii}.(flds{jj}).stemArm.ts + preRec;
-                events{ii}.(flds{jj}).centerArm.ts = events{ii}.(flds{jj}).centerArm.ts + preRec;
+try
+    for ii = 1:length(events)
+        if isfield(events{ii},'entry') && isfield(events{ii},'exit')
+            flds = fields(events{ii});
+            rmv = find(ismember(flds,{'exit','entry'}) == 0);
+            flds(rmv) = [];
+            preRec = tracking.events.subSessions(ii,1);
+            for jj = 1:length(flds)
+                if ~isempty(flds{jj})
+                    events{ii}.(flds{jj}).leftArm.ts = events{ii}.(flds{jj}).leftArm.ts + preRec;
+                    events{ii}.(flds{jj}).rightArm.ts = events{ii}.(flds{jj}).rightArm.ts + preRec;
+                    events{ii}.(flds{jj}).stemArm.ts = events{ii}.(flds{jj}).stemArm.ts + preRec;
+                    events{ii}.(flds{jj}).centerArm.ts = events{ii}.(flds{jj}).centerArm.ts + preRec;
+                end
             end
         end
     end
 end
 
-
+for ii = 1:length(efields)
+    preRec = tracking.events.subSessions(ii,1);
+    if strcmpi(behaviorTemp.(efields{ii}).description,'Social Interaction')
+        if isfield(events{ii},'entry') 
+            fld = fields(events{ii}.entry);
+            for jj = 1:length(fld)
+                events{ii}.entry.(fld{jj}).ts = events{ii}.entry.(fld{jj}).ts + preRec;
+            end
+        end
+        if isfield(events{ii},'exit')
+            fld = fields(events{ii}.exit);
+            for jj = 1:length(fld)
+                events{ii}.exit.(fld{jj}).ts = events{ii}.exit.(fld{jj}).ts + preRec;
+            end
+        end
+    end
+end
 % behavior.events = events;
 
 try
@@ -230,6 +261,10 @@ try
     behavior.events.startPoint = startPoint;
     behavior.events.rReward = rReward;
     behavior.events.lReward = lReward;
+    
+    behavior.events.lReward(isnan(behavior.events.lReward)) = [];
+    behavior.events.rReward(isnan(behavior.events.rReward)) = [];
+    
     behavior.events.startDelay = startDelay;
     behavior.events.endDelay = endDelay;
     behavior.events.intersection = intersection;
@@ -241,6 +276,9 @@ try
     behavior.trials.choice = choice;
     behavior.trials.expectedArm = expectedArm;
     behavior.trials.recordings = recordingsTrial;
+    
+    behavior.entry = entry;
+    behavior.exit = exit;
 catch
 end
 

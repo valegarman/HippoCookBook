@@ -196,12 +196,19 @@ behavior.trials.expectedArm = NaN;
 
 if exist('entry','var')
     try
-        behavior.events.entry_sample = entry_sample;
-        behavior.events.exit_sample = exit_sample;
-        behavior.events.entry_ts = entry_ts;
-        behavior.events.exit_ts = exit_ts;
+        behavior.events.entry = entry;
+        behavior.events.exit = exit;
+%         behavior.events.entry_sample = entry_sample;
+%         behavior.events.exit_sample = exit_sample;
+%         behavior.events.entry_ts = entry_ts;
+%         behavior.events.exit_ts = exit_ts;
     catch
+        behavior.events.entry.ts = NaN;
+        behavior.events.exit.ts = NaN;
     end
+else
+    behavior.events.entry.ts = NaN;
+    behavior.events.exit.ts = NaN;
 end
 
 if saveMat

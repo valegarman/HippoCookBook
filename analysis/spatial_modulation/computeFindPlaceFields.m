@@ -238,7 +238,7 @@ for c = 1:length(firingMaps.rateMaps{1})
                 title(num2str(unit),'FontWeight','normal','FontSize',10);
         end    
     end
-    saveas(gcf,[basepath filesep,'SummaryFigures',filesep,'firingMap_' num2str(c) '.png'],'png');
+    saveas(gcf,[basepath filesep,'SummaryFigures',filesep,'firingField_' num2str(c) '.png'],'png');
 end
 close all;
 
@@ -263,6 +263,7 @@ for c = 1:length(firingMaps.rateMapsUnvisited{1})
                 ytrack = linspace(0,sizeMazeY,sizeMazeY);
             end
             subplot(7,ceil(size(firingMaps.UID,2)/7),unit); % autocorrelogram
+            firingMaps.rateMapsUnvisited{unit}{c}(firingMaps.rateMapsUnvisited{unit}{c} == 0) = NaN;
             imagesc(xtrack,ytrack,firingMaps.rateMapsUnvisited{unit}{c});
             if sum(sum(firingMaps.rateMapsUnvisited{unit}{c}))>0
                 hold on

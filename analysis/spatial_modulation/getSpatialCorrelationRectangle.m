@@ -25,7 +25,7 @@ p = inputParser;
 addParameter(p,'basepath',pwd,@isfolder);
 addParameter(p,'z',[]);
 addParameter(p,'occupancy',[]);
-addParameter(p,'minTime',0.2,@isnumeric);
+addParameter(p,'minTime',0.5,@isnumeric);
 
 parse(p,varargin{:});
 
@@ -40,31 +40,91 @@ z(indnan) = 0;
 
 [m,n] = size(z);
 vect_prom = zeros(m,n);
-
+vector1 = z(:);
 for i = 2:m-1
     for j = 2:n-1
-        occu_subMatrix = [occupancy(i-1,j-1), occupancy(i-1,j), occupancy(i-1,j+1), occupancy(i,j-1), occupancy(i+1,j-1), occupancy(i+1,j), occupancy(i+1,j+1)];
-        nCrit = find(occu_subMatrix>minTime);
-        if isempty(nCrit)
-            nn = length(nCrit);
-            vect_prom(i,j)=(z(i-1,j-1)+z(i-1,j)+z(i-1,j+1)+z(i,j-1)+z(i,j+1)+z(i+1,j-1)+z(i+1,j)+z(i+1,j+1))/nn;
-        else
-            nn=length(find(occu_subMatrix>0.5));
-            vect_prom(i,j)=(matriz(i-1,j-1)+matriz(i-1,j)+matriz(i-1,j+1)+matriz(i,j-1)+matriz(i,j+1)+matriz(i+1,j-1)+matriz(i+1,j)+matriz(i+1,j+1))/nn;
-        end
+        occu_subMatrix = [occupancy(i-1,j-1), occupancy(i-1,j), occupancy(i-1,j+1), occupancy(i,j-1), occupancy(i,j+1),occupancy(i+1,j-1), occupancy(i+1,j), occupancy(i+1,j+1)];
+        z_subMatrix = [z(i-1,j-1), z(i-1,j), z(i-1,j+1), z(i,j-1), z(i,j+1),z(i+1,j-1), z(i+1,j), z(i+1,j+1)];
+        nCrit = find(occu_subMatrix > minTime);
+        z_subMatrix = z_subMatrix(nCrit);
+        vect_prom(i,j) = sum(z_subMatrix) / length(z_subMatrix);
     end
 end
 
 % First row
 for j = 2:n-1
     occu_subMatrix = [occupancy(1,j-1), occupancy(1,j+1), occupancy(2,j+1), occupancy(2,j-1), occupancy(2,j)];
+    z_subMatrix = [z(1,j-1), z(1,j+1), z(2,j+1), z(2,j-1), z(2,j)];
     nCrit = find(occu_subMatrix > minTime);
-    if isempty(nCrit)
-        nn = length(nCrit);
-        vect_prom(1,j)=(z(1,j-1)+z(1,j+1)+z(2,j+1)+z(2,j-1)+z(2,j))/nn;
-    else
-%         nn = length(find(occu_subMatrix
-    end
+    z_subMatrix = z_subMatrix(nCrit);
+    vect_prom(1,j) = sum(z_subMatrix) / length(z_subMatrix);
 end
 
+% Last row #m
+for j = 2:n-1
+    occu_subMatrix = [occupancy(m,j-1), occupancy(m,j+1), occupancy(m-1,j+1), occupancy(m-1,j-1), occupancy(m-1,j)];
+    z_subMatrix = [z(m,j-1), z(m,j+1), z(m-1,j+1), z(m-1,j-1), z(m-1,j)];
+    nCrit = find(occu_subMatrix > minTime);
+    z_subMatrix = z_subMatrix(nCrit);
+    vect_prom(m,j) = sum(z_subMatrix) / length(z_subMatrix);
+end
+
+% First column
+for i = 2:m-1
+    occu_subMatrix = [occupancy(i-1,1), occupancy(i+1,1), occupancy(i,2), occupancy(i+1,2), occupancy(i-1,2)];
+    z_subMatrix = [z(i-1,1), z(i+1,1), z(i,2), z(i+1,2), z(i-1,2)];
+    nCrit = find(occu_subMatrix > minTime);
+    z_subMatrix = z_subMatrix(nCrit);
+    vect_prom(i,1) = sum(z_subMatrix) / length(z_subMatrix);
+end
+
+% Last column #n
+for i = 2:m-1
+    occu_subMatrix = [occupancy(i-1,n), occupancy(i+1,n), occupancy(i,n-1), occupancy(i+1,n-1), occupancy(i-1,n-1)];
+    z_subMatrix = [z(i-1,n), z(i+1,n), z(i,n-1), z(i+1,n-1), z(i-1,n-1)];
+    nCrit = find(occu_subMatrix > minTime);
+    z_subMatrix = z_subMatrix(nCrit);
+    vect_prom(i,n) = sum(z_subMatrix) / length(z_subMatrix);
+end
+
+% Four corners
+% TopLeft
+occu_subMatrix = [occupancy(1,2) occupancy(2,1) occupancy(2,2)];
+z_subMatrix = [z(1,2) z(2,1) z(2,2)];
+nCrit = find(occu_subMatrix > minTime);
+z_subMatrix = z_subMatrix(nCrit);
+vect_prom(1,1) = sum(z_subMatrix) / length(z_subMatrix);
+
+% TopRight
+occu_subMatrix = [occupancy(1,m-1) occupancy(2,m-1) occupancy(2,m)];
+z_subMatrix = [z(1,m-1) z(2,m-1) z(2,m)];
+nCrit = find(occu_subMatrix > minTime);
+z_subMatrix = z_subMatrix(nCrit);
+vect_prom(1,m) = sum(z_subMatrix) / length(z_subMatrix);
+
+% BottomLeft
+occu_subMatrix = [occupancy(n-1,2) occupancy(n-1,1) occupancy(n,2)];
+z_subMatrix = [z(n-1,2) z(n-1,1) z(n,2)];
+nCrit = find(occu_subMatrix > minTime);
+z_subMatrix = z_subMatrix(nCrit);
+vect_prom(n,1) = sum(z_subMatrix) / length(z_subMatrix);
+
+% BottomRight
+occu_subMatrix = [occupancy(n-1,m-1) occupancy(n-1,m) occupancy(n,m-1)];
+z_subMatrix = [z(n-1,m-1) z(n-1,m) z(n,m-1)];
+nCrit = find(occu_subMatrix > minTime);
+z_subMatrix = z_subMatrix(nCrit);
+vect_prom(n,m) = sum(z_subMatrix) / length(z_subMatrix);
+
+
+%% Output
+occu = occupancy(:);
+n = find(occu > minTime);
+vector2 = vect_prom(:);
+
+vector1 = vector1(n);
+vector2 = vector2(n);
+spatialCorr = vect_prom;
+
+[r,p] = corrcoef(vector1,vector2);
 end

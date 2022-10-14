@@ -537,7 +537,7 @@ if rasterPlot
             end
         end
         saveas(gcf,['SummaryFigures\OptogenticRespRaster_ch',num2str(conditions(ii,2)),'_dur',num2str(conditions(ii,1)),'ch.png']); 
-        close(gcf);
+%         close(gcf);
     end
 end
 % 2. Rate plot
