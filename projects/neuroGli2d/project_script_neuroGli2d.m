@@ -11,7 +11,7 @@ for z = 1
     clear; close all
     analysis_project_path = adapt_filesep([dropbox_path filesep 'ProjectsOnLine\neuroGli2d\data']);
     [projectResults, projectSessionResults] = ...
-        loadProjectResults('project', 'neuroGli2d','analysis_project_path', analysis_project_path,'loadLast',true);
+        loadProjectResults('project', 'neuroGli2d','analysis_project_path', analysis_project_path,'loadLast',false);
     
     % general
     inCortex = {'PTLp' 'PTLp5' 'PTLp6' 'PTLp2_3' 'PTLp1' 'PTLp4'}; % only using cortical data data... :(
