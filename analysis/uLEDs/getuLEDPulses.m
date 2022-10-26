@@ -192,7 +192,7 @@ uLEDPulses.duration_round_decimal = duration_round_decimal;
 
 [N, ~] = histcounts(uLEDPulses.shank,4);
 uLEDPulses.pulsesPerShank = N;
-uLEDPulses.nonStimulatedShank = find(N<100);
+uLEDPulses.nonStimulatedShank = find(N<1400);
 try session = loadSession;
     uLEDPulses.nonStimulatedChannels = session.extracellular.electrodeGroups.channels{uLEDPulses.nonStimulatedShank};
 catch
@@ -205,15 +205,15 @@ end
 
 % parse conditions
 uLEDPulses.conditionDuration = unique(round(uLEDPulses.durationRounded,3));
+uLEDPulses.conditionID = ones(size(code));
 for ii = 1:length(uLEDPulses.conditionDuration)
-    uLEDPulses.conditionDurationID = ii;
-    uLEDPulses.conditionID = uLEDPulses.durationRounded == uLEDPulses.conditionDuration * ii;
+    uLEDPulses.conditionDurationID(ii) = ii;
+    uLEDPulses.conditionID(uLEDPulses.durationRounded == uLEDPulses.conditionDuration(ii)) = uLEDPulses.conditionID(uLEDPulses.durationRounded == uLEDPulses.conditionDuration(ii)) * ii;
 end
 
 if saveMat
     disp('Saving results...');
-    filename = split(pwd,filesep); filename = filename{end};
-    save([filename '.uLEDPulses.event.mat'],'uLEDPulses');
+    save([basenameFromBasepath(pwd) '.uLEDPulses.event.mat'],'uLEDPulses');
 end
 
 cd(prevPath);
