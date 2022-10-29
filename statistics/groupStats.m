@@ -334,7 +334,10 @@ if length(yC) == 2
         stats.pairedtTest.stats = stats2;
         stats.pairedtTest.ci = ci2;
     end
+<<<<<<< HEAD
+=======
 
+>>>>>>> 3f47bd1c532f67b8195d9deb54b781a3687e3b4a
     % two-sample t-test.
     [p2,h2,ci2,stats2] = ttest2(yC{1},yC{2});
     stats.tTest.p = p2;

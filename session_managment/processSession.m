@@ -162,7 +162,7 @@ end
 %% 4. Spike Features
 % 4.1 Light responses, if available
 if ~any(ismember(excludeAnalysis, {'4',lower('spikesFeatures')}))
-    optogeneticResponses = getOptogeneticResponse('numRep',500,'force',true);
+    optogeneticResponses = getOptogeneticResponse('numRep',0,'force',true);
     % 4.2 ACG and waveform
     spikeFeatures;
 end
@@ -177,7 +177,7 @@ if ~any(ismember(excludeAnalysis, {'5',lower('checkSleep')}))
     end
     
     SleepScoreMaster(pwd,'noPrompts',true,'ignoretime',pulses.stimulationEpochs, 'overwrite', true);
-    % TheStateEditor_temp(session.general.name);
+    % TheStateEditor(session.general.name);
     bz_ThetaStates(pwd);
 end
 
