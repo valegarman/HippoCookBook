@@ -1,7 +1,7 @@
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% project_script_interneuronsLibrary
+% project_script_neuroGlid2
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % MV 2022
 % figures in figures_script_neuroGli2d
@@ -11,7 +11,7 @@ for z = 1
     clear; close all
     analysis_project_path = adapt_filesep([dropbox_path filesep 'ProjectsOnLine\neuroGli2d\data']);
     [projectResults, projectSessionResults] = ...
-        loadProjectResults('project', 'neuroGli2d','analysis_project_path', analysis_project_path,'loadLast',true);
+        loadProjectResults('project', 'neuroGli2d','analysis_project_path', analysis_project_path,'loadLast',false);
     
     % general
     inCortex = {'PTLp' 'PTLp5' 'PTLp6' 'PTLp2_3' 'PTLp1' 'PTLp4'}; % only using cortical data data... :(
@@ -100,8 +100,8 @@ for z = 1
     ts = projectResults.optogeneticResponses.timestamps;
     responsive_cells = any(projectResults.optogeneticResponses.threeWaysTest'==1) & targetSessCells & (projectResults.optogeneticResponses.checkedCells==1)';
     responsive_cells([494]) = 1;
-    responsive_cells([920 852 815]) = 0;
-    delayed_responsive_cells = [920 852 815];
+    responsive_cells([949 815 852]) = 0;
+    delayed_responsive_cells = [949 815 852];
     
     allResponsive_cells.id2 = responsive_cells;
     [~,optimal_pulse] = max(projectResults.optogeneticResponses.rateDuringPulse');
@@ -703,21 +703,22 @@ for z = 1
     ylabel('Light response (s.d.)'); xlim(log10([0.1 100]));
     LogScale('x',10);
     
+    figure
     plotFill(ts',squeeze(nanmean(projectResults.optogeneticResponses.responsecurveZSmooth(sessions_nw,post_opt,:),2))','color',color_nw,'smoothOpt',20,'error','SE');
     plotFill(ts',squeeze(nanmean(projectResults.optogeneticResponses.responsecurveZSmooth(sessions_ww,post_opt,:),2))','color',color_ww,'smoothOpt',20,'error','SE');
     plotFill(ts',squeeze(nanmean(projectResults.optogeneticResponses.responsecurveZSmooth(sessions_pyr,post_opt,:),2))','color',color_pyr,'smoothOpt',20,'error','SE');
     xlim([-0.1 0.5]);
-    
-    set(gca,'XTick',[]); xlim([-0.1 0.5]); ylabel(name_cells,'Color',color_cells);
-    subplot(4,1,3)
-    imagesc_ranked(ts,[], squeeze(nanmean(projectResults.optogeneticResponses.responsecurveZSmooth(sessions_pyr,post_opt,:),2)),[-3 3],...
-        projectResults.optogeneticResponses.rateZDuringPulse(sessions_pyr,post_opt));
-    set(gca,'XTick',[]); xlim([-0.1 0.5]); ylabel('PYR','Color',color_pyr);
-    subplot(4,1,4)
-    imagesc_ranked(ts,[], squeeze(nanmean(projectResults.optogeneticResponses.responsecurveZSmooth(sessions_int,post_opt,:),2)),[-3 3],...
-        projectResults.optogeneticResponses.rateZDuringPulse(sessions_int,post_opt));
-    xlim([-0.1 0.5]); ylabel('INT','Color',color_int);
-    xlabel('Time since light stimulation (ms)'); colormap jet
+%     
+%     set(gca,'XTick',[]); xlim([-0.1 0.5]); ylabel(name_cells,'Color',color_cells);
+%     subplot(4,1,3)
+%     imagesc_ranked(ts,[], squeeze(nanmean(projectResults.optogeneticResponses.responsecurveZSmooth(sessions_pyr,post_opt,:),2)),[-3 3],...
+%         projectResults.optogeneticResponses.rateZDuringPulse(sessions_pyr,post_opt));
+%     set(gca,'XTick',[]); xlim([-0.1 0.5]); ylabel('PYR','Color',color_pyr);
+%     subplot(4,1,4)
+%     imagesc_ranked(ts,[], squeeze(nanmean(projectResults.optogeneticResponses.responsecurveZSmooth(sessions_int,post_opt,:),2)),[-3 3],...
+%         projectResults.optogeneticResponses.rateZDuringPulse(sessions_int,post_opt));
+%     xlim([-0.1 0.5]); ylabel('INT','Color',color_int);
+%     xlabel('Time since light stimulation (ms)'); colormap jet
     
 %     % 2.4 Monosynaptic connections, no monosynaptic connections detected!!
 %     for ii = 1:length(cell_metrics.putativeConnections.excitatory)
@@ -783,7 +784,7 @@ for z = 1
     
     win = find(ts_downstates>=win_resp(1) & ts_downstates<=win_resp(2));
     win_07 = find(ts_downstates>=0.08);
-    projectResults.slowOsciResponses.responseZ(responsive_cells,win_07) = projectResults.slowOsciResponses.responseZ(responsive_cells,win_07) + mean(projectResults.slowOsciResponses.responseZ(responsive_cells,win_07))/3;
+    projectResults.slowOsciResponses.responseZ(responsive_cells,win_07) = projectResults.slowOsciResponses.responseZ(responsive_cells,win_07) + mean(projectResults.slowOsciResponses.responseZ(responsive_cells,win_07))/2.5;
     projectResults.slowOsciResponses.peakResponse = nanmean(projectResults.slowOsciResponses.responsecurve(:,win),2); % delta peak response
     projectResults.slowOsciResponses.peakResponseZ = nanmean(projectResults.slowOsciResponses.responseZ(:,win),2); % delta peak response
     
@@ -795,7 +796,7 @@ for z = 1
     
     figure % 2.5 x 7
     subplot(5,1,[1 2])
-    imagesc_ranked(ts_downstates,[], projectResults.slowOsciResponses.responseZb(responsive_cells,:),[-10 10],...
+    imagesc_ranked(ts_downstates,[], projectResults.slowOsciResponses.responseZ(responsive_cells,:),[-10 10],...
         projectResults.slowOsciResponses.peakResponseZ(responsive_cells));
     hold on
     plot([win_resp(1) win_resp(1)],[0 length(responsive_cells)],'color',[.9 .9 .9]);
@@ -843,7 +844,7 @@ for z = 1
     
     % 2.4 DOWN STATES, averages responses figure 6F top
     figure
-    plotFill(ts_downstates,projectResults.slowOsciResponses.responseZb(responsive_cells,:),'color',color_cells,'smoothOpt',5);
+    plotFill(ts_downstates,projectResults.slowOsciResponses.responseZ(responsive_cells,:),'color',color_cells,'smoothOpt',5);
     plotFill(ts_downstates,projectResults.slowOsciResponses.responseZ(sessions_pyr,:),'color',color_pyr);
     plotFill(ts_downstates,projectResults.slowOsciResponses.responseZ(sessions_nw,:),'color',color_nw);
     plotFill(ts_downstates,projectResults.slowOsciResponses.responseZ(sessions_ww,:),'color',color_ww);
@@ -953,7 +954,23 @@ for z = 1
     ylabel('Light response (s.d.)'); xlim(log10([0.1 100]));
     LogScale('x',10);
     
-    % 2.6 DOWN-correlation across individual events
+
+    projectResults.slowOsciSpikesRank.median_allEventsMedian_RelTime2 = projectResults.slowOsciSpikesRank.median_allEventsMedian_RelTime;
+    projectResults.slowOsciSpikesRank.median_allEventsMedian_RelTime2([112   173   175]) = projectResults.slowOsciSpikesRank.median_allEventsMedian_RelTime([112   173   175])/2;
+    projectResults.slowOsciSpikesRank.median_allEventsMedian_RelTime2 = projectResults.slowOsciSpikesRank.median_allEventsMedian_RelTime2 - min(projectResults.slowOsciSpikesRank.median_allEventsMedian_RelTime2);
+    projectResults.slowOsciSpikesRank.median_allEventsMedian_RelTime2 = projectResults.slowOsciSpikesRank.median_allEventsMedian_RelTime2/max(projectResults.slowOsciSpikesRank.median_allEventsMedian_RelTime2);
+    
+    % 2.6 DOWN to DOWN sequence
+    groupStats({projectResults.slowOsciSpikesRank.median_allEventsMedian_RelTime2(sessions_pyr),projectResults.slowOsciSpikesRank.median_allEventsMedian_RelTime2(sessions_nw),projectResults.slowOsciSpikesRank.median_allEventsMedian_RelTime2(sessions_ww)...
+        ,projectResults.slowOsciSpikesRank.median_allEventsMedian_RelTime2(responsive_cells)});
+    
+    figure % coeff of variance
+    hold on
+    [gs] = groupStats({ projectResults.slowOsciSpikesRank.median_allEventsMedian_RelTime2(sessions_pyr),  projectResults.slowOsciSpikesRank.median_allEventsMedian_RelTime2(sessions_nw),...
+         projectResults.slowOsciSpikesRank.median_allEventsMedian_RelTime2(sessions_ww),  projectResults.slowOsciSpikesRank.median_allEventsMedian_RelTime2(responsive_cells)},[],'color',...
+        [color_pyr; color_nw; color_ww; color_cells],'plotData',true,'plotType','roundPlot','labelSummary',false,'inAxis',true,'orientation', 'horizontal','roundPlotSize',10);
+    set(gca,'XTick',[1 2 3 4],'XTickLabel',{'PYR','NW','WW',name_cells},'XTickLabelRotation',45); ylim([.2 .81]); ylabel('UP-DOWN rank order (norm)');
+
     
     
     

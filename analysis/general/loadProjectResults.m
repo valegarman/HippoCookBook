@@ -148,6 +148,11 @@ for ii = 1:length(sessions.basepaths)
     slowOsciResponses = importdata(targetFile.name);
     projectSessionResults.slowOsciResponses{ii} = slowOsciResponses;
     clear slowOsciResponses
+
+    targetFile = dir('*.spikesRank_upStates.cellinfo.mat'); 
+    slowOsciSpikesRank = importdata(targetFile.name);
+    projectSessionResults.slowOsciSpikesRank{ii} = slowOsciSpikesRank;
+    clear slowOsciSpikesRank
     
     % theta phase_locking
     targetFile = dir('*.theta_*PhaseLockingData.cellinfo.mat'); load(targetFile.name);
@@ -262,6 +267,7 @@ projectResults.slowOsciResponses = stackSessionResult(projectSessionResults.slow
 projectResults.spatialModulation = stackSessionResult(projectSessionResults.spatialModulation, projectSessionResults.numcells);
 % projectResults.speedCorr = stackSessionResult(projectSessionResults.speedCorr, projectSessionResults.numcells);
 projectResults.acgPeak = stackSessionResult(projectSessionResults.acgPeak, projectSessionResults.numcells);
+projectResults.slowOsciSpikesRank = stackSessionResult(projectSessionResults.slowOsciSpikesRank, projectSessionResults.numcells);
 
 projectResults.cell_metrics = cell_metrics;
 

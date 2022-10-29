@@ -162,7 +162,7 @@ end
 %% 4. Spike Features
 % 4.1 Light responses, if available
 if ~any(ismember(excludeAnalysis, {'4',lower('spikesFeatures')}))
-    optogeneticResponses = getOptogeneticResponse('numRep',0,'force',true);
+    optogeneticResponses = getOptogeneticResponse('numRep',500,'force',true);
     % 4.2 ACG and waveform
     spikeFeatures;
 end
@@ -177,7 +177,7 @@ if ~any(ismember(excludeAnalysis, {'5',lower('checkSleep')}))
     end
     
     SleepScoreMaster(pwd,'noPrompts',true,'ignoretime',pulses.stimulationEpochs, 'overwrite', true);
-    % TheStateEditor(session.general.name);
+    % TheStateEditor_temp(session.general.name);
     bz_ThetaStates(pwd);
 end
 
@@ -198,8 +198,9 @@ end
 if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     % Trying changes in detecUD_temp
     % 8.1 Up and downs
-    UDStates = detectUD('plotOpt', true,'forceDetect',true','NREMInts','all','ch',51);
+    UDStates = detectUD('plotOpt', true,'forceDetect',true','NREMInts','all');
     psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true);
+    getSpikesRank('events','upstates');
 
     % 8.2 Ripples
     ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'removeOptogeneticStimulation',true); % [1.5 3.5]

@@ -16,9 +16,7 @@ for ii = 1:length(sessionsTable.SessionName)
         try
 
             %%% your code goes here...
-            psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true);
-            clear psthUD;
-            
+            getSpikesRank('events','upstates')
             %%%
             
             close all;
