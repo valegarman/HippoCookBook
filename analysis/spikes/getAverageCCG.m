@@ -162,10 +162,10 @@ if useBrainRegions && exist([basenameFromBasepath(basepath) '.cell_metrics.celli
                 cellsID = indCell(indCell~=jj & cellsInRegion);
                 
                 ccMedian(jj,:) = nanmedian(squeeze(allCcg(:,jj,cellsID)),2); %
-                ccZMedian(jj,:) = nanmedian(zscore(squeeze(allCcg(:,jj,cellsID))',[],2)); % zCCG
+                ccZMedian(jj,:) = nanmedian(zscore(squeeze(allCcg(:,jj,cellsID))',[],2),1); % zCCG
 
                 ccMean(jj,:) = nanmean(squeeze(allCcg(:,jj,cellsID)),2); % zCCG
-                ccZMean(jj,:) = nanmean(zscore(squeeze(allCcg(:,jj,cellsID))',[],2)); % zCCG
+                ccZMean(jj,:) = nanmean(zscore(squeeze(allCcg(:,jj,cellsID))',[],2),1); % zCCG
             end
             
             if interp0

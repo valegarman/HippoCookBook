@@ -270,9 +270,10 @@ if ~isempty(spikeThreshold)
     downPopResponse = [];
     tic
     parfor (ii = 1: length(downValley),6)
-        a = sSpkMat(spikemat.timestamps>=downValley(ii)-downWinSize ...
+        try a = sSpkMat(spikemat.timestamps>=downValley(ii)-downWinSize ...
             & spikemat.timestamps<=downValley(ii)+downWinSize);
-        downPopResponse(ii,:) = zscore(a(int32(1:downWinSize*2/(mean(diff(spikemat.timestamps)))-1)));
+            downPopResponse(ii,:) = zscore(a(int32(1:downWinSize*2/(mean(diff(spikemat.timestamps)))-1)));
+        end
     end
     toc
     t_ds = linspace(-downWinSize,downWinSize,size(downPopResponse,2));
