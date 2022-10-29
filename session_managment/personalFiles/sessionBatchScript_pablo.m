@@ -319,7 +319,7 @@ batch_preprocessSession_pablo('basepath','F:\data\HPS22','analysisPath',[],'clea
 computeSessionSummary_pablo('basepath','F:\data\HPS22\HPS22_040621_sess25','analogChannelsList',[],'digitalChannelsList',[]);
 computeSessionSummary_pablo('basepath','F:\data\HPS22\HPS22_140521_sess13','analogChannelsList',[],'digitalChannelsList',[]);
 
-computeSessionSummary_pablo('basepath','F:\data\HPS22\HPS22_210521_sess17','analogChannelsList',[],'digitalChannelsList',[]);
+computeSessionSummary_pablo('basepath','F:\data\HPS22\HPS22_040621_sess25','analogChannelsList',[],'digitalChannelsList',[]);
 batch_sessionSummary_pablo('basepath','F:\data\HPS22','analogChannelsList',[],'digitalChannelsList',[]);
 
 
@@ -350,7 +350,10 @@ createFiles('basepath',basepath);
 
 
 %%
-computeSessionSummary_pablo('basepath','D:\fCr1\fCr1_220402_sess26','analogChannelsList',[],'digitalChannelsList',[]);
+computeSessionSummary_pablo('basepath','J:\buzsakilab data\fCr1_220402_sess26','analogChannelsList',[],'digitalChannelsList',[1]);
+computeSessionSummary_pablo('basepath','J:\buzsakilab data\fCr1_220404_sess27','analogChannelsList',[],'digitalChannelsList',[1]);
+
+
 
 %% HPR21409
 basepath = 'I:\HPR21409';
@@ -371,3 +374,6 @@ createFiles('basepath',basepath);
 batch_preprocessSession_pablo('basepath','I:\HPR21409','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'anymaze_ttl_channel',2);
 
 
+
+%%
+createProbe('excel_file','electrodes_coordinates_Tetrodes-32ch(8t-4c)-C57-4');

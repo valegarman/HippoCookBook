@@ -46,7 +46,7 @@ filename = p.Results.filename;
 lag = p.Results.periodLag;
 
 if ~isempty(dir('*DigitalIn.events.mat'))
-    disp('Pulses already detected! Loading file.');
+    disp('Digital pulses already detected! Loading file.');
     file = dir('*DigitalIn.events.mat');
     load(file.name);
     

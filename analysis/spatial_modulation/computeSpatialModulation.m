@@ -32,6 +32,15 @@ addParameter(p,'firingTrialsMap',[],@isstruct);
 addParameter(p,'saveMat', true, @islogical);
 addParameter(p,'plotOpt', true, @islogical);
 addParameter(p,'force', false, @islogical);
+addParameter(p,'minTime',0,@isnumeric);
+addParameter(p,'randomization',true,@islogical);
+addParameter(p,'gridAnalysis',true,@islogical);
+addParameter(p,'periodicFiring',true,@islogical);
+addParameter(p,'twoHalvesAnalysis',true,@islogical);
+addParameter(p,'tint',true,@islogical);
+addParameter(p,'pixelsPerCm',2.5,@isnumeric);
+addParameter(p,'nPix2BinBy',[],@isnumeric);
+
 
 parse(p, varargin{:});
 firingMaps = p.Results.firingMaps;
@@ -43,10 +52,21 @@ saveMat = p.Results.saveMat;
 plotOpt = p.Results.plotOpt;
 firingTrialsMap = p.Results.firingTrialsMap;
 force = p.Results.force;
+minTime = p.Results.minTime;
+randomization = p.Results.randomization;
+gridAnalysis = p.Results.gridAnalysis;
+periodicFiring = p.Results.periodicFiring;
+twoHalvesAnalysis = p.Results.twoHalvesAnalysis;
+tint = p.Results.tint;
+pixelsPerCm = p.Results.pixelsPerCm;
+nPix2BinBy = p.Results.nPix2BinBy;
+
 
 % Deal with inputs
 prevPath = pwd;
 cd(basepath);
+
+session = loadSession();
 
 filename = basenameFromBasepath(pwd);
 if ~isempty(dir([basenameFromBasepath(pwd) '.spatialModulation.cellinfo.mat'])) && ~force
@@ -88,10 +108,19 @@ if isempty(placeFieldStats)
     end
 end
 
-if isempty(firingTrialsMap)
-    firingTrialsMap = firingMapPerTrial;
+try
+    if isempty(firingTrialsMap)
+        firingTrialsMap = firingMapPerTrial;
+    end
 end
 
+% Tracking
+
+if ~isempty(dir([session.general.name,'.Tracking.Behavior.mat']))
+    file = dir([session.general.name,'.Tracking.Behavior.mat']);
+    load(file.name);
+end
+    
 % rearrange maps
 zscor_xnan = @(x) bsxfun(@rdivide, bsxfun(@minus, x, mean(x,'omitnan')), std(x, 'omitnan'));
 for jj = 1:length(firingMaps.rateMaps{1})
@@ -105,10 +134,9 @@ for jj = 1:length(firingMaps.rateMaps{1})
         spatialModulation.(['map_' num2str(jj) '_occupancyMapsUnSmooth']){ii} = firingMaps.occupancyUnSmooth{ii}{jj};
         spatialModulation.(['map_' num2str(jj) '_rateMapsUnvisited']){ii} = firingMaps.rateMapsUnvisited{ii}{jj};
         spatialModulation.(['map_' num2str(jj) '_countMapsUnvisited']){ii} = firingMaps.countMapsUnvisited{ii}{jj};
-        spatialModulation.(['map_' num2str(jj) '_occupancyMapsUnvisited']){ii} = firingMaps.occupancyUnvisited{ii}{jj};
-        
-        
+        spatialModulation.(['map_' num2str(jj) '_occupancyMapsUnvisited']){ii} = firingMaps.occupancyUnvisited{ii}{jj};   
     end
+    spatialModulation.(['map_',num2str(jj) '_description']) = behavior.description{jj} ;
     if size(firingMaps.rateMaps{1}{jj},1) == 1 % linearized
         spatialModulation.(['map_' num2str(jj) '_timestamps'])...
             = 0:round(firingMaps.cmBin{jj},1):round(firingMaps.cmBin{jj},1)*(length(firingMaps.rateMaps{1}{jj})-1);
@@ -262,6 +290,14 @@ end
 
 %% Compute statistics for 2D
 % Spatial correlation (rate Map unsmooth)
+
+% smoothing mask
+B = [0.0025 0.0125 0.0200 0.0125 0.0025;
+    0.0125 0.0625 0.1000 0.0625 0.0125;
+    0.0200 0.1000 0.1600 0.1000 0.0200;
+    0.0125 0.0625 0.1000 0.0625 0.0125;
+    0.0025 0.0125 0.0200 0.0125 0.0025];
+
 for jj = 1:length(firingMaps.rateMaps{1})
     for ii = 1:length(firingMaps.UID)
         if ~(size(firingMaps.rateMaps{ii}{jj},1) == 1) % not linearize
@@ -270,42 +306,234 @@ for jj = 1:length(firingMaps.rateMaps{1})
             spatialModulation.(['spatial_corr_map_' num2str(jj)]){ii} = spatialCorr;
             spatialModulation.(['spatial_corr_r_map_' num2str(jj)]){ii} = r;
             spatialModulation.(['spatial_corr_p_map_' num2str(jj)]){ii} = p;
-            spatialModulation.(['spatial_corr_sc_map_' num2str(jj)]){ii} = r(1,2);
+            spatialModulation.(['spatial_corr_sc_r_map_' num2str(jj)]){ii} = r(1,2);
+            spatialModulation.(['spatial_corr_sc_p_map_' num2str(jj)]){ii} = p(1,2);
+            spatialModulation.(['spatil_corr_convolution_map_' num2str(jj)]){ii} = conv2(spatialCorr,B,'same');
             
             % Spatial correlation rectangle
             
-            [r,p] = getSpatialCorrelationRectangle('z',firingMaps.rateMapsUnSmooth{ii}{jj},'occupancy',firingMaps.occupancyUnSmooth{ii}{jj});
+            [spatialCorr,r,p] = getSpatialCorrelationRectangle('z',firingMaps.rateMapsUnSmooth{ii}{jj},'occupancy',firingMaps.occupancyUnSmoothSec{ii}{jj});
+            spatialModulation.(['spatial_corr2_map_' num2str(jj)]){ii} = spatialCorr;
             spatialModulation.(['spatial_corr2_r_map_' num2str(jj)]){ii} = r;
             spatialModulation.(['spatial_corr2_p_map_' num2str(jj)]){ii} = p;
-            spatialModulation.(['spatial_corr2_sc_a_map_' num2str(jj)]){ii} = r(1,2); 
-            spatialModulation.(['spatial_corr2_sc_pa_map_' num2str(jj)]){ii} = p(1,2);
+            spatialModulation.(['spatial_corr2_sc_r_map_' num2str(jj)]){ii} = r(1,2); 
+            spatialModulation.(['spatial_corr2_sc_p_map_' num2str(jj)]){ii} = p(1,2);
         end
     end    
 end
 
-
 % Bits/Spike
 for jj = 1:length(firingMaps.rateMaps{1})
     for ii = 1:length(firingMaps.UID)
-        [skaggs] = getSkaggsIndex('z',firingMaps.rateMaps{ii}{jj},'occupancy',firingMaps.occupancy{ii}{jj},'count',firingMaps.countMaps{ii}{jj});
+        if ~(size(firingMaps.rateMaps{ii}{jj},1) == 1) % not linearize
+%             [skaggs] = getSkaggsIndex('z',firingMaps.rateMapsUnSmooth{ii}{jj},'occupancyUnSmooth',firingMaps.occupancyUnSmooth{ii}{jj},'time',firingMaps.occupancyUnSmoothSec{ii}{jj});
+            [skaggs] = getSkaggsIndex('z',firingMaps.rateMaps{ii}{jj},'occupancyUnSmooth',firingMaps.occupancyUnSmooth{ii}{jj},'time',firingMaps.occupancyUnSmoothSec{ii}{jj});
+            spatialModulation.(['bitsPerSec_map_' num2str(jj)]){ii} = skaggs.bitsPerSec;
+            spatialModulation.(['bitsPerSpike_map_' num2str(jj)]){ii} = skaggs.bitsPerSpike;
+        end
     end
 end
-
 
 % Firing Field Size
 for jj = 1:length(firingMaps.rateMaps{1})
     for ii = 1:length(firingMaps.UID)
-        [firingField] = getFiringFieldSize();
+        if ~(size(firingMaps.rateMaps{ii}{jj},1) == 1) % not linearize
+            [firingFieldSize] = getFiringFieldSize('z',firingMaps.rateMaps{ii}{jj},'debug',false);
+            spatialModulation.(['firingFieldSize_map_' num2str(jj)]).size{ii} = firingFieldSize.size;
+            spatialModulation.(['firingFieldSize_map_' num2str(jj)]).sizeperc{ii} = firingFieldSize.sizeperc;
+            spatialModulation.(['firingFieldSize_map_' num2str(jj)]).data{ii} = firingFieldSize.data;
+            spatialModulation.(['firingFieldSize_map_' num2str(jj)]).positionx{ii} = firingFieldSize.positionx;
+            spatialModulation.(['firingFieldSize_map_' num2str(jj)]).positiony{ii} = firingFieldSize.positiony;
+            spatialModulation.(['firingFieldSize_map_' num2str(jj)]).MaxF{ii} = firingFieldSize.MaxF;
+            spatialModulation.(['firingFieldSize_map_' num2str(jj)]).numFF{ii} = firingFieldSize.numFF;
+            spatialModulation.(['firingFieldSize_map_' num2str(jj)]).FFarea{ii} = firingFieldSize.FFarea;
+            spatialModulation.(['firingFieldSize_map_' num2str(jj)]).FFareatot{ii} = firingFieldSize.FFareatot;
+            spatialModulation.(['firingFieldSize_map_' num2str(jj)]).maxFr{ii} = firingFieldSize.maxFr;
+            spatialModulation.(['firingFieldSize_map_' num2str(jj)]).meanFr{ii} = firingFieldSize.meanFr;
+            spatialModulation.(['firingFieldSize_map_' num2str(jj)]).Serr{ii} = firingFieldSize.Serr;
+            
+            % isPlaceCell: maxFr(any FF) > 1, at least one FF
+            if firingFieldSize.numFF > 1 && firingFieldSize.maxFr > 1
+                spatialModulation.(['firingFieldSize_map_' num2str(jj)]).isPlaceCell{ii} = 1;
+            else
+                spatialModulation.(['firingFieldSize_map_' num2str(jj)]).isPlaceCell{ii} = 0;
+            end
+        end
     end
 end
 
+% Border Index
 
+for jj = 1:length(firingMaps.rateMaps{1})
+    for ii = 1:length(firingMaps.UID)
+        if ~(size(firingMaps.rateMaps{ii}{jj},1) == 1) % Not linearize
+            borderIndex = getBorderIndex('z',firingMaps.rateMaps{ii}{jj});
+            
+            spatialModulation.(['borderIndex_map_' num2str(jj)]).west{ii} = borderIndex.west;
+            spatialModulation.(['borderIndex_map_' num2str(jj)]).east{ii} = borderIndex.east;
+            spatialModulation.(['borderIndex_map_' num2str(jj)]).north{ii} = borderIndex.north;
+            spatialModulation.(['borderIndex_map_' num2str(jj)]).south{ii} = borderIndex.south;
+            spatialModulation.(['borderIndex_map_' num2str(jj)]).maxBorderIndex{ii} = borderIndex.maxBorderIndex;
+            
+        end
+    end
+end
 
+% Periodic Firing
 
+if periodicFiring
+    for jj = 1:length(firingMaps.rateMaps{1})
+        for ii = 1:length(firingMaps.UID)
+            if ~(size(firingMaps.rateMaps{ii}{jj},1) == 1) % Not linearize
+                periodic = getPeriodicFiring('z',firingMaps.rateMapsUnSmooth{ii}{jj},'unit',ii);
+                
+                spatialModulation.(['periodicFiring_map_' num2str(jj)]).maxPolar{ii} = periodic.maxPolar;
+                spatialModulation.(['periodicFiring_map_' num2str(jj)]).posPolar{ii} = periodic.posPolar;
+                spatialModulation.(['periodicFiring_map_' num2str(jj)]).theta{ii} = periodic.theta;
+                spatialModulation.(['periodicFiring_map_' num2str(jj)]).Orient{ii} = periodic.Orient;
+                spatialModulation.(['periodicFiring_map_' num2str(jj)]).frec{ii} = periodic.frec;
+                spatialModulation.(['periodicFiring_map_' num2str(jj)]).periodicComponents{ii} = periodic.periodicComponents;
+                spatialModulation.(['periodicFiring_map_' num2str(jj)]).BC{ii} = periodic.BC;
+                spatialModulation.(['periodicFiring_map_' num2str(jj)]).TFP{ii} = periodic.TFP;
+                
+            end
+        end
+    end
+end
 
+% Grid Analysis
 
+if gridAnalysis
+    for jj = 1:length(firingMaps.rateMaps{1})
+        for ii = 1:length(firingMaps.UID)
+           if ~(size(firingMaps.rateMaps{ii}{jj},1) == 1) % Not linearize
+               try
+                   grid = computeGrid('z',firingMaps.rateMaps{ii}{jj},'unit',ii);
 
+                   spatialModulation.(['grid_map_' num2str(jj)]){ii}.autoCorr = grid.autoCorr;
+                   spatialModulation.(['grid_map_' num2str(jj)]){ii}.regionalMax = grid.regionalMax;
+                   spatialModulation.(['grid_map_' num2str(jj)]){ii}.geometry = grid.geometry;
+               catch
+                   spatialModulation.(['grid_map_', num2str(jj)]){ii}.autoCorr.autoCorrMap = NaN;
+                   spatialModulation.(['grid_map_', num2str(jj)]){ii}.autoCorr.gridness = NaN;
+                   spatialModulation.(['grid_map_', num2str(jj)]){ii}.autoCorr.squareIndex = NaN;
+                   spatialModulation.(['grid_map_' num2str(jj)]){ii}.regionalMax = NaN;
+                   spatialModulation.(['grid_map_' num2str(jj)]){ii}.geometry = NaN;
+                   
+               end
+           end
+        end
+    end
+end
 
+% Spatial Autocorrelation (in case no grid analysis, because it is computed inside that function)
+for jj = 1:length(firingMaps.rateMaps{1})
+    for ii = 1:length(firingMaps.UID)
+        if ~(size(firingMaps.rateMaps{ii}{jj},1) == 1) % Not linearize
+            
+            spatialAutoCorr = computeSpatialAutocorrelation('z',firingMaps.rateMaps{ii}{jj});
+                
+            spatialModulation.(['spatialAutoCorr_map_',num2str(jj)]){ii}.r = spatialAutoCorr.r;
+        end
+    end
+end
+
+% Randomization
+
+if randomization
+    for jj = 1:length(firingMaps.rateMaps{1})
+        for ii = 1:length(firingMaps.UID)
+            if ~(size(firingMaps.rateMaps{ii}{jj},1) == 1) % Not linearize
+                
+                if isfield(firingMaps,'bndbox')
+                    bndbox = firingMaps.bndbox{ii}{jj};
+                else
+                    bndbox = [];
+                end
+                if isfield(firingMaps,'var2binby')
+                    var2binby = firingMaps.var2binby{ii}{jj};
+                else
+                    var2binby = [];
+                end
+                if isfield(firingMaps,'binsize')
+                    binsize = firingMaps.binsize{ii}{jj};
+                else
+                    binsize = [];
+                end
+                if isfield(firingMaps,'pixelsmetre')
+                    pixelsmetre = firingMaps.pixelsmetre{ii}{jj};
+                else
+                    pixelsmetre = [];
+                end
+                
+                ts = spikes.times{ii};
+                ts = ts(InIntervals(ts,[behavior.maps{jj}(1,1) behavior.maps{jj}(end,1)]));
+                duration = behavior.maps{jj}(end,1) - behavior.maps{jj}(1,1);
+                positions = behavior.maps{jj};
+                nBins = size(firingMaps.rateMaps{ii}{jj},1);
+                
+                
+                fprintf('** Randomization from unit %3.i/ %3.i \n',ii,size(spikes.UID,2));
+                shuffling = computeSpikeShuffling(ts,'z',firingMaps.rateMaps{ii}{jj},'occupancy',firingMaps.occupancy{ii}{jj},'count',firingMaps.countMaps{ii}{jj},...
+                                    'z_unsmooth',firingMaps.rateMapsUnSmooth{ii}{jj},'occupancy_unsmoothed',firingMaps.occupancyUnSmooth{ii}{jj},'count_unsmooth',firingMaps.countMapsUnSmooth{ii}{jj},...
+                                        'duration',duration,'positions',positions,'nBins',nBins,...
+                                            'bndbox',bndbox,'var2binby',var2binby,'binsize',binsize,'pixelsmetre',pixelsmetre);
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.shuffling = shuffling;  
+                % Coherence
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.spatial_corr_sc_r.mean = mean(cell2mat(spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.shuffling.spatial_corr_sc_r));
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.spatial_corr_sc_r.std = std(cell2mat(spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.shuffling.spatial_corr_sc_r));
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.spatial_corr_sc_r.R99 = prctile(cell2mat(spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.shuffling.spatial_corr_sc_r),99);
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.spatial_corr_sc_r.R95 = prctile(cell2mat(spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.shuffling.spatial_corr_sc_r),95);
+                
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.spatial_corr_sc_p.mean = mean(cell2mat(spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.shuffling.spatial_corr_sc_p));
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.spatial_corr_sc_p.std = std(cell2mat(spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.shuffling.spatial_corr_sc_p));
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.spatial_corr_sc_p.R99 = prctile(cell2mat(spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.shuffling.spatial_corr_sc_p),99);
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.spatial_corr_sc_p.R95 = prctile(cell2mat(spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.shuffling.spatial_corr_sc_p),95);
+                % Coherence v2
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.spatial_corr2_sc_r.mean = mean(cell2mat(spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.shuffling.spatial_corr2_sc_r));
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.spatial_corr2_sc_r.std = std(cell2mat(spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.shuffling.spatial_corr2_sc_r));
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.spatial_corr2_sc_r.R99 = prctile(cell2mat(spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.shuffling.spatial_corr2_sc_r),99);
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.spatial_corr2_sc_r.R95 = prctile(cell2mat(spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.shuffling.spatial_corr2_sc_r),95);
+                
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.spatial_corr2_sc_p.mean = mean(cell2mat(spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.shuffling.spatial_corr2_sc_p));
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.spatial_corr2_sc_p.std = std(cell2mat(spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.shuffling.spatial_corr2_sc_p));
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.spatial_corr2_sc_p.R99 = prctile(cell2mat(spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.shuffling.spatial_corr2_sc_p),99);
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.spatial_corr2_sc_p.R95 = prctile(cell2mat(spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.shuffling.spatial_corr2_sc_p),95);
+                % BitsPerSpike
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.bitsPerSpike.mean = mean(cell2mat(spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.shuffling.bitsPerSpike));
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.bitsPerSpike.std = std(cell2mat(spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.shuffling.bitsPerSpike));
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.bitsPerSpike.R99 = prctile(cell2mat(spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.shuffling.bitsPerSpike),99);
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.bitsPerSpike.R95 = prctile(cell2mat(spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.shuffling.bitsPerSpike),95);
+                % BitsPerSec
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.bitsPerSec.mean = mean(cell2mat(spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.shuffling.bitsPerSec));
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.bitsPerSec.std = std(cell2mat(spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.shuffling.bitsPerSec));
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.bitsPerSec.R99 = prctile(cell2mat(spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.shuffling.bitsPerSec),99);
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.bitsPerSec.R95 = prctile(cell2mat(spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.shuffling.bitsPerSec),95);
+                % Border Index
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.borderIndex.west.mean = mean(cell2mat(spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.shuffling.borderIndex.west));
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.borderIndex.west.std = std(cell2mat(spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.shuffling.borderIndex.west));
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.borderIndex.west.R99 = prctile(cell2mat(spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.shuffling.borderIndex.west),99);
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.borderIndex.west.R95 = prctile(cell2mat(spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.shuffling.borderIndex.west),95);
+                
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.borderIndex.east.mean = mean(cell2mat(spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.shuffling.borderIndex.east));
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.borderIndex.east.std = std(cell2mat(spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.shuffling.borderIndex.east));
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.borderIndex.east.R99 = prctile(cell2mat(spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.shuffling.borderIndex.east),99);
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.borderIndex.east.R95 = prctile(cell2mat(spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.shuffling.borderIndex.east),95);
+                
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.borderIndex.mean = mean(cell2mat(spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.shuffling.borderIndex.north));
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.borderIndex.std = std(cell2mat(spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.shuffling.borderIndex.north));
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.borderIndex.R99 = prctile(cell2mat(spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.shuffling.borderIndex.north),99);
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.borderIndex.R95 = prctile(cell2mat(spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.shuffling.borderIndex.north),95);
+                
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.borderIndex.south.mean = mean(cell2mat(spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.shuffling.borderIndex.south));
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.borderIndex.south.std = std(cell2mat(spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.shuffling.borderIndex.south));
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.borderIndex.south.R99 = prctile(cell2mat(spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.shuffling.borderIndex.south),99);
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.borderIndex.south.R95 = prctile(cell2mat(spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.shuffling.borderIndex.south),95);
+                
+            end
+        end
+    end
+end
 
 
 if saveMat

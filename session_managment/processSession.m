@@ -1,5 +1,4 @@
 
-
 function [] = processSession(varargin)
 
 % [] = indexSession_InterneuronsLibrary(varargin)
@@ -199,7 +198,7 @@ end
 if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     % Trying changes in detecUD_temp
     % 8.1 Up and downs
-    UDStates = detectUD('plotOpt', true,'forceDetect',true','NREMInts','all');
+    UDStates = detectUD('plotOpt', true,'forceDetect',true','NREMInts','all','ch',51);
     psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true);
 
     % 8.2 Ripples
@@ -248,7 +247,7 @@ end
 if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
     try
         spikes = loadSpikes;
-        getSessionTracking('convFact',tracking_pixel_cm,'roiTracking','manual');
+        getSessionTracking('roiTracking','manual','forceReload',true);
         getSessionArmChoice('task','alternation');
         behaviour = getSessionLinearize('forceReload',false);  
         firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',true);

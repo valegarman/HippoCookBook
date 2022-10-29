@@ -128,6 +128,11 @@ else
     if ~isempty(datay(noNan,:))
         [x1, y1] = fillformat(datax(noNan), smooth(nanmean(datay(noNan,:),2),smoothOpt),...
             smooth(nanstd(datay(noNan,:),[],2) * f1,smoothOpt));
+        if ~isempty(find(isinf(y1)))
+            x1(find(isinf(y1))) = [];
+            y1(find(isinf(y1))) = [];
+        end
+        
         if any(y1<=0) & strcmpi(yscale,'log')
             warning('Truncating negative values of the Y deviation for log plot...');
             ind = find(y1<=0);

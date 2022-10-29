@@ -33,7 +33,7 @@ addParameter(p,'analogChannelsList',NaN);
 addParameter(p,'digitalChannelsList',NaN);
 addParameter(p,'spikes',[],@isstruct);
 addParameter(p,'basepath',pwd,@ischar);
-addParameter(p,'numRep',50,@isnumeric);
+addParameter(p,'numRep',500,@isnumeric);
 addParameter(p,'binSize',0.001,@isnumeric);
 addParameter(p,'winSize',1,@isnumeric);
 addParameter(p,'rasterPlot',true,@islogical);
@@ -537,7 +537,7 @@ if rasterPlot
             end
         end
         saveas(gcf,['SummaryFigures\OptogenticRespRaster_ch',num2str(conditions(ii,2)),'_dur',num2str(conditions(ii,1)),'ch.png']); 
-        close(gcf);
+%         close(gcf);
     end
 end
 % 2. Rate plot

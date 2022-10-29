@@ -9,7 +9,7 @@ function [spatialCorr,r,p] = getSpatialCorrelation(varargin)
 %       [spatialCorr,r,p] = getSpatialCorrelation(varargin);
 %
 %   INPUTS
-%
+%       z : rateMap UnSmooth
 %
 %   OUTPUT
 %       spatialCorrelation

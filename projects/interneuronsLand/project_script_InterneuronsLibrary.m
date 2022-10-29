@@ -3,7 +3,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % project_script_interneuronsLibrary
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% MV & PA 2022
+% MV, PA, RGH 2022
 % figures in figures_script_interneuronsLibrary
 
 % CHAPTER_0: GET DATA
@@ -14,7 +14,7 @@ for z = 1
         loadProjectResults('project', 'InterneuronsLibrary','analysis_project_path', analysis_project_path,'loadLast',true);
     
     % general
-    inHippocampus = {'CA1sp' 'CA1so' 'CA1sr' 'CA1slm' 'CA1' 'CA3' 'DG'}; % only using hippocampus data... :(
+    inHippocampus = {'CA1sp' 'CA1so' 'CA1sr' 'CA1slm' 'CA1' 'CA3' 'DG'}; % only using hippocampus data... :)
     
     is_pyr = strcmpi(projectResults.cell_metrics.putativeCellType,'Pyramidal Cell') & ismember(projectResults.cell_metrics.brainRegion,inHippocampus);
     is_int = (strcmpi(projectResults.cell_metrics.putativeCellType,'Narrow Interneuron')...

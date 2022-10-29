@@ -16,20 +16,7 @@ for ii = 1:length(sessionsTable.SessionName)
         try
 
             %%% your code goes here...
-            clear session brainRegions
-            session = loadSession;
-            fn = fieldnames(session.brainRegions);
-            brainRegions = cell(0);
-            for jj = 1:length(fn)
-                brainRegions{1,length(brainRegions)+1} = fn{jj};
-                brainRegions{1,length(brainRegions)+1} = ' ';
-            end    
-            brainRegions(end) = [];
-            
-            sessionsTable.brainRegions{ii} = [brainRegions{:}];
-            
-            sessionsTable.Project{ii} = session.general.projects;
-            
+            getSpikesRank('events','upstates')
             %%%
             
             close all;
@@ -40,4 +27,4 @@ for ii = 1:length(sessionsTable.SessionName)
 end
 
 %%% your code goes here...
-writetable(sessionsTable,[HCB_directory.path filesep 'indexedSessions.csv']); % the variable is called allSessions
+% writetable(sessionsTable,[HCB_directory.path filesep 'indexedSessions.csv']); % the variable is called allSessions
