@@ -18,7 +18,7 @@ batch_sessionSummary('basepath','G:\data\fPv4','cleanArtifacts',({65,[]}),'analo
 % 3% CLEAN SESSIONS MANUALLY BY PHY
 
 % 4% Processs individual sessions by by 'processSession'. Example:
-processSession('digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true,'profileType','hippocampus');
+processSession('digital_optogenetic_channels',1,'analog_optogenetic_channels',[],'promt_hippo_layers',true,'profileType','hippocampus');
 
 % 5% Index session
 indexNewSession;
@@ -33,6 +33,5 @@ indexNewSession;
 % run getOptogeneticResponses with uLEDs
 pulses = getAnalogPulses('manualThr',true,'overwrite',true); % 1-index
 getDigitalIn;
-
 optogeneticResponses = getOptogeneticResponse('numRep',50,'force',true,...
     'analogChannelsList',[3 4 5 6 7 8],'digitalChannelsList',[11 12 13 14 15 16]);

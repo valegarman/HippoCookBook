@@ -76,7 +76,7 @@ end
 if removeRipplesStimulation && ~isempty(dir('*optogeneticPulses.events.mat'))
     targetFile = dir('*optogeneticPulses.events.mat'); load(targetFile.name);
     restrict_temp = SubtractIntervals([0 Inf],optoPulses.stimulationEpochs);
-    restrict =  ConsolidateIntervals([restrict; restrict_temp]);
+    restrict =  ConsolidateIntervals([restrict; restrict_temp; restrict_temp]);
 end
 
 % Compute channels features
