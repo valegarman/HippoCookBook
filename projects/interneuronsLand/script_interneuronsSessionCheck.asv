@@ -27,7 +27,7 @@ getAverageCCG('force',true);
 getSpikesReturnPlot('force',true);
 
 %6. Loot at thetaEpochs, if not good run:
-thetaEpochs = detectThetaEpochs('force',true,'useCSD',false,'channel',47);
+thetaEpochs = detectThetaEpochs('force',true,'useCSD',false,'channel',48);
 
 SWChannel = []; 
 rippleChannel = [];

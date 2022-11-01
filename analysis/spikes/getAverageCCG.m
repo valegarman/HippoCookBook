@@ -305,10 +305,10 @@ if useDistinctShanks && length(session.extracellular.electrodeGroups.channels)>1
             cellsID = indCell(indCell~=jj & cellsInShank);
 
             ccMedian(jj,:) = nanmedian(squeeze(allCcg(:,jj,cellsID)),2); %
-            ccZMedian(jj,:) = nanmedian(zscore(squeeze(allCcg(:,jj,cellsID))',[],2)); % zCCG
+            ccZMedian(jj,:) = nanmedian(zscore(squeeze(allCcg(:,jj,cellsID))',[],2),1); % zCCG
 
             ccMean(jj,:) = nanmean(squeeze(allCcg(:,jj,cellsID)),2); % zCCG
-            ccZMean(jj,:) = nanmean(zscore(squeeze(allCcg(:,jj,cellsID))',[],2)); % zCCG
+            ccZMean(jj,:) = nanmean(zscore(squeeze(allCcg(:,jj,cellsID))',[],2),1); % zCCG
         end
         
         if interp0

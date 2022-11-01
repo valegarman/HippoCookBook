@@ -162,7 +162,7 @@ end
 %% 4. Spike Features
 % 4.1 Light responses, if available
 if ~any(ismember(excludeAnalysis, {'4',lower('spikesFeatures')}))
-    optogeneticResponses = getOptogeneticResponse('numRep',0,'force',true);
+    optogeneticResponses = getOptogeneticResponse('numRep',500,'force',true);
     % 4.2 ACG and waveform
     spikeFeatures;
 end
@@ -206,7 +206,7 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true);
 
     % 8.3 Theta intervals
-    thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection);
+    thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'powerThreshold',.8);
 end
 
 %% 9. Phase Modulation
