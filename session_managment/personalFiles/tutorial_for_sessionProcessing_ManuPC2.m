@@ -11,17 +11,18 @@ spike2toDat;
 
 updateExpFolder({'F:\fCamk10','Y:\fCamk10'},'J:\fCamk10');
 updateExpFolder({'V:\data\fId4','Y:\fId4'},'J:\fId4');
+updateExpFolder({'V:\data\fVip4'},'J:\fVip4');
 
 
 % 2% Then, preprocess session (includes artifacts removal, median signal
 %   removal, LFP and Kilosort, and running computeSessionSummary by 'batch_preprocessSession('basepath','sessionBasepath').
 %   Example:
 batch_preprocessSession('basepath','J:\fCamk10','cleanArtifacts',({[],[5 6 7  8 9 10  11 12 13  14 15 16]}),'analogChannelsList',[],'digitalChannelsList',1);
+batch_preprocessSession('basepath','J:\fVip4','cleanArtifacts',({[],1}),'analogChannelsList',[],'digitalChannelsList',1);
 
-batch_preprocessSession('basepath','J:\fId4','cleanArtifacts',({[],1}),'analogChannelsList',[],'digitalChannelsList',1);
 
 % <OPTIONAL> If summary was not processed, it can be run in batch by 'batch_preprocessSession'
-batch_sessionSummary('basepath','J:\fId4','cleanArtifacts',({[],1}),'analogChannelsList',[],'digitalChannelsList',1);
+batch_sessionSummary('basepath','J:\fVip4','analogChannelsList',[],'digitalChannelsList',1);
 
 % 3% CLEAN SESSIONS MANUALLY BY PHY
 

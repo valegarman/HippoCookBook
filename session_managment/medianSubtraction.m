@@ -79,7 +79,7 @@ while 1
     if strcmpi('substractMedian',method)
         m_data = median(data(ch,:));
     elseif strcmpi('substractMean',method)
-        m_data = median(data(ch,:));
+        m_data = mean(data(ch,:));
     end
 
     for ii = 1:length(ch)
