@@ -179,14 +179,6 @@ for ii = 1:length(sessions.basepaths)
     projectSessionResults.hGammaModulation{ii} = hgammaMod;
     clear hgammaMod
     
-    % sharp-wave phase_locking
-%     try targetFile = dir('*.SW*PhaseLockingData.cellinfo.mat'); load(targetFile.name);
-%         projectSessionResults.SWMod{ii} = SWMod;
-%         clear SWMod
-%     catch
-%         projectSessionResults.SWMod{ii} = NaN;
-%     end
-    
     % ripple phase_locking
     try targetFile = dir('*.ripple*PhaseLockingData.cellinfo.mat'); load(targetFile.name);
         projectSessionResults.rippleMod{ii} = rippleMod;
