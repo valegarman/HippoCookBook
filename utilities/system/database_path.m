@@ -9,7 +9,7 @@ function dp = database_path
             dp = 'W:';
         case 'SB13FLPC017'
             %dp = 'W';
-            dp = 'Z:\data';
+            dp = 'W:\buzsakilab\Buzsakilabspace\Datasets\ValeroM';
     end
 
 end
