@@ -98,12 +98,8 @@ addParameter(p,'plotType',2,@isnumeric);
 addParameter(p,'srLfp',1250,@isnumeric);
 addParameter(p,'rippleStats',true,@islogical);
 addParameter(p,'debug',false,@islogical);
-<<<<<<< HEAD
 addParameter(p,'eventSpikeThreshold',1);
-=======
-addParameter(p,'eventSpikeThreshold',1,@isnumeric);
 addParameter(p,'eventSpikeThreshold_shanks','all');
->>>>>>> df8b5cdaa0d6476c76078e0a0d0f6a5544f1b964
 addParameter(p,'force',false,@islogical);
 addParameter(p,'removeOptogeneticStimulation',true,@islogical);
 addParameter(p,'useCSD',false,@islogical);
