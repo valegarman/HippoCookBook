@@ -14,6 +14,7 @@ function [events] = eventSpikingTreshold(events,spikes,varargin)
 %    'winSize'          .5
 %    'eventSize'        .01
 %    'figOpt'           Default true
+%    'shanksID'         Shanks ID for loading spikes from           
 % 
 % OUTPUS
 %    'events'           Buzcode format events (i.e. ripples) structure
@@ -29,6 +30,7 @@ addParameter(p,'spikingThreshold',.5);
 addParameter(p,'winSize',.5);
 addParameter(p,'eventSize',.01);
 addParameter(p,'figOpt',true,@islogical);
+addParameter(p,'shanksID','all');
 
 parse(p,varargin{:});
 basepath = p.Results.basepath;
@@ -37,6 +39,7 @@ spikingThreshold = p.Results.spikingThreshold;
 winSize = p.Results.winSize;
 eventSize = p.Results.eventSize;
 figOpt = p.Results.figOpt;
+shanksID = p.Results.shanksID;
 
 prevPath = pwd;
 cd(basepath);
@@ -45,7 +48,22 @@ cd(basepath);
 if isempty(spikes)
     spikes = loadSpikes('getWaveformsFromDat',false);
 end
+
+if ischar(shanksID) && strcmpi(shanksID,'all')
+    inShank = ones(size(spikes.times));
+else
+    try
+        inShank = ismember(spikes.shankID, shanksID);
+        fprintf(' Discarting %3.i units from %3.i session for response  validation... \n', length(find(inShank==0)), length(inShank)); %\n
+    catch
+        warning('Discating spikes by shank was not possible! Using all detected spikes...');
+        inShank = ones(size(spikes.times));
+    end
+end
+
 [spikemat] = bz_SpktToSpkmat(spikes, 'dt',0.01,'overlap',6);
+spikemat.data = spikemat.data(:,inShank);
+spikemat.UID = spikemat.UID(inShank);
 sSpkMat = zscore(sum(spikemat.data,2)/size(spikemat.data,2));
 % sSpkMat = mean(zscore(spikemat.data,[],1),2);
 clear eventPopResponse

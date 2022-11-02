@@ -12,8 +12,8 @@ selectProbe('force',true);
 
 %3. Loot at ripples, if not good run:
 SWChannel = []; 
-rippleChannel = [];
-ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true);
+rippleChannel = 11;
+ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'eventSpikeThreshold_shanks',[4 5]);
 psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true);
 
 %4. assing layers
@@ -27,7 +27,7 @@ getAverageCCG('force',true);
 getSpikesReturnPlot('force',true);
 
 %6. Loot at thetaEpochs, if not good run:
-thetaEpochs = detectThetaEpochs('force',true,'useCSD',false);
+thetaEpochs = detectThetaEpochs('force',true,'useCSD',false,'powerThreshold',1.2);
 
 SWChannel = []; 
 rippleChannel = [];
