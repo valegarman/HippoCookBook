@@ -202,11 +202,11 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true);
 
     % 8.2 Ripples
-    ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'removeOptogeneticStimulation',true); % [1.5 3.5]
+    ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'removeOptogeneticStimulation',true,'eventSpikeThreshold',false,'threshold',[2 5]); % [1.5 3.5]
     psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true);
 
     % 8.3 Theta intervals
-    thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'powerThreshold',.8);
+    thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'powerThreshold',1);
 end
 
 %% 9. Phase Modulation
