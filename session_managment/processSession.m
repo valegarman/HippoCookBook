@@ -200,10 +200,12 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     % 8.1 Up and downs
     UDStates = detectUD('plotOpt', true,'forceDetect',true','NREMInts','all');
     psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true);
+    getSpikesRank('events','upstates')
 
     % 8.2 Ripples
     ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'removeOptogeneticStimulation',true,'eventSpikeThreshold',false,'threshold',[2 5]); % [1.5 3.5]
     psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true);
+    getSpikesRank('events','ripples')
 
     % 8.3 Theta intervals
     thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'powerThreshold',1);
