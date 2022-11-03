@@ -16,7 +16,7 @@ function [psth] = spikesPsth(timestamps,varargin)
 %   rasterPlot - Default true
 %   ratePlot - Default true
 %   saveMat - default true
-%   eventType - default, date
+%   eventType - default, date, other options: slowOscillations, ripples...
 %   event_ints - interval around events timestamps to compute cell reponses
 %   baseline_ints - interval before events timestamps to compute baseline
 %   min_pulsesNumber - minimum number of pulses to create pulses entry, default 100
@@ -307,7 +307,11 @@ end
 
 if saveMat
     disp('Saving results...');
+    
+    raster = psth.raster;
+    psth = rmfield(psth,'raster');
     save([basenameFromBasepath(pwd) '.' eventType '_psth.cellinfo.mat'],'psth','-v7.3');
+    save([basenameFromBasepath(pwd) '.' eventType '_raster.cellinfo.mat'],'raster','-v7.3');
 end
 
 % PLOTS
