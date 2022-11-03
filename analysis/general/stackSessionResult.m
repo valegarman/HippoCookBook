@@ -7,10 +7,12 @@ p = inputParser;
 addRequired(p,'toStack',@iscell);
 addRequired(p,'numCells',@isnumeric);
 addParameter(p,'exampleSession',1,@isnumeric);
+addParameter(p,'activateTry',true,@islogical);
 
 parse(p, toStack,numCells,varargin{:});
 
 exampleSession = p.Results.exampleSession;
+activateTry = p.Results.activateTry;
 
 if length(toStack)<1
     error('Input data is empty');
@@ -89,9 +91,10 @@ for ii = 1:length(names)
                 end
             elseif strcmpi('timestamps',l2_names{jj})
                 for mm = 1:length(toStack)
-                    if isstruct(toStack{mm})
+                    if isstruct(toStack{mm}) && isstruct(toStack{mm}.(names{ii}))
                         toStack{mm}.([names{ii} '_' l2_names{jj}]) = toStack{mm}.(names{ii}).(l2_names{jj});
-                    elseif isnan(toStack{mm})
+                    % elseif isnan(toStack{mm})
+                    else
                         toStack_clon{mm}.([names{ii} '_' l2_names{jj}]) = toStack{exampleSession}.(names{ii}).(l2_names{jj});
                     end
                 end
@@ -107,6 +110,8 @@ end
 
 names = fieldnames(toStack{exampleSession});
 for ii = 1:length(names)
+    try
+    
     for jj = 1:length(toStack)
        size_field(jj,:) = size(toStack{jj}.(names{ii})); 
        is_vector(jj) = isvector(toStack{jj}.(names{ii}));
@@ -177,6 +182,9 @@ for ii = 1:length(names)
         fprintf('Field %s can not be stacked \n', names{ii}); %\n
     end
     clear size_field is_vector is_vector ndims_field dims dim_sorted dim_cells_data type_field
+    catch
+        warning('One field failed to be stacked!!');
+    end
 end
 stacked.sessionNumber = [];
 for jj = 1:length(numCells)

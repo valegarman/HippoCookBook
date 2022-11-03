@@ -104,7 +104,6 @@ if saveSummaries
 end
 
 if lightVersion
-    includeSpikes = false;
     includeLFP = false;
 end
 
@@ -127,6 +126,10 @@ for ii = 1:length(sessions.basepaths)
     
     % spikes
     if includeSpikes
+        if lightVersion
+            spikes = rmfield(spikes,'ts');
+            spikes = rmfield(spikes,'ids');
+        end
         projectSessionResults.spikes{ii} = spikes;
     end
     clear spikes
@@ -137,7 +140,9 @@ for ii = 1:length(sessions.basepaths)
         optogeneticResponses.checkedCells = zeros(length(optogeneticResponses.bootsTrapRate(:,1)),1);
     end
     if lightVersion
-        optogeneticResponses = rmfield(optogeneticResponses,'raster');
+        if isfield(optogeneticResponses,'raster')
+            optogeneticResponses = rmfield(optogeneticResponses,'raster');
+        end
     end
     projectSessionResults.optogeneticResponses{ii} = optogeneticResponses;
     clear optogeneticResponses
@@ -151,7 +156,9 @@ for ii = 1:length(sessions.basepaths)
     targetFile = dir('*.ripples_psth.cellinfo.mat'); load(targetFile.name);
     ripplesResponses = importdata(targetFile.name);
     if lightVersion
-        ripplesResponses = rmfield(ripplesResponses,'raster');
+        if isfield(ripplesResponses,'raster')
+            ripplesResponses = rmfield(ripplesResponses,'raster');
+        end
     end
     projectSessionResults.ripplesResponses{ii} = ripplesResponses;
     clear ripplesResponses
@@ -160,15 +167,19 @@ for ii = 1:length(sessions.basepaths)
     targetFile = dir('*.slowOscillations_psth.cellinfo.mat'); 
     slowOsciResponses = importdata(targetFile.name);
     if lightVersion
-        slowOsciResponses = rmfield(slowOsciResponses,'raster');
+        if isfield(slowOsciResponses,'raster')
+            slowOsciResponses = rmfield(slowOsciResponses,'raster');
+        end
     end
     projectSessionResults.slowOsciResponses{ii} = slowOsciResponses;
     clear slowOsciResponses
-
-    targetFile = dir('*.spikesRank_upStates.cellinfo.mat'); 
-    slowOsciSpikesRank = importdata(targetFile.name);
-    projectSessionResults.slowOsciSpikesRank{ii} = slowOsciSpikesRank;
-    clear slowOsciSpikesRank
+    
+    if ~lightVersion
+        targetFile = dir('*.spikesRank_upStates.cellinfo.mat'); 
+        slowOsciSpikesRank = importdata(targetFile.name);
+        projectSessionResults.slowOsciSpikesRank{ii} = slowOsciSpikesRank;
+        clear slowOsciSpikesRank
+    end
     
     % theta phase_locking
     targetFile = dir('*.theta_*PhaseLockingData.cellinfo.mat'); load(targetFile.name);
@@ -260,22 +271,67 @@ for ii = 1:length(sessions.basepaths)
     
 end
 %% stack all results
-projectResults.optogeneticResponses = stackSessionResult(projectSessionResults.optogeneticResponses, projectSessionResults.numcells);
-projectResults.ripplesResponses = stackSessionResult(projectSessionResults.ripplesResponses, projectSessionResults.numcells);
-projectResults.averageCCG = stackSessionResult(projectSessionResults.averageCCG, projectSessionResults.numcells);
-projectResults.thetaModulation = stackSessionResult(projectSessionResults.thetaModulation, projectSessionResults.numcells);
-projectResults.thetaREMModulation = stackSessionResult(projectSessionResults.thetaREMModulation, projectSessionResults.numcells);
-projectResults.thetaRunModulation = stackSessionResult(projectSessionResults.thetaRunModulation, projectSessionResults.numcells);
-projectResults.lGammaModulation = stackSessionResult(projectSessionResults.lGammaModulation, projectSessionResults.numcells);
-projectResults.hGammaModulation = stackSessionResult(projectSessionResults.hGammaModulation, projectSessionResults.numcells);
-projectResults.ripplePhaseModulation = stackSessionResult(projectSessionResults.rippleMod, projectSessionResults.numcells);
-projectResults.slowOsciResponses = stackSessionResult(projectSessionResults.slowOsciResponses, projectSessionResults.numcells);
-% projectResults.behavior =
-% stackSessionResult(projectSessionResults.behavior, projectSessionResults.numcells); 
-projectResults.spatialModulation = stackSessionResult(projectSessionResults.spatialModulation, projectSessionResults.numcells);
-% projectResults.speedCorr = stackSessionResult(projectSessionResults.speedCorr, projectSessionResults.numcells);
-projectResults.acgPeak = stackSessionResult(projectSessionResults.acgPeak, projectSessionResults.numcells);
-projectResults.slowOsciSpikesRank = stackSessionResult(projectSessionResults.slowOsciSpikesRank, projectSessionResults.numcells);
+try projectResults.optogeneticResponses = stackSessionResult(projectSessionResults.optogeneticResponses, projectSessionResults.numcells);
+catch
+    warning('Optogenetics response was not staked!');
+end
+try projectResults.ripplesResponses = stackSessionResult(projectSessionResults.ripplesResponses, projectSessionResults.numcells);
+catch
+    warning('Ripple response was not staked!');
+end
+try projectResults.averageCCG = stackSessionResult(projectSessionResults.averageCCG, projectSessionResults.numcells);
+catch
+    warning('averageCCG was not staked!');
+end
+try projectResults.thetaModulation = stackSessionResult(projectSessionResults.thetaModulation, projectSessionResults.numcells);
+catch
+    warning('theta modulation was not staked!');
+end
+try projectResults.thetaREMModulation = stackSessionResult(projectSessionResults.thetaREMModulation, projectSessionResults.numcells);
+catch
+    warning('theta REM modulation was not staked!');
+end
+try projectResults.thetaRunModulation = stackSessionResult(projectSessionResults.thetaRunModulation, projectSessionResults.numcells);
+catch
+    warning('theta run modulation was not staked!');
+end
+try projectResults.lGammaModulation = stackSessionResult(projectSessionResults.lGammaModulation, projectSessionResults.numcells);
+catch
+    warning('lGamma modulation was not staked!');
+end
+try projectResults.hGammaModulation = stackSessionResult(projectSessionResults.hGammaModulation, projectSessionResults.numcells);
+catch
+    warning('HGamma modulation was not staked!');
+end
+try projectResults.ripplePhaseModulation = stackSessionResult(projectSessionResults.rippleMod, projectSessionResults.numcells);
+catch
+    warning('Ripple phase modulation  was not staked!');
+end
+try projectResults.slowOsciResponses = stackSessionResult(projectSessionResults.slowOsciResponses, projectSessionResults.numcells);
+catch
+    warning('Slow oscillation responses was not staked!');
+end
+try projectResults.behavior = stackSessionResult(projectSessionResults.behavior, projectSessionResults.numcells);
+catch
+    warning('Behaviour responses were not stack!');
+end
+try
+    projectResults.spatialModulation = stackSessionResult(projectSessionResults.spatialModulation, projectSessionResults.numcells);
+catch
+    warning('Satial modulation was not stack!');
+end
+try projectResults.speedCorr = stackSessionResult(projectSessionResults.speedCorr, projectSessionResults.numcells);
+catch
+    warning('Speed corr was not stack!');
+end
+try projectResults.acgPeak = stackSessionResult(projectSessionResults.acgPeak, projectSessionResults.numcells);
+catch
+    warning('ACG peak was not stack!');
+end
+try projectResults.slowOsciSpikesRank = stackSessionResult(projectSessionResults.slowOsciSpikesRank, projectSessionResults.numcells);
+catch
+    warning('Slow Osc Spikes rank was not stack!');
+end
 
 projectResults.cell_metrics = cell_metrics;
 
