@@ -184,7 +184,7 @@ switch(type),
 		else
 			[b a] = cheby2(order,ripple,stopband/nyquist,'stop');
         end
-        warning('Cheby2 is often numerically unstable - if you get NaNs, use the ''fir1'' argument to bz_Filter');
+        % warning('Cheby2 is often numerically unstable - if you get NaNs, use the ''fir1'' argument to bz_Filter');
 	case 'fir1',
         %Order input to fir1 needs to be in samples, not cycles
 		if ~isempty(passband),

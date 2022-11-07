@@ -16,9 +16,8 @@ for ii = 1:length(sessionsTable.SessionName)
         try
 
             %%% your code goes here...
-            psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true);
-            clear psthUD;
-            
+            psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true);
+            psthRipples = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true);
             %%%
             
             close all;

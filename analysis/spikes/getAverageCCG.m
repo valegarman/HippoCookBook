@@ -164,6 +164,7 @@ if useBrainRegions && exist([basenameFromBasepath(basepath) '.cell_metrics.celli
             clear cellsID ccMedian ccZMedian ccMean ccZMean
             for jj = 1 : length(spikes.times)
                 cellsID = indCell(indCell~=jj & cellsInRegion);
+<<<<<<< HEAD
                 if length(cellsID) == 1
                     ccMedian(jj,:) = squeeze(allCcg(:,jj,cellsID)); %
                     ccZMedian(jj,:) = zscore(squeeze(allCcg(:,jj,cellsID))',[],2); % zCCG
@@ -177,6 +178,14 @@ if useBrainRegions && exist([basenameFromBasepath(basepath) '.cell_metrics.celli
                     ccMean(jj,:) = nanmean(squeeze(allCcg(:,jj,cellsID)),2); % zCCG
                     ccZMean(jj,:) = nanmean(zscore(squeeze(allCcg(:,jj,cellsID))',[],2)); % zCCG
                 end
+=======
+                
+                ccMedian(jj,:) = nanmedian(squeeze(allCcg(:,jj,cellsID)),2); %
+                ccZMedian(jj,:) = nanmedian(zscore(squeeze(allCcg(:,jj,cellsID))',[],2),1); % zCCG
+
+                ccMean(jj,:) = nanmean(squeeze(allCcg(:,jj,cellsID)),2); % zCCG
+                ccZMean(jj,:) = nanmean(zscore(squeeze(allCcg(:,jj,cellsID))',[],2),1); % zCCG
+>>>>>>> cfee0c9a464b9be2bcdb292aad260cc9bc8f09bf
             end
             
             if interp0
@@ -216,10 +225,10 @@ if useBrainRegions && exist([basenameFromBasepath(basepath) '.cell_metrics.celli
             cellsID = indCell(indCell~=jj & cellsInRegion);
 
             ccMedian(jj,:) = nanmedian(squeeze(allCcg(:,jj,cellsID)),2); %
-            ccZMedian(jj,:) = nanmedian(zscore(squeeze(allCcg(:,jj,cellsID))',[],2)); % zCCG
+            ccZMedian(jj,:) = nanmedian(zscore(squeeze(allCcg(:,jj,cellsID))',[],2),1); % zCCG
 
             ccMean(jj,:) = nanmean(squeeze(allCcg(:,jj,cellsID)),2); % zCCG
-            ccZMean(jj,:) = nanmean(zscore(squeeze(allCcg(:,jj,cellsID))',[],2)); % zCCG
+            ccZMean(jj,:) = nanmean(zscore(squeeze(allCcg(:,jj,cellsID))',[],2),1); % zCCG
         end
 
         if interp0
@@ -258,10 +267,10 @@ if useBrainRegions && exist([basenameFromBasepath(basepath) '.cell_metrics.celli
             cellsID = indCell(indCell~=jj & cellsInRegion);
 
             ccMedian(jj,:) = nanmedian(squeeze(allCcg(:,jj,cellsID)),2); %
-            ccZMedian(jj,:) = nanmedian(zscore(squeeze(allCcg(:,jj,cellsID))',[],2)); % zCCG
+            ccZMedian(jj,:) = nanmedian(zscore(squeeze(allCcg(:,jj,cellsID))',[],2),1); % zCCG
 
             ccMean(jj,:) = nanmean(squeeze(allCcg(:,jj,cellsID)),2); % zCCG
-            ccZMean(jj,:) = nanmean(zscore(squeeze(allCcg(:,jj,cellsID))',[],2)); % zCCG
+            ccZMean(jj,:) = nanmean(zscore(squeeze(allCcg(:,jj,cellsID))',[],2),1); % zCCG
         end
 
         if interp0
@@ -325,9 +334,17 @@ if useDistinctShanks && length(session.extracellular.electrodeGroups.channels)>1
                 ccMedian(jj,:) = nanmedian(squeeze(allCcg(:,jj,cellsID)),2); %
                 ccZMedian(jj,:) = nanmedian(zscore(squeeze(allCcg(:,jj,cellsID))',[],2)); % zCCG
 
+<<<<<<< HEAD
                 ccMean(jj,:) = nanmean(squeeze(allCcg(:,jj,cellsID)),2); % zCCG
                 ccZMean(jj,:) = nanmean(zscore(squeeze(allCcg(:,jj,cellsID))',[],2)); % zCCG
             end
+=======
+            ccMedian(jj,:) = nanmedian(squeeze(allCcg(:,jj,cellsID)),2); %
+            ccZMedian(jj,:) = nanmedian(zscore(squeeze(allCcg(:,jj,cellsID))',[],2),1); % zCCG
+
+            ccMean(jj,:) = nanmean(squeeze(allCcg(:,jj,cellsID)),2); % zCCG
+            ccZMean(jj,:) = nanmean(zscore(squeeze(allCcg(:,jj,cellsID))',[],2),1); % zCCG
+>>>>>>> cfee0c9a464b9be2bcdb292aad260cc9bc8f09bf
         end
         
         if interp0

@@ -41,7 +41,7 @@ function [phaseMod] = computePhaseModulation(varargin)
 p = inputParser;
 addParameter(p,'basepath',pwd,@isdir);
 addParameter(p,'spikes',[]);
-addParameter(p,'bandsToCompute',{'rippleModulation','SWModulation','thetaModulation','lgammaModulation',...
+addParameter(p,'bandsToCompute',{'rippleModulation','thetaModulation','lgammaModulation',...
     'hgammaModulation','thetaRunModulation','thetaREMModulation'});
 addParameter(p,'rippleChannel',[],@isnumeric);
 addParameter(p,'SWChannel',[],@isnumeric);

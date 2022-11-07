@@ -8,9 +8,9 @@ function h = plotFill(datax,datay,varargin)
 %    'datay'        N x M, Different entries must be in columns.
 %
 % <optional>
-%    'error'        'ic95' (default), 'std' or 'SE'.
+%    'error'        'ci95' (default), 'std' or 'SE'.
 %    'color'        M x 3, RGB code for groups. Random by default
-%    'style'        'alpha' (default), 'inverted', 'white', 'filled'
+%    'style'        'alpha' (default), 'inverted', 'white', 'filled', 'edge'
 %    'smoothOpt'    Smooth average window (in y bins size), default 1 (no smooth)
 %    'xscale'       'linear' (default) or 'log'
 %    'yscale'       'linear' (default), 'log' or 'circular'
@@ -19,6 +19,8 @@ function h = plotFill(datax,datay,varargin)
 %    'lineStyle'    default, '-'
 %    'error'        'ic95' (default), 'SE', 'std'
 %    'faceAlpha'    Default, 0.5
+%    'excluding'
+%                   Default, all false
 
 % 
 % OUTPUS
@@ -28,7 +30,7 @@ function h = plotFill(datax,datay,varargin)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 p = inputParser;
 addParameter(p,'color',[],@isnumeric);
-addParameter(p,'error','ic95',@ischar);
+addParameter(p,'error','ci95',@ischar);
 addParameter(p,'style','alpha',@ischar);
 addParameter(p,'smoothOpt',1,@isnumeric);
 addParameter(p,'xscale','linear',@ischar);
@@ -37,7 +39,7 @@ addParameter(p,'show_cycle',false,@islogical);
 addParameter(p,'duplicate_x',false,@islogical);
 addParameter(p,'faceAlpha',0.5,@isnumeric);
 addParameter(p,'lineStyle','-');
-
+addParameter(p,'excluding',[]);
 
 parse(p,varargin{:});
 color = p.Results.color;
@@ -50,6 +52,7 @@ show_cycle = p.Results.show_cycle;
 duplicate_x = p.Results.duplicate_x;
 lineStyle = p.Results.lineStyle;
 faceAlpha = p.Results.faceAlpha;
+excluding = p.Results.excluding;
 
 % Deal with inputs
 if length(datax) ~= size(datay,1)
@@ -58,7 +61,12 @@ if length(datax) ~= size(datay,1)
         error('Dimenssion do not match');
     end
 end
-if strcmpi(error, 'ic95')
+
+if ~isempty(excluding)
+    datay(:,excluding) = [];
+end
+
+if strcmpi(error, 'ci95')
         f1 = 1.96/ sqrt(size(datay,2));
 elseif  strcmp(error, 'sd') || strcmp(error, 'std') 
         f1 = 1;
@@ -152,6 +160,8 @@ else
             h = plot(datax, smooth(nanmean(datay,2),smoothOpt),lineStyle,'lineWidth',1,'color',[1 1 1]);
         elseif strcmpi(style,'filled') 
             h = fill(x1, y1, color,'EdgeColor','none','faceAlpha',faceAlpha);
+        elseif strcmpi(style,'edge') 
+            h = fill(x1, y1, [1 1 1],'EdgeColor',color,'faceAlpha',faceAlpha);
         end
     end
         set(gca,'XScale',xscale,'YScale',yscale,'TickDir','out');
