@@ -306,8 +306,13 @@ if nConditions == 1
 end
 
 if saveMat
-    disp('Saving results...');
-    save([basenameFromBasepath(pwd) '.' eventType '_psth.cellinfo.mat'],'psth');
+    try
+        disp('Saving results...');
+        save([basenameFromBasepath(pwd) '.' eventType '_psth.cellinfo.mat'],'psth');
+    catch
+        disp('Saving results...');
+        save([basenameFromBasepath(pwd) '.' eventType '_psth.cellinfo.mat'],'psth','-v7.3');
+    end
 end
 
 % PLOTS

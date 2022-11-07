@@ -20,7 +20,7 @@ addParameter(p,'basepath',pwd,@isfolder);
 addParameter(p,'z',[]);
 addParameter(p,'MINPFSIZE',8,@isnumeric);
 addParameter(p,'frThreshold',1,@isnumeric);
-addParameter(p,'debug',true,@islogical);
+addParameter(p,'debug',false,@islogical);
 
 parse(p,varargin{:})
 

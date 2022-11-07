@@ -172,7 +172,7 @@ for ii = 1:numR
     shuffling.spatial_corr_p{ii} = p;
     shuffling.spatial_corr_sc_r{ii} = r(1,2);
     shuffling.spatial_corr_sc_p{ii} = p(1,2);
-    shuffling.spatil_corr_convolution{ii} = conv2(spatialCorr,B,'same');
+    shuffling.spatial_corr_convolution{ii} = conv2(spatialCorr,B,'same');
 
     % Spatial coherence rectangle
     [spatialCorr,r,p] = getSpatialCorrelationRectangle('z',map.zUnSmooth,'occupancy',map.timeUnSmooth);
@@ -210,14 +210,14 @@ for ii = 1:numR
     
     % Periodic Firing
     periodic = getPeriodicFiring('z',map.zUnSmooth,'plt',false);         
-    spatialModulation.periodicFiring.maxPolar{ii} = periodic.maxPolar;
-    spatialModulation.periodicFiring.posPolar{ii} = periodic.posPolar;
-    spatialModulation.periodicFiring.theta{ii} = periodic.theta;
-    spatialModulation.periodicFiring.Orient{ii} = periodic.Orient;
-    spatialModulation.periodicFiring.frec{ii} = periodic.frec;
-    spatialModulation.periodicFiring.periodicComponents{ii} = periodic.periodicComponents;
-    spatialModulation.periodicFiring.BC{ii} = periodic.BC;
-    spatialModulation.periodicFiring.TFP{ii} = periodic.TFP;
+    shuffling.periodicFiring.maxPolar{ii} = periodic.maxPolar;
+    shuffling.periodicFiring.posPolar{ii} = periodic.posPolar;
+    shuffling.periodicFiring.theta{ii} = periodic.theta;
+    shuffling.periodicFiring.Orient{ii} = periodic.Orient;
+    shuffling.periodicFiring.frec{ii} = periodic.frec;
+    shuffling.periodicFiring.periodicComponents{ii} = periodic.periodicComponents;
+    shuffling.periodicFiring.BC{ii} = periodic.BC;
+%     shuffling.periodicFiring.TFP{ii} = periodic.TFP;
     
     % Grid Analysis
     if gridAnalysis

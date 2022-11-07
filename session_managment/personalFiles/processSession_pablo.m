@@ -13,9 +13,11 @@ function [] = processSession_pablo(varargin)
 %  7. 'getHippocampalLayers'    Define semi-automatically hippocampal Layers
 %  8. 'eventsModulation'        Runs brain events modulation: i) Up and downs; ii) Ripples and iii) Theta intervals
 %  9. 'phaseModulation'         Computes phase modulation for theta, gamma and ripples
-% 10. 'cellMetrics'             Gets cell metrics (from Cell Explorer, and a few new)                       
-% 11. 'spatialModulation'       Process spatial modulation analysis, behavioural events and speed
-% 12. 'summary'                 Makes cell/session sumary
+% 10. 'cellMetrics'             Gets cell metrics (from Cell Explorer, and a few new)   
+% 11. 'lfpAnalysis'             Computes power spectrum and coherence for
+%                               different channels
+% 12. 'spatialModulation'       Process spatial modulation analysis, behavioural events and speed
+% 13. 'summary'                 Makes cell/session sumary
 %
 % Note: to exclude any analysis, use 'excludeAnalysis' and provide the name
 % or number of the section analysis to exlucde, example: processSession('excludeAnalysis',{'cureAnalogPulses', 'getHippocampalLayers', 8})
@@ -37,6 +39,9 @@ addParameter(p,'excludeManipulationIntervals',[],@isnumeric);
 addParameter(p,'rippleChannel',[],@isnumeric);% manually selecting ripple Channel in case getHippocampalLayers does not provide a right output
 addParameter(p,'SWChannel',[],@isnumeric); % manually selecting SW Channel in case getHippocampalLayers does not provide a right output
 addParameter(p,'thetaChannel',[],@isnumeric);
+addParameter(p,'CA1Channel',[],@isnumeric); % manually selecting CA1 Channel / Can be also done by brain regions
+addParameter(p,'SUBChannel',[],@isnumeric); % same as CA1 Channel
+addParameter(p,'PFCChannel',[],@isnumeric); % same as CA1 Channel
 addParameter(p,'digital_optogenetic_channels',[],@isnumeric);
 addParameter(p,'analog_optogenetic_channels',[],@isnumeric);
 addParameter(p,'promt_hippo_layers',false,@islogical);
@@ -56,6 +61,7 @@ addParameter(p,'showTetrodes',true,@islogical);
 addParameter(p,'twoHalvesAnalysis',true,@islogical);
 addParameter(p,'gridAnalysis',false,@islogical);
 addParameter(p,'randomization',false,@islogical);
+addParameter(p,'tint',true,@islogical);
 
 parse(p,varargin{:})
 
@@ -71,6 +77,9 @@ excludeManipulationIntervals = p.Results.excludeManipulationIntervals;
 rippleChannel = p.Results.rippleChannel;
 SWChannel = p.Results.SWChannel;
 thetaChannel = p.Results.thetaChannel;
+CA1Channel = p.Results.CA1Channel;
+SUBChannel = p.Results.SUBChannel;
+PFCChannel = p.Results.PFCChannel;
 digital_optogenetic_channels = p.Results.digital_optogenetic_channels;
 analog_optogenetic_channels = p.Results.analog_optogenetic_channels;
 promt_hippo_layers = p.Results.promt_hippo_layers;
@@ -90,7 +99,7 @@ showTetrodes = p.Results.showTetrodes;
 twoHalvesAnalysis = p.Results.twoHalvesAnalysis;
 gridAnalysis = p.Results.gridAnalysis;
 randomization = p.Results.randomization;
-
+tint = p.Results.tint;
 
 % Deal with inputs
 prevPath = pwd;
@@ -146,6 +155,15 @@ if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))
         end
         if ~isfield(session.analysisTags,'thetaChannel')
             session.analysisTags.thetaChannel = thetaChannel;
+        end
+        if ~isfield(session.analysisTags,'CA1Channel')
+            session.analysisTags.CA1Channel = CA1Channel;
+        end
+        if ~isfield(session.analysisTags,'SUBChannel')
+            session.analysisTags.SUBChannel = SUBChannel;
+        end
+        if ~isfield(session.analysisTags,'PFCChannel')
+            session.analysisTags.PFCChannel = PFCChannel;
         end
                
         save([basepath filesep session.general.name,'.session.mat'],'session','-v7.3');
@@ -242,6 +260,8 @@ end
 if ~any(ismember(excludeAnalysis, {'9',lower('phaseModulation')}))
     % LFP-spikes modulation
     [phaseMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel);
+    % LFP-spikes modulation per subsession
+    [phaseModSubSession] = computePhaseModulationPerSubSession('rippleChannel',rippleChannel,'SWChannel',SWChannel);
     computeCofiringModulation;
 end
 
@@ -264,18 +284,25 @@ if ~any(ismember(excludeAnalysis, {'10',lower('cellMetrics')}))
         warning('Not possible to get manipulation periods. Running CellMetrics withouth excluding manipulation epochs');
     end
     cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',{'deepSuperficial'},'forceReload',true);
+    cell_metrics_subSession = ProcessCellMetricsPerSubSession('session', session,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',{'deepSuperficial'},'forceReload',true);
 
     getACGPeak('force',true);
 
     getAverageCCG('force',true);
+    getAverageCCGPerSubSession('force',true);
     getSpikesReturnPlot('force',true);
-    computeAverageCCG('force',true);
+%     computeAverageCCG('force',true);
     
     
 end
 
-%% 11. Spatial modulation
-if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
+%% 11. lfp Analysis
+if ~any(ismember(excludeAnalysis,{'11',lower('lfpAnalysis')}))
+    cohgram = computeCohgram('force',true);
+    cohgramSubSession = computeCohgramPerSubsession('force',true);
+end
+%% 12. Spatial modulation
+if ~any(ismember(excludeAnalysis, {'12',lower('spatialModulation')}))
     try
         spikes = loadSpikes;
         getSessionTracking('convFact',tracking_pixel_cm,'roiTracking','manual','anyMaze',anyMaze);
@@ -306,14 +333,14 @@ if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
         try         
             for ii = 1:length(behavior.description)
                 if strcmpi(behavior.description{ii},'Social Interaction')
-                    flds = fields(behavior.events{ii}.entry);
+                    flds = fields(behavior.events.entry{ii});
                     for jj = 1:length(flds)
-                        psth_entry.(flds{jj}){ii} = spikesPsth([behavior.events{ii}.entry.(flds{jj}).ts],'numRep',100,'saveMat',false,...
+                        psth_entry.(flds{jj}){ii} = spikesPsth([behavior.events.entry{ii}.(flds{jj}).ts],'numRep',100,'saveMat',false,...
                             'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01,'win_Z',[-3 -1]);
                     end
-                    flds = fields(behavior.events{ii}.exit);
+                    flds = fields(behavior.events.exit{ii});
                     for jj = 1:length(flds)
-                        psth_exit.(flds{jj}){ii} = spikesPsth([behavior.events{ii}.exit.(flds{jj}).ts],'numRep',100,'saveMat',false,...
+                        psth_exit.(flds{jj}){ii} = spikesPsth([behavior.events.exit{ii}.(flds{jj}).ts],'numRep',100,'saveMat',false,...
                             'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01,'win_Z',[-3 -1]);
                     end
                     behavior.psth_entry = psth_entry;
@@ -360,17 +387,39 @@ if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
         end
     end
     
+    if any(ismember(behavior.description, 'YMaze Apparatus'))
+        try
+           for ii = 1:length(behavior.description)
+               if strcmpi(behavior.description{ii},'YMaze Apparatus')
+                   flds = fields(behavior.events.entry{ii});
+                   for jj = 1:length(flds)
+                        psth_entry.(flds{jj}){ii} = spikesPsth([behavior.events.entry{ii}.(flds{jj}).ts],'numRep',100,'saveMat',false,...
+                            'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01,'win_Z',[-3 -1]);
+                   end
+                    flds = fields(behavior.events.exit{ii});
+                    for jj = 1:length(flds)
+                        psth_exit.(flds{jj}){ii} = spikesPsth([behavior.events.exit{ii}.(flds{jj}).ts],'numRep',100,'saveMat',false,...
+                            'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01,'win_Z',[-3 -1]);
+                    end
+                    behavior.psth_entry = psth_entry;
+                    behavior.psth_exit = psth_exit;
+                    save([basenameFromBasepath(pwd) '.behavior.cellinfo.mat'],'behavior');
+               end
+           end
+        end
+    end
+    
     try
         speedCorr = getSpeedCorr('numQuantiles',20,'force',true,'trials',false);
     end
 end
 
-%% 12. Summary per cell
-if ~any(ismember(excludeAnalysis, {'12',lower('summary')}))
+%% 13. Summary per cell
+if ~any(ismember(excludeAnalysis, {'13',lower('summary')}))
 %     plotSummary();
 %     getSummaryPerCell;
     if strcmpi(project,'SocialProject')
-        plotSummary_social();
+%         plotSummary_social();
         plotSummary_pablo();
     elseif strcmpi(project,'SubiculumProject')
         plotSpatialModulation('gridAnalysis',gridAnalysis);

@@ -126,9 +126,8 @@ if size(tracking.events.subSessions,1) == size(efields,1)
             zone{ii} = behaviorTemp.(efields{ii}).zone;
         end
             
-%         events{ii} = behaviorTemp.(efields{ii}).events;
-        
-        
+        events{ii} = behaviorTemp.(efields{ii}).events;
+
         lin = [lin; behaviorTemp.(efields{ii}).position.lin];
         try
             armMask = [armMask; behaviorTemp.(efields{ii}).masks.arm];
@@ -149,8 +148,10 @@ if size(tracking.events.subSessions,1) == size(efields,1)
             direction = [direction; behaviorTemp.(efields{ii}).masks.direction];
             trialsDirection = [trialsDirection; behaviorTemp.(efields{ii}).masks.trialsDirection'];
             recordingsTrial = [recordingsTrial; ii*ones(size(behaviorTemp.(efields{ii}).trials.startPoint,1),1)];
-            entry = [entry; behaviorTemp.(efields{ii}).events.entry.ts + preRec];
-            exit = [exit; behaviorTemp.(efields{ii}).events.exit.ts + preRec];
+%             for jj = 1:length(zone{ii})
+%                 entry{ii}.zone{ii}{jj} = [entry; behaviorTemp.(efields{ii}).events.entry.(cell2mat(zone{jj}.name)).ts + preRec];
+%                 exit{jj} = [exit; behaviorTemp.(efields{ii}).events.exit.(cell2mat(zone{jj}.name)).ts + preRec];
+%             end
             
         catch
         end
@@ -191,6 +192,14 @@ for ii = 1:length(efields)
         zone{count} = behaviorTemp.(efields{ii}).zone;
         avFrame{count} = tracking.avFrame{ii};
         count = count + 1;
+    elseif strcmpi(behaviorTemp.(efields{ii}).description, 'YMaze Apparatus') && any(isnan(behaviorTemp.(efields{ii}).position.lin))
+        maps{count}(:,1) = timestamps(subSessionMask == ii);
+        maps{count}(:,2) = x(subSessionMask == ii);
+        maps{count}(:,3) = y(subSessionMask == ii);
+        description{count} = behaviorTemp.(efields{ii}).description;
+        zone{count} = behaviorTemp.(efields{ii}).zone;
+        avFrame{count} = tracking.avFrame{ii};
+        count = count + 1;
     else
         disp('Error while running getSessionBehavior. Quitting...');
         return;
@@ -213,23 +222,43 @@ behavior.maps = maps;
 behavior.description = description;
 behavior.avFrame = avFrame;
 
-try
-    for ii = 1:length(events)
-        if isfield(events{ii},'entry') && isfield(events{ii},'exit')
-            flds = fields(events{ii});
-            rmv = find(ismember(flds,{'exit','entry'}) == 0);
-            flds(rmv) = [];
-            preRec = tracking.events.subSessions(ii,1);
-            for jj = 1:length(flds)
-                if ~isempty(flds{jj})
-                    events{ii}.(flds{jj}).leftArm.ts = events{ii}.(flds{jj}).leftArm.ts + preRec;
-                    events{ii}.(flds{jj}).rightArm.ts = events{ii}.(flds{jj}).rightArm.ts + preRec;
-                    events{ii}.(flds{jj}).stemArm.ts = events{ii}.(flds{jj}).stemArm.ts + preRec;
-                    events{ii}.(flds{jj}).centerArm.ts = events{ii}.(flds{jj}).centerArm.ts + preRec;
-                end
+% try
+%     for ii = 1:length(events)
+%         if isfield(events{ii},'entry') && isfield(events{ii},'exit')
+%             flds = fields(events{ii});
+%             rmv = find(ismember(flds,{'exit','entry'}) == 0);
+%             flds(rmv) = [];
+%             preRec = tracking.events.subSessions(ii,1);
+%             for jj = 1:length(flds)
+%                 if ~isempty(flds{jj})
+%                     events{ii}.(flds{jj}).leftArm.ts = events{ii}.(flds{jj}).leftArm.ts + preRec;
+%                     events{ii}.(flds{jj}).rightArm.ts = events{ii}.(flds{jj}).rightArm.ts + preRec;
+%                     events{ii}.(flds{jj}).stemArm.ts = events{ii}.(flds{jj}).stemArm.ts + preRec;
+%                     events{ii}.(flds{jj}).centerArm.ts = events{ii}.(flds{jj}).centerArm.ts + preRec;
+%                 end
+%             end
+%         end
+%     end
+% end
+
+
+for ii = 1:length(efields)
+   preRec = tracking.events.subSessions(ii,1);
+   if strcmpi(behaviorTemp.(efields{ii}).description, 'YMaze Apparatus')
+       if isfield(events{ii},'entry')
+           fld = fields(events{ii}.entry);
+           for jj = 1:length(fld)
+               entry{ii}.(fld{jj}).ts = events{ii}.entry.(fld{jj}).ts + preRec;
+           end
+       end
+       if isfield(events{ii},'exit')
+            fld = fields(events{ii}.exit);
+            for jj = 1:length(fld)
+    %                 events{ii}.exit.(fld{jj}).ts = events{ii}.exit.(fld{jj}).ts + preRec;
+                exit{ii}.(fld{jj}).ts = events{ii}.exit.(fld{jj}).ts + preRec;
             end
-        end
-    end
+       end
+   end
 end
 
 for ii = 1:length(efields)
@@ -238,13 +267,15 @@ for ii = 1:length(efields)
         if isfield(events{ii},'entry') 
             fld = fields(events{ii}.entry);
             for jj = 1:length(fld)
-                events{ii}.entry.(fld{jj}).ts = events{ii}.entry.(fld{jj}).ts + preRec;
+%                 events{ii}.entry.(fld{jj}).ts = events{ii}.entry.(fld{jj}).ts + preRec;
+                entry{ii}.(fld{jj}).ts = events{ii}.entry.(fld{jj}).ts + preRec;
             end
         end
         if isfield(events{ii},'exit')
             fld = fields(events{ii}.exit);
             for jj = 1:length(fld)
-                events{ii}.exit.(fld{jj}).ts = events{ii}.exit.(fld{jj}).ts + preRec;
+%                 events{ii}.exit.(fld{jj}).ts = events{ii}.exit.(fld{jj}).ts + preRec;
+                exit{ii}.(fld{jj}).ts = events{ii}.exit.(fld{jj}).ts + preRec;
             end
         end
     end
@@ -277,8 +308,9 @@ try
     behavior.trials.expectedArm = expectedArm;
     behavior.trials.recordings = recordingsTrial;
     
-    behavior.entry = entry;
-    behavior.exit = exit;
+    behavior.events.entry = entry;
+    behavior.events.exit = exit;
+
 catch
 end
 

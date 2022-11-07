@@ -56,10 +56,10 @@ for i=2:m-1
 end
 % Four corners
 % las cuatro esquinas
-vect_prom(1,1)=(z(1,2)+z(2,1)+z(2,2))/3;
-vect_prom(1,m)=(z(1,m-1)+z(2,m-1)+z(2,m))/3;
-vect_prom(n,1)=(z(n-1,2)+z(n-1,1)+z(n,2))/3;
-vect_prom(n,m)=(z(n-1,m-1)+z(n-1,m)+z(n,m-1))/3;
+vect_prom(1,1)=(z(1,2)+z(2,1)+z(2,2))/3; % North-Left
+vect_prom(1,n)=(z(1,n-1)+z(2,n-1)+z(2,n))/3; % North-right
+vect_prom(m,1)=(z(m-1,2)+z(m-1,1)+z(m,2))/3; % South-left
+vect_prom(m,n)=(z(m-1,n-1)+z(m-1,n)+z(m,n-1))/3;
 
 spatialCorr = vect_prom;
 vector2 = vect_prom(:);

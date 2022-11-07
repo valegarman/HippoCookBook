@@ -167,6 +167,7 @@ updateExpFolder({'Y:\fCamk7','T:\fCamk7','X:\fCamk7'},'J:\fCamk7');
 updateExpFolder({'Y:\fCamk7','T:\fCamk7'},'J:\fCamk7');
 
 editDatFile(pwd,[0 839]);
+computeSessionSummary('basepath','K:\fCamk7\fCamk7_220511_sess29','analogChannelsList',[],'digitalChannelsList',[1]);
 
 %% fId2
 updateExpFolder('V:\data\fId2','X:\data\fId2');
@@ -294,6 +295,7 @@ basepath = 'D:\FLR\FL3';
 cd(basepath);
 arrangeSessionFolder;
 createFiles('basepath',basepath);
+preprocessSession_pablo('basepath','D:\FLR\FL3\FL3_020322_sess1','analogChannelsList',[],'digitalChannelsList',[],'anymaze_ttl_channel',2);
 batch_preprocessSession_pablo('basepath','D:\FLR\FL3','analysisPath','C:\FL3','cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'anymaze_ttl_channel',2);
 
 %% FL5
@@ -314,8 +316,9 @@ batch_preprocessSession_pablo('basepath','D:\FLR\FL5','analysisPath','C:\FL5','c
 
 %% HPS22
 basepath = 'F:\data\HPS22';
+basepath = 'D:\HPS22';
 createFiles('basepath',basepath);
-batch_preprocessSession_pablo('basepath','F:\data\HPS22','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'anymaze_ttl_channel',2);
+batch_preprocessSession_pablo('basepath','D:\HPS22','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'anymaze_ttl_channel',2);
 computeSessionSummary_pablo('basepath','F:\data\HPS22\HPS22_040621_sess25','analogChannelsList',[],'digitalChannelsList',[]);
 computeSessionSummary_pablo('basepath','F:\data\HPS22\HPS22_140521_sess13','analogChannelsList',[],'digitalChannelsList',[]);
 
@@ -323,24 +326,29 @@ computeSessionSummary_pablo('basepath','F:\data\HPS22\HPS22_040621_sess25','anal
 batch_sessionSummary_pablo('basepath','F:\data\HPS22','analogChannelsList',[],'digitalChannelsList',[]);
 
 
+preprocessSession_pablo('basepath','D:\HPS22\HPS22_300521_sess21','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'anymaze_ttl_channel',2)
+
 %% HPS23
 basepath = 'F:\data\HPS23';
+basepath = 'D:\HPS23';
 createFiles('basepath',basepath);
-batch_preprocessSession_pablo('basepath','F:\data\HPS23','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'anymaze_ttl_channel',2);
+batch_preprocessSession_pablo('basepath','D:\HPS23','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'anymaze_ttl_channel',2);
 
 basepath = 'F:\data\HPS23\HPS23_090621_sess9';
 computeSessionSummary_pablo('basepath',basepath,'analogChannelsList',[],'digitalChannelsList',[]);
 
 %% HPS24
 basepath = 'F:\data\HPS24';
+basepath = 'D:\HPS24';
 createFiles('basepath',basepath);
 batch_preprocessSession_pablo('basepath','F:\data\HPS24','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'anymaze_ttl_channel',2);
-batch_preprocessSession_pablo('basepath','F:\data\HPS25','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'anymaze_ttl_channel',2);
 
 
 %% HPS25
 basepath = 'F:\data\HPS25';
+basepath = 'D:\HPS25';
 createFiles('basepath',basepath);
+batch_preprocessSession_pablo('basepath','F:\data\HPS25','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'anymaze_ttl_channel',2);
 
 %% HPR21409
 
@@ -374,6 +382,10 @@ createFiles('basepath',basepath);
 batch_preprocessSession_pablo('basepath','I:\HPR21409','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'anymaze_ttl_channel',2);
 
 
+%% fCamk7
+
+
 
 %%
 createProbe('excel_file','electrodes_coordinates_Tetrodes-32ch(8t-4c)-C57-4');
+createProbe('excel_file','electrodes_coordinates_DiagnosticBiochip-128-6-128ch&uLED_12LED-32Ch-4Shanks');

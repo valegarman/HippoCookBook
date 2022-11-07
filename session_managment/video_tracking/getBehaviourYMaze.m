@@ -1,4 +1,4 @@
-function [behaviour] = getBehaviourYMaze(varargin)
+function [behavior] = getBehaviourYMaze(varargin)
 % Creates behaviour for YMaze recordings
 %
 % USAGE
@@ -152,42 +152,51 @@ catch
 end
 
 %% Output
-behaviour.timestamps = tracking.timestamps;
-
-behaviour.position.lin = [];
-behaviour.position.x = tracking.position.x;
-behaviour.position.y = tracking.position.y;
-
-if exist('x_head','var') && ~isempty(x_head)
-    behaviour.headposition.x = x_head;
-    behaviour.headposition.y = y_head;
-end
-
-if exist('x_tail','var') && ~isempty(x_tail)
-    behaviour.tailposition.x = x_tail;
-    behaviour.tailposition.y = y_tail;
-end
-
-if exist('zone','var') && ~isempty(zone)
-    behaviour.zone = zone;
-end
-
-behaviour.maps = maps;
-
-try
-    behaviour.description = tracking.apparatus.name;
-catch
-    behaviour.description = 'YMaze';
-end
-
 behavior.masks = [];
 behavior.events = [];
 behavior.trials = [];
 
+behavior.timestamps = tracking.timestamps;
+
+behavior.position.lin = nan(length(behavior.timestamps),1);
+behavior.position.x = tracking.position.x;
+behavior.position.y = tracking.position.y;
+
+if exist('zone','var') && ~isempty(zone)
+    behavior.zone = zone;
+end
+
+behavior.masks.arm = NaN;
+behavior.masks.direction = nan(length(behavior.timestamps),1);
+behavior.masks.trials = nan(length(behavior.timestamps),1);
+behavior.masks.trialsDirection = NaN;
+
+
+behavior.maps = maps;
+
+try
+    behavior.description = tracking.apparatus.name;
+catch
+    behavior.description = 'YMaze';
+end
+
+behavior.events.startPoint = NaN;
+behavior.events.rReward = NaN;
+behavior.events.lReward = NaN;
+behavior.events.startDelay = NaN;
+behavior.events.endDelay = NaN;
+behavior.events.intersection = NaN;
+
+behavior.trials.startPoint = [NaN NaN];
+behavior.trials.endDelay = NaN;
+behavior.trials.visitedArm = NaN;
+behavior.trials.choice = NaN;
+behavior.trials.expectedArm = NaN;
+
 if exist('entry','var')
     try
-        behaviour.events.entry = entry;
-        behaviour.events.exit = exit;
+        behavior.events.entry = entry;
+        behavior.events.exit = exit;
     catch
         behavior.events.entry.ts = NaN;
         behavior.events.exit.ts = NaN;
@@ -198,7 +207,7 @@ else
 end
 if saveMat
     C = strsplit(basepath,'\');
-    save([C{end} '.YMaze.Behavior.mat'], 'behaviour');
+    save([C{end} '.YMaze.Behavior.mat'], 'behavior');
 end
 
 end
