@@ -3,6 +3,10 @@ function [im, idx] = imagesc_ranked(x,y,C,cax,sortingVariable,varargin)
 % function im = imagesc_sorted(x,y,C,cax,sortingVariable);
 % Run imagesc after sorting C by sortingVariable
 
+if ndims(C)>2
+    C = squeeze(C);
+end
+
 [val,idx] = sort(sortingVariable);
 if isempty(y)
     y = 1:size(C,1);

@@ -34,6 +34,9 @@ function [stats,h] = groupStats(y,group,varargin)
 %                       Default 0
 %    'fillAlpha'   Default .3
 %    'FaceEdge'    1 for face, 0 for edge. Default, all 1
+%    'x_position'  Specify x position of groups, by default 1:n
+%    'roundPlotCenterColor' Center color for medianBall, meanBall, and
+%                   roundplots
 % 
 % OUTPUS
 %    'stats'    Structure containing the statistical test results.
@@ -62,6 +65,8 @@ addParameter(p,'posOffset',0,@isnumeric);
 addParameter(p,'fillAlpha',.5,@isnumeric);
 addParameter(p,'FaceEdge',[],@isnumeric);
 addParameter(p,'roundPlotSize',15,@isnumeric);
+addParameter(p,'roundPlotCenterColor',[]);
+addParameter(p,'x_position',[]);
 
 parse(p,varargin{:});
 color = p.Results.color;
@@ -83,9 +88,15 @@ posOffset = p.Results.posOffset;
 fillAlpha = p.Results.fillAlpha;
 FaceEdge = p.Results.FaceEdge;
 roundPlotSize = p.Results.roundPlotSize;
+x_position = p.Results.x_position;
+roundPlotCenterColor = p.Results.roundPlotCenterColor;
 
 
 % Dealing with inputs
+if isempty(roundPlotCenterColor)
+    roundPlotCenterColor = color;
+end
+
 if size(y,1) < size(y,2)
     y = y';
 end
@@ -334,10 +345,7 @@ if length(yC) == 2
         stats.pairedtTest.stats = stats2;
         stats.pairedtTest.ci = ci2;
     end
-<<<<<<< HEAD
-=======
 
->>>>>>> 3f47bd1c532f67b8195d9deb54b781a3687e3b4a
     % two-sample t-test.
     [p2,h2,ci2,stats2] = ttest2(yC{1},yC{2});
     stats.tTest.p = p2;
@@ -429,15 +437,22 @@ if doPlot
     if ~inAxis
         h = figure;
     end
-    
-    if strcmpi(plotType, 'violinPlot')
+
+    % computing position in group (x) axis
+    if isempty(x_position)
         if size(groupAll,2) < 2
-            pos = [1:length(ind)];
+                pos = [1:length(ind)];
         else
             pos = [1:length(ind)];                                         % group by the first variable
             pos = (cumsum([0; diff(indAll(:,1))/(1*10^(size(groupAll,2)-1))])/2)' + pos;
         end
-        pos = pos + posOffset;
+    else
+        pos = x_position;
+    end
+    pos = pos + posOffset;
+
+    
+    if strcmpi(plotType, 'violinPlot')
         
         groupPos = zeros(size(group));
         idGroup = unique(group);
@@ -452,13 +467,6 @@ if doPlot
         end
         xlim([0.5 max(pos)+.5]);
     elseif strcmpi(plotType,'symRoundPlot')
-        if size(groupAll,2) < 2
-            pos = [1:length(ind)];
-        else
-            pos = [1:length(ind)];                                         % group by the first variable
-            pos = (cumsum([0; diff(indAll(:,1))/(1*10^(size(groupAll,2)-1))])/2)' + pos;
-        end
-        pos = pos + posOffset;
         
         hold on
         plot([.5 max(pos)+.5],[0 0],'color',[.7 .7 .7]);
@@ -474,7 +482,7 @@ if doPlot
                 plot(pos(ii)+ posData, y(group==ind(ii)),'o','color',[1 1 1],...
                        'MarkerFaceColor','k','MarkerEdgeColor','none','MarkerSize',dataSize);
             end
-            plot(pos(ii)-0.1, m,'o','MarkerFaceColor',color(ii,:),'MarkerEdgeColor',color(ii,:),'MarkerSize',roundPlotSize);
+            plot(pos(ii)-0.1, m,'o','MarkerFaceColor',roundPlotCenterColor(ii,:),'MarkerEdgeColor',color(ii,:),'MarkerSize',roundPlotSize);
             plot([pos(ii)-0.1 pos(ii)-0.1], [m-s1 m+s2],'-','MarkerFaceColor',color(ii,:),'MarkerEdgeColor',color(ii,:),...
                 'MarkerSize',dataSize,'color',color(ii,:),'LineWidth',2)
         end
@@ -487,13 +495,6 @@ if doPlot
         end
         
     elseif strcmpi(plotType,'roundPlot')
-        if size(groupAll,2) < 2
-            pos = [1:length(ind)];
-        else
-            pos = [1:length(ind)];                                         % group by the first variable
-            pos = (cumsum([0; diff(indAll(:,1))/(1*10^(size(groupAll,2)-1))])/2)' + pos;
-        end
-        pos = pos + posOffset;
         
         hold on
         % plot([.5 max(pos)+.5],[0 0],'color',[.7 .7 .7]);
@@ -508,7 +509,7 @@ if doPlot
                 plot(pos(ii)+ posData, y(group==ind(ii)),'o','color',[1 1 1],...
                        'MarkerFaceColor','k','MarkerEdgeColor','none','MarkerSize',dataSize);
             end
-            plot(pos(ii)-0.1, m,'o','MarkerFaceColor',color(ii,:),'MarkerEdgeColor',color(ii,:),'MarkerSize',roundPlotSize);
+            plot(pos(ii)-0.1, m,'o','MarkerFaceColor',roundPlotCenterColor(ii,:),'MarkerEdgeColor',color(ii,:),'MarkerSize',roundPlotSize);
             plot([pos(ii)-0.1 pos(ii)-0.1], [s1 s2],'-','MarkerFaceColor',color(ii,:),'MarkerEdgeColor',color(ii,:),...
                 'MarkerSize',dataSize,'color',color(ii,:),'LineWidth',2)
         end
@@ -520,19 +521,13 @@ if doPlot
         end
         
     elseif strcmpi(plotType,'medianBall')
-        if size(groupAll,2) < 2
-            pos = [1:length(ind)];
-        else
-            pos = [1:length(ind)];                                         % group by the first variable
-            pos = (cumsum([0; diff(indAll(:,1))/(1*10^(size(groupAll,2)-1))])/2)' + pos;
-        end
-        pos = pos + posOffset;
+        
         hold on
         plot(pos, stats.descriptive.median,'color',color(1,:));
         for ii = 1:length(pos)
             plot([pos(ii) pos(ii)], [stats.descriptive.q25(ii) stats.descriptive.q75(ii)],'color',color(1,:));
         end
-        plot(pos, stats.descriptive.median,'o','color', color(1,:),'MarkerFaceColor',[1 1 1],'MarkerEdgeColor',color(1,:),'MarkerSize',roundPlotSize);
+        plot(pos, stats.descriptive.median,'o','color', color(1,:),'MarkerFaceColor',roundPlotCenterColor(1,:),'MarkerEdgeColor',color(1,:),'MarkerSize',roundPlotSize);
         xlim([.5 max(pos)+.5]);
         set(gca,'xtick',[]);
         if strcmpi(orientation, 'horizontal')
@@ -540,19 +535,13 @@ if doPlot
         end
         
     elseif strcmpi(plotType,'meanBall')
-        if size(groupAll,2) < 2
-            pos = [1:length(ind)];
-        else
-            pos = [1:length(ind)];                                         % group by the first variable
-            pos = (cumsum([0; diff(indAll(:,1))/(1*10^(size(groupAll,2)-1))])/2)' + pos;
-        end
-        pos = pos + posOffset;
+        
         hold on
         plot(pos, stats.descriptive.mean,'color',color(1,:));
         for ii = 1:length(pos)
             plot([pos(ii) pos(ii)], [stats.descriptive.mean(ii)-stats.descriptive.SEM(ii) stats.descriptive.mean(ii)+stats.descriptive.SEM(ii)],'color',color(1,:));
         end
-        plot(pos, stats.descriptive.mean,'o','color', color(1,:),'MarkerFaceColor',[1 1 1],'MarkerEdgeColor',color(1,:),'MarkerSize',roundPlotSize);
+        plot(pos, stats.descriptive.mean,'o','color', color(1,:),'MarkerFaceColor',roundPlotCenterColor(1,:),'MarkerEdgeColor',color(1,:),'MarkerSize',roundPlotSize);
         xlim([.5 max(pos)+.5]);
         set(gca,'xtick',[]);
         if strcmpi(orientation, 'horizontal')
@@ -560,19 +549,13 @@ if doPlot
         end
         
     elseif strcmpi(plotType,'meanBallCI95')
-        if size(groupAll,2) < 2
-            pos = [1:length(ind)];
-        else
-            pos = [1:length(ind)];                                         % group by the first variable
-            pos = (cumsum([0; diff(indAll(:,1))/(1*10^(size(groupAll,2)-1))])/2)' + pos;
-        end
-        pos = pos + posOffset;
+        
         hold on
         plot(pos, stats.descriptive.mean,'color',color(1,:));
         for ii = 1:length(pos)
             plot([pos(ii) pos(ii)], [stats.descriptive.mean(ii)-stats.descriptive.SEM(ii)*1.96 stats.descriptive.mean(ii)+stats.descriptive.SEM(ii)*1.96],'color',color(1,:));
         end
-        plot(pos, stats.descriptive.mean,'o','color', color(1,:),'MarkerFaceColor',[1 1 1],'MarkerEdgeColor',color(1,:),'MarkerSize',10);
+        plot(pos, stats.descriptive.mean,'o','color', color(1,:),'MarkerFaceColor',roundPlotCenterColor(1,:),'MarkerEdgeColor',color(1,:),'MarkerSize',roundPlotSize);
         xlim([.5 max(pos)+.5]);
         set(gca,'xtick',[]);
         if strcmpi(orientation, 'horizontal')
@@ -581,13 +564,6 @@ if doPlot
         
     elseif strcmpi(plotType,'boxplot')
         color=flip(color,1);
-        if size(groupAll,2) < 2
-            pos = [1:length(ind)];
-        else
-            pos = [1:length(ind)];                                         % group by the first variable
-            pos = (cumsum([0; diff(indAll(:,1))/(1*10^(size(groupAll,2)-1))])/2)' + pos;
-        end
-        pos = pos + posOffset;
         
         boxplot(y,group,'colors',[0 0 0],'symbol','o','width',.8,'orientation',orientation,'positions',pos);
         h = findobj(gca,'Tag','Box');
@@ -644,13 +620,6 @@ if doPlot
         end 
         
     elseif strcmpi(plotType,'barSEM') || strcmpi(plotType,'barStd')
-        if size(groupAll,2) < 2
-            pos = [1:length(ind)];
-        else
-            pos = [1:length(ind)];                                         % group by the first variable
-            pos = (cumsum([0; diff(indAll(:,1))/(1*10^(size(groupAll,2)-1))])/2)' + pos;
-        end
-        pos = pos + posOffset;
         
         hold on
         for ii = 1:length(ind) 
@@ -673,7 +642,7 @@ if doPlot
         end
         
     elseif strcmpi(plotType,'BoxLinesStd') || strcmpi(plotType,'BoxLinesSEM')
-        pos = [1:length(ind)] + posOffset;
+        % pos = [1:length(ind)] + posOffset;
         if isempty(FaceEdge)
             FaceEdge = ones(size(pos));
         end
@@ -710,13 +679,6 @@ if doPlot
         xlim([.5 max(pos)+.5]);
         
     elseif strcmpi(plotType,'dispersionStd') 
-        if size(groupAll,2) < 2
-            pos = [1:length(ind)];
-        else
-            pos = [1:length(ind)];                                         % group by the first variable
-            pos = (cumsum([0; diff(indAll(:,1))/(1*10^(size(groupAll,2)-1))])/2)' + pos;
-        end
-        pos = pos + posOffset;
         
         hold on
         for ii = 1:length(ind) 
@@ -738,13 +700,7 @@ if doPlot
         end
         
     elseif strcmpi(plotType,'fillStd') || strcmpi(plotType,'fillSEM')
-        if size(groupAll,2) < 2
-            pos = [1:length(ind)];
-        else
-            pos = [1:length(ind)];                                         % group by the first variable
-            pos = (cumsum([0; diff(indAll(:,1))/(1*10^(size(groupAll,2)-1))])/2)' + pos;
-        end
-        pos = pos + posOffset;
+        
         m = stats.descriptive.mean;
         
         if strcmpi(plotType,'fillStd')
