@@ -306,22 +306,12 @@ if nConditions == 1
 end
 
 if saveMat
-<<<<<<< HEAD
-    try
-        disp('Saving results...');
-        save([basenameFromBasepath(pwd) '.' eventType '_psth.cellinfo.mat'],'psth');
-    catch
-        disp('Saving results...');
-        save([basenameFromBasepath(pwd) '.' eventType '_psth.cellinfo.mat'],'psth','-v7.3');
-    end
-=======
     disp('Saving results...');
-    
+
     raster = psth.raster;
     psth = rmfield(psth,'raster');
     save([basenameFromBasepath(pwd) '.' eventType '_psth.cellinfo.mat'],'psth','-v7.3');
     save([basenameFromBasepath(pwd) '.' eventType '_raster.cellinfo.mat'],'raster','-v7.3');
->>>>>>> cfee0c9a464b9be2bcdb292aad260cc9bc8f09bf
 end
 
 % PLOTS
