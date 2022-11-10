@@ -54,7 +54,7 @@ fcr1_220303_sess5,fcr1,fcr1\fcr1_220303_sess5,c57b1/6,vip/cr/ai80,"105µm (125µ
 fpv4_210323_sess13,fpv4,fpv4\fpv4_210323_sess13,c57b1/6,pv/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,11,PTLp CA1sp CA1so CA1sr CA1slm CA3,InterneuronsLibrary
 fpv4_210317_sess10,fpv4,fpv4\fpv4_210317_sess10,c57b1/6,pv/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,22,PTLp CA1sr CA1sp CA1so CA3,InterneuronsLibrary
 fpv4_210324_sess14,fpv4,fpv4\fpv4_210324_sess14,c57b1/6,pv/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,20,PTLp CA1sp CA1so CA1sr CA3,InterneuronsLibrary
-fcamk1_200827_sess9,fcamk1,fcamk1\fcamk1_200827_sess9,c57,camkii/ai32,uled-12led-32ch-4shanks,linear maze,57,CA1sp CA1so,uLEDiscotheque InterneuronsLibrary
+fcamk1_200827_sess9,fcamk1,fcamk1\fcamk1_200827_sess9,c57,camkii/ai32,"uled-12led-32ch-4shanks",linear maze,57,CA1sp CA1so,uLEDiscotheque InterneuronsLibrary
 fpv4_210315_sess8,fpv4,fpv4\fpv4_210315_sess8,c57b1/6,pv/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,13,PTLp CA1sp CA1so CA1sr CA3,InterneuronsLibrary
 fid2dlx1_191119_sess2,fid2dlx1,fid2dlx1\fid2dlx1_191119_sess2,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,48,PTLp5 PTLp6 PTLp2_3 PTLp1 PTLp4,InterneuronsLibrary neuroGli2d
 fpv3_210317_sess13,fpv3,fpv3\fpv3_210317_sess13,c57b1/6,pv/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,30,PTLp CA1so CA1sp CA1slm CA1sr CA3,InterneuronsLibrary
@@ -83,10 +83,11 @@ fnkx8_200821_sess5,fnkx8,fnkx8\fnkx8_200821_sess5,c57b1/6,id2/dlx/ai80,"105µm (
 fnkx8_200824_sess6,fnkx8,fnkx8\fnkx8_200824_sess6,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,50,CA1sp CA1so CA1sr PTLp6 PTLp5 CA1slm CA3 DG,InterneuronsLibrary
 fnkx9_200817_sess1,fnkx9,fnkx9\fnkx9_200817_sess1,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,70,PTLp5 PTLp6 PTLp2_3 CA1so CA1sp CA1sr CA1slm CA3,InterneuronsLibrary neuroGli2d
 fcr2_220304_sess4,fcr2,fCr2\fCr2_220304_sess4,c57b1/6,vip/cr/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,75,PTLp5 PTLp6 PTLp2_3 CA1so CA1sp CA1sr CA1slm CA3,InterneuronsLibrary desVIPnhibition
-fcamk1_200901_sess12,fcamk1,fcamk1\fcamk1_200901_sess12,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze,47,CA1sp,uLEDiscotheque InterneuronsLibrary
-fcamk3_201028_sess10_cleanned,fcamk3,fcamk3\fcamk3_201028_sess10_cleanned,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze linear maze,43,CA1sp,uLEDiscotheque InterneuronsLibrary
+fcamk1_200901_sess12,fcamk1,fcamk1\fcamk1_200901_sess12,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze,47,CA1sp,uLEDiscotheque InterneuronsLibrary
+fcamk3_201028_sess10_cleanned,fcamk3,fcamk3\fcamk3_201028_sess10_cleanned,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze linear maze,43,CA1sp,uLEDiscotheque InterneuronsLibrary
 fvip5_221021_sess6,fvip5,fvip5\fvip5_221021_sess6,c57b1/6,vip/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,100,PTLp5 PTLp2_3 CA1so CA1sp CA1slm CA1sr CA3sp CA3so CA3sr,InterneuronsLibrary desVIPnhibition
 fvip5_221019_sess4,fvip5,fvip5\fvip5_221019_sess4,c57b1/6,vip/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,97,PTLp5 PTLp2_3 CA1so CA1sp CA1slm CA1sr CA3sp CA3so CA3sr,InterneuronsLibrary desVIPnhibition
 fsst1_190522_sess23,fsst1,fsst1\fsst1_190522_sess23,c57b1/6,sst/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,31,CA1sp CA1so PTLp5 PTLp6,InterneuronsLibrary
 fsst1_190521_sess22,fsst1,fsst1\fsst1_190521_sess22,c57b1/6,sst/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,61,CA1sp CA1so PTLp6 PTLp5,InterneuronsLibrary
-fvip2_220823_sess13,fvip2,fvip2\fvip2_220823_sess13,c57b1/6,vip/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,56,PTLp5 PTLp2_3 CA1so CA1sp CA1slm CA1sr CA3sp DG Thalamus,InterneuronsLibrary desVIPnhibition 
+fvip2_220823_sess13,fvip2,fvip2\fvip2_220823_sess13,c57b1/6,vip/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,56,PTLp5 PTLp2_3 CA1so CA1sp CA1slm CA1sr CA3sp DG Thalamus,InterneuronsLibrary desVIPnhibition
+fcamk7_220421_sess17,fcamk7,fcamk7\fcamk7_220421_sess17,c57b1/6,camkii/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,240,Cortex CA1sp CA1so CA1slm CA1sr pSUB,InterneuronsLibrary 
