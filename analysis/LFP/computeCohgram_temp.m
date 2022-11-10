@@ -101,7 +101,7 @@ session = loadSession(basepath);
 
 targetFile = dir('*.cohgram.lfp.mat');
 if ~isempty(targetFile) && ~force
-    disp('Cohgram already detected! Loading file.');
+    disp('Power Spectrum already detected! Loading file.');
     load(targetFile.name);
     return
 end
@@ -283,8 +283,7 @@ if plt
         title(['Ch: ', num2str(cohgram.(flds{ii}).ch2), ' Region: ', cohgram.(flds{ii}).region2]);
         
         if saveFig
-            mkdir('lfpAnalysis');
-            saveas(gcf,['lfpAnalysis\cohgram_',num2str(cohgram.(flds{ii}).region1),'_',num2str(cohgram.(flds{ii}).region2),'.png']);
+            saveas(gcf,['SummaryFigures\cohgram_',num2str(cohgram.(flds{ii}).region1),'_',num2str(cohgram.(flds{ii}).region2),'.png']);
         end
         
         
@@ -352,7 +351,7 @@ if plt
         title(['Ch: ', num2str(cohgram.(flds{ii}).ch2), ' Region: ', cohgram.(flds{ii}).region2]);
         
         if saveFig
-            saveas(gcf,['lfpAnalysis\cohgram_thetaEpochs_',num2str(cohgram.(flds{ii}).region1),'_',num2str(cohgram.(flds{ii}).region2),'.png']);
+            saveas(gcf,['SummaryFigures\cohgram_thetaEpochs_',num2str(cohgram.(flds{ii}).region1),'_',num2str(cohgram.(flds{ii}).region2),'.png']);
         end
         
         % Figure 3 (Non-theta epochs)
@@ -421,69 +420,18 @@ if plt
         title(['Ch: ', num2str(cohgram.(flds{ii}).ch2), ' Region: ', cohgram.(flds{ii}).region2]);
         
         if saveFig
-            saveas(gcf,['lfpAnalysis\cohgram_NonthetaEpochs_',num2str(cohgram.(flds{ii}).region1),'_',num2str(cohgram.(flds{ii}).region2),'.png']);
+            saveas(gcf,['SummaryFigures\cohgram_NonthetaEpochs_',num2str(cohgram.(flds{ii}).region1),'_',num2str(cohgram.(flds{ii}).region2),'.png']);
         end
         
-        % Figure 4 all epochs together
-        t_theta = sum(diff(thetaEpochs.intervals')) * diff(t);
-        t_non_theta = sum(diff(thetaEpochs.intervals_nonTheta')) * diff(t);
-        figure('units','normalized','outerposition',[0 0 1 1]);
-        subplot(1,4,1)
-        plotFill(f,mean(cohgram.(flds{ii}).coherogram),'color',[.8 .8 .8],'lineStyle','--'); xlim([1 200]); ylim([-1 1]);
-        plotFill(f,mean(cohgram.(flds{ii}).thetaEpochs.coherogram),'color',[.8 .2 .2],'lineStyle','-'); xlim([1 200]); ylim([-1 1]);
-        plotFill(f,mean(cohgram.(flds{ii}).NonthetaEpochs.coherogram),'color',[.2 .2 .8],'lineStyle','-'); xlim([1 200]); ylim([-1 1]);
-        ax = axis;
-        fill([theta_bandpass flip(theta_bandpass)],[ax([3 3 4 4])],[.8 .6 .6],'EdgeColor','none','FaceAlpha',.1);
-        fill([lgamma_bandpass flip(lgamma_bandpass)],[ax([3 3 4 4])],[.8 .4 .4],'EdgeColor','none','FaceAlpha',.1);
-        fill([hgamma_bandpass flip(hgamma_bandpass)],[ax([3 3 4 4])],[.8 .2 .2],'EdgeColor','none','FaceAlpha',.1);
-        ylabel('Full recording [r]'); xlabel('Freq [Hz]');  
-        title(['Coherence (r) Ch: ', num2str(cohgram.(flds{ii}).ch1) , ' Ch: ', num2str(cohgram.(flds{ii}).ch2)]);
-        
-        subplot(1,4,2)
-        plotFill(f,mean(cohgram.(flds{ii}).phase),'color',[.8 .8 .8],'lineStyle','--'); xlim([1 200]); ylim([-1 1]);
-        plotFill(f,mean(cohgram.(flds{ii}).thetaEpochs.phase),'color',[.8 .2 .2],'lineStyle','-'); xlim([1 200]); ylim([-1 1]);
-        plotFill(f,mean(cohgram.(flds{ii}).NonthetaEpochs.phase),'color',[.2 .2 .8],'lineStyle','-'); xlim([1 200]); ylim([-1 1]);
-        ax = axis;
-        fill([theta_bandpass flip(theta_bandpass)],[ax([3 3 4 4])],[.8 .6 .6],'EdgeColor','none','FaceAlpha',.1);
-        fill([lgamma_bandpass flip(lgamma_bandpass)],[ax([3 3 4 4])],[.8 .4 .4],'EdgeColor','none','FaceAlpha',.1);
-        fill([hgamma_bandpass flip(hgamma_bandpass)],[ax([3 3 4 4])],[.8 .2 .2],'EdgeColor','none','FaceAlpha',.1);
-        ylabel('Full recording [Phase]'); xlabel('Freq [Hz]');  
-        title(['Phase Coherence Ch: ', num2str(cohgram.(flds{ii}).ch1) , ' Ch: ', num2str(cohgram.(flds{ii}).ch2)]);
-        
-        subplot(1,4,3)
-        plotFill(f,mean(cohgram.(flds{ii}).S1),'color',[.8 .8 .8],'lineStyle','--'); xlim([1 200]); ylim([-1 1]);
-        plotFill(f,mean(cohgram.(flds{ii}).thetaEpochs.S1),'color',[.8 .2 .2],'lineStyle','-'); xlim([1 200]); ylim([-1 1]);
-        plotFill(f,mean(cohgram.(flds{ii}).NonthetaEpochs.S1),'color',[.2 .2 .8],'lineStyle','-'); xlim([1 200]); ylim([-1 1]);
-        ax = axis;
-        fill([theta_bandpass flip(theta_bandpass)],[ax([3 3 4 4])],[.8 .6 .6],'EdgeColor','none','FaceAlpha',.1);
-        fill([lgamma_bandpass flip(lgamma_bandpass)],[ax([3 3 4 4])],[.8 .4 .4],'EdgeColor','none','FaceAlpha',.1);
-        fill([hgamma_bandpass flip(hgamma_bandpass)],[ax([3 3 4 4])],[.8 .2 .2],'EdgeColor','none','FaceAlpha',.1);
-        ylabel('Full recording [Freq, Hz]'); xlabel('Freq [Hz]');  
-        title(['Ch: ', num2str(cohgram.(flds{ii}).ch1), ' Region: ', cohgram.(flds{ii}).region1]);
-        
-        subplot(1,4,4)
-        plotFill(f,mean(cohgram.(flds{ii}).S2),'color',[.8 .8 .8],'lineStyle','--'); xlim([1 200]); ylim([-1 1]);
-        plotFill(f,mean(cohgram.(flds{ii}).thetaEpochs.S2),'color',[.8 .2 .2],'lineStyle','-'); xlim([1 200]); ylim([-1 1]);
-        plotFill(f,mean(cohgram.(flds{ii}).NonthetaEpochs.S2),'color',[.2 .2 .8],'lineStyle','-'); xlim([1 200]); ylim([-1 1]);
-        ax = axis;
-        fill([theta_bandpass flip(theta_bandpass)],[ax([3 3 4 4])],[.8 .6 .6],'EdgeColor','none','FaceAlpha',.1);
-        fill([lgamma_bandpass flip(lgamma_bandpass)],[ax([3 3 4 4])],[.8 .4 .4],'EdgeColor','none','FaceAlpha',.1);
-        fill([hgamma_bandpass flip(hgamma_bandpass)],[ax([3 3 4 4])],[.8 .2 .2],'EdgeColor','none','FaceAlpha',.1);
-        ylabel('Full recording [Freq, Hz]'); xlabel('Freq [Hz]');  
-        title(['Ch: ', num2str(cohgram.(flds{ii}).ch2), ' Region: ', cohgram.(flds{ii}).region2]);
-        
-        if saveFig
-            saveas(gcf,['lfpAnalysis\cohgram_allEpochs_',num2str(cohgram.(flds{ii}).region1),'_',num2str(cohgram.(flds{ii}).region2),'.png']);
-        end
     end
 end
-close all;
+
 if saveMat
     try
-        save([session.general.name,'.cohgram.lfp.mat'],'cohgram','-v7.3');
+        save([session.general.name,'.cohgram.lfp.mat','cohgram']);
     catch
         disp('Saving with -v7.3...');
-        save([session.general.name,'.cohgram.lfp.mat'],'cohgram','-v7.3');
+        save([session.general.name,'.cohgram.lfp.mat','cohgram'],'-v7.3');
     end
 end
 

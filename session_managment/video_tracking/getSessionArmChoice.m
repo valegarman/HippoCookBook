@@ -92,17 +92,17 @@ cd(basepath);
 efields = fieldnames(sessionArmChoice);
 try tracking = getSessionTracking;
     if size(tracking.events.subSessions,1) == size(efields,1)
-    disp('Correctiong timestamps for session recording...');
-    for ii = 1:size(efields,1)
-        preRec = tracking.events.subSessions(ii,1);
-        sessionArmChoice.(efields{ii}).timestamps = ...
-            sessionArmChoice.(efields{ii}).timestamps + preRec;
-        sessionArmChoice.(efields{ii}).delay.timestamps = ...
-            sessionArmChoice.(efields{ii}).delay.timestamps + preRec;
+        disp('Correctiong timestamps for session recording...');
+        for ii = 1:size(efields,1)
+            preRec = tracking.events.subSessions(ii,1);
+            sessionArmChoice.(efields{ii}).timestamps = ...
+                sessionArmChoice.(efields{ii}).timestamps + preRec;
+            sessionArmChoice.(efields{ii}).delay.timestamps = ...
+                sessionArmChoice.(efields{ii}).delay.timestamps + preRec;
+        end
+    else
+        warning('Number of behavioral recordings do not match!')
     end
-else
-    warning('Number of behavioral recordings do not match!')
-end
 catch 
     warning('No available tracking!');
 end

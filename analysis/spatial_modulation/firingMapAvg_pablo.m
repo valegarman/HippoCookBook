@@ -108,12 +108,24 @@ try
     Fs_tracking = cell(1,length(behavior.maps));
     bndbox = cell(1,length(behavior.maps));
     pixelsmetre = cell(1,length(behavior.maps));
-    for i = 1:length(tracking.folders)
-        fld{i} = find(ismember(behavior.description,tracking.apparatus{i}.name));
-    end
-    count = 1;
-    for ii = 1:length(fld)
-        for jj = 1:length(fld{ii})
+    if any(ismember(behavior.description,'Linear maze  N-S'))
+        for i = 1:length(tracking.folders)
+            fld{i} = find(ismember(behavior.description,tracking.apparatus{i}.name));
+        end
+        count = 1;
+        for ii = 1:length(fld)
+            for jj = 1:length(fld{ii})
+                nBins{count} = round(round(tracking.apparatus{ii}.boundingbox.xmax - tracking.apparatus{ii}.boundingbox.xmin)/pixelsPerCm);
+                nPix2BinBy{count} = (tracking.pixelsmetre{ii}*pixelsPerCm)/100;
+                Fs_tracking{count} = tracking.samplingRate(ii);
+                bndbox{count} = tracking.apparatus{ii}.boundingbox;
+                pixelsmetre{count} = tracking.pixelsmetre{ii};
+                count = count + 1;
+            end
+        end
+    else
+        count = 1;
+        for ii = 1:length(behavior.description)
             nBins{count} = round(round(tracking.apparatus{ii}.boundingbox.xmax - tracking.apparatus{ii}.boundingbox.xmin)/pixelsPerCm);
             nPix2BinBy{count} = (tracking.pixelsmetre{ii}*pixelsPerCm)/100;
             Fs_tracking{count} = tracking.samplingRate(ii);
@@ -122,6 +134,7 @@ try
             count = count + 1;
         end
     end
+        
 
     % Check if bin size is different for same conditions
     uniqueParadigms = unique(behavior.description);
@@ -197,6 +210,52 @@ for unit = 1:length(spikes.times)
         end
     end
 end
+
+% Check that maps of same paradigm have same number of bins
+for ii = 1:length(map)
+    for jj = 1:length(uniqueParadigms)
+        sameParadigm = find(ismember(behavior.description,uniqueParadigms{jj}));
+        for kk = 1:length(sameParadigm)
+            if size(map{ii}{sameParadigm(1)}.count,1) ~= size(map{ii}{sameParadigm(2)}.count,1) || size(map{ii}{sameParadigm(1)}.count,2) ~= size(map{ii}{sameParadigm(2)}.count,2)
+                disp('Different number of bins for same paradigm. Trying to fix...');
+                m1 = size(map{ii}{sameParadigm(1)}.count,1);
+                m2 = size(map{ii}{sameParadigm(2)}.count,1);
+                n1 = size(map{ii}{sameParadigm(1)}.count,2);
+                n2 = size(map{ii}{sameParadigm(2)}.count,2);
+                
+                if m1 ~= m2
+                    maximum= max(m1,m2);
+                    idmax = find(max(m1,m2));
+                    map{ii}{sameParadigm(idmax)}.y(end) = [];
+                    map{ii}{sameParadigm(idmax)}.count(end,:) = [];
+                    map{ii}{sameParadigm(idmax)}.time(end,:) = [];
+                    map{ii}{sameParadigm(idmax)}.z(end,:) = [];
+                    map{ii}{sameParadigm(idmax)}.countUnSmooth(end,:) = [];
+                    map{ii}{sameParadigm(idmax)}.timeUnSmooth(end,:) = [];
+                    map{ii}{sameParadigm(idmax)}.timeUnSmoothSec(end,:) = [];
+                    map{ii}{sameParadigm(idmax)}.zUnSmooth(end,:) = [];
+                    
+                end
+                
+                if n1 ~= n2
+                    maximum = max(n1,n2);
+                    idmax = find(max(n1,n2));
+                    map{ii}{sameParadigm(idmax)}.x(end) = [];
+                    map{ii}{sameParadigm(idmax)}.count(:,end) = [];
+                    map{ii}{sameParadigm(idmax)}.time(:,end) = [];
+                    map{ii}{sameParadigm(idmax)}.z(:,end) = [];
+                    map{ii}{sameParadigm(idmax)}.countUnSmooth(:,end) = [];
+                    map{ii}{sameParadigm(idmax)}.timeUnSmooth(:,end) = [];
+                    map{ii}{sameParadigm(idmax)}.timeUnSmoothSec(:,end) = [];
+                    map{ii}{sameParadigm(idmax)}.zUnSmooth(:,end) = [];
+                    
+                end
+            end        
+        end
+    end
+end
+
+
 
 for c = 1:conditions
     cmBin{c} = (max(positions{c}(:,2))-min(positions{c}(:,2)))/nBins{c};

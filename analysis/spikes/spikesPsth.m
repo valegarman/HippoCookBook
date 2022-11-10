@@ -306,6 +306,13 @@ if nConditions == 1
 end
 
 if saveMat
+    try
+        disp('Saving results...');
+        save([basenameFromBasepath(pwd) '.' eventType '_psth.cellinfo.mat'],'psth');
+    catch
+        disp('Saving results...');
+        save([basenameFromBasepath(pwd) '.' eventType '_psth.cellinfo.mat'],'psth','-v7.3');
+    end
     disp('Saving results...');
     
     raster = psth.raster;

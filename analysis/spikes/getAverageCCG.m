@@ -11,6 +11,7 @@ function [averageCCG] = getAverageCCG(varargin)
 % winSize       In seconds, default, 0.6.
 % winSizePlot   Interval in seconds, default [-.3 .3] 
 % plotOpt       Default true.
+% saveFig       Default true
 % saveMat       Default true.
 % force         Overwrite previos analysis, default false.
 % excludeStimulationPeriods
@@ -21,7 +22,8 @@ function [averageCCG] = getAverageCCG(varargin)
 % interp0       Default, true.
 % useBrainRegions
 %               Default, true.
-%
+% includeIntervals
+%               intervals to include for analysis
 % OUTPUTS
 % averageCCG
 %
@@ -34,6 +36,7 @@ addParameter(p,'basepath',pwd,@ischar);
 addParameter(p,'binSize',0.005,@isnumeric);
 addParameter(p,'winSize',0.6,@isnumeric);
 addParameter(p,'plotOpt',true,@islogical);
+addParameter(p,'saveFig',true,@islogical);
 addParameter(p,'winSizePlot',[-.3 .3],@isnumeric);
 addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'force',false,@islogical);
@@ -52,6 +55,7 @@ binSize = p.Results.binSize;
 winSize = p.Results.winSize;
 winSizePlot = p.Results.winSizePlot;
 plotOpt = p.Results.plotOpt;
+saveFig = p.Results.saveFig;
 saveMat = p.Results.saveMat;
 force = p.Results.force;
 skipStimulationPeriods = p.Results.skipStimulationPeriods;
@@ -160,6 +164,19 @@ if useBrainRegions && exist([basenameFromBasepath(basepath) '.cell_metrics.celli
             clear cellsID ccMedian ccZMedian ccMean ccZMean
             for jj = 1 : length(spikes.times)
                 cellsID = indCell(indCell~=jj & cellsInRegion);
+                if length(cellsID) == 1
+                    ccMedian(jj,:) = squeeze(allCcg(:,jj,cellsID)); %
+                    ccZMedian(jj,:) = zscore(squeeze(allCcg(:,jj,cellsID))',[],2); % zCCG
+
+                    ccMean(jj,:) = squeeze(allCcg(:,jj,cellsID)); % zCCG
+                    ccZMean(jj,:) = zscore(squeeze(allCcg(:,jj,cellsID))',[],2); % zCCG
+                else
+                    ccMedian(jj,:) = nanmedian(squeeze(allCcg(:,jj,cellsID)),2); %
+                    ccZMedian(jj,:) = nanmedian(zscore(squeeze(allCcg(:,jj,cellsID))',[],2)); % zCCG
+
+                    ccMean(jj,:) = nanmean(squeeze(allCcg(:,jj,cellsID)),2); % zCCG
+                    ccZMean(jj,:) = nanmean(zscore(squeeze(allCcg(:,jj,cellsID))',[],2)); % zCCG
+                end
                 
                 ccMedian(jj,:) = nanmedian(squeeze(allCcg(:,jj,cellsID)),2); %
                 ccZMedian(jj,:) = nanmedian(zscore(squeeze(allCcg(:,jj,cellsID))',[],2),1); % zCCG
@@ -303,7 +320,20 @@ if useDistinctShanks && length(session.extracellular.electrodeGroups.channels)>1
         clear cellsID ccMedian ccZMedian ccMean ccZMean
         for jj = 1 : length(spikes.times)
             cellsID = indCell(indCell~=jj & cellsInShank);
+            
+            if length(cellsID) == 1
+                ccMedian(jj,:) = squeeze(allCcg(:,jj,cellsID));
+                ccZMedian(jj,:) = zscore(squeeze(allCcg(:,jj,cellsID))',[],2);
+                
+                ccMean(jj,:) = squeeze(allCcg(:,jj,cellsID));
+                ccZMean(jj,:) = zscore(squeeze(allCcg(:,jj,cellsID))',[],2);
+            else
+                ccMedian(jj,:) = nanmedian(squeeze(allCcg(:,jj,cellsID)),2); %
+                ccZMedian(jj,:) = nanmedian(zscore(squeeze(allCcg(:,jj,cellsID))',[],2)); % zCCG
 
+                ccMean(jj,:) = nanmean(squeeze(allCcg(:,jj,cellsID)),2); % zCCG
+                ccZMean(jj,:) = nanmean(zscore(squeeze(allCcg(:,jj,cellsID))',[],2)); % zCCG
+            end
             ccMedian(jj,:) = nanmedian(squeeze(allCcg(:,jj,cellsID)),2); %
             ccZMedian(jj,:) = nanmedian(zscore(squeeze(allCcg(:,jj,cellsID))',[],2),1); % zCCG
 
@@ -387,7 +417,9 @@ if plotOpt
             set(gca,'YTick',[],'XTick',[]);
         end
     end
-    saveas(gcf,['SummaryFigures\allCellsAverageCCG.png']); 
+    if saveFig
+        saveas(gcf,['SummaryFigures\allCellsAverageCCG.png']); 
+    end
     
     % grand mean
     figure
@@ -395,7 +427,9 @@ if plotOpt
         averageCCG.ZmeanCCG); caxis([-3 3]); colormap(jet);
     set(gca,'TickDir','out'); xlabel('Time'); ylabel('Cells'); xlim([winSizePlot(1) winSizePlot(2)]);
     title('Grand CCG average','FontWeight','normal','FontSize',10);
-    saveas(gcf,['SummaryFigures\grandCCGAverage.png']);
+    if saveFig
+        saveas(gcf,['SummaryFigures\grandCCGAverage.png']);
+    end
     
     % by BrainRegion
     if isfield(averageCCG,'brainRegionCCG')
@@ -421,7 +455,9 @@ if plotOpt
                 ylabel('CCG Index');
             end
         end
-        saveas(gcf,['SummaryFigures\CCGAvgPerRegion.png']); 
+        if saveFig
+            saveas(gcf,['SummaryFigures\CCGAvgPerRegion.png']); 
+        end
     end
     
     % by shank
@@ -449,9 +485,12 @@ if plotOpt
                 ylabel('CCG Index');
             end
         end
+        if saveFig
+            saveas(gcf,['SummaryFigures\CCGAvgPerShank.png']);
+        end      
     end
     
 end
-
+close all;
 cd(prevPath);
 end

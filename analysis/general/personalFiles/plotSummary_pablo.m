@@ -625,42 +625,52 @@ end
 
 % spatial modulation
 if ~isempty(spatialModulation) && ~any(ismember(excludePlot,{lower('spatialModulation')}))
-    h = get(gcf);
-    actualSubPlot = length(h.Children);
-    subplot(5,5,[21 22])
-    hold on
+    try
+        h = get(gcf);
+        actualSubPlot = length(h.Children);
+        subplot(5,5,[21 22])
+        hold on
 
-    imagesc_ranked(spatialModulation.map_1_timestamps, [1:length(find(all_pyr))], spatialModulation.map_1_rateMapsZ(all_pyr,:),[-3 3],...
-        spatialModulation.PF_position_map_1(all_pyr,:));
+        imagesc_ranked(spatialModulation.map_1_timestamps, [1:length(find(all_pyr))], spatialModulation.map_1_rateMapsZ(all_pyr,:),[-3 3],...
+            spatialModulation.PF_position_map_1(all_pyr,:));
 
-    imagesc_ranked(spatialModulation.map_1_timestamps, [length(find(all_pyr)) + 5 (length(find(all_pyr))+ length(find(all_nw)) + 5)], spatialModulation.map_1_rateMapsZ(all_nw,:),[-3 3],...
-        spatialModulation.PF_position_map_1(all_nw,:));
+        imagesc_ranked(spatialModulation.map_1_timestamps, [length(find(all_pyr)) + 5 (length(find(all_pyr))+ length(find(all_nw)) + 5)], spatialModulation.map_1_rateMapsZ(all_nw,:),[-3 3],...
+            spatialModulation.PF_position_map_1(all_nw,:));
 
-    imagesc_ranked(spatialModulation.map_1_timestamps,...
-        [(length(find(all_pyr)) + length(find(all_nw)) + 10) (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)], spatialModulation.map_1_rateMapsZ(all_ww,:),[-3 3],...
-        spatialModulation.PF_position_map_1(all_ww,:));
-    xlim(spatialModulation.map_1_timestamps([1 end]));
-    ylim([0 (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)]);
-    xlabel('cm'); ylabel('Map 1 (-3 to 3 SD)');
-    set(gca,'YTick',[0 (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)],'YTickLabel',[0 length(all_pyr)]);
+        imagesc_ranked(spatialModulation.map_1_timestamps,...
+            [(length(find(all_pyr)) + length(find(all_nw)) + 10) (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)], spatialModulation.map_1_rateMapsZ(all_ww,:),[-3 3],...
+            spatialModulation.PF_position_map_1(all_ww,:));
+        xlim(spatialModulation.map_1_timestamps([1 end]));
+        ylim([0 (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)]);
+        xlabel('cm'); ylabel('Map 1 (-3 to 3 SD)');
+        set(gca,'YTick',[0 (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)],'YTickLabel',[0 length(all_pyr)]);
 
-    subplot(5,5,[23 24])
-    hold on
+        subplot(5,5,[23 24])
+        hold on
 
-    imagesc_ranked(spatialModulation.map_2_timestamps, [1:length(find(all_pyr))], spatialModulation.map_2_rateMapsZ(all_pyr,:),[-3 3],...
-        spatialModulation.PF_position_map_2(all_pyr,:));
+        imagesc_ranked(spatialModulation.map_2_timestamps, [1:length(find(all_pyr))], spatialModulation.map_2_rateMapsZ(all_pyr,:),[-3 3],...
+            spatialModulation.PF_position_map_2(all_pyr,:));
 
-    imagesc_ranked(spatialModulation.map_2_timestamps, [length(find(all_pyr)) + 5 (length(find(all_pyr))+ length(find(all_nw)) + 5)], spatialModulation.map_2_rateMapsZ(all_nw,:),[-3 3],...
-        spatialModulation.PF_position_map_1(all_nw,:));
+        imagesc_ranked(spatialModulation.map_2_timestamps, [length(find(all_pyr)) + 5 (length(find(all_pyr))+ length(find(all_nw)) + 5)], spatialModulation.map_2_rateMapsZ(all_nw,:),[-3 3],...
+            spatialModulation.PF_position_map_1(all_nw,:));
 
-    imagesc_ranked(spatialModulation.map_2_timestamps,...
-        [(length(find(all_pyr)) + length(find(all_nw)) + 10) (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)], spatialModulation.map_2_rateMapsZ(all_ww,:),[-3 3],...
-        spatialModulation.PF_position_map_1(all_ww,:));
-    xlim(spatialModulation.map_2_timestamps([1 end]));
-    ylim([0 (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)]);
-    xlabel('cm'); ylabel('Map 2 (-3 to 3 SD)');
-    set(gca,'YTick',[0 (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)],'YTickLabel',[0 length(all_pyr)]);
-    colormap jet
+        imagesc_ranked(spatialModulation.map_2_timestamps,...
+            [(length(find(all_pyr)) + length(find(all_nw)) + 10) (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)], spatialModulation.map_2_rateMapsZ(all_ww,:),[-3 3],...
+            spatialModulation.PF_position_map_1(all_ww,:));
+        xlim(spatialModulation.map_2_timestamps([1 end]));
+        ylim([0 (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)]);
+        xlabel('cm'); ylabel('Map 2 (-3 to 3 SD)');
+        set(gca,'YTick',[0 (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)],'YTickLabel',[0 length(all_pyr)]);
+        colormap jet
+    catch
+        subplot(5,5,[21 22])
+        axis off
+        title('No behaviour data','FontWeight','normal');
+
+        subplot(5,5,[23 24])
+        axis off
+        title('No behaviour data','FontWeight','normal');
+    end
 else
     subplot(5,5,[21 22])
     axis off

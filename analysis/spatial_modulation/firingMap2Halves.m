@@ -105,13 +105,24 @@ try
     Fs_tracking = cell(1,length(behavior.maps));
     bndbox = cell(1,length(behavior.maps));
     pixelsmetre = cell(1,length(behavior.maps));
-    
-    for i = 1:length(tracking.folders)
-        fld{i} = find(ismember(behavior.description,tracking.apparatus{i}.name));
-    end
-    count = 1;
-    for ii = 1:length(fld)
-        for jj = 1:length(fld{ii})
+    if any(ismember(behavior.description,'Linear maze N-S'))
+        for i = 1:length(tracking.folders)
+            fld{i} = find(ismember(behavior.description,tracking.apparatus{i}.name));
+        end
+        count = 1;
+        for ii = 1:length(fld)
+            for jj = 1:length(fld{ii})
+                nBins{count} = round(round(tracking.apparatus{ii}.boundingbox.xmax - tracking.apparatus{ii}.boundingbox.xmin)/pixelsPerCm);
+                nPix2BinBy{count} = (tracking.pixelsmetre{ii}*pixelsPerCm)/100;
+                Fs_tracking{count} = tracking.samplingRate(ii);
+                bndbox{count} = tracking.apparatus{ii}.boundingbox;
+                pixelsmetre{count} = tracking.pixelsmetre{ii};
+                count = count + 1;
+            end
+        end
+    else
+        count = 1;
+        for ii = 1:length(behavior.description)
             nBins{count} = round(round(tracking.apparatus{ii}.boundingbox.xmax - tracking.apparatus{ii}.boundingbox.xmin)/pixelsPerCm);
             nPix2BinBy{count} = (tracking.pixelsmetre{ii}*pixelsPerCm)/100;
             Fs_tracking{count} = tracking.samplingRate(ii);

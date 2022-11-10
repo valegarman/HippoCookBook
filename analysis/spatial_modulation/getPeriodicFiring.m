@@ -94,6 +94,7 @@ if plt
         mkdir('periodicFiring')
         saveas(gcf,['periodicFiring\periodic_cell_',num2str(unit)]);
     end
+    close all;
 end
 
 end

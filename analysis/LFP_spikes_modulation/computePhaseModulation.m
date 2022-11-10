@@ -59,6 +59,7 @@ addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'skipStimulationPeriods',true,@islogical);
 addParameter(p,'excludeIntervals',[],@isnumeric);
 addParameter(p,'powerThresh',0,@isnumeric);
+addParameter(p,'restrictIntervals',[],@isnumeric);
 
 parse(p,varargin{:})
 
@@ -81,6 +82,7 @@ saveMat = p.Results.saveMat;
 skipStimulationPeriods = p.Results.skipStimulationPeriods;
 excludeIntervals = p.Results.excludeIntervals;
 powerThresh = p.Results.powerThresh;
+restrictIntervals = p.Results.restrictIntervals;
 
 %% Session template
 % session = sessionTemplate(basepath,'showGUI',false);
@@ -113,6 +115,14 @@ if ~isempty(excludeIntervals)
         [status] = InIntervals(spikes.times{ii},excludeIntervals);
         spikes.times{ii} = spikes.times{ii}(~status);
     end
+end
+
+if ~isempty(restrictIntervals)
+    warning('Restricting analysis for intervals...');
+    for ii = 1:length(spikes.times)
+        [status] = InIntervals(spikes.times{ii},restrictIntervals);
+        spikes.times{ii} = spikes.times{ii}(status);
+    end 
 end
 
 if isempty(powerThresh)

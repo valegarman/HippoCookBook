@@ -90,7 +90,7 @@ for ii = 1:amountRowCorr
         end
         
         %
-        AA = z(ii:amountRowOrig,1:amountRowOrig-jj+1);
+        AA = z(ii:amountRowOrig,1:amountColOrig-jj+1);
         BB = z(1:amountRowOrig-ii+1,jj:amountColOrig);
         AAx = reshape(AA,1,numel(AA));
         BBy = reshape(BB,1,numel(BB));

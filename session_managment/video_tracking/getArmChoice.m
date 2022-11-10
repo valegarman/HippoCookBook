@@ -39,17 +39,22 @@ function [armChoice] = getArmChoice(varargin)
 % armChoice.expectedArm          In 'cueSide', it specifias the right choice. 
 %
 %  Manuel Valero 2019
+%
+%
+% Modified by Pablo Abad 2022 to include performance for trials with
+% different homeDelay and plotting them.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Defaults and Parms
 p = inputParser;
 addParameter(p,'digitalIn',[],@ischar);
 addParameter(p,'task',[]);
-addParameter(p,'force',false,@islogical)
-addParameter(p,'verbose',false,@islogical)
-addParameter(p,'leftArmTtl_channel',2,@isnumeric)
-addParameter(p,'rightArmTtl_channel',3,@isnumeric)
-addParameter(p,'homeDelayTtl_channel',4,@isnumeric)
+addParameter(p,'force',false,@islogical);
+addParameter(p,'verbose',false,@islogical);
+addParameter(p,'leftArmTtl_channel',2,@isnumeric);
+addParameter(p,'rightArmTtl_channel',3,@isnumeric);
+addParameter(p,'homeDelayTtl_channel',4,@isnumeric);
+addParameter(p,'delayPlot',true,@islogical);
 
 parse(p,varargin{:});
 digitalIn = p.Results.digitalIn;
@@ -58,6 +63,7 @@ force = p.Results.force;
 leftArmTtl_channel = p.Results.leftArmTtl_channel;
 rightArmTtl_channel = p.Results.rightArmTtl_channel;
 homeDelayTtl_channel = p.Results.homeDelayTtl_channel;
+delayPlot = p.Results.delayPlot;
 
 if ~isempty(dir('*.ArmChoice.Events.mat')) && ~force 
     disp('Arm choice already computed! Loading file.');
@@ -228,8 +234,20 @@ elseif strcmpi(task,'alternation')
         armChoice.visitedArm = armChoice.visitedArm(idx);
         
         armChoice.delay.dur = nanmean(armChoice.delay.timestamps(:,2) - armChoice.delay.timestamps(:,1));
+        armChoice.delay.durations = round(armChoice.delay.timestamps(:,2) - armChoice.delay.timestamps(:,1),0);
         armChoice.choice = [NaN; abs(diff(armChoice.visitedArm))]; % 1 is right, 0 is wrong
         armChoice.performance = nansum(armChoice.choice)/(length(armChoice.choice) - 1);
+        performance = [];
+        
+        if ~isnan(armChoice.delay.durations(end))
+            armChoice.delay.durations(end) = NaN;
+        end
+        durations = unique(armChoice.delay.durations);
+        for ii = 1:length(durations)- 1
+            performance = [performance; sum(armChoice.choice(find(armChoice.delay.durations == durations(ii)) + 1)) / length(find(armChoice.delay.durations == durations(ii)))];
+        end
+        armChoice.delay.performance = performance;
+        armChoice.delay.uniqueDurations = durations;
         armChoice.task = task;
         armChoice.expectedArm = [NaN; ~xor(armChoice.visitedArm(2:end), armChoice.choice(2:end))];
 
@@ -281,8 +299,7 @@ elseif strcmpi(task,'alternation')
         save([C{end} '.ArmChoice.Events.mat'], 'armChoice');
     else
         warning('DigitalIn format does not match. Was T maze performed? ');
-    end
-    
+    end  
 end
 
 end

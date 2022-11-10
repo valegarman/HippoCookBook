@@ -272,20 +272,24 @@ for jj = 1:length(firingMaps.rateMaps{1})
 end
 
 % 3 Mutual information between space and rate
-params.nsmooth = 1;%  # smoothing windows (x)
-for jj = 1:length(firingTrialsMap.raster_rate{1})
-    for ii = 1:length(firingTrialsMap.raster_rate)
-        params.npos = size(firingTrialsMap.raster_rate{ii}{jj},2);   % - # position bins
+try
+    params.nsmooth = 1;%  # smoothing windows (x)
+    for jj = 1:length(firingTrialsMap.raster_rate{1})
+        for ii = 1:length(firingTrialsMap.raster_rate)
+            params.npos = size(firingTrialsMap.raster_rate{ii}{jj},2);   % - # position bins
 
-        raster_rate = firingTrialsMap.raster_rate{ii}{jj}; 
-        raster_rate(isnan(raster_rate)) = 0; raster_rate(isinf(raster_rate)) = -1;
-        raster_rate(raster_rate==-1) = max(raster_rate(:));
-        raster_rate_smooth = smoothdata(raster_rate','gaussian',8)';
-        rr{1} = raster_rate_smooth;
-        [~, mut_inf] = spatialInfo(rr, params);
-        spatialModulation.(['rate_space_MI_map' num2str(jj)])(ii,:) = mut_inf;
-        clear raster_rate rr mut_inf
+            raster_rate = firingTrialsMap.raster_rate{ii}{jj}; 
+            raster_rate(isnan(raster_rate)) = 0; raster_rate(isinf(raster_rate)) = -1;
+            raster_rate(raster_rate==-1) = max(raster_rate(:));
+            raster_rate_smooth = smoothdata(raster_rate','gaussian',8)';
+            rr{1} = raster_rate_smooth;
+            [~, mut_inf] = spatialInfo(rr, params);
+            spatialModulation.(['rate_space_MI_map' num2str(jj)])(ii,:) = mut_inf;
+            clear raster_rate rr mut_inf
+        end
     end
+catch
+    warning('No firingMaps per trial detected...');
 end
 
 %% Compute statistics for 2D
@@ -426,17 +430,22 @@ if gridAnalysis
     end
 end
 
-% Spatial Autocorrelation (in case no grid analysis, because it is computed inside that function)
-for jj = 1:length(firingMaps.rateMaps{1})
-    for ii = 1:length(firingMaps.UID)
-        if ~(size(firingMaps.rateMaps{ii}{jj},1) == 1) % Not linearize
-            
-            spatialAutoCorr = computeSpatialAutocorrelation('z',firingMaps.rateMaps{ii}{jj});
-                
-            spatialModulation.(['spatialAutoCorr_map_',num2str(jj)]){ii}.r = spatialAutoCorr.r;
+try
+    % Spatial Autocorrelation (in case no grid analysis, because it is computed inside that function)
+    for jj = 1:length(firingMaps.rateMaps{1})
+        for ii = 1:length(firingMaps.UID)
+            if ~(size(firingMaps.rateMaps{ii}{jj},1) == 1) % Not linearize
+
+                spatialAutoCorr = computeSpatialAutocorrelation('z',firingMaps.rateMaps{ii}{jj});
+
+                spatialModulation.(['spatialAutoCorr_map_',num2str(jj)]){ii}.r = spatialAutoCorr.r;
+            end
         end
     end
+catch
+    disp('Spatial Autocorrelation not computed...');
 end
+
 
 % Randomization
 
@@ -530,6 +539,15 @@ if randomization
                 spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.borderIndex.south.R99 = prctile(cell2mat(spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.shuffling.borderIndex.south),99);
                 spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.borderIndex.south.R95 = prctile(cell2mat(spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.shuffling.borderIndex.south),95);
                 
+                % Periodic Firing
+                for kk = 1:length(spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.shuffling.periodicFiring.BC)
+                    BCR(kk,:) = spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.shuffling.periodicFiring.BC{kk};
+                end
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.periodicFiring.BC.mean = mean(BCR);
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.periodicFiring.BC.R99 = prctile(BCR,99);
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.periodicFiring.BC.R95 = prctile(BCR,95);
+                
+                
             end
         end
     end
@@ -537,7 +555,11 @@ end
 
 
 if saveMat
-    save([basenameFromBasepath(pwd) '.spatialModulation.cellinfo.mat'],'spatialModulation'); 
+    try
+        save([basenameFromBasepath(pwd) '.spatialModulation.cellinfo.mat'],'spatialModulation'); 
+    catch
+        save([basenameFromBasepath(pwd) '.spatialModulation.cellinfo.mat'],'spatialModulation','-v7.3');
+    end
 end
 
 cd(prevPath);

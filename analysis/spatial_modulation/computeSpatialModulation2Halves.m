@@ -131,30 +131,33 @@ end
 %% compute statistics
 
 % 1 Spatial corr
-for ii = 1:length(firingMaps2Halves.UID)
-    maps_pairs = nchoosek(1:length(firingMaps2Halves.rateMaps{ii}), 2);
-    for jj = 1:size(maps_pairs)
-        sameParadigm(jj) = strcmpi(behavior.description{maps_pairs(jj,1)},behavior.description{maps_pairs(jj,2)});
-    end
-    maps_pairs(find(sameParadigm == 0),: ) = [];
-    for jj = 1:size(maps_pairs,1) % for each pairs of maps
-        if size(firingMaps2Halves.rateMaps{ii}{maps_pairs(jj,1)},1) == 1 % linearized
-            % 1 Spatial corr
-            [rho, pval]= corr(firingMaps2Halves.rateMaps{ii}{maps_pairs(jj,1)}',firingMaps2Halves.rateMaps{ii}{maps_pairs(jj,2)}',...
-                'Type','Spearman','rows','complete');
-            spatialModulation.(['corr_maps_' num2str(maps_pairs(jj,1)) '_' num2str(maps_pairs(jj,2))])(ii,1) = rho;
-            spatialModulation.(['corr_pval_maps_' num2str(maps_pairs(jj,1)) '_' num2str(maps_pairs(jj,2))])(ii,1) = pval;
-            clear rho pval
-        else
-            % 1 Spatial corr 2D
-            % Finding position bins where animal spent more than minTime
-            idx = find(firingMaps2Halves.occupancyUnSmooth{ii}{maps_pairs(jj,1)} > minTime & firingMaps2Halves.occupancyUnSmooth{ii}{maps_pairs(jj,2)} > minTime);
-            [rho,pval] = corrcoef(firingMaps2Halves.rateMaps{ii}{maps_pairs(jj,1)}(idx),firingMaps2Halves.rateMaps{ii}{maps_pairs(jj,2)}(idx));
-            spatialModulation.(['corr_maps_' num2str(maps_pairs(jj,1)) '_' num2str(maps_pairs(jj,2))])(ii,1) = rho(1,2);
-            spatialModulation.(['corr_pval_maps_' num2str(maps_pairs(jj,1)) '_' num2str(maps_pairs(jj,2))])(ii,1) = pval(1,2);
-            clear rho pval
+try
+    for ii = 1:length(firingMaps2Halves.UID)
+        maps_pairs = nchoosek(1:length(firingMaps2Halves.rateMaps{ii}), 2);
+        for jj = 1:size(maps_pairs)
+            sameParadigm(jj) = strcmpi(behavior.description{maps_pairs(jj,1)},behavior.description{maps_pairs(jj,2)});
+        end
+        maps_pairs(find(sameParadigm == 0),: ) = [];
+        for jj = 1:size(maps_pairs,1) % for each pairs of maps
+            if size(firingMaps2Halves.rateMaps{ii}{maps_pairs(jj,1)},1) == 1 % linearized
+                % 1 Spatial corr
+                [rho, pval]= corr(firingMaps2Halves.rateMaps{ii}{maps_pairs(jj,1)}',firingMaps2Halves.rateMaps{ii}{maps_pairs(jj,2)}',...
+                    'Type','Spearman','rows','complete');
+                spatialModulation.(['corr_maps_' num2str(maps_pairs(jj,1)) '_' num2str(maps_pairs(jj,2))])(ii,1) = rho;
+                spatialModulation.(['corr_pval_maps_' num2str(maps_pairs(jj,1)) '_' num2str(maps_pairs(jj,2))])(ii,1) = pval;
+                clear rho pval
+            else
+                % 1 Spatial corr 2D
+                % Finding position bins where animal spent more than minTime
+                idx = find(firingMaps2Halves.occupancyUnSmooth{ii}{maps_pairs(jj,1)} > minTime & firingMaps2Halves.occupancyUnSmooth{ii}{maps_pairs(jj,2)} > minTime);
+                [rho,pval] = corrcoef(firingMaps2Halves.rateMaps{ii}{maps_pairs(jj,1)}(idx),firingMaps2Halves.rateMaps{ii}{maps_pairs(jj,2)}(idx));
+                spatialModulation.(['corr_maps_' num2str(maps_pairs(jj,1)) '_' num2str(maps_pairs(jj,2))])(ii,1) = rho(1,2);
+                spatialModulation.(['corr_pval_maps_' num2str(maps_pairs(jj,1)) '_' num2str(maps_pairs(jj,2))])(ii,1) = pval(1,2);
+                clear rho pval
+            end
         end
     end
+catch
 end
 
 % 2 Spatial stats
