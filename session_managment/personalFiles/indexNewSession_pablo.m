@@ -35,6 +35,9 @@ end
 if strcmpi(project,'Social Project')
     indexedSessionCSV_name = [indexedSessionCSV_name,'_SocialProject'];
     project_path = 'SocialProject';
+elseif strcmpi(project,'MK801 Project')
+    indexedSessionCSV_name = [indexedSessionCSV_name,'_MK801Project'];
+    project_path = 'MK801Project';
 end
 
 
@@ -91,9 +94,27 @@ for jj = 1:length(fn)
 end    
 brainRegions(end) = [];
 
-sessionEntry = {lower(sessionName), lower(session.animal.name), lower(generalPath), lower(session.animal.strain),...
+
+if strcmpi(project,'MK801 Project')
+    drug = cell(0); 
+    for i = 1:length(session.epochs)
+        if contains(session.epochs{i}.behavioralParadigm, 'Maze')
+            drug{1, length(drug)+1} = lower(session.epochs{i}.notes);
+            drug{1, length(drug)+1} = ' ';
+        end
+    end
+    drug = unique(drug);
+    drug = drug{2};
+    sessionEntry = {lower(sessionName), lower(session.animal.name), lower(generalPath), lower(session.animal.strain),...
+    lower(session.animal.geneticLine), [behav{:}], spikes.numcells,  [brainRegions{:}], drug,project};
+
+    sessionEntry = cell2table(sessionEntry,"VariableNames",["SessionName", "Subject", "Path", "Strain", "GeneticLine", "Behavior", "numCells", "brainRegions", "Drug", "Project"]);
+else
+    sessionEntry = {lower(sessionName), lower(session.animal.name), lower(generalPath), lower(session.animal.strain),...
     lower(session.animal.geneticLine), [behav{:}], spikes.numcells,  [brainRegions{:}], project};
-sessionEntry = cell2table(sessionEntry,"VariableNames",["SessionName", "Subject", "Path", "Strain", "GeneticLine", "Behavior", "numCells", "brainRegions", "Project"]);
+
+    sessionEntry = cell2table(sessionEntry,"VariableNames",["SessionName", "Subject", "Path", "Strain", "GeneticLine", "Behavior", "numCells", "brainRegions", "Project"]);
+end
 sessionsTable = [sessionsTable; sessionEntry];
 writetable(sessionsTable,[indexedSessionCSV_path filesep indexedSessionCSV_name,'.csv']); % the variable is called allSessions
 

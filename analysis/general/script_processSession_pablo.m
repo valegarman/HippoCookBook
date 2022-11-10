@@ -82,11 +82,13 @@ indexNewSession_pablo('basepath',bpath,'project','Subiculum Project');
 
 
 %% MK801 Project
-% HPS22_100621_sess26
+% HPS22_100621_sess26 MK801
 bpath = 'F:\data\HPS22\HPS22_100621_sess26';
 % processSession_pablo('basepath',bpath,'promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',24,'SWChannel',13,'thetaChannel',24,'excludeAnalysis',{'getHippocampalLayers'});
 processSession_pablo('basepath',bpath,'promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',24,'SWChannel',13,'thetaChannel',24);
 indexNewSession_pablo('basepath',bpath,'project','MK801 Project');
+
+% HPS22_
 
 
 
