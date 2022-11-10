@@ -338,7 +338,7 @@ if any(ismember(listOfAnalysis,'tMazeBehaviour')) || any(ismember(listOfAnalysis
    try 
         getSessionTracking('convFact',tracking_pixel_cm,'roiTracking','manual'); 
         if any(ismember(listOfAnalysis,'tMazeBehaviour'))
-            getSessionArmChoice('task','alternation');
+            getSessionArmChoice('task','alternation','leftArmTtl_channel',3,'rightArmTtl_channel',4,'homeDelayTtl_channel',5);
         end
         behaviour = getSessionLinearize;
 

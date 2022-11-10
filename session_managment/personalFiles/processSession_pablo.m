@@ -284,7 +284,7 @@ if ~any(ismember(excludeAnalysis, {'10',lower('cellMetrics')}))
         warning('Not possible to get manipulation periods. Running CellMetrics withouth excluding manipulation epochs');
     end
     cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',{'deepSuperficial'},'forceReload',true);
-    cell_metrics_subSession = ProcessCellMetricsPerSubSession('session', session,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',{'deepSuperficial'},'forceReload',true);
+    cell_metrics_SubSession = ProcessCellMetricsPerSubSession('session', session,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',{'deepSuperficial'},'forceReload',true);
 
     getACGPeak('force',true);
 
@@ -425,6 +425,7 @@ if ~any(ismember(excludeAnalysis, {'13',lower('summary')}))
         plotSpatialModulation('gridAnalysis',gridAnalysis);
         plotSummary_subiculum();
     elseif strcmpi(project,'MK801Project')
+        plotSummary_pablo();
         plotSpatialModulation('gridAnalysis',gridAnalysis);
         plotSummary_MK801();
     elseif strcmpi(project,'GLUN3Project')

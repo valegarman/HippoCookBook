@@ -1,4 +1,4 @@
-function cell_metrics = ProcessCellMetricsPerSubSession(varargin)
+function cell_metrics_SubSessions = ProcessCellMetricsPerSubSession(varargin)
 %   This function calculates cell metrics for a given recording/session
 %   Most metrics are single value per cell, either numeric or string type, but
 %   certain metrics are vectors like the autocorrelograms or cell with double content like waveforms.
@@ -157,7 +157,11 @@ for ii = 1:length(MergePoints.foldernames)
     
     cell_metrics = ProcessCellMetrics('restrictToIntervals',ts,'session',parameters.session,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',parameters.excludeMetrics,'forceReload',parameters.forceReload,'saveMat',false);
     
+    cell_metrics_SubSessions.(MergePoints.foldernames{ii}) = cell_metrics;
 end
 
+if saveMat
+    save([basenameFromBasepath(basepath),'.cell_metrics_SubSessions.cellinfo.mat'],'cell_metrics_SubSessions','-v7.3');
+end
 
 end

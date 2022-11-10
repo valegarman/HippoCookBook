@@ -93,10 +93,6 @@ roundPlotCenterColor = p.Results.roundPlotCenterColor;
 
 
 % Dealing with inputs
-if isempty(roundPlotCenterColor)
-    roundPlotCenterColor = color;
-end
-
 if size(y,1) < size(y,2)
     y = y';
 end
@@ -189,6 +185,11 @@ end
 if size(color,1) == 1 && ~(strcmpi(plotType,'fillStd') || strcmpi(plotType,'fillSEM'))
     color = repmat(color,length(ind),1);
 end
+
+if isempty(roundPlotCenterColor)
+    roundPlotCenterColor = color;
+end
+
 
 for i=1:length(ind)                                                        % grouping data
     yC{i}=y(group==ind(i));
@@ -519,7 +520,29 @@ if doPlot
         if strcmpi(orientation, 'horizontal')
             view([90 90]); 
         end
+    
+    elseif strcmpi(plotType,'onyData')
         
+        hold on
+        % plot([.5 max(pos)+.5],[0 0],'color',[.7 .7 .7]);
+        for ii = 1:length(ind) 
+            posData = randn(length(find(group==ind(ii))),1)/10; 
+                posData((posData)>0.3) = posData((posData)>0.3)/2;
+                posData((posData)<-0.3) = posData((posData)<-0.3)/2;
+                plot(pos(ii)+ posData, y(group==ind(ii)),'o','color',[1 1 1],...
+                       'MarkerFaceColor',[.9 .9 .9],'MarkerEdgeColor','none','MarkerSize',dataSize);
+             m = stats.descriptive.median(ii);
+             plot([pos(ii)-0.35 pos(ii)+0.35], [m m],'-','color',[.7 .7 .7]);      
+        end
+        
+
+        xlim([.5 max(pos)+.5]);
+        set(gca,'xtick',[],'TickDir','out');
+        grid off
+        if strcmpi(orientation, 'horizontal')
+            view([90 90]); 
+        end
+
     elseif strcmpi(plotType,'medianBall')
         
         hold on
