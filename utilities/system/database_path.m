@@ -6,7 +6,7 @@ function dp = database_path
         case 'MANULAPTOP'
             dp = 'W:\Buzsakilabspace\Datasets\ValeroM';
         case 'MANUPC'
-            dp = 'X:\data';
+            dp = 'W:\Buzsakilabspace\Datasets\ValeroM';
         case 'MANUXPS'
             dp = 'W:';
         case 'SB13FLPC017'
