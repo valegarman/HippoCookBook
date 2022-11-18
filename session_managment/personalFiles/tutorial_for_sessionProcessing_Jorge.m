@@ -28,8 +28,8 @@ indexNewSession;
 % 6% Once a database has been created, use loadProjectResults to stack results for all sessions
 % an enjoy data analysis!
 [projectResults, projectSessionResults] = ...
-        loadProjectResults('project', 'VIPcortex',...
-        'analysis_project_path', 'C:\Users\valeg\Dropbox\ProjectsOnLine\desVIPnhibition','loadLast',false);
+        loadProjectResults('project', 'InterneuronsLibrary',...
+        'analysis_project_path', 'C:\Users\manu\Documents','loadLast',false);
     
 %% Fix digitalIn not recorded in initial recording
 % 1. Run getDigitalIn in subfolder with digitalIn
