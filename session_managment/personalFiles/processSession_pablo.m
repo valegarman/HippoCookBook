@@ -16,8 +16,9 @@ function [] = processSession_pablo(varargin)
 % 10. 'cellMetrics'             Gets cell metrics (from Cell Explorer, and a few new)   
 % 11. 'lfpAnalysis'             Computes power spectrum and coherence for
 %                               different channels
-% 12. 'spatialModulation'       Process spatial modulation analysis, behavioural events and speed
-% 13. 'summary'                 Makes cell/session sumary
+% 12. subSessions Analysis      Runs different analysis for subSessions
+% 13. 'spatialModulation'       Process spatial modulation analysis, behavioural events and speed
+% 14. 'summary'                 Makes cell/session sumary
 %
 % Note: to exclude any analysis, use 'excludeAnalysis' and provide the name
 % or number of the section analysis to exlucde, example: processSession('excludeAnalysis',{'cureAnalogPulses', 'getHippocampalLayers', 8})
@@ -224,7 +225,7 @@ if ~any(ismember(excludeAnalysis, {'5',lower('checkSleep')}))
     end
     
     SleepScoreMaster(pwd,'noPrompts',true,'ignoretime',pulses.stimulationEpochs, 'overwrite', true);
-    % TheStateEditor_temp(session.general.name);
+%     TheStateEditor_temp(session.general.name);
     bz_ThetaStates(pwd);
 end
 
@@ -260,8 +261,6 @@ end
 if ~any(ismember(excludeAnalysis, {'9',lower('phaseModulation')}))
     % LFP-spikes modulation
     [phaseMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel);
-    % LFP-spikes modulation per subsession
-    [phaseModSubSession] = computePhaseModulationPerSubSession('rippleChannel',rippleChannel,'SWChannel',SWChannel);
     computeCofiringModulation;
 end
 
@@ -284,7 +283,6 @@ if ~any(ismember(excludeAnalysis, {'10',lower('cellMetrics')}))
         warning('Not possible to get manipulation periods. Running CellMetrics withouth excluding manipulation epochs');
     end
     cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',{'deepSuperficial'},'forceReload',true);
-    cell_metrics_SubSession = ProcessCellMetricsPerSubSession('session', session,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',{'deepSuperficial'},'forceReload',true);
 
     getACGPeak('force',true);
 
@@ -299,10 +297,20 @@ end
 %% 11. lfp Analysis
 if ~any(ismember(excludeAnalysis,{'11',lower('lfpAnalysis')}))
     cohgram = computeCohgram('force',true);
+end
+
+%% 12. SubSessions Analysis
+if ~any(ismember(excludeAnalysis,{'12',lower('subSessionsAnalysis')}))
+    % LFP-spikes modulation per subsession
+    [phaseModSubSession] = computePhaseModulationPerSubSession('rippleChannel',rippleChannel,'SWChannel',SWChannel);
+    % Cell Metrics per subsession
+    cell_metrics_SubSession = ProcessCellMetricsPerSubSession('session', session,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',{'deepSuperficial'},'forceReload',true);
+    % lfp Analysis per subsession
     cohgramSubSession = computeCohgramPerSubsession('force',true);
 end
-%% 12. Spatial modulation
-if ~any(ismember(excludeAnalysis, {'12',lower('spatialModulation')}))
+
+%% 13. Spatial modulation
+if ~any(ismember(excludeAnalysis, {'13',lower('spatialModulation')}))
     try
         spikes = loadSpikes;
         getSessionTracking('convFact',tracking_pixel_cm,'roiTracking','manual','anyMaze',anyMaze);
@@ -394,12 +402,12 @@ if ~any(ismember(excludeAnalysis, {'12',lower('spatialModulation')}))
                    flds = fields(behavior.events.entry{ii});
                    for jj = 1:length(flds)
                         psth_entry.(flds{jj}){ii} = spikesPsth([behavior.events.entry{ii}.(flds{jj}).ts],'numRep',100,'saveMat',false,...
-                            'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01,'win_Z',[-3 -1]);
+                            'min_pulsesNumber',0,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01,'win_Z',[-3 -1]);
                    end
                     flds = fields(behavior.events.exit{ii});
                     for jj = 1:length(flds)
                         psth_exit.(flds{jj}){ii} = spikesPsth([behavior.events.exit{ii}.(flds{jj}).ts],'numRep',100,'saveMat',false,...
-                            'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01,'win_Z',[-3 -1]);
+                            'min_pulsesNumber',0,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01,'win_Z',[-3 -1]);
                     end
                     behavior.psth_entry = psth_entry;
                     behavior.psth_exit = psth_exit;
@@ -414,8 +422,8 @@ if ~any(ismember(excludeAnalysis, {'12',lower('spatialModulation')}))
     end
 end
 
-%% 13. Summary per cell
-if ~any(ismember(excludeAnalysis, {'13',lower('summary')}))
+%% 14. Summary per cell
+if ~any(ismember(excludeAnalysis, {'14',lower('summary')}))
 %     plotSummary();
 %     getSummaryPerCell;
     if strcmpi(project,'SocialProject')
@@ -425,9 +433,9 @@ if ~any(ismember(excludeAnalysis, {'13',lower('summary')}))
         plotSpatialModulation('gridAnalysis',gridAnalysis);
         plotSummary_subiculum();
     elseif strcmpi(project,'MK801Project')
-        plotSummary_pablo();
-        plotSpatialModulation('gridAnalysis',gridAnalysis);
-        plotSummary_MK801();
+        plotSummary_pablo('excludePlot',{'spatialModulation'});
+%         plotSpatialModulation('gridAnalysis',gridAnalysis);
+%         plotSummary_MK801();
     elseif strcmpi(project,'GLUN3Project')
         plotSummary_GLUN3();
     end

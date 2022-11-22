@@ -32,10 +32,10 @@ if isempty(indexedSessionCSV_name)
     error('Need to provide the name of the index Project variable');
 end
 
-if strcmpi(project,'Social Project')
+if strcmpi(project,'SocialProject')
     indexedSessionCSV_name = [indexedSessionCSV_name,'_SocialProject'];
     project_path = 'SocialProject';
-elseif strcmpi(project,'MK801 Project')
+elseif strcmpi(project,'MK801Project')
     indexedSessionCSV_name = [indexedSessionCSV_name,'_MK801Project'];
     project_path = 'MK801Project';
 end
@@ -95,7 +95,7 @@ end
 brainRegions(end) = [];
 
 
-if strcmpi(project,'MK801 Project')
+if strcmpi(project,'MK801Project')
     drug = cell(0); 
     for i = 1:length(session.epochs)
         if contains(session.epochs{i}.behavioralParadigm, 'Maze')

@@ -120,6 +120,7 @@ sessionStruct = p.Results.session;
 basepath = p.Results.basepath;
 parameters = p.Results;
 timerCalcMetrics = tic;
+saveMat = p.Results.saveMat;
 
 % Verifying required toolboxes are installed
 installedToolboxes = ver;

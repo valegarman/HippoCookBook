@@ -175,6 +175,8 @@ for ii = 1:size(channels_pairs,1)
     S1(S1==0) = NaN;
     S2(S2==0) = NaN;
     
+    
+    
     S12 = log10(S12); % in Db
     S1 = log10(S1); % in Db
     S2 = log10(S2);
@@ -215,7 +217,7 @@ for ii = 1:size(channels_pairs,1)
 end
 
 %% Plotting
-if plt
+ if plt
     flds = fields(cohgram);
     for ii = 1:length(flds)
         t = cohgram.(flds{ii}).t;
@@ -247,25 +249,25 @@ if plt
         title(['Ch: ', num2str(cohgram.(flds{ii}).ch2), ' Region: ', cohgram.(flds{ii}).region2]);
         
         subplot(4,6,[3 9 15 21])
-        plotFill(f,mean(cohgram.(flds{ii}).coherogram),'color',[0 0 0]); xlim([1 200]); ylim([-1 1]);
+        plotFill(f,nanmean(cohgram.(flds{ii}).coherogram),'color',[0 0 0]); xlim([1 200]); ylim([-1 1]);
         ax = axis;
-        fill([theta_bandpass flip(theta_bandpass)],[ax([3 3 4 4])],[.8 .5 .5],'EdgeColor','none','FaceAlpha',.1);
-        fill([lgamma_bandpass flip(lgamma_bandpass)],[ax([3 3 4 4])],[.8 .5 .5],'EdgeColor','none','FaceAlpha',.1);
-        fill([hgamma_bandpass flip(hgamma_bandpass)],[ax([3 3 4 4])],[.8 .5 .5],'EdgeColor','none','FaceAlpha',.1);
+        fill([theta_bandpass flip(theta_bandpass)],[ax([3 3 4 4])],[.8 .6 .6],'EdgeColor','none','FaceAlpha',.1);
+        fill([lgamma_bandpass flip(lgamma_bandpass)],[ax([3 3 4 4])],[.8 .4 .4],'EdgeColor','none','FaceAlpha',.1);
+        fill([hgamma_bandpass flip(hgamma_bandpass)],[ax([3 3 4 4])],[.8 .2 .2],'EdgeColor','none','FaceAlpha',.1);
         ylabel('Full recording [r]'); xlabel('Freq [Hz]');  
         title(['Coherence (r) Ch: ', num2str(cohgram.(flds{ii}).ch1) , ' Ch: ', num2str(cohgram.(flds{ii}).ch2)]);
         
         subplot(4,6,[4 10 16 22])
-        plotFill(f,mean(cohgram.(flds{ii}).phase),'color',[0 0 0]); xlim([1 200]); ylim([-1 1]);
+        plotFill(f,nanmean(cohgram.(flds{ii}).phase),'color',[0 0 0]); xlim([1 200]); ylim([-1 1]);
         ax = axis;
-        fill([theta_bandpass flip(theta_bandpass)],[ax([3 3 4 4])],[.8 .5 .5],'EdgeColor','none','FaceAlpha',.1);
-        fill([lgamma_bandpass flip(lgamma_bandpass)],[ax([3 3 4 4])],[.8 .5 .5],'EdgeColor','none','FaceAlpha',.1);
-        fill([hgamma_bandpass flip(hgamma_bandpass)],[ax([3 3 4 4])],[.8 .5 .5],'EdgeColor','none','FaceAlpha',.1);
+        fill([theta_bandpass flip(theta_bandpass)],[ax([3 3 4 4])],[.8 .6 .6],'EdgeColor','none','FaceAlpha',.1);
+        fill([lgamma_bandpass flip(lgamma_bandpass)],[ax([3 3 4 4])],[.8 .4 .4],'EdgeColor','none','FaceAlpha',.1);
+        fill([hgamma_bandpass flip(hgamma_bandpass)],[ax([3 3 4 4])],[.8 .2 .2],'EdgeColor','none','FaceAlpha',.1);
         ylabel('Full recording [Phase]'); xlabel('Freq [Hz]');  
         title(['Phase Coherence Ch: ', num2str(cohgram.(flds{ii}).ch1) , ' Ch: ', num2str(cohgram.(flds{ii}).ch2)]);
         
         subplot(4,6,[5 11 17 23])
-        plotFill(f,mean(cohgram.(flds{ii}).S1),'color',[0 0 0]); xlim([1 200]); ylim([-1 1]);
+        plotFill(f,nanmean(cohgram.(flds{ii}).S1),'color',[0 0 0]); xlim([1 200]); ylim([-1 1]);
         ax = axis;
         fill([theta_bandpass flip(theta_bandpass)],[ax([3 3 4 4])],[.8 .6 .6],'EdgeColor','none','FaceAlpha',.1);
         fill([lgamma_bandpass flip(lgamma_bandpass)],[ax([3 3 4 4])],[.8 .4 .4],'EdgeColor','none','FaceAlpha',.1);
@@ -274,7 +276,7 @@ if plt
         title(['Ch: ', num2str(cohgram.(flds{ii}).ch1), ' Region: ', cohgram.(flds{ii}).region1]);
         
         subplot(4,6,[6 12 18 24])
-        plotFill(f,mean(cohgram.(flds{ii}).S2),'color',[0 0 0]); xlim([1 200]); ylim([-1 1]);
+        plotFill(f,nanmean(cohgram.(flds{ii}).S2),'color',[0 0 0]); xlim([1 200]); ylim([-1 1]);
         ax = axis;
         fill([theta_bandpass flip(theta_bandpass)],[ax([3 3 4 4])],[.8 .6 .6],'EdgeColor','none','FaceAlpha',.1);
         fill([lgamma_bandpass flip(lgamma_bandpass)],[ax([3 3 4 4])],[.8 .4 .4],'EdgeColor','none','FaceAlpha',.1);
@@ -316,25 +318,25 @@ if plt
         title(['Ch: ', num2str(cohgram.(flds{ii}).ch2), ' Region: ', cohgram.(flds{ii}).region2]);
         
         subplot(4,6,[3 9 15 21])
-        plotFill(f,mean(cohgram.(flds{ii}).thetaEpochs.coherogram),'color',[0 0 0]); xlim([1 200]); ylim([-1 1]);
+        plotFill(f,nanmean(cohgram.(flds{ii}).thetaEpochs.coherogram),'color',[0 0 0]); xlim([1 200]); ylim([-1 1]);
         ax = axis;
-        fill([theta_bandpass flip(theta_bandpass)],[ax([3 3 4 4])],[.8 .5 .5],'EdgeColor','none','FaceAlpha',.1);
-        fill([lgamma_bandpass flip(lgamma_bandpass)],[ax([3 3 4 4])],[.8 .5 .5],'EdgeColor','none','FaceAlpha',.1);
-        fill([hgamma_bandpass flip(hgamma_bandpass)],[ax([3 3 4 4])],[.8 .5 .5],'EdgeColor','none','FaceAlpha',.1);
+        fill([theta_bandpass flip(theta_bandpass)],[ax([3 3 4 4])],[.8 .6 .6],'EdgeColor','none','FaceAlpha',.1);
+        fill([lgamma_bandpass flip(lgamma_bandpass)],[ax([3 3 4 4])],[.8 .4 .4],'EdgeColor','none','FaceAlpha',.1);
+        fill([hgamma_bandpass flip(hgamma_bandpass)],[ax([3 3 4 4])],[.8 .2 .2],'EdgeColor','none','FaceAlpha',.1);
         ylabel('Theta Epochs [r]'); xlabel('Freq [Hz]');  
         title(['Coherence (r) Ch: ', num2str(cohgram.(flds{ii}).ch1) , ' Ch: ', num2str(cohgram.(flds{ii}).ch2)]);
         
         subplot(4,6,[4 10 16 22])
-        plotFill(f,mean(cohgram.(flds{ii}).thetaEpochs.phase),'color',[0 0 0]); xlim([1 200]); ylim([-1 1]);
+        plotFill(f,nanmean(cohgram.(flds{ii}).thetaEpochs.phase),'color',[0 0 0]); xlim([1 200]); ylim([-1 1]);
         ax = axis;
-        fill([theta_bandpass flip(theta_bandpass)],[ax([3 3 4 4])],[.8 .5 .5],'EdgeColor','none','FaceAlpha',.1);
-        fill([lgamma_bandpass flip(lgamma_bandpass)],[ax([3 3 4 4])],[.8 .5 .5],'EdgeColor','none','FaceAlpha',.1);
-        fill([hgamma_bandpass flip(hgamma_bandpass)],[ax([3 3 4 4])],[.8 .5 .5],'EdgeColor','none','FaceAlpha',.1);
+        fill([theta_bandpass flip(theta_bandpass)],[ax([3 3 4 4])],[.8 .6 .6],'EdgeColor','none','FaceAlpha',.1);
+        fill([lgamma_bandpass flip(lgamma_bandpass)],[ax([3 3 4 4])],[.8 .4 .4],'EdgeColor','none','FaceAlpha',.1);
+        fill([hgamma_bandpass flip(hgamma_bandpass)],[ax([3 3 4 4])],[.8 .2 .2],'EdgeColor','none','FaceAlpha',.1);
         ylabel('Theta Epochs [Phase]'); xlabel('Freq [Hz]');  
         title(['Phase Coherence Ch: ', num2str(cohgram.(flds{ii}).ch1) , ' Ch: ', num2str(cohgram.(flds{ii}).ch2)]);
         
         subplot(4,6,[5 11 17 23])
-        plotFill(f,mean(cohgram.(flds{ii}).thetaEpochs.S1),'color',[0 0 0]); xlim([1 200]); ylim([-1 1]);
+        plotFill(f,nanmean(cohgram.(flds{ii}).thetaEpochs.S1),'color',[0 0 0]); xlim([1 200]); ylim([-1 1]);
         ax = axis;
         fill([theta_bandpass flip(theta_bandpass)],[ax([3 3 4 4])],[.8 .6 .6],'EdgeColor','none','FaceAlpha',.1);
         fill([lgamma_bandpass flip(lgamma_bandpass)],[ax([3 3 4 4])],[.8 .4 .4],'EdgeColor','none','FaceAlpha',.1);
@@ -343,7 +345,7 @@ if plt
         title(['Ch: ', num2str(cohgram.(flds{ii}).ch1), ' Region: ', cohgram.(flds{ii}).region1]);
         
         subplot(4,6,[6 12 18 24])
-        plotFill(f,mean(cohgram.(flds{ii}).thetaEpochs.S2),'color',[0 0 0]); xlim([1 200]); ylim([-1 1]);
+        plotFill(f,nanmean(cohgram.(flds{ii}).thetaEpochs.S2),'color',[0 0 0]); xlim([1 200]); ylim([-1 1]);
         ax = axis;
         fill([theta_bandpass flip(theta_bandpass)],[ax([3 3 4 4])],[.8 .6 .6],'EdgeColor','none','FaceAlpha',.1);
         fill([lgamma_bandpass flip(lgamma_bandpass)],[ax([3 3 4 4])],[.8 .4 .4],'EdgeColor','none','FaceAlpha',.1);
@@ -385,25 +387,25 @@ if plt
         title(['Ch: ', num2str(cohgram.(flds{ii}).ch2), ' Region: ', cohgram.(flds{ii}).region2]);
         
         subplot(4,6,[3 9 15 21])
-        plotFill(f,mean(cohgram.(flds{ii}).NonthetaEpochs.coherogram),'color',[0 0 0]); xlim([1 200]); ylim([-1 1]);
+        plotFill(f,nanmean(cohgram.(flds{ii}).NonthetaEpochs.coherogram),'color',[0 0 0]); xlim([1 200]); ylim([-1 1]);
         ax = axis;
-        fill([theta_bandpass flip(theta_bandpass)],[ax([3 3 4 4])],[.8 .5 .5],'EdgeColor','none','FaceAlpha',.1);
-        fill([lgamma_bandpass flip(lgamma_bandpass)],[ax([3 3 4 4])],[.8 .5 .5],'EdgeColor','none','FaceAlpha',.1);
-        fill([hgamma_bandpass flip(hgamma_bandpass)],[ax([3 3 4 4])],[.8 .5 .5],'EdgeColor','none','FaceAlpha',.1);
+        fill([theta_bandpass flip(theta_bandpass)],[ax([3 3 4 4])],[.8 .6 .6],'EdgeColor','none','FaceAlpha',.1);
+        fill([lgamma_bandpass flip(lgamma_bandpass)],[ax([3 3 4 4])],[.8 .4 .4],'EdgeColor','none','FaceAlpha',.1);
+        fill([hgamma_bandpass flip(hgamma_bandpass)],[ax([3 3 4 4])],[.8 .2 .2],'EdgeColor','none','FaceAlpha',.1);
         ylabel('Non Theta Epochs [r]'); xlabel('Freq [Hz]');  
         title(['Coherence (r) Ch: ', num2str(cohgram.(flds{ii}).ch1) , ' Ch: ', num2str(cohgram.(flds{ii}).ch2)]);
         
         subplot(4,6,[4 10 16 22])
-        plotFill(f,mean(cohgram.(flds{ii}).NonthetaEpochs.phase),'color',[0 0 0]); xlim([1 200]); ylim([-1 1]);
+        plotFill(f,nanmean(cohgram.(flds{ii}).NonthetaEpochs.phase),'color',[0 0 0]); xlim([1 200]); ylim([-1 1]);
         ax = axis;
-        fill([theta_bandpass flip(theta_bandpass)],[ax([3 3 4 4])],[.8 .5 .5],'EdgeColor','none','FaceAlpha',.1);
-        fill([lgamma_bandpass flip(lgamma_bandpass)],[ax([3 3 4 4])],[.8 .5 .5],'EdgeColor','none','FaceAlpha',.1);
-        fill([hgamma_bandpass flip(hgamma_bandpass)],[ax([3 3 4 4])],[.8 .5 .5],'EdgeColor','none','FaceAlpha',.1);
+        fill([theta_bandpass flip(theta_bandpass)],[ax([3 3 4 4])],[.8 .6 .6],'EdgeColor','none','FaceAlpha',.1);
+        fill([lgamma_bandpass flip(lgamma_bandpass)],[ax([3 3 4 4])],[.8 .4 .4],'EdgeColor','none','FaceAlpha',.1);
+        fill([hgamma_bandpass flip(hgamma_bandpass)],[ax([3 3 4 4])],[.8 .2 .2],'EdgeColor','none','FaceAlpha',.1);
         ylabel('Non Theta Epochs [Phase]'); xlabel('Freq [Hz]');  
         title(['Phase Coherence Ch: ', num2str(cohgram.(flds{ii}).ch1) , ' Ch: ', num2str(cohgram.(flds{ii}).ch2)]);
         
         subplot(4,6,[5 11 17 23])
-        plotFill(f,mean(cohgram.(flds{ii}).NonthetaEpochs.S1),'color',[0 0 0]); xlim([1 200]); ylim([-1 1]);
+        plotFill(f,nanmean(cohgram.(flds{ii}).NonthetaEpochs.S1),'color',[0 0 0]); xlim([1 200]); ylim([-1 1]);
         ax = axis;
         fill([theta_bandpass flip(theta_bandpass)],[ax([3 3 4 4])],[.8 .6 .6],'EdgeColor','none','FaceAlpha',.1);
         fill([lgamma_bandpass flip(lgamma_bandpass)],[ax([3 3 4 4])],[.8 .4 .4],'EdgeColor','none','FaceAlpha',.1);
@@ -412,7 +414,7 @@ if plt
         title(['Ch: ', num2str(cohgram.(flds{ii}).ch1), ' Region: ', cohgram.(flds{ii}).region1]);
         
         subplot(4,6,[6 12 18 24])
-        plotFill(f,mean(cohgram.(flds{ii}).NonthetaEpochs.S2),'color',[0 0 0]); xlim([1 200]); ylim([-1 1]);
+        plotFill(f,nanmean(cohgram.(flds{ii}).NonthetaEpochs.S2),'color',[0 0 0]); xlim([1 200]); ylim([-1 1]);
         ax = axis;
         fill([theta_bandpass flip(theta_bandpass)],[ax([3 3 4 4])],[.8 .6 .6],'EdgeColor','none','FaceAlpha',.1);
         fill([lgamma_bandpass flip(lgamma_bandpass)],[ax([3 3 4 4])],[.8 .4 .4],'EdgeColor','none','FaceAlpha',.1);
@@ -429,9 +431,9 @@ if plt
         t_non_theta = sum(diff(thetaEpochs.intervals_nonTheta')) * diff(t);
         figure('units','normalized','outerposition',[0 0 1 1]);
         subplot(1,4,1)
-        plotFill(f,mean(cohgram.(flds{ii}).coherogram),'color',[.8 .8 .8],'lineStyle','--'); xlim([1 200]); ylim([-1 1]);
-        plotFill(f,mean(cohgram.(flds{ii}).thetaEpochs.coherogram),'color',[.8 .2 .2],'lineStyle','-'); xlim([1 200]); ylim([-1 1]);
-        plotFill(f,mean(cohgram.(flds{ii}).NonthetaEpochs.coherogram),'color',[.2 .2 .8],'lineStyle','-'); xlim([1 200]); ylim([-1 1]);
+        plotFill(f,nanmean(cohgram.(flds{ii}).coherogram),'color',[.8 .8 .8],'lineStyle','--'); xlim([1 200]); ylim([-1 1]);
+        plotFill(f,nanmean(cohgram.(flds{ii}).thetaEpochs.coherogram),'color',[.8 .2 .2],'lineStyle','-'); xlim([1 200]); ylim([-1 1]);
+        plotFill(f,nanmean(cohgram.(flds{ii}).NonthetaEpochs.coherogram),'color',[.2 .2 .8],'lineStyle','-'); xlim([1 200]); ylim([-1 1]);
         ax = axis;
         fill([theta_bandpass flip(theta_bandpass)],[ax([3 3 4 4])],[.8 .6 .6],'EdgeColor','none','FaceAlpha',.1);
         fill([lgamma_bandpass flip(lgamma_bandpass)],[ax([3 3 4 4])],[.8 .4 .4],'EdgeColor','none','FaceAlpha',.1);
@@ -440,9 +442,9 @@ if plt
         title(['Coherence (r) Ch: ', num2str(cohgram.(flds{ii}).ch1) , ' Ch: ', num2str(cohgram.(flds{ii}).ch2)]);
         
         subplot(1,4,2)
-        plotFill(f,mean(cohgram.(flds{ii}).phase),'color',[.8 .8 .8],'lineStyle','--'); xlim([1 200]); ylim([-1 1]);
-        plotFill(f,mean(cohgram.(flds{ii}).thetaEpochs.phase),'color',[.8 .2 .2],'lineStyle','-'); xlim([1 200]); ylim([-1 1]);
-        plotFill(f,mean(cohgram.(flds{ii}).NonthetaEpochs.phase),'color',[.2 .2 .8],'lineStyle','-'); xlim([1 200]); ylim([-1 1]);
+        plotFill(f,nanmean(cohgram.(flds{ii}).phase),'color',[.8 .8 .8],'lineStyle','--'); xlim([1 200]); ylim([-1 1]);
+        plotFill(f,nanmean(cohgram.(flds{ii}).thetaEpochs.phase),'color',[.8 .2 .2],'lineStyle','-'); xlim([1 200]); ylim([-1 1]);
+        plotFill(f,nanmean(cohgram.(flds{ii}).NonthetaEpochs.phase),'color',[.2 .2 .8],'lineStyle','-'); xlim([1 200]); ylim([-1 1]);
         ax = axis;
         fill([theta_bandpass flip(theta_bandpass)],[ax([3 3 4 4])],[.8 .6 .6],'EdgeColor','none','FaceAlpha',.1);
         fill([lgamma_bandpass flip(lgamma_bandpass)],[ax([3 3 4 4])],[.8 .4 .4],'EdgeColor','none','FaceAlpha',.1);
@@ -451,9 +453,9 @@ if plt
         title(['Phase Coherence Ch: ', num2str(cohgram.(flds{ii}).ch1) , ' Ch: ', num2str(cohgram.(flds{ii}).ch2)]);
         
         subplot(1,4,3)
-        plotFill(f,mean(cohgram.(flds{ii}).S1),'color',[.8 .8 .8],'lineStyle','--'); xlim([1 200]); ylim([-1 1]);
-        plotFill(f,mean(cohgram.(flds{ii}).thetaEpochs.S1),'color',[.8 .2 .2],'lineStyle','-'); xlim([1 200]); ylim([-1 1]);
-        plotFill(f,mean(cohgram.(flds{ii}).NonthetaEpochs.S1),'color',[.2 .2 .8],'lineStyle','-'); xlim([1 200]); ylim([-1 1]);
+        plotFill(f,nanmean(cohgram.(flds{ii}).S1),'color',[.8 .8 .8],'lineStyle','--'); xlim([1 200]); ylim([-1 1]);
+        plotFill(f,nanmean(cohgram.(flds{ii}).thetaEpochs.S1),'color',[.8 .2 .2],'lineStyle','-'); xlim([1 200]); ylim([-1 1]);
+        plotFill(f,nanmean(cohgram.(flds{ii}).NonthetaEpochs.S1),'color',[.2 .2 .8],'lineStyle','-'); xlim([1 200]); ylim([-1 1]);
         ax = axis;
         fill([theta_bandpass flip(theta_bandpass)],[ax([3 3 4 4])],[.8 .6 .6],'EdgeColor','none','FaceAlpha',.1);
         fill([lgamma_bandpass flip(lgamma_bandpass)],[ax([3 3 4 4])],[.8 .4 .4],'EdgeColor','none','FaceAlpha',.1);
@@ -462,9 +464,9 @@ if plt
         title(['Ch: ', num2str(cohgram.(flds{ii}).ch1), ' Region: ', cohgram.(flds{ii}).region1]);
         
         subplot(1,4,4)
-        plotFill(f,mean(cohgram.(flds{ii}).S2),'color',[.8 .8 .8],'lineStyle','--'); xlim([1 200]); ylim([-1 1]);
-        plotFill(f,mean(cohgram.(flds{ii}).thetaEpochs.S2),'color',[.8 .2 .2],'lineStyle','-'); xlim([1 200]); ylim([-1 1]);
-        plotFill(f,mean(cohgram.(flds{ii}).NonthetaEpochs.S2),'color',[.2 .2 .8],'lineStyle','-'); xlim([1 200]); ylim([-1 1]);
+        plotFill(f,nanmean(cohgram.(flds{ii}).S2),'color',[.8 .8 .8],'lineStyle','--'); xlim([1 200]); ylim([-1 1]);
+        plotFill(f,nanmean(cohgram.(flds{ii}).thetaEpochs.S2),'color',[.8 .2 .2],'lineStyle','-'); xlim([1 200]); ylim([-1 1]);
+        plotFill(f,nanmean(cohgram.(flds{ii}).NonthetaEpochs.S2),'color',[.2 .2 .8],'lineStyle','-'); xlim([1 200]); ylim([-1 1]);
         ax = axis;
         fill([theta_bandpass flip(theta_bandpass)],[ax([3 3 4 4])],[.8 .6 .6],'EdgeColor','none','FaceAlpha',.1);
         fill([lgamma_bandpass flip(lgamma_bandpass)],[ax([3 3 4 4])],[.8 .4 .4],'EdgeColor','none','FaceAlpha',.1);
@@ -486,7 +488,6 @@ if saveMat
         save([session.general.name,'.cohgram.lfp.mat'],'cohgram','-v7.3');
     end
 end
-
 cd(prevBasepath);
 
 end

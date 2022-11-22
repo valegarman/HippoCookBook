@@ -130,7 +130,8 @@ bpath = 'F:\data\HPS25\HPS25_050721_sess4';
 processSession_pablo('basepath',bpath,'project','MK801Project','promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',27,'SWChannel',17,'thetaChannel',27);
 indexNewSession_pablo('basepath',bpath,'project','MK801Project');
 
-% HPS23_110621_sess210 VEHICLE 
+
+% HPS23_110621_sess210 VEHICLE ¡¡¡¡¡¡¡¡¡¡¡ TO DO !!!!!!!!!!!!!!!!!!
 bpath = 'F:\data\HPS23\HPS23_110621_sess10'; 
 processSession_pablo('basepath',bpath,'project','MK801Project','promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',27,'SWChannel',17,'thetaChannel',27);
 indexNewSession_pablo('basepath',bpath,'project','MK801Project');
@@ -152,6 +153,3 @@ cd(basepath);
     
 % groupStats({group1,group2},{*groups*});
     
-%% 
-
-createProbe('excel_file','electrodes_coordinates_Qtrode-32ch-IPO430');

@@ -149,7 +149,7 @@ end
 figure('units','normalized','outerposition',[0 0 1 1])
 
 % waveform
-subplot(5,5,1)
+subplot(6,6,1)
 hold on
 if length(find(all_nw) == 1) == 1
     plot(cell_metrics.waveforms.time{1}, all_waveforms(:,all_nw),'color',nw_color);
@@ -170,7 +170,7 @@ scatter(cell_metrics.troughToPeak(all_ww),rand(length(find(all_ww)),1)/10 + 2.4,
 axis tight; xlabel('ms'); ylabel('Waveform amp (SD)');
 
 % acg
-subplot(5,5,2)
+subplot(6,6,2)
 hold on
 plotFill(acg_time, acg(:,all_pyr),'style','filled','color',pyr_color,'faceAlpha',0.7);
 if length(find(all_nw == 1)) == 1
@@ -190,7 +190,7 @@ scatter(rand(length(find(all_ww)),1)*2 + 58, cell_metrics.acg_tau_rise(all_ww)/1
 axis tight; xlabel('ms'); ylabel('ACG (prob)');
 
 % ACG Peak
-subplot(5,5,3)
+subplot(6,6,3)
 hold on
 plotFill(acgPeak.acg_time, acgPeak.acg_smoothed_norm(:,all_pyr),'style','filled','color',pyr_color,'faceAlpha',0.7);
 if length(find(all_nw == 1)) == 1
@@ -216,7 +216,7 @@ ylabel('logACG (prob)'); xlabel('Time(s)');
 axis tight;
 
 % cell position
-subplot(5,5,4)
+subplot(6,6,4)
 hold on
 scatter(cell_metrics.general.chanCoords.x+100, cell_metrics.general.chanCoords.y,10,[.9 .9 .9],"filled");
 scatter(cell_metrics.trilat_x(all_pyr)+100, cell_metrics.trilat_y(all_pyr),30,pyr_color,'x','LineWidth',2);
@@ -239,11 +239,11 @@ xlim([min(cell_metrics.general.chanCoords.x)+50 max(cell_metrics.general.chanCoo
 ylim([min(cell_metrics.general.chanCoords.y)-100 max(cell_metrics.general.chanCoords.y)+100]);
 
 % Brain Region
-subplot(5,5,5)
+subplot(6,6,5)
 pie(categorical(cell_metrics.brainRegion))
 
 % firing rate
-subplot(5,5,6)
+subplot(6,6,6)
 hold on
 plotFill(spikemat.timestamps/60, spikemat.data(:,all_pyr),'color',pyr_color,'yscale','log','style','filled','smoothOpt',10);
 if length(find(all_nw == 1)) == 1
@@ -264,7 +264,7 @@ ylim([.1 50]); xlim([0 spikemat.timestamps(end)/60]);
 xlabel('Time (min)'); ylabel('Rate (Hz)');
 
 % firing rate states
-subplot(5,5,7)
+subplot(6,6,7)
 hold on
 plotFill(1:5,states_rate(all_pyr,:),'color',pyr_color,'yscale','log','style','filled');
 if length(find(all_nw == 1)) == 1
@@ -282,7 +282,7 @@ set(gca,'XTick',[1:5],'XTickLabel',{'All','Wake','Run','NREM','REM'},'XTickLabel
 xlim([.8 5.2]); ylabel('Rate (Hz)');
 
 % States index
-subplot(5,5,8)
+subplot(6,6,8)
 hold on
 scatter(rand(length(find(all_pyr)),1)/5 + .9, run_quiet_index(all_pyr),20,pyr_color,'filled');
 scatter(rand(length(find(all_nw)),1)/5 + 1.1, run_quiet_index(all_nw),20,nw_color,'filled');
@@ -301,7 +301,7 @@ set(gca,'TickDir','out','XTick',[1:3],'XTickLabel',{'run-quiet','rem-nrem','cv'}
 ylabel('Index (SD)'); xlim([.8 3.4]);
 
 % avCCG
-subplot(5,5,9)
+subplot(6,6,9)
 hold on
 plotFill(averageCCG.timestamps,averageCCG.ZmedianCCG(all_pyr,:),'color',pyr_color,'style','filled');
 if length(find(all_nw == 1)) == 1
@@ -323,7 +323,7 @@ axis tight
 xlabel('Time (s)'); ylabel('Rate (SD)');
 
 % avCCG per region
-subplot(5,5,10)
+subplot(6,6,10)
 hold on
 b = bar(averageCCG.brainRegionCCG.listOfRegionsID, nanmean(averageCCG.brainRegionCCG.absCcgIndexRegion));
 b.FaceColor = 'flat';
@@ -334,7 +334,7 @@ ylabel('CCG Index');
 set(gca,'TickDir','out','XTick',averageCCG.brainRegionCCG.listOfRegionsID,'XTickLabel',averageCCG.brainRegionCCG.listOfRegions,'XTickLabelRotation',45);                  
 
 % ripples 
-subplot(5,5,11)
+subplot(6,6,11)
 hold on
 t_win = ripplesResponses.timestamps > -0.25 & ripplesResponses.timestamps < 0.25;
 plotFill(ripplesResponses.timestamps(t_win),ripplesResponses.responsecurveZSmooth(all_pyr,t_win),'color',pyr_color,'style','filled','faceAlpha',.9);
@@ -362,7 +362,7 @@ axis tight
 xlabel('Ripple center (s)'); ylabel('Rate (SD)');
 
 % ripple phase
-subplot(5,5,12)
+subplot(6,6,12)
 hold on
 x_wave = 0:0.01:4*pi;
 y_wave = cos(x_wave)*2;
@@ -392,7 +392,7 @@ xlabel('Ripple phase (rad)'); ylabel('Rate (SD)');
 set(gca,'XTick',[0:2*pi:4*pi],'XTickLabel',{'0', '2\pi', '4\pi'});
 
 % theta
-subplot(5,5,13)
+subplot(6,6,13)
 hold on
 x_wave = 0:0.01:4*pi;
 y_wave = cos(x_wave)*2;
@@ -423,7 +423,7 @@ set(gca,'XTick',[0:2*pi:4*pi],'XTickLabel',{'0', '2\pi', '4\pi'});
 
 
 % lgamma
-subplot(5,5,14)
+subplot(6,6,14)
 hold on
 x_wave = 0:0.01:4*pi;
 y_wave = cos(x_wave)*2;
@@ -453,7 +453,7 @@ xlabel('Low gamma phase (rad)'); ylabel('Rate (SD)');
 set(gca,'XTick',[0:2*pi:4*pi],'XTickLabel',{'0', '2\pi', '4\pi'});
 
 % hgamma
-subplot(5,5,15)
+subplot(6,6,15)
 hold on
 x_wave = 0:0.01:4*pi;
 y_wave = cos(x_wave)*2;
@@ -483,7 +483,7 @@ xlabel('High gamma phase (rad)'); ylabel('Rate (SD)');
 set(gca,'XTick',[0:2*pi:4*pi],'XTickLabel',{'0', '2\pi', '4\pi'});
 
 % speed
-subplot(5,5,16)
+subplot(6,6,16)
 if ~isempty(speedCorr)
     if size(speedVals,1) ~= length(all_nw)
         speedVals = speedVals';
@@ -521,25 +521,27 @@ if ~isempty(behavior)
         flds = fieldnames(behavior.psth_entry);
         for ii = 1:length(flds)
             for jj = 1:length(behavior.psth_entry.(flds{ii}))
-                h = get(gcf);
-                nextSubplot = length(h.Children) + 1;
-                subplot(5,5,nextSubplot)
-                hold on;
-                t_win = behavior.psth_entry.(flds{ii}){jj}.timestamps > -2 & behavior.psth_entry.(flds{ii}){jj}.timestamps < 2;
-                if length(find(all_nw == 1)) == 1
-                    plot(behavior.psth_entry.(flds{ii}){jj}.timestamps(t_win),behavior.psth_entry.(flds{ii}){jj}.responsecurveZSmooth(all_nw,t_win),'color',nw_color);
-                else
-                    plotFill(behavior.psth_entry.(flds{ii}){jj}.timestamps(t_win),behavior.psth_entry.(flds{ii}){jj}.responsecurveZSmooth(all_nw,t_win),'color',nw_color,'style','filled');
+                if ~isempty(behavior.psth_entry.(flds{ii}){jj})
+                    h = get(gcf);
+                    nextSubplot = length(h.Children) + 1;
+                    subplot(6,6,nextSubplot)
+                    hold on;
+                    t_win = behavior.psth_entry.(flds{ii}){jj}.timestamps > -2 & behavior.psth_entry.(flds{ii}){jj}.timestamps < 2;
+                    if length(find(all_nw == 1)) == 1 && length(find(all_nw == 1)) > 0
+                        plot(behavior.psth_entry.(flds{ii}){jj}.timestamps(t_win),behavior.psth_entry.(flds{ii}){jj}.responsecurveZSmooth(all_nw,t_win),'color',nw_color);
+                    elseif length(find(all_nw == 1)) > 1 
+                        plotFill(behavior.psth_entry.(flds{ii}){jj}.timestamps(t_win),behavior.psth_entry.(flds{ii}){jj}.responsecurveZSmooth(all_nw,t_win),'color',nw_color,'style','filled');
+                    end
+                    if length(find(all_ww == 1)) == 1 && length(find(all_ww == 1)) > 0
+                        plot(behavior.psth_entry.(flds{ii}){jj}.timestamps(t_win),behavior.psth_entry.(flds{ii}){jj}.responsecurveZSmooth(all_ww,t_win),'color',ww_color);
+                    elseif length(find(all_ww == 1)) > 1
+                        plotFill(behavior.psth_entry.(flds{ii}){jj}.timestamps(t_win),behavior.psth_entry.(flds{ii}){jj}.responsecurveZSmooth(all_ww,t_win),'color',ww_color,'style','filled');
+                    end
+                    plotFill(behavior.psth_entry.(flds{ii}){jj}.timestamps(t_win),behavior.psth_entry.(flds{ii}){jj}.responsecurveZSmooth(all_pyr,t_win),'color',pyr_color,'style','filled');
+                    axis tight
+                    xlabel('Entry time (s)'); ylabel('Rate (SD)');
+                    title([behavior.description{jj},' - ',flds{ii}],'FontWeight','normal');
                 end
-                if length(find(all_ww == 1)) == 1
-                    plot(behavior.psth_entry.(flds{ii}){jj}.timestamps(t_win),behavior.psth_entry.(flds{ii}){jj}.responsecurveZSmooth(all_ww,t_win),'color',ww_color);
-                else
-                    plotFill(behavior.psth_entry.(flds{ii}){jj}.timestamps(t_win),behavior.psth_entry.(flds{ii}){jj}.responsecurveZSmooth(all_ww,t_win),'color',ww_color,'style','filled');
-                end
-                plotFill(behavior.psth_entry.(flds{ii}){jj}.timestamps(t_win),behavior.psth_entry.(flds{ii}){jj}.responsecurveZSmooth(all_pyr,t_win),'color',pyr_color,'style','filled');
-                axis tight
-                xlabel('Entry time (s)'); ylabel('Rate (SD)');
-                title([behavior.description{ii},' - ',flds{ii}],'FontWeight','normal');
             end
         end
     end
@@ -548,25 +550,27 @@ if ~isempty(behavior)
         flds = fieldnames(behavior.psth_exit);
         for ii = 1:length(flds)
             for jj = 1:length(behavior.psth_exit.(flds{ii}))
-                h = get(gcf);
-                nextSubplot = length(h.Children) + 1;
-                subplot(5,5,nextSubplot)
-                hold on;
-                t_win = behavior.psth_exit.(flds{ii}){jj}.timestamps > -2 & behavior.psth_exit.(flds{ii}){jj}.timestamps < 2;
-                if length(find(all_nw == 1)) == 1
-                    plot(behavior.psth_exit.(flds{ii}){jj}.timestamps(t_win),behavior.psth_exit.(flds{ii}){jj}.responsecurveZSmooth(all_nw,t_win),'color',nw_color);
-                else
-                    plotFill(behavior.psth_exit.(flds{ii}){jj}.timestamps(t_win),behavior.psth_exit.(flds{ii}){jj}.responsecurveZSmooth(all_nw,t_win),'color',nw_color,'style','filled');
+                if ~isempty(behavior.psth_exit.(flds{ii}){jj})
+                    h = get(gcf);
+                    nextSubplot = length(h.Children) + 1;
+                    subplot(6,6,nextSubplot)
+                    hold on;
+                    t_win = behavior.psth_exit.(flds{ii}){jj}.timestamps > -2 & behavior.psth_exit.(flds{ii}){jj}.timestamps < 2;
+                    if length(find(all_nw == 1)) == 1
+                        plot(behavior.psth_exit.(flds{ii}){jj}.timestamps(t_win),behavior.psth_exit.(flds{ii}){jj}.responsecurveZSmooth(all_nw,t_win),'color',nw_color);
+                    else
+                        plotFill(behavior.psth_exit.(flds{ii}){jj}.timestamps(t_win),behavior.psth_exit.(flds{ii}){jj}.responsecurveZSmooth(all_nw,t_win),'color',nw_color,'style','filled');
+                    end
+                    if length(find(all_ww == 1)) == 1
+                        plot(behavior.psth_exit.(flds{ii}){jj}.timestamps(t_win),behavior.psth_exit.(flds{ii}){jj}.responsecurveZSmooth(all_ww,t_win),'color',ww_color);
+                    else
+                        plotFill(behavior.psth_exit.(flds{ii}){jj}.timestamps(t_win),behavior.psth_exit.(flds{ii}){jj}.responsecurveZSmooth(all_ww,t_win),'color',ww_color,'style','filled');
+                    end
+                    plotFill(behavior.psth_exit.(flds{ii}){jj}.timestamps(t_win),behavior.psth_exit.(flds{ii}){jj}.responsecurveZSmooth(all_pyr,t_win),'color',pyr_color,'style','filled');
+                    axis tight
+                    xlabel('Exit time (s)'); ylabel('Rate (SD)');
+                    title([behavior.description{jj},' - ',flds{ii}],'FontWeight','normal');
                 end
-                if length(find(all_ww == 1)) == 1
-                    plot(behavior.psth_exit.(flds{ii}){jj}.timestamps(t_win),behavior.psth_exit.(flds{ii}){jj}.responsecurveZSmooth(all_ww,t_win),'color',ww_color);
-                else
-                    plotFill(behavior.psth_exit.(flds{ii}){jj}.timestamps(t_win),behavior.psth_exit.(flds{ii}){jj}.responsecurveZSmooth(all_ww,t_win),'color',ww_color,'style','filled');
-                end
-                plotFill(behavior.psth_exit.(flds{ii}){jj}.timestamps(t_win),behavior.psth_exit.(flds{ii}){jj}.responsecurveZSmooth(all_pyr,t_win),'color',pyr_color,'style','filled');
-                axis tight
-                xlabel('Exit time (s)'); ylabel('Rate (SD)');
-                title([behavior.description{ii},' - ',flds{ii}],'FontWeight','normal');
             end
         end
     end
@@ -574,7 +578,7 @@ if ~isempty(behavior)
     if isfield(behavior,'psth_lReward') && isstruct(behavior.psth_lReward)
         h = get(gcf);
         nextSubPlot = length(h.Children) + 1;
-        subplot(5,5,nextSubPlot)
+        subplot(6,6,nextSubPlot)
         hold on;
         t_win = behavior.psth_lReward.timestamps > -2 & behavior.psth_lReward.timestamps < 2;
         if length(find(all_nw == 1)) == 1
@@ -595,7 +599,7 @@ if ~isempty(behavior)
     if isfield(behavior,'psth_rReward') && isstruct(behavior.psth_rReward)
         h = get(gcf);
         nextSubPlot = length(h.Children) + 1;
-        subplot(5,5,nextSubPlot)
+        subplot(6,6,nextSubPlot)
         hold on;
         t_win = behavior.psth_rReward.timestamps > -2 & behavior.psth_rReward.timestamps < 2;
         if length(find(all_nw == 1)) == 1
@@ -614,11 +618,15 @@ if ~isempty(behavior)
     end
         
 else
-    subplot(5,5,17)
+    h = get(gcf);
+    nextSubPlot = length(h.Children) + 1;
+    subplot(6,6,nextSubPlot)
     axis off
     title('No psth behaviour data','FontWeight','normal');
     
-    subplot(5,5,18)
+    h = get(gcf);
+    nextSubPlot = length(h.Children) + 1;
+    subplot(6,6,nextSubPlot)
     axis off
     title('No psth behaviour data','FontWeight','normal');
 end
@@ -627,8 +635,8 @@ end
 if ~isempty(spatialModulation) && ~any(ismember(excludePlot,{lower('spatialModulation')}))
     try
         h = get(gcf);
-        actualSubPlot = length(h.Children);
-        subplot(5,5,[21 22])
+        nextSubPlot = length(h.Children) + 1;
+        subplot(6,6,[nextSubplot nextSubplot+1])
         hold on
 
         imagesc_ranked(spatialModulation.map_1_timestamps, [1:length(find(all_pyr))], spatialModulation.map_1_rateMapsZ(all_pyr,:),[-3 3],...
@@ -645,7 +653,7 @@ if ~isempty(spatialModulation) && ~any(ismember(excludePlot,{lower('spatialModul
         xlabel('cm'); ylabel('Map 1 (-3 to 3 SD)');
         set(gca,'YTick',[0 (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)],'YTickLabel',[0 length(all_pyr)]);
 
-        subplot(5,5,[23 24])
+        subplot(6,6,[23 24])
         hold on
 
         imagesc_ranked(spatialModulation.map_2_timestamps, [1:length(find(all_pyr))], spatialModulation.map_2_rateMapsZ(all_pyr,:),[-3 3],...
@@ -663,20 +671,24 @@ if ~isempty(spatialModulation) && ~any(ismember(excludePlot,{lower('spatialModul
         set(gca,'YTick',[0 (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)],'YTickLabel',[0 length(all_pyr)]);
         colormap jet
     catch
-        subplot(5,5,[21 22])
+        subplot(6,6,[21 22])
         axis off
         title('No behaviour data','FontWeight','normal');
 
-        subplot(5,5,[23 24])
+        subplot(6,6,[23 24])
         axis off
         title('No behaviour data','FontWeight','normal');
     end
 else
-    subplot(5,5,[21 22])
+    h = get(gcf);
+    nextSubPlot = length(h.Children) + 1;
+    subplot(6,6,[nextSubPlot])
     axis off
     title('No behaviour data','FontWeight','normal');
     
-    subplot(5,5,[23 24])
+    h = get(gcf);
+    nextSubPlot = length(h.Children) + 1;
+    subplot(6,6,[nextSubPlot])
     axis off
     title('No behaviour data','FontWeight','normal');
 end

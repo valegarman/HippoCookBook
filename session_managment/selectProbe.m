@@ -57,18 +57,11 @@ end
 % if empty or force
 if parameters.force || isempty(chanCoords)
     if ~showTetrodes
-<<<<<<< HEAD
         listOfProbes = {'Select probe...','A5x12-16-Buz-lin-5mm-100-200-160-177', 'CambridgeNeurotech-E1-64ch', 'CambridgeNeurotech-H2-64ch', 'uLED-12LED-32Ch-4Shanks','DiagnosticBiochip-128-6-128ch', 'Buzsaki64(64 ch, 8 shanks, staggered)',... 
             'DiagnosticBiochip-128-6-128ch&uLED-12LED-32Ch-4Shanks','Not included'};
     else
-        listOfProbes = {'Select probe...','A5x12-16-Buz-lin-5mm-100-200-160-177', 'CambridgeNeurotech-E1-64ch', 'CambridgeNeurotech-H2-64ch', 'uLED-12LED-32Ch-4Shanks','DiagnosticBiochip-128-6-128ch', 'Buzsaki64(64 ch, 8 shanks, staggered)','BehnkeFried-8ch','BehnkeFried-16ch','NeuroNexus-A8x1-tet-2mm-200-121(32ch,8 shanks,tetrode)','Tetrodes-32ch(8t-4c)-C57-4','Not included'};
-=======
-        listOfProbes = {'Select probe...','A5x12-16-Buz-lin-5mm-100-200-160-177', 'CambridgeNeurotech-E1-64ch', 'CambridgeNeurotech-H2-64ch', 'uLED-12LED-32Ch-4Shanks','DiagnosticBiochip-128-6-128ch', 'Buzsaki64(64 ch, 8 shanks, staggered)',...
-                            'DiagnosticBiochip-128-6-128ch&uLED-12LED-32Ch-4Shanks','Not included'};
-    else
         listOfProbes = {'Select probe...','A5x12-16-Buz-lin-5mm-100-200-160-177', 'CambridgeNeurotech-E1-64ch', 'CambridgeNeurotech-H2-64ch', 'uLED-12LED-32Ch-4Shanks','DiagnosticBiochip-128-6-128ch', 'Buzsaki64(64 ch, 8 shanks, staggered)', 'NeuroNexus-A8x1-tet-2mm-200-121(32ch,8 shanks,tetrode)',...,
-                            'DiagnosticBiochip-128-6-128ch&uLED-12LED-32Ch-4Shanks','Tetrodes-32ch(8t-4c)-C57-4', 'Tetrodes-32ch(8t-4c)-C57-3','Not included'};
->>>>>>> 32bd9dba2da8a3ae42d809aa8968b47d619b7c31
+                            'DiagnosticBiochip-128-6-128ch&uLED-12LED-32Ch-4Shanks','Tetrodes-32ch(8t-4c)-C57-4', 'Tetrodes-32ch(8t-4c)-C57-3','Qtrode-32ch-IPO430','Not included'};
     end
     fig = figure;
     set(fig, 'MenuBar', 'none');
@@ -137,6 +130,10 @@ if parameters.force || isempty(chanCoords)
             coord_path = dir([directory.path filesep 'session_files'...
                 filesep 'probes_coordinates' filesep ...
                 'electrodes_coordinates_BehnkeFried-16ch.chanCoords.channelinfo.mat']);    
+        case lower('Qtrode-32ch-IPO430')
+        coord_path = dir([directory.path filesep 'session_files'...
+            filesep 'probes_coordinates' filesep ...
+            'electrodes_coordinates_Qtrode-32ch-IPO430.chanCoords.channelinfo']);
         otherwise
             error('Probe not supported yet...');
     end

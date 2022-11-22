@@ -31,7 +31,11 @@ addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'force',false,@islogical);
 addParameter(p,'rippleChannel',[],@isnumeric);
 addParameter(p,'ripples',[], @isstruct);
+addParameter(p,'saveFig',true,@islogical);
+addParameter(p,'restrictToIntervals',[],@isnumeric);
+
 parse(p,varargin{:});
+
 basePath = p.Results.basepath;
 discardShanks = p.Results.discardShanks;
 probesNumber = p.Results.probesNumber;
@@ -40,6 +44,8 @@ saveMat = p.Results.saveMat;
 force = p.Results.force;
 rippleChannel = p.Results.rippleChannel;
 ripples = p.Results.ripples;
+saveFig = p.Results.saveFig;
+restrictToIntervals = p.Results.restrictToIntervals;
 
 prevPath = pwd;
 cd(basePath);
@@ -121,7 +127,11 @@ end
 Win=70;
 LfpSamplingrate = lfp.samplingRate;
 % Removing short startting and the end ripples
+if ~isempty(restrictToIntervals)
+    ripples.peaks = ripples.peaks(restrictToIntervals);
+end
 ripples.peaks = ripples.peaks(ripples.peaks*LfpSamplingrate>Win+1 & ripples.peaks*LfpSamplingrate<length(lfp.timestamps)-Win+1);
+    
 
 %% Calculate Ripple power ##################################################
 
@@ -187,7 +197,9 @@ set(gca,'visible','off')
 set(gca,'color','w')
 
 mkdir(basePath,'SummaryFigures');
-saveas(gcf,['SummaryFigures',filesep,'plotRippleChannels.png']);
+if saveFig
+    saveas(gcf,['SummaryFigures',filesep,'plotRippleChannels.png']);
+end
 cd(prevPath);
 end
 
