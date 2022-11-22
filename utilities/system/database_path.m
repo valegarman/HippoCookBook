@@ -1,12 +1,12 @@
 function dp = database_path
 % return dropbox folder path
 [~,computerName] = system('hostname');
-    switch computerName
-    % switch getenv('computername')
+    % switch computerName
+    switch getenv('computername')
         case 'MANULAPTOP'
             dp = 'W:\Buzsakilabspace\Datasets\ValeroM';
         case 'MANUPC'
-            dp = 'X:\data';
+            dp = 'W:\Buzsakilabspace\Datasets\ValeroM';
         case 'MANUXPS'
             dp = 'W:';
         case 'SB13FLPC017'

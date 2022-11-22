@@ -61,7 +61,11 @@ if parameters.force || isempty(chanCoords)
             'DiagnosticBiochip-128-6-128ch&uLED-12LED-32Ch-4Shanks','Not included'};
     else
         listOfProbes = {'Select probe...','A5x12-16-Buz-lin-5mm-100-200-160-177', 'CambridgeNeurotech-E1-64ch', 'CambridgeNeurotech-H2-64ch', 'uLED-12LED-32Ch-4Shanks','DiagnosticBiochip-128-6-128ch', 'Buzsaki64(64 ch, 8 shanks, staggered)', 'NeuroNexus-A8x1-tet-2mm-200-121(32ch,8 shanks,tetrode)',...,
+<<<<<<< HEAD
                             'DiagnosticBiochip-128-6-128ch&uLED-12LED-32Ch-4Shanks','Tetrodes-32ch(8t-4c)-C57-4', 'Tetrodes-32ch(8t-4c)-C57-3','Qtrode-32ch-IPO430','Not included'};
+=======
+                            'DiagnosticBiochip-128-6-128ch&uLED-12LED-32Ch-4Shanks','Tetrodes-32ch(8t-4c)-C57-4', 'Tetrodes-32ch(8t-4c)-C57-3','Not included'};
+>>>>>>> b3317a7485dd324f8429ef0b5b25a08c7dd9ae19
     end
     fig = figure;
     set(fig, 'MenuBar', 'none');

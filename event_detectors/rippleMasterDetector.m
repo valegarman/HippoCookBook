@@ -50,6 +50,7 @@ function [ripples,SW] = rippleMasterDetector(varargin)
 %     'EMGThresh'   0-1 threshold of EMG to exclude noise
 %     'saveMat'     logical (default=false) to save in buzcode format
 %     'plotType'   1=original version (several plots); 2=only raw lfp
+%     'detector'   'filter' (default), 'cnn', 'consensus'
 %    =========================================================================
 %
 % OUTPUT
@@ -104,6 +105,14 @@ addParameter(p,'force',false,@islogical);
 addParameter(p,'removeOptogeneticStimulation',true,@islogical);
 addParameter(p,'useCSD',false,@islogical);
 addParameter(p,'stdThreshold',1.5,@isnumeric);
+addParameter(p,'detector','filter',@ischar);
+% -- cnn related --
+addParameter(p,'cnn_channels', [], @isnumeric);
+addParameter(p,'model_file', '', @ischar);
+addParameter(p,'pred_every', 0.032, @isnumeric);
+addParameter(p,'verbose', false, @islogical);
+addParameter(p,'handle_overlap', 'mean', @ischar);
+addParameter(p,'exec_env', '', @ischar);
 
 parse(p,varargin{:})
 
@@ -133,6 +142,16 @@ force = p.Results.force;
 removeOptogeneticStimulation = p.Results.removeOptogeneticStimulation;
 useCSD = p.Results.useCSD;
 stdThreshold = p.Results.stdThreshold;
+detector = p.Results.detector;
+% -- cnn related --
+cnn_channels = p.Results.cnn_channels;
+pred_every = p.Results.pred_every;
+verbose = p.Results.verbose;
+model_file = p.Results.model_file;
+handle_overlap = p.Results.handle_overlap;
+exec_env = p.Results.exec_env;
+dir_project = fileparts(which('detect_ripples_cnn.m'));
+
 
 %% Load Session Metadata and several variables if not provided
 % session = sessionTemplate(basepath,'showGUI',false);
@@ -181,8 +200,25 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%
 %% Computing Ripples
 %%%%%%%%%%%%%%%%%%%%%%%%
-ripples = findRipples(rippleChannel,'thresholds',thresholds,'passband',passband,...
-    'EMGThresh',EMGThresh,'durations',durations, 'saveMat',false,'restrict',restrict,'frequency',frequency);
+
+if strcmp(detector, 'filter')
+    ripples = findRipples(rippleChannel,'thresholds',thresholds,'passband',passband,...
+        'EMGThresh',EMGThresh,'durations',durations, 'saveMat',false,'restrict',restrict,'frequency',frequency);
+elseif strcmp(detector, 'cnn')
+    % Choose cnn channels
+    if isempty(cnn_channels)
+        cnn_channels = rippleChannel + [-3:4];
+    end
+    lfp = getLFP(cnn_channels,'basepath',basepath);
+    ripples = detect_ripples_cnn(double(lfp.data), lfp.samplingRate, 'channels', cnn_channels, 'model_file', model_file, ...
+        'pred_every', pred_every, 'verbose', verbose, 'handle_overlap', handle_overlap, ...
+        'exec_env', exec_env);
+elseif strcmp(detector, 'consensus')
+    
+else
+    warning([detector ' is not recognised as a detector, please chose between filter/cnn/consensus'])
+    return
+end
 if removeOptogeneticStimulation
     try
         % Remove ripples durting stimulation artifacts
