@@ -53,7 +53,7 @@ if isempty(indexedSessionCSV_name)
 end
 if isempty(indexedSessionCSV_path)
     warning('Not included the path where the indexed Projects .mat variable is located. Trying to find it...');
-    indexedSessionCSV_path = fileparts(which([indexedSessionCSV_name,'.mat']));
+    indexedSessionCSV_path = fileparts(which([indexedSessionCSV_name,'.csv']));
 end
 if isempty(analysis_project_path)
     analysis_project_path = indexedSessionCSV_path;
@@ -123,7 +123,7 @@ for ii = 1:length(sessions.basepaths)
     projectSessionResults.geneticLine{ii} = session.animal.geneticLine;
     projectSessionResults.expSubject{ii} = session.animal.name;
     clear session
-    
+    edit groupStats
     % spikes
     if includeSpikes
         if lightVersion

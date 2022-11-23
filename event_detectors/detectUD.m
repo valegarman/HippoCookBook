@@ -55,6 +55,8 @@ function [UDStates] = detectUD(varargin)
 %
 %   Updated by Pablo Abad 2022 to discard bad channels ( I think it was already done) from session
 %   metadata and remove sessionInfo dependencies
+%   Modified by Pablo Abad to take into account timestamps where lfp is
+%   completely flat (2022)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -80,6 +82,7 @@ addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'noPrompts',true,@islogical);
 addParameter(p,'spikeThreshold',.25,@isnumeric);
 addParameter(p,'skipCluster',[],@isnumeric);
+addParameter(p,'useparfor',true,@islogical);
 
 parse(p,varargin{:})
 basepath = p.Results.basepath;
@@ -98,7 +101,7 @@ forceDetect = p.Results.forceDetect;
 saveMat = p.Results.saveMat;
 spikeThreshold = p.Results.spikeThreshold;
 skipCluster = p.Results.skipCluster;
-
+useparfor = p.Results.useparfor;
 
 %% Collect pieces
 if exist([basenameFromBasepath(pwd) '.UDStates.events.mat'],'file') && ~forceDetect
@@ -156,23 +159,45 @@ channels = 1:session.extracellular.nChannels;
 if isempty(ch) % if no channel declared, pick channel with higher gamma std during NREM and out of stimulation periods %anticorrelation delta gamma
     disp('Selecting best channel... ');
     params.Fs = session.extracellular.srLfp; params.fpass = [1 400]; params.tapers = [3 5]; params.pad = 1;
-    parfor ii = 1:session.extracellular.nChannels
-        if isfield(session.channelTags,'Bad') && any(channels(ii) == session.channelTags.Bad.channels)
-            gdCorr(ii) = 0; stdGamma(ii) = 0;
-        else
-            fprintf(' **Channel %3.i/ %3.i, ',ii, session.extracellular.nChannels); %\n
-            chlfp = getLFP(ii,'basepath',basepath,'noPrompts',noPrompts);
-            [S,t,f] = mtspecgramc_fast(double(chlfp.data(NREM_ts)),[2 1],params);
-            S = 10 * log10(S)' + 60;
-            gamm = sum(S(find(f >= filterparams.gamma(1) & f <= filterparams.gamma(2)),:));
-            delt = sum(S(find(f >= filterparams.delta(1) & f <= filterparams.delta(2)),:));
-            avGamma(ii) = mean(gamm);
-            stdGamma(ii) = std(gamm);
-            try gdCorr(ii) = corr(gamm',delt','Type','Spearman');
-            catch gdCorr(ii) = 0;
+    if useparfor
+        parfor ii = 1:session.extracellular.nChannels
+            if isfield(session.channelTags,'Bad') && any(channels(ii) == session.channelTags.Bad.channels)
+                gdCorr(ii) = 0; stdGamma(ii) = 0;
+            else
+                fprintf(' **Channel %3.i/ %3.i, ',ii, session.extracellular.nChannels); %\n
+                chlfp = getLFP(ii,'basepath',basepath,'noPrompts',noPrompts);
+                [S,t,f] = mtspecgramc_fast(double(chlfp.data(NREM_ts)),[2 1],params);
+                S(find(S == 0)) = NaN;
+                S = 10 * log10(S)' + 60; 
+                gamm = nansum(S(find(f >= filterparams.gamma(1) & f <= filterparams.gamma(2)),:));
+                delt = nansum(S(find(f >= filterparams.delta(1) & f <= filterparams.delta(2)),:));
+                avGamma(ii) = nanmean(gamm);
+                stdGamma(ii) = nanstd(gamm);
+                try gdCorr(ii) = corr(gamm',delt','Type','Spearman');
+                catch gdCorr(ii) = 0;
+                end
+            end
+        end 
+    else
+        for ii = 1:session.extracellular.nChannels
+            if isfield(session.channelTags,'Bad') && any(channels(ii) == session.channelTags.Bad.channels)
+                gdCorr(ii) = 0; stdGamma(ii) = 0;
+            else
+                fprintf(' **Channel %3.i/ %3.i, ',ii, session.extracellular.nChannels); %\n
+                chlfp = getLFP(ii,'basepath',basepath,'noPrompts',noPrompts);
+                [S,t,f] = mtspecgramc_fast(double(chlfp.data(NREM_ts)),[2 1],params);
+                S(find(S == 0)) = NaN;
+                S = 10 * log10(S)' + 60; 
+                gamm = nansum(S(find(f >= filterparams.gamma(1) & f <= filterparams.gamma(2)),:));
+                delt = nansum(S(find(f >= filterparams.delta(1) & f <= filterparams.delta(2)),:));
+                avGamma(ii) = nanmean(gamm);
+                stdGamma(ii) = nanstd(gamm);
+                try gdCorr(ii) = corr(gamm',delt','Type','Spearman');
+                catch gdCorr(ii) = 0;
+                end
             end
         end
-    end 
+    end
     gdCorr(gdCorr==0) = 1;
     sdScore = stdGamma./gdCorr;
     sdScore(~isnan(sdScore)) = zscore(sdScore(~isnan(sdScore)));                                     % down score increase with std gamma and gamma delta anticorr

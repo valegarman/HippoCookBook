@@ -114,10 +114,12 @@ if useParfor
         lfp = getLFP(channels(ii),'noPrompts', true); % now channels are 1-index an getLFP_temp is also 1-index
         [S,t,f] = mtspecgramc_fast(single(lfp.data),[4 2],params);
         S = 10 * log10(S);
-        powerProfileMean(ii) = mean(mean(S,2));
-        powerProfileStd(ii) = std(mean(S,2));
-        powerProfileIc95(ii) = 1.96 * std(mean(S,2))/sqrt(length(mean(S,2)));
-        powerProfileMedian(ii) = median(median(S,2));
+        S(find(isinf(S))) = NaN;
+        t(find(isinf(t))) = NaN;
+        powerProfileMean(ii) = nanmean(nanmean(S,2));
+        powerProfileStd(ii) = nanstd(nanmean(S,2));
+        powerProfileIc95(ii) = 1.96 * nanstd(nanmean(S,2))/sqrt(length(nanmean(S,2)));
+        powerProfileMedian(ii) = nanmedian(nanmedian(S,2));
         powerProfileChannels(ii) = channels(ii);
     end
 else
@@ -128,10 +130,12 @@ else
         fprintf('Channel %3.i/%3.i ,\n',ii, length(channels));
         [S,t,f] = mtspecgramc_fast(single(lfp.data(:,channels(ii))),[4 2],params);
         S = 10 * log10(S);
-        powerProfileMean(ii) = mean(mean(S,2));
-        powerProfileStd(ii) = std(mean(S,2));
-        powerProfileIc95(ii) = 1.96 * std(mean(S,2))/sqrt(length(mean(S,2)));
-        powerProfileMedian(ii) = median(median(S,2));
+        S(find(isinf(S))) = NaN;
+        t(find(isinf(S))) = NaN;
+        powerProfileMean(ii) = nanmean(nanmean(S,2));
+        powerProfileStd(ii) = std(nanmean(S,2));
+        powerProfileIc95(ii) = 1.96 * nanstd(nanmean(S,2))/sqrt(length(nanmean(S,2)));
+        powerProfileMedian(ii) = nanmedian(nanmedian(S,2));
         powerProfileChannels(ii) = channels(ii);
     end
 end
