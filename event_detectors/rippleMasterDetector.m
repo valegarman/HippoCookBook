@@ -150,7 +150,7 @@ verbose = p.Results.verbose;
 model_file = p.Results.model_file;
 handle_overlap = p.Results.handle_overlap;
 exec_env = p.Results.exec_env;
-dir_project = fileparts(which('detect_ripples_cnn.m'));
+dir_cnn = fileparts(which('detect_ripples_cnn.m'));
 
 
 %% Load Session Metadata and several variables if not provided
@@ -205,12 +205,38 @@ if strcmp(detector, 'filter')
     ripples = findRipples(rippleChannel,'thresholds',thresholds,'passband',passband,...
         'EMGThresh',EMGThresh,'durations',durations, 'saveMat',false,'restrict',restrict,'frequency',frequency);
 elseif strcmp(detector, 'cnn')
-    % Choose cnn channels
-    if isempty(cnn_channels)
-        cnn_channels = rippleChannel + [-3:4];
+    % Load channel configuration
+    load([session.general.name,'.session.mat']);
+    channelConf = session.extracellular.electrodeGroups.channels;
+    % Get best shank
+    if isvarname('hippocampalLayers')
+        bestShank = hippocampalLayers.bestShank;
+    elseif ~isempty(dir([session.general.name,'.hippocampalLayers.channelinfo.mat']))
+        file = dir([session.general.name,'.hippocampalLayers.channelinfo.mat']);
+        load(file.name);
+        bestShank = hippocampalLayers.bestShank;
+    else
+        [hippocampalLayers] = getHippocampalLayers();
+        bestShank = hippocampalLayers.bestShank;
     end
+    % Get channels near pyr that fits in the shank
+    channelsShank = channelConf{bestShank};
+    rippleChPos = find(channelsShank==rippleChannel);
+    if (rippleChPos < length(channelsShank)-5) && (rippleChPos > 2)
+        cnn_channels = channelsShank(rippleChPos + [-2:5]);
+    elseif (rippleChPos < length(channelsShank)-5)
+        cnn_channels = channelsShank(1:8);
+    elseif (rippleChPos > 2)
+        cnn_channels = channelsShank(end-7:end);
+    end
+    % Get LFP
     lfp = getLFP(cnn_channels,'basepath',basepath);
-    ripples = detect_ripples_cnn(double(lfp.data), lfp.samplingRate, 'channels', cnn_channels, 'model_file', model_file, ...
+    % Get model directory
+    if isempty(model_file)
+        model_file = fullfile(dir_cnn, 'cnn');
+    end
+    % Predict probability
+    ripples = detect_ripples_cnn(double(lfp.data), lfp.samplingRate, 'model_file', model_file, ...
         'pred_every', pred_every, 'verbose', verbose, 'handle_overlap', handle_overlap, ...
         'exec_env', exec_env);
 elseif strcmp(detector, 'consensus')
