@@ -287,13 +287,15 @@ for ii = 1:length(sessions.basepaths)
     end
     
     % cohgram 
-    targetFile = dir('*.cohgram.lfp.mat');
-    try
-        load(targetFile.name);
-        projectSessionResults.cohgram{ii} = cohgram;
-        clear cohgram
-    catch
-        projectSessionResults.cohgram{ii} = NaN;
+    if ~lightVersion
+        targetFile = dir('*.cohgram.lfp.mat');
+        try
+            load(targetFile.name);
+            projectSessionResults.cohgram{ii} = cohgram;
+            clear cohgram
+        catch
+            projectSessionResults.cohgram{ii} = NaN;
+        end
     end
     
     if includeLFP
@@ -304,20 +306,20 @@ for ii = 1:length(sessions.basepaths)
     
     if subSessionAnalysis
         % average CCG perSubSession
-        try
-            targetFile = dir('*.averageCCGSubSessions.cellinfo.mat'); load(targetFile.name);
-            projectSessionResults.averageCCGSubsession{ii} = averageCCGSubSessions;
-            clear averageCCGSubSession
-        catch
-        end
+%         try
+%             targetFile = dir('*.averageCCGSubSessions.cellinfo.mat'); load(targetFile.name);
+%             projectSessionResults.averageCCGSubsession{ii} = averageCCGSubSessions;
+%             clear averageCCGSubSession
+%         catch
+%         end
         
         % cohgram subSessions
-        try
-            targetFile = dir('*.cohgramSubsessions.cellinfo.mat'); load(targetFile.name);
-            projectSessionResults.cohgramSubsession{ii} = cohgramSubsessions;
-            clear cohgramSubsessions
-        catch
-        end
+%         try
+%             targetFile = dir('*.cohgramSubsessions.lfp.mat'); load(targetFile.name);
+%             projectSessionResults.cohgramSubsession{ii} = cohgram;
+%             clear cohgram
+%         catch
+%         end
         
         % cell_metrics SubSession
         try
@@ -330,17 +332,25 @@ for ii = 1:length(sessions.basepaths)
         % ripples SubSessions
         try
             targetFile = dir('*ripples_psthSubsessions.cellinfo.mat'); load(targetFile.name);
-            projectSessionResults.ripples_psthSubsessions = ripples_psthSubsessions;
+            projectSessionResults.ripples_psthSubsessions{ii} = psthRipplesSubsessions;
             clear ripples_psthSubsessions
         catch
         end
         
         try
             targetFile = dir('*ripples_rasterSubsessions.cellinfo.mat'); load(targetFile.name);
-            projectSessionResults.ripples_rasterSubsessions = ripples_rasterSubsessions;
+            projectSessionResults.ripples_rasterSubsessions{ii} = psthrasterRipplesSubsessions;
             clear ripples_rasterSubsessions
         catch
         end
+        try
+            targetFile = dir('*ripplesSubsessions.events.mat'); load(targetFile.name);
+            projectSessionResults.ripplesSubsessions{ii} = ripplesSubsessions;
+            clear ripplesSubsessions
+        catch
+            
+        end
+        
     end
     
     if saveSummaries
@@ -436,15 +446,15 @@ for ii = 1:length(projectSessionResults.numcells)
         
         % expSubject
          projectResults.expSubject{counCell} = lower(projectSessionResults.expSubject{ii});
-         counCell = counCell + 1;
          
         try 
             % drug
             projectResults.drug{counCell} = lower(projectSessionResults.drug{ii});
-            counCell = counCell + 1;
         catch
             warning('No drug detected in this session...');
         end
+        
+        counCell = counCell + 1;
     end
 end
 
@@ -468,9 +478,9 @@ for ii = 1:length(projectResults.expSubjectList)
 end
 
 try
-    projectResults.drug = nan(size(projectResults.drug));
-    for ii = 1:length(projectResults.drug)
-        projectResults.drug(strcmpi(projectResults.drug,projectResults.drugList{ii})) = ii;
+    projectResults.drugNumber = nan(size(projectResults.drug));
+    for ii = 1:length(projectResults.drugList)
+        projectResults.drugNumber(strcmpi(projectResults.drug,projectResults.drugList{ii})) = ii;
     end
 catch
     warning('No drug detected in this session...');

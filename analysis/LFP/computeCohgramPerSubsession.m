@@ -498,7 +498,7 @@ end
 
 if saveMat
     try
-        save([session.general.name,'.cohgramSubsessions.lfp.mat'],'cohgram');
+        save([session.general.name,'.cohgramSubsessions.lfp.mat'],'cohgram','-v7.3');
     catch
         disp('Saving with -v7.3...');
         save([session.general.name,'.cohgramSubsessions.lfp.mat'],'cohgram','-v7.3');

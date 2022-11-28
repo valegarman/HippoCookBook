@@ -96,12 +96,17 @@ indexNewSession_pablo('basepath',bpath,'project','MK801Project');
 % HPS22_160621_sess28 KETAMINE (Animal dead when injected ketamine. Not run
 % processSession)
 bpath = 'F:\data\HPS22\HPS22_160621_sess28';
-processSession_pablo('basepath',bpath,'promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',24,'SWChannel',13,'thetaChannel',24);
+processSession_pablo('basepath',bpath,'promt_hippo_layers',false,'anymaze_ttl_channel',2,'rippleChannel',24,'SWChannel',13,'thetaChannel',24);
 indexNewSession_pablo('basepath',bpath,'project','MK801Project');
 
 % HPS23_090621_sess9 MK801
 bpath = 'F:\data\HPS23\HPS23_090621_sess9';
 processSession_pablo('basepath',bpath,'promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',30,'SWChannel',13,'thetaChannel',30);
+indexNewSession_pablo('basepath',bpath,'project','MK801Project');
+
+% HPS23_110621_sess210 VEHICLE 
+bpath = 'F:\data\HPS23\HPS23_110621_sess10'; 
+processSession_pablo('basepath',bpath,'project','MK801Project','promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',47,'SWChannel',13,'thetaChannel',47);
 indexNewSession_pablo('basepath',bpath,'project','MK801Project');
 
 % HPS23_160621_sess11 KETAMINE
@@ -130,28 +135,18 @@ bpath = 'F:\data\HPS25\HPS25_050721_sess4';
 processSession_pablo('basepath',bpath,'project','MK801Project','promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',27,'SWChannel',17,'thetaChannel',27);
 indexNewSession_pablo('basepath',bpath,'project','MK801Project');
 
-% HPS23_110621_sess210 VEHICLE 
-bpath = 'F:\data\HPS23\HPS23_110621_sess10'; 
-processSession_pablo('basepath',bpath,'project','MK801Project','promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',27,'SWChannel',17,'thetaChannel',27);
+% HPS25_240621_sess2 KETAMINE
+bpath = 'F:\data\HPS25\HPS25_240621_sess2'; 
+processSession_pablo('basepath',bpath,'project','MK801Project','promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',17,'SWChannel',13,'thetaChannel',17);
 indexNewSession_pablo('basepath',bpath,'project','MK801Project');
-
-
-% LOAD PROJECT RESULTS FOR MK801 PROJECT
-% First we move tot the folder where the sessions of the same project are
-% located
-basepath = 'F:\data';
-cd(basepath);
-[projectResults, projectSessionResults] = ...
-        loadProjectResults_pablo('project', 'MK801Project',...
-        'analysis_project_path', 'C:\Users\Jorge\Dropbox\MK801Project\data',...
-        'indexedSessionCSV_name','indexedSessions_MK801Project',...
-        'prePath',basepath,...
-        'lightVersion',false,'loadLast',false);
-
     
-    
-% groupStats({group1,group2},{*groups*});
-    
-%% 
-
+% IPO 430
 createProbe('excel_file','electrodes_coordinates_Qtrode-32ch-IPO430');
+% IPO149
+createProbe('excel_file','electrodes_coordinates_Tetrodes-16ch(4t-4c)-IPO149');
+
+
+
+%% MISCELLANEA
+% groupStats({group1,group2},{*groups*});
+

@@ -361,6 +361,7 @@ basepath = 'F:\data\HPS25';
 basepath = 'D:\HPS25';
 createFiles('basepath',basepath);
 batch_preprocessSession_pablo('basepath','F:\data\HPS25','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'anymaze_ttl_channel',2);
+preprocessSession_pablo('basepath','F:\data\HPS25\HPS25_280621_sess3','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'anymaze_ttl_channel',2,'getPos',false,'sessionSummary',false);
 
 %% HPR21409
 

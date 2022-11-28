@@ -645,6 +645,7 @@ for ii = 1:length(UID)
         imagesc_ranked(spatialModulation.map_1_timestamps,...
             [(length(find(all_pyr)) + length(find(all_nw)) + 10) (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)], spatialModulation.map_1_rateMapsZ(all_ww,:),[-3 3],...
             spatialModulation.PF_position_map_1(all_ww,:));
+        
         xlim(spatialModulation.map_1_timestamps([1 end]));
         ylim([0 (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)]);
         xlabel('cm'); ylabel('Map 1 (-3 to 3 SD)');
