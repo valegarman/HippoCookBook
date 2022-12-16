@@ -48,6 +48,7 @@ addParameter(p,'tracking_pixel_cm',0.1149,@isnumeric);
 addParameter(p,'excludeAnalysis',[]); % 
 addParameter(p,'useCSD_for_theta_detection',true,@islogical);
 addParameter(p,'profileType','hippocampus',@ischar); % options, 'hippocampus' and 'cortex'
+addParameter(p,'rippleMasterDetector_threshold',[1.5 3.5],@isnumeric); % [1.5 3.5]
 
 parse(p,varargin{:})
 
@@ -73,6 +74,7 @@ tracking_pixel_cm = p.Results.tracking_pixel_cm;
 excludeAnalysis = p.Results.excludeAnalysis;
 useCSD_for_theta_detection = p.Results.useCSD_for_theta_detection;
 profileType = p.Results.profileType;
+rippleMasterDetector_threshold = p.Results.rippleMasterDetector_threshold;
 
 % Deal with inputs
 prevPath = pwd;
@@ -200,12 +202,12 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     % 8.1 Up and downs
     UDStates = detectUD('plotOpt', true,'forceDetect',true','NREMInts','all');
     psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true);
-    getSpikesRank('events','upstates')
+    getSpikesRank('events','upstates');
 
     % 8.2 Ripples
-    ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'removeOptogeneticStimulation',true); % [1.5 3.5]
-    psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true);
-    getSpikesRank('events','ripples')
+    ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'removeOptogeneticStimulation',true,'thresholds',rippleMasterDetector_threshold);
+    psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'min_pulsesNumber',10);
+    getSpikesRank('events','ripples');
 
     % 8.3 Theta intervals
     thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'powerThreshold',1);
@@ -226,15 +228,17 @@ if ~any(ismember(excludeAnalysis, {'10',lower('cellMetrics')}))
     elseif strcmpi(profileType,'cortex')
         session = assignBrainRegion('showPowerProfile','hfo','showEvent','slowOscilations','eventTwin',[-.5 .5]); % hfo slowOscilations [-.5 .5]
     end
-
-    try
-        if ~isempty(dir([session.general.name,'.optogeneticPulses.events.mat']))
-            file = dir([session.general.name,'.optogeneticPulses.events.mat']);
-            load(file.name);
+    
+    if isempty(excludeManipulationIntervals)
+        try
+            if ~isempty(dir([session.general.name,'.optogeneticPulses.events.mat']))
+                file = dir([session.general.name,'.optogeneticPulses.events.mat']);
+                load(file.name);
+            end
+                excludeManipulationIntervals = optoPulses.stimulationEpochs;
+        catch
+            warning('Not possible to get manipulation periods. Running CellMetrics withouth excluding manipulation epochs');
         end
-            excludeManipulationIntervals = optoPulses.stimulationEpochs;
-    catch
-        warning('Not possible to get manipulation periods. Running CellMetrics withouth excluding manipulation epochs');
     end
     cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true);
     

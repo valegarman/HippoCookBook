@@ -125,9 +125,13 @@ for i = 1:length(session.extracellular.spikeGroups.channels)
             channels{i}.slm = NaN;
         end
         
-        % Ripples
+        % Ripples [2 5]
         ripples{i} = findRipples(channels{i}.pyramidal,'thresholds',[2 5],'passband',[80 200],'durations',[20 150],'saveMat',false,'restrict',restrict);
-        
+        if isempty(ripples{i}.peaks)
+            [~,maxHFOChannel] = max(powerProfile_hfo.mean(session.extracellular.spikeGroups.channels{i}));
+            maxHFOChannel = session.extracellular.spikeGroups.channels{i}(maxHFOChannel);
+            ripples{i} = findRipples(maxHFOChannel,'thresholds',[.01 .05],'passband',[80 200],'durations',[20 150],'saveMat',false,'restrict',restrict);
+        end
         
         twin = 0.1;
         [evCsd,lfpAvg] = bz_eventCSD(lfp,ripples{i}.peaks,'channels',session.extracellular.spikeGroups.channels{i},'twin',[twin twin],'plotLFP',false,'plotCSD',false);
@@ -144,7 +148,7 @@ for i = 1:length(session.extracellular.spikeGroups.channels)
         end
 
         channels{i}.all = [channels{i}.oriens; channels{i}.pyramidal; channels{i}.radiatum; channels{i}.slm];
-        try
+        %try
             if promt
                 fp = figure;
                 set(gcf,'Position',[100 100 500 500]);
@@ -255,7 +259,7 @@ for i = 1:length(session.extracellular.spikeGroups.channels)
                 channels{i}.slm = channel_list(slm);
                 channels{i}.oriens = channel_list(or);
             end
-        end
+        % end
         
         %% Summary Plot
         subplot(2,nShanks,index(2*i-1))
