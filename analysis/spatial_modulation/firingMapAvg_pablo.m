@@ -50,7 +50,7 @@ function [firingMaps] = firingMapAvg_pablo(positions,spikes,varargin)
 %% parse inputs
 p=inputParser;
 addParameter(p,'smooth',2,@isnumeric);
-addParameter(p,'speedThresh',0.02,@isnumeric);
+addParameter(p,'speedThresh',0,@isnumeric);
 addParameter(p,'nBins',50,@isnumeric);
 addParameter(p,'maxGap',0.1,@isnumeric);
 addParameter(p,'minTime',0,@isnumeric);
@@ -62,7 +62,7 @@ addParameter(p,'orderKalmanVel',2,@isnumeric);
 addParameter(p,'pixelsPerCm',2.5,@isnumeric);
 addParameter(p,'plt',true,@islogical);
 addParameter(p,'positionFilter',true,@islogical);
-addParameter(p,'tint',true,@islogical);
+addParameter(p,'tint',false,@islogical);
 addParameter(p,'nPix2BinBy',[],@isnumeric);
 
 
@@ -108,7 +108,28 @@ try
     Fs_tracking = cell(1,length(behavior.maps));
     bndbox = cell(1,length(behavior.maps));
     pixelsmetre = cell(1,length(behavior.maps));
-    if any(ismember(behavior.description,'Linear maze  N-S'))
+    if any(ismember(behavior.description,'Linear maze  N-S')) | any(ismember(behavior.description,'Linear Track  N-S'))
+        for i = 1:length(tracking.folders)
+            fld{i} = find(ismember(behavior.description,tracking.apparatus{i}.name));
+        end
+        count = 1;
+        for ii = 1:length(fld)
+            for jj = 1:length(fld{ii})
+                nBins{count} = round(round(tracking.apparatus{ii}.boundingbox.xmax - tracking.apparatus{ii}.boundingbox.xmin)/pixelsPerCm);
+                nPix2BinBy{count} = (tracking.pixelsmetre{ii}*pixelsPerCm)/100;
+                Fs_tracking{count} = tracking.samplingRate(ii);
+                bndbox{count} = tracking.apparatus{ii}.boundingbox;
+                pixelsmetre{count} = tracking.pixelsmetre{ii};
+                count = count + 1;
+            end
+        end
+    elseif any(ismember(behavior.description,'YMaze Apparatus'))
+        behavior = getSessionBehavior();
+        nBins = cell(1,length(behavior.maps_whole));
+        nPix2BinBy = cell(1,length(behavior.maps_whole));
+        Fs_tracking = cell(1,length(behavior.maps_whole));
+        bndbox = cell(1,length(behavior.maps_whole));
+        pixelsmetre = cell(1,length(behavior.maps_whole));
         for i = 1:length(tracking.folders)
             fld{i} = find(ismember(behavior.description,tracking.apparatus{i}.name));
         end
@@ -166,7 +187,7 @@ for iCond = 1:size(positions,2)
     elseif size(positions{iCond},2)==3
         posx = positions{iCond}(:,2);
         posy = positions{iCond}(:,3);
-        [~,~,~,vx,vy,~,~] = KalmanVel(posx,posy,post,order);
+        [~,posxf,posyf,vx,vy,~,~] = KalmanVel(posx,posy,post,order);
     else
         warning('This is not a linear nor a 2D space!');
     end
@@ -182,7 +203,7 @@ for unit = 1:length(spikes.times)
     for c = 1:conditions
         if size(positions{c},2) == 2 || ~tint % is linearize 
             map{unit}{c} = Map_pablo(positions{c},spikes.times{unit},'smooth',smooth,'minTime',minTime,...
-                'nBins',round(nBins{c}),'maxGap',maxGap,'mode',mode,'maxDistance',maxDistance);
+                'nBins',round(nBins{c}),'maxGap',maxGap,'mode',mode,'maxDistance',maxDistance,'bndbox',bndbox{c},'binsize',nPix2BinBy{c},'pixelsmetre',pixelsmetre{c});
             if positionFilter && ~isempty(map{unit}{c}.y)
                 nonVisitedBins = find(map{unit}{c}.timeUnSmooth == 0);
 
@@ -207,55 +228,72 @@ for unit = 1:length(spikes.times)
             bin = bin (bin > 0);
 %             bin = unique(bin);
             map{unit}{c} = MapTint(positions{c},bin,'bndbox',bndbox{c},'binsize',nPix2BinBy{c},'pixelsmetre',pixelsmetre{c});
+            
+            if positionFilter
+                nonVisitedBins = find(map{unit}{c}.timeUnSmooth == 0);
+               
+                countUnvisited = map{unit}{c}.count;
+                countUnvisited(nonVisitedBins) = 0;
+               
+                timeUnvisited = map{unit}{c}.time;
+                timeUnvisited(nonVisitedBins) = 0;
+               
+                zUnvisited = map{unit}{c}.z;
+                zUnvisited(nonVisitedBins) = 0;
+
+                map{unit}{c}.countUnvisited = countUnvisited;
+                map{unit}{c}.timeUnvisited = timeUnvisited;
+                map{unit}{c}.zUnvisited = zUnvisited;
+            end
         end
     end
 end
 
 % Check that maps of same paradigm have same number of bins
-for ii = 1:length(map)
-    for jj = 1:length(uniqueParadigms)
-        sameParadigm = find(ismember(behavior.description,uniqueParadigms{jj}));
-        for kk = 1:length(sameParadigm)
-            if size(map{ii}{sameParadigm(1)}.count,1) ~= size(map{ii}{sameParadigm(2)}.count,1) || size(map{ii}{sameParadigm(1)}.count,2) ~= size(map{ii}{sameParadigm(2)}.count,2)
-                disp('Different number of bins for same paradigm. Trying to fix...');
-                m1 = size(map{ii}{sameParadigm(1)}.count,1);
-                m2 = size(map{ii}{sameParadigm(2)}.count,1);
-                n1 = size(map{ii}{sameParadigm(1)}.count,2);
-                n2 = size(map{ii}{sameParadigm(2)}.count,2);
-                
-                if m1 ~= m2
-                    maximum= max(m1,m2);
-                    idmax = find(max(m1,m2));
-                    map{ii}{sameParadigm(idmax)}.y(end) = [];
-                    map{ii}{sameParadigm(idmax)}.count(end,:) = [];
-                    map{ii}{sameParadigm(idmax)}.time(end,:) = [];
-                    map{ii}{sameParadigm(idmax)}.z(end,:) = [];
-                    map{ii}{sameParadigm(idmax)}.countUnSmooth(end,:) = [];
-                    map{ii}{sameParadigm(idmax)}.timeUnSmooth(end,:) = [];
-                    map{ii}{sameParadigm(idmax)}.timeUnSmoothSec(end,:) = [];
-                    map{ii}{sameParadigm(idmax)}.zUnSmooth(end,:) = [];
-                    
-                end
-                
-                if n1 ~= n2
-                    maximum = max(n1,n2);
-                    idmax = find(max(n1,n2));
-                    map{ii}{sameParadigm(idmax)}.x(end) = [];
-                    map{ii}{sameParadigm(idmax)}.count(:,end) = [];
-                    map{ii}{sameParadigm(idmax)}.time(:,end) = [];
-                    map{ii}{sameParadigm(idmax)}.z(:,end) = [];
-                    map{ii}{sameParadigm(idmax)}.countUnSmooth(:,end) = [];
-                    map{ii}{sameParadigm(idmax)}.timeUnSmooth(:,end) = [];
-                    map{ii}{sameParadigm(idmax)}.timeUnSmoothSec(:,end) = [];
-                    map{ii}{sameParadigm(idmax)}.zUnSmooth(:,end) = [];
-                    
-                end
-            end        
+if length(sameParadigm) > 1
+    for ii = 1:length(map)
+        for jj = 1:length(uniqueParadigms)
+            sameParadigm = find(ismember(behavior.description,uniqueParadigms{jj}));
+            for kk = 1:length(sameParadigm)
+                if size(map{ii}{sameParadigm(1)}.count,1) ~= size(map{ii}{sameParadigm(2)}.count,1) || size(map{ii}{sameParadigm(1)}.count,2) ~= size(map{ii}{sameParadigm(2)}.count,2)
+                    disp('Different number of bins for same paradigm. Trying to fix...');
+                    m1 = size(map{ii}{sameParadigm(1)}.count,1);
+                    m2 = size(map{ii}{sameParadigm(2)}.count,1);
+                    n1 = size(map{ii}{sameParadigm(1)}.count,2);
+                    n2 = size(map{ii}{sameParadigm(2)}.count,2);
+
+                    if m1 ~= m2
+                        maximum= max(m1,m2);
+                        idmax = find(max(m1,m2));
+                        map{ii}{sameParadigm(idmax)}.y(end) = [];
+                        map{ii}{sameParadigm(idmax)}.count(end,:) = [];
+                        map{ii}{sameParadigm(idmax)}.time(end,:) = [];
+                        map{ii}{sameParadigm(idmax)}.z(end,:) = [];
+                        map{ii}{sameParadigm(idmax)}.countUnSmooth(end,:) = [];
+                        map{ii}{sameParadigm(idmax)}.timeUnSmooth(end,:) = [];
+                        map{ii}{sameParadigm(idmax)}.timeUnSmoothSec(end,:) = [];
+                        map{ii}{sameParadigm(idmax)}.zUnSmooth(end,:) = [];
+
+                    end
+
+                    if n1 ~= n2
+                        maximum = max(n1,n2);
+                        idmax = find(max(n1,n2));
+                        map{ii}{sameParadigm(idmax)}.x(end) = [];
+                        map{ii}{sameParadigm(idmax)}.count(:,end) = [];
+                        map{ii}{sameParadigm(idmax)}.time(:,end) = [];
+                        map{ii}{sameParadigm(idmax)}.z(:,end) = [];
+                        map{ii}{sameParadigm(idmax)}.countUnSmooth(:,end) = [];
+                        map{ii}{sameParadigm(idmax)}.timeUnSmooth(:,end) = [];
+                        map{ii}{sameParadigm(idmax)}.timeUnSmoothSec(:,end) = [];
+                        map{ii}{sameParadigm(idmax)}.zUnSmooth(:,end) = [];
+
+                    end
+                end        
+            end
         end
     end
 end
-
-
 
 for c = 1:conditions
     cmBin{c} = (max(positions{c}(:,2))-min(positions{c}(:,2)))/nBins{c};
@@ -284,6 +322,7 @@ firingMaps.params.mode = mode;
 firingMaps.params.maxDistance = maxDistance;
 firingMaps.cmBin = cmBin;
 firingMaps.positionFilter = positionFilter;
+firingMaps.tint = tint;
 
 for unit = 1:length(spikes.times)
     for c = 1:conditions
@@ -349,13 +388,22 @@ if plt
                     end
                     title(num2str(unit),'FontWeight','normal','FontSize',10);
             end
-            saveas(gcf,[pwd,filesep,'SummaryFigures',filesep ,'firingMap_' num2str(c) '.png'],'png');
+            if tint
+                saveas(gcf,[pwd,filesep,'SummaryFigures',filesep ,'firingMap_' num2str(c) '_tint.png'],'png');
+            else
+                saveas(gcf,[pwd,filesep,'SummaryFigures',filesep ,'firingMap_' num2str(c) '_FMA.png'],'png');
+            end
         end
     end
 end
+
 close all;
 if saveMat
-   save([firingMaps.sessionName '.firingMapsAvg.cellinfo.mat'],'firingMaps'); 
+    if tint
+        save([firingMaps.sessionName '.firingMapsAvg_tint.cellinfo.mat'],'firingMaps'); 
+    else
+        save([firingMaps.sessionName '.firingMapsAvg.cellinfo.mat'],'firingMaps');
+    end
 end
 
 end

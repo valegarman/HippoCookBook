@@ -661,8 +661,10 @@ if isempty(anyMazeTtl)
     digitalIn = getDigitalIn;
     anyMazeTtl = digitalIn.timestampsOn{anyMaze_ttl_channel};
     anyMazeTtl_start = digitalIn.timestampsOn{1};
-    if isempty(anyMazeTtl_start)
+    if isempty(anyMazeTtl_start) & ~isempty(anyMazeTtl)
         anyMazeTtl_start = anyMazeTtl(1);
+    elseif isempty(anyMazeTtl_start) & isempty(anyMazeTtl)
+        anyMazeTtl_start = 0;
     end
 end
 % match anymaze frames con ttl pulses

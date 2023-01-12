@@ -406,3 +406,20 @@ computeSessionSummary('basepath','K:\fCamk7\fCamk7_220514_sess30','exclude',{'an
 %%
 createProbe('excel_file','electrodes_coordinates_Tetrodes-32ch(8t-4c)-C57-4');
 createProbe('excel_file','electrodes_coordinates_DiagnosticBiochip-128-6-128ch&uLED_12LED-32Ch-4Shanks');
+
+
+%% HM
+createProbe('excel_file','electrodes_coordinates_UtahArray-96ch');
+selectProbe();
+basepath = 'F:\data\HM';
+cd(basepath);
+createNSFiles('basepath',basepath);
+preprocessSession_pablo('basepath','F:\data\HM\HM_270722_sess2','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'changeAnalogInputs',false,'getPos',false,'sessionSummary',false);
+computeSessionSummary_pablo('basepath','F:\data\HM\HM_270722_sess2','analogChannelsList',[1 2 3],'digitalChannelsList',[]);
+
+
+
+
+preprocessSession('basepath','K:\fCamk7\fCamk7_220511_sess29','cleanArtifacts',({[],[1 2 6]}),'analogChannelsList',[],'digitalChannelsList',[1 2 6],'bazler_ttl_channel',10,'getPos',false,'sessionSummary',false);
+preprocessSession('basepath','K:\fCamk7\fCamk7_220511_sess29','cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[1 2 6],'bazler_ttl_channel',10,'getPos',false,'sessionSummary',false);
+

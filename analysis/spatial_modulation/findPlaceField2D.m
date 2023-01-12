@@ -93,6 +93,7 @@ addParameter(p,'type','ll',@isstr);
 addParameter(p,'verbose','off',@isstr);
 addParameter(p,'saveMat', true, @islogical);
 addParameter(p,'useColorBar',true,@islogical);
+addParameter(p,'showFig',true,@islogical);
 
 
 parse(p,varargin{:});
@@ -107,6 +108,7 @@ type = p.Results.type;
 verbose = p.Results.verbose;
 saveMat = p.Results.saveMat;
 useColorBar = p.Results.useColorBar;
+showFig = p.Results.showFig;
 
 % Get session info
 basename = basenameFromBasepath(basepath);
@@ -187,21 +189,24 @@ while true
         disp(' ');
         if showFig
             figure;
-            if nDims == 1,
+            if nDims == 1
                 plot(rateMap);hold on;
                 PlotIntervals(ToIntervals(field1),'rectangles');
                 PlotIntervals(ToIntervals(field2),'bars');
                 ylabel(tc);
             else
                 subplot(3,1,1);imagesc(rateMap);xlabel('Data');
-                subplot(3,1,2);imagesc(field1);clim([0 1]);xlabel('Field');
-                subplot(3,1,3);imagesc(field2);clim([0 1]);ylabel(tc);xlabel('Subfield');
+                subplot(3,1,2);imagesc(field1);xlabel('Field');
+                subplot(3,1,3);imagesc(field2);ylabel(tc);xlabel('Subfield');
+                
+%                 subplot(3,1,2);imagesc(field1);clim([0 1]);xlabel('Field');
+%                 subplot(3,1,3);imagesc(field2);clim([0 1]);ylabel(tc);xlabel('Subfield');
             end
         end
     end
     fieldSize = sum(field(:));
     % Keep this field if its size is sufficient
-    if fieldSize > minSize && fieldSize < size(rateMap,1)*size(rateMap,2)
+    if fieldSize > minSize*size(rateMap,1)*size(rateMap,2) && fieldSize < size(rateMap,1)*size(rateMap,2)
         mapStats.field(:,:,i) = field;
         mapStats.size(i) = fieldSize;
         mapStats.peak(i) = peak;

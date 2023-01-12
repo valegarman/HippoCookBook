@@ -69,6 +69,7 @@ if exist([filetarget '.pulses.events.mat'],'file')
             pulses.duration = pulses.duration(maskPulses,:);
             pulses.eventGroupID = pulses.eventGroupID(maskPulses,:);
             pulses.analogChannelsList = pulses.analogChannelsList(maskPulses,:);
+            
         end
         return
     end

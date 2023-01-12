@@ -37,6 +37,7 @@ addParameter(p,'randomization',false,@islogical);
 addParameter(p,'gridAnalysis',false,@islogical);
 addParameter(p,'twoHalvesAnalysis',true,@islogical);
 addParameter(p,'tint',false,@islogical);
+addParameter(p,'speedThresh',0,@isnumeric);
 
 parse(p, varargin{:});
 firingMaps2Halves = p.Results.firingMaps2Halves;
@@ -53,6 +54,7 @@ randomization = p.Results.randomization;
 gridAnalysis = p.Results.gridAnalysis;
 twoHalvesAnalysis = p.Results.twoHalvesAnalysis;
 tint = p.Results.tint;
+speedThresh = p.Results.speedThresh;
 
 % Deal with inputs
 prevPath = pwd;
@@ -75,25 +77,50 @@ if isempty(spikes)
 end
 
 if isempty(firingMaps2Halves)
-    if exist([basenameFromBasepath(pwd) '.firingMapsAvg2Halves.cellinfo.mat']) == 2
-        load([basenameFromBasepath(pwd) '.firingMapsAvg2Halves.cellinfo.mat']);
+    if tint
+        if exist([basenameFromBasepath(pwd) '.firingMapsAvg2Halves_tint.cellinfo.mat']) == 2
+            load([basenameFromBasepath(pwd) '.firingMapsAvg2Halves_tint.cellinfo.mat']);
+        else
+            try
+                firingMaps2Halves = firingMap2Halves(behavior, spikes,'saveMat',false);
+            catch
+                error('Firing maps could not be obtained.')
+            end
+        end
     else
-        try
-            firingMaps2Halves = firingMap2Halves(behavior, spikes,'saveMat',false);
-        catch
-            error('Firing maps could not be obtained.')
+        if exist([basenameFromBasepath(pwd) '.firingMapsAvg2Halves.cellinfo.mat']) == 2
+            load([basenameFromBasepath(pwd) '.firingMapsAvg2Halves.cellinfo.mat']);
+        else
+            try
+                firingMaps2Halves = firingMap2Halves(behavior, spikes,'saveMat',false);
+            catch
+                error('Firing maps could not be obtained.')
+            end
         end
     end
 end
 
 if isempty(placeFieldStats)
-    if exist([basenameFromBasepath(pwd) '.placeFields.cellinfo.mat']) == 2
-        load([basenameFromBasepath(pwd) '.placeFields.cellinfo.mat']);
+    if tint
+        if exist([basenameFromBasepath(pwd) '.placeFields2Halves_tint.cellinfo.mat']) == 2
+            load([basenameFromBasepath(pwd) '.placeFields2Halves_tint.cellinfo.mat']);
+            placeFieldStats2Halves = placeFieldStats2Halves_tint;
+        else
+            try
+                placeFieldStats = computeFindPlaceFields('firingMaps',firingMaps,'maxSize',.75,'sepEdge',0.03); %
+            catch
+                error('Place fields could not be obtained.')
+            end
+        end
     else
-        try
-            placeFieldStats = computeFindPlaceFields('firingMaps',firingMaps,'maxSize',.75,'sepEdge',0.03); %
-        catch
-            error('Place fields could not be obtained.')
+        if exist([basenameFromBasepath(pwd) '.placeFields2Halves_tint.cellinfo.mat']) == 2
+            load([basenameFromBasepath(pwd) '.placeFields2Halves_tint.cellinfo.mat']);
+        else
+            try
+                placeFieldStats = computeFindPlaceFields('firingMaps',firingMaps,'maxSize',.75,'sepEdge',0.03); %
+            catch
+                error('Place fields could not be obtained.')
+            end
         end
     end
 end
@@ -160,6 +187,7 @@ try
 catch
 end
 
+
 % 2 Spatial stats
 for jj = 1:length(firingMaps2Halves.rateMaps{1})
     for ii = 1:length(firingMaps2Halves.UID)
@@ -180,18 +208,18 @@ for jj = 1:length(firingMaps2Halves.rateMaps{1})
                 sparsity = ((sum(sum(occupancy.*Rate_Map))).^2)/sum(sum(occupancy.*(Rate_Map.^2)));
                 selectivity = max(max(Rate_Map))./meanFiringRate;
 
-                pf_position = placeFieldStats.mapStats{ii}{jj}.x(1);
-                pf_peak = placeFieldStats.mapStats{ii}{jj}.peak(1);
+                pf_position = placeFieldStats2Halves.mapStats{ii}{jj}{kk}.x(1);
+                pf_peak = placeFieldStats2Halves.mapStats{ii}{jj}{kk}.peak(1);
                 if pf_peak == 0
                     pf_peak =  NaN;
                 end
-                pf_size = placeFieldStats.mapStats{ii}{jj}.size(1); 
+                pf_size = placeFieldStats2Halves.mapStats{ii}{jj}{kk}.size(1); 
                 if pf_size == 0
                     pf_size = NaN;
                 end
-                fieldX = placeFieldStats.mapStats{ii}{jj}.fieldX(1,:);
-                fieldY = placeFieldStats.mapStats{ii}{jj}.fieldY(1,:);
-                is_placeField = double(~isnan(placeFieldStats.mapStats{ii}{jj}.x(1)));
+                fieldX = placeFieldStats2Halves.mapStats{ii}{jj}{kk}.fieldX(1,:);
+                fieldY = placeFieldStats2Halves.mapStats{ii}{jj}{kk}.fieldY(1,:);
+                is_placeField = double(~isnan(placeFieldStats2Halves.mapStats{ii}{jj}{kk}.x(1)));
 
                 spatialModulation.(['meanRate_map_' num2str(jj),'_half',num2str(kk)])(ii,1) = meanFiringRate;
                 spatialModulation.(['bits_spike_map_' num2str(jj),'_half',num2str(kk)])(ii,1) = bits_spike;
@@ -436,7 +464,11 @@ end
 spatialModulation2Halves = spatialModulation;
 
 if saveMat
-    save([basenameFromBasepath(pwd) '.spatialModulation2Halves.cellinfo.mat'],'spatialModulation2Halves'); 
+    if tint
+        save([basenameFromBasepath(pwd) '.spatialModulation2Halves_tint.cellinfo.mat'],'spatialModulation2Halves'); 
+    else
+        save([basenameFromBasepath(pwd) '.spatialModulation2Halves.cellinfo.mat'],'spatialModulation2Halves');
+    end
 end
 
 cd(prevPath);

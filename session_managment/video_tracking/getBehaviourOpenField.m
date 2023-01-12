@@ -149,6 +149,10 @@ try
     saveas(h1,'Behavior\Behavior_inZone.png');
     close(h1);
 catch
+    h1 = figure;
+    plot(tracking.position.x, tracking.position.y, 'Color', [0.5 0.5 0.5])
+    hold on;
+    axis ij;
     disp('There are not zones declared. Skipping...');
 end
 
@@ -173,6 +177,7 @@ behavior.masks.trials = nan(length(behavior.timestamps),1);
 behavior.masks.trialsDirection = NaN;
 
 behavior.maps = maps;
+behavior.maps_whole = NaN;
 
 % behaviour.description = 'Open Field';
 try
@@ -187,6 +192,9 @@ behavior.events.lReward = NaN;
 behavior.events.startDelay = NaN;
 behavior.events.endDelay = NaN;
 behavior.events.intersection = NaN;
+behavior.events.stemArm = NaN;
+behavior.events.rightArm = NaN;
+behavior.events.leftArm = NaN;
 
 behavior.trials.startPoint = [NaN NaN];
 behavior.trials.endDelay = NaN;

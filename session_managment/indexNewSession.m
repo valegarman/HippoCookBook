@@ -9,7 +9,7 @@ function [] = indexNewSession(varargin)
 p = inputParser;
 
 addParameter(p,'basepath',pwd,@isdir);
-addParameter(p,'project',[],@isstring);
+addParameter(p,'project',[],@ischar);
 addParameter(p,'indexedSessionCSV_path',[],@isstring);
 addParameter(p,'indexedSessionCSV_name','indexedSessions',@isstring);
 addParameter(p,'hippoCookBook_path','HippoCookBook',@isstring);
@@ -36,6 +36,11 @@ driveStorage_name = p.Results.driveStorage_name;
 if isempty(indexedSessionCSV_name)
     error('Need to provide the name of the index Project variable');
 end
+
+if ~isempty(project)
+    indexedSessionCSV_name = [indexedSessionCSV_name,'_',project];
+end
+
 if isempty(indexedSessionCSV_path)
     warning('Not included the path where the indexed Projects .csv variable is located. Trying to find it...');
     indexedSessionCSV_path = fileparts(which([indexedSessionCSV_name,'.csv']));
@@ -46,6 +51,8 @@ if isempty(indexedSessionCSV_path)
         allSessions = [];
         save([indexedSessionCSV_name,'.csv'],'allSessions');
         indexedSessionCSV_path = fileparts(which([indexedSessionCSV_name,'.csv']));
+        warning('There is a bug in the creation of the file. Go to the path, open the csv file created and delete everything. Then press any key and go on with the function :)');
+        pause
     end
 end
 

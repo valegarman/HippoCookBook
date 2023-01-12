@@ -1,6 +1,4 @@
 %% BatchScript_analysis_ripplesPerSubsession
-% place your code to run an analysis across all sessions for a given
-% project
 
 clear; close all
 targetProject= 'MK801Project';
@@ -9,7 +7,7 @@ database_path = 'F:\data';
 HCB_directory = what('MK801Project'); 
 
 sessionsTable = readtable([HCB_directory.path filesep 'indexedSessions_MK801Project.csv']); % the variable is called allSessions
-forceReload = true;
+forceReload = false;
 
 win_resp = [-0.025 0.025];
 

@@ -135,7 +135,7 @@ for ii = 1:length(sessions.basepaths)
     try
         drug = cell(0); 
         for i = 1:length(session.epochs)
-            if contains(session.epochs{i}.behavioralParadigm, 'Maze')
+            if contains(session.epochs{i}.behavioralParadigm, 'Maze1') | contains(session.epochs{i}.behavioralParadigm, 'Maze2')
                 drug{1, length(drug)+1} = lower(session.epochs{i}.notes);
                 drug{1, length(drug)+1} = ' ';
             end

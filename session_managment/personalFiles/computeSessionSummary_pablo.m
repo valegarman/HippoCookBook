@@ -91,6 +91,7 @@ if any(ismember(listOfAnalysis,'analogPulses'))
     try 
         disp('Psth and CSD from analog-in inputs...');
         pulses = getAnalogPulses('manualThr',true);
+        pulses.analogChannelsList = analogChannelsList;
         if ~isfield(pulses,'analogChannelsList') && ~isempty(pulses)
             pulses.analogChannelsList = ones(size(pulses.amplitude))*65;
             pulses.eventGroupID = ones(size(pulses.amplitude));
@@ -107,7 +108,7 @@ if any(ismember(listOfAnalysis,'analogPulses'))
             % CSD
             for mm = 1:length(listOfChannel)
                 fprintf('Stimulus %3.i of %3.i \n',mm, length(listOfChannel)); %\n
-                st = pulses.timestamps(pulses.analogChannelsList == listOfChannel(mm),1);
+                st = pulses.timestampsOn{pulses.analogChannelsList == listOfChannel(mm),1};
                 if isempty(st)
                     st = pulses.timestamps(pulses.analogChannelsList == listOfChannel(mm) + 1,1);
                 end
@@ -131,11 +132,12 @@ if any(ismember(listOfAnalysis,'analogPulses'))
                     end
                 end
                 saveas(gcf,['SummaryFigures\analogPulsesCSD_ch',num2str(listOfChannel(mm)), '.png']);
-                clear pulses listOfChannel
+                
             end
         else
             warning('Analog pulses not found!');
         end
+        clear pulses listOfChannel
 
     catch
         warning('Error on CSD from analog inputs! ');
@@ -206,6 +208,7 @@ if any(ismember(listOfAnalysis,{'digitalPulses', 'analogPulses'}))
         % getting analog pulses channel
         if ~isempty(analogChannelsList)
             analogPulses = getAnalogPulses;
+            analogPulses.listOfChannel = analogChannelsList;
             if isempty(analogPulses)
                 listOfAnalogChannel = [];
                 if ~isempty(analogChannelsList)
@@ -220,10 +223,45 @@ if any(ismember(listOfAnalysis,{'digitalPulses', 'analogPulses'}))
                     listOfAnalogChannel = analogChannelsList;
                 end
             end
-            clear analogPulses
+%             clear analogPulses
         else
             listOfAnalogChannel = [];
         end
+        
+        for ii = 1:length(listOfAnalogChannel)
+            psth = spikesPsth([analogPulses.timestampsOn{ii}'],'numRep',100,'saveMat',false,...
+                'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-3 3],'binSize',0.01, 'win_Z',[-3 -1]);
+            % Computing responseZ (instead of doing in master
+            % function due to subsession analysis)
+            win_resp = [-0.1 0.1];
+            psth_timestamps = psth.timestamps;
+            win_Z = find(psth_timestamps<=-0.1);
+            for kk = 1:size(psth.responsecurveSmooth,1)
+                psth.responseZ(kk,:) = (psth.responsecurveSmooth(kk,:) - ...
+                    mean(psth.responsecurveSmooth(kk,win_Z)))./std(psth.responsecurveSmooth(kk,win_Z));
+            end
+
+            % Computing peakResponse and peakResponseZ (instead of
+            % doing in master function due to subsession analysis)
+            win = find(psth_timestamps>=win_resp(1) & psth_timestamps<=win_resp(2));
+            for kk = 1:size(psth.responsecurve,1)
+                psth.peakResponse(kk,:) = nanmean(psth.responsecurve(kk,win),2); % delta peak response
+            end
+            for kk = 1:size(psth.responsecurveZ,1)
+                psth.peakResponseZ(kk,:) = nanmean(psth.responseZ(kk,win),2); % delta peak response
+            end
+            a = find(isnan(psth.peakResponseZ));
+            psth.peakResponseZ(a) = [];
+            psth.responseZ(a,:) = [];
+            
+            figure,
+            imagesc_ranked(psth.timestamps,[1:size(psth.responseZ,1)],psth.responseZ,[-5 5],...
+                        psth.peakResponseZ);
+            xlim([-0.5 1])    
+            colormap(jet);
+            saveas(gcf,['SummaryFigures\psthAnalog_ch',num2str(ii), '.png']);
+        end
+        close all;
         
         % getting digital pulses channel
         if ~isempty(digitalChannelsList)
@@ -250,8 +288,12 @@ if any(ismember(listOfAnalysis,{'digitalPulses', 'analogPulses'}))
             listOfDigitalChannel = [];
         end
         
-        optogeneticResponses = getOptogeneticResponse('analogChannelsList',listOfAnalogChannel,'digitalChannelsList', listOfDigitalChannel,'numRep',0,'saveMat',false);
-        optogeneticResponses = getOptogeneticResponse_temp('analogChannelsList',listOfAnalogChannel,'digitalChannelsList',listOfDigitalChannel,'numRep',0,'onset',50,'offset',50);
+
+            
+        
+        
+%         optogeneticResponses = getOptogeneticResponse('analogChannelsList',listOfAnalogChannel,'digitalChannelsList', listOfDigitalChannel,'numRep',0,'saveMat',false);
+%         optogeneticResponses = getOptogeneticResponse_temp('analogChannelsList',listOfAnalogChannel,'digitalChannelsList',listOfDigitalChannel,'numRep',0,'onset',50,'offset',50);
     catch
         warning('Error on PSTH from digital and/or analog inputs! ');
     end
@@ -298,7 +340,7 @@ if any(ismember(listOfAnalysis,'ripples'))
     try
         disp('Ripples CSD and PSTH...');
         
-        ripples = rippleMasterDetector('removeRipplesStimulation',removeRipplesStimulation);
+        ripples = rippleMasterDetector();
         % CSD
         shanks = session.extracellular.electrodeGroups.channels;            
         shanks(excludeShanks) = [];
@@ -323,7 +365,7 @@ if any(ismember(listOfAnalysis,'ripples'))
         saveas(gcf,'SummaryFigures\ripplesCSD.png');
         
         % PSTH
-        psthRipples = spikesPsth([],'eventType','ripples','numRep',100);
+        psthRipples = spikesPsth([],'eventType','ripples','numRep',100,'min_pulsesnumber',10);
         
     catch
         warning('Error on Psth and CSD from ripples! ');

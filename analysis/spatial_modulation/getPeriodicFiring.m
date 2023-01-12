@@ -21,6 +21,7 @@ addParameter(p,'gradStep',1,@isnumeric);
 addParameter(p,'plt',true,@islogical);
 addParameter(p,'saveFig',true,@islogical);
 addParameter(p,'unit',[],@isnumeric);
+addParameter(p,'tint',true,@islogical);
 
 parse(p,varargin{:})
 
@@ -30,6 +31,7 @@ gradStep = p.Results.gradStep;
 saveFig = p.Results.saveFig;
 plt = p.Results.plt;
 unit = p.Results.unit;
+tint = p.Results.tint;
 
 map = z;
 map = map - nanmean(map(:));
@@ -91,8 +93,13 @@ if plt
     subplot(2,1,2)
     polarplot(theta,smooth(BC)');
     if saveFig
-        mkdir('periodicFiring')
-        saveas(gcf,['periodicFiring\periodic_cell_',num2str(unit)]);
+        if tint
+            mkdir('periodicFiring')
+            saveas(gcf,['periodicFiring\periodic_cell_',num2str(unit),'_tint'],'png');
+        else
+            mkdir('periodicFiring')
+            saveas(gcf,['periodicFiring\periodic_cell_',num2str(unit),'_FMA'],'png');
+        end
     end
     close all;
 end
