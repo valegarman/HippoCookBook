@@ -126,8 +126,12 @@ sessionEntry = cell2table(sessionEntry,"VariableNames",["SessionName", "Subject"
 sessionsTable = [sessionsTable; sessionEntry];
 writetable(sessionsTable,[indexedSessionCSV_path filesep indexedSessionCSV_name,'.csv']); % the variable is called allSessions
 
+
 % Lets do a push for git repository
 cd(indexedSessionCSV_path);
+% Git pull 
+commandToExecute = ['git pull'];
+system(commandToExecute);
 % Git add variable to the repository
 commandToExecute = ['git add ', indexedSessionCSV_name,'.csv']
 system(commandToExecute);
