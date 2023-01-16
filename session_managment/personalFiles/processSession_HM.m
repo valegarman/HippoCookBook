@@ -1,6 +1,6 @@
-function [] = processSession_pablo(varargin)
+function [] = processSession_HM(varargin)
 
-% [] = processSession_pablo(varargin)
+% [] = processSession_HM(varargin)
 
 % This function runs standard analysis
 % Based on index_session_script_InterneuronsLibrary and indexNewSession by MV 2020
@@ -10,20 +10,17 @@ function [] = processSession_pablo(varargin)
 %  4. 'spikesFeatures'          Runs spike features: Light responses, if available, and ACG and waveform
 %  5. 'checkSleep'              Check sleep score
 %  6. 'powerProfiles'           Recompute power Profiles, considering bad channels now
-%  7. 'getHippocampalLayers'    Define semi-automatically hippocampal Layers
-%  8. 'eventsModulation'        Runs brain events modulation: i) Up and downs; ii) Ripples and iii) Theta intervals
-%  9. 'phaseModulation'         Computes phase modulation for theta, gamma and ripples
-% 10. 'cellMetrics'             Gets cell metrics (from Cell Explorer, and a few new)   
-% 11. 'lfpAnalysis'             Computes power spectrum and coherence for
+%  7. 'eventsModulation'        Runs brain events modulation: i) Up and downs; ii) Ripples and iii) Theta intervals
+%  8. 'phaseModulation'         Computes phase modulation for theta, gamma and ripples
+%  9. 'cellMetrics'             Gets cell metrics (from Cell Explorer, and a few new)   
+% 10. 'lfpAnalysis'             Computes power spectrum and coherence for
 %                               different channels
-% 12. subSessions Analysis      Runs different analysis for subSessions
-% 13. 'spatialModulation'       Process spatial modulation analysis, behavioural events and speed
-% 14. 'summary'                 Makes cell/session sumary
+% 11. 'summary'                 Makes cell/session sumary
 %
 % Note: to exclude any analysis, use 'excludeAnalysis' and provide the name
 % or number of the section analysis to exlucde, example: processSession('excludeAnalysis',{'cureAnalogPulses', 'getHippocampalLayers', 8})
 %
-% MV 2022, based on indexNewSession (now indeNewSession only indexes session on github)
+% Pablo Abad 2022, based on indexNewSession (now indeNewSession only indexes session on github)
 
 %% Defaults and Params
 p = inputParser;
@@ -63,7 +60,6 @@ addParameter(p,'twoHalvesAnalysis',true,@islogical);
 addParameter(p,'gridAnalysis',false,@islogical);
 addParameter(p,'randomization',false,@islogical);
 addParameter(p,'tint',true,@islogical);
-addParameter(p,'speedThresh',0,@isnumeric);
 
 parse(p,varargin{:})
 
@@ -102,7 +98,6 @@ twoHalvesAnalysis = p.Results.twoHalvesAnalysis;
 gridAnalysis = p.Results.gridAnalysis;
 randomization = p.Results.randomization;
 tint = p.Results.tint;
-speedThresh = p.Results.speedThresh;
 
 % Deal with inputs
 prevPath = pwd;
@@ -115,6 +110,19 @@ if length(excludeAnalysis) == 0
     excludeAnalysis = num2str(excludeAnalysis);
 end
 excludeAnalysis = lower(excludeAnalysis);
+
+try
+    quadrants = getSessionQuadrants('force',true);
+    
+    psth_quadrants_correct = spikesPsth([quadrants.ts(quadrants.choice == 1)],'numRep',100,'saveMat',false,...
+                'min_pulsesNumber',1,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-1 1],'binSize',0.01, 'win_Z',[-3 -1]);
+            
+    psth_quadrants_incorrect = spikesPsth([quadrants.ts(quadrants.choice == 0)],'numRep',100,'saveMat',false,...
+                'min_pulsesNumber',1,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-1 1],'binSize',0.01, 'win_Z',[-3 -1]);
+catch
+    warning('Not possible to run getQuadrants...');
+end
+
 %% 1. Runs sessionTemplate
 if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))
     try
@@ -238,13 +246,7 @@ if ~any(ismember(excludeAnalysis, {'6',lower('powerProfiles')}))
     powerProfile_hfo = powerSpectrumProfile(hfo_bandpass,'showfig',true,'forceDetect',true);
 end
 
-%% 7. Getting Hippocampal Layers
-if ~any(ismember(excludeAnalysis, {'7',lower('getHippocampalLayers')}))
-    [hippocampalLayers] = getHippocampalLayers('force',true,'promt',promt_hippo_layers);
-end
-
-
-%% 8. Check Brain Events
+%% 7. Check Brain Events
 if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     % Trying changes in detecUD_temp
     % 8.1 Up and downs
@@ -253,20 +255,20 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
 
     % 8.2 Ripples
     ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'removeOptogeneticStimulation',true); % [1.5 3.5]
-    psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'min_pulsesNumber',0);
+    psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true);
 
     % 8.3 Theta intervals
     thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'channel',thetaChannel);
 end
 
-%% 9. Phase Modulation
+%% 8. Phase Modulation
 if ~any(ismember(excludeAnalysis, {'9',lower('phaseModulation')}))
     % LFP-spikes modulation
     [phaseMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel);
     computeCofiringModulation;
 end
 
-%% 10. Cell metrics
+%% 9. Cell metrics
 % Exclude manipulation intervals for computing CellMetrics
 if ~any(ismember(excludeAnalysis, {'10',lower('cellMetrics')}))
     if strcmpi(profileType,'hippocampus')
@@ -296,163 +298,14 @@ if ~any(ismember(excludeAnalysis, {'10',lower('cellMetrics')}))
     
 end
 
-%% 11. lfp Analysis
+%% 10. lfp Analysis
 if ~any(ismember(excludeAnalysis,{'11',lower('lfpAnalysis')}))
- end
-
-%% 12. SubSessions Analysis
-if ~any(ismember(excludeAnalysis,{'12',lower('subSessionsAnalysis')}))
-    % LFP-spikes modulation per subsession
-    [phaseModSubSession] = computePhaseModulationPerSubSession('rippleChannel',rippleChannel,'SWChannel',SWChannel);
-    % Cell Metrics per subsession
-    cell_metrics_SubSession = ProcessCellMetricsPerSubSession('session', session,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',{'deepSuperficial'},'forceReload',true);
-    % lfp Analysis per subsession
-    cohgramSubSession = computeCohgramPerSubsession('force',true);
+    cohgram = computeCohgram('force',true);
 end
 
-%% 13. Spatial modulation
-if ~any(ismember(excludeAnalysis, {'13',lower('spatialModulation')}))
-    try
-        spikes = loadSpikes;
-        getSessionTracking('convFact',tracking_pixel_cm,'roiTracking','manual','anyMaze',anyMaze);
-        try
-            getSessionArmChoice('task','alternation');
-        catch
-            warning('No arm choice available to compute.');
-        end
-        try
-            getSessionYMazeChoice('forceReload',true);
-        catch
-            warning('No YMaze arm choice available to compute.');
-        end
-        try
-            getSessionCircularMazeArmChoice('task','forced')
-        catch
-            warning('No circular arm choice available to compute.');
-        end
-        behavior = getSessionBehavior('forceReload',true);
-        firingMaps = firingMapAvg_pablo(behavior,spikes,'speedThresh',speedThresh,'tint',0,'pixelsPerCm',pixelsPerCm,'saveMat',true); 
-        firingMaps_tint = firingMapAvg_pablo(behavior,spikes,'speedThresh',speedThresh,'tint',1,'pixelsPerCm',pixelsPerCm,'saveMat',true);
-        placeFieldStats = computeFindPlaceFields('firingMaps',[],'tint',tint,'useColorBar',false,'saveMat',true);
-        if any(ismember(behavior.description,'Linear Track  N-S'))
-            firingTrialsMap = firingMapPerTrial_pablo;
-        end
-        spatialModulation = computeSpatialModulation('force',true,'tint',tint,'gridAnalysis',gridAnalysis,'randomization',randomization,'speedThresh',speedThresh);
-        if twoHalvesAnalysis
-            firingMaps2Halves = firingMap2Halves(behavior,spikes,'pixelsPerCm',pixelsPerCm,'saveMat',true,'tint',false);
-            firingMaps2Halves_tint = firingMap2Halves(behavior,spikes,'pixelsPerCm',pixelsPerCm,'saveMat',true,'tint',true);
-            placeFieldStats2Halves = computeFindPlaceFields2Halves('firingMaps',[],'tint',tint,'useColorBar',false);
-            spatialModulation2Halves = computeSpatialModulation2Halves('force',true,'tint',tint,'speedThresh',speedThresh); % Not running gridAnalysis for two Halves
-        end
-    catch
-        warning('Not possible to run spatial modulation...');
-    end
-    
-    % PSTH
-    behavior = getSessionBehavior;
-    if any(ismember(behavior.description,'Social Interaction'))
-        try         
-            for ii = 1:length(behavior.description)
-                if strcmpi(behavior.description{ii},'Social Interaction')
-                    flds = fields(behavior.events.entry{ii});
-                    for jj = 1:length(flds)
-                        psth_entry.(flds{jj}){ii} = spikesPsth([behavior.events.entry{ii}.(flds{jj}).ts],'numRep',100,'saveMat',false,...
-                            'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01,'win_Z',[-3 -1]);
-                    end
-                    flds = fields(behavior.events.exit{ii});
-                    for jj = 1:length(flds)
-                        psth_exit.(flds{jj}){ii} = spikesPsth([behavior.events.exit{ii}.(flds{jj}).ts],'numRep',100,'saveMat',false,...
-                            'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01,'win_Z',[-3 -1]);
-                    end
-                    behavior.psth_entry = psth_entry;
-                    behavior.psth_exit = psth_exit;
-                    save([basenameFromBasepath(pwd) '.behavior.cellinfo.mat'],'behavior');
-                end
-            end
-        end
-    end
-        
-    if any(ismember(behavior.description,'TMaze'))
-        try
-            psth_lReward = spikesPsth([behavior.events.lReward],'numRep',100,'saveMat',false,...
-                'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
-            psth_rReward = spikesPsth([behavior.events.rReward],'numRep',100,'saveMat',false,...
-                'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
-            psth_reward = spikesPsth([behavior.events.lReward; behavior.events.rReward],'numRep',100,'saveMat',false,...
-                'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
-
-            psth_intersection = spikesPsth([behavior.events.intersection],'numRep',100,'saveMat',false,...
-                'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
-            psth_startPoint = spikesPsth([behavior.events.startPoint],'numRep',100,'saveMat',false,...
-                'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
-
-            behavior.psth_lReward = psth_lReward;
-            behavior.psth_rReward = psth_rReward;
-            behavior.psth_reward = psth_reward;
-            behavior.psth_intersection = psth_intersection;
-            behavior.psth_startPoint = psth_startPoint; 
-            behavior = behavior; % british to american :)
-            save([basenameFromBasepath(pwd) '.behavior.cellinfo.mat'],'behavior');
-        end
-    end
-    
-    if any(ismember(behavior.description,'Linear Track  N-S'))
-        try
-            psth_lReward = spikesPsth([behavior.events.lReward],'numRep',100,'saveMat',false,...
-                'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
-            psth_rReward = spikesPsth([behavior.events.rReward],'numRep',100,'saveMat',false,...
-                'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
-            behavior.psth_lReward = psth_lReward;
-            behavior.psth_rReward = psth_rReward;
-            save([basenameFromBasepath(pwd) '.behavior.cellinfo.mat'],'behavior');
-        end
-    end
-    
-    if any(ismember(behavior.description, 'YMaze Apparatus'))
-        try
-           for ii = 1:length(behavior.description)
-               if strcmpi(behavior.description{ii},'YMaze Apparatus')
-                   flds = fields(behavior.events.entry{ii});
-                   for jj = 1:length(flds)
-                        psth_entry.(flds{jj}){ii} = spikesPsth([behavior.events.entry{ii}.(flds{jj}).ts],'numRep',100,'saveMat',false,...
-                            'min_pulsesNumber',0,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01,'win_Z',[-3 -1]);
-                   end
-                    flds = fields(behavior.events.exit{ii});
-                    for jj = 1:length(flds)
-                        psth_exit.(flds{jj}){ii} = spikesPsth([behavior.events.exit{ii}.(flds{jj}).ts],'numRep',100,'saveMat',false,...
-                            'min_pulsesNumber',0,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01,'win_Z',[-3 -1]);
-                    end
-                    behavior.psth_entry = psth_entry;
-                    behavior.psth_exit = psth_exit;
-                    save([basenameFromBasepath(pwd) '.behavior.cellinfo.mat'],'behavior');
-               end
-           end
-        end
-    end
-    
-    try
-        speedCorr = getSpeedCorr('numQuantiles',20,'force',true,'trials',false);
-    end
-end
-
-%% 14. Summary per cell
+%% 11. Summary per cell
 if ~any(ismember(excludeAnalysis, {'14',lower('summary')}))
-%     plotSummary();
-%     getSummaryPerCell;
-    if strcmpi(project,'SocialProject')
-%         plotSummary_social();
-        plotSummary_pablo();
-    elseif strcmpi(project,'SubiculumProject')
-        plotSpatialModulation('gridAnalysis',gridAnalysis);
-        plotSummary_subiculum();
-    elseif strcmpi(project,'MK801Project')
-        plotSummary_pablo('excludePlot',{'spatialModulation'});
-%         plotSpatialModulation('gridAnalysis',gridAnalysis);
-%         plotSummary_MK801();
-    elseif strcmpi(project,'GLUN3Project')
-        plotSummary_GLUN3();
-    end
-        
+    plotSummary_HM();   
 end
 
 cd(prevPath);

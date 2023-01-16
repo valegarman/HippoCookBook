@@ -327,9 +327,15 @@ if plt
                     title(num2str(unit),'FontWeight','normal','FontSize',10);
                     
                 end
+                
+                if tint
                     mkdir('2Halves');
-                    saveas(gcf,[pwd,filesep,'2Halves',filesep ,'firingMap_' num2str(unit) '.png'],'png');
-                    close all;
+                    saveas(gcf,[pwd,filesep,'2Halves',filesep ,'firingMap_' num2str(unit) '_tint.png'],'png');
+                else
+                    mkdir('2Halves');
+                    saveas(gcf,[pwd,filesep,'2Halves',filesep ,'firingMap_' num2str(unit) '_FMA.png'],'png');
+                end
+                close all;
             else
             end
         end
@@ -340,7 +346,11 @@ close all;
 firingMaps2Halves = firingMaps;
 firingMaps2Halves.pos = pos;
 if saveMat
-   save([firingMaps.sessionName '.firingMapsAvg2Halves.cellinfo.mat'],'firingMaps2Halves'); 
+    if tint
+        save([firingMaps.sessionName '.firingMapsAvg2Halves_tint.cellinfo.mat'],'firingMaps2Halves'); 
+    else
+        save([firingMaps.sessionName '.firingMapsAvg2Halves.cellinfo.mat'],'firingMaps2Halves');
+    end
 end
 
 end

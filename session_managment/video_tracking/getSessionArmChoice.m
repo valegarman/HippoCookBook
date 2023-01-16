@@ -4,12 +4,12 @@ function [sessionArmChoice] = getSessionArmChoice(varargin)
 %
 % USAGE
 %
-%   [tracking] = getSessionTracking(varargin)
+%   [sessionArmChoice] = getSessionArmChoice(varargin)
 %
 % INPUTS
 % basePath                      (default: pwd) basePath for the recording file, 
 %                                    in buzcode format:
-% task                          'alternation' and 'cudeSide'
+% task                          'alternation' and 'cudeSide' 
 % forceReload                   Force detection (boolean, default false)
 % verbose                       Default false
 % saveMat                       Default true
@@ -32,6 +32,7 @@ function [sessionArmChoice] = getSessionArmChoice(varargin)
 %
 %   Manuel Valero 2019
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 %% Defaults and Parms
 p = inputParser;
 addParameter(p,'basepath',pwd,@isstr);

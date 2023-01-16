@@ -83,19 +83,44 @@ if (size(z,2) < 1 || size(z,2) > 2) && ~isempty(z),
 	error('Parameter ''z'' should have 1 or 2 columns (type ''help <a href="matlab:help Map">Map</a>'' for details).');
 end
 
+% Parse Inputs
+
+p = inputParser;
+addParameter(p,'maxGap',0.1,@isnumeric);
+addParameter(p,'smooth',2,@isnumeric);
+addParameter(p,'nBins',50,@isnumeric);
+addParameter(p,'minTime',0,@isnumeric);
+addParameter(p,'type','lll',@ischar);
+addParameter(p,'mode','discard',@ischar);
+addParameter(p,'maxDistance',5,@isnumeric);
+addParameter(p,'sample_rate',30,@isnumeric);
+addParameter(p,'bndbox',[],@isstruct);
+addParameter(p,'var2binby','position',@ischar);
+addParameter(p,'pixelsmetre',[],@isnumeric);
+addParameter(p,'binsize',[],@isnumeric);
+
+parse(p,varargin{:});
+
+maxGap = p.Results.maxGap;
+smooth = p.Results.smooth;
+nBins = p.Results.nBins;
+minTime = p.Results.minTime;
+type = p.Results.type;
+mode = p.Results.mode;
+maxDistance = p.Results.maxDistance;
+sample_rate = p.Results.sample_rate;
+bndbox = p.Results.bndbox;
+var2binby = p.Results.var2binby;
+pixelsmetre = p.Results.pixelsmetre;
+binsize = p.Results.binsize;
+
 % Default values
-maxGap = 0.1;
 map.x = [];
 map.y = [];
 map.count = [];
 map.time = [];
 map.z = [];
-smooth = 2;
-nBins = 50;
-minTime = 0;
-type = 'lll';
-mode = 'discard';
-maxDistance = 5;
+
 
 if isempty(v) || size(v,1) < 2, return; end
 
@@ -109,60 +134,6 @@ else
 	y = [];
 end
 
-% Parse parameter list
-for i = 1:2:length(varargin),
-	if ~ischar(varargin{i}),
-		error(['Parameter ' num2str(i+2) ' is not a property (type ''help <a href="matlab:help Map">Map</a>'' for details).']);
-	end
-	switch(lower(varargin{i})),
-
-		case 'smooth',
-			smooth = varargin{i+1};
-			if ~isdvector(smooth,'>=0') || length(smooth) > 2,
-				error('Incorrect value for property ''smooth'' (type ''help <a href="matlab:help Map">Map</a>'' for details).');
-			end
-
-		case 'nbins',
-			nBins = varargin{i+1};
-			if ~isivector(nBins,'>0') || length(nBins) > 2,
-				error('Incorrect value for property ''nBins'' (type ''help <a href="matlab:help Map">Map</a>'' for details).');
-			end
-
-		case 'mintime',
-			minTime = varargin{i+1};
-			if ~isdscalar(minTime,'>=0'),
-				error('Incorrect value for property ''minTime'' (type ''help <a href="matlab:help Map">Map</a>'' for details).');
-			end
-
-		case 'maxgap',
-			maxGap = varargin{i+1};
-			if ~isdscalar(maxGap,'>=0'),
-			error('Incorrect value for property ''maxGap'' (type ''help <a href="matlab:help Map">Map</a>'' for details).');
-			end
-
-		case 'maxdistance',
-			maxDistance = varargin{i+1};
-			if ~isdscalar(maxDistance,'>=0'),
-			error('Incorrect value for property ''maxDistance'' (type ''help <a href="matlab:help Map">Map</a>'' for details).');
-			end
-
-		case 'mode',
-			mode = lower(varargin{i+1});
-			if ~isstring_FMAT(mode,'interpolate','discard'),
-				error('Incorrect value for property ''mode'' (type ''help <a href="matlab:help Map">Map</a>'' for details).');
-			end
-
-		case 'type',
-			type = lower(varargin{i+1});
-			if (isempty(y) && ~isstring_FMAT(type,'cc','cl','lc','ll')) || (~isempty(y) && ~isstring_FMAT(type,'ccl','cll','lcl','lll','ccc','clc','lcc','llc')),
-				error('Incorrect value for property ''type'' (type ''help <a href="matlab:help Map">Map</a>'' for details).');
-			end
-
-		otherwise,
-			error(['Unknown property ''' num2str(varargin{i}) ''' (type ''help <a href="matlab:help Map">Map</a>'' for details).']);
-
-  end
-end
 
 % Make sure x and y are normalized
 if max(x) > 1 || min(x) < 0,
@@ -236,6 +207,7 @@ else
 	valid = map.time > minTime;
     map.countUnSmooth = map.count';
     map.timeUnSmooth = map.time';
+    map.timeUnSmoothSec = map.timeUnSmooth/sample_rate;
 	map.count = Smooth(Interpolate2(map.x,map.y,map.count,valid,mode,maxDistance),smooth,'type',type(1:2))';
 	map.time = Smooth(Interpolate2(map.x,map.y,map.time,valid,mode,maxDistance),smooth,'type',type(1:2))';
 	if pointProcess
@@ -255,6 +227,14 @@ if strcmp(type(end),'c'), map.z = wrap(angle(map.z),range); end
 % Interpolate or discard regions with insufficient sampling
 if strcmp(mode,'discard'),
 	map.z(map.time<=minTime) = 0;
+end
+
+try
+    map.bndbox = bndbox;
+    map.var2binby = var2binby;
+    map.binsize = binsize;
+    map.pixelsmetre = pixelsmetre;
+catch
 end
 
 % ------------------------------- Helper functions -------------------------------

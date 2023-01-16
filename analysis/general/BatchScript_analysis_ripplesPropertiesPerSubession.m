@@ -9,7 +9,7 @@ database_path = 'F:\data';
 HCB_directory = what('MK801Project'); 
 
 sessionsTable = readtable([HCB_directory.path filesep 'indexedSessions_MK801Project.csv']); % the variable is called allSessions
-forceReload = true;
+forceReload = false;
 
 win_resp = [-0.025 0.025];
 

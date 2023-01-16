@@ -119,7 +119,8 @@ if rotate
     [autoCorr] = rotAutoCorr(r,'arenaSize',arenaSize,'unit',unit);
     in = input('Are you OK with Grid? 1- Yes 0- No');
     while in == 0
-        [autoCorr] = rotAutoCorr(r);
+        [autoCorr] = rotAutoCorr(r,'arenaSize',arenaSize,'unit',unit);
+        in = input('Are you OK with Grid? 1- Yes 0- No');
     end
 end
 

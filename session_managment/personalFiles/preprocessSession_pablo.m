@@ -65,6 +65,7 @@ addParameter(p,'bazler_ttl_channel',10,@isnumeric);
 addParameter(p,'anymaze_ttl_channel',[],@isnumeric);
 addParameter(p,'getDigitalInputBySubfolders',true,@islogical);
 addParameter(p,'anyMaze',true,@islogical);
+addParameter(p,'changeAnalogInputs',false,@islogical);
 
 % addParameter(p,'pullData',[],@isdir); To do... 
 parse(p,varargin{:});
@@ -84,6 +85,7 @@ bazler_ttl_channel = p.Results.bazler_ttl_channel;
 anymaze_ttl_channel = p.Results.anymaze_ttl_channel;
 getDigitalInputBySubfolders = p.Results.getDigitalInputBySubfolders;
 anyMaze = p.Results.anyMaze;
+changeAnalogInputs = p.Results.changeAnalogInputs;
 
 if ~exist('basepath') || isempty(basepath)
     basepath = uigetdir; % select folder
@@ -156,8 +158,12 @@ concatenateDats(pwd,0,1);
 
 %% Get analog and digital pulses
 if  ~isempty(analogChannelsList)
+    if changeAnalogInputs
+        changeAnalogIn; 
+    end
     try
-        [pulses] = getAnalogPulses('analogChannelsList',analogChannelsList,'manualThr', manualThr);
+%         [pulses] = getAnalogPulses('analogChannelsList',analogChannelsList,'manualThr', manualThr);
+        pulses = getAnalogInBySubfolders('all','fs',session.extracellular.sr);
     catch
         warning('No analog pulses detected');
     end
@@ -202,6 +208,7 @@ catch
 end
 
 %% Make LFP
+cd(basepath);
 if isempty(dir('*.lfp'))
     disp('Creating .lfp file. This could take a while...');
     ResampleBinary(strcat(basename,'.dat'),strcat(basename,'.lfp'),...

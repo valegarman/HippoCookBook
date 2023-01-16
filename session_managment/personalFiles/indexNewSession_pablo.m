@@ -32,14 +32,8 @@ if isempty(indexedSessionCSV_name)
     error('Need to provide the name of the index Project variable');
 end
 
-if strcmpi(project,'SocialProject')
-    indexedSessionCSV_name = [indexedSessionCSV_name,'_SocialProject'];
-    project_path = 'SocialProject';
-elseif strcmpi(project,'MK801Project')
-    indexedSessionCSV_name = [indexedSessionCSV_name,'_MK801Project'];
-    project_path = 'MK801Project';
-end
-
+indexedSessionCSV_name = [indexedSessionCSV_name,'_',project];
+project_path = project;
 
 if isempty(indexedSessionCSV_path)
     warning('Not included the path where the indexed Projects .csv variable is located. Trying to find it...');
@@ -98,7 +92,7 @@ brainRegions(end) = [];
 if strcmpi(project,'MK801Project')
     drug = cell(0); 
     for i = 1:length(session.epochs)
-        if contains(session.epochs{i}.behavioralParadigm, 'Maze')
+        if contains(session.epochs{i}.behavioralParadigm, 'Maze1') | contains(session.epochs{i}.behavioralParadigm, 'Maze2') | contains(session.epochs{i}.behavioralParadigm, 'Maze3')
             drug{1, length(drug)+1} = lower(session.epochs{i}.notes);
             drug{1, length(drug)+1} = ' ';
         end
@@ -120,12 +114,18 @@ writetable(sessionsTable,[indexedSessionCSV_path filesep indexedSessionCSV_name,
 
 % Lets do a push for git repository
 cd(indexedSessionCSV_path);
+% Git pull 
+commandToExecute = ['git pull'];
+system(commandToExecute);
 % Git add variable to the repository
 commandToExecute = ['git add ', indexedSessionCSV_name,'.csv']
 system(commandToExecute);
 % Git Commit
 commentToCommit = ['Added Session: ' session.general.name];
 commandToExecute = ['git commit -m "' commentToCommit '"'];
+system(commandToExecute);
+% Git Pull
+commandToExecute = ['git pull'];
 system(commandToExecute);
 % Git Push
 commandToExecute = ['git push'];

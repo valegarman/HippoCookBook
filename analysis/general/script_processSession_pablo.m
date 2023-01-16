@@ -72,14 +72,37 @@ indexNewSession_pablo('basepath',bpath,'project','Social Project');
 bpath = 'D:\FLR\FL3\FL3_170322_sess6';
 processSession_pablo('basepath',bpath,'project','SocialProject','promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',28,'SWChannel',4,'thetaChannel',28);
 indexNewSession_pablo('basepath',bpath,'project','Social Project');
+indexNewSession('basepath',bpath,'project','SocialProject');
 
 
 %% SPATIAL SUBICULUM PROJECT
 createProbe('excel_file','electrodes_coordinates_Buzsaki64(64 ch, 8 shanks, staggered)');
+createProbe('excel_file','electrodes_coordinates_A5x12-16-Buz-lin-5mm-100-200-160-177-Allego');
+
+% HPS22_210521_sess17
 bpath = 'F:\data\HPS22\HPS22_210521_sess17';
 processSession_pablo('basepath',bpath,'promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',39,'SWChannel',13,'thetaChannel',39,'excludeAnalysis',{'getHippocampalLayers'});
 indexNewSession_pablo('basepath',bpath,'project','Subiculum Project');
 
+% HPS22_210521_sess117 (to be done)
+bpath = 'F:\data\HPS22\HPS22_210521_sess117';
+processSession_pablo('basepath',bpath,'promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',39,'SWChannel',13,'thetaChannel',39,'excludeAnalysis',{'getHippocampalLayers'});
+indexNewSession_pablo('basepath',bpath,'project','SubiculumProject');
+
+% fSUB1_121222_sess18 (Open Field)
+bpath = 'D:\fSUB1\fSUB1_121222_sess18';
+processSession_pablo('basepath',bpath,'promt_hippo_layers',true,'anymaze_ttl_channel',2,'tint',true,'speedThresh',0,'gridAnalysis',true,'randomization',true);
+indexNewSession_pablo('basepath',bpath,'project','SubiculumProject');
+
+% fSUB1_281122_sess13 (Open Field)
+bpath = 'D:\fSUB1\fSUB1_281122_sess13';
+processSession_pablo('basepath',bpath,'promt_hippo_layers',true,'anymaze_ttl_channel',2,'tint',true,'speedThresh',0,'gridAnalysis',true,'randomization',true);
+indexNewSession_pablo('basepath',bpath,'project','SubiculumProject');
+
+% fSUB1_231222_sess25 (TMaze)
+bpath = 'D:\fSUB1\fSUB1_231222_sess25';
+processSession_pablo('basepath',bpath,'promt_hippo_layers',true,'anymaze_ttl_channel',2);
+indexNewSession_pablo('basepath',bpath,'project','Subiculum Project');
 
 %% MK801 Project
 % HPS22_100621_sess26 MK801
@@ -142,11 +165,77 @@ indexNewSession_pablo('basepath',bpath,'project','MK801Project');
     
 % IPO 430
 createProbe('excel_file','electrodes_coordinates_Qtrode-32ch-IPO430');
+% IPO430_131021_sess2
+bpath = 'F:\data\IPO430\IPO430_131021_sess2'; 
+processSession_pablo('basepath',bpath,'project','MK801Project','promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',17,'SWChannel',13,'thetaChannel',17);
+indexNewSession_pablo('basepath',bpath,'project','MK801Project');
+
+% IPO430_151021_sess3
+bpath = 'F:\data\IPO430\IPO430_151021_sess3'; 
+processSession_pablo('basepath',bpath,'project','MK801Project','promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',17,'SWChannel',13,'thetaChannel',17);
+indexNewSession_pablo('basepath',bpath,'project','MK801Project');
+
+% IOP429_111021_sess1
+bpath = 'F:\data\IPO429\IPO429_111021_sess1'; 
+processSession_pablo('basepath',bpath,'project','MK801Project','promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',17,'SWChannel',13,'thetaChannel',17);
+indexNewSession_pablo('basepath',bpath,'project','MK801Project');
+
+% IPO429_131021_sess2
+bpath = 'F:\data\IPO429\IPO429_131021_sess2'; 
+processSession_pablo('basepath',bpath,'project','MK801Project','promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',17,'SWChannel',13,'thetaChannel',17);
+indexNewSession_pablo('basepath',bpath,'project','MK801Project');
+
+% IPO429_151021_sess3
+bpath = 'F:\data\IPO429\IPO429_151021_sess3'; 
+processSession_pablo('basepath',bpath,'project','MK801Project','promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',17,'SWChannel',13,'thetaChannel',17);
+indexNewSession_pablo('basepath',bpath,'project','MK801Project');
+
 % IPO149
 createProbe('excel_file','electrodes_coordinates_Tetrodes-16ch(4t-4c)-IPO149');
+% IPO149_231021_sess3
+bpath = 'F:\data\IPO149\IPO149_231021_sess3'; 
+processSession_pablo('basepath',bpath,'project','MK801Project','promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',17,'SWChannel',13,'thetaChannel',17);
+indexNewSession_pablo('basepath',bpath,'project','MK801Project');
+
+% IPO149_251021_sess4
+bpath = 'F:\data\IPO149\IPO149_251021_sess4'; 
+processSession_pablo('basepath',bpath,'project','MK801Project','promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',17,'SWChannel',13,'thetaChannel',17);
+indexNewSession_pablo('basepath',bpath,'project','MK801Project');
+
+% IPO149_281021_sess5
+bpath = 'F:\data\IPO149\IPO149_281021_sess5'; 
+processSession_pablo('basepath',bpath,'project','MK801Project','promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',17,'SWChannel',13,'thetaChannel',17);
+indexNewSession_pablo('basepath',bpath,'project','MK801Project');
+
+% fCr1_220402_sess26
+bpath = 'F:\data\fCr1\fCr1_220402_sess26'; 
+processSession('basepath',bpath,'promt_hippo_layers',false);
+indexNewSession_pablo('basepath',bpath,'project','MK801Project');
+
+% fCr1_220404_sess27
+bpath = 'F:\data\fCr1\fCr1_220404_sess27'; 
+processSession('basepath',bpath,'promt_hippo_layers',false);
+indexNewSession_pablo('basepath',bpath,'project','MK801Project');
+
+% fCamk7_220509_sess27 VEHICLE
+bpath = 'F:\data\fCamk7\fCamk7_220509_sess27'; 
+processSession('basepath',bpath,'promt_hippo_layers',true);
+indexNewSession_pablo('basepath',bpath,'project','MK801Project');
+
+% IPO447_181121_sess1 VEHICLE
+bpath = 'F:\data\IPO447\IPO447_181121_sess1'; 
+processSession_pablo('basepath',bpath,'project','MK801Project','promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',12,'SWChannel',[],'thetaChannel',12);
+indexNewSession_pablo('basepath',bpath,'project','MK801Project');
+
+% IPO150_091121_sess4 VEHICLE
+bpath = 'F:\data\IPO150\IPO150_091121_sess4'; 
+processSession_pablo('basepath',bpath,'project','MK801Project','promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',2,'SWChannel',[],'thetaChannel',2);
+indexNewSession_pablo('basepath',bpath,'project','MK801Project');
+indexNewSession('basepath',bpath,'project','MK801Project');
 
 
-
-%% MISCELLANEA
-% groupStats({group1,group2},{*groups*});
+%% HM PROJECT
+bpath = 'F:\data\HM\HM_270722_sess2'; 
+processSession_HM('basepath',bpath,'project','HMProject');
+indexNewSession_pablo('basepath',bpath,'project','HMProject');
 
