@@ -130,7 +130,7 @@ commandToExecute = ['git commit -m "' commentToCommit '"'];
 system(commandToExecute);
 % Git Push
 commandToExecute = ['git push'];
-system(commandToExecute);
+system(commandToExecute);e
 
 cd(basepath)     
 
