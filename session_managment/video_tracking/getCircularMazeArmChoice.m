@@ -88,11 +88,13 @@ if strcmpi(task,'forced')
 elseif strcmpi(task,'alternation')
     % score for alternation task
     if isfield(digitalIn,'timestampsOn') && size(digitalIn.timestampsOn,2)>= 5
-        armChoice.timestamps = [digitalIn.timestampsOn{leftArmTtl_channel}; digitalIn.timestampsOn{rightArmTtl_channel}]; 
+        armChoice.timestamps = [digitalIn.timestampsOn{leftArmTtl_channel}'; digitalIn.timestampsOn{rightArmTtl_channel}']; 
         % 0 is left, 1 is right
-        armChoice.visitedArm = [zeros(size(digitalIn.timestampsOn{leftArmTtl_channel})); ones(size(digitalIn.timestampsOn{rightArmTtl_channel}))];
+        armChoice.visitedArm = [zeros(size(digitalIn.timestampsOn{leftArmTtl_channel}))'; ones(size(digitalIn.timestampsOn{rightArmTtl_channel}))'];
         armChoice.delay.timestamps = digitalIn.ints{homeDelayTtl_channel};
-        if size(armChoice.visitedArm,1) < size(digitalIn.timestampsOn{homeDelayTtl_channel},1) - 10
+        armChoice.delay.delay = diff(armChoice.delay.timestamps')';
+        
+        if size(armChoice.visitedArm,1) < size(digitalIn.timestampsOn{homeDelayTtl_channel},2) - 10
             warning('There was problem with one of the sensors! Triying to fix it!')
             leftArmSensor = digitalIn.timestampsOn{leftArmTtl_channel};
             rightArmSensor = digitalIn.timestampsOn{rightArmTtl_channel};
@@ -130,36 +132,30 @@ elseif strcmpi(task,'alternation')
         armChoice.performance = nansum(armChoice.choice)/(length(armChoice.choice) - 1);
         performance = [];
         
-        if ~isnan(armChoice.delay.durations(end))
-            armChoice.delay.durations(end) = NaN;
+%         if ~isnan(armChoice.delay.durations(end))
+%             armChoice.delay.durations(end) = NaN;
+%         end
+        
+        armChoice.delay.durations = [NaN; armChoice.delay.durations];
+        armChoice.delay.timestamps = [NaN NaN; armChoice.delay.timestamps];
+        if length(armChoice.delay.durations) > length(armChoice.choice)
+            armChoice.delay.durations(end) = [];
+            armChoice.delay.timestamps(end,:) = [];
         end
         durations = unique(armChoice.delay.durations);
         for ii = 1:length(durations)- 1
-            performance = [performance; sum(armChoice.choice(find(armChoice.delay.durations == durations(ii)) + 1)) / length(find(armChoice.delay.durations == durations(ii)))];
+            performance = [performance; sum(armChoice.choice(find(armChoice.delay.durations == durations(ii)))) / length(find(armChoice.delay.durations == durations(ii)))];
         end
         armChoice.delay.performance = performance;
         armChoice.delay.uniqueDurations = durations;
         armChoice.task = task;
         armChoice.expectedArm = [NaN; ~xor(armChoice.visitedArm(2:end), armChoice.choice(2:end))];
-
-        if size(digitalIn.timestampsOn,2) >=6
-            if digitalIn.timestampsOn{6}>digitalIn.timestampsOff{6}
-                armChoice.forzed = 1;
-                desc = 'forzed alternation';
-            else
-                armChoice.forzed = 0;
-                desc = 'spontaneous alternation';
-            end
-        else
-            if armChoice.performance == 1 
-                armChoice.forzed = 1;
-                desc = 'forzed alternation';
-            else
-                armChoice.forzed = 0;
-                desc = 'spontaneous alternation';
-            end
-        end
-
+%         armChoice.delay.timestamps = armChoice.delay.timestamps(:,1);
+        
+        armChoice.forzed = 0;
+        desc = 'spontanepous alternation';
+        
+        % General figure ( no including delay)
         h = figure;
         hold on
         plot(armChoice.timestamps, armChoice.visitedArm,'color',[.7 .7 .7]);
@@ -186,8 +182,41 @@ elseif strcmpi(task,'alternation')
         mkdir('Behavior');
         saveas(h,'Behavior\armChoice.png');
 
+        % Figures including delay
+        if length(armChoice.delay.uniqueDurations) > 2
+            for jj = 1:length(armChoice.delay.uniqueDurations)-1
+                h = figure;
+                hold on
+                plot(armChoice.timestamps, armChoice.visitedArm,'color',[.7 .7 .7]);
+                    scatter(armChoice.timestamps(isnan(armChoice.choice)),...
+                armChoice.visitedArm(isnan(armChoice.choice)),100,[.8 .8 .8],'filled');
+                scatter(armChoice.timestamps(find(armChoice.choice == 1 & armChoice.delay.durations == armChoice.delay.uniqueDurations(jj))),...
+                    armChoice.visitedArm(find(armChoice.choice == 1 & armChoice.delay.durations == armChoice.delay.uniqueDurations(jj))),100,[.6 .9 .7],'filled');
+                scatter(armChoice.timestamps(find(armChoice.choice == 0 & armChoice.delay.durations == armChoice.delay.uniqueDurations(jj))),...
+                    armChoice.visitedArm(find(armChoice.choice == 0 &  armChoice.delay.durations == armChoice.delay.uniqueDurations(jj))),100,[.9 .6 .7],'filled');
+                ts = find(armChoice.delay.durations == armChoice.delay.uniqueDurations(jj));
+                for ii = 1:length(ts)
+                    fill([armChoice.delay.timestamps(ts(ii),:)'; flip(armChoice.delay.timestamps(ts(ii),:))'],[1 1 1.2 1.2]',...
+                        [.7 .6 .9],'EdgeColor',[.7 .6 .9],'FaceAlpha',.5)
+                end
+                xlabel('seconds'); ylim([-.2 1.2]);
+                text(10,-.1,strcat('Performance: ',{' '},num2str(round(armChoice.delay.performance(jj),2)),',',{' '},...
+                    desc, ', delay: ',{' '},num2str(round(armChoice.delay.uniqueDurations(jj),2)), ', # trials: ',{' '},...
+                    num2str(length(armChoice.choice(armChoice.delay.durations == armChoice.delay.uniqueDurations(jj)))),{' '},' in: ',{' '},num2str(round(armChoice.timestamps(end))),{' '},...
+                    's'));
+                set(gca,'YTick', [0 1],'YTickLabel',{'Left','Right'});
+                
+                mkdir('Behavior');
+                saveas(h,['Behavior\armChoice_delay_',num2str(armChoice.delay.uniqueDurations(jj)),'.png']);
+            end
+        end
+        
+        
+        close all;
+        % Save Output
         C = strsplit(pwd,'\');
         save([C{end} '.ArmChoice.Events.mat'], 'armChoice');
+        
     else
         warning('DigitalIn format does not match. Was T maze performed? ');
     end  

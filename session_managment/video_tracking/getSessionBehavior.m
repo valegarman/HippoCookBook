@@ -70,14 +70,15 @@ for ii = 1:size(sess,1)
         end
         
         if strcmpi(tracking.apparatus.name,'yMaze') || strcmpi(tracking.apparatus.name,'YMaze Apparatus')
-            behaviorTemp.(sess(ii).name) = linearizeYMaze('forceReload',forceReload);
-%             behaviorTemp.(sess(ii).name)= getBehaviourYMaze; 
+%             behaviorTemp.(sess(ii).name) = linearizeYMaze('forceReload',forceReload);
+            behaviorTemp.(sess(ii).name)= getBehaviourYMaze('forceReload',forceReload); 
         elseif strcmpi(tracking.apparatus.name,'Open Field') || strcmpi(tracking.apparatus.name,'OpenField') || strcmpi(tracking.apparatus.name,'Social Interaction')
-            behaviorTemp.(sess(ii).name) = getBehaviourOpenField;
+            behaviorTemp.(sess(ii).name) = getBehaviourOpenField('forceReload',forceReload);
         elseif strcmpi(tracking.apparatus.name,'Linear Track  N-S')
             behaviorTemp.(sess(ii).name) = linearizeLinearMaze_pablo('verbose',verbose);
         elseif strcmpi(tracking.apparatus.name,'TMaze')
-            behaviorTemp.(sess(ii).name) = linearizeArmChoice_pablo('verbose',verbose);
+            behaviorTemp.(sess(ii).name) = linearizeCircularMaze('verbose',verbose);
+%             behaviorTemp.(sess(ii).name) = linearizeArmChoice_pablo('verbose',verbose);
         end
         behaviorFolder(count) = ii; 
         count = count + 1;
@@ -124,6 +125,7 @@ if size(tracking.events.subSessions,1) == size(efields,1)
         subSessionMask = [subSessionMask;behaviorTemp.(efields{ii}).events.subSessionMask];
         x = [x; behaviorTemp.(efields{ii}).position.x];
         y = [y; behaviorTemp.(efields{ii}).position.y];
+        
         if isfield(behaviorTemp.(efields{ii}),'zone')
             zone{ii} = behaviorTemp.(efields{ii}).zone;
         end
@@ -153,19 +155,30 @@ if size(tracking.events.subSessions,1) == size(efields,1)
             direction = [direction; behaviorTemp.(efields{ii}).masks.direction];
             trialsDirection = [trialsDirection; behaviorTemp.(efields{ii}).masks.trialsDirection'];
             recordingsTrial = [recordingsTrial; ii*ones(size(behaviorTemp.(efields{ii}).trials.startPoint,1),1)];
-%             for jj = 1:length(zone{ii})
-%                 entry{ii}.zone{ii}{jj} = [entry; behaviorTemp.(efields{ii}).events.entry.(cell2mat(zone{jj}.name)).ts + preRec];
-%                 exit{jj} = [exit; behaviorTemp.(efields{ii}).events.exit.(cell2mat(zone{jj}.name)).ts + preRec];
-%             end
-            
         catch
         end
-%         description{ii} = behaviorTemp.(efields{ii}).description;
+        
+        description{ii} = behaviorTemp.(efields{ii}).description;
+        
+        if strcmpi(description{ii},'YMaze Apparatus') | strcmpi(description{ii},'YMaze')
+           flds = fields(behaviorTemp.(efields{ii}).events.entry);
+           for jj = 1:length(flds)
+                entry{ii}.(flds{jj}).ts = behaviorTemp.(efields{ii}).events.entry.(flds{jj}).ts + preRec;
+           end
+           flds = fields(behaviorTemp.(efields{ii}).events.exit);
+           for jj = 1:length(flds)
+                exit{ii}.(flds{jj}).ts = behaviorTemp.(efields{ii}).events.entry.(flds{jj}).ts + preRec;
+           end
+        end
+            
+            
     end
 else
     warning('Number of behavioral recordings do not match!')
 end
 
+     
+        
 % generate maps, one for each arm and for each recording
 maps = [];
 directionList = unique(direction);
@@ -223,9 +236,13 @@ for ii = 1:length(efields)
         end
         maps_whole{count2}(:,1) = timestamps(recMask == ii);
         maps_whole{count2}(:,2) = lin(recMask == ii);
+        description{count} = behaviorTemp.(efields{ii}).description;
         description2{count2} = behaviorTemp.(efields{ii}).description;
+        zone{count} = behaviorTemp.(efields{ii}).zone;
         zone2{count2} = behaviorTemp.(efields{ii}).zone;
+        avFrame{count} = tracking.avFrame{ii};
         avFrame2{count2} = tracking.avFrame{ii};
+        count = count + 1;
         count2 = count2 +1;
     else
         disp('Error while running getSessionBehavior. Quitting...');
@@ -278,6 +295,8 @@ try
     behavior.events.leftArm = leftArm;
     
     behavior.events.recordings = recordings;
+    
+%     behavior.events = events;
     
     
     behavior.trials.startPoint = startPointTrials;

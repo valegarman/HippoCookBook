@@ -82,7 +82,7 @@ for i=1:size(data,1)
 %         plot(xt(1:100:end), data(i,1:100:end));
         plot(xt, data(i,:));
         xlabel('s'); ylabel('amp');
-        ylim([0 1000]);
+        ylim([-1000 1000]);
         title('Select threshold with the mouse and press left click...');
         [~,thr] = ginput(1);
         hold on

@@ -147,10 +147,11 @@ elseif isnumeric(varargin{1})
     basepath = pwd;
     cd(basepath);
     basename = basenameFromBasepath(p.Results.basepath);
-    lfp = getLFP(p.Results.channel,'basepath',p.Results.basepath,'basename',basename);
+    lfp = getLFP(p.Results.channel,'basepath',p.Results.basepath,'basename',basename); 
     signal = bz_Filter(lfp,'filter','butter','passband',passband,'order',3);
     timestamps = signal.timestamps;
     signal = signal.data;
+    region = lfp.region;
 end
 
 % assign parameters (either defaults or given)
@@ -431,6 +432,7 @@ end
 
 %Put it into the ripples structure
 ripples.detectorinfo = detectorinfo;
+ripples.detectorinfo.region = region;
 
 cd(prevPath);
 

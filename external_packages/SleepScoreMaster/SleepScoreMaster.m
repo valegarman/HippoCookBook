@@ -248,7 +248,7 @@ end
 % Schomburg E.W. Neuron 84, 470?485. 2014)
 EMGFromLFP = bz_EMGFromLFP(basePath,'overwrite',overwrite,...
                                      'rejectChannels',rejectChannels,'noPrompts',noPrompts,...
-                                     'saveMat',savebool);
+                                     'saveMat',savebool,'ignoretime',ignoretime);
 
 %% DETERMINE BEST SLOW WAVE AND THETA CHANNELS
 %Determine the best channels for Slow Wave and Theta separation.

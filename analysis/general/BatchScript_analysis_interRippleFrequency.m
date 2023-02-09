@@ -3,7 +3,7 @@
 % project
 
 clear; close all
-targetProject= 'GLUN3Project';
+targetProject= 'MK801Project';
 cd('F:\data');
 database_path = 'F:\data';
 HCB_directory = what('MK801Project'); 
@@ -22,7 +22,15 @@ for ii = 1:length(sessionsTable.SessionName)
         
         ripples = rippleMasterDetector();
         
+        if ~isfield(ripples.rippleStats.data,'interRippleFrequency')
+            
+            ripples.rippleStats.data.interRippleFrequency = [NaN; 1./diff(ripples.peaks)];
+            
+            ripples.rippleStats.data.incidende = length(ripples.peaks) / str2num(session.general.duration);
+            
+        end
         
+        save([session.general.name,'.ripples.events.mat'],'ripples');
     end
         
     close all;

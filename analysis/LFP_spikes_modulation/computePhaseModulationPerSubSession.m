@@ -101,18 +101,63 @@ end
 
 for ii = 1:length(MergePoints.foldernames)
     ts = MergePoints.timestamps(ii,:);
-    phaseModulation = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel,'restrictIntervals',ts,'saveMat',false,'plotting',false);
-    
-    phaseMod.(MergePoints.foldernames{ii}) = phaseModulation;
+    try
+        
+        phaseModulation = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel,'restrictIntervals',ts,'saveMat',false,'plotting',false);
+
+
+        phaseMod.(MergePoints.foldernames{ii}) = phaseModulation;
+
+        rippleMod.(MergePoints.foldernames{ii}) = phaseModulation.ripples;
+        SWMod.(MergePoints.foldernames{ii}) = phaseModulation.SharpWave;
+        thetaMod.(MergePoints.foldernames{ii}) = phaseModulation.theta;
+        lgammaMod.(MergePoints.foldernames{ii}) = phaseModulation.lgamma;
+        hgammaMod.(MergePoints.foldernames{ii}) = phaseModulation.hgamma;
+        thetaRunMod.(MergePoints.foldernames{ii}) = phaseModulation.thetaRunMod;
+        thetaREMMod.(MergePoints.foldernames{ii}) = phaseModulation.thetaREMMod;
+        
+    catch
+        
+        rippleMod.(MergePoints.foldernames{ii}) = [];
+        SWMod.(MergePoints.foldernames{ii}) = [];
+        thetaMod.(MergePoints.foldernames{ii}) = [];
+        lgammaMod.(MergePoints.foldernames{ii}) = [];
+        hgammaMod.(MergePoints.foldernames{ii}) = [];
+        thetaRunMod.(MergePoints.foldernames{ii}) = [];
+        thetaREMMod.(MergePoints.foldernames{ii}) = [];
+        
+    end
 end
 
 
 %% Output
 
 if saveMat
-    save([session.general.name,'.PhaseLockingDataSubSessions.cellinfo.mat'],'phaseMod','-v7.3');    
-end
+    
+%     save([session.general.name,'.PhaseLockingDataSubSessions.cellinfo.mat'],'phaseMod','-v7.3'); 
 
+            % Ripples
+            save([session.general.name,'.ripple_',num2str(ripple_passband(1)),'-',num2str(ripple_passband(end)),...
+                    '.PhaseLockingData.Subsession.cellinfo.mat'],'rippleMod');
+            % Sharp Wave
+            save([session.general.name,'.SW_',num2str(SW_passband(1)),'-',num2str(SW_passband(end)),...
+                '.PhaseLockingData.Subsession.cellinfo.mat'],'SWMod');
+            % Theta
+            save([session.general.name,'.theta_',num2str(theta_passband(1)),'-',num2str(theta_passband(end)),...
+                '.PhaseLockingData.Subsession.cellinfo.mat'],'thetaMod');
+            % Low Gamma
+            save([session.general.name,'.lgamma_',num2str(lgamma_passband(1)),'-',num2str(lgamma_passband(end)),...
+                '.PhaseLockingData.Subsession.cellinfo.mat'],'lgammaMod');
+            % High Gamma
+            save([session.general.name,'.hgamma_',num2str(hgamma_passband(1)),'-',num2str(hgamma_passband(end)),...
+                '.PhaseLockingData.Subsession.cellinfo.mat'],'hgammaMod');
+            % ThetaRun
+            save([session.general.name,'.thetaRun_',num2str(theta_passband(1)),'-',num2str(theta_passband(end)),...
+                '.PhaseLockingData.Subsession.cellinfo.mat'],'thetaRunMod');
+            % thetaREM
+            save([session.general.name,'.thetaREM_',num2str(theta_passband(1)),'-',num2str(theta_passband(end)),...
+                '.PhaseLockingData.Subsession.cellinfo.mat'],'thetaREMMod');
+end
 
 
 %% Plotting

@@ -1,4 +1,4 @@
-function [outputArg1,outputArg2] = getACGPeak(varargin)
+function [acgPeak] = getACGPeak(varargin)
 %       [] = getACGPeak(varargin)
 %
 % Gets the time of the peak of the log10 ACG computed by CellExplorer.
@@ -26,6 +26,7 @@ addParameter(p,'minPeakTime',15,@isnumeric);
 addParameter(p,'lightPulseDuration',0.1,@isnumeric);
 addParameter(p,'force',false,@islogical);
 addParameter(p,'debug',false,@islogical);
+addParameter(p,'restrictIntervals',[],@isnumeric);
 
 parse(p,varargin{:});
 
@@ -38,6 +39,7 @@ minPeakTime = p.Results.minPeakTime;
 lightPulseDuration = p.Results.lightPulseDuration;
 force = p.Results.force;
 debug = p.Results.debug;
+restrictIntervals = p.Results.restrictIntervals;
 
 %% Load session
 % session = sessionTemplate(basepath);
@@ -53,7 +55,14 @@ try
     if isempty(UID)
         spikes = loadSpikes;
         UID = spikes.UID;
+        if ~isempty(restrictIntervals)
+            for ii = 1:length(spikes.UID)
+                ts = InIntervals(spikes.times{ii},restrictIntervals);
+                spikes.times{ii} = spikes.times{ii}(ts);
+            end
+        end
     end
+    
     if ~isempty(dir([session.general.name,'*.cell_metrics.cellinfo.mat']))
         file = dir([session.general.name,'.*cell_metrics.cellinfo.mat']);
         load(file.name);
@@ -93,7 +102,7 @@ acg_time = cell_metrics.general.acgs.log10;
 acg_time_offset = acg_time(minPeakTime:end);
 offset = length(acg_time) - length(acg_time_offset);
 
-acg_time = 1:100;
+% acg_time = 1:100;
 acg_smoothed = smooth(acg,10);
 acg_smoothed = reshape(acg_smoothed,size(acg,1),size(acg,2));
 acg_smoothed_norm = acg_smoothed./sum(acg_smoothed);
@@ -162,21 +171,28 @@ if showFig
         histogram(acgPeak_sample(optoPyr)+offset,'FaceColor',optoPyr_color);
     end
     axis tight; ylabel('Count'); xlabel('bin number'); xlim([0 60])
+    
     if saveFig
-       saveas(gcf,['SummaryFigures\ACGPeak.png']); 
+        saveas(gcf,['SummaryFigures\ACGPeak.png']); 
     end
 end
 
 % save output in cell_metrics structure
 acgPeak = [];
+
 acgPeak.acg_smoothed = acg_smoothed;
 acgPeak.acg_smoothed_norm = acg_smoothed_norm;
 acgPeak.acgPeak_sample = acgPeak_sample+offset;
 acgPeak.acg_time = acg_time;
 acgPeak.acg_time_samples = acg_time_samples';
 
-save([session.general.name,'.ACGPeak.cellinfo.mat'],'acgPeak');
+acgPeak.acgPeak_sample2 = acgPeak_sample2;
+acgPeak.acgPeak_sample = acgPeak_sample;
+acgPeak.offset = offset;
 
+if saveMat
+    save([session.general.name,'.ACGPeak.cellinfo.mat'],'acgPeak');
+end
 
 end
 

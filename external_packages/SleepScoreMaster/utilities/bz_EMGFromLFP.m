@@ -9,6 +9,7 @@ function [EMGFromLFP] = bz_EMGFromLFP(basePath,varargin)
 %   (Optional)
 %       'restrict'          - interval of time (relative to recording) to sleep score
 %                            default = [0 inf]
+%       'ignoretime'        - time (in sec) to ignore to sleep score
 %       'specialChannels'   - vector of 'special' channels that you DO want to use for EMGCorr calc (will be added to those auto-selected by spike group)
 %       'rejectChannels'    - vector of 'bad' channels that you DO NOT want to use for EMGCorr calc
 %       'restrictChannels'  - use only these channels (Neuroscope numbers)
@@ -55,6 +56,7 @@ matfilename = fullfile(basePath,[recordingname,'.EMGFromLFP.LFP.mat']);
 %% xmlPameters
 p = inputParser;
 addParameter(p,'restrict',[0 inf],@isnumeric)
+addParameter(p,'ignoretime',[],@isnumeric);
 addParameter(p,'specialChannels',[],@isnumeric)
 addParameter(p,'rejectChannels',[],@isnumeric)
 addParameter(p,'restrictChannels',[],@isnumeric)
@@ -68,6 +70,7 @@ addParameter(p,'basepath',pwd,@isstruct);
 parse(p,varargin{:})
     
 restrict = p.Results.restrict;
+ignoretime = p.Results.ignoretime;
 specialChannels = p.Results.specialChannels;
 rejectChannels = p.Results.rejectChannels;
 restrictChannels = p.Results.restrictChannels;
@@ -197,6 +200,9 @@ else
     xcorr_chs = unique([xcorr_chs,specialChannels]); 
 end
 
+if ~isempty(ignoretime)
+    restrict = [0 ignoretime(1); ignoretime(2) Inf];
+end
 %% Read and filter channel
 % read channels
  % bz_sessionInfo is 0 indexed (neuroscope) channels, 
@@ -204,16 +210,24 @@ end
 switch fromDat
     case false
 %         lfp = LoadBinary(lfpFile ,'nChannels',nChannels,'channels',xcorr_chs+1,...
+%             'start',restrict(1),'duration',diff(restrict),'frequency',Fs); %read and convert to mV
+        
+        lfp = getLFP(xcorr_chs,'ignoretime',ignoretime);
+        lfp = lfp.data;
+        
+%         lfp = LoadBinary(lfpFile ,'nChannels',nChannels,'channels',xcorr_chs,...
 %             'start',restrict(1),'duration',diff(restrict),'frequency',Fs); %read and convert to mV    
-        lfp = LoadBinary(lfpFile ,'nChannels',nChannels,'channels',xcorr_chs,...
-            'start',restrict(1),'duration',diff(restrict),'frequency',Fs); %read and convert to mV    
     case true
 %         lfp = LoadBinary(datFile ,'nChannels',nChannels,'channels',xcorr_chs+1,...
 %             'start',restrict(1),'duration',diff(restrict),'frequency',datFs,...
 %             'downsample',datFs./Fs); %read and convert to mV  
-        lfp = LoadBinary(datFile ,'nChannels',nChannels,'channels',xcorr_chs,...
-            'start',restrict(1),'duration',diff(restrict),'frequency',datFs,...
-            'downsample',datFs./Fs); %read and convert to mV 
+
+        lfp = getLFP(xcorr_chs,'ignoretime',ignoretime);
+        lfp = lfp.data;
+
+%         lfp = LoadBinary(datFile ,'nChannels',nChannels,'channels',xcorr_chs,...
+%             'start',restrict(1),'duration',diff(restrict),'frequency',datFs,...
+%             'downsample',datFs./Fs); %read and convert to mV 
 end
 
 % Filter first in high frequency band to remove low-freq physiologically

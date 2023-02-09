@@ -34,38 +34,44 @@ type(isnan(type)) = 0;
 filelist = filelist(logical(type));
 % ---------------- start read tetrodes ---------------------
 % read tetrode files
-for ifile = 1:numel(filelist)
-    current_tet = str2double(filelist(ifile).name(strfind(filelist(ifile).name,'.')+1:end));
-    if isfinite(current_tet)
-        % get header info
-        header = getDACQHeader ( [filepath,flnmroot,'.',num2str(current_tet)], 'tet' );
-        mtint.tetrode(ifile).id = current_tet;
-        mtint.tetrode(ifile).header = header;
-        ts = getspikes([filepath,flnmroot,'.',num2str(current_tet)]);
-        mtint.tetrode(ifile).ts = ts;
-%         [ts,ch1,ch2,ch3,ch4] =
-%         getspikes([filepath,flnmroot,num2str(current_tet)]); % uncomment
-%         this line and the 4 below to get the spikes on each channel
-%         mtint.tetrode(current_tet).ch1 = ch1; 
-%         mtint.tetrode(current_tet).ch2 = ch2;
-%         mtint.tetrode(current_tet).ch3 = ch3;
-%         mtint.tetrode(current_tet).ch4 = ch4;
-        mtint.tetrode(ifile).pos_sample = ceil(ts * 50);
-        mtint.tetrode(ifile).cut = [];
+try
+    for ifile = 1:numel(filelist)
+        current_tet = str2double(filelist(ifile).name(strfind(filelist(ifile).name,'.')+1:end));
+        if isfinite(current_tet)
+            % get header info
+            header = getDACQHeader ( [filepath,flnmroot,'.',num2str(current_tet)], 'tet' );
+            mtint.tetrode(ifile).id = current_tet;
+            mtint.tetrode(ifile).header = header;
+            ts = getspikes([filepath,flnmroot,'.',num2str(current_tet)]);
+            mtint.tetrode(ifile).ts = ts;
+    %         [ts,ch1,ch2,ch3,ch4] =
+    %         getspikes([filepath,flnmroot,num2str(current_tet)]); % uncomment
+    %         this line and the 4 below to get the spikes on each channel
+    %         mtint.tetrode(current_tet).ch1 = ch1; 
+    %         mtint.tetrode(current_tet).ch2 = ch2;
+    %         mtint.tetrode(current_tet).ch3 = ch3;
+    %         mtint.tetrode(current_tet).ch4 = ch4;
+            mtint.tetrode(ifile).pos_sample = ceil(ts * 50);
+            mtint.tetrode(ifile).cut = [];
+        end
     end
+catch
 end
 % ---------------- end read tetrodes ---------------------
 
 % ---------------- start read cuts ---------------------
-% read them in and assign to structure
-for ifile = 1:numel(mtint.tetrode)
-    current_tet = mtint.tetrode(ifile).id;
-    if exist([filepath,flnmroot,'_',num2str(current_tet),'.cut'],'file')
-        clust = getcut([filepath,flnmroot,'_',num2str(current_tet),'.cut']);
-    else
-        clust = [];
+try
+    % read them in and assign to structure
+    for ifile = 1:numel(mtint.tetrode)
+        current_tet = mtint.tetrode(ifile).id;
+        if exist([filepath,flnmroot,'_',num2str(current_tet),'.cut'],'file')
+            clust = getcut([filepath,flnmroot,'_',num2str(current_tet),'.cut']);
+        else
+            clust = [];
+        end
+        mtint.tetrode(ifile).cut = clust;
     end
-    mtint.tetrode(ifile).cut = clust;
+catch
 end
 % ---------------- end read cuts ---------------------
 

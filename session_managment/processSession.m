@@ -256,7 +256,7 @@ if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
         spikes = loadSpikes;
         getSessionTracking('roiTracking','manual','forceReload',true);
         getSessionArmChoice('task','alternation');
-        behaviour = getSessionLinearize('forceReload',false);  
+        behaviour = getSessionLinearize('forceReload',true);  
         firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',true);
         placeFieldStats = bz_findPlaceFields1D('firingMaps',firingMaps,'maxSize',.75,'sepEdge',0.03); %% ,'maxSize',.75,'sepEdge',0.03
         firingTrialsMap = firingMapPerTrial('force',true);
@@ -295,7 +295,7 @@ end
 
 %% 12. Summary per cell
 if ~any(ismember(excludeAnalysis, {'12',lower('summary')}))
-    plotSummary;
+    plotSummary('showTagCells',false);
 end
 
 cd(prevPath);
