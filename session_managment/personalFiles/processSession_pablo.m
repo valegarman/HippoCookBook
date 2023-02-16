@@ -150,15 +150,9 @@ if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))
         if ~isfield(session.analysisTags,'homeDelayTtl_channel')
             session.analysisTags.homeDelayTtl_channel = homeDelayTtl_channel;
         end
-        if ~isfield(session.analysisTags,'rippleChannel')
-            session.analysisTags.rippleChannel = rippleChannel;
-        end
-        if ~isfield(session.analysisTags,'SWChannel')
-            session.analysisTags.SWChannel = SWChannel;
-        end
-        if ~isfield(session.analysisTags,'thetaChannel')
-            session.analysisTags.thetaChannel = thetaChannel;
-        end
+        session.analysisTags.rippleChannel = rippleChannel;
+        session.analysisTags.SWChannel = SWChannel;
+        session.analysisTags.thetaChannel = thetaChannel;
         if ~isfield(session.analysisTags,'CA1Channel')
             session.analysisTags.CA1Channel = CA1Channel;
         end

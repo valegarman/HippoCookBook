@@ -18,19 +18,27 @@ theta_passband = [6 12];
 lgamma_passband = [20 60];
 hgamma_passband = [60 100];
 
+notchFilter = false;
+
 plt = true;
 
-force = true;
+force = false;
+forceLfp = false;
+forceACGPeak = false;
 
-for ii = 5:length(sessionsTable.SessionName)
+for ii = 1:length(sessionsTable.SessionName)
     if strcmpi(sessionsTable.Project{ii}, targetProject) || strcmpi('all', targetProject)
         
         fprintf(' > %3.i/%3.i session \n',ii, length(sessionsTable.SessionName)); %\n
         cd([database_path filesep sessionsTable.Path{ii}]);
         
+        close all;
         % Load session info
         session = loadSession();
         spikes = loadSpikes();
+        
+%         cell_metrics = CellExplorer('basepath',pwd);
+        
         ts_Baseline = [];
         ts_Drug = [];
         count = 1;
@@ -52,9 +60,425 @@ for ii = 5:length(sessionsTable.SessionName)
             ts_Drug = [ts_Drug(1) ts_Drug(end)];
         end
         
+        for jj = 1:length(session.epochs)
+            if strcmpi(session.epochs{jj}.behavioralParadigm,'Maze1Baseline')
+                ts_Maze1Baseline = [session.epochs{jj}.startTime session.epochs{jj}.stopTime];
+            elseif strcmpi(session.epochs{jj}.behavioralParadigm,'Maze1Drug')
+                ts_Maze1Drug = [session.epochs{jj}.startTime session.epochs{jj}.stopTime];
+            end
+        end
+        
+        % =======================================
+        % LFP
+        % =======================================
+        if isempty(dir('*.coherogram_Baseline.mat')) || forceLfp
+            
+            params.Fs = session.extracellular.srLfp; params.fpass = [1 200]; params.tapers = [3 5]; params.pad = 1;
+
+            try
+                targetFile = dir('*.thetaEpochs.states.mat'); load(targetFile.name);
+            catch
+                error('Not possible to load thetaEpochs...');
+            end
+
+            ts_theta = thetaEpochs.intervals;
+
+            lfp1w = getLFP(session.analysisTags.channel1,'noPrompts',true);
+            lfp2w = getLFP(session.analysisTags.channel2,'noPrompts',true);
+
+            if notchFilter
+                lfp1 = Notched(single(lfp1w.data),params.Fs,50);
+                lfp2 = Notched(single(lfp2w.data),params.Fs,50);
+            else
+                lfp1 = single(lfp1w.data);
+                lfp2 = single(lfp2w.data);
+            end
+
+            [coherogram,phase,S12,S1,S2,t,f] = cohgramc(lfp1,lfp2,[2 1],params);
+
+            S12(S12==0) = NaN;
+            S1(S1==0) = NaN;
+            S2(S2==0) = NaN;
+
+            S12 = log10(S12); % in Db
+            S1 = log10(S1); % in Db
+            S2 = log10(S2);
+
+            S12_det = detrend(S12',2)';
+            S1_det = detrend(S1',2)';
+            S2_det = detrend(S2',2)';
+
+            % Baseline 
+
+            t_Baseline = t(InIntervals(t,ts_Baseline));
+            coherogram_Baseline = coherogram(InIntervals(t,ts_Baseline),:);
+            phase_Baseline = phase(InIntervals(t,ts_Baseline),:);
+            S1_Baseline = S1_det(InIntervals(t,ts_Baseline),:);
+            S2_Baseline = S2_det(InIntervals(t,ts_Baseline),:);
+
+            t_Baseline_theta = t(InIntervals(t_Baseline,ts_theta));
+            coherogram_Baseline_theta = coherogram_Baseline(InIntervals(t_Baseline,ts_theta),:);
+            phase_Baseline_theta = phase_Baseline(InIntervals(t_Baseline,ts_theta),:);
+            S1_Baseline_theta = S1_Baseline(InIntervals(t_Baseline,ts_theta),:);
+            S2_Baseline_theta = S2_Baseline(InIntervals(t_Baseline,ts_theta),:);
+
+            cohgram.t = t_Baseline_theta;
+            cohgram.f = f;
+            cohgram.coherogram = coherogram_Baseline_theta;
+            cohgram.S1 = S1_Baseline_theta;
+            cohgram.S2 = S2_Baseline_theta;
+            cohgram.lfp1Channel = lfp1w.channels;
+            cohgram.lfp1Region = lfp1w.region;
+            cohgram.lfp2Channel = lfp2w.channels;
+            cohgram.lfp2Region = lfp2w.region;
+
+            save([session.general.name,'.coherogram_Baseline.mat'],'cohgram');
+
+            figure('position',[200 115 1300 800])
+            subplot(4,6,[1 2])
+            imagesc(t_Baseline_theta,f,coherogram_Baseline_theta',[-1 1]);
+            colormap jet
+            set(gca,'TickDir','out'); ylabel('Freq [Hz]'); xlabel('Time [s]');
+            title(['Coherence (r) Ch: ', num2str(session.analysisTags.channel1) , ' ' , lfp1w.region, ' Ch: ', num2str(session.analysisTags.channel2), ' ', lfp2w.region]); 
+
+            subplot(4,6,[7 8])
+            imagesc(t_Baseline_theta,f,phase_Baseline_theta',[-1.5 1.5]);
+            colormap jet
+            set(gca,'TickDir','out'); ylabel('Freq [Hz]'); xlabel('Time [s]');
+            title(['Phase Coherence Ch: ', num2str(session.analysisTags.channel1) , ' ' , lfp1w.region, ' Ch: ', num2str(session.analysisTags.channel2), ' ', lfp2w.region]); 
+
+            subplot(4,6,[13 14])
+            imagesc(t_Baseline_theta,f,S1_Baseline_theta',[-1.5 1.5]);
+            colormap jet
+            set(gca,'TickDir','out'); ylabel('Freq [Hz]'); xlabel('Time [s]');
+            title(['Ch: ', num2str(session.analysisTags.channel1) , ' ' , lfp1w.region]); 
+
+            subplot(4,6,[19 20])
+            imagesc(t_Baseline_theta,f,S2_Baseline_theta',[-1.5 1.5]);
+            colormap jet
+            set(gca,'TickDir','out'); ylabel('Freq [Hz]'); xlabel('Time [s]');
+            title(['Ch: ', num2str(session.analysisTags.channel2) , ' ' , lfp2w.region]); 
+
+            subplot(4,6,[3 9 15 21])
+            plotFill(f,nanmean(coherogram_Baseline_theta),'color',[0 0 0]); xlim([1 200]); ylim([-1 1]);     
+            ax = axis;
+            fill([theta_passband flip(theta_passband)],[ax([3 3 4 4])],[.8 .6 .6],'EdgeColor','none','FaceAlpha',.1);
+            fill([lgamma_passband flip(lgamma_passband)],[ax([3 3 4 4])],[.8 .4 .4],'EdgeColor','none','FaceAlpha',.1);
+            fill([hgamma_passband flip(hgamma_passband)],[ax([3 3 4 4])],[.8 .2 .2],'EdgeColor','none','FaceAlpha',.1);
+            ylabel('Baseline [r]'); xlabel('Freq [Hz]');  
+    %         title(['Coherence (r) Ch: ', num2str(session.analysisTags.channel1) , ' ' , lfp1w.region, ' Ch: ', num2str(session.analysisTags.channel2), ' ', lfp2w.region]); 
+
+            subplot(4,6,[4 10 16 22])
+            plotFill(f,nanmean(phase_Baseline_theta),'color',[0 0 0]); xlim([1 200]); ylim([-1 1]);     
+            ax = axis;
+            fill([theta_passband flip(theta_passband)],[ax([3 3 4 4])],[.8 .6 .6],'EdgeColor','none','FaceAlpha',.1);
+            fill([lgamma_passband flip(lgamma_passband)],[ax([3 3 4 4])],[.8 .4 .4],'EdgeColor','none','FaceAlpha',.1);
+            fill([hgamma_passband flip(hgamma_passband)],[ax([3 3 4 4])],[.8 .2 .2],'EdgeColor','none','FaceAlpha',.1);
+            ylabel('Baseline [r]'); xlabel('Freq [Hz]');  
+    %         title(['Phase Coherence (r) Ch: ', num2str(session.analysisTags.channel1) , ' ' , lfp1w.region, ' Ch: ', num2str(session.analysisTags.channel2), ' ', lfp2w.region]); 
+
+            subplot(4,6,[5 11 17 23])
+            plotFill(f,nanmean(S1_Baseline_theta),'color',[0 0 0]); xlim([1 200]); ylim([-2 2]);     
+            ax = axis;
+            fill([theta_passband flip(theta_passband)],[ax([3 3 4 4])],[.8 .6 .6],'EdgeColor','none','FaceAlpha',.1);
+            fill([lgamma_passband flip(lgamma_passband)],[ax([3 3 4 4])],[.8 .4 .4],'EdgeColor','none','FaceAlpha',.1);
+            fill([hgamma_passband flip(hgamma_passband)],[ax([3 3 4 4])],[.8 .2 .2],'EdgeColor','none','FaceAlpha',.1);
+            ylabel('Baseline [r]'); xlabel('Freq [Hz]');  
+    %         title(['Ch: ', num2str(session.analysisTags.channel1) , ' ' , lfp1w.region]); 
+
+            subplot(4,6,[6 12 18 24])
+            plotFill(f,nanmean(S2_Baseline_theta),'color',[0 0 0]); xlim([1 200]); ylim([-2 2]);     
+            ax = axis;
+            fill([theta_passband flip(theta_passband)],[ax([3 3 4 4])],[.8 .6 .6],'EdgeColor','none','FaceAlpha',.1);
+            fill([lgamma_passband flip(lgamma_passband)],[ax([3 3 4 4])],[.8 .4 .4],'EdgeColor','none','FaceAlpha',.1);
+            fill([hgamma_passband flip(hgamma_passband)],[ax([3 3 4 4])],[.8 .2 .2],'EdgeColor','none','FaceAlpha',.1);
+            ylabel('Baseline [r]'); xlabel('Freq [Hz]');  
+
+            saveas(gca,['BaselineVsDrug\coherogram_Baseline.png']);    
+
+            % Drug
+
+            t_Drug = t(InIntervals(t,ts_Drug));
+            coherogram_Drug = coherogram(InIntervals(t,ts_Drug),:);
+            phase_Drug = phase(InIntervals(t,ts_Drug),:);
+            S1_Drug = S1_det(InIntervals(t,ts_Drug),:);
+            S2_Drug = S2_det(InIntervals(t,ts_Drug),:);
+
+            t_Drug_theta = t(InIntervals(t_Drug,ts_theta));
+            coherogram_Drug_theta = coherogram_Drug(InIntervals(t_Drug,ts_theta),:);
+            phase_Drug_theta = phase_Drug(InIntervals(t_Drug,ts_theta),:);
+            S1_Drug_theta = S1_Drug(InIntervals(t_Drug,ts_theta),:);
+            S2_Drug_theta = S2_Drug(InIntervals(t_Drug,ts_theta),:);
+
+            cohgram = [];
+            cohgram.t = t_Drug_theta;
+            cohgram.f = f;
+            cohgram.coherogram = coherogram_Drug_theta;
+            cohgram.S1 = S1_Drug_theta;
+            cohgram.S2 = S2_Drug_theta;
+            cohgram.lfp1Channel = lfp1w.channels;
+            cohgram.lfp1Region = lfp1w.region;
+            cohgram.lfp2Channel = lfp2w.channels;
+            cohgram.lfp2Region = lfp2w.region;
+
+            save([session.general.name,'.coherogram_Drug.mat'],'cohgram');
+
+            figure('position',[200 115 1300 800])
+            subplot(4,6,[1 2])
+            imagesc(t_Drug_theta,f,coherogram_Drug_theta',[-1 1]);
+            colormap jet
+            set(gca,'TickDir','out'); ylabel('Freq [Hz]'); xlabel('Time [s]');
+            title(['Coherence (r) Ch: ', num2str(session.analysisTags.channel1) , ' ' , lfp1w.region, ' Ch: ', num2str(session.analysisTags.channel2), ' ', lfp2w.region]); 
+
+            subplot(4,6,[7 8])
+            imagesc(t_Drug_theta,f,phase_Drug_theta',[-1.5 1.5]);
+            colormap jet
+            set(gca,'TickDir','out'); ylabel('Freq [Hz]'); xlabel('Time [s]');
+            title(['Phase Coherence Ch: ', num2str(session.analysisTags.channel1) , ' ' , lfp1w.region, ' Ch: ', num2str(session.analysisTags.channel2), ' ', lfp2w.region]); 
+
+            subplot(4,6,[13 14])
+            imagesc(t_Drug_theta,f,S1_Drug_theta',[-1.5 1.5]);
+            colormap jet
+            set(gca,'TickDir','out'); ylabel('Freq [Hz]'); xlabel('Time [s]');
+            title(['Ch: ', num2str(session.analysisTags.channel1) , ' ' , lfp1w.region]); 
+
+            subplot(4,6,[19 20])
+            imagesc(t_Drug_theta,f,S2_Drug_theta',[-1.5 1.5]);
+            colormap jet
+            set(gca,'TickDir','out'); ylabel('Freq [Hz]'); xlabel('Time [s]');
+            title(['Ch: ', num2str(session.analysisTags.channel2) , ' ' , lfp2w.region]); 
+
+            subplot(4,6,[3 9 15 21])
+            plotFill(f,nanmean(coherogram_Drug_theta),'color',[0 0 0]); xlim([1 200]); ylim([-1 1]);     
+            ax = axis;
+            fill([theta_passband flip(theta_passband)],[ax([3 3 4 4])],[.8 .6 .6],'EdgeColor','none','FaceAlpha',.1);
+            fill([lgamma_passband flip(lgamma_passband)],[ax([3 3 4 4])],[.8 .4 .4],'EdgeColor','none','FaceAlpha',.1);
+            fill([hgamma_passband flip(hgamma_passband)],[ax([3 3 4 4])],[.8 .2 .2],'EdgeColor','none','FaceAlpha',.1);
+            ylabel('Drug [r]'); xlabel('Freq [Hz]');  
+    %         title(['Coherence (r) Ch: ', num2str(session.analysisTags.channel1) , ' ' , lfp1w.region, ' Ch: ', num2str(session.analysisTags.channel2), ' ', lfp2w.region]); 
+
+            subplot(4,6,[4 10 16 22])
+            plotFill(f,nanmean(phase_Drug_theta),'color',[0 0 0]); xlim([1 200]); ylim([-1 1]);     
+            ax = axis;
+            fill([theta_passband flip(theta_passband)],[ax([3 3 4 4])],[.8 .6 .6],'EdgeColor','none','FaceAlpha',.1);
+            fill([lgamma_passband flip(lgamma_passband)],[ax([3 3 4 4])],[.8 .4 .4],'EdgeColor','none','FaceAlpha',.1);
+            fill([hgamma_passband flip(hgamma_passband)],[ax([3 3 4 4])],[.8 .2 .2],'EdgeColor','none','FaceAlpha',.1);
+            ylabel('Drug [r]'); xlabel('Freq [Hz]');  
+    %         title(['Phase Coherence (r) Ch: ', num2str(session.analysisTags.channel1) , ' ' , lfp1w.region, ' Ch: ', num2str(session.analysisTags.channel2), ' ', lfp2w.region]); 
+
+            subplot(4,6,[5 11 17 23])
+            plotFill(f,nanmean(S1_Drug_theta),'color',[0 0 0]); xlim([1 200]); ylim([-2 2]);     
+            ax = axis;
+            fill([theta_passband flip(theta_passband)],[ax([3 3 4 4])],[.8 .6 .6],'EdgeColor','none','FaceAlpha',.1);
+            fill([lgamma_passband flip(lgamma_passband)],[ax([3 3 4 4])],[.8 .4 .4],'EdgeColor','none','FaceAlpha',.1);
+            fill([hgamma_passband flip(hgamma_passband)],[ax([3 3 4 4])],[.8 .2 .2],'EdgeColor','none','FaceAlpha',.1);
+            ylabel('Drug [r]'); xlabel('Freq [Hz]');  
+    %         title(['Ch: ', num2str(session.analysisTags.channel1) , ' ' , lfp1w.region]); 
+
+            subplot(4,6,[6 12 18 24])
+            plotFill(f,nanmean(S2_Drug_theta),'color',[0 0 0]); xlim([1 200]); ylim([-2 2]);     
+            ax = axis;
+            fill([theta_passband flip(theta_passband)],[ax([3 3 4 4])],[.8 .6 .6],'EdgeColor','none','FaceAlpha',.1);
+            fill([lgamma_passband flip(lgamma_passband)],[ax([3 3 4 4])],[.8 .4 .4],'EdgeColor','none','FaceAlpha',.1);
+            fill([hgamma_passband flip(hgamma_passband)],[ax([3 3 4 4])],[.8 .2 .2],'EdgeColor','none','FaceAlpha',.1);
+            ylabel('Drug [r]'); xlabel('Freq [Hz]');  
+
+            saveas(gca,['BaselineVsDrug\coherogram_Drug.png']);    
+
+
+            % MAZE1 BASELINE
+
+            t_Maze1Baseline = t(InIntervals(t,ts_Maze1Baseline));
+            coherogram_Maze1Baseline = coherogram(InIntervals(t,ts_Maze1Baseline),:);
+            phase_Maze1Baseline = phase(InIntervals(t,ts_Maze1Baseline),:);
+            S1_Maze1Baseline = S1_det(InIntervals(t,ts_Maze1Baseline),:);
+            S2_Maze1Baseline = S2_det(InIntervals(t,ts_Maze1Baseline),:);
+
+            t_Maze1Baseline_theta = t(InIntervals(t_Maze1Baseline,ts_theta));
+            coherogram_Maze1Baseline_theta = coherogram_Maze1Baseline(InIntervals(t_Maze1Baseline,ts_theta),:);
+            phase_Maze1Baseline_theta = phase_Maze1Baseline(InIntervals(t_Maze1Baseline,ts_theta),:);
+            S1_Maze1Baseline_theta = S1_Maze1Baseline(InIntervals(t_Maze1Baseline,ts_theta),:);
+            S2_Maze1Baseline_theta = S2_Maze1Baseline(InIntervals(t_Maze1Baseline,ts_theta),:);
+
+            cohgram.t = t_Maze1Baseline_theta;
+            cohgram.f = f;
+            cohgram.coherogram = coherogram_Maze1Baseline_theta;
+            cohgram.S1 = S1_Maze1Baseline_theta;
+            cohgram.S2 = S2_Maze1Baseline_theta;
+            cohgram.lfp1Channel = lfp1w.channels;
+            cohgram.lfp1Region = lfp1w.region;
+            cohgram.lfp2Channel = lfp2w.channels;
+            cohgram.lfp2Region = lfp2w.region;
+
+            save([session.general.name,'.coherogram_Maze1Baseline.mat'],'cohgram');
+
+            figure('position',[200 115 1300 800])
+            subplot(4,6,[1 2])
+            imagesc(t_Maze1Baseline_theta,f,coherogram_Maze1Baseline_theta',[-1 1]);
+            colormap jet
+            set(gca,'TickDir','out'); ylabel('Freq [Hz]'); xlabel('Time [s]');
+            title(['Coherence (r) Ch: ', num2str(session.analysisTags.channel1) , ' ' , lfp1w.region, ' Ch: ', num2str(session.analysisTags.channel2), ' ', lfp2w.region]); 
+
+            subplot(4,6,[7 8])
+            imagesc(t_Maze1Baseline_theta,f,phase_Maze1Baseline_theta',[-1.5 1.5]);
+            colormap jet
+            set(gca,'TickDir','out'); ylabel('Freq [Hz]'); xlabel('Time [s]');
+            title(['Phase Coherence Ch: ', num2str(session.analysisTags.channel1) , ' ' , lfp1w.region, ' Ch: ', num2str(session.analysisTags.channel2), ' ', lfp2w.region]); 
+
+            subplot(4,6,[13 14])
+            imagesc(t_Maze1Baseline_theta,f,S1_Maze1Baseline_theta',[-1.5 1.5]);
+            colormap jet
+            set(gca,'TickDir','out'); ylabel('Freq [Hz]'); xlabel('Time [s]');
+            title(['Ch: ', num2str(session.analysisTags.channel1) , ' ' , lfp1w.region]); 
+
+            subplot(4,6,[19 20])
+            imagesc(t_Maze1Baseline_theta,f,S2_Maze1Baseline_theta',[-1.5 1.5]);
+            colormap jet
+            set(gca,'TickDir','out'); ylabel('Freq [Hz]'); xlabel('Time [s]');
+            title(['Ch: ', num2str(session.analysisTags.channel2) , ' ' , lfp2w.region]); 
+
+            subplot(4,6,[3 9 15 21])
+            plotFill(f,nanmean(coherogram_Maze1Baseline_theta),'color',[0 0 0]); xlim([1 200]); ylim([-1 1]);     
+            ax = axis;
+            fill([theta_passband flip(theta_passband)],[ax([3 3 4 4])],[.8 .6 .6],'EdgeColor','none','FaceAlpha',.1);
+            fill([lgamma_passband flip(lgamma_passband)],[ax([3 3 4 4])],[.8 .4 .4],'EdgeColor','none','FaceAlpha',.1);
+            fill([hgamma_passband flip(hgamma_passband)],[ax([3 3 4 4])],[.8 .2 .2],'EdgeColor','none','FaceAlpha',.1);
+            ylabel('Maze1Baseline [r]'); xlabel('Freq [Hz]');  
+    %         title(['Coherence (r) Ch: ', num2str(session.analysisTags.channel1) , ' ' , lfp1w.region, ' Ch: ', num2str(session.analysisTags.channel2), ' ', lfp2w.region]); 
+
+            subplot(4,6,[4 10 16 22])
+            plotFill(f,nanmean(phase_Maze1Baseline_theta),'color',[0 0 0]); xlim([1 200]); ylim([-1 1]);     
+            ax = axis;
+            fill([theta_passband flip(theta_passband)],[ax([3 3 4 4])],[.8 .6 .6],'EdgeColor','none','FaceAlpha',.1);
+            fill([lgamma_passband flip(lgamma_passband)],[ax([3 3 4 4])],[.8 .4 .4],'EdgeColor','none','FaceAlpha',.1);
+            fill([hgamma_passband flip(hgamma_passband)],[ax([3 3 4 4])],[.8 .2 .2],'EdgeColor','none','FaceAlpha',.1);
+            ylabel('Maze1Baseline [r]'); xlabel('Freq [Hz]');  
+    %         title(['Phase Coherence (r) Ch: ', num2str(session.analysisTags.channel1) , ' ' , lfp1w.region, ' Ch: ', num2str(session.analysisTags.channel2), ' ', lfp2w.region]); 
+
+            subplot(4,6,[5 11 17 23])
+            plotFill(f,nanmean(S1_Maze1Baseline_theta),'color',[0 0 0]); xlim([1 200]); ylim([-2 2]);     
+            ax = axis;
+            fill([theta_passband flip(theta_passband)],[ax([3 3 4 4])],[.8 .6 .6],'EdgeColor','none','FaceAlpha',.1);
+            fill([lgamma_passband flip(lgamma_passband)],[ax([3 3 4 4])],[.8 .4 .4],'EdgeColor','none','FaceAlpha',.1);
+            fill([hgamma_passband flip(hgamma_passband)],[ax([3 3 4 4])],[.8 .2 .2],'EdgeColor','none','FaceAlpha',.1);
+            ylabel('Maze1Baseline [r]'); xlabel('Freq [Hz]');  
+    %         title(['Ch: ', num2str(session.analysisTags.channel1) , ' ' , lfp1w.region]); 
+
+            subplot(4,6,[6 12 18 24])
+            plotFill(f,nanmean(S2_Maze1Baseline_theta),'color',[0 0 0]); xlim([1 200]); ylim([-2 2]);     
+            ax = axis;
+            fill([theta_passband flip(theta_passband)],[ax([3 3 4 4])],[.8 .6 .6],'EdgeColor','none','FaceAlpha',.1);
+            fill([lgamma_passband flip(lgamma_passband)],[ax([3 3 4 4])],[.8 .4 .4],'EdgeColor','none','FaceAlpha',.1);
+            fill([hgamma_passband flip(hgamma_passband)],[ax([3 3 4 4])],[.8 .2 .2],'EdgeColor','none','FaceAlpha',.1);
+            ylabel('Maze1Baseline [r]'); xlabel('Freq [Hz]');  
+
+            saveas(gca,['BaselineVsDrug\coherogram_Maze1Baseline.png']);    
+        
+        
+        
+        
+            % MAZE1 DRUG
+
+            t_Maze1Drug = t(InIntervals(t,ts_Maze1Drug));
+            coherogram_Maze1Drug = coherogram(InIntervals(t,ts_Maze1Drug),:);
+            phase_Maze1Drug = phase(InIntervals(t,ts_Maze1Drug),:);
+            S1_Maze1Drug = S1_det(InIntervals(t,ts_Maze1Drug),:);
+            S2_Maze1Drug = S2_det(InIntervals(t,ts_Maze1Drug),:);
+
+            t_Maze1Drug_theta = t(InIntervals(t_Maze1Drug,ts_theta));
+            coherogram_Maze1Drug_theta = coherogram_Maze1Drug(InIntervals(t_Maze1Drug,ts_theta),:);
+            phase_Maze1Drug_theta = phase_Maze1Drug(InIntervals(t_Maze1Drug,ts_theta),:);
+            S1_Maze1Drug_theta = S1_Maze1Drug(InIntervals(t_Maze1Drug,ts_theta),:);
+            S2_Maze1Drug_theta = S2_Maze1Drug(InIntervals(t_Maze1Drug,ts_theta),:);
+
+            cohgram = [];
+            cohgram.t = t_Maze1Drug_theta;
+            cohgram.f = f;
+            cohgram.coherogram = coherogram_Maze1Drug_theta;
+            cohgram.S1 = S1_Maze1Drug_theta;
+            cohgram.S2 = S2_Maze1Drug_theta;
+            cohgram.lfp1Channel = lfp1w.channels;
+            cohgram.lfp1Region = lfp1w.region;
+            cohgram.lfp2Channel = lfp2w.channels;
+            cohgram.lfp2Region = lfp2w.region;
+
+            save([session.general.name,'.coherogram_Maze1Drug.mat'],'cohgram');
+
+            figure('position',[200 115 1300 800])
+            subplot(4,6,[1 2])
+            imagesc(t_Maze1Drug_theta,f,coherogram_Maze1Drug_theta',[-1 1]);
+            colormap jet
+            set(gca,'TickDir','out'); ylabel('Freq [Hz]'); xlabel('Time [s]');
+            title(['Coherence (r) Ch: ', num2str(session.analysisTags.channel1) , ' ' , lfp1w.region, ' Ch: ', num2str(session.analysisTags.channel2), ' ', lfp2w.region]); 
+
+            subplot(4,6,[7 8])
+            imagesc(t_Maze1Drug_theta,f,phase_Maze1Drug_theta',[-1.5 1.5]);
+            colormap jet
+            set(gca,'TickDir','out'); ylabel('Freq [Hz]'); xlabel('Time [s]');
+            title(['Phase Coherence Ch: ', num2str(session.analysisTags.channel1) , ' ' , lfp1w.region, ' Ch: ', num2str(session.analysisTags.channel2), ' ', lfp2w.region]); 
+
+            subplot(4,6,[13 14])
+            imagesc(t_Maze1Drug_theta,f,S1_Maze1Drug_theta',[-1.5 1.5]);
+            colormap jet
+            set(gca,'TickDir','out'); ylabel('Freq [Hz]'); xlabel('Time [s]');
+            title(['Ch: ', num2str(session.analysisTags.channel1) , ' ' , lfp1w.region]); 
+
+            subplot(4,6,[19 20])
+            imagesc(t_Maze1Drug_theta,f,S2_Maze1Drug_theta',[-1.5 1.5]);
+            colormap jet
+            set(gca,'TickDir','out'); ylabel('Freq [Hz]'); xlabel('Time [s]');
+            title(['Ch: ', num2str(session.analysisTags.channel2) , ' ' , lfp2w.region]); 
+
+            subplot(4,6,[3 9 15 21])
+            plotFill(f,nanmean(coherogram_Maze1Drug_theta),'color',[0 0 0]); xlim([1 200]); ylim([-1 1]);     
+            ax = axis;
+            fill([theta_passband flip(theta_passband)],[ax([3 3 4 4])],[.8 .6 .6],'EdgeColor','none','FaceAlpha',.1);
+            fill([lgamma_passband flip(lgamma_passband)],[ax([3 3 4 4])],[.8 .4 .4],'EdgeColor','none','FaceAlpha',.1);
+            fill([hgamma_passband flip(hgamma_passband)],[ax([3 3 4 4])],[.8 .2 .2],'EdgeColor','none','FaceAlpha',.1);
+            ylabel('Maze1Drug [r]'); xlabel('Freq [Hz]');  
+    %         title(['Coherence (r) Ch: ', num2str(session.analysisTags.channel1) , ' ' , lfp1w.region, ' Ch: ', num2str(session.analysisTags.channel2), ' ', lfp2w.region]); 
+
+            subplot(4,6,[4 10 16 22])
+            plotFill(f,nanmean(phase_Maze1Drug_theta),'color',[0 0 0]); xlim([1 200]); ylim([-1 1]);     
+            ax = axis;
+            fill([theta_passband flip(theta_passband)],[ax([3 3 4 4])],[.8 .6 .6],'EdgeColor','none','FaceAlpha',.1);
+            fill([lgamma_passband flip(lgamma_passband)],[ax([3 3 4 4])],[.8 .4 .4],'EdgeColor','none','FaceAlpha',.1);
+            fill([hgamma_passband flip(hgamma_passband)],[ax([3 3 4 4])],[.8 .2 .2],'EdgeColor','none','FaceAlpha',.1);
+            ylabel('Maze1Drug [r]'); xlabel('Freq [Hz]');  
+    %         title(['Phase Coherence (r) Ch: ', num2str(session.analysisTags.channel1) , ' ' , lfp1w.region, ' Ch: ', num2str(session.analysisTags.channel2), ' ', lfp2w.region]); 
+
+            subplot(4,6,[5 11 17 23])
+            plotFill(f,nanmean(S1_Maze1Drug_theta),'color',[0 0 0]); xlim([1 200]); ylim([-2 2]);     
+            ax = axis;
+            fill([theta_passband flip(theta_passband)],[ax([3 3 4 4])],[.8 .6 .6],'EdgeColor','none','FaceAlpha',.1);
+            fill([lgamma_passband flip(lgamma_passband)],[ax([3 3 4 4])],[.8 .4 .4],'EdgeColor','none','FaceAlpha',.1);
+            fill([hgamma_passband flip(hgamma_passband)],[ax([3 3 4 4])],[.8 .2 .2],'EdgeColor','none','FaceAlpha',.1);
+            ylabel('Maze1Drug [r]'); xlabel('Freq [Hz]');  
+    %         title(['Ch: ', num2str(session.analysisTags.channel1) , ' ' , lfp1w.region]); 
+
+            subplot(4,6,[6 12 18 24])
+            plotFill(f,nanmean(S2_Maze1Drug_theta),'color',[0 0 0]); xlim([1 200]); ylim([-2 2]);     
+            ax = axis;
+            fill([theta_passband flip(theta_passband)],[ax([3 3 4 4])],[.8 .6 .6],'EdgeColor','none','FaceAlpha',.1);
+            fill([lgamma_passband flip(lgamma_passband)],[ax([3 3 4 4])],[.8 .4 .4],'EdgeColor','none','FaceAlpha',.1);
+            fill([hgamma_passband flip(hgamma_passband)],[ax([3 3 4 4])],[.8 .2 .2],'EdgeColor','none','FaceAlpha',.1);
+            ylabel('Maze1Drug [r]'); xlabel('Freq [Hz]');  
+
+            saveas(gca,['BaselineVsDrug\coherogram_Maze1Drug.png']);   
+            
+        end
+    
+    
+    
+        % ======================================
+        % THETA/GAMMA MODULATION
+        % ======================================
+        
+
         % ======================================
         % 0. SESSION PERFORMANCE
         % ======================================
+        
         
         % Baseline
         try
@@ -108,7 +532,7 @@ for ii = 5:length(sessionsTable.SessionName)
 
             t = psthUD_Baseline.timestamps;
             winSizePlot = [-0.5 0.5];
-            figure,
+            figure('position',[200 115 1300 800])
             subplot(1,2,1)
             imagesc([t(1) t(end)],[1 size(psthUD_Baseline.responsecurve,1)],...
                 psthUD_Baseline.responsecurveSmooth); caxis([0 10]); colormap(jet);
@@ -126,7 +550,7 @@ for ii = 5:length(sessionsTable.SessionName)
             xlabel('Time');
             mkdir('BaselineVsDrug');
 
-            saveas(gcf,['BaselinevsDrug\spikesPsthRate_slowOscillations_Baseline.png']);
+            saveas(gca,['BaselinevsDrug\spikesPsthRate_slowOscillations_Baseline.png']);
 
             raster = psthUD_Baseline.raster;
             psth = rmfield(psthUD_Baseline,'raster');
@@ -141,7 +565,7 @@ for ii = 5:length(sessionsTable.SessionName)
 
                 t = psthUD_Drug.timestamps;
                 winSizePlot = [-0.5 0.5];
-                figure,
+                figure('position',[200 115 1300 800])
                 subplot(1,2,1)
                 imagesc([t(1) t(end)],[1 size(psthUD_Drug.responsecurve,1)],...
                     psthUD_Drug.responsecurveSmooth); caxis([0 10]); colormap(jet);
@@ -159,7 +583,7 @@ for ii = 5:length(sessionsTable.SessionName)
                 xlabel('Time');
                 mkdir('BaselineVsDrug');
 
-                saveas(gcf,['BaselinevsDrug\spikesPsthRate_slowOscillations_Druge.png']);
+                saveas(gca,['BaselinevsDrug\spikesPsthRate_slowOscillations_Druge.png']);
 
                 raster = psthUD_Drug.raster;
                 psth = rmfield(psthUD_Drug,'raster');
@@ -173,6 +597,54 @@ for ii = 5:length(sessionsTable.SessionName)
                 save([session.general.name,'.slowOscillations_Drug_raster.cellinfo.mat'],'raster','-v7.3');
             end
         end
+        
+        % =================================
+        % SPIKES RANK SLOW OSCILLATIONS
+        % =================================
+        
+        if isempty(dir('*.spikesRank_upSates_Baseline.mat')) | isempty(dir('*.spikesRank_upStates_Drug')) | force
+            
+            % Baseline
+            spkEventTimes = [];
+            spkEventTimes = getSpikesRank('events','upstates','includeIntervals',ts_Baseline);
+            
+            save([session.general.name,'.spikesRank_upStates_Baseline.mat'],'spkEventTimes');
+            
+            % Drug
+            
+            spkEventTimes = [];
+            try
+                spkEventTimes = getSpikesRank('events','upstates','includeIntervals',ts_Drug);
+            catch
+                spkEventTimes = NaN;
+            end
+            save([session.general.name,'.spikesRank_upStates_Drug.mat'],'spkEventTimes');            
+        end
+        
+        % ================================
+        % SPIKES RANK RIPPLES
+        % =================================
+        
+        if isempty(dir('*.spikesRank_ripples_Baseline.mat')) | isempty(dir('*.spikesRank_ripples_Drug')) | force
+            
+            % Baseline
+            spkEventTimes = [];
+            spkEventTimes = getSpikesRank('events','ripples','includeIntervals',ts_Baseline);
+            
+            save([session.general.name,'.spikesRank_ripples_Baseline.mat'],'spkEventTimes');
+            
+            % Drug
+            
+            spkEventTimes = [];
+            try
+                spkEventTimes = getSpikesRank('events','ripples','includeIntervals',ts_Drug);
+            catch
+                spkEventTimes = NaN;
+            end
+            save([session.general.name,'.spikesRank_ripples_Drug.mat'],'spkEventTimes');            
+        end
+        
+        
         
         % =================================
         % 2. RIPPLES 
@@ -191,7 +663,7 @@ for ii = 5:length(sessionsTable.SessionName)
             figure('position',[200 115 1300 800])
             plotRippleChannel('rippleChannel',ripples.detectorinfo.detectionchannel,'ripples',ripples,'saveFig',false,'restrictToIntervals',ts_ripples_Baseline,'inAxis',true);
             mkdir('BaselinevsDrug');
-            saveas(gcf,['BaselinevsDrug\plotRippleChannel_Baseline.png']);
+            saveas(gca,['BaselinevsDrug\plotRippleChannel_Baseline.png']);
 
 
             ripples_Baseline.timestamps = ripples.timestamps(ts_ripples_Baseline,:);
@@ -284,7 +756,7 @@ for ii = 5:length(sessionsTable.SessionName)
                 figure('position',[200 115 1300 800])
                 plotRippleChannel('rippleChannel',ripples.detectorinfo.detectionchannel,'ripples',ripples,'saveFig',false,'restrictToIntervals',ts_ripples_Drug,'inAxis',true);
                 mkdir('BaselinevsDrug');
-                saveas(gcf,['BaselinevsDrug\plotRippleChannel_Drug.png']);
+                saveas(gca,['BaselinevsDrug\plotRippleChannel_Drug.png']);
 
                 ripples_Drug.timestamps = ripples.timestamps(ts_ripples_Drug,:);
 
@@ -380,7 +852,7 @@ for ii = 5:length(sessionsTable.SessionName)
 
             t = psthRipples_Baseline.timestamps;
             winSizePlot = [-0.5 0.5];
-            figure,
+            figure('position',[200 115 1300 800])
             subplot(1,2,1)
             imagesc([t(1) t(end)],[1 size(psthRipples_Baseline.responsecurve,1)],...
                 psthRipples_Baseline.responsecurveSmooth); caxis([0 10]); colormap(jet);
@@ -398,7 +870,7 @@ for ii = 5:length(sessionsTable.SessionName)
             xlabel('Time');
             mkdir('BaselineVsDrug');
 
-            saveas(gcf,['BaselinevsDrug\spikesPsthRate_ripples_Baseline.png']);
+            saveas(gca,['BaselinevsDrug\spikesPsthRate_ripples_Baseline.png']);
 
             raster = psthRipples_Baseline.raster;
             psth = rmfield(psthRipples_Baseline,'raster');
@@ -412,7 +884,7 @@ for ii = 5:length(sessionsTable.SessionName)
 
                 t = psthRipples_Drug.timestamps;
                 winSizePlot = [-0.5 0.5];
-                figure,
+                figure('position',[200 115 1300 800])
                 subplot(1,2,1)
                 imagesc([t(1) t(end)],[1 size(psthRipples_Drug.responsecurve,1)],...
                     psthRipples_Drug.responsecurveSmooth); caxis([0 10]); colormap(jet);
@@ -430,7 +902,7 @@ for ii = 5:length(sessionsTable.SessionName)
                 xlabel('Time');
                 mkdir('BaselineVsDrug');
 
-                saveas(gcf,['BaselinevsDrug\spikesPsthRate_ripples_Drug.png']);
+                saveas(gca,['BaselinevsDrug\spikesPsthRate_ripples_Drug.png']);
 
                 raster = psthRipples_Drug.raster;
                 psth = rmfield(psthRipples_Drug,'raster');
@@ -505,8 +977,7 @@ for ii = 5:length(sessionsTable.SessionName)
                 
                 % Ripples modulation
                try
-                   figure,
-                   set(gcf,'Position',get(0,'ScreenSize'))
+                   figure('position',[200 115 1300 800])
                    for i = 1:length(spikes.UID)
                         subplot(7,ceil(size(spikes.UID,2)/7),i)
                         area([rippleMod.phasebins ; rippleMod.phasebins + 2*pi],[rippleMod.phasedistros(:,i) ;  rippleMod.phasedistros(:,i)], 'EdgeColor','none');
@@ -527,7 +998,7 @@ for ii = 5:length(sessionsTable.SessionName)
                             set(gca,'YTick',[],'XTick',[]);
                         end
                    end 
-                   saveas(gcf,['BaselinevsDrug\ripple_',num2str(ripple_passband(1)),'-',num2str(ripple_passband(end)),'_Baseline_PhaseModulation.png']);
+                   saveas(gca,['BaselinevsDrug\ripple_',num2str(ripple_passband(1)),'-',num2str(ripple_passband(end)),'_Baseline_PhaseModulation.png']);
                catch
                    disp('Not possible to run ripples modulation Baseline vs Drug...');
                end
@@ -539,8 +1010,7 @@ for ii = 5:length(sessionsTable.SessionName)
             if plt
                 % SW Modulation
                try
-                    figure,
-                    set(gcf,'Position',get(0,'ScreenSize'))
+                    figure('position',[200 115 1300 800])
                     for i = 1:length(spikes.UID)
                         subplot(7,ceil(size(spikes.UID,2)/7),i)
                         area([SWMod.phasebins ; SWMod.phasebins + 2*pi],[SWMod.phasedistros(:,i) ;  SWMod.phasedistros(:,i)], 'EdgeColor','none');
@@ -561,7 +1031,7 @@ for ii = 5:length(sessionsTable.SessionName)
                             set(gca,'YTick',[],'XTick',[]);
                         end
                     end
-                    saveas(gcf,['BaselinevsDrug\SW_',num2str(SW_passband(1)),'-',num2str(SW_passband(end)),'_Baseline_PhaseModulation.png']);
+                    saveas(gca,['BaselinevsDrug\SW_',num2str(SW_passband(1)),'-',num2str(SW_passband(end)),'_Baseline_PhaseModulation.png']);
                catch
                    disp('Not possible to run SW modulation Baseline vs Drug');
                end
@@ -573,8 +1043,7 @@ for ii = 5:length(sessionsTable.SessionName)
             if plt
                 % Theta modulation
                try
-                    figure,
-                    set(gcf,'Position',get(0,'ScreenSize'))
+                    figure('position',[200 115 1300 800])
                     for i = 1:length(spikes.UID)
                         subplot(7,ceil(size(spikes.UID,2)/7),i)
                         area([thetaMod.phasebins ; thetaMod.phasebins + 2*pi],[thetaMod.phasedistros(:,i) ;  thetaMod.phasedistros(:,i)], 'EdgeColor','none');
@@ -595,7 +1064,7 @@ for ii = 5:length(sessionsTable.SessionName)
                             set(gca,'YTick',[],'XTick',[]);
                         end
                     end
-                    saveas(gcf,['BaselinevsDrug\theta_',num2str(theta_passband(1)),'-',num2str(theta_passband(end)),'_Baseline_PhaseModulation.png']);
+                    saveas(gca,['BaselinevsDrug\theta_',num2str(theta_passband(1)),'-',num2str(theta_passband(end)),'_Baseline_PhaseModulation.png']);
                catch
                    disp('Not possible to run theta modulation Baseline vs Drug...');
                end
@@ -607,8 +1076,7 @@ for ii = 5:length(sessionsTable.SessionName)
                 % lgamma modulation
 
                try
-                    figure,
-                    set(gcf,'Position',get(0,'ScreenSize'))
+                    figure('position',[200 115 1300 800])
                     for i = 1:length(spikes.UID)
                         subplot(7,ceil(size(spikes.UID,2)/7),i)
                         area([lgammaMod.phasebins ; lgammaMod.phasebins + 2*pi],[lgammaMod.phasedistros(:,i) ;  lgammaMod.phasedistros(:,i)], 'EdgeColor','none');
@@ -629,7 +1097,7 @@ for ii = 5:length(sessionsTable.SessionName)
                             set(gca,'YTick',[],'XTick',[]);
                         end
                     end
-                    saveas(gcf,['BaselinevsDrug\lGamma_',num2str(lgamma_passband(1)),'-',num2str(lgamma_passband(end)),'_Baseline_PhaseModulation.png'])
+                    saveas(gca,['BaselinevsDrug\lGamma_',num2str(lgamma_passband(1)),'-',num2str(lgamma_passband(end)),'_Baseline_PhaseModulation.png'])
                catch
                    disp('Not possible to run lgamma modulation Baseline vs Drug...');
                end
@@ -641,8 +1109,7 @@ for ii = 5:length(sessionsTable.SessionName)
                 % hgamma modulation
 
                try
-                    figure,
-                    set(gcf,'Position',get(0,'ScreenSize'))
+                    figure('position',[200 115 1300 800])
                     for i = 1:length(spikes.UID)
                         subplot(7,ceil(size(spikes.UID,2)/7),i)
                         area([hgammaMod.phasebins ; hgammaMod.phasebins + 2*pi],[hgammaMod.phasedistros(:,i) ;  hgammaMod.phasedistros(:,i)], 'EdgeColor','none');
@@ -663,7 +1130,7 @@ for ii = 5:length(sessionsTable.SessionName)
                             set(gca,'YTick',[],'XTick',[]);
                         end
                     end
-                    saveas(gcf,['BaselinevsDrug\hGamma_',num2str(hgamma_passband(1)),'-',num2str(hgamma_passband(end)),'_Baseline_PhaseModulation.png']);
+                    saveas(gca,['BaselinevsDrug\hGamma_',num2str(hgamma_passband(1)),'-',num2str(hgamma_passband(end)),'_Baseline_PhaseModulation.png']);
                catch
                    disp('Not possible to run hgamma modulation Baseline vs Drug...');
                end
@@ -675,8 +1142,7 @@ for ii = 5:length(sessionsTable.SessionName)
             % ThetaRun modulation
             if plt
                try
-                    figure,
-                    set(gcf,'Position',get(0,'ScreenSize'))
+                    figure('position',[200 115 1300 800])
                     for i = 1:length(spikes.UID)
                         subplot(7,ceil(size(spikes.UID,2)/7),i)
                         area([thetaRunMod.phasebins ; thetaRunMod.phasebins + 2*pi],[thetaRunMod.phasedistros(:,i) ;  thetaRunMod.phasedistros(:,i)], 'EdgeColor','none');
@@ -697,7 +1163,7 @@ for ii = 5:length(sessionsTable.SessionName)
                             set(gca,'YTick',[],'XTick',[]);
                         end
                     end
-                    saveas(gcf,['BaselinevsDrug\thetaRun_',num2str(theta_passband(1)),'-',num2str(theta_passband(end)),'_Baseline_PhaseModulation.png']);
+                    saveas(gca,['BaselinevsDrug\thetaRun_',num2str(theta_passband(1)),'-',num2str(theta_passband(end)),'_Baseline_PhaseModulation.png']);
                catch
                    disp('Not possible to run thetaRun modulation Baseline vs Drug...');
                end
@@ -710,8 +1176,7 @@ for ii = 5:length(sessionsTable.SessionName)
             if plt
                 % ThetaREM modulation
                 try
-                    figure,
-                    set(gcf,'Position',get(0,'ScreenSize'))
+                    figure('position',[200 115 1300 800])
                     for i = 1:length(spikes.UID)
                         subplot(7,ceil(size(spikes.UID,2)/7),i)
                         area([thetaREMMod.phasebins ; thetaREMMod.phasebins + 2*pi],[thetaREMMod.phasedistros(:,i) ;  thetaREMMod.phasedistros(:,i)], 'EdgeColor','none');
@@ -732,7 +1197,7 @@ for ii = 5:length(sessionsTable.SessionName)
                             set(gca,'YTick',[],'XTick',[]);
                         end
                     end
-                    saveas(gcf,['BaselinevsDrug\thetaREM_',num2str(theta_passband(1)),'-',num2str(theta_passband(end)),'_Baseline_PhaseModulation.png']);
+                    saveas(gca,['BaselinevsDrug\thetaREM_',num2str(theta_passband(1)),'-',num2str(theta_passband(end)),'_Baseline_PhaseModulation.png']);
                 catch
                     disp('Not possible to run thetaREM Baseline vs Drug...');
                 end
@@ -757,8 +1222,7 @@ for ii = 5:length(sessionsTable.SessionName)
                 if plt
                     % Ripples modulation
                    try
-                       figure,
-                       set(gcf,'Position',get(0,'ScreenSize'))
+                       figure('position',[200 115 1300 800])
                        for i = 1:length(spikes.UID)
                             subplot(7,ceil(size(spikes.UID,2)/7),i)
                             area([rippleMod.phasebins ; rippleMod.phasebins + 2*pi],[rippleMod.phasedistros(:,i) ;  rippleMod.phasedistros(:,i)], 'EdgeColor','none');
@@ -779,7 +1243,7 @@ for ii = 5:length(sessionsTable.SessionName)
                                 set(gca,'YTick',[],'XTick',[]);
                             end
                        end 
-                       saveas(gcf,['BaselinevsDrug\ripple_',num2str(ripple_passband(1)),'-',num2str(ripple_passband(end)),'_Drug_PhaseModulation.png']);
+                       saveas(gca,['BaselinevsDrug\ripple_',num2str(ripple_passband(1)),'-',num2str(ripple_passband(end)),'_Drug_PhaseModulation.png']);
                    catch
                        disp('Not possible to run ripples modulation Baseline vs Drug...');
                    end
@@ -791,8 +1255,7 @@ for ii = 5:length(sessionsTable.SessionName)
                 if plt
                     % SW Modulation
                    try
-                        figure,
-                        set(gcf,'Position',get(0,'ScreenSize'))
+                        figure('position',[200 115 1300 800])
                         for i = 1:length(spikes.UID)
                             subplot(7,ceil(size(spikes.UID,2)/7),i)
                             area([SWMod.phasebins ; SWMod.phasebins + 2*pi],[SWMod.phasedistros(:,i) ;  SWMod.phasedistros(:,i)], 'EdgeColor','none');
@@ -813,7 +1276,7 @@ for ii = 5:length(sessionsTable.SessionName)
                                 set(gca,'YTick',[],'XTick',[]);
                             end
                         end
-                        saveas(gcf,['BaselinevsDrug\SW_',num2str(SW_passband(1)),'-',num2str(SW_passband(end)),'_Drug_PhaseModulation.png']);
+                        saveas(gca,['BaselinevsDrug\SW_',num2str(SW_passband(1)),'-',num2str(SW_passband(end)),'_Drug_PhaseModulation.png']);
                    catch
                        disp('Not possible to run SW modulation Baseline vs Drug');
                    end
@@ -825,8 +1288,7 @@ for ii = 5:length(sessionsTable.SessionName)
                 if plt
                     % Theta modulation
                    try
-                        figure,
-                        set(gcf,'Position',get(0,'ScreenSize'))
+                        figure('position',[200 115 1300 800])
                         for i = 1:length(spikes.UID)
                             subplot(7,ceil(size(spikes.UID,2)/7),i)
                             area([thetaMod.phasebins ; thetaMod.phasebins + 2*pi],[thetaMod.phasedistros(:,i) ;  thetaMod.phasedistros(:,i)], 'EdgeColor','none');
@@ -847,7 +1309,7 @@ for ii = 5:length(sessionsTable.SessionName)
                                 set(gca,'YTick',[],'XTick',[]);
                             end
                         end
-                        saveas(gcf,['BaselinevsDrug\theta_',num2str(theta_passband(1)),'-',num2str(theta_passband(end)),'_Drug_PhaseModulation.png']);
+                        saveas(gca,['BaselinevsDrug\theta_',num2str(theta_passband(1)),'-',num2str(theta_passband(end)),'_Drug_PhaseModulation.png']);
                    catch
                        disp('Not possible to run theta modulation Baseline vs Drug...');
                    end
@@ -860,8 +1322,7 @@ for ii = 5:length(sessionsTable.SessionName)
                     % lgamma modulation
 
                    try
-                        figure,
-                        set(gcf,'Position',get(0,'ScreenSize'))
+                        figure('position',[200 115 1300 800])
                         for i = 1:length(spikes.UID)
                             subplot(7,ceil(size(spikes.UID,2)/7),i)
                             area([lgammaMod.phasebins ; lgammaMod.phasebins + 2*pi],[lgammaMod.phasedistros(:,i) ;  lgammaMod.phasedistros(:,i)], 'EdgeColor','none');
@@ -882,7 +1343,7 @@ for ii = 5:length(sessionsTable.SessionName)
                                 set(gca,'YTick',[],'XTick',[]);
                             end
                         end
-                        saveas(gcf,['BaselinevsDrug\lGamma_',num2str(lgamma_passband(1)),'-',num2str(lgamma_passband(end)),'_Drug_PhaseModulation.png'])
+                        saveas(gca,['BaselinevsDrug\lGamma_',num2str(lgamma_passband(1)),'-',num2str(lgamma_passband(end)),'_Drug_PhaseModulation.png'])
                    catch
                        disp('Not possible to run lgamma modulation Baseline vs Drug...');
                    end
@@ -895,8 +1356,7 @@ for ii = 5:length(sessionsTable.SessionName)
                     % hgamma modulation
 
                    try
-                        figure,
-                        set(gcf,'Position',get(0,'ScreenSize'))
+                        figure('position',[200 115 1300 800])
                         for i = 1:length(spikes.UID)
                             subplot(7,ceil(size(spikes.UID,2)/7),i)
                             area([hgammaMod.phasebins ; hgammaMod.phasebins + 2*pi],[hgammaMod.phasedistros(:,i) ;  hgammaMod.phasedistros(:,i)], 'EdgeColor','none');
@@ -917,7 +1377,7 @@ for ii = 5:length(sessionsTable.SessionName)
                                 set(gca,'YTick',[],'XTick',[]);
                             end
                         end
-                        saveas(gcf,['BaselinevsDrug\hGamma_',num2str(hgamma_passband(1)),'-',num2str(hgamma_passband(end)),'_Drug_PhaseModulation.png']);
+                        saveas(gca,['BaselinevsDrug\hGamma_',num2str(hgamma_passband(1)),'-',num2str(hgamma_passband(end)),'_Drug_PhaseModulation.png']);
                    catch
                        disp('Not possible to run hgamma modulation Baseline vs Drug...');
                    end
@@ -929,8 +1389,7 @@ for ii = 5:length(sessionsTable.SessionName)
                 if plt
                     % ThetaRun modulation
                    try
-                        figure,
-                        set(gcf,'Position',get(0,'ScreenSize'))
+                        figure('position',[200 115 1300 800])
                         for i = 1:length(spikes.UID)
                             subplot(7,ceil(size(spikes.UID,2)/7),i)
                             area([thetaRunMod.phasebins ; thetaRunMod.phasebins + 2*pi],[thetaRunMod.phasedistros(:,i) ;  thetaRunMod.phasedistros(:,i)], 'EdgeColor','none');
@@ -951,7 +1410,7 @@ for ii = 5:length(sessionsTable.SessionName)
                                 set(gca,'YTick',[],'XTick',[]);
                             end
                         end
-                        saveas(gcf,['BaselinevsDrug\thetaRun_',num2str(theta_passband(1)),'-',num2str(theta_passband(end)),'_Drug_PhaseModulation.png']);
+                        saveas(gca,['BaselinevsDrug\thetaRun_',num2str(theta_passband(1)),'-',num2str(theta_passband(end)),'_Drug_PhaseModulation.png']);
                    catch
                        disp('Not possible to run thetaRun modulation Baseline vs Drug ...');
                    end
@@ -963,8 +1422,7 @@ for ii = 5:length(sessionsTable.SessionName)
                 if plt
                     % ThetaREM modulation
                     try
-                        figure,
-                        set(gcf,'Position',get(0,'ScreenSize'))
+                        figure('position',[200 115 1300 800])
                         for i = 1:length(spikes.UID)
                             subplot(7,ceil(size(spikes.UID,2)/7),i)
                             area([thetaREMMod.phasebins ; thetaREMMod.phasebins + 2*pi],[thetaREMMod.phasedistros(:,i) ;  thetaREMMod.phasedistros(:,i)], 'EdgeColor','none');
@@ -985,7 +1443,7 @@ for ii = 5:length(sessionsTable.SessionName)
                                 set(gca,'YTick',[],'XTick',[]);
                             end
                         end
-                        saveas(gcf,['BaselinevsDrug\thetaREM_',num2str(theta_passband(1)),'-',num2str(theta_passband(end)),'_Drug_PhaseModulation.png']);
+                        saveas(gca,['BaselinevsDrug\thetaREM_',num2str(theta_passband(1)),'-',num2str(theta_passband(end)),'_Drug_PhaseModulation.png']);
                     catch
                         disp('Not possible to run thetaREM modulation Baseline vs Drug ...');
                     end
@@ -1029,37 +1487,37 @@ for ii = 5:length(sessionsTable.SessionName)
         % 5. CELL METRICS        
         % ===============================
         
-        if isempty(dir('*.cell_metrics_Baseline.cellinfo.mat')) | isempty(dir('*.cell_metrics_Drug.cellinfo.mat')) | force
-            try
-                if ~isempty(dir([session.general.name,'.optogeneticPulses.events.mat']))
-                    file = dir([session.general.name,'.optogeneticPulses.events.mat']);
-                    load(file.name);
-                end
-                    excludeManipulationIntervals = optoPulses.stimulationEpochs;
-            catch
-                warning('Not possible to get manipulation periods. Running CellMetrics withouth excluding manipulation epochs');
-                excludeManipulationIntervals = [];
-            end
-            
-            % Baseline
-            
-            cell_metrics_Baseline = ProcessCellMetrics('session', session,'restrictToIntervals',ts_Baseline,'manualAdjustMonoSyn',false,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',{'deepSuperficial'},'forceReload',true,'saveMat',false);
-
-            cell_metrics = cell_metrics_Baseline;
-            save([session.general.name,'.cell_metrics_Baseline.cellinfo.mat'],'cell_metrics');
-            
-            % Drug
-            
-            if ~isempty(ts_Drug)
-                cell_metrics_Drug = ProcessCellMetrics('session', session,'restrictToIntervals',ts_Drug,'manualAdjustMonoSyn',false,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',{'deepSuperficial'},'forceReload',true,'saveMat',false);
-
-                cell_metrics = cell_metrics_Drug;
-                save([session.general.name,'.cell_metrics_Drug.cellinfo.mat'],'cell_metrics');
-            else
-                cell_metrics = [];
-                save([session.general.name,'.cell_metrics_Drug.cellinfo.mat'],'cell_metrics');
-            end
-        end
+%         if isempty(dir('*.cell_metrics_Baseline.cellinfo.mat')) | isempty(dir('*.cell_metrics_Drug.cellinfo.mat')) | force
+%             try
+%                 if ~isempty(dir([session.general.name,'.optogeneticPulses.events.mat']))
+%                     file = dir([session.general.name,'.optogeneticPulses.events.mat']);
+%                     load(file.name);
+%                 end
+%                     excludeManipulationIntervals = optoPulses.stimulationEpochs;
+%             catch
+%                 warning('Not possible to get manipulation periods. Running CellMetrics withouth excluding manipulation epochs');
+%                 excludeManipulationIntervals = [];
+%             end
+%             
+%             % Baseline
+%             
+%             cell_metrics_Baseline = ProcessCellMetrics('session', session,'restrictToIntervals',ts_Baseline,'manualAdjustMonoSyn',false,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',{'deepSuperficial'},'forceReload',true,'saveMat',false);
+% 
+%             cell_metrics = cell_metrics_Baseline;
+%             save([session.general.name,'.cell_metrics_Baseline.cellinfo.mat'],'cell_metrics');
+%             
+%             % Drug
+%             
+%             if ~isempty(ts_Drug)
+%                 cell_metrics_Drug = ProcessCellMetrics('session', session,'restrictToIntervals',ts_Drug,'manualAdjustMonoSyn',false,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',{'deepSuperficial'},'forceReload',true,'saveMat',false);
+% 
+%                 cell_metrics = cell_metrics_Drug;
+%                 save([session.general.name,'.cell_metrics_Drug.cellinfo.mat'],'cell_metrics');
+%             else
+%                 cell_metrics = [];
+%                 save([session.general.name,'.cell_metrics_Drug.cellinfo.mat'],'cell_metrics');
+%             end
+%         end
         
         % ===============================
         % 6. ACG PEAK ( dependent upon cell_metrics);
@@ -1068,7 +1526,7 @@ for ii = 5:length(sessionsTable.SessionName)
         minPeakTime = 15;
         
         % Baseline
-        if isempty(dir('*.ACGPeak_Baseline.cellinfo.mat')) | isempty(dir('*.ACGPeak_Drug.cellinfo.mat')) | force
+        if isempty(dir('*.ACGPeak_Baseline.cellinfo.mat')) | isempty(dir('*.ACGPeak_Drug.cellinfo.mat')) | forceACGPeak
             
             try
                 targetFile = dir('*.cell_metrics_Baseline.cellinfo.mat'); load(targetFile.name);
@@ -1098,6 +1556,9 @@ for ii = 5:length(sessionsTable.SessionName)
             acg_smoothed_offset = acg_smoothed_norm(minPeakTime:end,:);
 
             acgPeak = [];
+            acgPeak2 = [];
+            acgPeak_sample = [];
+            acgPeak_sample2 = [];
 
             for i = 1:length(UID)
                 [~ , acgPeak_sample(i)] = max(acg_smoothed_offset(:,i));
@@ -1110,7 +1571,7 @@ for ii = 5:length(sessionsTable.SessionName)
             acg_time_samples = acg_time;
             acg_time = log10(cell_metrics.general.acgs.log10);
 
-            gcf = figure;
+            figure('position',[200 115 1300 800])
             % set(gcf,'Position',get(0,'screensize'));
             subplot(2,2,[1 2])
             hold on;
@@ -1139,7 +1600,7 @@ for ii = 5:length(sessionsTable.SessionName)
             histogram(acgPeak_sample(all_ww)+offset,'FaceColor',ww_color);
             axis tight; ylabel('Count'); xlabel('bin number'); xlim([0 60])
 
-            saveas(gcf,['BaselinevsDrug\ACGPeak_Baseline.png']); 
+            saveas(gca,['BaselinevsDrug\ACGPeak_Baseline.png']); 
 
             acgPeak = [];
 
@@ -1186,6 +1647,9 @@ for ii = 5:length(sessionsTable.SessionName)
                 acg_smoothed_offset = acg_smoothed_norm(minPeakTime:end,:);
 
                 acgPeak = [];
+                acgPeak2 = [];
+                acgPeak_sample = [];
+                acgPeak_sample2 = [];
 
                 for i = 1:length(UID)
                     [~ , acgPeak_sample(i)] = max(acg_smoothed_offset(:,i));
@@ -1198,7 +1662,7 @@ for ii = 5:length(sessionsTable.SessionName)
                 acg_time_samples = acg_time;
                 acg_time = log10(cell_metrics.general.acgs.log10);
 
-                gcf = figure;
+                figure('position',[200 115 1300 800])
                 % set(gcf,'Position',get(0,'screensize'));
                 subplot(2,2,[1 2])
                 hold on;
@@ -1227,7 +1691,7 @@ for ii = 5:length(sessionsTable.SessionName)
                 histogram(acgPeak_sample(all_ww)+offset,'FaceColor',ww_color);
                 axis tight; ylabel('Count'); xlabel('bin number'); xlim([0 60])
 
-                saveas(gcf,['BaselinevsDrug\ACGPeak_Drug.png']); 
+                saveas(gca,['BaselinevsDrug\ACGPeak_Drug.png']); 
 
                 acgPeak = [];
 
@@ -1280,38 +1744,37 @@ for ii = 5:length(sessionsTable.SessionName)
             allCcg = averageCCG_Baseline.allCcg;
             indCell = [1:size(allCcg,2)];
 
-            gcf = figure,
-            set(gcf,'Position',[200 -500 2500 1200]);
-            for jj = 1:size(spikes.UID,2)
-                % fprintf(' **CCG from unit %3.i/ %3.i \n',jj, size(spikes.UID,2)); %\n
-                subplot(7,ceil(size(spikes.UID,2)/7),jj);
-                cc = zscore(squeeze(allCcg(:,jj,indCell(indCell~=jj)))',[],2); % get crosscorr
+            figure('position',[200 115 1300 800])
+            for kk = 1:size(spikes.UID,2)
+                % fprintf(' **CCG from unit %3.i/ %3.i \n',kk, size(spikes.UID,2)); %\n
+                subplot(7,ceil(size(spikes.UID,2)/7),kk);
+                cc = zscore(squeeze(allCcg(:,kk,indCell(indCell~=kk)))',[],2); % get crosscorr
                 imagesc(t_ccg,1:max(indCell)-1,cc)
                 set(gca,'YDir','normal'); colormap jet; caxis([-abs(max(cc(:))) abs(max(cc(:)))])
                 hold on
-                zmean = mean(zscore(squeeze(allCcg(:,jj,indCell(indCell~=jj)))',[],2));
+                zmean = mean(zscore(squeeze(allCcg(:,kk,indCell(indCell~=kk)))',[],2));
                 zmean = zmean - min(zmean); zmean = zmean/max(zmean) * (max(indCell)-1) * std(zmean);
                 plot(t_ccg, zmean,'k','LineWidth',2);
                 xlim([winSizePlot(1) winSizePlot(2)]); ylim([0 max(indCell)-1]);
-                title(num2str(jj),'FontWeight','normal','FontSize',10);
+                title(num2str(kk),'FontWeight','normal','FontSize',10);
 
-                if jj == 1
+                if kk == 1
                     ylabel('Cell');
-                elseif jj == size(spikes.UID,2)
+                elseif kk == size(spikes.UID,2)
                     xlabel('Time (s)');
                 else
                     set(gca,'YTick',[],'XTick',[]);
                 end
             end
-            saveas(gcf,['BaselineVsDrug\allCellsAverageCCG_Baseline.png']);
+            saveas(gca,['BaselineVsDrug\allCellsAverageCCG_Baseline.png']);
             
-            gcf = figure;
+            figure('position',[200 115 1300 800])
             imagesc([t_ccg(1) t_ccg(end)],[1 size(averageCCG_Baseline.ZmeanCCG,1)],...
                 averageCCG_Baseline.ZmeanCCG); caxis([-3 3]); colormap(jet);
             set(gca,'TickDir','out'); xlabel('Time'); ylabel('Cells'); xlim([winSizePlot(1) winSizePlot(2)]);
             title('Grand CCG average','FontWeight','normal','FontSize',10);
             
-            saveas(gcf,['BaselineVsDrug\grandCCGAverage_Baseline.png']);
+            saveas(gca,['BaselineVsDrug\grandCCGAverage_Baseline.png']);
 
             % Drug 
             
@@ -1325,38 +1788,37 @@ for ii = 5:length(sessionsTable.SessionName)
                 allCcg = averageCCG_Drug.allCcg;
                 indCell = [1:size(allCcg,2)];
 
-                gcf = figure,
-                set(gcf,'Position',[200 -500 2500 1200]);
-                for jj = 1:size(spikes.UID,2)
-                    % fprintf(' **CCG from unit %3.i/ %3.i \n',jj, size(spikes.UID,2)); %\n
-                    subplot(7,ceil(size(spikes.UID,2)/7),jj);
-                    cc = zscore(squeeze(allCcg(:,jj,indCell(indCell~=jj)))',[],2); % get crosscorr
+                figure('position',[200 115 1300 800])
+                for kk = 1:size(spikes.UID,2)
+                    % fprintf(' **CCG from unit %3.i/ %3.i \n',kk, size(spikes.UID,2)); %\n
+                    subplot(7,ceil(size(spikes.UID,2)/7),kk);
+                    cc = zscore(squeeze(allCcg(:,kk,indCell(indCell~=kk)))',[],2); % get crosscorr
                     imagesc(t_ccg,1:max(indCell)-1,cc)
                     set(gca,'YDir','normal'); colormap jet; caxis([-abs(max(cc(:))) abs(max(cc(:)))])
                     hold on
-                    zmean = mean(zscore(squeeze(allCcg(:,jj,indCell(indCell~=jj)))',[],2));
+                    zmean = mean(zscore(squeeze(allCcg(:,kk,indCell(indCell~=kk)))',[],2));
                     zmean = zmean - min(zmean); zmean = zmean/max(zmean) * (max(indCell)-1) * std(zmean);
                     plot(t_ccg, zmean,'k','LineWidth',2);
                     xlim([winSizePlot(1) winSizePlot(2)]); ylim([0 max(indCell)-1]);
-                    title(num2str(jj),'FontWeight','normal','FontSize',10);
+                    title(num2str(kk),'FontWeight','normal','FontSize',10);
 
-                    if jj == 1
+                    if kk == 1
                         ylabel('Cell');
-                    elseif jj == size(spikes.UID,2)
+                    elseif kk == size(spikes.UID,2)
                         xlabel('Time (s)');
                     else
                         set(gca,'YTick',[],'XTick',[]);
                     end
                 end
-                saveas(gcf,['BaselineVsDrug\allCellsAverageCCG_Drug.png']);
+                saveas(gca,['BaselineVsDrug\allCellsAverageCCG_Drug.png']);
                 
-                gcf = figure;
+                figure('position',[200 115 1300 800])
                 imagesc([t_ccg(1) t_ccg(end)],[1 size(averageCCG_Drug.ZmeanCCG,1)],...
                     averageCCG_Drug.ZmeanCCG); caxis([-3 3]); colormap(jet);
                 set(gca,'TickDir','out'); xlabel('Time'); ylabel('Cells'); xlim([winSizePlot(1) winSizePlot(2)]);
                 title('Grand CCG average','FontWeight','normal','FontSize',10);
                 
-                saveas(gcf,['BaselineVsDrug\grandCCGAverage_Drug.png']);
+                saveas(gca,['BaselineVsDrug\grandCCGAverage_Drug.png']);
             
             else
                 averageCCG = [];
@@ -1390,48 +1852,48 @@ for ii = 5:length(sessionsTable.SessionName)
             allCcg = averageCCG_Baseline.allCcg;
             indCell = [1:size(allCcg,2)];
             
-            gcf = figure,
-            set(gcf,'Position',[200 -500 2500 1200]);
-            for jj = 1:size(spikes.UID,2)
-                % fprintf(' **CCG from unit %3.i/ %3.i \n',jj, size(spikes.UID,2)); %\n
-                subplot(7,ceil(size(spikes.UID,2)/7),jj);
-                cc = zscore(squeeze(allCcg(:,jj,indCell(indCell~=jj)))',[],2); % get crosscorr
+            figure('position',[200 115 1300 800])
+            for kk = 1:size(spikes.UID,2)
+                % fprintf(' **CCG from unit %3.i/ %3.i \n',kk, size(spikes.UID,2)); %\n
+                subplot(7,ceil(size(spikes.UID,2)/7),kk);
+                cc = zscore(squeeze(allCcg(:,kk,indCell(indCell~=kk)))',[],2); % get crosscorr
                 imagesc(t_ccg,1:max(indCell)-1,cc)
                 set(gca,'YDir','normal'); colormap jet; caxis([-abs(max(cc(:))) abs(max(cc(:)))])
                 hold on
-                zmean = mean(zscore(squeeze(allCcg(:,jj,indCell(indCell~=jj)))',[],2));
+                zmean = mean(zscore(squeeze(allCcg(:,kk,indCell(indCell~=kk)))',[],2));
                 zmean = zmean - min(zmean); zmean = zmean/max(zmean) * (max(indCell)-1) * std(zmean);
                 plot(t_ccg, zmean,'k','LineWidth',2);
                 xlim([winSizePlot(1) winSizePlot(2)]); ylim([0 max(indCell)-1]);
-                title(num2str(jj),'FontWeight','normal','FontSize',10);
+                title(num2str(kk),'FontWeight','normal','FontSize',10);
 
-                if jj == 1
+                if kk == 1
                     ylabel('Cell');
-                elseif jj == size(spikes.UID,2)
+                elseif kk == size(spikes.UID,2)
                     xlabel('Time (s)');
                 else
                     set(gca,'YTick',[],'XTick',[]);
                 end
             end
-            saveas(gcf,['BaselineVsDrug\allCellsAverageCCGNoRipples_Baseline.png']);
+            saveas(gca,['BaselineVsDrug\allCellsAverageCCGNoRipples_Baseline.png']);
             
-            gcf = figure;
+            figure('position',[200 115 1300 800])
             imagesc([t_ccg(1) t_ccg(end)],[1 size(averageCCG_Baseline.ZmeanCCG,1)],...
                 averageCCG_Baseline.ZmeanCCG); caxis([-3 3]); colormap(jet);
             set(gca,'TickDir','out'); xlabel('Time'); ylabel('Cells'); xlim([winSizePlot(1) winSizePlot(2)]);
             title('Grand CCG average','FontWeight','normal','FontSize',10);
             
-            saveas(gcf,['BaselineVsDrug\grandCCGAverageNoRipples_Baseline.png']);
+            saveas(gca,['BaselineVsDrug\grandCCGAverageNoRipples_Baseline.png']);
             
             % Drug
             
-            if ~isempty(dir('*ripples_Drug.events.mat'))
-                file = dir('*ripples_Drug.events.mat');
-                load(file.name);
-            end
-            ts_ripples_Drug = [ripples.timestamps];
-            
             if ~isempty(ts_Drug)
+                
+                if ~isempty(dir('*ripples_Drug.events.mat'))
+                    file = dir('*ripples_Drug.events.mat');
+                    load(file.name);
+                end
+                ts_ripples_Drug = [ripples.timestamps];
+            
                 averageCCG_Drug = getAverageCCG('force',true,'includeIntervals',ts_Drug,'excludeIntervals',ts_ripples_Drug,'savemat',false,'plotOpt',false,'saveFig',false);
 
                 averageCCG = averageCCG_Drug;
@@ -1441,38 +1903,37 @@ for ii = 5:length(sessionsTable.SessionName)
                 allCcg = averageCCG_Drug.allCcg;
                 indCell = [1:size(allCcg,2)];
 
-                gcf = figure,
-                set(gcf,'Position',[200 -500 2500 1200]);
-                for jj = 1:size(spikes.UID,2)
-                    % fprintf(' **CCG from unit %3.i/ %3.i \n',jj, size(spikes.UID,2)); %\n
-                    subplot(7,ceil(size(spikes.UID,2)/7),jj);
-                    cc = zscore(squeeze(allCcg(:,jj,indCell(indCell~=jj)))',[],2); % get crosscorr
+                figure('position',[200 115 1300 800])
+                for kk = 1:size(spikes.UID,2)
+                    % fprintf(' **CCG from unit %3.i/ %3.i \n',kk, size(spikes.UID,2)); %\n
+                    subplot(7,ceil(size(spikes.UID,2)/7),kk);
+                    cc = zscore(squeeze(allCcg(:,kk,indCell(indCell~=kk)))',[],2); % get crosscorr
                     imagesc(t_ccg,1:max(indCell)-1,cc)
                     set(gca,'YDir','normal'); colormap jet; caxis([-abs(max(cc(:))) abs(max(cc(:)))])
                     hold on
-                    zmean = mean(zscore(squeeze(allCcg(:,jj,indCell(indCell~=jj)))',[],2));
+                    zmean = mean(zscore(squeeze(allCcg(:,kk,indCell(indCell~=kk)))',[],2));
                     zmean = zmean - min(zmean); zmean = zmean/max(zmean) * (max(indCell)-1) * std(zmean);
                     plot(t_ccg, zmean,'k','LineWidth',2);
                     xlim([winSizePlot(1) winSizePlot(2)]); ylim([0 max(indCell)-1]);
-                    title(num2str(jj),'FontWeight','normal','FontSize',10);
+                    title(num2str(kk),'FontWeight','normal','FontSize',10);
 
-                    if jj == 1
+                    if kk == 1
                         ylabel('Cell');
-                    elseif jj == size(spikes.UID,2)
+                    elseif kk == size(spikes.UID,2)
                         xlabel('Time (s)');
                     else
                         set(gca,'YTick',[],'XTick',[]);
                     end
                 end
-                saveas(gcf,['BaselineVsDrug\allCellsAverageCCGNoRipples_Drug.png']);
+                saveas(gca,['BaselineVsDrug\allCellsAverageCCGNoRipples_Drug.png']);
                 
-                gcf = figure;
+                figure('position',[200 115 1300 800])
                 imagesc([t_ccg(1) t_ccg(end)],[1 size(averageCCG_Drug.ZmeanCCG,1)],...
                     averageCCG_Drug.ZmeanCCG); caxis([-3 3]); colormap(jet);
                 set(gca,'TickDir','out'); xlabel('Time'); ylabel('Cells'); xlim([winSizePlot(1) winSizePlot(2)]);
                 title('Grand CCG average','FontWeight','normal','FontSize',10);
                 
-                saveas(gcf,['BaselineVsDrug\grandCCGAverage_Drug.png']);
+                saveas(gca,['BaselineVsDrug\grandCCGAverageNoRipples_Drug.png']);
             
             else
                 averageCCG = [];
@@ -1537,6 +1998,6 @@ for ii = 5:length(sessionsTable.SessionName)
             end  
         end
     end
-    close all;
+%     close all;
     clc;
 end
