@@ -20,7 +20,7 @@ for ii = 1:length(sessionsTable.SessionName)
         fprintf(' > %3.i/%3.i session \n',ii, length(sessionsTable.SessionName)); %\n
         cd([database_path filesep sessionsTable.Path{ii}]);
         
-        if isempty(dir(['*theta_',num2str(theta_passband(1)),'-',num2str(theta_passband(end)),'PhaseLockingData_Subsession.cellinfo.mat']))
+        if isempty(dir(['*theta_',num2str(theta_passband(1)),'-',num2str(theta_passband(end)),'.PhaseLockingData.Subsession.cellinfo.mat'])) | forceReload
             targetFile = dir('*thetaEpochs.states.mat');
             try
                 load(targetFile.name);

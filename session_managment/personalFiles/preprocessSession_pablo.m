@@ -231,7 +231,7 @@ if spikeSort
     if  isempty(dir('*Kilosort*')) % if not kilosorted yet
         fprintf(' ** Kilosorting session...');
         
-        KiloSortWrapper;
+        KiloSortWrapper('performAutoCluster',0);
         kilosortFolder = dir('*Kilosort*');
         try PhyAutoClustering(strcat(kilosortFolder.folder,filesep,kilosortFolder.name)); % autoclustering
         catch

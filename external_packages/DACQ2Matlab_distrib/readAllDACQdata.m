@@ -1,7 +1,5 @@
 function mtint = readAllDACQdata ( varargin )
 
-% cd('C:\Users\Pablo Abad .LAPTOP-7OH9S44L\Fundación Universitaria San Pablo CEU\The Cognition and Circuit Lab - Repository\Roche-Hippocampal-Prefrontal\HPF_WT_15\1103C57_WTHPF_15') % Replace this line with the appropriate string
-
 if nargin == 0
     [filename,filepath] = uigetfile('*.set','Select the .set file...',...
         'MultiSelect','on');

@@ -1,4 +1,4 @@
-function [] = plotSummary_pablo(varargin)
+function [] = plotSummary_Baseline(varargin)
 %        [] = getSummaryPerCells(varargin)
 %
 % Display summary plots for a given cell in a single figures. By default
@@ -61,11 +61,17 @@ all_pyr = ismember(cell_metrics.putativeCellType,'Pyramidal Cell');
 all_nw = ismember(cell_metrics.putativeCellType,'Narrow Interneuron');
 all_ww = ismember(cell_metrics.putativeCellType,'Wide Interneuron');
 
-spikes = loadSpikes;
+% Cell metrics Baseline
+try
+    targetFile = dir('*.cell_metrics_Baseline.cellinfo.mat'); load(targetFile.name);
+catch
+    error ('No cell_metrics_Baseline file detected !');
+end
 
 % waveforms
 all_waveforms = zscore(reshape([cell_metrics.waveforms.filt{:}],...
     [length(cell_metrics.waveforms.time{1}) length(cell_metrics.waveforms.filt)]));
+
 pyr_color = [1 .7 .7];
 nw_color = [.7 .7 1];
 ww_color = [.7 1 1];
@@ -80,7 +86,7 @@ acg = cell_metrics.acg.narrow;
 acg = acg./sum(acg);
 
 % acg PeakTime
-targetFile = dir('*.ACGPeak.cellinfo.mat'); 
+targetFile = dir('*.ACGPeak_Baseline.cellinfo.mat'); 
 acgPeak = importdata(targetFile.name);
 
 % firing rate
@@ -98,34 +104,34 @@ rem_nrem_index = rem_nrem_index/std(rem_nrem_index);
 cv = cell_metrics.firingRateCV; cv = cv/std(cv);
 
 % avg CCG
-[averageCCG] = getAverageCCG;
+targetFile = dir('*.averageCCG_Baseline.cellinfo.mat'); load(targetFile.name);
 
-% ripples responses
-targetFile = dir('*.ripples_psth.cellinfo.mat'); ripplesResponses = importdata(targetFile.name);
-targetFile = dir('*.ripple_120-200.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
-ripples = rippleMasterDetector;
-
-% theta epochs
+% Theta Epochs
 targetFile = dir('*.thetaEpochs.states.mat'); load(targetFile.name);
+
+% Ripples Responses Baseline
+targetFile = dir('*.ripples_Baseline_psth.cellinfo.mat'); ripplesResponses = importdata(targetFile.name);
+targetFile = dir('*.ripple_120-200_Baseline.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+targetFile = dir('*.ripples_Baseline.events.mat'); load(targetFile.name);
+
 % theta and gamma/s
-targetFile = dir('*.theta_6-12.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
-targetFile = dir('*.lgamma_20-60.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
-targetFile = dir('*.hgamma_60-100.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+targetFile = dir('*.theta_6-12_Baseline.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+targetFile = dir('*.lgamma_20-60_Baseline.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+targetFile = dir('*.hgamma_60-100_Baseline.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
 
 % Theta for REM and RUN
-targetFile = dir('*.thetaRun_6-12.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
-targetFile = dir('*.thetaREM_6-12.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+targetFile = dir('*.thetaRun_6-12_Baseline.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+targetFile = dir('*.thetaREM_6-12_Baseline.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
 
-% speed
-speedCorr = getSpeedCorr('force',false);
+% speed (normalizing by firing rate)
+targetFile = dir('*.speedCorrs_Baseline.cellinfo.mat'); load(targetFile.name);
+speedCorr = speedCorrs;
 if ~isempty(speedCorr)
     for ii = 1:size(speedCorr.speedVals,1)
         speedVals(ii,:) = mean(speedCorr.speedVals(ii,:,:),3)/cell_metrics.firingRate(ii);
     end
 end
     
-% speedVals = bsxfun(@rdivide,mean(speedCorr.speedVals,3),cell_metrics.firingRate(:));
-
 % spatial modulation
 targetFile = dir('*.spatialModulation.cellinfo.mat'); 
 if ~isempty(targetFile)
@@ -151,7 +157,6 @@ end
     
 
 figure('units','normalized','outerposition',[0 0 1 1])
-
 % waveform
 subplot(6,6,1)
 hold on
@@ -160,11 +165,15 @@ if length(find(all_nw) == 1) == 1
 else
     plotFill(cell_metrics.waveforms.time{1}, all_waveforms(:,all_nw),'style','filled','color',nw_color,'faceAlpha',0.9);
 end
-plotFill(cell_metrics.waveforms.time{1}, all_waveforms(:,all_pyr),'style','filled','color',pyr_color,'faceAlpha',0.9);
 if length(find(all_ww) == 1) == 1
     plot(cell_metrics.waveforms.time{1},all_waveforms(:,all_ww),'color',ww_color);
 else
     plotFill(cell_metrics.waveforms.time{1}, all_waveforms(:,all_ww),'style','filled','color',ww_color,'faceAlpha',0.9);
+end
+if length(find(all_pyr) == 1) == 1
+    plot(cell_metrics.waveforms.time{1},all_waveforms(:,all_pyr),'color',pyr_color);
+else
+    plotFill(cell_metrics.waveforms.time{1}, all_waveforms(:,all_pyr),'style','filled','color',pyr_color,'faceAlpha',0.9);
 end
 
 scatter(cell_metrics.troughToPeak(all_pyr),rand(length(find(all_pyr)),1)/10 + 2,20,pyr_color,'filled');
@@ -176,7 +185,11 @@ axis tight; xlabel('ms'); ylabel('Waveform amp (SD)');
 % acg
 subplot(6,6,2)
 hold on
-plotFill(acg_time, acg(:,all_pyr),'style','filled','color',pyr_color,'faceAlpha',0.7);
+if length(find(all_pyr) == 1) == 1
+    plot(acg_time,acg(:,all_pyr),'color',pyr_color);
+else
+    plotFill(acg_time, acg(:,all_pyr),'style','filled','color',pyr_color,'faceAlpha',0.7);
+end
 if length(find(all_nw == 1)) == 1
     plot(acg_time, acg(:,all_nw),'color',nw_color);
 else
@@ -196,7 +209,11 @@ axis tight; xlabel('ms'); ylabel('ACG (prob)');
 % ACG Peak
 subplot(6,6,3)
 hold on
-plotFill(acgPeak.acg_time, acgPeak.acg_smoothed_norm(:,all_pyr),'style','filled','color',pyr_color,'faceAlpha',0.7);
+if length(find(all_pyr) == 1) == 1
+    plot(acgPeak.acg_time, acgPeak.acg_smoothed_norm(:,all_pyr),'color',pyr_color);
+else
+    plotFill(acgPeak.acg_time, acgPeak.acg_smoothed_norm(:,all_pyr),'style','filled','color',pyr_color,'faceAlpha',0.7);
+end
 if length(find(all_nw == 1)) == 1
     plot(acgPeak.acg_time, acgPeak.acg_smoothed_norm(:,all_nw),'color',nw_color);
 else
@@ -249,7 +266,11 @@ pie(categorical(cell_metrics.brainRegion))
 % firing rate
 subplot(6,6,6)
 hold on
-plotFill(spikemat.timestamps/60, spikemat.data(:,all_pyr),'color',pyr_color,'yscale','log','style','filled','smoothOpt',10);
+if length(find(all_pyr == 1)) == 1
+    plot(spikemat.timestamps/60, spikemat.data(:,all_pyr),'color',pyr_color)
+else
+    plotFill(spikemat.timestamps/60, spikemat.data(:,all_pyr),'color',pyr_color,'yscale','log','style','filled','smoothOpt',10);
+end
 if length(find(all_nw == 1)) == 1
     plot(spikemat.timestamps/60, spikemat.data(:,all_nw),'color',nw_color);
 else
@@ -270,7 +291,11 @@ xlabel('Time (min)'); ylabel('Rate (Hz)');
 % firing rate states
 subplot(6,6,7)
 hold on
-plotFill(1:5,states_rate(all_pyr,:),'color',pyr_color,'yscale','log','style','filled');
+if length(find(all_pyr) == 1) == 1
+    plot(1:5, states_rate(all_pyr,:),'color',pyr_color);
+else
+    plotFill(1:5,states_rate(all_pyr,:),'color',pyr_color,'yscale','log','style','filled');
+end
 if length(find(all_nw == 1)) == 1
     plot(1:5,states_rate(all_nw,:),'color',nw_color);
 else
@@ -307,7 +332,6 @@ ylabel('Index (SD)'); xlim([.8 3.4]);
 % avCCG
 subplot(6,6,9)
 hold on
-plotFill(averageCCG.timestamps,averageCCG.ZmedianCCG(all_pyr,:),'color',pyr_color,'style','filled');
 if length(find(all_nw == 1)) == 1
     plot(averageCCG.timestamps,averageCCG.ZmedianCCG(all_nw,:),'color',nw_color);
 else
@@ -317,6 +341,11 @@ if length(find(all_ww == 1)) == 1
     plot(averageCCG.timestamps,averageCCG.ZmedianCCG(all_ww,:),'color',ww_color);
 else
     plotFill(averageCCG.timestamps,averageCCG.ZmedianCCG(all_ww,:),'color',ww_color,'style','filled');
+end
+if length(find(all_pyr) == 1) == 1
+    plot(averageCCG.timestamps,averageCCG.ZmedianCCG(all_pyr,:),'color',pyr_color);
+else
+    plotFill(averageCCG.timestamps,averageCCG.ZmedianCCG(all_pyr,:),'color',pyr_color,'style','filled');
 end
 
 scatter(rand(length(find(all_pyr)),1)/10 + .35, averageCCG.ccgIndex(all_pyr),20,pyr_color,'filled');
@@ -341,7 +370,6 @@ set(gca,'TickDir','out','XTick',averageCCG.brainRegionCCG.listOfRegionsID,'XTick
 subplot(6,6,11)
 hold on
 t_win = ripplesResponses.timestamps > -0.25 & ripplesResponses.timestamps < 0.25;
-plotFill(ripplesResponses.timestamps(t_win),ripplesResponses.responsecurveZSmooth(all_pyr,t_win),'color',pyr_color,'style','filled','faceAlpha',.9);
 if length(find(all_nw == 1)) == 1
     plot(ripplesResponses.timestamps(t_win),ripplesResponses.responsecurveZSmooth(all_nw,t_win),'color',nw_color);
 else
@@ -351,6 +379,11 @@ if length(find(all_ww == 1)) == 1
     plot(ripplesResponses.timestamps(t_win),ripplesResponses.responsecurveSmooth(all_ww,t_win),'color',ww_color);
 else
     plotFill(ripplesResponses.timestamps(t_win),ripplesResponses.responsecurveZSmooth(all_ww,t_win),'color',ww_color,'style','filled');
+end
+if length(find(all_pyr) == 1) == 1
+    plot(ripplesResponses.timestamps(t_win),ripplesResponses.responsecurveZSmooth(all_pyr,t_win),'color',pyr_color)
+else
+    plotFill(ripplesResponses.timestamps(t_win),ripplesResponses.responsecurveZSmooth(all_pyr,t_win),'color',pyr_color,'style','filled','faceAlpha',.9);
 end
 
 scatter(rand(length(find(all_pyr)),1)/20 + .25, ripplesResponses.rateZDuringPulse(all_pyr),20,pyr_color,'filled');
@@ -381,7 +414,11 @@ if length(find(all_ww == 1)) == 1
 else
     plotFill(rippleMod.phasebins_wide_doubled,rippleMod.phasedistro_wide_smoothZ_doubled(all_ww,:),'color',ww_color,'style','filled');
 end
-plotFill(rippleMod.phasebins_wide_doubled,rippleMod.phasedistro_wide_smoothZ_doubled(all_pyr,:)','color',pyr_color,'style','filled');
+if length(find(all_pyr) == 1) == 1
+    plot(rippleMod.phasebins_wide_doubled,rippleMod.phasedistro_wide_smoothZ_doubled(all_pyr,:),'color',pyr_color)
+else
+    plotFill(rippleMod.phasebins_wide_doubled,rippleMod.phasedistro_wide_smoothZ_doubled(all_pyr,:)','color',pyr_color,'style','filled');
+end
 
 scatter(rand(length(find(all_pyr)),1)/2 + 12.6, rippleMod.phasestats.r(all_pyr)*5,20,pyr_color,'filled');
 scatter(rand(length(find(all_nw)),1)/2 + 13.1, rippleMod.phasestats.r(all_nw)*5,20,nw_color,'filled');
@@ -391,17 +428,33 @@ scatter(rippleMod.phasestats.m(all_pyr), rand(length(find(all_pyr)),1)/2 + 2.2,2
 scatter(rippleMod.phasestats.m(all_nw), rand(length(find(all_nw)),1)/2 + 2.8,20,nw_color,'filled');
 scatter(rippleMod.phasestats.m(all_ww), rand(length(find(all_ww)),1)/2 + 3.4,20,ww_color,'filled');
 
-session.analysisTags.rippleChannel = ripples.detectorinfo.detectionchannel;
-for ii = 1:length(session.extracellular.electrodeGroups.channels)
-    if ismember(session.analysisTags.rippleChannel,session.extracellular.electrodeGroups.channels{ii})
-        ripple_shank = ii;
+if isfield(session.analysisTags,'rippleChannel') & ~isempty(session.analysisTags.rippleChannel)
+    for ii = 1:length(session.extracellular.electrodeGroups.channels)
+          if ismember(session.analysisTags.rippleChannel,session.extracellular.electrodeGroups.channels{ii})
+                ripple_shank = ii;  
+          end
     end
+else
+    for ii = 1:length(session.extracellular.electrodeGroups.channels)
+        if ismember(ripples.detectorinfo.detectionchannel,session.extracellular.electrodeGroups.channels{ii})
+            ripple_shank = ii;
+        end
+    end     
 end
+
 flds = fields(session.brainRegions);
-for ii = 1:length(flds)    
-    if ismember(session.analysisTags.rippleChannel,session.brainRegions.(flds{ii}).channels)
-        ripple_region = flds{ii};
+if isfield(session.analysisTags,'rippleChannel') & ~isempty(session.analysisTags.rippleChannel)
+    for ii = 1:length(flds)    
+        if ismember(session.analysisTags.rippleChannel,session.brainRegions.(flds{ii}).channels)
+            ripple_region = flds{ii};
+        end
     end
+else
+   for ii = 1:length(flds)    
+        if ismember(ripples.detectorinfo.detectionchannel,session.brainRegions.(flds{ii}).channels)
+            ripple_region = flds{ii};
+        end
+   end
 end
     
 title(['Ripple shank: ', num2str(ripple_shank), ' Ripple region: ', num2str(ripple_region) ],'FontWeight','normal');
@@ -425,7 +478,11 @@ if length(find(all_ww == 1)) == 1
 else
     plotFill(thetaMod.phasebins_wide_doubled,thetaMod.phasedistro_wide_smoothZ_doubled(all_ww,:),'color',ww_color,'style','filled');
 end
-plotFill(thetaMod.phasebins_wide_doubled,thetaMod.phasedistro_wide_smoothZ_doubled(all_pyr,:)','color',pyr_color,'style','filled');
+if length(find(all_pyr) == 1) == 1
+    plot(thetaMod.phasebins_wide_doubled,thetaMod.phasedistro_wide_smoothZ_doubled(all_pyr,:),'color',pyr_color)
+else
+    plotFill(thetaMod.phasebins_wide_doubled,thetaMod.phasedistro_wide_smoothZ_doubled(all_pyr,:)','color',pyr_color,'style','filled');
+end
 
 scatter(rand(length(find(all_pyr)),1)/2 + 12.6, thetaMod.phasestats.r(all_pyr)*5,20,pyr_color,'filled');
 scatter(rand(length(find(all_nw)),1)/2 + 13.1, thetaMod.phasestats.r(all_nw)*5,20,nw_color,'filled');
@@ -435,16 +492,32 @@ scatter(thetaMod.phasestats.m(all_pyr), rand(length(find(all_pyr)),1)/2 + 2.2,20
 scatter(thetaMod.phasestats.m(all_nw), rand(length(find(all_nw)),1)/2 + 2.8,20,nw_color,'filled');
 scatter(thetaMod.phasestats.m(all_ww), rand(length(find(all_ww)),1)/2 + 3.4,20,ww_color,'filled');
 
-session.analysisTags.thetaChannel = thetaEpochs.channel;
-for ii = 1:length(session.extracellular.electrodeGroups.channels)
-    if ismember(session.analysisTags.thetaChannel,session.extracellular.electrodeGroups.channels{ii})
-        theta_shank = ii;
+
+if isfield(session.analysisTags,'thetaChannel') & ~isempty(session.analysisTags.thetaChannel)
+    for ii = 1:length(session.extracellular.electrodeGroups.channels)
+        if ismember(session.analysisTags.thetaChannel,session.extracellular.electrodeGroups.channels{ii})
+            theta_shank = ii;
+        end
+    end
+else
+    for ii = 1:length(session.extracellular.electrodeGroups.channels)
+        if ismember(thetaEpochs.channel,session.extracellular.electrodeGroups.channels{ii})
+            theta_shank = ii;
+        end
     end
 end
 flds = fields(session.brainRegions);
-for ii = 1:length(flds)    
-    if ismember(session.analysisTags.thetaChannel,session.brainRegions.(flds{ii}).channels)
-        theta_region = flds{ii};
+if isfield(session.analysisTags,'thetaChannel') & ~isempty(session.analysisTags.thetaChannel)
+    for ii = 1:length(flds)    
+        if ismember(session.analysisTags.thetaChannel,session.brainRegions.(flds{ii}).channels)
+            theta_region = flds{ii};
+        end
+    end
+else
+    for ii = 1:length(flds)    
+        if ismember(thetaEpochs.channel,session.brainRegions.(flds{ii}).channels)
+            theta_region = flds{ii};
+        end
     end
 end
 
@@ -470,7 +543,11 @@ if length(find(all_ww == 1)) == 1
 else
     plotFill(lgammaMod.phasebins_wide_doubled,lgammaMod.phasedistro_wide_smoothZ_doubled(all_ww,:),'color',ww_color,'style','filled');
 end
-plotFill(lgammaMod.phasebins_wide_doubled,lgammaMod.phasedistro_wide_smoothZ_doubled(all_pyr,:)','color',pyr_color,'style','filled');
+if length(find(all_pyr) == 1) == 1
+    plot(lgammaMod.phasebins_wide_doubled,lgammaMod.phasedistro_wide_smoothZ_doubled(all_pyr,:),'color',pyr_color)
+else
+    plotFill(lgammaMod.phasebins_wide_doubled,lgammaMod.phasedistro_wide_smoothZ_doubled(all_pyr,:)','color',pyr_color,'style','filled');
+end
 
 scatter(rand(length(find(all_pyr)),1)/2 + 12.6, lgammaMod.phasestats.r(all_pyr)*5,20,pyr_color,'filled');
 scatter(rand(length(find(all_nw)),1)/2 + 13.1, lgammaMod.phasestats.r(all_nw)*5,20,nw_color,'filled');
@@ -500,7 +577,11 @@ if length(find(all_ww == 1)) == 1
 else
     plotFill(hgammaMod.phasebins_wide_doubled,hgammaMod.phasedistro_wide_smoothZ_doubled(all_ww,:),'color',ww_color,'style','filled');
 end
-plotFill(hgammaMod.phasebins_wide_doubled,hgammaMod.phasedistro_wide_smoothZ_doubled(all_pyr,:)','color',pyr_color,'style','filled');
+if length(find(all_pyr) == 1) == 1
+    plot(hgammaMod.phasebins_wide_doubled,hgammaMod.phasedistro_wide_smoothZ_doubled(all_pyr,:),'color',pyr_color)
+else
+    plotFill(hgammaMod.phasebins_wide_doubled,hgammaMod.phasedistro_wide_smoothZ_doubled(all_pyr,:)','color',pyr_color,'style','filled');
+end
 
 scatter(rand(length(find(all_pyr)),1)/2 + 12.6, hgammaMod.phasestats.r(all_pyr)*5,20,pyr_color,'filled');
 scatter(rand(length(find(all_nw)),1)/2 + 13.1, hgammaMod.phasestats.r(all_nw)*5,20,nw_color,'filled');
@@ -531,7 +612,7 @@ if ~isempty(speedCorr)
         plotFill(log10(speedCorr.prc_vals),speedVals(all_ww,:),'color',ww_color,'style','filled');
     end
     if length(find(all_pyr == 1)) ~= size(speedVals(all_pyr),2)
-        plotFill(log10(speedCorr.prc_vals),speedVals(all_pyr,:),'color',pyr_color,'style','filled');
+        plot(log10(speedCorr.prc_vals),speedVals(all_pyr,:),'color',pyr_color,'style','filled');
     else
         plotFill(log10(speedCorr.prc_vals),speedVals(all_pyr,:)','color',pyr_color,'style','filled');
     end
@@ -547,94 +628,8 @@ else
     title('No speed data','FontWeight','normal');
 end
 
-
-
-
 % Behavior
 if ~isempty(behavior)
-    try
-        if isfield(behavior,'psth_reward')
-            subplot(6,6,17)
-            hold on;
-            t_win = behavior.psth_reward.timestamps > -2 & behavior.psth_reward.timestamps < 2;
-            plotFill(behavior.psth_reward.timestamps(t_win),behavior.psth_reward.responsecurveZSmooth(all_nw,t_win),'color',nw_color,'style','filled');
-            plotFill(behavior.psth_reward.timestamps(t_win),behavior.psth_reward.responsecurveZSmooth(all_ww,t_win),'color',ww_color,'style','filled');
-            plotFill(behavior.psth_reward.timestamps(t_win),behavior.psth_reward.responsecurveZSmooth(all_pyr,t_win),'color',pyr_color,'style','filled');
-            axis tight
-            xlabel('Reward time (s)'); ylabel('Rate (SD)');
-        end
-        
-        if isfield(behavior,'psth_lReward') && isstruct(behavior.psth_lReward)
-            h = get(gcf);
-            nextSubPlot = length(h.Children) + 1;
-            subplot(6,6,nextSubPlot)
-            hold on;
-            t_win = behavior.psth_lReward.timestamps > -2 & behavior.psth_lReward.timestamps < 2;
-            if length(find(all_nw == 1)) == 1
-                plot(behavior.psth_lReward.timestamps(t_win),behavior.psth_lReward.responsecurveZSmooth(all_nw,t_win),'color',nw_color);
-            else
-                plotFill(behavior.psth_lReward.timestamps(t_win),behavior.psth_lReward.responsecurveZSmooth(all_nw,t_win),'color',nw_color,'style','filled');
-            end
-            if length(find(all_ww == 1)) == 1
-                plot(behavior.psth_lReward.timestamps(t_win),behavior.psth_lReward.responsecurveZSmooth(all_ww,t_win),'color',ww_color);
-            else
-                plotFill(behavior.psth_lReward.timestamps(t_win),behavior.psth_lReward.responsecurveZSmooth(all_ww,t_win),'color',ww_color,'style','filled');
-            end
-            plotFill(behavior.psth_lReward.timestamps(t_win),behavior.psth_lReward.responsecurveZSmooth(all_pyr,t_win),'color',pyr_color,'style','filled');
-            axis tight
-            xlabel('lReward time (s)'); ylabel('Rate (SD)');
-        end
-
-        if isfield(behavior,'psth_rReward') && isstruct(behavior.psth_rReward)
-            h = get(gcf);
-            nextSubPlot = length(h.Children) + 1;
-            subplot(6,6,nextSubPlot)
-            hold on;
-            t_win = behavior.psth_rReward.timestamps > -2 & behavior.psth_rReward.timestamps < 2;
-            if length(find(all_nw == 1)) == 1
-                plot(behavior.psth_rReward.timestamps(t_win),behavior.psth_rReward.responsecurveZSmooth(all_nw,t_win),'color',nw_color);
-            else
-                plotFill(behavior.psth_rReward.timestamps(t_win),behavior.psth_rReward.responsecurveZSmooth(all_nw,t_win),'color',nw_color,'style','filled');
-            end
-            if length(find(all_ww == 1)) == 1
-                plot(behavior.psth_rReward.timestamps(t_win),behavior.psth_rReward.responsecurveZSmooth(all_ww,t_win),'color',ww_color);
-            else
-                plotFill(behavior.psth_rReward.timestamps(t_win),behavior.psth_rReward.responsecurveZSmooth(all_ww,t_win),'color',ww_color,'style','filled');
-            end
-            plotFill(behavior.psth_rReward.timestamps(t_win),behavior.psth_rReward.responsecurveZSmooth(all_pyr,t_win),'color',pyr_color,'style','filled');
-            axis tight
-            xlabel('rReward time (s)'); ylabel('Rate (SD)');
-        end
-        
-        if isfield(behavior,'psth_intersection') && isstruct(behavior.psth_intersection)
-            h = get(gcf);
-            nextSubPlot = length(h.Children) + 1;
-            subplot(6,6,nextSubPlot)
-            hold on;
-            t_win = behavior.psth_intersection.timestamps > -2 & behavior.psth_intersection.timestamps < 2;
-            plotFill(behavior.psth_intersection.timestamps(t_win),behavior.psth_intersection.responsecurveZSmooth(all_nw,t_win),'color',nw_color,'style','filled');
-            plotFill(behavior.psth_intersection.timestamps(t_win),behavior.psth_intersection.responsecurveZSmooth(all_ww,t_win),'color',ww_color,'style','filled');
-            plotFill(behavior.psth_intersection.timestamps(t_win),behavior.psth_intersection.responsecurveZSmooth(all_pyr,t_win),'color',pyr_color,'style','filled');
-            axis tight
-            xlabel('Intersection time (s)'); ylabel('Rate (SD)');
-        end
-        
-        if isfield(behavior,'psth_startPoint') && isstruct(behavior.psth_startPoint)
-            h = get(gcf);
-            nextSubPlot = length(h.Children) + 1;
-            subplot(6,6,nextSubPlot)
-            hold on
-            t_win = behavior.psth_startPoint.timestamps > -2 & behavior.psth_startPoint.timestamps < 2;
-            plotFill(behavior.psth_startPoint.timestamps(t_win),behavior.psth_startPoint.responsecurveZSmooth(all_nw,t_win),'color',nw_color,'style','filled');
-            plotFill(behavior.psth_startPoint.timestamps(t_win),behavior.psth_startPoint.responsecurveZSmooth(all_ww,t_win),'color',ww_color,'style','filled');
-            plotFill(behavior.psth_startPoint.timestamps(t_win),behavior.psth_startPoint.responsecurveZSmooth(all_pyr,t_win),'color',pyr_color,'style','filled');
-            axis tight
-            xlabel('Start point time (s)'); ylabel('Rate (SD)');
-        end
- 
-    catch
-    end
-            
     if isfield(behavior,'psth_entry') && isstruct(behavior.psth_entry)
         flds = fieldnames(behavior.psth_entry);
         for ii = 1:length(flds)
@@ -693,7 +688,47 @@ if ~isempty(behavior)
         end
     end
     
+    if isfield(behavior,'psth_lReward') && isstruct(behavior.psth_lReward)
+        h = get(gcf);
+        nextSubPlot = length(h.Children) + 1;
+        subplot(6,6,nextSubPlot)
+        hold on;
+        t_win = behavior.psth_lReward.timestamps > -2 & behavior.psth_lReward.timestamps < 2;
+        if length(find(all_nw == 1)) == 1
+            plot(behavior.psth_lReward.timestamps(t_win),behavior.psth_lReward.responsecurveZSmooth(all_nw,t_win),'color',nw_color);
+        else
+            plotFill(behavior.psth_lReward.timestamps(t_win),behavior.psth_lReward.responsecurveZSmooth(all_nw,t_win),'color',nw_color,'style','filled');
+        end
+        if length(find(all_ww == 1)) == 1
+            plot(behavior.psth_lReward.timestamps(t_win),behavior.psth_lReward.responsecurveZSmooth(all_ww,t_win),'color',ww_color);
+        else
+            plotFill(behavior.psth_lReward.timestamps(t_win),behavior.psth_lReward.responsecurveZSmooth(all_ww,t_win),'color',ww_color,'style','filled');
+        end
+        plotFill(behavior.psth_lReward.timestamps(t_win),behavior.psth_lReward.responsecurveZSmooth(all_pyr,t_win),'color',pyr_color,'style','filled');
+        axis tight
+        xlabel('lReward time (s)'); ylabel('Rate (SD)');
+    end
     
+    if isfield(behavior,'psth_rReward') && isstruct(behavior.psth_rReward)
+        h = get(gcf);
+        nextSubPlot = length(h.Children) + 1;
+        subplot(6,6,nextSubPlot)
+        hold on;
+        t_win = behavior.psth_rReward.timestamps > -2 & behavior.psth_rReward.timestamps < 2;
+        if length(find(all_nw == 1)) == 1
+            plot(behavior.psth_rReward.timestamps(t_win),behavior.psth_rReward.responsecurveZSmooth(all_nw,t_win),'color',nw_color);
+        else
+            plotFill(behavior.psth_rReward.timestamps(t_win),behavior.psth_rReward.responsecurveZSmooth(all_nw,t_win),'color',nw_color,'style','filled');
+        end
+        if length(find(all_ww == 1)) == 1
+            plot(behavior.psth_rReward.timestamps(t_win),behavior.psth_rReward.responsecurveZSmooth(all_ww,t_win),'color',ww_color);
+        else
+            plotFill(behavior.psth_rReward.timestamps(t_win),behavior.psth_rReward.responsecurveZSmooth(all_ww,t_win),'color',ww_color,'style','filled');
+        end
+        plotFill(behavior.psth_rReward.timestamps(t_win),behavior.psth_rReward.responsecurveZSmooth(all_pyr,t_win),'color',pyr_color,'style','filled');
+        axis tight
+        xlabel('rReward time (s)'); ylabel('Rate (SD)');
+    end
         
 else
     h = get(gcf);
@@ -712,87 +747,42 @@ end
 % spatial modulation
 if ~isempty(spatialModulation) && ~any(ismember(excludePlot,{lower('spatialModulation')}))
     try
-        count = 1;
-        
-        while isfield(spatialModulation,['map_',num2str(count),'_timestamps'])
-            if count == 1
-                subplot(6,6,[25 31])
-                hold on
+        h = get(gcf);
+        nextSubPlot = length(h.Children) + 1;
+        subplot(6,6,[nextSubplot nextSubplot+1])
+        hold on
 
-                imagesc_ranked(spatialModulation.map_1_timestamps, [1:length(find(all_pyr))], spatialModulation.map_1_rateMapsZ(all_pyr,:),[-3 3],...
-                    spatialModulation.PF_position_map_1(all_pyr,:));
+        imagesc_ranked(spatialModulation.map_1_timestamps, [1:length(find(all_pyr))], spatialModulation.map_1_rateMapsZ(all_pyr,:),[-3 3],...
+            spatialModulation.PF_position_map_1(all_pyr,:));
 
-                imagesc_ranked(spatialModulation.map_1_timestamps, [length(find(all_pyr)) + 5 (length(find(all_pyr))+ length(find(all_nw)) + 5)], spatialModulation.map_1_rateMapsZ(all_nw,:),[-3 3],...
-                    spatialModulation.PF_position_map_1(all_nw,:));
+        imagesc_ranked(spatialModulation.map_1_timestamps, [length(find(all_pyr)) + 5 (length(find(all_pyr))+ length(find(all_nw)) + 5)], spatialModulation.map_1_rateMapsZ(all_nw,:),[-3 3],...
+            spatialModulation.PF_position_map_1(all_nw,:));
 
-                imagesc_ranked(spatialModulation.map_1_timestamps,...
-                    [(length(find(all_pyr)) + length(find(all_nw)) + 10) (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)], spatialModulation.map_1_rateMapsZ(all_ww,:),[-3 3],...
-                    spatialModulation.PF_position_map_1(all_ww,:));
-                xlim(spatialModulation.map_1_timestamps([1 end]));
-                ylim([0 (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)]);
-                xlabel('cm'); ylabel('Map 1 (-3 to 3 SD)');
-                set(gca,'YTick',[0 (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)],'YTickLabel',[0 length(all_pyr)]);
-                colormap jet
-            elseif count == 2
-                subplot(6,6,[26 32])
-                hold on
-                imagesc_ranked(spatialModulation.map_2_timestamps, [1:length(find(all_pyr))], spatialModulation.map_2_rateMapsZ(all_pyr,:),[-3 3],...
-                    spatialModulation.PF_position_map_2(all_pyr,:));
+        imagesc_ranked(spatialModulation.map_1_timestamps,...
+            [(length(find(all_pyr)) + length(find(all_nw)) + 10) (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)], spatialModulation.map_1_rateMapsZ(all_ww,:),[-3 3],...
+            spatialModulation.PF_position_map_1(all_ww,:));
+        xlim(spatialModulation.map_1_timestamps([1 end]));
+        ylim([0 (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)]);
+        xlabel('cm'); ylabel('Map 1 (-3 to 3 SD)');
+        set(gca,'YTick',[0 (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)],'YTickLabel',[0 length(all_pyr)]);
 
-                imagesc_ranked(spatialModulation.map_2_timestamps, [length(find(all_pyr)) + 5 (length(find(all_pyr))+ length(find(all_nw)) + 5)], spatialModulation.map_2_rateMapsZ(all_nw,:),[-3 3],...
-                    spatialModulation.PF_position_map_2(all_nw,:));
+        subplot(6,6,[23 24])
+        hold on
 
-                imagesc_ranked(spatialModulation.map_2_timestamps,...
-                    [(length(find(all_pyr)) + length(find(all_nw)) + 10) (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)], spatialModulation.map_2_rateMapsZ(all_ww,:),[-3 3],...
-                    spatialModulation.PF_position_map_2(all_ww,:));
-                xlim(spatialModulation.map_2_timestamps([1 end]));
-                ylim([0 (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)]);
-                xlabel('cm'); ylabel('Map 2 (-3 to 3 SD)');
-                set(gca,'YTick',[0 (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)],'YTickLabel',[0 length(all_pyr)]);
-                colormap jet
-                
-            elseif count == 3
-                
-                subplot(6,6,[27 33])
-                hold on
-                imagesc_ranked(spatialModulation.map_3_timestamps, [1:length(find(all_pyr))], spatialModulation.map_3_rateMapsZ(all_pyr,:),[-3 3],...
-                    spatialModulation.PF_position_map_3(all_pyr,:));
+        imagesc_ranked(spatialModulation.map_2_timestamps, [1:length(find(all_pyr))], spatialModulation.map_2_rateMapsZ(all_pyr,:),[-3 3],...
+            spatialModulation.PF_position_map_2(all_pyr,:));
 
-                imagesc_ranked(spatialModulation.map_3_timestamps, [length(find(all_pyr)) + 5 (length(find(all_pyr))+ length(find(all_nw)) + 5)], spatialModulation.map_3_rateMapsZ(all_nw,:),[-3 3],...
-                    spatialModulation.PF_position_map_3(all_nw,:));
+        imagesc_ranked(spatialModulation.map_2_timestamps, [length(find(all_pyr)) + 5 (length(find(all_pyr))+ length(find(all_nw)) + 5)], spatialModulation.map_2_rateMapsZ(all_nw,:),[-3 3],...
+            spatialModulation.PF_position_map_1(all_nw,:));
 
-                imagesc_ranked(spatialModulation.map_3_timestamps,...
-                    [(length(find(all_pyr)) + length(find(all_nw)) + 10) (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)], spatialModulation.map_3_rateMapsZ(all_ww,:),[-3 3],...
-                    spatialModulation.PF_position_map_3(all_ww,:));
-                xlim(spatialModulation.map_3_timestamps([1 end]));
-                ylim([0 (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)]);
-                xlabel('cm'); ylabel('Map 3 (-3 to 3 SD)');
-                set(gca,'YTick',[0 (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)],'YTickLabel',[0 length(all_pyr)]);
-                colormap jet
-                
-                
-                
-            elseif count == 4
-                
-                subplot(6,6,[28 34])
-                hold on
-                imagesc_ranked(spatialModulation.map_4_timestamps, [1:length(find(all_pyr))], spatialModulation.map_4_rateMapsZ(all_pyr,:),[-3 3],...
-                    spatialModulation.PF_position_map_4(all_pyr,:));
-
-                imagesc_ranked(spatialModulation.map_4_timestamps, [length(find(all_pyr)) + 5 (length(find(all_pyr))+ length(find(all_nw)) + 5)], spatialModulation.map_4_rateMapsZ(all_nw,:),[-3 3],...
-                    spatialModulation.PF_position_map_4(all_nw,:));
-
-                imagesc_ranked(spatialModulation.map_4_timestamps,...
-                    [(length(find(all_pyr)) + length(find(all_nw)) + 10) (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)], spatialModulation.map_4_rateMapsZ(all_ww,:),[-3 3],...
-                    spatialModulation.PF_position_map_4(all_ww,:));
-                xlim(spatialModulation.map_4_timestamps([1 end]));
-                ylim([0 (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)]);
-                xlabel('cm'); ylabel('Map 4 (-3 to 3 SD)');
-                set(gca,'YTick',[0 (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)],'YTickLabel',[0 length(all_pyr)]);
-                colormap jet                
-            end
-            count = count + 1;
-        end
+        imagesc_ranked(spatialModulation.map_2_timestamps,...
+            [(length(find(all_pyr)) + length(find(all_nw)) + 10) (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)], spatialModulation.map_2_rateMapsZ(all_ww,:),[-3 3],...
+            spatialModulation.PF_position_map_1(all_ww,:));
+        xlim(spatialModulation.map_2_timestamps([1 end]));
+        ylim([0 (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)]);
+        xlabel('cm'); ylabel('Map 2 (-3 to 3 SD)');
+        set(gca,'YTick',[0 (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)],'YTickLabel',[0 length(all_pyr)]);
+        colormap jet
     catch
         subplot(6,6,[21 22])
         axis off
@@ -817,7 +807,7 @@ else
 end
 
 if saveFigure
-    saveas(gcf,['SummaryFigures\Summary.png']);
+    saveas(gcf,['BaselinevsDrug\Summary_Baseline.png']);
 end
 
 cd(prevPath);

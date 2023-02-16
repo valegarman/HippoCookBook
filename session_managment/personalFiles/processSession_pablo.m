@@ -150,15 +150,9 @@ if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))
         if ~isfield(session.analysisTags,'homeDelayTtl_channel')
             session.analysisTags.homeDelayTtl_channel = homeDelayTtl_channel;
         end
-        if ~isfield(session.analysisTags,'rippleChannel')
-            session.analysisTags.rippleChannel = rippleChannel;
-        end
-        if ~isfield(session.analysisTags,'SWChannel')
-            session.analysisTags.SWChannel = SWChannel;
-        end
-        if ~isfield(session.analysisTags,'thetaChannel')
-            session.analysisTags.thetaChannel = thetaChannel;
-        end
+        session.analysisTags.rippleChannel = rippleChannel;
+        session.analysisTags.SWChannel = SWChannel;
+        session.analysisTags.thetaChannel = thetaChannel;
         if ~isfield(session.analysisTags,'CA1Channel')
             session.analysisTags.CA1Channel = CA1Channel;
         end
@@ -212,7 +206,11 @@ end
 %% 4. Spike Features
 % 4.1 Light responses, if available
 if ~any(ismember(excludeAnalysis, {'4',lower('spikesFeatures')}))
-%     optogeneticResponses = getOptogeneticResponse('numRep',500,'force',true);
+    try
+        optogeneticResponses = getOptogeneticResponse('numRep',500,'force',true);
+    catch
+        warning('Not possible to compute optogenetic Responses...');
+    end
     % 4.2 ACG and waveform
     spikeFeatures;
 end
@@ -249,20 +247,23 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     % Trying changes in detecUD_temp
     % 8.1 Up and downs
     UDStates = detectUD('plotOpt', true,'forceDetect',true','NREMInts','all');
-    psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true);
-
+    psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true,'min_pulsesNumber',0);
+    getSpikesRank('events','upstates');
+    
     % 8.2 Ripples
-    ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'removeOptogeneticStimulation',true); % [1.5 3.5]
+    ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'removeOptogeneticStimulation',true,'eventSpikeThreshold',false); % [1.5 3.5]
     psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'min_pulsesNumber',0);
-
+    getSpikesRank('events','ripples');
+    
     % 8.3 Theta intervals
     thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'channel',thetaChannel);
+  
 end
 
 %% 9. Phase Modulation
 if ~any(ismember(excludeAnalysis, {'9',lower('phaseModulation')}))
     % LFP-spikes modulation
-    [phaseMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel);
+    [phaseMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel,'thetaChannel',thetaChannel,'lgammaChannel',thetaChannel,'hgammaChannel',thetaChannel);
     computeCofiringModulation;
 end
 
@@ -284,8 +285,10 @@ if ~any(ismember(excludeAnalysis, {'10',lower('cellMetrics')}))
     catch
         warning('Not possible to get manipulation periods. Running CellMetrics withouth excluding manipulation epochs');
     end
-    cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',{'deepSuperficial'},'forceReload',true);
-
+    cell_metrics = ProcessCellMetrics('session', session,'manualAdjustMonoSyn',false,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',{'deepSuperficial'},'forceReload',true);
+    
+    cell_metrics = CellExplorer('basepath',pwd);
+    
     getACGPeak('force',true);
 
     getAverageCCG('force',true);
@@ -308,6 +311,8 @@ if ~any(ismember(excludeAnalysis,{'12',lower('subSessionsAnalysis')}))
     cell_metrics_SubSession = ProcessCellMetricsPerSubSession('session', session,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',{'deepSuperficial'},'forceReload',true);
     % lfp Analysis per subsession
     cohgramSubSession = computeCohgramPerSubsession('force',true);
+    % ACGPeak per subsession
+    getACGPeakSubSession('force',true);
 end
 
 %% 13. Spatial modulation
@@ -320,19 +325,19 @@ if ~any(ismember(excludeAnalysis, {'13',lower('spatialModulation')}))
         catch
             warning('No arm choice available to compute.');
         end
+%         try
+%             getSessionYMazeChoice('forceReload',true);
+%         catch
+%             warning('No YMaze arm choice available to compute.');
+%         end
         try
-            getSessionYMazeChoice('forceReload',true);
-        catch
-            warning('No YMaze arm choice available to compute.');
-        end
-        try
-            getSessionCircularMazeArmChoice('task','forced')
+            getSessionCircularMazeArmChoice('task','alternation')
         catch
             warning('No circular arm choice available to compute.');
         end
         behavior = getSessionBehavior('forceReload',true);
-        firingMaps = firingMapAvg_pablo(behavior,spikes,'speedThresh',speedThresh,'tint',0,'pixelsPerCm',pixelsPerCm,'saveMat',true); 
-        firingMaps_tint = firingMapAvg_pablo(behavior,spikes,'speedThresh',speedThresh,'tint',1,'pixelsPerCm',pixelsPerCm,'saveMat',true);
+        firingMaps = firingMapAvg_pablo(behavior,spikes,'speedThresh',speedThresh,'tint',true,'pixelsPerCm',pixelsPerCm,'saveMat',true); 
+        firingMaps_tint = firingMapAvg_pablo(behavior,spikes,'speedThresh',speedThresh,'tint',true,'pixelsPerCm',pixelsPerCm,'saveMat',true);
         placeFieldStats = computeFindPlaceFields('firingMaps',[],'tint',tint,'useColorBar',false,'saveMat',true);
         if any(ismember(behavior.description,'Linear Track  N-S'))
             firingTrialsMap = firingMapPerTrial_pablo;
@@ -443,10 +448,10 @@ if ~any(ismember(excludeAnalysis, {'14',lower('summary')}))
 %         plotSummary_social();
         plotSummary_pablo();
     elseif strcmpi(project,'SubiculumProject')
-        plotSpatialModulation('gridAnalysis',gridAnalysis);
+        plotSpatialModulation('gridAnalysis',gridAnalysis,'tint',tint);
         plotSummary_subiculum();
     elseif strcmpi(project,'MK801Project')
-        plotSummary_pablo('excludePlot',{'spatialModulation'});
+        plotSummary_pablo();
 %         plotSpatialModulation('gridAnalysis',gridAnalysis);
 %         plotSummary_MK801();
     elseif strcmpi(project,'GLUN3Project')

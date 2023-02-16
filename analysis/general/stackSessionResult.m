@@ -32,6 +32,16 @@ for mm = 1:length(toStack)
     end
 end 
 
+% In case exampleSession(1) is NaN
+for ii = 1:length(toStack)
+    while ~isstruct(toStack{exampleSession})
+        exampleSession = exampleSession + 1;
+        if isstruct(toStack{exampleSession})
+            continue;
+        end
+    end
+end
+
 names = fieldnames(toStack{exampleSession});
 clonned = zeros(size(toStack));
 % if nan, clon data of same size as numCells with nan values
@@ -76,7 +86,7 @@ for ii = 1:length(names)
                         size_sess(find(size_ex == numCells(exampleSession))) = numCells(mm);
                         toStack{mm}.([names{ii} '_' l2_names{jj}]) = nan(size_sess);
                     elseif isnan(toStack{mm}) % if nan, clone
-                        if ischar(toStack{exampleSession}.([names{ii} '_' l2_names{jj}]))
+                        if  ischar(toStack{exampleSession}.([names{ii} '_' l2_names{jj}]))
                             toStack_clon{mm}.([names{ii} '_' l2_names{jj}]) = ...
                                 toStack{exampleSession}.([names{ii} '_' l2_names{jj}]);
                         else
@@ -89,6 +99,26 @@ for ii = 1:length(names)
                         clonned(mm) = 1;    
                     end
                 end
+            elseif isstruct(toStack{exampleSession}.(names{ii}).(l2_names{jj}))
+                l3_names = fieldnames(toStack{exampleSession}.(names{ii}).(l2_names{jj}));
+                
+                for kk = 1:length(l3_names)
+                    if isnumeric(toStack{exampleSession}.(names{ii}).(l2_names{jj}).(l3_names{kk})) & any(size(toStack{exampleSession}.(names{ii}).(l2_names{jj}).(l3_names{kk})) == numCells(exampleSession))
+                        fprintf('Flattening %s... \n', l3_names{kk});
+                        for mm = 1:length(toStack)
+                           if isstruct(toStack{mm}) && isfield(toStack{mm}.(names{ii}).(l2_names{jj}),(l3_names{kk}))
+                               toStack{mm}.([names{ii} '_' l2_names{jj} '_' l3_names{kk}]) = toStack{mm}.(names{ii}).(l2_names{jj}).(l3_names{kk});
+                           elseif isstruct(toStack{mm}) && ~isfield(toStack{mm}.(names{ii}).(l2_names{jj}),(l3_names{kk})) % if it doesn't exist, create as nan matrix
+                               example_data = nan*toStack{exampleSession}.([names{ii} '_' l2_names{jj} '_' l3_names{kk}]);
+                                size_ex = size(example_data);
+                                size_sess = size_ex; 
+                                size_sess(find(size_ex == numCells(exampleSession))) = numCells(mm);
+                                toStack{mm}.([names{ii} '_' l2_names{jj} '_' l3_names{kk}]) = nan(size_sess);
+                           end
+                        end
+                    end
+                end
+                
             elseif strcmpi('timestamps',l2_names{jj})
                 for mm = 1:length(toStack)
                     if isstruct(toStack{mm}) && isstruct(toStack{mm}.(names{ii}))

@@ -271,6 +271,11 @@ catch
     PhaseLockingData.sessionName = spikes.sessionName;
 end
 
+try
+    PhaseLockingData.lfpChannel = lfp.channels;
+catch
+    PhaseLockingData.lfpChannel = [];
+end
 % acummulating data in less bins...
 if numBins_wider > 0
     ps_bins = discretize(phasebins,36);

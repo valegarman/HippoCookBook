@@ -17,12 +17,14 @@ p = inputParser;
 addParameter(p,'basepath',pwd,@isdir); % by default, current folder
 addParameter(p,'overwrite',false,@islogical);
 addParameter(p,'isNotchFilter',false,@islogical);
+addParameter(p,'nChannels',96,@isnumeric);
 % addParameter(p,'pullData',[],@isdir); To do... 
 parse(p,varargin{:});
 
 basepath = p.Results.basepath;
 overwrite = p.Results.overwrite;
 is_notch_filter = p.Results.isNotchFilter;
+nChannels = p.Results.nChannels;
 
 % prevPath = pwd;
 if nargin < 1
@@ -39,7 +41,7 @@ else
     error('global.xml not found. Can not retrieve number of channels. Quitting...');
 end
 
-nChannels = session.extracellular.nChannels;
+% nChannels = session.extracellular.nChannels;
 expName = strsplit(basepath,filesep);
 expName = expName{end};
 
@@ -91,23 +93,26 @@ for i=1:length(sess_folders)
                             pri_signals = [];
                             num_analog_inputs = 16;
                                                                                                               
-                            if num_total_signals > nChannels
-                                num_pri_signals = nChannels;
-                                num_skip_signals = num_total_signals-num_pri_signals;
-                                disp('global.xml channels and Allego metadata channels do not coincide. Check...');
-                            elseif num_total_signals == nChannels
-                                num_pri_signals = nChannels;
-                            end
-                            
-                            if isempty(num_skip_signals)
-                                pri_signals = ns5.Data(1:num_pri_signals,:);
-                            else
-                                pri_signals = ns5.Data(1:num_pri_signals,:);
-                                ain_signals = ns5.Data(num_pri_signals+1:num_total_signals,:);
-                                if size(ain_signals,2) ~= 16
-                                    ain_signals(size(ain_signals,1)+1:num_analog_inputs,:) = zeros(num_analog_inputs-size(ain_signals,1),size(ain_signals,2));
-                                end
-                            end
+%                             if num_total_signals > nChannels
+%                                 num_pri_signals = nChannels;
+%                                 num_skip_signals = num_total_signals-num_pri_signals;
+%                                 disp('global.xml channels and Allego metadata channels do not coincide. Check...');
+%                             elseif num_total_signals == nChannels
+%                                 num_pri_signals = nChannels;
+%                             end
+%                             
+%                             if isempty(num_skip_signals)
+%                                 pri_signals = ns5.Data(1:num_pri_signals,:);
+%                             else
+%                                 pri_signals = ns5.Data(1:num_pri_signals,:);
+%                                 ain_signals = ns5.Data(num_pri_signals+1:num_total_signals,:);
+%                                 if size(ain_signals,2) ~= 16
+%                                     ain_signals(size(ain_signals,1)+1:num_analog_inputs,:) = zeros(num_analog_inputs-size(ain_signals,1),size(ain_signals,2));
+%                                 end
+%                             end
+
+                            pri_signals = ns5.Data(1:nChannels,:);
+                            ain_signals = ns5.Data(nChannels+1:num_total_signals,:);
                             
                             
                             % Creating time.dat

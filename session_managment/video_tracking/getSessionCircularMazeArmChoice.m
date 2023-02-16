@@ -102,12 +102,8 @@ catch
     warning('No available tracking!');
 end
 
-try [sessionInfo] = bz_getSessionInfo(pwd, 'noPrompts', true);
-catch
-    sessionInfo.FileName = split(pwd,filesep); sessionInfo.FileName = sessionInfo.FileName{end};
-end
 if saveMat
-    save([basepath filesep sessionInfo.FileName '.SessionArmChoice.Events.mat'],'sessionArmChoice');
+    save([session.general.name '.SessionArmChoice.Events.mat'],'sessionArmChoice');
 end
 
 end

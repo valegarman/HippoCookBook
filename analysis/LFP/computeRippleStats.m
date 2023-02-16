@@ -136,6 +136,9 @@ data.peakAmplitude = maps.amplitude(:,centerBin);
 % Ripple durations
 data.duration = abs(diff(ripples.timestamps'))';
 
+% InterRipple Frequency
+data.interRippleFrequency = [NaN; 1./diff(ripples.peaks)];
+
 % stats
 [stats.acg.data,stats.acg.t] = CCG(ripples.peaks,ones(length(ripples.peaks),1),'binSize',corrBinSize);
 

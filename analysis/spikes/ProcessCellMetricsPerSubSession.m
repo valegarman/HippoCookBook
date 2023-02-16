@@ -121,6 +121,7 @@ basepath = p.Results.basepath;
 parameters = p.Results;
 timerCalcMetrics = tic;
 saveMat = p.Results.saveMat;
+excludeIntervals = p.Results.excludeIntervals;
 
 % Verifying required toolboxes are installed
 installedToolboxes = ver;
@@ -155,7 +156,9 @@ end
     
 for ii = 1:length(MergePoints.foldernames)
     ts = MergePoints.timestamps(ii,:);
-    
+%     if ~isempty(excludeIntervals)
+%         ts_aux = InIntervals(ts,excludeIntervals);
+%     end
     cell_metrics = ProcessCellMetrics('restrictToIntervals',ts,'session',parameters.session,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',parameters.excludeMetrics,'forceReload',parameters.forceReload,'saveMat',false);
     
     cell_metrics_SubSessions.(MergePoints.foldernames{ii}) = cell_metrics;

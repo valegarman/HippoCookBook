@@ -208,6 +208,7 @@ if ~isempty(powerThreshold_nonTheta)
 
 end
 
+thetaEpochs.region = lfpT.region;
 thetaEpochs.lfpphase = lfpphase;
 thetaEpochs.samplingRate = samplingRate;
 thetaEpochs.power = power;
