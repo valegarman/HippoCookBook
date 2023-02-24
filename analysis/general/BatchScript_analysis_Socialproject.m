@@ -21,7 +21,7 @@ hgamma_passband = [60 100];
 plt = true;
 force = true;
 
-for ii = 15:length(sessionsTable.SessionName)
+for ii = 22:length(sessionsTable.SessionName)
     if strcmpi(sessionsTable.Project{ii}, targetProject) || strcmpi('all', targetProject)
         
         fprintf(' > %3.i/%3.i session \n',ii, length(sessionsTable.SessionName)); %\n
@@ -31,7 +31,7 @@ for ii = 15:length(sessionsTable.SessionName)
         session = loadSession();
         spikes = loadSpikes();
         
-        cell_metrics = CellExplorer('basepath',pwd);
+%         cell_metrics = CellExplorer('basepath',pwd);
         
         ripples = rippleMasterDetector('rippleChannel',session.analysisTags.rippleChannel,'SWChannel',session.analysisTags.SWChannel,'force',true,'removeOptogeneticStimulation',true,'eventSpikeThreshold',false); % [1.5 3.5]
         psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'min_pulsesNumber',0);

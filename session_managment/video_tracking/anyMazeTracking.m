@@ -299,6 +299,15 @@ catch
 end
 
 %%
+if strcmpi(apparatus_name,'Open Field')
+    if boundingbox.w < 50
+        boundingbox.w = 50;
+    end
+    if boundingbox.h < 50
+        boundingbox.h = 50;
+    end
+end
+
 boundingbox_X = boundingbox.x + boundingbox.w;
 boundingbox_Y = boundingbox.y + boundingbox.h;
 
@@ -310,7 +319,6 @@ boundingbox_xy = [boundingbox_xmax-boundingbox_xmin;boundingbox_ymax-boundingbox
 
 xMaze = [boundingbox_xmin boundingbox_xmax];
 yMaze = [boundingbox_ymin boundingbox_ymax];
-
 
 %% ZONES
 

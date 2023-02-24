@@ -184,7 +184,7 @@ end
 try
     if iscell(cleanArtifacts) || cleanArtifacts
         if iscell(cleanArtifacts)
-            pulArtifacts_analog = getAnalogPulses('analogChannelsList',cleanArtifacts{1});
+            pulArtifacts_analog = getAnalogInBySubfolders('all');
             if isempty(pulArtifacts_analog)
                 pulArtifacts_analog.timestamps = [];
             end            
@@ -197,7 +197,7 @@ try
                     pulArtifacts_dig = [pulArtifacts_dig; digitalIn.ints{ii}];
                 end
             end
-            pulArtifacts = [pulArtifacts_analog.timestamps; pulArtifacts_dig];
+            pulArtifacts = [pulArtifacts_analog.timestampsOn; pulArtifacts_dig];
         else
             pulArtifacts = pulses.timestamps;
         end

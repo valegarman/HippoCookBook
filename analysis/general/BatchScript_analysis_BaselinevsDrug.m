@@ -23,10 +23,11 @@ notchFilter = false;
 plt = true;
 
 force = false;
-forceLfp = false;
+forceLfp = true;
 forceACGPeak = false;
+forceBehavior = true;
 
-for ii = 1:length(sessionsTable.SessionName)
+for ii = 7:length(sessionsTable.SessionName)
     if strcmpi(sessionsTable.Project{ii}, targetProject) || strcmpi('all', targetProject)
         
         fprintf(' > %3.i/%3.i session \n',ii, length(sessionsTable.SessionName)); %\n
@@ -41,9 +42,11 @@ for ii = 1:length(sessionsTable.SessionName)
         
         ts_Baseline = [];
         ts_Drug = [];
+        ts_Maze1Baseline = [];
+        ts_Maze1Drug = [];
         count = 1;
         for jj = 1:length(session.epochs)
-            session.epochs{jj}.behavioralParadigm
+            session.epochs{jj}.behavioralParadigm;
             if strcmpi(session.epochs{jj}.behavioralParadigm , 'PreSleep') | strcmpi(session.epochs{jj}.behavioralParadigm, 'Maze1Baseline')  | strcmpi(session.epochs{jj}.behavioralParadigm, 'InterMazeBaseline') | strcmpi(session.epochs{jj}.behavioralParadigm, 'Maze2Baseline') | strcmpi(session.epochs{jj}.behavioralParadigm, 'Maze3Baseline') | strcmpi(session.epochs{jj}.behavioralParadigm, 'LongSleepBaseline')
                 
                 ts_Baseline = [ts_Baseline ; session.epochs{jj}.startTime session.epochs{jj}.stopTime];
@@ -127,6 +130,15 @@ for ii = 1:length(sessionsTable.SessionName)
             cohgram.coherogram = coherogram_Baseline_theta;
             cohgram.S1 = S1_Baseline_theta;
             cohgram.S2 = S2_Baseline_theta;
+            cohgram.phase = phase_Baseline_theta;
+            
+            cohgram.NonThetaEpochs.t = t_Baseline;
+            cohgram.NonThetaEpochs.f = f;
+            cohgram.NonThetaEpochs.coherogram = coherogram_Baseline;
+            cohgram.NonThetaEpochs.S1 = S1_Baseline;
+            cohgram.NonThetaEpochs.S2 = S2_Baseline;
+            cohgram.NonThetaEpochs.phase = phase_Baseline;
+            
             cohgram.lfp1Channel = lfp1w.channels;
             cohgram.lfp1Region = lfp1w.region;
             cohgram.lfp2Channel = lfp2w.channels;
@@ -216,6 +228,15 @@ for ii = 1:length(sessionsTable.SessionName)
             cohgram.coherogram = coherogram_Drug_theta;
             cohgram.S1 = S1_Drug_theta;
             cohgram.S2 = S2_Drug_theta;
+            cohgram.phase = phase_Drug_theta;
+            
+            cohgram.NonThetaEpochs.t = t_Drug;
+            cohgram.NonThetaEpochs.f = f;
+            cohgram.NonThetaEpochs.coherogram = coherogram_Drug;
+            cohgram.NonThetaEpochs.S1 = S1_Drug;
+            cohgram.NonThetaEpochs.S2 = S2_Drug;
+            cohgram.NonThetaEpochs.phase = phase_Drug;
+            
             cohgram.lfp1Channel = lfp1w.channels;
             cohgram.lfp1Region = lfp1w.region;
             cohgram.lfp2Channel = lfp2w.channels;
@@ -305,6 +326,15 @@ for ii = 1:length(sessionsTable.SessionName)
             cohgram.coherogram = coherogram_Maze1Baseline_theta;
             cohgram.S1 = S1_Maze1Baseline_theta;
             cohgram.S2 = S2_Maze1Baseline_theta;
+            cohgram.phase = phase_Maze1Baseline_theta;
+            
+            cohgram.NonThetaEpochs.t = t_Maze1Baseline;
+            cohgram.NonThetaEpochs.f = f;
+            cohgram.NonThetaEpochs.coherogram = coherogram_Maze1Baseline;
+            cohgram.NonThetaEpochs.S1 = S1_Maze1Baseline;
+            cohgram.NonThetaEpochs.S2 = S2_Maze1Baseline;
+            cohgram.NonThetaEpochs.phase = phase_Maze1Baseline;
+            
             cohgram.lfp1Channel = lfp1w.channels;
             cohgram.lfp1Region = lfp1w.region;
             cohgram.lfp2Channel = lfp2w.channels;
@@ -375,8 +405,6 @@ for ii = 1:length(sessionsTable.SessionName)
             saveas(gca,['BaselineVsDrug\coherogram_Maze1Baseline.png']);    
         
         
-        
-        
             % MAZE1 DRUG
 
             t_Maze1Drug = t(InIntervals(t,ts_Maze1Drug));
@@ -397,6 +425,15 @@ for ii = 1:length(sessionsTable.SessionName)
             cohgram.coherogram = coherogram_Maze1Drug_theta;
             cohgram.S1 = S1_Maze1Drug_theta;
             cohgram.S2 = S2_Maze1Drug_theta;
+            cohgram.phase = phase_Maze1Drug_theta;
+            
+            cohgram.NonThetaEpochs.t = t_Maze1Drug;
+            cohgram.NonThetaEpochs.f = f;
+            cohgram.NonThetaEpochs.coherogram = coherogram_Maze1Drug;
+            cohgram.NonThetaEpochs.S1 = S1_Maze1Drug;
+            cohgram.NonThetaEpochs.S2 = S2_Maze1Drug;
+            cohgram.NonThetaEpochs.phase = phase_Maze1Drug;
+            
             cohgram.lfp1Channel = lfp1w.channels;
             cohgram.lfp1Region = lfp1w.region;
             cohgram.lfp2Channel = lfp2w.channels;
@@ -482,7 +519,7 @@ for ii = 1:length(sessionsTable.SessionName)
         
         % Baseline
         try
-             if isempty(dir('*.OpenField_Baseline.mat')) | isempty(dir('*.OpenField_Drug.mat'))
+             if isempty(dir('*.OpenField_Baseline.mat')) | isempty(dir('*.OpenField_Drug.mat')) | forceBehavior
                 performance = getSessionPerformance('includeIntervals',ts_Baseline);
 
                 OpenField = performance.OpenField;
@@ -494,12 +531,16 @@ for ii = 1:length(sessionsTable.SessionName)
 
                 if exist('YMaze','var')  
                     performance = YMaze;
-                    save([session.general.name,'.YMaze_Baseline.mat'],'performance');
+                else
+                    performance.meanSpeed = NaN;
+                    performance.distance = NaN;
                 end
-            end
+                save([session.general.name,'.YMaze_Baseline.mat'],'performance');
+             end
+            clear performance; clear OpenField; clear YMaze;
 
             % Drug
-           if isempty(dir('*.YMaze_Baseline.mat')) | isempty(dir('*.YMaze_Drug.mat')) 
+           if isempty(dir('*.YMaze_Baseline.mat')) | isempty(dir('*.YMaze_Drug.mat')) | forceBehavior
                performance = getSessionPerformance('includeIntervals',ts_Drug);
 
                 OpenField = performance.OpenField;
@@ -511,9 +552,15 @@ for ii = 1:length(sessionsTable.SessionName)
 
                 if exist('YMaze','var')  
                     performance = YMaze;
-                    save([session.general.name,'.YMaze_Drug.mat'],'performance');
+                    
+                else
+                    performance.meanSpeed = NaN;
+                    performance.distance = NaN;
                 end
+                save([session.general.name,'.YMaze_Drug.mat'],'performance');
            end
+           
+           clear performance; clear OpenField; clear YMaze;
         catch
         end
         
@@ -602,7 +649,7 @@ for ii = 1:length(sessionsTable.SessionName)
         % SPIKES RANK SLOW OSCILLATIONS
         % =================================
         
-        if isempty(dir('*.spikesRank_upSates_Baseline.mat')) | isempty(dir('*.spikesRank_upStates_Drug')) | force
+        if isempty(dir('*.spikesRank_upStates_Baseline.mat')) | isempty(dir('*.spikesRank_upStates_Drug.mat')) | force
             
             % Baseline
             spkEventTimes = [];
@@ -625,7 +672,7 @@ for ii = 1:length(sessionsTable.SessionName)
         % SPIKES RANK RIPPLES
         % =================================
         
-        if isempty(dir('*.spikesRank_ripples_Baseline.mat')) | isempty(dir('*.spikesRank_ripples_Drug')) | force
+        if isempty(dir('*.spikesRank_ripples_Baseline.mat')) | isempty(dir('*.spikesRank_ripples_Drug.mat')) | force
             
             % Baseline
             spkEventTimes = [];

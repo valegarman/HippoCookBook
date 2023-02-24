@@ -100,6 +100,7 @@ if ~strcmpi(project,'Undefined')
     end
 end
 fprintf('Loading %3.i sessions... \n',length(sessions.basepaths)); %\n
+
 % Added by Pablo to take into account folders where sessions are located
 if ~isempty(prePath)
    for ii = 1:length(sessions.basepaths)
@@ -188,6 +189,10 @@ for ii = 1:length(sessions.basepaths)
        warning('Not possible to load optogeneticResponses. Quitting...');     
     end
     
+    % Tracking
+    targetFile = dir('*.Tracking.Behavior.mat');load(targetFile.name),
+    projectSessionResults.tracking{ii} = tracking;
+    clear tracking;
     
     % ACG peak
     targetFile = dir('*.ACGPeak.cellinfo.mat'); load(targetFile.name);
@@ -282,16 +287,24 @@ for ii = 1:length(sessions.basepaths)
     end
         
     % Spikes Rank Baseline
-    targetFile = dir('*.spikesRank_upStates_Baseline.mat'); 
-    slowOsciSpikesRank = importdata(targetFile.name);
-    projectSessionResults.slowOsciSpikesRank_Baseline{ii} = slowOsciSpikesRank;
-    clear slowOsciSpikesRank
+    try
+        targetFile = dir('*.spikesRank_upStates_Baseline.mat'); 
+        slowOsciSpikesRank = importdata(targetFile.name);
+        projectSessionResults.slowOsciSpikesRank_Baseline{ii} = slowOsciSpikesRank;
+        clear slowOsciSpikesRank
+    catch
+        warning('Not possible to load spikesRank_upStates_Baseline');
+    end
     
     % Ripples Rank Baseline
-    targetFile = dir('*.spikesRank_ripples_Baseline.mat');
-    ripplesSpikesRank = importdata(targetFile.name);
-    projectSessionResults.ripplesSpikesRank_Baseline{ii} = ripplesSpikesRank;
-    clear ripplesSpikesRank;
+    try
+        targetFile = dir('*.spikesRank_ripples_Baseline.mat');
+        ripplesSpikesRank = importdata(targetFile.name);
+        projectSessionResults.ripplesSpikesRank_Baseline{ii} = ripplesSpikesRank;
+        clear ripplesSpikesRank;
+    catch
+        warning('Not possible to load spikesRank_ripples_Baseline');
+    end
     
     % Phase Locking
     try
@@ -394,9 +407,19 @@ for ii = 1:length(sessions.basepaths)
     try
         targetFile = dir('*.coherogram_Baseline.mat'); load(targetFile.name);
         projectSessionResults.coherogram_Baseline{ii} = cohgram;
+        
         projectSessionResults.coherogram_Baseline{ii}.S1_mean = nanmean(cohgram.S1);
         projectSessionResults.coherogram_Baseline{ii}.S2_mean = nanmean(cohgram.S2);
         projectSessionResults.coherogram_Baseline{ii}.coherogram_mean = nanmean(cohgram.coherogram);
+        projectSessionResults.coherogram_Baseline{ii}.phase_mean = nanmean(cohgram.phase);
+        
+        projectSessionResults.coherogram_NonThetaEpochsBaseline{ii}.S1_mean = nanmean(cohgram.NonThetaEpochs.S1);
+        projectSessionResults.coherogram_NonThetaEpochsBaseline{ii}.S2_mean = nanmean(cohgram.NonThetaEpochs.S2);
+        
+        cohgram.NonThetaEpochs.coherogram(isinf(cohgram.NonThetaEpochs.coherogram)) = NaN;
+        
+        projectSessionResults.coherogram_NonThetaEpochsBaseline{ii}.coherogram_mean = nanmean(cohgram.NonThetaEpochs.coherogram);
+        projectSessionResults.coherogram_NonThetaEpochsBaseline{ii}.phase_mean = nanmean(cohgram.NonThetaEpochs.phase);
         
         clear cohgram
     catch
@@ -406,9 +429,17 @@ for ii = 1:length(sessions.basepaths)
     try
         targetFile = dir('*.coherogram_Maze1Baseline.mat'); load(targetFile.name);
         projectSessionResults.coherogram_Maze1Baseline{ii} = cohgram;
+        
         projectSessionResults.coherogram_Maze1Baseline{ii}.S1_mean = nanmean(cohgram.S1);
         projectSessionResults.coherogram_Maze1Baseline{ii}.S2_mean = nanmean(cohgram.S2);
         projectSessionResults.coherogram_Maze1Baseline{ii}.coherogram_mean = nanmean(cohgram.coherogram);
+        projectSessionResults.coherogram_Maze1Baseline{ii}.phase_mean = nanmean(cohgram.phase);
+        
+        projectSessionResults.coherogram_NonThetaEpochsMaze1Baseline{ii}.S1_mean = nanmean(cohgram.NonThetaEpochs.S1);
+        projectSessionResults.coherogram_NonThetaEpochsMaze1Baseline{ii}.S2_mean = nanmean(cohgram.NonThetaEpochs.S2);
+        projectSessionResults.coherogram_NonThetaEpochsMaze1Baseline{ii}.coherogram_mean = nanmean(cohgram.NonThetaEpochs.coherogram);
+        projectSessionResults.coherogram_NonThetaEpochsMaze1Baseline{ii}.phase_mean = nanmean(cohgram.NonThetaEpochs.phase);
+        
         clear cohgram
     catch
         projectSessionResults.coherogram_Maze1Baseline{ii} = NaN;
@@ -584,12 +615,19 @@ try projectResults.coherogram_Baseline = stackSessionResult(projectSessionResult
 catch
     warning('Coherogram baseline was not stack!');
 end
-
+try
+    projectResults.coherogram_NonThetaEpochsBaseline = stackSessionResult(projectSessionResults.coherogram_NonThetaEpochsBaseline,ones(1,length(projectSessionResults.numcells)));
+catch
+    warning('Coherogram Non Theta Epochs Baseline was not stack!');
+end
 try projectResults.coherogram_Maze1Baseline = stackSessionResult(projectSessionResults.coherogram_Maze1Baseline,ones(1,length(projectSessionResults.numcells)));
 catch
     warning('Coherogram Maze 1 Baseline was not stack');
 end
-
+try projectResults.coherogram_NonThetaEpochsMaze1Baseline = stackSessionResult(projectSessionResults.coherogram_NonThetaEpochsMaze1Baseline,ones(1,length(projectSessionResults.numcells)));
+catch
+    warning('Coherogram Non Theta Epochs Maze 1 Baseline was not stack');
+end
 % Open Field
 try projectResults.OpenField_Baseline = stackSessionResult(projectSessionResults.OpenField_Baseline,ones(1,length(projectSessionResults.numcells)));
 catch

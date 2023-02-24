@@ -443,8 +443,13 @@ createProbe('excel_file','electrodes_coordinates_UtahArray-96ch');
 selectProbe();
 basepath = 'D:\HM';
 cd(basepath);
+basepath = 'D:\HM2';
 createNSFiles('basepath',basepath,'nChannels',96);
+
 preprocessSession_pablo('basepath','D:\HM\HM_290622_sess1','analysisPath',[],'cleanArtifacts',({[1 2],[]}),'analogChannelsList',[],'digitalChannelsList',[],'changeAnalogInputs',false,'getPos',false,'sessionSummary',false);
+preprocessSession_pablo('basepath','D:\HM\HM_291122_sess3','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[1],'digitalChannelsList',[],'changeAnalogInputs',false,'getPos',false,'sessionSummary',false);
+preprocessSession_pablo('basepath','D:\HM\HM_391122_sess4','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[1],'digitalChannelsList',[],'changeAnalogInputs',false,'getPos',false,'sessionSummary',false);
+
 computeSessionSummary_pablo('basepath','F:\data\HM\HM_270722_sess2','analogChannelsList',[1 2 3],'digitalChannelsList',[]);
 
 
@@ -453,7 +458,15 @@ preprocessSession('basepath','K:\fCamk7\fCamk7_220511_sess29','cleanArtifacts',(
 
 
 createFiles('basepath','D:\FLR\FL10');
+preprocessSession_pablo('basepath','D:\HM2\HM2_210223_sess1','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'changeAnalogInputs',false,'getPos',false,'sessionSummary',false);
+
+
 
 % fSUB1
 preprocessSession_pablo('basepath','J:\fSUB1\fSUB1_181122_sess7','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'changeAnalogInputs',false,'getPos',false,'sessionSummary',false);
+preprocessSession_pablo('basepath','D:\fSUB1\fSUB1_150223_sess37','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'changeAnalogInputs',false,'getPos',false,'sessionSummary',false);
 
+
+% fSUB2
+preprocessSession_pablo('basepath','J:\fSUB2\fSUB2_150223_sess6','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'changeAnalogInputs',false,'getPos',false,'sessionSummary',false);
+preprocessSession_pablo('basepath','J:\fSUB2\fSUB2_160223_sess7','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'changeAnalogInputs',false,'getPos',false,'sessionSummary',false);
