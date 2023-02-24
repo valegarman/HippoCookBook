@@ -151,7 +151,11 @@ elseif isnumeric(varargin{1})
     signal = bz_Filter(lfp,'filter','butter','passband',passband,'order',3);
     timestamps = signal.timestamps;
     signal = signal.data;
-    region = lfp.region;
+    if isfield(lfp,'region')
+        region = lfp.region;
+    else
+        region = 'N/A';
+    end
 end
 
 % assign parameters (either defaults or given)

@@ -9,9 +9,9 @@ spike2toDat;
 %   'updateExpFolder({recordingPC_1, recordingPC_2, etc}, 'analysis unit')',
 %   Example:
 
-updateExpFolder({'F:\fCamk10','Y:\fCamk10'},'J:\fCamk10');
-updateExpFolder({'V:\data\fId4','Y:\fId4'},'J:\fId4');
-updateExpFolder({'V:\data\fVip4'},'J:\fVip4');
+updateExpFolder({'F:\fCamk10','Y:\fCamk10'},'H:\fCamk10');
+updateExpFolder({'V:\data\fId4','Y:\fId4'},'H:\fId4');
+updateExpFolder({'V:\data\fVip4'},'H:\fVip4');
 
 
 % 2% Then, preprocess session (includes artifacts removal, median signal
