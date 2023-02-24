@@ -84,6 +84,7 @@ addParameter(p,'spikes',{},@isstruct);
 addParameter(p,'UIDs',[],@islogical);
 addParameter(p,'padding',0.05,@isnumeric);
 addParameter(p,'saveMat', true, @islogical);
+addParameter(p,'includeIntervals',[],@isnumeric);
 
 parse(p,varargin{:});
 basepath = p.Results.basepath;
@@ -92,6 +93,7 @@ spikes = p.Results.spikes;
 UIDs = p.Results.UIDs;
 padding = p.Results.padding;
 saveMat = p.Results.saveMat;
+includeIntervals = p.Results.includeIntervals;
 
 % Get session info
 basename = basenameFromBasepath(basepath);
@@ -127,9 +129,19 @@ elseif ischar(events)
 
             events(diff(events')>max_duration | diff(events')<min_duration,:) = [];
             label = 'upStates';
+            
+            if ~isempty(includeIntervals)
+                status = InIntervals(events,includeIntervals);
+                events(~status,:) = [];
+            end
         case 'ripples'
             ripples = rippleMasterDetector;
             events = ripples.timestamps;
+            
+            if ~isempty(includeIntervals)
+                status = InIntervals(events,includeIntervals);
+                events(~status,:) = [];
+            end
             label = 'ripples';
     end
 

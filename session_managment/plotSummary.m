@@ -96,6 +96,7 @@ acgPeak = importdata(targetFile.name);
 
 % firing rate
 spikemat = bz_SpktToSpkmat(loadSpikes,'dt',10,'units','rate');
+
 if use_deltaThetaEpochs
     states_rate =   [cell_metrics.firingRate' cell_metrics.firingRate_QWake_noRipples_ThDt'  cell_metrics.firingRate_WAKEtheta_ThDt' cell_metrics.firingRate_NREM_noRipples_ThDt' cell_metrics.firingRate_REMtheta_ThDt'];
 else

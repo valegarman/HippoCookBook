@@ -28,6 +28,8 @@ function [psth] = spikesPsth(timestamps,varargin)
 %
 % To do: implement post-baseline
 % Developed by Pablo Abad and Manuel Valero 2022.
+% Modified by Pablo Abad to restrict analysis to specific intervals
+% (restrictIntervals)
 %% Defaults and Params
 p = inputParser;
 
@@ -50,6 +52,7 @@ addParameter(p,'min_pulsesNumber',100,@isnumeric);
 addParameter(p,'win_Z',[],@isnumeric);
 addParameter(p,'win_raster',[-.5 .5],@isnumeric);
 addParameter(p,'binSize_raster',[0.001],@isnumeric);
+addParameter(p,'restrictIntervals',[],@isnumeric);
 
 parse(p, timestamps,varargin{:});
 
@@ -71,6 +74,7 @@ min_pulsesNumber = p.Results.min_pulsesNumber;
 win_Z = p.Results.win_Z;
 win_raster = p.Results.win_raster;
 binSize_raster = p.Results.binSize_raster;
+restrictIntervals = p.Results.restrictIntervals;
 
 %% Session Template
 % Deal with inputs
@@ -120,6 +124,12 @@ end
 %% Spikes
 if isempty(spikes)
     spikes = loadSpikes();
+    if ~isempty(restrictIntervals)
+        for ii = 1:length(spikes.UID)
+            [status] = InIntervals(spikes.times{ii},restrictIntervals);
+            spikes.times{ii} = spikes.times{ii}(status);
+        end
+    end
 end
 
 %% Get cell response

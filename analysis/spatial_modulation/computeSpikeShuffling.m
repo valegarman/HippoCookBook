@@ -40,7 +40,7 @@ addParameter(p,'anyMaze',true,@islogical);
 addParameter(p,'duration',[],@isnumeric);
 addParameter(p,'numR',1000,@isnumeric);
 addParameter(p,'positions',[]);
-addParameter(p,'speedThresh',0.1,@isnumeric);
+addParameter(p,'speedThresh',0,@isnumeric);
 addParameter(p,'orderKalmanVel',2,@isnumeric);
 addParameter(p,'smooth',2,@isnumeric);
 addParameter(p,'nBins',50,@isnumeric);
@@ -117,8 +117,9 @@ B = [0.0025 0.0125 0.0200 0.0125 0.0025;
     0.0125 0.0625 0.1000 0.0625 0.0125;
     0.0025 0.0125 0.0200 0.0125 0.0025];
 
+count = 1;
 
-for ii = 1:numR
+parfor ii = 1:numR
     
     % Creation of shuffled map
     unitTimes_r1 = ts + valRand(ii);
@@ -166,66 +167,126 @@ for ii = 1:numR
     map_output(:,:,ii) = map;
     
     % Spatial Coherence
-    [spatialCorr,r,p] = getSpatialCorrelation('z',map.zUnSmooth);     
-    shuffling.spatialCorr{ii} = spatialCorr;
-    shuffling.spatial_corr_r{ii} = r;
-    shuffling.spatial_corr_p{ii} = p;
-    shuffling.spatial_corr_sc_r{ii} = r(1,2);
-    shuffling.spatial_corr_sc_p{ii} = p(1,2);
-    shuffling.spatial_corr_convolution{ii} = conv2(spatialCorr,B,'same');
+    [spatialCorr,r,p] = getSpatialCorrelation('z',map.zUnSmooth);
+    
+    shuffling{ii}.spatialCorr = spatialCorr;
+    shuffling{ii}.spatial_corr_r = r;
+    shuffling{ii}.spatial_corr_p = p;
+    shuffling{ii}.spatial_corr_sc_r = r(1,2);
+    shuffling{ii}.spatial_corr_sc_p = p(1,2);
+    shuffling{ii}.spatial_corr_convolution = conv2(spatialCorr,B,'same');
+        
+%     shuffling.spatialCorr{ii} = spatialCorr;
+%     shuffling.spatial_corr_r{ii} = r;
+%     shuffling.spatial_corr_p{ii} = p;
+%     shuffling.spatial_corr_sc_r{ii} = r(1,2);
+%     shuffling.spatial_corr_sc_p{ii} = p(1,2);
+%     shuffling.spatial_corr_convolution{ii} = conv2(spatialCorr,B,'same');
 
     % Spatial coherence rectangle
+    
     [spatialCorr,r,p] = getSpatialCorrelationRectangle('z',map.zUnSmooth,'occupancy',map.timeUnSmooth);
-    shuffling.spatial_corr2{ii} = spatialCorr;
-    shuffling.spatial_corr2{ii} = r;
-    shuffling.spatial_corr2{ii} = p;
-    shuffling.spatial_corr2_sc_r{ii} = r(1,2); 
-    shuffling.spatial_corr2_sc_p{ii} = p(1,2);
+    
+    shuffling{ii}.spatial_corr2 = spatialCorr;
+    shuffling{ii}.spatial_corr2_r = r;
+    shuffling{ii}.spatial_corr2_p = p;
+    shuffling{ii}.spatial_corr2_sc_r = r(1,2); 
+    shuffling{ii}.spatial_corr2_sc_p = p(1,2);
+%     
+%     shuffling.spatial_corr2{ii} = spatialCorr;
+%     shuffling.spatial_corr2_r{ii} = r;
+%     shuffling.spatial_corr2_p{ii} = p;
+%     shuffling.spatial_corr2_sc_r{ii} = r(1,2); 
+%     shuffling.spatial_corr2_sc_p{ii} = p(1,2);
     
     % Bits per Spike
 %     [skaggs] = getSkaggsIndex('z',map.z,'occupancy',map.time);
     [skaggs] = getSkaggsIndex('z',map.zUnSmooth,'occupancy',map.timeUnSmooth,'time',map.timeUnSmoothSec);
-    shuffling.bitsPerSec{ii} = skaggs.bitsPerSec;
-    shuffling.bitsPerSpike{ii} = skaggs.bitsPerSpike;
+    
+    shuffling{ii}.bitsPerSec = skaggs.bitsPerSec;
+    shuffling{ii}.bitsPerSpike = skaggs.bitsPerSpike;
+    
+%     
+%     shuffling.bitsPerSec{ii} = skaggs.bitsPerSec;
+%     shuffling.bitsPerSpike{ii} = skaggs.bitsPerSpike;
     
     % Firing Field Size
     [firingFieldSize] = getFiringFieldSize('z',map.z,'debug',false);
-    shuffling.firingFieldSize.size{ii} = firingFieldSize.size;
-    shuffling.firingFieldSize.sizeperc{ii} = firingFieldSize.sizeperc;
-    shuffling.firingFieldSize.data{ii} = firingFieldSize.data;
-    shuffling.firingFieldSize.positionx{ii} = firingFieldSize.positionx;
-    shuffling.firingFieldSize.positiony{ii} = firingFieldSize.positiony;
-    shuffling.firingFieldSize.MaxF{ii} = firingFieldSize.MaxF;
-    shuffling.firingFieldSize.numFF{ii} = firingFieldSize.numFF;
-    shuffling.firingFieldSize.FFarea{ii} = firingFieldSize.FFarea;
-    shuffling.firingFieldSize.FFareatot{ii} = firingFieldSize.FFareatot;
+    
+    
+    shuffling{ii}.firingFieldSize.size = firingFieldSize.size;
+    shuffling{ii}.firingFieldSize.sizeperc = firingFieldSize.sizeperc;
+    shuffling{ii}.firingFieldSize.data = firingFieldSize.data;
+    shuffling{ii}.firingFieldSize.positionx = firingFieldSize.positionx;
+    shuffling{ii}.firingFieldSize.positiony = firingFieldSize.positiony;
+    shuffling{ii}.firingFieldSize.MaxF = firingFieldSize.MaxF;
+    shuffling{ii}.firingFieldSize.numFF = firingFieldSize.numFF;
+    shuffling{ii}.firingFieldSize.FFarea = firingFieldSize.FFarea;
+    shuffling{ii}.firingFieldSize.FFareatot = firingFieldSize.FFareatot;
+    
+    
+%     shuffling.firingFieldSize.size{ii} = firingFieldSize.size;
+%     shuffling.firingFieldSize.sizeperc{ii} = firingFieldSize.sizeperc;
+%     shuffling.firingFieldSize.data{ii} = firingFieldSize.data;
+%     shuffling.firingFieldSize.positionx{ii} = firingFieldSize.positionx;
+%     shuffling.firingFieldSize.positiony{ii} = firingFieldSize.positiony;
+%     shuffling.firingFieldSize.MaxF{ii} = firingFieldSize.MaxF;
+%     shuffling.firingFieldSize.numFF{ii} = firingFieldSize.numFF;
+%     shuffling.firingFieldSize.FFarea{ii} = firingFieldSize.FFarea;
+%     shuffling.firingFieldSize.FFareatot{ii} = firingFieldSize.FFareatot;
     
     % Border Index
     borderIndex = getBorderIndex('z',map.z); 
-    shuffling.borderIndex.west{ii} = borderIndex.west;
-    shuffling.borderIndex.east{ii} = borderIndex.east;
-    shuffling.borderIndex.north{ii} = borderIndex.north;
-    shuffling.borderIndex.south{ii} = borderIndex.south;
-    shuffling.borderIndex.maxBorderIndex{ii} = borderIndex.maxBorderIndex;
+    
+    shuffling{ii}.borderIndex.west = borderIndex.west;
+    shuffling{ii}.borderIndex.east = borderIndex.east;
+    shuffling{ii}.borderIndex.north = borderIndex.north;
+    shuffling{ii}.borderIndex.south = borderIndex.south;
+    shuffling{ii}.borderIndex.maxBorderIndex = borderIndex.maxBorderIndex;
+    
+%     
+%     shuffling.borderIndex.west{ii} = borderIndex.west;
+%     shuffling.borderIndex.east{ii} = borderIndex.east;
+%     shuffling.borderIndex.north{ii} = borderIndex.north;
+%     shuffling.borderIndex.south{ii} = borderIndex.south;
+%     shuffling.borderIndex.maxBorderIndex{ii} = borderIndex.maxBorderIndex;
     
     % Periodic Firing
-    periodic = getPeriodicFiring('z',map.zUnSmooth,'plt',false);         
-    shuffling.periodicFiring.maxPolar{ii} = periodic.maxPolar;
-    shuffling.periodicFiring.posPolar{ii} = periodic.posPolar;
-    shuffling.periodicFiring.theta{ii} = periodic.theta;
-    shuffling.periodicFiring.Orient{ii} = periodic.Orient;
-    shuffling.periodicFiring.frec{ii} = periodic.frec;
-    shuffling.periodicFiring.periodicComponents{ii} = periodic.periodicComponents;
-    shuffling.periodicFiring.BC{ii} = periodic.BC;
+    periodic = getPeriodicFiring('z',map.zUnSmooth,'plt',false);     
+    
+    shuffling{ii}.periodicFiring.maxPolar = periodic.maxPolar;
+    shuffling{ii}.periodicFiring.posPolar = periodic.posPolar;
+    shuffling{ii}.periodicFiring.theta = periodic.theta;
+    shuffling{ii}.periodicFiring.Orient = periodic.Orient;
+    shuffling{ii}.periodicFiring.frec = periodic.frec;
+    shuffling{ii}.periodicFiring.periodicComponents = periodic.periodicComponents;
+    shuffling{ii}.periodicFiring.BC = periodic.BC;
+    shuffling{ii}.periodicFiring.TFP = periodic.TFP;
+%     
+%     shuffling.periodicFiring.maxPolar{ii} = periodic.maxPolar;
+%     shuffling.periodicFiring.posPolar{ii} = periodic.posPolar;
+%     shuffling.periodicFiring.theta{ii} = periodic.theta;
+%     shuffling.periodicFiring.Orient{ii} = periodic.Orient;
+%     shuffling.periodicFiring.frec{ii} = periodic.frec;
+%     shuffling.periodicFiring.periodicComponents{ii} = periodic.periodicComponents;
+%     shuffling.periodicFiring.BC{ii} = periodic.BC;
 %     shuffling.periodicFiring.TFP{ii} = periodic.TFP;
     
     % Grid Analysis
     if gridAnalysis
-       grid = computeGrid('z',map.z);      
-       shuffling.grid{ii}.autoCorr = grid.autoCorr;
-       shuffling.grid{ii}.regionalMax = grid.regionalMax;
-       shuffling.grid{ii}.geometry = grid.geometry; 
-    end 
+       grid = computeGrid('z',map.z); 
+       
+       
+       shuffling{ii}.grid.autoCorr = grid.autoCorr;
+       shuffling{ii}.grid.regionalMax = grid.regionalMax;
+       shuffling{ii}.grid.geometry = grid.geometry; 
+%        
+%        shuffling.grid{ii}.autoCorr = grid.autoCorr;
+%        shuffling.grid{ii}.regionalMax = grid.regionalMax;
+%        shuffling.grid{ii}.geometry = grid.geometry; 
+    end
+    
+    count = count + 1;
 end
 
 

@@ -248,7 +248,7 @@ if strcmp(type(end),'c'), map.z = wrap(angle(map.z),range); end
 
 
 % Interpolate or discard regions with insufficient sampling
-if strcmp(mode,'discard'),
+if strcmp(mode,'discard')
 	map.z(map.time<=minTime) = 0;
 end
 

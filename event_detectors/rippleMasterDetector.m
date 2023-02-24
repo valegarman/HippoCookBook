@@ -99,12 +99,12 @@ addParameter(p,'plotType',2,@isnumeric);
 addParameter(p,'srLfp',1250,@isnumeric);
 addParameter(p,'rippleStats',true,@islogical);
 addParameter(p,'debug',false,@islogical);
-addParameter(p,'eventSpikeThreshold',1);
+addParameter(p,'eventSpikeThreshold',.5);
 addParameter(p,'eventSpikeThreshold_shanks','all');
 addParameter(p,'force',false,@islogical);
 addParameter(p,'removeOptogeneticStimulation',true,@islogical);
 addParameter(p,'useCSD',false,@islogical);
-addParameter(p,'stdThreshold',1.5,@isnumeric);
+addParameter(p,'stdThreshold',2,@isnumeric);
 addParameter(p,'detector','filter',@ischar);
 % -- cnn related --
 addParameter(p,'cnn_channels', [], @isnumeric);
@@ -245,6 +245,7 @@ else
     warning([detector ' is not recognised as a detector, please chose between filter/cnn/consensus'])
     return
 end
+
 if removeOptogeneticStimulation
     try
         % Remove ripples durting stimulation artifacts
@@ -277,13 +278,16 @@ if removeOptogeneticStimulation
         warning('Not possible to remove ripples during stimulation epochs...');
     end
 end
+
 ripples = removeArtifactsFromEvents(ripples,'stdThreshold',stdThreshold);
+
 if isnumeric(eventSpikeThreshold) || eventSpikeThreshold
     if islogical(eventSpikeThreshold)
         eventSpikeThreshold = 1;
     end
     ripples = eventSpikingTreshold(ripples,[],'spikingThreshold',eventSpikeThreshold,'shanksID',eventSpikeThreshold_shanks);
 end
+
 plotRippleChannel('rippleChannel',rippleChannel,'ripples',ripples); % to do, run this after ripple detection
 % EventExplorer(pwd, ripples)
 

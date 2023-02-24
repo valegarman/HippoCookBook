@@ -25,6 +25,7 @@ addParameter(p,'saveFigure',true, @islogical);
 addParameter(p,'checkUnits',true, @islogical);
 addParameter(p,'use_deltaThetaEpochs',true, @islogical);
 addParameter(p,'excludePlot',[]);
+addParameter(p,'saveAs',[],@ischar);
 
 parse(p,varargin{:})
 
@@ -34,6 +35,7 @@ saveFigure = p.Results.saveFigure;
 checkUnits = p.Results.checkUnits;
 use_deltaThetaEpochs = p.Results.use_deltaThetaEpochs;
 excludePlot = p.Results.excludePlot;
+saveAs = p.Results.saveAs;
 
 for ii = 1:length(excludePlot)
     excludePlot{ii} = num2str(excludePlot{ii});
@@ -103,6 +105,8 @@ targetFile = dir('*.ripples_psth.cellinfo.mat'); ripplesResponses = importdata(t
 targetFile = dir('*.ripple_120-200.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
 ripples = rippleMasterDetector;
 
+% theta epochs
+targetFile = dir('*.thetaEpochs.states.mat'); load(targetFile.name);
 % theta and gamma/s
 targetFile = dir('*.theta_6-12.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
 targetFile = dir('*.lgamma_20-60.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
@@ -387,6 +391,20 @@ scatter(rippleMod.phasestats.m(all_pyr), rand(length(find(all_pyr)),1)/2 + 2.2,2
 scatter(rippleMod.phasestats.m(all_nw), rand(length(find(all_nw)),1)/2 + 2.8,20,nw_color,'filled');
 scatter(rippleMod.phasestats.m(all_ww), rand(length(find(all_ww)),1)/2 + 3.4,20,ww_color,'filled');
 
+session.analysisTags.rippleChannel = ripples.detectorinfo.detectionchannel;
+for ii = 1:length(session.extracellular.electrodeGroups.channels)
+    if ismember(session.analysisTags.rippleChannel,session.extracellular.electrodeGroups.channels{ii})
+        ripple_shank = ii;
+    end
+end
+flds = fields(session.brainRegions);
+for ii = 1:length(flds)    
+    if ismember(session.analysisTags.rippleChannel,session.brainRegions.(flds{ii}).channels)
+        ripple_region = flds{ii};
+    end
+end
+    
+title(['Ripple shank: ', num2str(ripple_shank), ' Ripple region: ', num2str(ripple_region) ],'FontWeight','normal');
 axis tight
 xlabel('Ripple phase (rad)'); ylabel('Rate (SD)');
 set(gca,'XTick',[0:2*pi:4*pi],'XTickLabel',{'0', '2\pi', '4\pi'});
@@ -417,6 +435,20 @@ scatter(thetaMod.phasestats.m(all_pyr), rand(length(find(all_pyr)),1)/2 + 2.2,20
 scatter(thetaMod.phasestats.m(all_nw), rand(length(find(all_nw)),1)/2 + 2.8,20,nw_color,'filled');
 scatter(thetaMod.phasestats.m(all_ww), rand(length(find(all_ww)),1)/2 + 3.4,20,ww_color,'filled');
 
+session.analysisTags.thetaChannel = thetaEpochs.channel;
+for ii = 1:length(session.extracellular.electrodeGroups.channels)
+    if ismember(session.analysisTags.thetaChannel,session.extracellular.electrodeGroups.channels{ii})
+        theta_shank = ii;
+    end
+end
+flds = fields(session.brainRegions);
+for ii = 1:length(flds)    
+    if ismember(session.analysisTags.thetaChannel,session.brainRegions.(flds{ii}).channels)
+        theta_region = flds{ii};
+    end
+end
+
+title(['Theta shank: ', num2str(theta_shank), ' Theta region: ', num2str(theta_region) ],'FontWeight','normal');
 axis tight
 xlabel('Theta phase (rad)'); ylabel('Rate (SD)');
 set(gca,'XTick',[0:2*pi:4*pi],'XTickLabel',{'0', '2\pi', '4\pi'});
@@ -515,8 +547,94 @@ else
     title('No speed data','FontWeight','normal');
 end
 
+
+
+
 % Behavior
 if ~isempty(behavior)
+    try
+        if isfield(behavior,'psth_reward')
+            subplot(6,6,17)
+            hold on;
+            t_win = behavior.psth_reward.timestamps > -2 & behavior.psth_reward.timestamps < 2;
+            plotFill(behavior.psth_reward.timestamps(t_win),behavior.psth_reward.responsecurveZSmooth(all_nw,t_win),'color',nw_color,'style','filled');
+            plotFill(behavior.psth_reward.timestamps(t_win),behavior.psth_reward.responsecurveZSmooth(all_ww,t_win),'color',ww_color,'style','filled');
+            plotFill(behavior.psth_reward.timestamps(t_win),behavior.psth_reward.responsecurveZSmooth(all_pyr,t_win),'color',pyr_color,'style','filled');
+            axis tight
+            xlabel('Reward time (s)'); ylabel('Rate (SD)');
+        end
+        
+        if isfield(behavior,'psth_lReward') && isstruct(behavior.psth_lReward)
+            h = get(gcf);
+            nextSubPlot = length(h.Children) + 1;
+            subplot(6,6,nextSubPlot)
+            hold on;
+            t_win = behavior.psth_lReward.timestamps > -2 & behavior.psth_lReward.timestamps < 2;
+            if length(find(all_nw == 1)) == 1
+                plot(behavior.psth_lReward.timestamps(t_win),behavior.psth_lReward.responsecurveZSmooth(all_nw,t_win),'color',nw_color);
+            else
+                plotFill(behavior.psth_lReward.timestamps(t_win),behavior.psth_lReward.responsecurveZSmooth(all_nw,t_win),'color',nw_color,'style','filled');
+            end
+            if length(find(all_ww == 1)) == 1
+                plot(behavior.psth_lReward.timestamps(t_win),behavior.psth_lReward.responsecurveZSmooth(all_ww,t_win),'color',ww_color);
+            else
+                plotFill(behavior.psth_lReward.timestamps(t_win),behavior.psth_lReward.responsecurveZSmooth(all_ww,t_win),'color',ww_color,'style','filled');
+            end
+            plotFill(behavior.psth_lReward.timestamps(t_win),behavior.psth_lReward.responsecurveZSmooth(all_pyr,t_win),'color',pyr_color,'style','filled');
+            axis tight
+            xlabel('lReward time (s)'); ylabel('Rate (SD)');
+        end
+
+        if isfield(behavior,'psth_rReward') && isstruct(behavior.psth_rReward)
+            h = get(gcf);
+            nextSubPlot = length(h.Children) + 1;
+            subplot(6,6,nextSubPlot)
+            hold on;
+            t_win = behavior.psth_rReward.timestamps > -2 & behavior.psth_rReward.timestamps < 2;
+            if length(find(all_nw == 1)) == 1
+                plot(behavior.psth_rReward.timestamps(t_win),behavior.psth_rReward.responsecurveZSmooth(all_nw,t_win),'color',nw_color);
+            else
+                plotFill(behavior.psth_rReward.timestamps(t_win),behavior.psth_rReward.responsecurveZSmooth(all_nw,t_win),'color',nw_color,'style','filled');
+            end
+            if length(find(all_ww == 1)) == 1
+                plot(behavior.psth_rReward.timestamps(t_win),behavior.psth_rReward.responsecurveZSmooth(all_ww,t_win),'color',ww_color);
+            else
+                plotFill(behavior.psth_rReward.timestamps(t_win),behavior.psth_rReward.responsecurveZSmooth(all_ww,t_win),'color',ww_color,'style','filled');
+            end
+            plotFill(behavior.psth_rReward.timestamps(t_win),behavior.psth_rReward.responsecurveZSmooth(all_pyr,t_win),'color',pyr_color,'style','filled');
+            axis tight
+            xlabel('rReward time (s)'); ylabel('Rate (SD)');
+        end
+        
+        if isfield(behavior,'psth_intersection') && isstruct(behavior.psth_intersection)
+            h = get(gcf);
+            nextSubPlot = length(h.Children) + 1;
+            subplot(6,6,nextSubPlot)
+            hold on;
+            t_win = behavior.psth_intersection.timestamps > -2 & behavior.psth_intersection.timestamps < 2;
+            plotFill(behavior.psth_intersection.timestamps(t_win),behavior.psth_intersection.responsecurveZSmooth(all_nw,t_win),'color',nw_color,'style','filled');
+            plotFill(behavior.psth_intersection.timestamps(t_win),behavior.psth_intersection.responsecurveZSmooth(all_ww,t_win),'color',ww_color,'style','filled');
+            plotFill(behavior.psth_intersection.timestamps(t_win),behavior.psth_intersection.responsecurveZSmooth(all_pyr,t_win),'color',pyr_color,'style','filled');
+            axis tight
+            xlabel('Intersection time (s)'); ylabel('Rate (SD)');
+        end
+        
+        if isfield(behavior,'psth_startPoint') && isstruct(behavior.psth_startPoint)
+            h = get(gcf);
+            nextSubPlot = length(h.Children) + 1;
+            subplot(6,6,nextSubPlot)
+            hold on
+            t_win = behavior.psth_startPoint.timestamps > -2 & behavior.psth_startPoint.timestamps < 2;
+            plotFill(behavior.psth_startPoint.timestamps(t_win),behavior.psth_startPoint.responsecurveZSmooth(all_nw,t_win),'color',nw_color,'style','filled');
+            plotFill(behavior.psth_startPoint.timestamps(t_win),behavior.psth_startPoint.responsecurveZSmooth(all_ww,t_win),'color',ww_color,'style','filled');
+            plotFill(behavior.psth_startPoint.timestamps(t_win),behavior.psth_startPoint.responsecurveZSmooth(all_pyr,t_win),'color',pyr_color,'style','filled');
+            axis tight
+            xlabel('Start point time (s)'); ylabel('Rate (SD)');
+        end
+ 
+    catch
+    end
+            
     if isfield(behavior,'psth_entry') && isstruct(behavior.psth_entry)
         flds = fieldnames(behavior.psth_entry);
         for ii = 1:length(flds)
@@ -575,47 +693,7 @@ if ~isempty(behavior)
         end
     end
     
-    if isfield(behavior,'psth_lReward') && isstruct(behavior.psth_lReward)
-        h = get(gcf);
-        nextSubPlot = length(h.Children) + 1;
-        subplot(6,6,nextSubPlot)
-        hold on;
-        t_win = behavior.psth_lReward.timestamps > -2 & behavior.psth_lReward.timestamps < 2;
-        if length(find(all_nw == 1)) == 1
-            plot(behavior.psth_lReward.timestamps(t_win),behavior.psth_lReward.responsecurveZSmooth(all_nw,t_win),'color',nw_color);
-        else
-            plotFill(behavior.psth_lReward.timestamps(t_win),behavior.psth_lReward.responsecurveZSmooth(all_nw,t_win),'color',nw_color,'style','filled');
-        end
-        if length(find(all_ww == 1)) == 1
-            plot(behavior.psth_lReward.timestamps(t_win),behavior.psth_lReward.responsecurveZSmooth(all_ww,t_win),'color',ww_color);
-        else
-            plotFill(behavior.psth_lReward.timestamps(t_win),behavior.psth_lReward.responsecurveZSmooth(all_ww,t_win),'color',ww_color,'style','filled');
-        end
-        plotFill(behavior.psth_lReward.timestamps(t_win),behavior.psth_lReward.responsecurveZSmooth(all_pyr,t_win),'color',pyr_color,'style','filled');
-        axis tight
-        xlabel('lReward time (s)'); ylabel('Rate (SD)');
-    end
     
-    if isfield(behavior,'psth_rReward') && isstruct(behavior.psth_rReward)
-        h = get(gcf);
-        nextSubPlot = length(h.Children) + 1;
-        subplot(6,6,nextSubPlot)
-        hold on;
-        t_win = behavior.psth_rReward.timestamps > -2 & behavior.psth_rReward.timestamps < 2;
-        if length(find(all_nw == 1)) == 1
-            plot(behavior.psth_rReward.timestamps(t_win),behavior.psth_rReward.responsecurveZSmooth(all_nw,t_win),'color',nw_color);
-        else
-            plotFill(behavior.psth_rReward.timestamps(t_win),behavior.psth_rReward.responsecurveZSmooth(all_nw,t_win),'color',nw_color,'style','filled');
-        end
-        if length(find(all_ww == 1)) == 1
-            plot(behavior.psth_rReward.timestamps(t_win),behavior.psth_rReward.responsecurveZSmooth(all_ww,t_win),'color',ww_color);
-        else
-            plotFill(behavior.psth_rReward.timestamps(t_win),behavior.psth_rReward.responsecurveZSmooth(all_ww,t_win),'color',ww_color,'style','filled');
-        end
-        plotFill(behavior.psth_rReward.timestamps(t_win),behavior.psth_rReward.responsecurveZSmooth(all_pyr,t_win),'color',pyr_color,'style','filled');
-        axis tight
-        xlabel('rReward time (s)'); ylabel('Rate (SD)');
-    end
         
 else
     h = get(gcf);
@@ -634,42 +712,87 @@ end
 % spatial modulation
 if ~isempty(spatialModulation) && ~any(ismember(excludePlot,{lower('spatialModulation')}))
     try
-        h = get(gcf);
-        nextSubPlot = length(h.Children) + 1;
-        subplot(6,6,[nextSubplot nextSubplot+1])
-        hold on
+        count = 1;
+        
+        while isfield(spatialModulation,['map_',num2str(count),'_timestamps'])
+            if count == 1
+                subplot(6,6,[25 31])
+                hold on
 
-        imagesc_ranked(spatialModulation.map_1_timestamps, [1:length(find(all_pyr))], spatialModulation.map_1_rateMapsZ(all_pyr,:),[-3 3],...
-            spatialModulation.PF_position_map_1(all_pyr,:));
+                imagesc_ranked(spatialModulation.map_1_timestamps, [1:length(find(all_pyr))], spatialModulation.map_1_rateMapsZ(all_pyr,:),[-3 3],...
+                    spatialModulation.PF_position_map_1(all_pyr,:));
 
-        imagesc_ranked(spatialModulation.map_1_timestamps, [length(find(all_pyr)) + 5 (length(find(all_pyr))+ length(find(all_nw)) + 5)], spatialModulation.map_1_rateMapsZ(all_nw,:),[-3 3],...
-            spatialModulation.PF_position_map_1(all_nw,:));
+                imagesc_ranked(spatialModulation.map_1_timestamps, [length(find(all_pyr)) + 5 (length(find(all_pyr))+ length(find(all_nw)) + 5)], spatialModulation.map_1_rateMapsZ(all_nw,:),[-3 3],...
+                    spatialModulation.PF_position_map_1(all_nw,:));
 
-        imagesc_ranked(spatialModulation.map_1_timestamps,...
-            [(length(find(all_pyr)) + length(find(all_nw)) + 10) (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)], spatialModulation.map_1_rateMapsZ(all_ww,:),[-3 3],...
-            spatialModulation.PF_position_map_1(all_ww,:));
-        xlim(spatialModulation.map_1_timestamps([1 end]));
-        ylim([0 (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)]);
-        xlabel('cm'); ylabel('Map 1 (-3 to 3 SD)');
-        set(gca,'YTick',[0 (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)],'YTickLabel',[0 length(all_pyr)]);
+                imagesc_ranked(spatialModulation.map_1_timestamps,...
+                    [(length(find(all_pyr)) + length(find(all_nw)) + 10) (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)], spatialModulation.map_1_rateMapsZ(all_ww,:),[-3 3],...
+                    spatialModulation.PF_position_map_1(all_ww,:));
+                xlim(spatialModulation.map_1_timestamps([1 end]));
+                ylim([0 (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)]);
+                xlabel('cm'); ylabel('Map 1 (-3 to 3 SD)');
+                set(gca,'YTick',[0 (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)],'YTickLabel',[0 length(all_pyr)]);
+                colormap jet
+            elseif count == 2
+                subplot(6,6,[26 32])
+                hold on
+                imagesc_ranked(spatialModulation.map_2_timestamps, [1:length(find(all_pyr))], spatialModulation.map_2_rateMapsZ(all_pyr,:),[-3 3],...
+                    spatialModulation.PF_position_map_2(all_pyr,:));
 
-        subplot(6,6,[23 24])
-        hold on
+                imagesc_ranked(spatialModulation.map_2_timestamps, [length(find(all_pyr)) + 5 (length(find(all_pyr))+ length(find(all_nw)) + 5)], spatialModulation.map_2_rateMapsZ(all_nw,:),[-3 3],...
+                    spatialModulation.PF_position_map_2(all_nw,:));
 
-        imagesc_ranked(spatialModulation.map_2_timestamps, [1:length(find(all_pyr))], spatialModulation.map_2_rateMapsZ(all_pyr,:),[-3 3],...
-            spatialModulation.PF_position_map_2(all_pyr,:));
+                imagesc_ranked(spatialModulation.map_2_timestamps,...
+                    [(length(find(all_pyr)) + length(find(all_nw)) + 10) (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)], spatialModulation.map_2_rateMapsZ(all_ww,:),[-3 3],...
+                    spatialModulation.PF_position_map_2(all_ww,:));
+                xlim(spatialModulation.map_2_timestamps([1 end]));
+                ylim([0 (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)]);
+                xlabel('cm'); ylabel('Map 2 (-3 to 3 SD)');
+                set(gca,'YTick',[0 (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)],'YTickLabel',[0 length(all_pyr)]);
+                colormap jet
+                
+            elseif count == 3
+                
+                subplot(6,6,[27 33])
+                hold on
+                imagesc_ranked(spatialModulation.map_3_timestamps, [1:length(find(all_pyr))], spatialModulation.map_3_rateMapsZ(all_pyr,:),[-3 3],...
+                    spatialModulation.PF_position_map_3(all_pyr,:));
 
-        imagesc_ranked(spatialModulation.map_2_timestamps, [length(find(all_pyr)) + 5 (length(find(all_pyr))+ length(find(all_nw)) + 5)], spatialModulation.map_2_rateMapsZ(all_nw,:),[-3 3],...
-            spatialModulation.PF_position_map_1(all_nw,:));
+                imagesc_ranked(spatialModulation.map_3_timestamps, [length(find(all_pyr)) + 5 (length(find(all_pyr))+ length(find(all_nw)) + 5)], spatialModulation.map_3_rateMapsZ(all_nw,:),[-3 3],...
+                    spatialModulation.PF_position_map_3(all_nw,:));
 
-        imagesc_ranked(spatialModulation.map_2_timestamps,...
-            [(length(find(all_pyr)) + length(find(all_nw)) + 10) (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)], spatialModulation.map_2_rateMapsZ(all_ww,:),[-3 3],...
-            spatialModulation.PF_position_map_1(all_ww,:));
-        xlim(spatialModulation.map_2_timestamps([1 end]));
-        ylim([0 (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)]);
-        xlabel('cm'); ylabel('Map 2 (-3 to 3 SD)');
-        set(gca,'YTick',[0 (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)],'YTickLabel',[0 length(all_pyr)]);
-        colormap jet
+                imagesc_ranked(spatialModulation.map_3_timestamps,...
+                    [(length(find(all_pyr)) + length(find(all_nw)) + 10) (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)], spatialModulation.map_3_rateMapsZ(all_ww,:),[-3 3],...
+                    spatialModulation.PF_position_map_3(all_ww,:));
+                xlim(spatialModulation.map_3_timestamps([1 end]));
+                ylim([0 (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)]);
+                xlabel('cm'); ylabel('Map 3 (-3 to 3 SD)');
+                set(gca,'YTick',[0 (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)],'YTickLabel',[0 length(all_pyr)]);
+                colormap jet
+                
+                
+                
+            elseif count == 4
+                
+                subplot(6,6,[28 34])
+                hold on
+                imagesc_ranked(spatialModulation.map_4_timestamps, [1:length(find(all_pyr))], spatialModulation.map_4_rateMapsZ(all_pyr,:),[-3 3],...
+                    spatialModulation.PF_position_map_4(all_pyr,:));
+
+                imagesc_ranked(spatialModulation.map_4_timestamps, [length(find(all_pyr)) + 5 (length(find(all_pyr))+ length(find(all_nw)) + 5)], spatialModulation.map_4_rateMapsZ(all_nw,:),[-3 3],...
+                    spatialModulation.PF_position_map_4(all_nw,:));
+
+                imagesc_ranked(spatialModulation.map_4_timestamps,...
+                    [(length(find(all_pyr)) + length(find(all_nw)) + 10) (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)], spatialModulation.map_4_rateMapsZ(all_ww,:),[-3 3],...
+                    spatialModulation.PF_position_map_4(all_ww,:));
+                xlim(spatialModulation.map_4_timestamps([1 end]));
+                ylim([0 (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)]);
+                xlabel('cm'); ylabel('Map 4 (-3 to 3 SD)');
+                set(gca,'YTick',[0 (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)],'YTickLabel',[0 length(all_pyr)]);
+                colormap jet                
+            end
+            count = count + 1;
+        end
     catch
         subplot(6,6,[21 22])
         axis off

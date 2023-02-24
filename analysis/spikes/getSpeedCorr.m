@@ -11,6 +11,7 @@ addParameter(p,'trials',true,@islogical);
 addParameter(p,'plt',true,@islogical);
 addParameter(p,'basepath',pwd,@isfolder);
 addParameter(p,'force',false,@islogical);
+addParameter(p,'restrictIntervals',[],@isnumeric);
 
 parse(p,varargin{:});
 saveMat = p.Results.saveMat;
@@ -23,6 +24,7 @@ trials = p.Results.trials;
 plt = p.Results.plt;
 basepath = p.Results.basepath;
 force = p.Results.force;
+restrictIntervals = p.Results.restrictIntervals;
 
 % Deal with inputs
 prevPath = pwd;
@@ -42,7 +44,7 @@ speedCorrs = struct();
 speedCorrs.sessionName = basename;
 
 %% Session metadata
-session = sessionTemplate(basepath);
+session = loadSession(basepath);
 
 % Get behavior
 if ~isempty(dir([session.general.name,'.Behavior.mat']))
@@ -60,6 +62,12 @@ if ~isempty(dir([session.general.name, '.spikes.cellinfo.mat']))
     disp('Spikes.cellinfo.mat found. Loading file');
     file = dir([[session.general.name, '.spikes.cellinfo.mat']]);
     load(file.name);
+    if ~isempty(restrictIntervals)
+       for ii = 1:length(spikes.UID)
+           [status] = InIntervals(spikes.times{ii},restrictIntervals);
+           spikes.times{ii} = spikes.times{ii}(status);
+       end
+    end
 end
 
 % Get speed

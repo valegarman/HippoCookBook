@@ -65,7 +65,8 @@ function [lfp] = getLFP(varargin)
 % add saveMat input 
 % expand channel selection options (i.e. region or spikegroup)
 % add forcereload
-% Updated by Pablo Abad from bz_GetLFP() to remove sessionInfo dependencies and also 1-index.
+% Updated by Pablo Abad from bz_GetLFP() to remove sessionInfo dependencies
+% and also 1-index. Added ignoretimes
 %% Parse the inputs!
 
 channelsValidation = @(x) isnumeric(x) || strcmp(x,'all');
@@ -82,6 +83,8 @@ addParameter(p,'downsample',1,@isnumeric);
 % addParameter(p,'forceReload',false,@islogical);
 addParameter(p,'noPrompts',false,@islogical);
 addParameter(p,'fromDat',false,@islogical);
+addParameter(p,'ignoretime',[],@isnumeric);
+
 
 parse(p,varargin{:})
 basename = p.Results.basename;
@@ -90,6 +93,7 @@ downsamplefactor = p.Results.downsample;
 basepath = p.Results.basepath;
 noPrompts = p.Results.noPrompts;
 fromDat = p.Results.fromDat;
+ignoretime = p.Results.ignoretime;
 
 % doing this so you can use either 'intervals' or 'restrict' as parameters to do the same thing
 intervals = p.Results.intervals;
@@ -209,7 +213,13 @@ for i = 1:nIntervals
         lfp(i).duration = (lfp(i).interval(i,2)-lfp(i).interval(i,1));
     end
     
-    
+    if ~isempty(ignoretime)
+        lfp(i).data(ignoretime(1)*lfp(i).samplingRate:ignoretime(2)*lfp(i).samplingRate,:) = [];
+        lfp(i).timestamps(ignoretime(1)*lfp(i).samplingRate:ignoretime(2)*lfp(i).samplingRate) = [];
+        lfp(i).duration = length(lfp(i).timestamps)/1250;
+        lfp(i).interval(2) = lfp(i).duration;
+        
+    end
     if isfield(session,'brainRegions') && isfield(session,'channels')    
         bRegions = cell(1,length(channels));
         for j = 1:length(bRegions)

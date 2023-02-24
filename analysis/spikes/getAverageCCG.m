@@ -149,6 +149,7 @@ averageCCG.timestamps = t_ccg;
 averageCCG.excludeIntervals = excludeIntervals;
 averageCCG.ccgIndex = ccgIndex;
 averageCCG.winIndex = winIndex;
+averageCCG.allCcg = allCcg;
 
 brainRegionCCG = [];
 if useBrainRegions && exist([basenameFromBasepath(basepath) '.cell_metrics.cellinfo.mat'])

@@ -304,7 +304,7 @@ parfor idx = 1:numThetaChannels;
     %dipTH(idx) = hartigansdiptest_ss(sort(thratio));
 
     %% Ratio of Theta Peak to sorrounding in mean spectrum (for selection)
-    meanspec = (mean(thFFTspec,2));
+    meanspec = (nanmean(thFFTspec,2));
     meanthratio = sum((meanspec(thfreqs)))./sum((meanspec(:)));
 
     %Record the spec and peak ratio for later comparison between chans
@@ -327,7 +327,7 @@ THchanID = ThetaChannels(goodTHidx);   %best SW and theta channels
 % downsample_save = Par.lfpSampleRate./250;
 downsample_save = Par.extracellular.srLfp./250;
 swthLFP = getLFP([SWchanID,THchanID],'basepath',basePath,'basename',recordingname,...
-    'downsample',downsample_save,'intervals',scoretime,'noPrompts',noPrompts);
+    'downsample',downsample_save,'intervals',scoretime,'noPrompts',noPrompts,'ignoretime',ignoretime);
 
 swLFP = (swthLFP.data(:,1));
 thLFP = (swthLFP.data(:,2));

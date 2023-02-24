@@ -33,6 +33,7 @@ addParameter(p,'rippleChannel',[],@isnumeric);
 addParameter(p,'ripples',[], @isstruct);
 addParameter(p,'saveFig',true,@islogical);
 addParameter(p,'restrictToIntervals',[],@isnumeric);
+addParameter(p,'inAxis',false,@islogical);
 
 parse(p,varargin{:});
 
@@ -46,6 +47,7 @@ rippleChannel = p.Results.rippleChannel;
 ripples = p.Results.ripples;
 saveFig = p.Results.saveFig;
 restrictToIntervals = p.Results.restrictToIntervals;
+inAxis = p.Results.inAxis;
 
 prevPath = pwd;
 cd(basePath);
@@ -166,7 +168,10 @@ end
 Rip_chnl=Ripples_Power(nd_Ripple,2);
 
 %% 1-Plot ripple layout
-figure('position',[200 115 1300 800])
+if inAxis
+else
+    figure('position',[200 115 1300 800])
+end
 Sh_spacing=200;
 chan_spacing=800;
 ylabel_p=[];

@@ -25,6 +25,7 @@ addParameter(p,'checkUnits',true, @islogical);
 addParameter(p,'use_deltaThetaEpochs',true, @islogical);
 addParameter(p,'excludePlot',[]);
 addParameter(p,'gridAnalysis',false,@islogical);
+addParameter(p,'tint',true,@islogical);
 
 parse(p,varargin{:})
 
@@ -35,6 +36,7 @@ checkUnits = p.Results.checkUnits;
 use_deltaThetaEpochs = p.Results.use_deltaThetaEpochs;
 excludePlot = p.Results.excludePlot;
 gridAnalysis = p.Results.gridAnalysis;
+tint = p.Results.tint;
 
 % Color rules
 color_R99 = [.9 .0 .0];
@@ -119,21 +121,41 @@ end
 % speedVals = bsxfun(@rdivide,mean(speedCorr.speedVals,3),cell_metrics.firingRate(:));
 
 % spatial modulation
-targetFile = dir('*.spatialModulation.cellinfo.mat'); 
-if ~isempty(targetFile)
-    load(targetFile.name);
-else 
-    spatialModulation = [];
+if tint
+    targetFile = dir('*.spatialModulation_tint.cellinfo.mat'); 
+    if ~isempty(targetFile)
+        load(targetFile.name);
+    else 
+        spatialModulation = [];
+    end
+else
+    targetFile = dir('*.spatialModulation_tint.cellinfo.mat'); 
+    if ~isempty(targetFile)
+        load(targetFile.name);
+    else 
+        spatialModulation = [];
+    end
 end
 
 % spatial modulation 2 halves
-targetFile = dir('*.spatialModulation2Halves.cellinfo.mat');
-if ~isempty(targetFile)
-    load(targetFile.name);
+if tint
+    targetFile = dir('*.spatialModulation2Halves_tint.cellinfo.mat');
+    if ~isempty(targetFile)
+        load(targetFile.name);
+    else
+        spatialModulation2Halves = [];
+    end
 else
-    spatialModulation2Halves = [];
+    targetFile = dir('*.spatialModulation2Halves.cellinfo.mat');
+    if ~isempty(targetFile)
+        load(targetFile.name);
+    else
+        spatialModulation2Halves = [];
+    end
 end
+    
 % behavioural events
+
 targetFile = dir('*.behavior.cellinfo.mat');
 if ~isempty(targetFile)
     load(targetFile.name);
@@ -142,19 +164,37 @@ else
 end
 
 % firing maps
-targetFile = dir('*.firingMapsAvg.cellinfo.mat');
-if ~isempty(targetFile)
-    load(targetFile.name);
+if tint
+    targetFile = dir('*.firingMapsAvg_tint.cellinfo.mat');
+    if ~isempty(targetFile)
+        load(targetFile.name);
+    else
+        firingMaps = [];
+    end
 else
-    firingMaps = [];
+    targetFile = dir('*.firingMapsAvg.cellinfo.mat');
+    if ~isempty(targetFile)
+        load(targetFile.name);
+    else
+        firingMaps = [];
+    end
 end
 
 % firing maps 2 halves
-targetFile = dir('*.firingMapsAvg2Halves.cellinfo.mat');
-if ~isempty(targetFile)
-    load(targetFile.name);
+if tint
+    targetFile = dir('*.firingMapsAvg2Halves_tint.cellinfo.mat');
+    if ~isempty(targetFile)
+        load(targetFile.name);
+    else
+        firingMaps = [];
+    end
 else
-    firingMaps = [];
+    targetFile = dir('*.firingMapsAvg2Halves.cellinfo.mat');
+    if ~isempty(targetFile)
+        load(targetFile.name);
+    else
+        firingMaps = [];
+    end
 end
 
 
@@ -340,7 +380,12 @@ for ii = 1:length(UID)
         end
     end
     
-    
+    targetFile = dir([session.general.name,'.Behavior.mat']);
+    if ~isempty(targetFile)
+        load(targetFile.name);
+    else
+        behavior = [];
+    end
     % Spatial Modulation rateMaps
     if ~isempty(firingMaps) && ~any(ismember(excludePlot,{lower('spatialModulation')}))
         for jj = 1:length(firingMaps.rateMaps{ii})
@@ -520,7 +565,11 @@ for ii = 1:length(UID)
     
     if saveFigure
         mkdir('spatialModulation');
-        saveas(gcf,['spatialModulation\Summary_Cell',num2str(ii),'.png']);
+        if tint
+            saveas(gcf,['spatialModulation\Summary_Cell',num2str(ii),'_tint.png']);
+        else
+            saveas(gcf,['spatialModulation\Summary_Cell',num2str(ii),'.png']);
+        end
     end
     close all;
 end

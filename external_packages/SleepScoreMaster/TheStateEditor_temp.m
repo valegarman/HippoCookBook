@@ -356,7 +356,7 @@ else
 
     if ~exist('nCh', 'var')
 %             info1 = LoadXmlIn([baseName, '.xml']);
-            nCh = info1.nChannels;
+%             nCh = info1.nChannels;
             nCh = info1.extracellular.nChannels;
     end
     if supressLoadGUI == 0
