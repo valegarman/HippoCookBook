@@ -215,23 +215,20 @@ for ii = 1:length(UID)
     figure('units','normalized','outerposition',[0 0 1 1])
     
     % Waveform
-    h = get(gcf); nextPlot = length(h.Children)+1;
-    subplot(5,5,nextPlot)
+    subplot(5,5,length(findobj(gcf,'type','axes'))+1)
     hold on;
     plot(cell_metrics.waveforms.time{1},all_waveforms(:,ii),'color',color);
     axis tight; xlabel('ms'); ylabel('Waveform amp (SD)');
     title(['Cell: ', num2str(ii)]);
     
     % ACG
-    h = get(gcf); nextPlot = length(h.Children)+1;
-    subplot(5,5,nextPlot)
+    subplot(5,5,length(findobj(gcf,'type','axes'))+1)
     plot(acg_time,acg(:,ii),'color',color);
     axis tight; xlabel('ms'); ylabel('ACG (prob)');
     title(['Cell type: ', num2str(cell_metrics.putativeCellType{ii})]);
     
     % ACG Peak
-    h = get(gcf); nextPlot = length(h.Children)+1;
-    subplot(5,5,nextPlot)
+    subplot(5,5,length(findobj(gcf,'type','axes'))+1)
     plot(acgPeak.acg_time,acgPeak.acg_smoothed_norm(:,ii),'color',color);
     XTick = [-2 -1 0 1];
     set(gca,'XTick',XTick);
@@ -241,8 +238,7 @@ for ii = 1:length(UID)
     axis tight;
     
     % Cell position
-    h = get(gcf); nextPlot = length(h.Children)+1;
-    subplot(5,5,nextPlot)
+    subplot(5,5,length(findobj(gcf,'type','axes'))+1)
     hold on;
     scatter(cell_metrics.general.chanCoords.x+100, cell_metrics.general.chanCoords.y,10,[.9 .9 .9],"filled");
     scatter(cell_metrics.trilat_x(ii)+100, cell_metrics.trilat_y(ii),30,color,'x','LineWidth',2);
@@ -253,8 +249,7 @@ for ii = 1:length(UID)
     title(['Region: ', num2str(cell_metrics.brainRegion{ii})]);
     
     % Firing Rate Stability
-    h = get(gcf); nextPlot = length(h.Children)+1;
-    subplot(5,5,nextPlot)
+    subplot(5,5,length(findobj(gcf,'type','axes'))+1)
     plot(spikemat.timestamps/60, spikemat.data(:,ii),'color',color);
     set(gca,'YScale','log');
     title(['Stability: ' num2str(round(cell_metrics.firingRateInstability(ii),2))],'FontWeight','normal');
@@ -262,8 +257,7 @@ for ii = 1:length(UID)
     xlabel('Time (min)'); ylabel('Rate (Hz)');
     
     % Firing rate states
-    h = get(gcf); nextPlot = length(h.Children)+1;
-    subplot(5,5,nextPlot)
+    subplot(5,5,length(findobj(gcf,'type','axes'))+1)
     plot(1:5,states_rate(ii,:),'color',color);
     set(gca,'YScale','log');
     set(gca,'XTick',[1:5],'XTickLabel',{'All','Wake','Run','NREM','REM'},'XTickLabelRotation',45);
@@ -282,15 +276,13 @@ for ii = 1:length(UID)
 %     ylabel('Index (SD)'); xlim([.8 3.4]);
     
     % Average CCG
-    h = get(gcf); nextPlot = length(h.Children)+1;
-    subplot(5,5,nextPlot)
+    subplot(5,5,length(findobj(gcf,'type','axes'))+1)
     plot(averageCCG.timestamps,averageCCG.ZmedianCCG(ii,:),'color',color);
     axis tight
     xlabel('Time (s)'); ylabel('Rate (SD)');
     
     % Ripples
-    h = get(gcf); nextPlot = length(h.Children)+1;
-    subplot(5,5,nextPlot)
+    subplot(5,5,length(findobj(gcf,'type','axes'))+1)
     hold on;
     t_win = ripplesResponses.timestamps > -0.25 & ripplesResponses.timestamps < 0.25;
     plot(ripplesResponses.timestamps(t_win),ripplesResponses.responsecurveZSmooth(ii,t_win),'color',color);
@@ -300,8 +292,7 @@ for ii = 1:length(UID)
     xlabel('Ripple center (s)'); ylabel('Rate (SD)');
     
     % ripple phase
-    h = get(gcf); nextPlot = length(h.Children)+1;
-    subplot(5,5,nextPlot)
+    subplot(5,5,length(findobj(gcf,'type','axes'))+1)
     hold on
     x_wave = 0:0.01:4*pi;
     y_wave = cos(x_wave)*2;
@@ -312,8 +303,7 @@ for ii = 1:length(UID)
     set(gca,'XTick',[0:2*pi:4*pi],'XTickLabel',{'0', '2\pi', '4\pi'});
     
     % theta
-    h = get(gcf); nextPlot = length(h.Children)+1;
-    subplot(5,5,nextPlot)
+    subplot(5,5,length(findobj(gcf,'type','axes'))+1)
     hold on
     x_wave = 0:0.01:4*pi;
     y_wave = cos(x_wave)*2;
@@ -324,8 +314,7 @@ for ii = 1:length(UID)
     set(gca,'XTick',[0:2*pi:4*pi],'XTickLabel',{'0', '2\pi', '4\pi'});
     
     % lgamma
-    h = get(gcf); nextPlot = length(h.Children)+1;
-    subplot(5,5,nextPlot)
+    subplot(5,5,length(findobj(gcf,'type','axes'))+1)
     hold on
     x_wave = 0:0.01:4*pi;
     y_wave = cos(x_wave)*2;
@@ -336,8 +325,7 @@ for ii = 1:length(UID)
     set(gca,'XTick',[0:2*pi:4*pi],'XTickLabel',{'0', '2\pi', '4\pi'});
     
     % hgamma
-    h = get(gcf); nextPlot = length(h.Children)+1;
-    subplot(5,5,nextPlot)
+    subplot(5,5,length(findobj(gcf,'type','axes'))+1)
     hold on
     x_wave = 0:0.01:4*pi;
     y_wave = cos(x_wave)*2;
@@ -349,8 +337,7 @@ for ii = 1:length(UID)
     
     % speed
     if ~isempty(speedCorr)
-        h = get(gcf); nextPlot = length(h.Children)+1;
-        subplot(5,5,nextPlot)
+        subplot(5,5,length(findobj(gcf,'type','axes'))+1)
         plot(log10(speedCorr.prc_vals),speedVals(ii,:),'color',color);
         LogScale('x',10);
         axis tight
@@ -360,8 +347,7 @@ for ii = 1:length(UID)
     % Behavior
     if ~isempty(behavior)
         if isfield(behavior,'psth_lReward') && isstruct(behavior.psth_lReward)
-            h = get(gcf); nextPlot = length(h.Children)+1;
-            subplot(5,5,nextPlot)
+            subplot(5,5,length(findobj(gcf,'type','axes'))+1)
             hold on;
             t_win = behavior.psth_lReward.timestamps > -2 & behavior.psth_lReward.timestamps < 2;
             plot(behavior.psth_lReward.timestamps(t_win),behavior.psth_lReward.responsecurveZSmooth(ii,t_win),'color',color);
@@ -370,8 +356,7 @@ for ii = 1:length(UID)
         end
         
         if isfield(behavior,'psth_rReward') && isstruct(behavior.psth_rReward)
-            h = get(gcf); nextPlot = length(h.Children)+1;
-            subplot(5,5,nextPlot)
+            subplot(5,5,length(findobj(gcf,'type','axes'))+1)
             hold on;
             t_win = behavior.psth_rReward.timestamps > -2 & behavior.psth_rReward.timestamps < 2;
             plot(behavior.psth_rReward.timestamps(t_win),behavior.psth_rReward.responsecurveZSmooth(ii,t_win),'color',color);
@@ -392,8 +377,7 @@ for ii = 1:length(UID)
                 timestamps = 0:round(firingMaps.cmBin{jj},1):round(firingMaps.cmBin{jj},1)*(length(firingMaps.rateMaps{1}{jj})-1);
                 if ~isempty(firingMaps2Halves) && ~isempty(firingMaps2Halves.rateMaps{ii}{jj})
                     for kk = 1:length(firingMaps2Halves.rateMaps{ii}{jj})
-                        h = get(gcf); nextPlot = length(h.Children)+1;
-                        subplot(5,5,nextPlot)
+                        subplot(5,5,length(findobj(gcf,'type','axes'))+1)
                         if size(firingMaps2Halves.rateMaps{ii}{jj}{kk},1) > 1
                             hold on;
                             plot(firingMaps2Halves.pos{jj}{kk}(:,2),firingMaps2Halves.pos{jj}{kk}(:,3),'color',[0.7 0.7 0.7]);
@@ -414,8 +398,7 @@ for ii = 1:length(UID)
                     end
 
                     if size(firingMaps.rateMaps{ii}{jj},1) > 1
-                        h = get(gcf); nextPlot = length(h.Children)+1;
-                        subplot(5,5,nextPlot)
+                        subplot(5,5,length(findobj(gcf,'type','axes'))+1)
                         hold on;
                         plot(behavior.maps{jj}(:,2),behavior.maps{jj}(:,3),'color',[0.7 0.7 0.7]);
                         t = behavior.maps{jj}(:,1);
@@ -438,8 +421,7 @@ for ii = 1:length(UID)
                     
                     end
                 else
-                    h = get(gcf); nextPlot = length(h.Children)+1;
-                    subplot(5,5,nextPlot)
+                    subplot(5,5,length(findobj(gcf,'type','axes'))+1)
                     plot(timestamps, firingMaps.rateMaps{ii}{jj},'color',color);
                     xlim(timestamps([1 end]));
                     xlabel('cm'); ylabel(['Map ',num2str(jj),' (-3 to 3 SD)']);
@@ -454,8 +436,7 @@ for ii = 1:length(UID)
                 if ~isempty(firingMaps2Halves) && ~isempty(firingMaps2Halves.rateMaps{ii}{jj})
                     
                     for kk = 1:length(firingMaps2Halves.rateMaps{ii}{jj})
-                        h = get(gcf); nextPlot = length(h.Children)+1;
-                        subplot(5,5,nextPlot)
+                        subplot(5,5,length(findobj(gcf,'type','axes'))+1)
                         imagesc(firingMaps2Halves.rateMaps{ii}{jj}{kk});
                         colormap(jet(15))
                         axis ij;
@@ -468,8 +449,7 @@ for ii = 1:length(UID)
                         end
                     end
                     
-                    h = get(gcf); nextPlot = length(h.Children)+1;
-                    ax = subplot(5,5,nextPlot)
+                    ax = subplot(5,5,length(findobj(gcf,'type','axes'))+1)
                     imagesc(firingMaps.rateMaps{ii}{jj});
                     colormap(jet(15))
                     axis ij;
@@ -521,8 +501,7 @@ for ii = 1:length(UID)
     if ~isempty(spatialModulation)
         for jj = 1:length(firingMaps.rateMaps{ii})
             if size(firingMaps.rateMaps{ii}{jj},1) > 1 % 2D spatial map
-                h = get(gcf); nextPlot = length(h.Children)+1;
-                subplot(5,5,nextPlot)
+                subplot(5,5,length(findobj(gcf,'type','axes'))+1)
                 spatialAutoCorr_var = ['spatialAutoCorr_map_',num2str(jj)];
                 spatialAutoCorr = spatialModulation.(spatialAutoCorr_var){ii}.r;
                 imagesc(spatialAutoCorr);
@@ -540,8 +519,7 @@ for ii = 1:length(UID)
     if ~isempty(spatialModulation) && gridAnalysis
         for jj = 1:length(firingMaps.rateMaps{ii})
             if size(firingMaps.rateMaps{ii}{jj},1) > 1 % 2D spatial map
-                h = get(gcf); nextPlot = length(h.Children)+1;
-                subplot(5,5,nextPlot)
+                subplot(5,5,length(findobj(gcf,'type','axes'))+1)
                 grid_var = ['grid_map_',num2str(jj)];
                 gridMap = spatialModulation.(grid_var){ii};
                 autoCorr = gridMap.autoCorr;

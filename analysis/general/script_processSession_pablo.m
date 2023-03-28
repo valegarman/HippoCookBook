@@ -5,42 +5,42 @@ createProbe('excel_file','electrodes_coordinates_Tetrodes-32ch(8t-4c)-C57-5');
 
 % FL4_080322_sess1
 bpath = 'D:\FLR\FL4\FL4_080322_sess1';
-processSession_pablo('basepath',bpath,'promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',27,'SWChannel',32);
+processSession_pablo('basepath',bpath,'promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',27,'SWChannel',32,'thetaChannel',27);
 indexNewSession_pablo('basepath',bpath,'project','SocialProject');
 
 % FL4_090322 sess2
 bpath = 'D:\FLR\FL4\FL4_090322_sess2';
-processSession_pablo('basepath',bpath,'promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',27,'SWChannel',32,'thetaChannel',28);
+processSession_pablo('basepath',bpath,'promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',27,'SWChannel',32,'thetaChannel',27);
 indexNewSession_pablo('basepath',bpath,'project','SocialProject');
 
 % FL4_100322_sess3
 bpath = 'D:\FLR\FL4\FL4_100322_sess3';
-processSession_pablo('basepath',bpath,'project','SocialProject','promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',27,'SWChannel',32,'thetaChannel',28);
+processSession_pablo('basepath',bpath,'project','SocialProject','promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',27,'SWChannel',32,'thetaChannel',27);
 indexNewSession_pablo('basepath',bpath,'project','SocialProject');
 
 % FL4_110322_sess4
 bpath = 'D:\FLR\FL4\FL4_110322_sess4';
-processSession_pablo('basepath',bpath,'project','SocialProject','promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',27,'SWChannel',32,'thetaChannel',28);
+processSession_pablo('basepath',bpath,'project','SocialProject','promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',27,'SWChannel',32,'thetaChannel',27);
 indexNewSession_pablo('basepath',bpath,'project','SocialProject');
 
 % FL4_170322_sess5
 bpath = 'D:\FLR\FL4\FL4_170322_sess5';
-processSession_pablo('basepath',bpath,'project','SocialProject','promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',27,'SWChannel',32,'thetaChannel',28);
+processSession_pablo('basepath',bpath,'project','SocialProject','promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',27,'SWChannel',32,'thetaChannel',27);
 indexNewSession_pablo('basepath',bpath,'project','SocialProject');
 
 % FL4_180322_sess6
 bpath = 'D:\FLR\FL4\FL4_180322_sess6';
-processSession_pablo('basepath',bpath,'project','SocialProject','promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',27,'SWChannel',32,'thetaChannel',28);
+processSession_pablo('basepath',bpath,'project','SocialProject','promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',27,'SWChannel',32,'thetaChannel',27);
 indexNewSession_pablo('basepath',bpath,'project','SocialProject');
 
 % FL4_210322_sess7
 bpath = 'D:\FLR\FL4\FL4_210322_sess7';
-processSession_pablo('basepath',bpath,'project','SocialProject','promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',27,'SWChannel',32,'thetaChannel',28);
+processSession_pablo('basepath',bpath,'project','SocialProject','promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',27,'SWChannel',32,'thetaChannel',27);
 indexNewSession_pablo('basepath',bpath,'project','SocialProject');
 
 % FL4_220322_sess8
 bpath = 'D:\FLR\FL4\FL4_220322_sess8';
-processSession_pablo('basepath',bpath,'project','SocialProject','promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',27,'SWChannel',32,'thetaChannel',28);
+processSession_pablo('basepath',bpath,'project','SocialProject','promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',27,'SWChannel',32,'thetaChannel',27);
 indexNewSession_pablo('basepath',bpath,'project','SocialProject');
 
 % FL3_020322_sess1
@@ -134,6 +134,11 @@ indexNewSession_pablo('basepath',bpath,'project','SUBProject');
 % fSUB2_130223_sess4 (Open Field)
 bpath = 'D:\fSUB2\fSUB2_130223_sess4';
 processSession_pablo('basepath',bpath,'promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',11,'SWChannel',17,'thetaChannel',11,'excludeAnalysis',{'subSessionsAnalysis'});
+indexNewSession_pablo('basepath',bpath,'project','SUBProject');
+
+% fSUB2_140223_sess5
+bpath = 'D:\fSUB2\fSUB2_140223_sess5';
+processSession_pablo('basepath',bpath,'promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',[],'SWChannel',[],'thetaChannel',[],'excludeAnalysis',{'subSessionsAnalysis'});
 indexNewSession_pablo('basepath',bpath,'project','SUBProject');
 
 % HPS22_210521_sess17
@@ -299,6 +304,11 @@ bpath = 'F:\data\IPO136\IPO136_280122_sess1';
 processSession_pablo('basepath',bpath,'project','MK801Project','promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',30,'SWChannel',[],'thetaChannel',30);
 indexNewSession_pablo('basepath',bpath,'project','MK801Project');
 
+% IPO431_221021_sess1 MK801
+bpath = 'F:\data\IPO431\IPO431_221021_sess1'; 
+processSession_pablo('basepath',bpath,'project','MK801Project','promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',2,'SWChannel',[],'thetaChannel',2);
+indexNewSession_pablo('basepath',bpath,'project','MK801Project');
+
 % fCr1_220402_sess26
 bpath = 'F:\data\fCr1\fCr1_220402_sess26'; 
 processSession_pablo('basepath',bpath,'project','MK801Project','promt_hippo_layers',true,'rippleChannel',56,'SWChannel',43);
@@ -330,4 +340,19 @@ createNSFiles('basepath','D:\HM');
 bpath = 'F:\data\HM\HM_270722_sess2'; 
 processSession_HM('basepath',bpath,'project','HMProject');
 indexNewSession_pablo('basepath',bpath,'project','HMProject');
+
+
+
+%% HM2
+bpath = 'J:\HM2\HM2_160323_sess1'; 
+processSession_HM('basepath',bpath,'project','HMProject');
+semanticWords = computeSemanticWords;
+
+%% fCck1
+
+% fCck1_220204_sess5
+bpath = 'J:\fCck1\fCck1_220204_sess5'; 
+processSession('basepath',bpath);
+indexNewSession('basepath',bpath,'copyFiles',false);
+
 

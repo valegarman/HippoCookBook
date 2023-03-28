@@ -179,7 +179,7 @@ if ~any(ismember(excludeAnalysis, {'5',lower('checkSleep')}))
     end
     
     SleepScoreMaster(pwd,'noPrompts',true,'ignoretime',pulses.stimulationEpochs, 'overwrite', true);
-    % TheStateEditor(session.general.name);
+%     TheStateEditor(session.general.name);
     bz_ThetaStates(pwd);
 end
 
