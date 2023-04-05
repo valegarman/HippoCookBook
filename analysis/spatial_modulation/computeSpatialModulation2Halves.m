@@ -113,8 +113,9 @@ if isempty(placeFieldStats)
             end
         end
     else
-        if exist([basenameFromBasepath(pwd) '.placeFields2Halves_tint.cellinfo.mat']) == 2
-            load([basenameFromBasepath(pwd) '.placeFields2Halves_tint.cellinfo.mat']);
+        if exist([basenameFromBasepath(pwd) '.placeFields2Halves.cellinfo.mat']) == 2
+            load([basenameFromBasepath(pwd) '.placeFields2Halves.cellinfo.mat']);
+            placeFieldStats2Halves = placeFieldStats2Halves;
         else
             try
                 placeFieldStats = computeFindPlaceFields('firingMaps',firingMaps,'maxSize',.75,'sepEdge',0.03); %

@@ -129,7 +129,7 @@ if tint
         spatialModulation = [];
     end
 else
-    targetFile = dir('*.spatialModulation_tint.cellinfo.mat'); 
+    targetFile = dir('*.spatialModulation.cellinfo.mat'); 
     if ~isempty(targetFile)
         load(targetFile.name);
     else 
@@ -454,23 +454,40 @@ for ii = 1:length(UID)
                     colormap(jet(15))
                     axis ij;
                     axis square;
-                    xlim([1 round(size(firingMaps.rateMaps{ii}{jj},1))]); ylim([1 round(size(firingMaps.rateMaps{ii}{jj},1))]);
+                    xlim([1 round(size(firingMaps.rateMaps{ii}{jj},1))]); 
+                    ylim([1 round(size(firingMaps.rateMaps{ii}{jj},1))]);
                     
                     % Color Randomization
-                    var_coherence = ['spatial_corr2_sc_r_map_',num2str(jj)];
-                    coherence = spatialModulation.(var_coherence){ii};
+                    if tint
+                        var_coherence = ['spatial_corr2_sc_r_map_',num2str(jj)];
+                        coherence = spatialModulation.(var_coherence){ii};
+                    else
+                        var_coherence = ['spatial_corr_sc_r_map_',num2str(jj)];
+                        coherence = spatialModulation.(var_coherence){ii};
+                    end
 
                     var_bitsPerSpike = ['bitsPerSpike_map_',num2str(jj)];
                     bitsPerSpike = spatialModulation.(var_bitsPerSpike){ii};
+                    
+                    var_bitsPerSecond = ['bitsPerSec_map_',num2str(jj)];
+                    bitsPerSecond = spatialModulation.(var_bitsPerSecond){ii};
 
                     shuffling_var = ['shuffling_map_',num2str(jj)];
-
-                    shuffling_coherenceR99 = spatialModulation.(shuffling_var){ii}.spatial_corr2_sc_r.R99;
-                    shuffling_coherenceR95 = spatialModulation.(shuffling_var){ii}.spatial_corr2_sc_r.R95;
-
+                    
+                    if tint
+                        shuffling_coherenceR99 = spatialModulation.(shuffling_var){ii}.spatial_corr2_sc_r.R99;
+                        shuffling_coherenceR95 = spatialModulation.(shuffling_var){ii}.spatial_corr2_sc_r.R95;
+                    else
+                        shuffling_coherenceR99 = spatialModulation.(shuffling_var){ii}.spatial_corr_sc_r.R99;
+                        shuffling_coherenceR95 = spatialModulation.(shuffling_var){ii}.spatial_corr_sc_r.R95;
+                    end
+                    
                     shuffling_bitsPerSpikeR99 = spatialModulation.(shuffling_var){ii}.bitsPerSpike.R99;
                     shuffling_bitsPerSpikeR95 = spatialModulation.(shuffling_var){ii}.bitsPerSpike.R95;
 
+                    shuffling_bitsPerSecondR99 = spatialModulation.(shuffling_var){ii}.bitsPerSec.R99;
+                    shuffling_bitsPerSecondR95 = spatialModulation.(shuffling_var){ii}.bitsPerSec.R95;
+                    
                     if coherence > shuffling_coherenceR99
                         color_coherence = color_R99;
                     elseif coherence > shuffling_coherenceR95
@@ -486,8 +503,20 @@ for ii = 1:length(UID)
                     else
                         color_bitsPerSpike = color_ns;
                     end
-    
+                    
+                    if bitsPerSecond > shuffling_bitsPerSecondR99
+                        color_bitsPerSecond = color_R99;
+                    elseif bitsPerSecond > shuffling_bitsPerSecondR95
+                        color_bitsPerSecond = color_R95;
+                    else
+                        color_bitsPerSecond = color_ns;
+                    end
+                    colorbar;
+                    yyaxis left
                     ylabel(ax,['Coherence: ', num2str(round(coherence,3))],'Color',color_coherence);
+                    yyaxis right
+                    set(gca,'ytick',[])
+                    ylabel(ax,['BitsPerSecond: ', num2str(round(bitsPerSecond,3))],'Color',color_bitsPerSecond);
                     xlabel(ax,['BitsPerSpike: ' num2str(round(bitsPerSpike,3))],'color',color_bitsPerSpike);
                     firingFieldSize_var = ['firingFieldSize_map_',num2str(jj)];
                     title(['Max FR: ', num2str(spatialModulation.(firingFieldSize_var).maxFr{ii})]); 

@@ -49,7 +49,11 @@ addParameter(p,'editLOI',false,@islogical);
 addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'forceReload',false,@islogical);
 addParameter(p,'verbose',false,@islogical);
+addParameter(p,'leftTimes_ttl',3,@isnumeric);
+addParameter(p,'rightTimes_ttl',4,@isnumeric);
+
 parse(p,varargin{:});
+
 tracking = p.Results.tracking;
 basepath = p.Results.basepath;
 digitalIn = p.Results.digitalIn;
@@ -57,6 +61,8 @@ editLOI = p.Results.editLOI;
 saveMat = p.Results.saveMat;
 forceReload = p.Results.forceReload;
 verbose = p.Results.verbose;
+leftTimes_ttl = p.Results.leftTimes_ttl;
+rightTimes_ttl = p.Results.rightTimes_ttl;
 
 if ~isempty(dir('*Linearized.Behavior.mat')) && ~forceReload 
     disp('Linearization already computed! Loading file.');
@@ -161,12 +167,12 @@ try
     cd(basepath)
 end
 digitalIn = getDigitalIn('all','fs',session.extracellular.sr);
-if length(digitalIn.timestampsOn{3}) <  length(digitalIn.timestampsOn{4})- 5 || length(digitalIn.timestampsOn{3}) >  length(digitalIn.timestampsOn{4})+ 5
+if length(digitalIn.timestampsOn{leftTimes_ttl}) <  length(digitalIn.timestampsOn{rightTimes_ttl})- 5 || length(digitalIn.timestampsOn{leftTimes_ttl}) >  length(digitalIn.timestampsOn{rightTimes_ttl})+ 5
     warning('Malfunctioning sensor!! Trying to fix');
-    if length(digitalIn.timestampsOn{3}) <  length(digitalIn.timestampsOn{4})- 5
+    if length(digitalIn.timestampsOn{leftTimes_ttl}) <  length(digitalIn.timestampsOn{righTimes_ttl})- 5
         warning('Left sensor is not working properly');
         disp('Find most distant place between consecutive right sensor pulses...');
-        rightSensorTimes = digitalIn.timestampsOn{4};
+        rightSensorTimes = digitalIn.timestampsOn{rightTimes_ttl};
         timestamps = tracking.timestamps;
         rightSensorPositions = interp1(timestamps, linCont', rightSensorTimes);
         for ii = 1:length(rightSensorTimes) - 1
@@ -178,7 +184,7 @@ if length(digitalIn.timestampsOn{3}) <  length(digitalIn.timestampsOn{4})- 5 || 
     else
         warning('Right sensor is not working properly');
         disp('Find most distant place between consecutive right sensor pulses...');
-        leftSensorTimes = digitalIn.timestampsOn{3};
+        leftSensorTimes = digitalIn.timestampsOn{leftTimes_ttl};
         timestamps = tracking.timestamps;
         leftSensorPositions = interp1(timestamps, linCont', leftSensorTimes);
         for ii = 1:length(leftSensorTimes) - 1
@@ -188,8 +194,8 @@ if length(digitalIn.timestampsOn{3}) <  length(digitalIn.timestampsOn{4})- 5 || 
         end
     end
 else
-    rightSensorTimes = digitalIn.timestampsOn{4};
-    leftSensorTimes = digitalIn.timestampsOn{3};
+    rightSensorTimes = digitalIn.timestampsOn{rightTimes_ttl};
+    leftSensorTimes = digitalIn.timestampsOn{leftTimes_ttl};
 end
 
 rightSensorTimes = rightSensorTimes';
@@ -325,6 +331,10 @@ behavior.events.endDelay = NaN;
 behavior.events.intersection = NaN;
 behavior.events.entry.ts = NaN;
 behavior.events.exit.ts = NaN;
+
+behavior.events.stemArm = NaN;
+behavior.events.rightArm = NaN;
+behavior.events.leftArm = NaN;
 
 behavior.trials.startPoint = trials0;
 behavior.trials.endDelay = NaN;

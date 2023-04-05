@@ -74,11 +74,20 @@ session = loadSession();
 
 filename = basenameFromBasepath(pwd);
 
-if ~isempty(dir([basenameFromBasepath(pwd) '.spatialModulation.cellinfo.mat'])) && ~force
-    disp('Spatial modulation already computed! Loading file');
-    file =dir([basenameFromBasepath(pwd) '.spatialModulation.cellinfo.mat']);
-    load(file.name);
-    return
+if tint
+    if ~isempty(dir([basenameFromBasepath(pwd) '.spatialModulation_tint.cellinfo.mat'])) && ~force
+        disp('Spatial modulation already computed! Loading file');
+        file =dir([basenameFromBasepath(pwd) '.spatialModulation_tint.cellinfo.mat']);
+        load(file.name);
+        return
+    end
+else
+    if ~isempty(dir([basenameFromBasepath(pwd) '.spatialModulation.cellinfo.mat'])) && ~force
+        disp('Spatial modulation already computed! Loading file');
+        file =dir([basenameFromBasepath(pwd) '.spatialModulation.cellinfo.mat']);
+        load(file.name);
+        return
+    end
 end
 
 if isempty(behavior)

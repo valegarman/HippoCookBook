@@ -24,12 +24,16 @@ addParameter(p,'forceReload',false,@islogical)
 addParameter(p,'verbose',false,@islogical)
 addParameter(p,'saveMat',true,@islogical)
 addParameter(p,'maze',[],@ischar)
+addParameter(p,'linearizePMaze',true,@islogical);
+
 parse(p,varargin{:});
+
 forceReload = p.Results.forceReload;
 basepath = p.Results.basepath;
 verbose = p.Results.verbose;
 saveMat = p.Results.saveMat;
 maze = p.Results.maze;
+linearizePMaze = p.Results.linearizePMaze;
 
 %% Get session metada
 session = loadSession(basepath);
@@ -76,9 +80,11 @@ for ii = 1:size(sess,1)
             behaviorTemp.(sess(ii).name) = getBehaviourOpenField('forceReload',forceReload);
         elseif strcmpi(tracking.apparatus.name,'Linear Track  N-S')
             behaviorTemp.(sess(ii).name) = linearizeLinearMaze_pablo('verbose',verbose);
-        elseif strcmpi(tracking.apparatus.name,'TMaze')
+        elseif strcmpi(tracking.apparatus.name,'TMaze') & linearizePMaze
             behaviorTemp.(sess(ii).name) = linearizeCircularMaze('verbose',verbose);
 %             behaviorTemp.(sess(ii).name) = linearizeArmChoice_pablo('verbose',verbose);
+        elseif strcmpi(tracking.apparatus.name,'TMaze') & ~linearizePMaze
+            behaviorTemp.(sess(ii).name) = getBehaviourPMaze('verbose',verbose);
         end
         behaviorFolder(count) = ii; 
         count = count + 1;
@@ -181,6 +187,7 @@ end
         
 % generate maps, one for each arm and for each recording
 maps = [];
+direction = direction';
 directionList = unique(direction);
 directionList(find(isnan(directionList))) = [];
 count = 1;
@@ -190,9 +197,12 @@ for ii = 1:length(efields)
         for jj = 1:length(directionList)
             maps{count}(:,1) = timestamps(direction == directionList(jj) & recMask == ii);
             maps{count}(:,2) = lin(direction == directionList(jj) & recMask==ii);
+            maps_whole{count} = NaN;
             description{count} = behaviorTemp.(efields{ii}).description;
+            description2{count} = NaN;
             zone{count} = behaviorTemp.(efields{ii}).zone;
             avFrame{count} = tracking.avFrame{ii};
+            avFrame2{count} = NaN;
             count = count+1;
         end
     elseif strcmpi(behaviorTemp.(efields{ii}).description,'Open Field') && any(isnan(behaviorTemp.(efields{ii}).position.lin))
@@ -251,7 +261,7 @@ for ii = 1:length(efields)
 end
 
 % populate behavior
-behavior.timestamps = timestamps;
+behavior.timestamps = timestamps';
 
 behavior.position.lin = lin;
 behavior.position.x = x;

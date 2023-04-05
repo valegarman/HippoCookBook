@@ -1,9 +1,9 @@
-function [behavior] = getBehaviourOpenField(varargin)
-% Creates behaviour for Open Field recordings
+function [behavior] = getBehaviourPMaze(varargin)
+% Creates behaviour for PMaze recordings in 2D (not linearize)
 %
 % USAGE
 %
-%   [behaviour] = getBehaviourOpenField(varargin)
+%   [behaviour] = getBehaviourPMaze(varargin)
 %
 % INPUTS
 % (OPTIONAL)
@@ -61,9 +61,9 @@ forceReload = p.Results.forceReload;
 verbose = p.Results.verbose;
 useTTLs = p.Results.useTTLs;
 
-if ~isempty(dir('*OpenField.Behavior.mat')) && ~forceReload 
-    disp('OpenField already computed! Loading file.');
-    file = dir('*OpenField.Behavior.mat');
+if ~isempty(dir('*PMaze.Behavior.mat')) && ~forceReload 
+    disp('PMaze already computed! Loading file.');
+    file = dir('*PMaze.Behavior.mat');
     load(file.name);
     return
 end
@@ -107,9 +107,14 @@ maps{1}(:,3) = tracking.position.y;
 try
     for ii = 1:length(tracking.zone.bndgbox)
         if ~strcmpi(tracking.zone.bndgbox{ii}.name,'Main')
-            xv{ii} = [tracking.zone.xmin{ii} tracking.zone.xmax{ii} tracking.zone.xmax{ii} tracking.zone.xmin{ii} tracking.zone.xmin{ii}];
-            yv{ii} = [tracking.zone.ymin{ii} tracking.zone.ymin{ii} tracking.zone.ymax{ii} tracking.zone.ymax{ii} tracking.zone.ymin{ii}];
-            [in{ii},on{ii}] = inpolygon(tracking.position.x,tracking.position.y, xv{ii}, yv{ii});
+%             xv{ii} = [tracking.zone.xmin{ii} tracking.zone.xmax{ii} tracking.zone.xmax{ii} tracking.zone.xmin{ii} tracking.zone.xmin{ii}];
+%             yv{ii} = [tracking.zone.ymin{ii} tracking.zone.ymin{ii} tracking.zone.ymax{ii} tracking.zone.ymax{ii} tracking.zone.ymin{ii}];
+%             [in{ii},on{ii}] = inpolygon(tracking.position.x,tracking.position.y, xv{ii}, yv{ii});
+
+            xv{ii} = [tracking.zone.bndgbox{ii}.bndgbox.Vertices(1,1) tracking.zone.bndgbox{ii}.bndgbox.Vertices(2,1) tracking.zone.bndgbox{ii}.bndgbox.Vertices(3,1) tracking.zone.bndgbox{ii}.bndgbox.Vertices(4,1)];
+            yv{ii} = [tracking.zone.bndgbox{ii}.bndgbox.Vertices(1,2) tracking.zone.bndgbox{ii}.bndgbox.Vertices(2,2) tracking.zone.bndgbox{ii}.bndgbox.Vertices(3,2) tracking.zone.bndgbox{ii}.bndgbox.Vertices(4,2)];
+
+            [in{ii},on{ii}] = inpolygon(tracking.position.x,tracking.position.y, xv{ii},yv{ii});
             a{ii} = diff(in{ii});
             entry.(tracking.zone.name{ii}).sample = find(a{ii} == 1)+1;
             entry.(tracking.zone.name{ii}).ts = t(entry.(tracking.zone.name{ii}).sample);
@@ -121,6 +126,33 @@ try
     %         exit_ts{ii} = t(exit_sample{ii});
         end
     end
+    
+    left = entry.leftReward.ts;
+    right = entry.(flds{ii}).ts;
+    homeDelay = entry.(flds{ii}).ts;
+    decision = entry.(flds{ii}).ts;
+    
+    flds = fields(entry);
+    for ii = 1:length(flds)
+        first_ttl(ii) = min(entry.(flds{ii}).ts);
+    end
+    
+    decisionTtl(1) = entry.decision.ts(1);
+    [ttl1, ttl1_index] = min(first_ttl);
+    while ttl1_index == 3
+        first_ttl(ttl1_index) = NaN;
+        [ttl1, ttl1_index] = min(first_ttl);
+    end
+    
+    if ttl1_index == 1
+        leftRewardTtl(1) = first_ttl(ttl1_index);
+    elseif ttl1_index == 2
+        rightRewardTtl(1) = first_ttl(ttl1_index);
+    end
+    
+    
+    
+    
     
     h1 = figure;
     plot(tracking.position.x, tracking.position.y, 'Color', [0.5 0.5 0.5])
@@ -183,7 +215,7 @@ behavior.maps_whole = NaN;
 try
     behavior.description = tracking.apparatus.name;
 catch
-    behavior.description = 'Open Field';
+    behavior.description = 'PMaze';
 end
 
 behavior.events.startPoint = NaN;
@@ -221,9 +253,7 @@ end
 
 if saveMat
     C = strsplit(basepath,'\');
-    save([C{end} '.OpenField.Behavior.mat'], 'behavior');
+    save([C{end} '.PMaze.Behavior.mat'], 'behavior');
 end
 
 end
-
-

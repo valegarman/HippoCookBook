@@ -116,9 +116,69 @@ indexNewSession_pablo('basepath',bpath,'project','SocialProject');
 createProbe('excel_file','electrodes_coordinates_Buzsaki64(64 ch, 8 shanks, staggered)');
 createProbe('excel_file','electrodes_coordinates_A5x12-16-Buz-lin-5mm-100-200-160-177-Allego');
 
+% HPS22_010621_sess22 (TMaze)
+bpath = 'K:\HPS22_010621_sess22';
+processSession_pablo('basepath',bpath,'promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',30,'thetaChannel',30,'tint',true,'speedThresh',0,'gridAnalysis',true,'randomization',true);
+indexNewSession_pablo('basepath',bpath,'project','SubiculumProject');
+
+% fSUB1_181122_sess7 (Open Field)
+bpath = 'D:\fSUB1\fSUB1_181122_sess7';
+processSession_pablo('basepath',bpath,'promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',47,'thetaChannel',47,'tint',true,'speedThresh',0,'gridAnalysis',true,'randomization',true);
+indexNewSession_pablo('basepath',bpath,'project','SubiculumProject');
+
+% fSUB1_281122_sess13 (Open Field)
+bpath = 'D:\fSUB1\fSUB1_281122_sess13';
+processSession_pablo('basepath',bpath,'promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',17,'thetaChannel',17,'tint',true,'speedThresh',0,'gridAnalysis',true,'randomization',true);
+indexNewSession_pablo('basepath',bpath,'project','SubiculumProject');
+
 % fSUB1_011122_sess16
 bpath = 'D:\fSUB1\fSUB1_011222_sess16';
-processSession_pablo('basepath',bpath,'promt_hippo_layers',true,'anymaze_ttl_channel',2);
+processSession_pablo('basepath',bpath,'promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',17,'thetaChannel',17,'tint',true,'speedThresh',0,'gridAnalysis',true,'randomization',true);
+indexNewSession_pablo('basepath',bpath,'project','SUBProject');
+
+% fSUB1_120223_sess34 (Open Field)
+bpath = 'D:\fSUB1\fSUB1_120223_sess34';
+processSession_pablo('basepath',bpath,'promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',17,'thetaChannel',17,'tint',true,'speedThresh',0,'gridAnalysis',false,'randomization',true);
+indexNewSession_pablo('basepath',bpath,'project','SUBProject');
+
+% fSUB1_130223_sess35 (Open Field)
+bpath = 'D:\fSUB1\fSUB1_130223_sess35';
+processSession_pablo('basepath',bpath,'promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',17,'thetaChannel',17,'tint',true,'speedThresh',0,'gridAnalysis',false,'randomization',true);
+indexNewSession_pablo('basepath',bpath,'project','SUBProject');
+
+% fSUB1_140223_sess36 (Open Field)
+bpath = 'D:\fSUB1\fSUB1_140223_sess36';
+processSession_pablo('basepath',bpath,'promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',17,'thetaChannel',17,'tint',true,'speedThresh',0,'gridAnalysis',false,'randomization',true);
+indexNewSession_pablo('basepath',bpath,'project','SUBProject');
+
+% fSUB1_160223_sess38 (Linear Track)
+bpath = 'D:\fSUB1\fSUB1_160223_sess38';
+processSession_pablo('basepath',bpath,'promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',22,'thetaChannel',22,'tint',true,'speedThresh',0,'gridAnalysis',false,'randomization',true);
+indexNewSession_pablo('basepath',bpath,'project','SUBProject');
+
+% fSUB2_110223_sess3 (Open Field)
+bpath = 'D:\fSUB2\fSUB2_110223_sess3';
+processSession_pablo('basepath',bpath,'promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',11,'SWChannel',17,'thetaChannel',11,'tint',true,'speedThresh',0,'gridAnalysis',false,'randomization',true,'excludeAnalysis',{'subSessionsAnalysis'});
+indexNewSession_pablo('basepath',bpath,'project','SUBProject');
+
+% fSUB2_130223_sess4 (Open Field)
+bpath = 'D:\fSUB2\fSUB2_130223_sess4';
+processSession_pablo('basepath',bpath,'promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',11,'SWChannel',17,'thetaChannel',11,'tint',true,'speedThresh',0,'gridAnalysis',false,'randomization',true,'excludeAnalysis',{'subSessionsAnalysis'});
+indexNewSession_pablo('basepath',bpath,'project','SUBProject');
+
+% fSUB2_140223_sess5
+bpath = 'D:\fSUB2\fSUB2_140223_sess5';
+processSession_pablo('basepath',bpath,'promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',11,'SWChannel',17,'thetaChannel',11,'tint',true,'speedThresh',0,'gridAnalysis',false,'randomization',true,'excludeAnalysis',{'subSessionsAnalysis'});
+indexNewSession_pablo('basepath',bpath,'project','SUBProject');
+
+% fSUB2_150223_sess6
+bpath = 'D:\fSUB2\fSUB2_150223_sess6';
+processSession_pablo('basepath',bpath,'promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',11,'SWChannel',17,'thetaChannel',11,'tint',true,'speedThresh',0,'gridAnalysis',false,'randomization',true,'excludeAnalysis',{'subSessionsAnalysis'});
+indexNewSession_pablo('basepath',bpath,'project','SUBProject');
+
+% fSUB1_150223_sess37 (Linear Track)
+bpath = 'D:\fSUB1\fSUB1_150223_sess37';
+processSession_pablo('basepath',bpath,'promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',28,'SWChannel',28,'thetaChannel',28);
 indexNewSession_pablo('basepath',bpath,'project','SUBProject');
 
 % fSUB1_121222_sess18 (Open Field)
@@ -131,29 +191,14 @@ bpath = 'D:\fSUB1\fSUB1_231222_sess25';
 processSession_pablo('basepath',bpath,'promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',18,'SWChannel',45,'thetaChannel',18);
 indexNewSession_pablo('basepath',bpath,'project','SUBProject');
 
-% fSUB2_130223_sess4 (Open Field)
-bpath = 'D:\fSUB2\fSUB2_130223_sess4';
-processSession_pablo('basepath',bpath,'promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',11,'SWChannel',17,'thetaChannel',11,'excludeAnalysis',{'subSessionsAnalysis'});
-indexNewSession_pablo('basepath',bpath,'project','SUBProject');
-
-% fSUB2_140223_sess5
-bpath = 'D:\fSUB2\fSUB2_140223_sess5';
-processSession_pablo('basepath',bpath,'promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',[],'SWChannel',[],'thetaChannel',[],'excludeAnalysis',{'subSessionsAnalysis'});
-indexNewSession_pablo('basepath',bpath,'project','SUBProject');
-
 % HPS22_210521_sess17
 bpath = 'F:\data\HPS22\HPS22_210521_sess17';
-processSession_pablo('basepath',bpath,'promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',39,'SWChannel',13,'thetaChannel',39,'excludeAnalysis',{'getHippocampalLayers'});
+processSession_pablo('basepath',bpath,'promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',39,'SWChannel',13,'thetaChannel',39,'tint',true,'speedThresh',0,'gridAnalysis',false,'randomization',true,'excludeAnalysis',{'getHippocampalLayers'});
 indexNewSession_pablo('basepath',bpath,'project','Subiculum Project');
 
 % HPS22_210521_sess117 (to be done)
 bpath = 'F:\data\HPS22\HPS22_210521_sess117';
 processSession_pablo('basepath',bpath,'promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',39,'SWChannel',13,'thetaChannel',39,'excludeAnalysis',{'getHippocampalLayers'});
-indexNewSession_pablo('basepath',bpath,'project','SubiculumProject');
-
-% fSUB1_281122_sess13 (Open Field)
-bpath = 'D:\fSUB1\fSUB1_281122_sess13';
-processSession_pablo('basepath',bpath,'promt_hippo_layers',true,'anymaze_ttl_channel',2,'tint',true,'speedThresh',0,'gridAnalysis',true,'randomization',true);
 indexNewSession_pablo('basepath',bpath,'project','SubiculumProject');
 
 % fSUB2_110223_sess3
@@ -354,5 +399,11 @@ semanticWords = computeSemanticWords;
 bpath = 'J:\fCck1\fCck1_220204_sess5'; 
 processSession('basepath',bpath);
 indexNewSession('basepath',bpath,'copyFiles',false);
+
+% fCck1_220131_sess1
+bpath = 'J:\data\fCck1\fCck1_220131_sess1'; 
+processSession('basepath',bpath);
+indexNewSession('basepath',bpath,'copyFiles',false);
+
 
 

@@ -251,7 +251,12 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     getSpikesRank('events','upstates');
     
     % 8.2 Ripples
-    ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'removeOptogeneticStimulation',true,'eventSpikeThreshold',false); % [1.5 3.5]
+    if ~isempty(dir('*MergePoints.events.mat'));
+        file = dir('*MergePoints.events.mat');
+        load(file.name);
+    end
+    ts_maze = MergePoints.timestamps(2,:);
+    ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'removeOptogeneticStimulation',true,'eventSpikeThreshold',false,'excludeIntervals',ts_maze); % [1.5 3.5]
     psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'min_pulsesNumber',0);
     getSpikesRank('events','ripples');
     
@@ -304,22 +309,29 @@ if ~any(ismember(excludeAnalysis,{'11',lower('lfpAnalysis')}))
  end
 
 %% 12. SubSessions Analysis
-if ~any(ismember(excludeAnalysis,{'12',lower('subSessionsAnalysis')}))
-    % LFP-spikes modulation per subsession
-    [phaseModSubSession] = computePhaseModulationPerSubSession('rippleChannel',rippleChannel,'SWChannel',SWChannel);
-    % Cell Metrics per subsession
-    cell_metrics_SubSession = ProcessCellMetricsPerSubSession('session', session,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',{'deepSuperficial'},'forceReload',true);
-    % lfp Analysis per subsession
-    cohgramSubSession = computeCohgramPerSubsession('force',true);
-    % ACGPeak per subsession
-    getACGPeakSubSession('force',true);
-end
+% if ~any(ismember(excludeAnalysis,{'12',lower('subSessionsAnalysis')}))
+%     % LFP-spikes modulation per subsession
+%     [phaseModSubSession] = computePhaseModulationPerSubSession('rippleChannel',rippleChannel,'SWChannel',SWChannel);
+%     % Cell Metrics per subsession
+%     cell_metrics_SubSession = ProcessCellMetricsPerSubSession('session', session,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',{'deepSuperficial'},'forceReload',true);
+%     % lfp Analysis per subsession
+%     cohgramSubSession = computeCohgramPerSubsession('force',true);
+%     % ACGPeak per subsession
+%     getACGPeakSubSession('force',true);
+% end
 
 %% 13. Spatial modulation
 if ~any(ismember(excludeAnalysis, {'13',lower('spatialModulation')}))
     try
         spikes = loadSpikes;
         getSessionTracking('convFact',tracking_pixel_cm,'roiTracking','manual','anyMaze',anyMaze);
+        
+        try
+            createSessionPMazeDigitalIn;
+        catch
+            warning('Not possible lo create TTls for PMaze');
+        end
+        
         try
             getSessionArmChoice('task','alternation');
         catch
@@ -335,19 +347,27 @@ if ~any(ismember(excludeAnalysis, {'13',lower('spatialModulation')}))
         catch
             warning('No circular arm choice available to compute.');
         end
-        behavior = getSessionBehavior('forceReload',true);
+        
+        behavior = getSessionBehavior('forceReload',true,'linearizePMaze',false);
         firingMaps = firingMapAvg_pablo(behavior,spikes,'speedThresh',speedThresh,'tint',false,'pixelsPerCm',pixelsPerCm,'saveMat',true); 
         firingMaps_tint = firingMapAvg_pablo(behavior,spikes,'speedThresh',speedThresh,'tint',true,'pixelsPerCm',pixelsPerCm,'saveMat',true);
-        placeFieldStats = computeFindPlaceFields('firingMaps',[],'tint',tint,'useColorBar',false,'saveMat',true);
+%         firingMaps = bz_firingMapAvg(behavior, spikes,'saveMat',true,'speedThresh',5);
+%         placeFieldStats = bz_findPlaceFields1D('firingMaps',firingMaps,'maxSize',.75,'sepEdge',0.03);
+        placeFieldStats = computeFindPlaceFields('firingMaps',[],'useColorBar',false,'saveMat',true);
+%         firingTrialsMap = firingMapPerTrial('force',true,'speedThresh',5);
+%         spatialModulation = getSpatialModulation('force',true);
         if any(ismember(behavior.description,'Linear Track  N-S'))
             firingTrialsMap = firingMapPerTrial_pablo;
         end
-        spatialModulation = computeSpatialModulation('force',true,'tint',tint,'gridAnalysis',gridAnalysis,'randomization',randomization,'speedThresh',speedThresh);
+        spatialModulation = computeSpatialModulation('force',true,'tint',false,'gridAnalysis',gridAnalysis,'randomization',randomization,'speedThresh',speedThresh);
+        spatialModulation_tint = computeSpatialModulation('force',true,'tint',true,'gridAnalysis',gridAnalysis,'randomization',randomization,'speedThresh',speedThresh);
+        
         if twoHalvesAnalysis
-            firingMaps2Halves = firingMap2Halves(behavior,spikes,'pixelsPerCm',pixelsPerCm,'saveMat',true,'tint',false);
-            firingMaps2Halves_tint = firingMap2Halves(behavior,spikes,'pixelsPerCm',pixelsPerCm,'saveMat',true,'tint',true);
-            placeFieldStats2Halves = computeFindPlaceFields2Halves('firingMaps',[],'tint',tint,'useColorBar',false);
-            spatialModulation2Halves = computeSpatialModulation2Halves('force',true,'tint',tint,'speedThresh',speedThresh); % Not running gridAnalysis for two Halves
+            firingMaps2Halves = firingMap2Halves(behavior,spikes,'pixelsPerCm',pixelsPerCm,'speedThresh',speedThresh,'saveMat',true,'tint',false);
+            firingMaps2Halves_tint = firingMap2Halves(behavior,spikes,'pixelsPerCm',pixelsPerCm,'speedThresh',speedThresh,'saveMat',true,'tint',true);
+            placeFieldStats2Halves = computeFindPlaceFields2Halves('firingMaps',[],'useColorBar',false);
+            spatialModulation2Halves = computeSpatialModulation2Halves('force',true,'tint',false,'speedThresh',speedThresh); % Not running gridAnalysis for two Halves
+            spatialModulation2Halves_tint = computeSpatialModulation2Halves('force',true,'tint',true,'speedThresh',speedThresh); % Not running gridAnalysis for two Halves
         end
     catch
         warning('Not possible to run spatial modulation...');
@@ -407,6 +427,7 @@ if ~any(ismember(excludeAnalysis, {'13',lower('spatialModulation')}))
                 'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
             psth_rReward = spikesPsth([behavior.events.rReward],'numRep',100,'saveMat',false,...
                 'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
+            
             behavior.psth_lReward = psth_lReward;
             behavior.psth_rReward = psth_rReward;
             save([basenameFromBasepath(pwd) '.behavior.cellinfo.mat'],'behavior');
@@ -449,7 +470,8 @@ if ~any(ismember(excludeAnalysis, {'14',lower('summary')}))
         plotSummary_pablo();
     elseif strcmpi(project,'SubiculumProject')
         plotSpatialModulation('gridAnalysis',gridAnalysis,'tint',tint);
-        plotSummary_subiculum();
+%         plotSummary_subiculum();
+        plotSummary_pablo();
     elseif strcmpi(project,'MK801Project')
         plotSummary_pablo();
 %         plotSpatialModulation('gridAnalysis',gridAnalysis);

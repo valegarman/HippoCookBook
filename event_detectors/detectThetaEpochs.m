@@ -207,16 +207,11 @@ if ~isempty(powerThreshold_nonTheta)
     end
 
 end
-<<<<<<< HEAD
 
-try
-    thetaEpochs.region = lfpT.region;
-=======
 if isfield(lfpT, 'region')
     thetaEpochs.region = lfpT.region;
 else
     thetaEpochs.region = 'N/A';
->>>>>>> ec2e342fc87d431644bbc4ebb3fbf6975255ad45
 end
 thetaEpochs.lfpphase = lfpphase;
 thetaEpochs.samplingRate = samplingRate;

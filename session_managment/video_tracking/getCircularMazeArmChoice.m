@@ -126,8 +126,25 @@ elseif strcmpi(task,'alternation')
         [armChoice.timestamps, idx] = sort(armChoice.timestamps);
         armChoice.visitedArm = armChoice.visitedArm(idx);
         
-        armChoice.delay.dur = nanmean(armChoice.delay.timestamps(:,2) - armChoice.delay.timestamps(:,1));
-        armChoice.delay.durations = round(armChoice.delay.timestamps(:,2) - armChoice.delay.timestamps(:,1),0);
+        try
+            armChoice.delay.dur = nanmean(armChoice.delay.timestamps(:,2) - armChoice.delay.timestamps(:,1));
+            armChoice.delay.durations = round(armChoice.delay.timestamps(:,2) - armChoice.delay.timestamps(:,1),0);
+            armChoice.delay.durations = [NaN; armChoice.delay.durations];
+            armChoice.delay.timestamps = [NaN NaN; armChoice.delay.timestamps];
+            if length(armChoice.delay.durations) > length(armChoice.choice)
+                armChoice.delay.durations(end) = [];
+                armChoice.delay.timestamps(end,:) = [];
+            end
+            durations = unique(armChoice.delay.durations);
+            for ii = 1:length(durations)- 1
+                performance = [performance; sum(armChoice.choice(find(armChoice.delay.durations == durations(ii)))) / length(find(armChoice.delay.durations == durations(ii)))];
+            end
+            armChoice.delay.performance = performance;
+            armChoice.delay.uniqueDurations = durations;
+        
+        catch
+            warning('No delay computed...');
+        end
         armChoice.choice = [NaN; abs(diff(armChoice.visitedArm))]; % 1 is right, 0 is wrong
         armChoice.performance = nansum(armChoice.choice)/(length(armChoice.choice) - 1);
         performance = [];
@@ -136,18 +153,6 @@ elseif strcmpi(task,'alternation')
 %             armChoice.delay.durations(end) = NaN;
 %         end
         
-        armChoice.delay.durations = [NaN; armChoice.delay.durations];
-        armChoice.delay.timestamps = [NaN NaN; armChoice.delay.timestamps];
-        if length(armChoice.delay.durations) > length(armChoice.choice)
-            armChoice.delay.durations(end) = [];
-            armChoice.delay.timestamps(end,:) = [];
-        end
-        durations = unique(armChoice.delay.durations);
-        for ii = 1:length(durations)- 1
-            performance = [performance; sum(armChoice.choice(find(armChoice.delay.durations == durations(ii)))) / length(find(armChoice.delay.durations == durations(ii)))];
-        end
-        armChoice.delay.performance = performance;
-        armChoice.delay.uniqueDurations = durations;
         armChoice.task = task;
         armChoice.expectedArm = [NaN; ~xor(armChoice.visitedArm(2:end), armChoice.choice(2:end))];
 %         armChoice.delay.timestamps = armChoice.delay.timestamps(:,1);
@@ -173,44 +178,52 @@ elseif strcmpi(task,'alternation')
             [.7 .6 .9],'EdgeColor',[.7 .6 .9],'FaceAlpha',.5)
         end
         xlabel('seconds'); ylim([-.2 1.2]);
-        text(10,-.1,strcat('Performance: ',{' '},num2str(round(armChoice.performance,2)),',',{' '},...
-            desc, ', delay: ',{' '},num2str(round(armChoice.delay.dur,2)), ', # trials: ',{' '},...
-            num2str(length(armChoice.visitedArm)),{' '},' in: ',{' '},num2str(round(armChoice.timestamps(end))),{' '},...
-            's'));
+        try
+            text(10,-.1,strcat('Performance: ',{' '},num2str(round(armChoice.performance,2)),',',{' '},...
+                desc, ', delay: ',{' '},num2str(round(armChoice.delay.dur,2)), ', # trials: ',{' '},...
+                num2str(length(armChoice.visitedArm)),{' '},' in: ',{' '},num2str(round(armChoice.timestamps(end))),{' '},...
+                's'));
+        catch
+            text(10,-.1,strcat('Performance: ',{' '},num2str(round(armChoice.performance,2)),',',{' '},...
+                desc, ', # trials: ',{' '},...
+                num2str(length(armChoice.visitedArm)),{' '},' in: ',{' '},num2str(round(armChoice.timestamps(end))),{' '},...
+                's'));
+        end
         set(gca,'YTick', [0 1],'YTickLabel',{'Left','Right'});
 
         mkdir('Behavior');
         saveas(h,'Behavior\armChoice.png');
 
         % Figures including delay
-        if length(armChoice.delay.uniqueDurations) > 2
-            for jj = 1:length(armChoice.delay.uniqueDurations)-1
-                h = figure;
-                hold on
-                plot(armChoice.timestamps, armChoice.visitedArm,'color',[.7 .7 .7]);
-                    scatter(armChoice.timestamps(isnan(armChoice.choice)),...
-                armChoice.visitedArm(isnan(armChoice.choice)),100,[.8 .8 .8],'filled');
-                scatter(armChoice.timestamps(find(armChoice.choice == 1 & armChoice.delay.durations == armChoice.delay.uniqueDurations(jj))),...
-                    armChoice.visitedArm(find(armChoice.choice == 1 & armChoice.delay.durations == armChoice.delay.uniqueDurations(jj))),100,[.6 .9 .7],'filled');
-                scatter(armChoice.timestamps(find(armChoice.choice == 0 & armChoice.delay.durations == armChoice.delay.uniqueDurations(jj))),...
-                    armChoice.visitedArm(find(armChoice.choice == 0 &  armChoice.delay.durations == armChoice.delay.uniqueDurations(jj))),100,[.9 .6 .7],'filled');
-                ts = find(armChoice.delay.durations == armChoice.delay.uniqueDurations(jj));
-                for ii = 1:length(ts)
-                    fill([armChoice.delay.timestamps(ts(ii),:)'; flip(armChoice.delay.timestamps(ts(ii),:))'],[1 1 1.2 1.2]',...
-                        [.7 .6 .9],'EdgeColor',[.7 .6 .9],'FaceAlpha',.5)
+        try
+            if length(armChoice.delay.uniqueDurations) > 2
+                for jj = 1:length(armChoice.delay.uniqueDurations)-1
+                    h = figure;
+                    hold on
+                    plot(armChoice.timestamps, armChoice.visitedArm,'color',[.7 .7 .7]);
+                        scatter(armChoice.timestamps(isnan(armChoice.choice)),...
+                    armChoice.visitedArm(isnan(armChoice.choice)),100,[.8 .8 .8],'filled');
+                    scatter(armChoice.timestamps(find(armChoice.choice == 1 & armChoice.delay.durations == armChoice.delay.uniqueDurations(jj))),...
+                        armChoice.visitedArm(find(armChoice.choice == 1 & armChoice.delay.durations == armChoice.delay.uniqueDurations(jj))),100,[.6 .9 .7],'filled');
+                    scatter(armChoice.timestamps(find(armChoice.choice == 0 & armChoice.delay.durations == armChoice.delay.uniqueDurations(jj))),...
+                        armChoice.visitedArm(find(armChoice.choice == 0 &  armChoice.delay.durations == armChoice.delay.uniqueDurations(jj))),100,[.9 .6 .7],'filled');
+                    ts = find(armChoice.delay.durations == armChoice.delay.uniqueDurations(jj));
+                    for ii = 1:length(ts)
+                        fill([armChoice.delay.timestamps(ts(ii),:)'; flip(armChoice.delay.timestamps(ts(ii),:))'],[1 1 1.2 1.2]',...
+                            [.7 .6 .9],'EdgeColor',[.7 .6 .9],'FaceAlpha',.5)
+                    end
+                    xlabel('seconds'); ylim([-.2 1.2]);
+                    text(10,-.1,strcat('Performance: ',{' '},num2str(round(armChoice.delay.performance(jj),2)),',',{' '},...
+                        desc, ', delay: ',{' '},num2str(round(armChoice.delay.uniqueDurations(jj),2)), ', # trials: ',{' '},...
+                        num2str(length(armChoice.choice(armChoice.delay.durations == armChoice.delay.uniqueDurations(jj)))),{' '},' in: ',{' '},num2str(round(armChoice.timestamps(end))),{' '},...
+                        's'));
+                    set(gca,'YTick', [0 1],'YTickLabel',{'Left','Right'});
+
+                    mkdir('Behavior');
+                    saveas(h,['Behavior\armChoice_delay_',num2str(armChoice.delay.uniqueDurations(jj)),'.png']);
                 end
-                xlabel('seconds'); ylim([-.2 1.2]);
-                text(10,-.1,strcat('Performance: ',{' '},num2str(round(armChoice.delay.performance(jj),2)),',',{' '},...
-                    desc, ', delay: ',{' '},num2str(round(armChoice.delay.uniqueDurations(jj),2)), ', # trials: ',{' '},...
-                    num2str(length(armChoice.choice(armChoice.delay.durations == armChoice.delay.uniqueDurations(jj)))),{' '},' in: ',{' '},num2str(round(armChoice.timestamps(end))),{' '},...
-                    's'));
-                set(gca,'YTick', [0 1],'YTickLabel',{'Left','Right'});
-                
-                mkdir('Behavior');
-                saveas(h,['Behavior\armChoice_delay_',num2str(armChoice.delay.uniqueDurations(jj)),'.png']);
             end
         end
-        
         
         close all;
         % Save Output
