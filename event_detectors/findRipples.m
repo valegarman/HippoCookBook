@@ -99,6 +99,7 @@ addParameter(p,'saveMat',false,@islogical);
 addParameter(p,'minDuration',20,@isnumeric);
 addParameter(p,'plotType',2,@isnumeric);
 addParameter(p,'basepath',pwd,@isfolder);
+addParameter(p,'excludeIntervals',[],@isnumeric);
 
 prevPath = pwd;
 if isstr(varargin{1})  % if first arg is basepath
@@ -145,13 +146,24 @@ elseif isnumeric(varargin{1})
     passband = p.Results.passband;
     EMGThresh = p.Results.EMGThresh;
     basepath = pwd;
+    excludeIntervals = p.Results.excludeIntervals;
     cd(basepath);
     basename = basenameFromBasepath(p.Results.basepath);
     lfp = getLFP(p.Results.channel,'basepath',p.Results.basepath,'basename',basename); 
+    if ~isempty(excludeIntervals)
+        [a,b] = InIntervals(lfp.timestamps,excludeIntervals);
+        lfp.timestamps(a) = [];
+        lfp.data(a,:) = [];
+    end
+    
     signal = bz_Filter(lfp,'filter','butter','passband',passband,'order',3);
     timestamps = signal.timestamps;
     signal = signal.data;
-    region = lfp.region;
+    if isfield(lfp,'region')
+        region = lfp.region;
+    else
+        region = 'N/A';
+    end
 end
 
 % assign parameters (either defaults or given)

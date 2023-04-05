@@ -120,13 +120,17 @@ if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))
             session.analysisTags.homeDelayTtl_channel = homeDelayTtl_channel;
         end
         
+        if ~isfield(session.analysisTags,'homeDelayTtl_channel')
+        end
         
         save([basepath filesep session.general.name,'.session.mat'],'session','-v7.3');
     catch
         warning('it seems that CellExplorer is not on your path');
+        
+        session = sessionTemplate(basepath,'showGUI',true);
     end
 
-    session = sessionTemplate(basepath,'showGUI',true);
+    session = gui_session(session);
 
     selectProbe('force',true); % choose probe
 end
@@ -142,6 +146,8 @@ if ~any(ismember(excludeAnalysis, {'2',lower('loadSpikes')}))
         end
     end   
     spikes = loadSpikes('forceReload',force_loadingSpikes);
+    
+    session = loadSession(basepath);
 end
 
 %% 3. Analog pulses detection
@@ -179,7 +185,7 @@ if ~any(ismember(excludeAnalysis, {'5',lower('checkSleep')}))
     end
     
     SleepScoreMaster(pwd,'noPrompts',true,'ignoretime',pulses.stimulationEpochs, 'overwrite', true);
-    % TheStateEditor(session.general.name);
+%     TheStateEditor(session.general.name);
     bz_ThetaStates(pwd);
 end
 
@@ -242,7 +248,6 @@ if ~any(ismember(excludeAnalysis, {'10',lower('cellMetrics')}))
     end
     cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true);
     
-
     getACGPeak('force',true);
 
     getAverageCCG('force',true);

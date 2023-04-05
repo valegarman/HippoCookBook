@@ -352,6 +352,16 @@ preprocessSession_pablo('basepath','F:\data\HPS22\HPS22_270521_sess18','analysis
 preprocessSession_pablo('basepath','F:\data\HPS22\HPS22_280521_sess19','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'anymaze_ttl_channel',2)
 preprocessSession_pablo('basepath','F:\data\HPS22\HPS22_040621_sess125','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'anymaze_ttl_channel',2)
 
+preprocessSession_pablo('basepath','D:\HPS22\HPS22_130521_sess11','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'anymaze_ttl_channel',2)
+preprocessSession_pablo('basepath','F:\data\HPS22\HPS22_040621_sess125','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'anymaze_ttl_channel',2)
+
+preprocessSession_pablo('basepath','F:\data\HPS22\HPS22_210421_sess4','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'anymaze_ttl_channel',2,'getPos',false,'sessionSummary',false)
+preprocessSession_pablo('basepath','F:\data\HPS22\HPS22_220421_sess5','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'anymaze_ttl_channel',2,'getPos',false,'sessionSummary',false)
+
+preprocessSession_pablo('basepath','D:\HPS22\HPS22_230421_sess6','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'anymaze_ttl_channel',2,'getPos',false,'sessionSummary',false)
+
+
+batch_preprocessSession_pablo('basepath','D:\HPS22','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'anymaze_ttl_channel',2);
 
 %% HPS23
 basepath = 'F:\data\HPS23';
@@ -368,6 +378,8 @@ preprocessSession_pablo('basepath','D:\HPS23\HPS23_270521_sess8','analysisPath',
 
 preprocessSession_pablo('basepath','F:\data\HPS23\HPS23_110621_sess10','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'anymaze_ttl_channel',2,'getPos',false,'sessionSummary',false);
 
+batch_preprocessSession_pablo('basepath','D:\HPS23','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'anymaze_ttl_channel',2);
+preprocessSession_pablo('basepath','D:\HPS23\HPS23_180521_sess16','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'anymaze_ttl_channel',2,'getPos',false,'sessionSummary',false);
 
 %% HPS24
 basepath = 'F:\data\HPS24';
@@ -378,12 +390,16 @@ batch_preprocessSession_pablo('basepath','F:\data\HPS24','analysisPath',[],'clea
 preprocessSession_pablo('basepath','F:\data\HPS24\HPS24_280621_sess5','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'anymaze_ttl_channel',2);
 preprocessSession_pablo('basepath','F:\data\HPS24\HPS24_290621_sess6','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'anymaze_ttl_channel',2);
 
+batch_preprocessSession_pablo('basepath','D:\HPS24','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'anymaze_ttl_channel',2);
+
 %% HPS25
 basepath = 'F:\data\HPS25';
 basepath = 'D:\HPS25';
 createFiles('basepath',basepath);
 batch_preprocessSession_pablo('basepath','F:\data\HPS25','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'anymaze_ttl_channel',2);
 preprocessSession_pablo('basepath','F:\data\HPS25\HPS25_280621_sess3','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'anymaze_ttl_channel',2,'getPos',false,'sessionSummary',false);
+
+batch_preprocessSession_pablo('basepath','D:\HPS25','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'anymaze_ttl_channel',2);
 
 %% IPO135
 basepath = 'F:\data\IPO135';
@@ -392,6 +408,10 @@ createFiles('basepath',basepath);
 %% IPO150
 preprocessSession_pablo('basepath','F:\data\IPO150\IPO150_261021_sess2','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'anymaze_ttl_channel',2,'getPos',true,'sessionSummary',true);
 preprocessSession_pablo('basepath','F:\data\IPO150\IPO150_291021_sess3','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'anymaze_ttl_channel',2,'getPos',true,'sessionSummary',true);
+
+%% IPO4311
+preprocessSession_pablo('basepath','F:\data\IPO431\IPO431_221021_sess1','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'anymaze_ttl_channel',2,'getPos',true,'sessionSummary',true);
+
 
 %% HPR21409
 
@@ -462,7 +482,7 @@ preprocessSession_pablo('basepath','D:\HM2\HM2_210223_sess1','analysisPath',[],'
 
 
 
-% fSUB1
+%% fSUB1
 preprocessSession_pablo('basepath','J:\fSUB1\fSUB1_181122_sess7','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'changeAnalogInputs',false,'getPos',false,'sessionSummary',false);
 preprocessSession_pablo('basepath','D:\fSUB1\fSUB1_150223_sess37','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'changeAnalogInputs',false,'getPos',false,'sessionSummary',false);
 
@@ -474,15 +494,31 @@ preprocessSession_pablo('basepath','C:\DATA\fSUB1\fSUB1_261222_sess25','analysis
 preprocessSession_pablo('basepath','C:\DATA\fSUB1\fSUB1_291122_sess14','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'changeAnalogInputs',false,'getPos',false,'sessionSummary',false);
 
 
-% fSUB2
+%% fSUB2
 preprocessSession_pablo('basepath','J:\fSUB2\fSUB2_150223_sess6','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'changeAnalogInputs',false,'getPos',false,'sessionSummary',false);
 preprocessSession_pablo('basepath','J:\fSUB2\fSUB2_160223_sess7','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'changeAnalogInputs',false,'getPos',false,'sessionSummary',false);
+<<<<<<< HEAD
 
 
 %% HM2
 bpath = 'C:\DATA\HM2';
 createNSFiles('basepath',bpath,'nChannels',96);
 preprocessSession_pablo('basepath','C:\DATA\HM2\HM2_090223_sess3','cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'bazler_ttl_channel',10,'getPos',false,'sessionSummary',false);
+=======
+preprocessSession_pablo('basepath','J:\fSUB2\fSUB2_220223_sess10','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'changeAnalogInputs',false,'getPos',false,'sessionSummary',false);
+
+
+%% HMX
+basepath = 'J:\HM2';
+createNSFiles('basepath',basepath,'nChannels',96);
+cd(basepath);
+preprocessSession_pablo('basepath','J:\HM2\HM2_270323_sess2','cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'bazler_ttl_channel',10,'getPos',false,'sessionSummary',false);
+preprocessSession_pablo('basepath','J:\HM2\HM2_160323_sess1','cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'bazler_ttl_channel',10,'getPos',false,'sessionSummary',false);
+
+
+
+
+>>>>>>> 58bb47033a3c33922f586aaec67719ddf7455501
 
 
 

@@ -18,7 +18,10 @@ addParameter(p,'anyMazeTTL',[],@isnumeric)
 addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'orderKalmanVel',2,@isnumeric);
 addParameter(p,'anyMaze_ttl_channel',2,@isnumeric);
-addParameter(p,'checkZones',true,@islogical);
+addParameter(p,'checkZones',false,@islogical);
+addParameter(p,'leftArmTtl_channel',3,@isnumeric);
+addParameter(p,'rightArmTtl_channel',4,@isnumeric);
+addParameter(p,'homeDelayTtl_channel',5,@isnumeric);
 
 % addParameter(p,'RGBChannel',[],@isstr);
 
@@ -38,6 +41,9 @@ saveMat = p.Results.saveMat;
 order = p.Results.orderKalmanVel;
 anyMaze_ttl_channel = p.Results.anyMaze_ttl_channel;
 checkZones = p.Results.checkZones;
+leftArmTtl_channel = p.Results.leftArmTtl_channel;
+rightArmTtl_channel = p.Results.rightArmTtl_channel;
+homeDelayTtl_channel = p.Results.homeDelayTtl_channel;
 
 
 %% In case tracking already exists
@@ -457,7 +463,7 @@ art = find(sum(abs(diff(pos))>artifactThreshold,2))+1;  % remove artefacs as mov
 pos(art,:) = NaN;
 xt = linspace(0,size(pos,1)/fs,size(pos,1));            % kalman filter
 xt1 = timesamples;
-[t,x,y,vx,vy,ax,ay] = trajectory_kalman_filter(pos(:,1)',pos(:,2)',xt,0);
+[t,x,y,vx,vy,ax,ay] = trajectory_kalman_filter(pos(:,1)',pos(:,2)',xt1,0);
 art = find(sum(abs(diff([x y]))>artifactThreshold,2))+1;
 art = [art - 2 art - 1 art art + 1 art + 2];
 x(art(:)) = NaN; y(art(:)) = NaN;
@@ -475,6 +481,81 @@ boundingbox_xmin =  boundingbox_xmin - xMaze(1);
 boundingbox_xmax = boundingbox_xmax - xMaze(1);
 boundingbox_ymin = boundingbox_ymin -yMaze(1);
 boundingbox_ymax = boundingbox_ymax - yMaze(1);
+
+% Plotting
+
+
+%% Get AnyMaze TTL
+% digitalIn legend: 2. anyMaze, 3. Left, 4. Right, 5. Home delay, 6. Is
+% alternation forced?
+
+if isempty(anyMazeTtl)
+    digitalIn = getDigitalIn;
+    anyMazeTtl = digitalIn.timestampsOn{anyMaze_ttl_channel};
+    anyMazeTtl_start = digitalIn.timestampsOn{1};
+    if isempty(anyMazeTtl_start) & ~isempty(anyMazeTtl)
+        anyMazeTtl_start = anyMazeTtl(1);
+    elseif isempty(anyMazeTtl_start) & isempty(anyMazeTtl)
+        anyMazeTtl_start = 0;
+    end
+end
+% match anymaze frames con ttl pulses
+% if length(anyMazeTtl) == length(x)
+%     disp('Number of frames match!!');
+% elseif length(anyMazeTtl) > length(x) && length(anyMazeTtl) <= length(x) + 15 * 1 
+%     fprintf('%3.i frames were dropped, probably at the end of the recording. Skipping... \n',...
+%         length(anyMazeTtl) - length(x));
+%     anyMazeTtl = anyMazeTtl(1:length(x));
+% elseif length(anyMazeTtl) < length(x) && (length(x)-length(anyMazeTtl)) < 60 * 10
+%     fprintf('%3.i video frames without TTL... Was the recording switched off before the camera?. Skipping... \n',...
+%     length(x) - length(anyMazeTtl));
+%     x = x(1:length(anyMazeTtl));
+%     y = y(1:length(anyMazeTtl));
+%     vx = vx(1:length(anyMazeTtl));
+%     vy = vy(1:length(anyMazeTtl));
+%     ax = ax(1:length(anyMazeTtl));
+%     ay = ay(1:length(anyMazeTtl)); 
+% elseif isempty(anyMazeTtl)
+%     anyMazeTtl = xt;
+% elseif abs(length(x)-length(anyMazeTtl)) > 15 * 1 && size(digitalIn.timestampsOn,2)> 4
+%     fprintf('%3.i frames were dropped, possibly at the beginning of the recording. Aligning timestamps to the first IR TTL... \n',...
+%         length(anyMazeTtl) - length(x));
+%     f1 = figure;
+%     freezeColors;
+%     scatter(x,y,3,t,'filled','MarkerEdgeColor','none','MarkerFaceAlpha',.5); colormap jet;  axis tight
+%     set(gca,'Ydir','reverse');
+%     xlim(xMaze); ylim(yMaze);
+%    
+%     lReward = digitalIn.timestampsOn{3}(1);
+%     rReward = digitalIn.timestampsOn{4}(1);
+% 
+%     if lReward < rReward % If the animal turned left first, find the location based on the IR location
+%         disp('Mouse turned left first. Mark y-position for left IR sensor...');
+%         roiIR = drawpoint;
+%         idx = find((y <= (roiIR.Position(2)+0.75)) & (y >= (roiIR.Position(2)- 0.75)) & x<20); %% tentative left IR location
+%         timediff = lReward-anyMazeTtl(idx(1));
+%         % correct TTLs
+%         bazlerTtl = anyMazeTtl + timediff;
+%     else % If the animal turned right first, find the location based on the IR location
+%         disp('Mouse turned right first. Mark y-position for right IR sensor...');
+%         roiIR = drawpoint;
+%         idx = find((y <= (roiIR.Position(2)+0.75)) & (y >= (roiIR.Position(2)- 0.75)) & x<20); %% tentative right IR location
+%         timediff = rReward-anyMazeTtl(idx(1));
+%         % correct TTLs
+%         bazlerTtl = anyMazeTtl + timediff;
+%     end
+%     close(f1);
+%     anyMazeTtl = anyMazeTtl(1:length(x));
+% else
+%     keyboard;
+%     error('Frames do not match for more than 5 seconds!! Trying to sync LED pulses');
+%     if length(digitalIn.timestampsOn{2}) == length(sync_signal)
+%          disp('Using sync LED pulses...');
+%          keyboard; % to do!!!
+%     end
+% end
+
+%% PLOTTING
 
 h2 = figure('units','normalized','outerposition',[0 0 1 1]);
 freezeColors;
@@ -513,6 +594,7 @@ for i=1:num_zones
 %         plot([boundingbox_zones_xmin{i} boundingbox_zones_xmin{i} boundingbox_zones_xmax{i} boundingbox_zones_xmax{i} boundingbox_zones_xmin{i}],[boundingbox_zones_ymin{i} boundingbox_zones_ymax{i}, boundingbox_zones_ymax{i}, boundingbox_zones_ymin{i} boundingbox_zones_ymin{i}],'b');
         plot(bndgbox_zones{i},'FaceAlpha',0);
 end
+
 if strcmpi(apparatus_name,'Linear Track  N-S') || isempty(apparatus_name)
     try
         scatter(x(find(NorthOutputActive)+1),y(find(NorthOutputActive)+1),20,'k');
@@ -528,6 +610,35 @@ oryMaze = yMaze;
 xMaze = xMaze - xMaze(1);
 yMaze = yMaze - yMaze(1);
 xlim(xMaze); ylim(yMaze);
+
+try
+    if strcmpi(apparatus_name,'TMaze')
+        leftTtl = digitalIn.timestampsOn{leftArmTtl_channel};
+        rightTtl = digitalIn.timestampsOn{rightArmTtl_channel};
+        homeDelayTtl = digitalIn.timestampsOn{homeDelayTtl_channel};
+        hold on;
+        % Right reward
+        for ii = 1:length(leftTtl)
+            [~,idx] = min(abs(leftTtl(ii) - (t+anyMazeTtl_start)));
+            p1 = plot(x(idx),y(idx),'o','MarkerFaceColor',[.8 .5 .1],'MarkerEdgeColor','k');
+        end
+        % Left reward
+        for ii = 1:length(rightTtl)
+            [~,idx] = min(abs(rightTtl(ii) - (t+anyMazeTtl_start)));
+            p2 = plot(x(idx),y(idx),'o','MarkerFaceColor',[.1 .5 .8],'MarkerEdgeColor','k');
+        end
+        % homeDelay
+        for ii = 1:length(homeDelayTtl)
+            [~,idx] = min(abs(homeDelayTtl(ii) - (t+anyMazeTtl_start)));
+            p3 = plot(x(idx),y(idx),'o','MarkerFaceColor',[.5 .8 .5],'MarkerEdgeColor','k');
+        end
+
+        legend([p1 p2 p3],'leftReward','rightReward','homeDelay');
+    end
+catch
+    warning('Not possible to load ttls for reward...');
+end
+
 
 mkdir('Behavior');
 if checkZones && strcmpi(apparatus_name,'YMaze Apparatus')
@@ -661,76 +772,143 @@ else
     end
 end
 
-%% Get AnyMaze TTL
-% digitalIn legend: 2. anyMaze, 3. Left, 4. Right, 5. Home delay, 6. Is
-% alternation forced?
 
-if isempty(anyMazeTtl)
-    digitalIn = getDigitalIn;
-    anyMazeTtl = digitalIn.timestampsOn{anyMaze_ttl_channel};
-    anyMazeTtl_start = digitalIn.timestampsOn{1};
-    if isempty(anyMazeTtl_start) & ~isempty(anyMazeTtl)
-        anyMazeTtl_start = anyMazeTtl(1);
-    elseif isempty(anyMazeTtl_start) & isempty(anyMazeTtl)
-        anyMazeTtl_start = 0;
+if checkZones & strcmpi(apparatus_name,'TMaze')
+    in = input('Press "y" if you are happy with the zones, any other key otherwise...','s');
+    if strcmpi(in,'y')
+        saveas(h2,'Behavior\trajectory.png');
+        if ~verbose
+            close(h2);
+        end
+        return;
+    end
+    bndbox_zones = [];
+    disp('Checking zones...Draw ROI for zones');
+    h1 = figure('units','normalized','outerposition',[0 0 1 1]);
+    freezeColors;
+    scatter(x,y,3,t,'filled','MarkerEdgeColor','none','MarkerFaceAlpha',.5); colormap jet
+    axis ij;
+    caxis([t(1) t(end)])
+    xlabel('norm/cm');ylabel('norm/cm'); colorbar
+    hold on;
+    plot(bndgbox,'FaceAlpha',0);
+    
+    % Drawing zones...
+    % Left reward
+    disp('Draw Left Reward...');
+    leftRewardROI = drawpolygon;
+    leftRewardRoi = polyshape(leftRewardROI.Position(:,1),leftRewardROI.Position(:,2));
+    close(h1);
+    bndgbox_zones{1}.name = 'leftReward';
+    bndgbox_zones{1}.bndgbox = leftRewardRoi;
+    
+    % Right Reward
+    h1 = figure('units','normalized','outerposition',[0 0 1 1]);
+    freezeColors;
+    scatter(x,y,3,t,'filled','MarkerEdgeColor','none','MarkerFaceAlpha',.5); colormap jet
+    axis ij
+    caxis([t(1) t(end)])
+    xlabel('norm/cm'); ylabel('norm/cm'); colorbar;
+    hold on;
+%     plot([boundingbox_xmin boundingbox_xmin boundingbox_xmax boundingbox_xmax boundingbox_xmin], [boundingbox_ymin boundingbox_ymax, boundingbox_ymax, boundingbox_ymin boundingbox_ymin],'r')
+    plot(bndgbox,'FaceAlpha',0);
+    hold on;
+    plot(leftRewardRoi,'FaceColor',[0.9 0.9 0.9],'EdgeColor','k','FaceAlpha',0.4);
+    
+    disp('Draw Right Reward...');
+    rightRewardROI = drawpolygon;
+    rightRewardRoi = polyshape(rightRewardROI.Position(:,1),rightRewardROI.Position(:,2));
+    close(h1);
+    bndgbox_zones{2}.name = 'rightReward';
+    bndgbox_zones{2}.bndgbox = rightRewardRoi;
+    
+    % Decision point
+    h1 = figure('units','normalized','outerposition',[0 0 1 1]);
+    freezeColors;
+    scatter(x,y,3,t,'filled','MarkerEdgeColor','none','MarkerFaceAlpha',.5); colormap jet
+    axis ij
+    caxis([t(1) t(end)])
+    xlabel('norm/cm'); ylabel('norm/cm'); colorbar;
+    hold on;
+%     plot([boundingbox_xmin boundingbox_xmin boundingbox_xmax boundingbox_xmax boundingbox_xmin], [boundingbox_ymin boundingbox_ymax, boundingbox_ymax, boundingbox_ymin boundingbox_ymin],'r')
+    plot(bndgbox,'FaceAlpha',0);
+    hold on;
+    plot(leftRewardRoi,'FaceColor',[0.9 0.9 0.9],'EdgeColor','k','FaceAlpha',0.4);
+    hold on;
+    plot(rightRewardRoi,'FaceColor',[0.9 0.9 0.9],'EdgeColor','k','FaceAlpha',0.4);
+    
+    disp('Draw Decision Point...');
+    decisionROI = drawpolygon;
+    decisionRoi = polyshape(decisionROI.Position(:,1),decisionROI.Position(:,2));
+    close(h1);
+    bndgbox_zones{3}.name = 'decision';
+    bndgbox_zones{3}.bndgbox = decisionRoi;
+    
+    % homeDelay
+    h1 = figure('units','normalized','outerposition',[0 0 1 1]);
+    freezeColors;
+    scatter(x,y,3,t,'filled','MarkerEdgeColor','none','MarkerFaceAlpha',.5); colormap jet
+    axis ij
+    caxis([t(1) t(end)])
+    xlabel('norm/cm'); ylabel('norm/cm'); colorbar;
+    hold on;
+%     plot([boundingbox_xmin boundingbox_xmin boundingbox_xmax boundingbox_xmax boundingbox_xmin], [boundingbox_ymin boundingbox_ymax, boundingbox_ymax, boundingbox_ymin boundingbox_ymin],'r')
+    plot(bndgbox,'FaceAlpha',0);
+    hold on;
+    plot(leftRewardRoi,'FaceColor',[0.9 0.9 0.9],'EdgeColor','k','FaceAlpha',0.4);
+    hold on;
+    plot(rightRewardRoi,'FaceColor',[0.9 0.9 0.9],'EdgeColor','k','FaceAlpha',0.4);
+    hold on;
+    plot(decisionRoi,'FaceColor',[0.9 0.9 0.9],'EdgeColor','k','FaceAlpha',0.4);
+    
+    disp('Draw Home Delay...');
+    homeDelayROI = drawpolygon;
+    homeDelayRoi = polyshape(homeDelayROI.Position(:,1),homeDelayROI.Position(:,2));
+    close(h1);
+    bndgbox_zones{4}.name = 'homeDelay';
+    bndgbox_zones{4}.bndgbox = homeDelayRoi;
+    
+    % Final Figure
+    h1 = figure('units','normalized','outerposition',[0 0 1 1]);
+    freezeColors;
+    scatter(x,y,3,t,'filled','MarkerEdgeColor','none','MarkerFaceAlpha',.5); colormap jet
+    axis ij
+    caxis([t(1) t(end)])
+    xlabel('norm/cm'); ylabel('norm/cm'); colorbar;
+    hold on;
+%     plot([boundingbox_xmin boundingbox_xmin boundingbox_xmax boundingbox_xmax boundingbox_xmin], [boundingbox_ymin boundingbox_ymax, boundingbox_ymax, boundingbox_ymin boundingbox_ymin],'r')
+    plot(bndgbox,'FaceAlpha',0);
+    hold on;
+    plot(leftRewardRoi,'FaceColor',[0.9 0.9 0.9],'EdgeColor','k','FaceAlpha',0.4);
+    hold on;
+    plot(rightRewardRoi,'FaceColor',[0.9 0.9 0.9],'EdgeColor','k','FaceAlpha',0.4);
+    hold on;
+    plot(decisionRoi,'FaceColor',[0.9 0.9 0.9],'EdgeColor','k','FaceAlpha',0.4);
+    hold on;
+    plot(homeDelayRoi,'FaceColor',[0.9 0.9 0.9],'EdgeColor','k','FaceAlpha',0.4);
+    xlim(xMaze); ylim(yMaze);
+    saveas(h1,'Behavior\trajectory_newZones.png');
+    
+    bndgbox_zones_aux = bndgbox_zones;
+    bndgbox_zones = [];
+    for ii = 1:num_zones
+        bndgbox_zones{ii}.name = bndgbox_zones_aux{ii}.name;
+        bndgbox_zones{ii}.bndgbox = bndgbox_zones_aux{ii}.bndgbox;
+        name_zones{ii} = bndgbox_zones_aux{ii}.name;
+    end
+    
+    else
+    saveas(h2,'Behavior\trajectory.png');
+%     if ~verbose
+%         close(h2);
+%     end
+    bndgbox_zones_aux = bndgbox_zones;
+    bndgbox_zones = [];
+    for ii = 1:num_zones
+        bndgbox_zones{ii}.name = name_zones{ii};
+        bndgbox_zones{ii}.bndgbox = bndgbox_zones_aux{ii};
     end
 end
-% match anymaze frames con ttl pulses
-% if length(anyMazeTtl) == length(x)
-%     disp('Number of frames match!!');
-% elseif length(anyMazeTtl) > length(x) && length(anyMazeTtl) <= length(x) + 15 * 1 
-%     fprintf('%3.i frames were dropped, probably at the end of the recording. Skipping... \n',...
-%         length(anyMazeTtl) - length(x));
-%     anyMazeTtl = anyMazeTtl(1:length(x));
-% elseif length(anyMazeTtl) < length(x) && (length(x)-length(anyMazeTtl)) < 60 * 10
-%     fprintf('%3.i video frames without TTL... Was the recording switched off before the camera?. Skipping... \n',...
-%     length(x) - length(anyMazeTtl));
-%     x = x(1:length(anyMazeTtl));
-%     y = y(1:length(anyMazeTtl));
-%     vx = vx(1:length(anyMazeTtl));
-%     vy = vy(1:length(anyMazeTtl));
-%     ax = ax(1:length(anyMazeTtl));
-%     ay = ay(1:length(anyMazeTtl)); 
-% elseif isempty(anyMazeTtl)
-%     anyMazeTtl = xt;
-% elseif abs(length(x)-length(anyMazeTtl)) > 15 * 1 && size(digitalIn.timestampsOn,2)> 4
-%     fprintf('%3.i frames were dropped, possibly at the beginning of the recording. Aligning timestamps to the first IR TTL... \n',...
-%         length(anyMazeTtl) - length(x));
-%     f1 = figure;
-%     freezeColors;
-%     scatter(x,y,3,t,'filled','MarkerEdgeColor','none','MarkerFaceAlpha',.5); colormap jet;  axis tight
-%     set(gca,'Ydir','reverse');
-%     xlim(xMaze); ylim(yMaze);
-%    
-%     lReward = digitalIn.timestampsOn{3}(1);
-%     rReward = digitalIn.timestampsOn{4}(1);
-% 
-%     if lReward < rReward % If the animal turned left first, find the location based on the IR location
-%         disp('Mouse turned left first. Mark y-position for left IR sensor...');
-%         roiIR = drawpoint;
-%         idx = find((y <= (roiIR.Position(2)+0.75)) & (y >= (roiIR.Position(2)- 0.75)) & x<20); %% tentative left IR location
-%         timediff = lReward-anyMazeTtl(idx(1));
-%         % correct TTLs
-%         bazlerTtl = anyMazeTtl + timediff;
-%     else % If the animal turned right first, find the location based on the IR location
-%         disp('Mouse turned right first. Mark y-position for right IR sensor...');
-%         roiIR = drawpoint;
-%         idx = find((y <= (roiIR.Position(2)+0.75)) & (y >= (roiIR.Position(2)- 0.75)) & x<20); %% tentative right IR location
-%         timediff = rReward-anyMazeTtl(idx(1));
-%         % correct TTLs
-%         bazlerTtl = anyMazeTtl + timediff;
-%     end
-%     close(f1);
-%     anyMazeTtl = anyMazeTtl(1:length(x));
-% else
-%     keyboard;
-%     error('Frames do not match for more than 5 seconds!! Trying to sync LED pulses');
-%     if length(digitalIn.timestampsOn{2}) == length(sync_signal)
-%          disp('Using sync LED pulses...');
-%          keyboard; % to do!!!
-%     end
-% end
-
 
 %% OUTPUT
 [~,fbasename,~] = fileparts(pwd);
@@ -804,32 +982,35 @@ if ~isempty(inSouth)
 end
    
 if exist('zone','var')
-    for i=1:num_zones
-        try
-            tracking.zone.name{i} = char(name_zones{i});
-            tracking.zone.centre.x{i} = center_zones_x{i};
-            tracking.zone.centre.y{i} = center_zones_y{i};
-            tracking.zone.boundingbox.x{i} = boundingbox_zones_x{i};
-            tracking.zone.boundingbox.y{i} = boundingbox_zones_y{i};
-            tracking.zone.boundingbox.w{i} = boundingbox_zones_w{i};
-            tracking.zone.boundingbox.h{i} = boundingbox_zones_h{i};  
-            tracking.zone.xmin{i} = boundingbox_zones_xmin{i};
-            tracking.zone.xmax{i} = boundingbox_zones_xmax{i};
-            tracking.zone.ymin{i} = boundingbox_zones_ymin{i};
-            tracking.zone.ymax{i} = boundingbox_zones_ymax{i};
-        catch
-            tracking.zone.name{i} = char(name_zones{i}.Text);
-            tracking.zone.centre.x{i} = center_zones_x{i};
-            tracking.zone.centre.y{i} = center_zones_y{i};
-            tracking.zone.boundingbox.x{i} = boundingbox_zones_x{i};
-            tracking.zone.boundingbox.y{i} = boundingbox_zones_y{i};
-            tracking.zone.boundingbox.w{i} = boundingbox_zones_w{i};
-            tracking.zone.boundingbox.h{i} = boundingbox_zones_h{i};  
-            tracking.zone.xmin{i} = boundingbox_zones_xmin{i};
-            tracking.zone.xmax{i} = boundingbox_zones_xmax{i};
-            tracking.zone.ymin{i} = boundingbox_zones_ymin{i};
-            tracking.zone.ymax{i} = boundingbox_zones_ymax{i};
-        end
+%     for i=1:num_zones
+%         try
+%             tracking.zone.name{i} = char(name_zones{i});
+%             tracking.zone.centre.x{i} = center_zones_x{i};
+%             tracking.zone.centre.y{i} = center_zones_y{i};
+%             tracking.zone.boundingbox.x{i} = boundingbox_zones_x{i};
+%             tracking.zone.boundingbox.y{i} = boundingbox_zones_y{i};
+%             tracking.zone.boundingbox.w{i} = boundingbox_zones_w{i};
+%             tracking.zone.boundingbox.h{i} = boundingbox_zones_h{i};  
+%             tracking.zone.xmin{i} = boundingbox_zones_xmin{i};
+%             tracking.zone.xmax{i} = boundingbox_zones_xmax{i};
+%             tracking.zone.ymin{i} = boundingbox_zones_ymin{i};
+%             tracking.zone.ymax{i} = boundingbox_zones_ymax{i};
+%         catch
+%             tracking.zone.name{i} = char(name_zones{i}.Text);
+%             tracking.zone.centre.x{i} = center_zones_x{i};
+%             tracking.zone.centre.y{i} = center_zones_y{i};
+%             tracking.zone.boundingbox.x{i} = boundingbox_zones_x{i};
+%             tracking.zone.boundingbox.y{i} = boundingbox_zones_y{i};
+%             tracking.zone.boundingbox.w{i} = boundingbox_zones_w{i};
+%             tracking.zone.boundingbox.h{i} = boundingbox_zones_h{i};  
+%             tracking.zone.xmin{i} = boundingbox_zones_xmin{i};
+%             tracking.zone.xmax{i} = boundingbox_zones_xmax{i};
+%             tracking.zone.ymin{i} = boundingbox_zones_ymin{i};
+%             tracking.zone.ymax{i} = boundingbox_zones_ymax{i};
+%         end
+%     end
+    for i = 1:num_zones
+        tracking.zone.name{i} = name_zones{i};
     end
     
     for ii = 1:length(bndgbox_zones)

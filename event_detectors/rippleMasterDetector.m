@@ -106,6 +106,7 @@ addParameter(p,'removeOptogeneticStimulation',true,@islogical);
 addParameter(p,'useCSD',false,@islogical);
 addParameter(p,'stdThreshold',2,@isnumeric);
 addParameter(p,'detector','filter',@ischar);
+addParameter(p,'excludeIntervals',[],@isnumeric);
 % -- cnn related --
 addParameter(p,'cnn_channels', [], @isnumeric);
 addParameter(p,'model_file', '', @ischar);
@@ -143,6 +144,7 @@ removeOptogeneticStimulation = p.Results.removeOptogeneticStimulation;
 useCSD = p.Results.useCSD;
 stdThreshold = p.Results.stdThreshold;
 detector = p.Results.detector;
+excludeIntervals = p.Results.excludeIntervals;
 % -- cnn related --
 cnn_channels = p.Results.cnn_channels;
 pred_every = p.Results.pred_every;
@@ -203,7 +205,7 @@ end
 
 if strcmp(detector, 'filter')
     ripples = findRipples(rippleChannel,'thresholds',thresholds,'passband',passband,...
-        'EMGThresh',EMGThresh,'durations',durations, 'saveMat',false,'restrict',restrict,'frequency',frequency);
+        'EMGThresh',EMGThresh,'durations',durations, 'saveMat',false,'restrict',restrict,'frequency',frequency,'excludeIntervals',excludeIntervals);
 elseif strcmp(detector, 'cnn')
     % Load channel configuration
     load([session.general.name,'.session.mat']);

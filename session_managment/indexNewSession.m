@@ -139,6 +139,9 @@ system(commandToExecute);
 commentToCommit = ['Added Session: ' session.general.name];
 commandToExecute = ['git commit -m "' commentToCommit '"'];
 system(commandToExecute);
+% Git Pull
+commandToExecute = ['git pull'];
+system(commandToExecute);
 % Git Push
 commandToExecute = ['git push'];
 system(commandToExecute);e

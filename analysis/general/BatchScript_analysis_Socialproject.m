@@ -1,4 +1,4 @@
-%% BatchScript_analysis_SocialProject
+%% BatchScript_analysis_SocialProjectHbituation
 
 clear; close all
 targetProject= 'SocialProject';
@@ -7,7 +7,7 @@ database_path = 'D:\FLR';
 HCB_directory = what('SocialProject'); 
 
 % sessionsTable = readtable([HCB_directory.path filesep 'indexedSessions_MK801Project.csv']); % the variable is called allSessions
-sessionsTable = readtable(['C:\Users\Jorge\Documents\GitHub\SocialProject',filesep,'indexedSessions_SocialProject.csv']);
+sessionsTable = readtable(['C:\Users\Jorge\Documents\GitHub\SocialProject',filesep,'indexedSessions_SocialProjectHabituation.csv']);
 forceReload = false;
 
 win_resp = [-0.025 0.025];
@@ -31,11 +31,46 @@ for ii = 22:length(sessionsTable.SessionName)
         session = loadSession();
         spikes = loadSpikes();
         
+        try
+            targetFile = dir('*.ripples.events.mat'); load(targetFile.name);
+            rippleChannel = session.analysisTags.rippleChannel;
+            if rippleChannel ~= ripples.detectorinfo.detectionchannel;
+                error('session metadata and ripple channels are not the same');
+            end
+        catch
+            rippleChannel = ripples.detectorinfo.detectionchannel;
+        end
+
+        try
+            targetFile = dir('*.sharpwaves.events.mat'); load(targetFile.name);
+            if ~isempty(targetFile)
+                SWChannel = session.analysisTags.SWChannel;
+                if SWChannel ~= SW.detectorinfo.detectionchannel
+                    error('session metadata and ripple channels are not the same');
+                end
+            else
+                SWChannel = [];
+            end
+        catch
+            SWChannel = [];
+        end
+
+        try
+            targetFile = dir('*.thetaEpochs.states.mat'); load(targetFile.name);
+            thetaChannel = session.analysisTags.thetaChannel;
+            if thetaChannel ~= thetaEpochs.channel
+                error('session metadata and theta channels are not the same');
+            end
+        catch
+            thetaChannel = thetaEpochs.channel;
+        end
+            
+        
 %         cell_metrics = CellExplorer('basepath',pwd);
         
-        ripples = rippleMasterDetector('rippleChannel',session.analysisTags.rippleChannel,'SWChannel',session.analysisTags.SWChannel,'force',true,'removeOptogeneticStimulation',true,'eventSpikeThreshold',false); % [1.5 3.5]
-        psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'min_pulsesNumber',0);
-        getSpikesRank('events','ripples');
+%         ripples = rippleMasterDetector('rippleChannel',session.analysisTags.rippleChannel,'SWChannel',session.analysisTags.SWChannel,'force',true,'removeOptogeneticStimulation',true,'eventSpikeThreshold',false); % [1.5 3.5]
+%         psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'min_pulsesNumber',0);
+%         getSpikesRank('events','ripples');
         
 
         for jj = 1:length(session.epochs)
@@ -43,7 +78,7 @@ for ii = 22:length(sessionsTable.SessionName)
             % ============================
             % 1. Ripples
             % ============================
-            
+            session.epochs{jj}.behavioralParadigm
             ts = [session.epochs{jj}.startTime session.epochs{jj}.stopTime];
             
             try
@@ -294,6 +329,43 @@ for ii = 22:length(sessionsTable.SessionName)
 
             cell_metrics = cell_metrics_epoch;
             save([session.general.name,'.cell_metrics_',session.epochs{jj}.behavioralParadigm,'.cellinfo.mat'],'cell_metrics');
+            
+            % ===========================
+            % 6. PHASE MODULATION 
+            % ===========================
+            
+            phaseMod_epoch = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel,'thetaChannel',thetaChannel,'lgammaChannel',thetaChannel,'hgammaChannel',thetaChannel,'restrictIntervals',ts,'plotting',false,'saveMat',false);
+            
+            rippleMod = phaseMod_epoch.ripples;
+            SWMod = phaseMod_epoch.SharpWave;
+            thetaMod = phaseMod_epoch.theta;
+            lgammaMod = phaseMod_epoch.lgamma;
+            hgammaMod = phaseMod_epoch.hgamma;
+            thetaRunMod = phaseMod_epoch.thetaRunMod;
+            thetaREMMod = phaseMod_epoch.thetaREMMod;
+            
+            save([session.general.name,'.ripple_',num2str(ripple_passband(1)),'-',num2str(ripple_passband(end)),...
+                '_',session.epochs{jj}.behavioralParadigm,'.cellinfo.mat'],'rippleMod');
+            
+            save([session.general.name,'.SW_',num2str(SW_passband(1)),'-',num2str(SW_passband(end)),...
+                '_',session.epochs{jj}.behavioralParadigm,'.cellinfo.mat'],'SWMod');
+            
+            save([session.general.name,'.theta_',num2str(theta_passband(1)),'-',num2str(theta_passband(end)),...
+                '_',session.epochs{jj}.behavioralParadigm,'.cellinfo.mat'],'thetaMod');
+            
+            save([session.general.name,'.lgamma_',num2str(lgamma_passband(1)),'-',num2str(lgamma_passband(end)),...
+                '_',session.epochs{jj}.behavioralParadigm,'.cellinfo.mat'],'lgammaMod');
+            
+            save([session.general.name,'.hgamma_',num2str(hgamma_passband(1)),'-',num2str(hgamma_passband(end)),...
+                '_',session.epochs{jj}.behavioralParadigm,'.cellinfo.mat'],'hgammaMod');
+            
+            save([session.general.name,'.thetaRun_',num2str(theta_passband(1)),'-',num2str(theta_passband(end)),...
+                '_',session.epochs{jj}.behavioralParadigm,'.cellinfo.mat'],'thetaRunMod');
+            
+            save([session.general.name,'.thetaREM_',num2str(theta_passband(1)),'-',num2str(theta_passband(end)),...
+                '_',session.epochs{jj}.behavioralParadigm,'.cellinfo.mat'],'thetaREMMod');
+            
+           
             
             close all;
         end

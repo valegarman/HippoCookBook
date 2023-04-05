@@ -411,9 +411,64 @@ if useBrainRegions & useCellType & exist([basenameFromBasepath(basepath) '.cell_
             
             clear cellsID ccMedian ccZMedian ccMean ccZMean
             
-            % 1) pyrCellsID
             for jj = 1:length(spikes.times)
+               cellsID = indCell(indCell ~= jj & cellsInRegion);
                pyrCellsID = indCell(indCell ~= jj & pyrCellsInRegion); 
+               nwCellsID = indCell(indCell ~= jj & nwCellsInRegion);
+               wwCellsID = indCell(indCell ~= jj & wwCellsInRegion);
+               intCellsID = indCell(indCell ~= jj & intCellsInRegion);
+               
+               % 1) cellsID
+               if length(cellsID) == 1
+                    ccMedian(jj,:) = squeeze(allCcg(:,jj,cellsID)); %
+                    ccZMedian(jj,:) = zscore(squeeze(allCcg(:,jj,cellsID))',[],2); % zCCG
+
+                    ccMean(jj,:) = squeeze(allCcg(:,jj,cellsID)); % zCCG
+                    ccZMean(jj,:) = zscore(squeeze(allCcg(:,jj,cellsID))',[],2); % zCCG
+                else
+                    ccMedian(jj,:) = nanmedian(squeeze(allCcg(:,jj,cellsID)),2); %
+                    ccZMedian(jj,:) = nanmedian(zscore(squeeze(allCcg(:,jj,cellsID))',[],2)); % zCCG
+
+                    ccMean(jj,:) = nanmean(squeeze(allCcg(:,jj,cellsID)),2); % zCCG
+                    ccZMean(jj,:) = nanmean(zscore(squeeze(allCcg(:,jj,cellsID))',[],2)); % zCCG
+                end
+                
+                ccMedian(jj,:) = nanmedian(squeeze(allCcg(:,jj,cellsID)),2); %
+                ccZMedian(jj,:) = nanmedian(zscore(squeeze(allCcg(:,jj,cellsID))',[],2),1); % zCCG
+
+                ccMean(jj,:) = nanmean(squeeze(allCcg(:,jj,cellsID)),2); % zCCG
+                ccZMean(jj,:) = nanmean(zscore(squeeze(allCcg(:,jj,cellsID))',[],2),1); % zCCG
+                
+                if interp0
+                    artifactSamples = find(t_ccg == 0);
+                    x_axis = 1:length(t_ccg);
+                    x_axis(artifactSamples) = [];
+                    for jj = 1:size(ccMedian,1)
+                        ccMedian(jj,artifactSamples) = interp1(x_axis,ccMedian(jj,x_axis),artifactSamples);
+                        ccZMedian(jj,artifactSamples) = interp1(x_axis,ccZMedian(jj,x_axis),artifactSamples);
+                        ccMean(jj,artifactSamples) = interp1(x_axis,ccMean(jj,x_axis),artifactSamples);
+                        ccZMean(jj,artifactSamples) = interp1(x_axis,ccZMean(jj,x_axis),artifactSamples);
+                    end
+                end
+                
+                win = t_ccg >= winIndex(1) & t_ccg <= winIndex(2);
+                ccgIndex = median(ccZMedian(:,win),2);
+
+                brainRegionCellTypeCCG.([efields{ii} '_medianCCG']) = ccMedian;
+                brainRegionCellTypeCCG.([efields{ii} '_ZmedianCCG']) = ccZMedian;
+                brainRegionCellTypeCCG.([efields{ii} '_meanCCG']) = ccMean;
+                brainRegionCellTypeCCG.([efields{ii} '_ZmeanCCG']) = ccZMean;
+                brainRegionCellTypeCCG.([efields{ii} '_ccgIndex']) = ccgIndex;
+                brainRegionCellTypeCCG.binSize = binSize;
+                brainRegionCellTypeCCG.winSize = winSize;
+                brainRegionCellTypeCCG.timestamps = t_ccg;
+                brainRegionCellTypeCCG.excludeIntervals = excludeIntervals;
+                brainRegionCellTypeCCG.winIndex = winIndex;
+                brainRegionCellTypeCcgIndex.(efields{ii}) = ccgIndex;
+                
+                clear ccMedian ccZMedian ccMean ccZMean
+               
+               % 2) pyrCellsID
                if length(pyrCellsID) == 1
                     ccMedian(jj,:) = squeeze(allCcg(:,jj,pyrCellsID)); %
                     ccZMedian(jj,:) = zscore(squeeze(allCcg(:,jj,pyrCellsID))',[],2); % zCCG
@@ -461,16 +516,9 @@ if useBrainRegions & useCellType & exist([basenameFromBasepath(basepath) '.cell_
                 brainRegionCellTypeCCG.winIndex = winIndex;
                 brainRegionCellTypeCcgIndex_pyr.(efields{ii}) = ccgIndex;
                 
-                
-            end
-            clear ccMedian ccZMedian ccMean ccZMean
-            
-            
-           % 2) nwCellsID            
-           for jj = 1:length(spikes.times)
+                clear ccMedian ccZMedian ccMean ccZMean
                
-               nwCellsID = indCell(indCell ~= jj & nwCellsInRegion);
-               
+               % 3) nwCellsID
                if length(nwCellsID) == 1
                     ccMedian(jj,:) = squeeze(allCcg(:,jj,nwCellsID)); %
                     ccZMedian(jj,:) = zscore(squeeze(allCcg(:,jj,nwCellsID))',[],2); % zCCG
@@ -518,14 +566,9 @@ if useBrainRegions & useCellType & exist([basenameFromBasepath(basepath) '.cell_
                 brainRegionCellTypeCCG.winIndex = winIndex;
                 brainRegionCellTypeCcgIndex_nw.(efields{ii}) = ccgIndex;
                 
-           end
-           clear ccMedian ccZMedian ccMean ccZMean
-               
-           % 3) wwCellsID    
-           for jj = 1:length(spikes.times)
-               
-               wwCellsID = indCell(indCell ~= jj & wwCellsInRegion);
-               
+                clear ccMedian ccZMedian ccMean ccZMean
+                
+               % 4) wwCellsID
                if length(wwCellsID) == 1
                     ccMedian(jj,:) = squeeze(allCcg(:,jj,wwCellsID)); %
                     ccZMedian(jj,:) = zscore(squeeze(allCcg(:,jj,wwCellsID))',[],2); % zCCG
@@ -573,14 +616,10 @@ if useBrainRegions & useCellType & exist([basenameFromBasepath(basepath) '.cell_
                 brainRegionCellTypeCCG.winIndex = winIndex;
                 brainRegionCellTypeCcgIndex_ww.(efields{ii}) = ccgIndex;
                 
-           end
-           clear ccMedian ccZMedian ccMean ccZMean
-               
-           % 4) intCellsID
-           for jj = 1:length(spikes.times)    
-               
-               intCellsID = indCell(indCell ~= jj & intCellsInRegion);
-               if length(intCellsID) == 1
+                clear ccMedian ccZMedian ccMean ccZMean
+                
+               % 5) intCellsID
+                if length(intCellsID) == 1
                     ccMedian(jj,:) = squeeze(allCcg(:,jj,intCellsID)); %
                     ccZMedian(jj,:) = zscore(squeeze(allCcg(:,jj,intCellsID))',[],2); % zCCG
 
@@ -626,10 +665,13 @@ if useBrainRegions & useCellType & exist([basenameFromBasepath(basepath) '.cell_
                 brainRegionCellTypeCCG.excludeIntervals = excludeIntervals;
                 brainRegionCellTypeCCG.winIndex = winIndex;
                 brainRegionCellTypeCcgIndex_int.(efields{ii}) = ccgIndex;
-           end
-           clear ccMedian ccZMedian ccMean ccZMean
+                
+                clear ccMedian ccZMedian ccMean ccZMean
+                
+                averageCCG.brainRegionCellTypeCCG = brainRegionCellTypeCCG;
+                
+            end
         end
-        averageCCG.brainRegionCellTypeCCG = brainRegionCellTypeCCG;
     end
 end
 
