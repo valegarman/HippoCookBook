@@ -340,7 +340,7 @@ if length(yC) == 2
         stats.wilconxonSignedRank.testName = 'Wilcoxon paired signed-rank test';
     
         % paired-sample t-test.
-        [p2,h2,ci2,stats2] = ttest(yC{1},yC{2});
+        [h2,p2,ci2,stats2] = ttest(yC{1},yC{2});
         stats.pairedtTest.p = p2;
         stats.pairedtTest.h = h2;
         stats.pairedtTest.stats = stats2;
@@ -348,7 +348,7 @@ if length(yC) == 2
     end
 
     % two-sample t-test.
-    [p2,h2,ci2,stats2] = ttest2(yC{1},yC{2});
+    [h2,p2,ci2,stats2] = ttest2(yC{1},yC{2});
     stats.tTest.p = p2;
     stats.tTest.h = h2;
     stats.tTest.stats = stats2;
