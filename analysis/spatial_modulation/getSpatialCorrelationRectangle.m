@@ -25,7 +25,7 @@ p = inputParser;
 addParameter(p,'basepath',pwd,@isfolder);
 addParameter(p,'z',[]);
 addParameter(p,'occupancy',[]);
-addParameter(p,'minTime',0.5,@isnumeric);
+addParameter(p,'minTime',0,@isnumeric);
 
 parse(p,varargin{:});
 
