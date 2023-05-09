@@ -467,7 +467,7 @@ semanticWords = computeSemanticWords;
 %% fCck1
 
 % fCck1_220204_sess5
-bpath = 'J:\fCck1\fCck1_220204_sess5'; 
+bpath = 'J:\data\fCck1\fCck1_220204_sess5'; 
 processSession('basepath',bpath);
 indexNewSession('basepath',bpath,'copyFiles',false);
 

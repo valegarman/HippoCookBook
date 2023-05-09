@@ -144,7 +144,7 @@ commandToExecute = ['git pull'];
 system(commandToExecute);
 % Git Push
 commandToExecute = ['git push'];
-system(commandToExecute);e
+system(commandToExecute);
 
 cd(basepath)     
 
