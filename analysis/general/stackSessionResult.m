@@ -128,6 +128,8 @@ for ii = 1:length(names)
                         toStack_clon{mm}.([names{ii} '_' l2_names{jj}]) = toStack{exampleSession}.(names{ii}).(l2_names{jj});
                     end
                 end
+            elseif iscell(toStack{exampleSession}.(names{ii}).(l2_names{jj}))
+                
             end
         end
     end

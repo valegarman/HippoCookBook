@@ -68,7 +68,7 @@ addParameter(p,'nPix2BinBy',[],@isnumeric);
 
 parse(p,varargin{:});
 smooth = p.Results.smooth;
-speedThresh = p.Results.speedThresh*100; % To convert to cm because speed is in cm/s
+speedThresh = p.Results.speedThresh; % To convert to cm because speed is in cm/s
 nBins = p.Results.nBins;
 maxGap = p.Results.maxGap;
 minTime = p.Results.minTime;
@@ -323,6 +323,7 @@ firingMaps.params.maxDistance = maxDistance;
 firingMaps.cmBin = cmBin;
 firingMaps.positionFilter = positionFilter;
 firingMaps.tint = tint;
+firingMaps.speedThresh = speedThresh;
 
 for unit = 1:length(spikes.times)
     for c = 1:conditions
@@ -381,7 +382,7 @@ if plt
                     scatter(positions{c}(n > 0 ,2),positions{c}(n > 0,3),1,'MarkerEdgeColor',[1 0 0], 'MarkerFaceColor',[0.9 0 0]);
                     axis ij;
                     axis square;
-                    xlim(round(behavior.avFrame{c}.xSize)); ylim(round(behavior.avFrame{c}.ySize));
+%                     xlim(round(behavior.avFrame{c}.xSize)); ylim(round(behavior.avFrame{c}.ySize));
                     if unit == 1
                         ylabel('Track (cm)');
                         xlabel('Track (cm)');

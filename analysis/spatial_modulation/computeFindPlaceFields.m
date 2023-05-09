@@ -83,8 +83,8 @@ addParameter(p,'basepath',pwd,@isstr);
 addParameter(p,'firingMapsAvg',{});
 addParameter(p,'threshold',0.2,@isnumeric);
 addParameter(p,'minSize',0.05,@isnumeric);
-addParameter(p,'maxSize',0.60,@isnumeric);
-addParameter(p,'minPeak',2,@isnumeric);
+addParameter(p,'maxSize',0.8,@isnumeric);
+addParameter(p,'minPeak',1,@isnumeric);
 addParameter(p,'minPeak2nd',0.6,@isnumeric);
 addParameter(p,'type','ll',@isstr);
 addParameter(p,'sepEdge',0.05,@isnumeric);
@@ -99,9 +99,9 @@ firingMaps = p.Results.firingMapsAvg;
 basename = basenameFromBasepath(basepath);
 sizeMaze = [];
 threshold = p.Results.threshold;
-minSize = p.Results.minSize * sizeMaze;
-maxSize = p.Results.maxSize * sizeMaze;
-sepEdge = p.Results.sepEdge * sizeMaze;
+minSize = p.Results.minSize;
+maxSize = p.Results.maxSize;
+sepEdge = p.Results.sepEdge;
 minPeak = p.Results.minPeak;
 minPeak2nd = p.Results.minPeak2nd;
 type = p.Results.type;
@@ -262,7 +262,7 @@ for c = 1:length(firingMaps_tint.rateMaps{1})
                 ytrack = linspace(0,sizeMazeY,sizeMazeY);
             end
 %             imagesc(xtrack,ytrack,firingMaps.rateMaps{unit}{c});
-            pcolor(xtrack,ytrack,firingMaps_tint.rateMaps{unit}{c}), shading flat;
+            pcolor(ytrack,xtrack,firingMaps_tint.rateMaps{unit}{c}), shading flat;
             if sum(sum(firingMaps_tint.rateMaps{unit}{c}))>0
                 hold on
                 for ii = 1:size(mapStats{unit}{c}.field,3)

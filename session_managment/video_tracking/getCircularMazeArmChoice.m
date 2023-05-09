@@ -131,11 +131,16 @@ elseif strcmpi(task,'alternation')
             armChoice.delay.durations = round(armChoice.delay.timestamps(:,2) - armChoice.delay.timestamps(:,1),0);
             armChoice.delay.durations = [NaN; armChoice.delay.durations];
             armChoice.delay.timestamps = [NaN NaN; armChoice.delay.timestamps];
+            
+            armChoice.choice = [NaN; abs(diff(armChoice.visitedArm))]; % 1 is right, 0 is wrong
+            armChoice.performance = nansum(armChoice.choice)/(length(armChoice.choice) - 1);
+        
             if length(armChoice.delay.durations) > length(armChoice.choice)
                 armChoice.delay.durations(end) = [];
                 armChoice.delay.timestamps(end,:) = [];
             end
             durations = unique(armChoice.delay.durations);
+            performance = [];
             for ii = 1:length(durations)- 1
                 performance = [performance; sum(armChoice.choice(find(armChoice.delay.durations == durations(ii)))) / length(find(armChoice.delay.durations == durations(ii)))];
             end
@@ -145,10 +150,7 @@ elseif strcmpi(task,'alternation')
         catch
             warning('No delay computed...');
         end
-        armChoice.choice = [NaN; abs(diff(armChoice.visitedArm))]; % 1 is right, 0 is wrong
-        armChoice.performance = nansum(armChoice.choice)/(length(armChoice.choice) - 1);
-        performance = [];
-        
+                
 %         if ~isnan(armChoice.delay.durations(end))
 %             armChoice.delay.durations(end) = NaN;
 %         end

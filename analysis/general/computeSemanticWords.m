@@ -232,6 +232,30 @@ plot(ts_psth,zmean+10,'k','LineWidth',1);
 positive_responsive_cells_action = (length(find(psth_actions.bootsTrapTest == 1)) / length(psth_actions.bootsTrapTest))*100;
 negative_responsive_cells_action = (length(find(psth_actions.bootsTrapTest == -1)) / length(psth_actions.bootsTrapTest))*100;
 
+% Familiar People
+psth_familiar = spikesPsth(pulses.timestampsOn{3}(indexes == 5)','numRep',100,'saveMat',false,...
+    'min_PulsesNumber',5,'winSize',6,'binSize', 0.01,'event_ints',[0.8 1.5],'baseline_ints',[-0.4 -0.1],'winSizePlot',[-1 2]);
+
+for ii = 1:size(psth_familiar.responsecurveSmooth,1)
+    psth_familiar.responseZ(ii,:) = psth_familiar.responsecurveZSmooth(ii,:) - ...
+        mean(psth_familiar.responsecurveSmooth(ii,win_Z))./std(psth_familiar.responsecurveSmooth(ii,win_Z));
+end
+psth_familiar.peakResponse = nanmean(psth_familiar.responsecurve(:,win),2);
+psth_familiar.peakResponseZ = nanmean(psth_familiar.responseZ(:,win),2);
+
+figure;
+imagesc_ranked(ts_psth,[],psth_familiar.responsecurveZSmooth(find(~isnan(psth_familiar.responsecurveZSmooth(:,1))),:),[-3 3],...
+    psth_familiar.peakResponseZ(find(~isnan(psth_familiar.responsecurveZSmooth(:,1)))));
+colormap jet;
+hold on;
+zmean = nanmean(zscore(psth_familiar.responsecurveZSmooth,[],2));
+zmean = zmean - min(zmean); 
+zmean = zmean/max(zmean) * (111-1) * std(zmean);
+plot(ts_psth,zmean+10,'k','LineWidth',1);
+
+positive_responsive_cells_familiar = (length(find(psth_familiar.bootsTrapTest == 1)) / length(psth_familiar.bootsTrapTest))*100;
+negative_responsive_cells_familiar = (length(find(psth_familiar.bootsTrapTest == -1)) / length(psth_familiar.bootsTrapTest))*100;
+
 %% ======= ARRIBA vs ABAJO =============
 
 arriba = strcmpi(words,'Arriba');
