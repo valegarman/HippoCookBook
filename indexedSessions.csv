@@ -92,3 +92,4 @@ fsst1_190521_sess22,fsst1,fsst1\fsst1_190521_sess22,c57b1/6,sst/ai32,"105µm (12
 fvip2_220823_sess13,fvip2,fvip2\fvip2_220823_sess13,c57b1/6,vip/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,56,PTLp5 PTLp2_3 CA1so CA1sp CA1slm CA1sr CA3sp DG Thalamus,InterneuronsLibrary desVIPnhibition
 fcamk7_220421_sess17,fcamk7,fcamk7\fcamk7_220421_sess17,c57b1/6,camkii/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,240,Cortex CA1sp CA1so CA1slm CA1sr pSUB,InterneuronsLibrary
 fvip5_221020_sess5,fvip5,fvip5\fvip5_221020_sess5,c57b1/6,vip/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,104,CA1sp CA1so PTLp6 PTLp2_3 CA1slm CA1sr CA3sp CA3so CA3sr,InterneuronsLibrary
+fcck1_220204_sess5,fcck1,fcck1\fcck1_220204_sess5,c57b1/6,vip/cck/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,50,PTLp CA1sp CA1sr CA1slm CA3,InterneuronsLibrary desVIPnhibition
