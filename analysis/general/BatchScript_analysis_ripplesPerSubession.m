@@ -1,12 +1,12 @@
 %% BatchScript_analysis_ripplesPerSubsession
 
 clear; close all
-targetProject= 'MK801Project';
+targetProject= 'SubiculumProject';
 cd('F:\data');
-database_path = 'F:\data';
-HCB_directory = what('MK801Project'); 
+database_path = 'D:\';
+HCB_directory = what('SubiculumProject'); 
 
-sessionsTable = readtable([HCB_directory.path filesep 'indexedSessions_MK801Project.csv']); % the variable is called allSessions
+sessionsTable = readtable([HCB_directory.path filesep 'indexedSessions_SubiculumProject.csv']); % the variable is called allSessions
 forceReload = false;
 
 win_resp = [-0.025 0.025];

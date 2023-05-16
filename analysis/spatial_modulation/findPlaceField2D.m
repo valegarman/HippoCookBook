@@ -88,6 +88,7 @@ addParameter(p,'occupancyMap',[]);
 addParameter(p,'countMap',[]);
 addParameter(p,'threshold',0.2,@isnumeric);
 addParameter(p,'minSize',0.02,@isnumeric);
+addParameter(p,'maxSize',0.8,@isnumeric);
 addParameter(p,'minPeak',1,@isnumeric);
 addParameter(p,'type','ll',@isstr);
 addParameter(p,'verbose','off',@isstr);
@@ -103,6 +104,7 @@ occupancyMap = p.Results.occupancyMap;
 countMap = p.Results.countMap;
 threshold = p.Results.threshold;
 minSize = p.Results.minSize;
+maxSize = p.Results.maxSize;
 minPeak = p.Results.minPeak;
 type = p.Results.type;
 verbose = p.Results.verbose;
@@ -137,6 +139,7 @@ mapStats.m = nan;
 mapStats.r = nan;
 mapStats.mode = nan;
 mapStats.k = nan;
+mapStats.numPF = NaN;
 
 x = 1:size(rateMap,1);
 y = 1:size(rateMap,2);
@@ -206,7 +209,7 @@ while true
     end
     fieldSize = sum(field(:));
     % Keep this field if its size is sufficient
-    if fieldSize > minSize*size(rateMap,1)*size(rateMap,2) && fieldSize < size(rateMap,1)*size(rateMap,2)
+    if fieldSize > minSize*size(rateMap,1)*size(rateMap,2) && fieldSize < size(rateMap,1)*size(rateMap,2)*maxSize
         mapStats.field(:,:,i) = field;
         mapStats.size(i) = fieldSize;
         mapStats.peak(i) = peak;
@@ -260,6 +263,9 @@ else
             mapStats.specificity = nansum(nansum(countMap.*log2(logArg).*occupancyMap))/m;
         end
     end
+end
+if mapStats.peak > 0
+    mapStats.numPF = length(mapStats.peak);
 end
 
     

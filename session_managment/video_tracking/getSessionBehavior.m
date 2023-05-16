@@ -80,10 +80,10 @@ for ii = 1:size(sess,1)
             behaviorTemp.(sess(ii).name) = getBehaviourOpenField('forceReload',forceReload);
         elseif strcmpi(tracking.apparatus.name,'Linear Track  N-S')
             behaviorTemp.(sess(ii).name) = linearizeLinearMaze_pablo('verbose',verbose);
-        elseif strcmpi(tracking.apparatus.name,'TMaze') & linearizePMaze
-            behaviorTemp.(sess(ii).name) = linearizeCircularMaze('verbose',verbose);
+        elseif strcmpi(tracking.apparatus.name,'TMaze') && linearizePMaze
+            behaviorTemp.(sess(ii).name) = linearizeCircularMaze('verbose',verbose,'forceReload',true);
 %             behaviorTemp.(sess(ii).name) = linearizeArmChoice_pablo('verbose',verbose);
-        elseif strcmpi(tracking.apparatus.name,'TMaze') & ~linearizePMaze
+        elseif strcmpi(tracking.apparatus.name,'TMaze') && ~linearizePMaze
             behaviorTemp.(sess(ii).name) = getBehaviourPMaze('verbose',verbose);
         end
         behaviorFolder(count) = ii; 
@@ -95,8 +95,6 @@ cd(basepath);
 efields = fieldnames(behaviorTemp);
 tracking = getSessionTracking;
 x = []; y = []; timestamps = []; 
-x_head = []; y_head = [];
-x_tail = []; y_tail = [];
 lin = []; armMask = []; trialMask = []; recMask = [];
 startPoint = []; rReward = []; lReward = []; startDelay = []; endDelay = []; intersection = [];
 stemArm = []; rightArm = []; leftArm = [];
@@ -139,6 +137,7 @@ if size(tracking.events.subSessions,1) == size(efields,1)
         events{ii} = behaviorTemp.(efields{ii}).events;
 
         lin = [lin; behaviorTemp.(efields{ii}).position.lin];
+        
         try
             armMask = [armMask; behaviorTemp.(efields{ii}).masks.arm];
             trialMask = [trialMask; behaviorTemp.(efields{ii}).masks.trials];
@@ -146,9 +145,6 @@ if size(tracking.events.subSessions,1) == size(efields,1)
             startPoint = [startPoint; behaviorTemp.(efields{ii}).events.startPoint + preRec];
             rReward = [rReward; behaviorTemp.(efields{ii}).events.rReward + preRec];
             lReward = [lReward; behaviorTemp.(efields{ii}).events.lReward + preRec];
-            stemArm = [stemArm; behaviorTemp.(efields{ii}).events.stemArm + preRec];
-            rightArm = [rightArm; behaviorTemp.(efields{ii}).events.rightArm + preRec];
-            leftArm = [leftArm; behaviorTemp.(efields{ii}).events.leftArm + preRec];
             startDelay = [startDelay; behaviorTemp.(efields{ii}).events.startDelay + preRec];
             endDelay = [endDelay; behaviorTemp.(efields{ii}).events.endDelay + preRec];
             intersection = [intersection; behaviorTemp.(efields{ii}).events.intersection + preRec];
@@ -161,6 +157,9 @@ if size(tracking.events.subSessions,1) == size(efields,1)
             direction = [direction; behaviorTemp.(efields{ii}).masks.direction];
             trialsDirection = [trialsDirection; behaviorTemp.(efields{ii}).masks.trialsDirection'];
             recordingsTrial = [recordingsTrial; ii*ones(size(behaviorTemp.(efields{ii}).trials.startPoint,1),1)];
+            stemArm = [stemArm; behaviorTemp.(efields{ii}).events.stemArm + preRec];
+            rightArm = [rightArm; behaviorTemp.(efields{ii}).events.rightArm + preRec];
+            leftArm = [leftArm; behaviorTemp.(efields{ii}).events.leftArm + preRec];
         catch
         end
         
@@ -187,22 +186,22 @@ end
         
 % generate maps, one for each arm and for each recording
 maps = [];
-direction = direction';
+direction = direction;
 directionList = unique(direction);
 directionList(find(isnan(directionList))) = [];
 count = 1;
 count2 = 1;
 for ii = 1:length(efields)
-    if strcmpi(behaviorTemp.(efields{ii}).description,'Linear Track  N-S') && ~any(find(isnan(behaviorTemp.(efields{ii}).position.lin)))
+    if (strcmpi(behaviorTemp.(efields{ii}).description,'Linear Track  N-S') | strcmpi(behaviorTemp.(efields{ii}).description,'PMaze')) 
         for jj = 1:length(directionList)
-            maps{count}(:,1) = timestamps(direction == directionList(jj) & recMask == ii);
-            maps{count}(:,2) = lin(direction == directionList(jj) & recMask==ii);
+            maps{count}(:,1) = timestamps(direction' == directionList(jj) & recMask == ii);
+            maps{count}(:,2) = lin(direction' == directionList(jj) & recMask==ii);
             maps_whole{count} = NaN;
             description{count} = behaviorTemp.(efields{ii}).description;
             description2{count} = NaN;
-            zone{count} = behaviorTemp.(efields{ii}).zone;
-            avFrame{count} = tracking.avFrame{ii};
-            avFrame2{count} = NaN;
+%             zone{count} = behaviorTemp.(efields{ii}).zone;
+%             avFrame{count} = tracking.avFrame{ii};
+%             avFrame2{count} = NaN;
             count = count+1;
         end
     elseif strcmpi(behaviorTemp.(efields{ii}).description,'Open Field') && any(isnan(behaviorTemp.(efields{ii}).position.lin))
@@ -254,6 +253,20 @@ for ii = 1:length(efields)
         avFrame2{count2} = tracking.avFrame{ii};
         count = count + 1;
         count2 = count2 +1;
+    elseif strcmpi(behaviorTemp.(efields{ii}).description,'TMaze') 
+        maps{count}(:,1) = timestamps(recMask == ii);
+        maps{count}(:,2) = lin(recMask == ii);
+        maps_whole{count2}(:,1) = timestamps(recMask == ii);
+        maps_whole{count2}(:,2) = x(recMask == ii);
+        maps_whole{count2}(:,3) = y(recMask == ii);
+        description{count} = behaviorTemp.(efields{ii}).description;
+        description2{count2} = behaviorTemp.(efields{ii}).description;
+%         zone{count} = behaviorTemp.(efields{ii}).zone;
+%         zone2{count2} = behaviorTemp.(efields{ii}).zone;
+        avFrame{count} = tracking.avFrame{ii};
+        avFrame2{count2} = tracking.avFrame{ii};
+        count = count + 1;
+        count2 = count2 + 1;
     else
         disp('Error while running getSessionBehavior. Quitting...');
         return;
@@ -261,7 +274,7 @@ for ii = 1:length(efields)
 end
 
 % populate behavior
-behavior.timestamps = timestamps';
+behavior.timestamps = timestamps;
 
 behavior.position.lin = lin;
 behavior.position.x = x;
@@ -280,13 +293,13 @@ behavior.maps_whole = maps_whole;
 
 behavior.description = description;
 behavior.description2 = description2;
-behavior.avFrame = avFrame;
-behavior.avFrame = avFrame2;
+% behavior.avFrame = avFrame;
+% behavior.avFrame = avFrame2;
 
 try
     behavior.masks.arm = armMask;
     behavior.masks.trials = trialMask;
-    behavior.masks.direction = direction;
+    behavior.masks.direction = direction';
     behavior.masks.trialsDirection = trialsDirection;
     behavior.masks.recording = recMask;
 

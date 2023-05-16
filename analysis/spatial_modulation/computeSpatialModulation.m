@@ -149,11 +149,11 @@ if isempty(placeFieldStats)
     end
 end
 
-try
-    if isempty(firingTrialsMap)
-        firingTrialsMap = firingMapPerTrial;
-    end
-end
+% try
+%     if isempty(firingTrialsMap)
+%         firingTrialsMap = firingMapPerTrial;
+%     end
+% end
 
 % Tracking
 
@@ -293,6 +293,7 @@ for jj = 1:length(firingMaps.rateMaps{1})
             fieldX = placeFieldStats.mapStats{ii}{jj}.fieldX(1,:);
             fieldY = placeFieldStats.mapStats{ii}{jj}.fieldY(1,:);
             is_placeField = double(~isnan(placeFieldStats.mapStats{ii}{jj}.x(1)));
+            numPF = placeFieldStats.mapStats{ii}{jj}.numPF;
 
             spatialModulation.(['meanRate_map_' num2str(jj)])(ii,1) = meanFiringRate;
             spatialModulation.(['bits_spike_map_' num2str(jj)])(ii,1) = bits_spike;
@@ -307,6 +308,7 @@ for jj = 1:length(firingMaps.rateMaps{1})
             spatialModulation.(['PF_boundariesY_map_' num2str(jj)])(ii,:) = fieldY;
             
             spatialModulation.(['is_placeField_map_' num2str(jj)])(ii,:) = double(is_placeField);
+            spatialModulation.(['numPF_map_' num2str(jj)])(ii,:) = numPF;
 
             clear pf_position pf_peak pf_size fieldX is_placeField
             clear meanFiringRate bits_spike bits_second sparsity selectivity T logArg occupancy
@@ -359,12 +361,20 @@ for jj = 1:length(firingMaps.rateMaps{1})
             
             % Spatial correlation rectangle
             
-            [spatialCorr,r,p] = getSpatialCorrelationRectangle('z',firingMaps.rateMapsUnSmooth{ii}{jj},'occupancy',firingMaps.occupancyUnSmoothSec{ii}{jj});
-            spatialModulation.(['spatial_corr2_map_' num2str(jj)]){ii} = spatialCorr;
-            spatialModulation.(['spatial_corr2_r_map_' num2str(jj)]){ii} = r;
-            spatialModulation.(['spatial_corr2_p_map_' num2str(jj)]){ii} = p;
-            spatialModulation.(['spatial_corr2_sc_r_map_' num2str(jj)]){ii} = r(1,2); 
-            spatialModulation.(['spatial_corr2_sc_p_map_' num2str(jj)]){ii} = p(1,2);
+            try
+                [spatialCorr,r,p] = getSpatialCorrelationRectangle('z',firingMaps.rateMapsUnSmooth{ii}{jj},'occupancy',firingMaps.occupancyUnSmoothSec{ii}{jj});
+                spatialModulation.(['spatial_corr2_map_' num2str(jj)]){ii} = spatialCorr;
+                spatialModulation.(['spatial_corr2_r_map_' num2str(jj)]){ii} = r;
+                spatialModulation.(['spatial_corr2_p_map_' num2str(jj)]){ii} = p;
+                spatialModulation.(['spatial_corr2_sc_r_map_' num2str(jj)]){ii} = r(1,2); 
+                spatialModulation.(['spatial_corr2_sc_p_map_' num2str(jj)]){ii} = p(1,2);
+            catch
+                spatialModulation.(['spatial_corr2_map_' num2str(jj)]){ii} = NaN(size(firingMaps.rateMapsUnSmooth{ii}{jj}));
+                spatialModulation.(['spatial_corr2_r_map_' num2str(jj)]){ii} = NaN;
+                spatialModulation.(['spatial_corr2_p_map_' num2str(jj)]){ii} = NaN;
+                spatialModulation.(['spatial_corr2_sc_r_map_' num2str(jj)]){ii} = NaN; 
+                spatialModulation.(['spatial_corr2_sc_p_map_' num2str(jj)]){ii} = NaN;
+            end
         end
     end    
 end
@@ -386,24 +396,24 @@ for jj = 1:length(firingMaps.rateMaps{1})
     for ii = 1:length(firingMaps.UID)
         if ~(size(firingMaps.rateMaps{ii}{jj},1) == 1) % not linearize
             [firingFieldSize] = getFiringFieldSize('z',firingMaps.rateMaps{ii}{jj},'debug',false);
-            spatialModulation.(['firingFieldSize_map_' num2str(jj)]).size{ii} = firingFieldSize.size;
-            spatialModulation.(['firingFieldSize_map_' num2str(jj)]).sizeperc{ii} = firingFieldSize.sizeperc;
-            spatialModulation.(['firingFieldSize_map_' num2str(jj)]).data{ii} = firingFieldSize.data;
-            spatialModulation.(['firingFieldSize_map_' num2str(jj)]).positionx{ii} = firingFieldSize.positionx;
-            spatialModulation.(['firingFieldSize_map_' num2str(jj)]).positiony{ii} = firingFieldSize.positiony;
-            spatialModulation.(['firingFieldSize_map_' num2str(jj)]).MaxF{ii} = firingFieldSize.MaxF;
-            spatialModulation.(['firingFieldSize_map_' num2str(jj)]).numFF{ii} = firingFieldSize.numFF;
-            spatialModulation.(['firingFieldSize_map_' num2str(jj)]).FFarea{ii} = firingFieldSize.FFarea;
-            spatialModulation.(['firingFieldSize_map_' num2str(jj)]).FFareatot{ii} = firingFieldSize.FFareatot;
-            spatialModulation.(['firingFieldSize_map_' num2str(jj)]).maxFr{ii} = firingFieldSize.maxFr;
-            spatialModulation.(['firingFieldSize_map_' num2str(jj)]).meanFr{ii} = firingFieldSize.meanFr;
-            spatialModulation.(['firingFieldSize_map_' num2str(jj)]).Serr{ii} = firingFieldSize.Serr;
+            spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.size = firingFieldSize.size;
+            spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.sizeperc = firingFieldSize.sizeperc;
+            spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.data = firingFieldSize.data;
+            spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.positionx = firingFieldSize.positionx;
+            spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.positiony = firingFieldSize.positiony;
+            spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.MaxF = firingFieldSize.MaxF;
+            spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.numFF = firingFieldSize.numFF;
+            spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.FFarea = firingFieldSize.FFarea;
+            spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.FFareatot = firingFieldSize.FFareatot;
+            spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.maxFr = firingFieldSize.maxFr;
+            spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.meanFr = firingFieldSize.meanFr;
+            spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.Serr = firingFieldSize.Serr;
             
             % isPlaceCell: maxFr(any FF) > 1, at least one FF
-            if firingFieldSize.numFF > 1 && firingFieldSize.maxFr > 1
-                spatialModulation.(['firingFieldSize_map_' num2str(jj)]).isPlaceCell{ii} = 1;
+            if firingFieldSize.numFF >=  1 && firingFieldSize.maxFr > 1
+                spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.isPlaceCell = 1;
             else
-                spatialModulation.(['firingFieldSize_map_' num2str(jj)]).isPlaceCell{ii} = 0;
+                spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.isPlaceCell = 0;
             end
         end
     end
@@ -416,11 +426,11 @@ for jj = 1:length(firingMaps.rateMaps{1})
         if ~(size(firingMaps.rateMaps{ii}{jj},1) == 1) % Not linearize
             borderIndex = getBorderIndex('z',firingMaps.rateMaps{ii}{jj});
             
-            spatialModulation.(['borderIndex_map_' num2str(jj)]).west{ii} = borderIndex.west;
-            spatialModulation.(['borderIndex_map_' num2str(jj)]).east{ii} = borderIndex.east;
-            spatialModulation.(['borderIndex_map_' num2str(jj)]).north{ii} = borderIndex.north;
-            spatialModulation.(['borderIndex_map_' num2str(jj)]).south{ii} = borderIndex.south;
-            spatialModulation.(['borderIndex_map_' num2str(jj)]).maxBorderIndex{ii} = borderIndex.maxBorderIndex;
+            spatialModulation.(['borderIndex_map_' num2str(jj)]){ii}.west = borderIndex.west;
+            spatialModulation.(['borderIndex_map_' num2str(jj)]){ii}.east = borderIndex.east;
+            spatialModulation.(['borderIndex_map_' num2str(jj)]){ii}.north = borderIndex.north;
+            spatialModulation.(['borderIndex_map_' num2str(jj)]){ii}.south = borderIndex.south;
+            spatialModulation.(['borderIndex_map_' num2str(jj)]){ii}.maxBorderIndex{ii} = borderIndex.maxBorderIndex;
             
         end
     end
@@ -434,14 +444,14 @@ if periodicFiring
             if ~(size(firingMaps.rateMaps{ii}{jj},1) == 1) % Not linearize
                 periodic = getPeriodicFiring('z',firingMaps.rateMapsUnSmooth{ii}{jj},'unit',ii,'tint',tint);
                 
-                spatialModulation.(['periodicFiring_map_' num2str(jj)]).maxPolar{ii} = periodic.maxPolar;
-                spatialModulation.(['periodicFiring_map_' num2str(jj)]).posPolar{ii} = periodic.posPolar;
-                spatialModulation.(['periodicFiring_map_' num2str(jj)]).theta{ii} = periodic.theta;
-                spatialModulation.(['periodicFiring_map_' num2str(jj)]).Orient{ii} = periodic.Orient;
-                spatialModulation.(['periodicFiring_map_' num2str(jj)]).frec{ii} = periodic.frec;
-                spatialModulation.(['periodicFiring_map_' num2str(jj)]).periodicComponents{ii} = periodic.periodicComponents;
-                spatialModulation.(['periodicFiring_map_' num2str(jj)]).BC{ii} = periodic.BC;
-                spatialModulation.(['periodicFiring_map_' num2str(jj)]).TFP{ii} = periodic.TFP;
+                spatialModulation.(['periodicFiring_map_' num2str(jj)]){ii}.maxPolar = periodic.maxPolar;
+                spatialModulation.(['periodicFiring_map_' num2str(jj)]){ii}.posPolar = periodic.posPolar;
+                spatialModulation.(['periodicFiring_map_' num2str(jj)]){ii}.theta = periodic.theta;
+                spatialModulation.(['periodicFiring_map_' num2str(jj)]){ii}.Orient = periodic.Orient;
+                spatialModulation.(['periodicFiring_map_' num2str(jj)]){ii}.frec = periodic.frec;
+                spatialModulation.(['periodicFiring_map_' num2str(jj)]){ii}.periodicComponents = periodic.periodicComponents;
+                spatialModulation.(['periodicFiring_map_' num2str(jj)]){ii}.BC = periodic.BC;
+                spatialModulation.(['periodicFiring_map_' num2str(jj)]){ii}.TFP = periodic.TFP;
                 
             end
         end
@@ -672,10 +682,10 @@ if randomization
                 spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.borderIndex.east.R99 = prctile(cell2mat(shuffling_aux.borderIndex.east),99);
                 spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.borderIndex.east.R95 = prctile(cell2mat(shuffling_aux.borderIndex.east),95);
                 
-                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.borderIndex.mean = nanmean(cell2mat(shuffling_aux.borderIndex.north));
-                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.borderIndex.std = nanstd(cell2mat(shuffling_aux.borderIndex.north));
-                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.borderIndex.R99 = prctile(cell2mat(shuffling_aux.borderIndex.north),99);
-                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.borderIndex.R95 = prctile(cell2mat(shuffling_aux.borderIndex.north),95);
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.borderIndex.north.mean = nanmean(cell2mat(shuffling_aux.borderIndex.north));
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.borderIndex.north.std = nanstd(cell2mat(shuffling_aux.borderIndex.north));
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.borderIndex.north.R99 = prctile(cell2mat(shuffling_aux.borderIndex.north),99);
+                spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.borderIndex.north.R95 = prctile(cell2mat(shuffling_aux.borderIndex.north),95);
                 
                 spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.borderIndex.south.mean = nanmean(cell2mat(shuffling_aux.borderIndex.south));
                 spatialModulation.(['shuffling_map_' num2str(jj)]){ii}.borderIndex.south.std = nanstd(cell2mat(shuffling_aux.borderIndex.south));

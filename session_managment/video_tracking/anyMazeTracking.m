@@ -458,18 +458,27 @@ tail_yPos = tail_yPos*100/pixels_metre;
 
 
 %% Filtering tracking data
+% figure;
+% hold on;
+% for ii = 1:length(xPos)
+%     plot(xPos(1:ii),yPos(1:ii));
+%     pause
+% end
 pos = [xPos'; yPos']';
 art = find(sum(abs(diff(pos))>artifactThreshold,2))+1;  % remove artefacs as movement > 10cm/frame
 pos(art,:) = NaN;
 xt = linspace(0,size(pos,1)/fs,size(pos,1));            % kalman filter
 xt1 = timesamples;
 [t,x,y,vx,vy,ax,ay] = trajectory_kalman_filter(pos(:,1)',pos(:,2)',xt1,0);
+
 art = find(sum(abs(diff([x y]))>artifactThreshold,2))+1;
 art = [art - 2 art - 1 art art + 1 art + 2];
 x(art(:)) = NaN; y(art(:)) = NaN;
 F = fillmissing([x y],'linear');
 x = F(:,1); y = F(:,2);
 
+figure,
+plot(x,y)
 % Get velocity
 [~,~,~,vx,vy,ax,ay] = KalmanVel(x,y,xt,2);
 velocity = sqrt(vx.^2 + vy.^2);
@@ -918,7 +927,9 @@ tracking.position.y = y; % y filtered
 tracking.position.z = [];
 tracking.description = 'AnyMaze Tracking';
 % tracking.timestamps = anyMazeTtl';
-tracking.timestamps = (t + anyMazeTtl_start)';
+% tracking.timestamps = (t + anyMazeTtl_start)';
+tracking.timestamps = (t + anyMazeTtl_start);
+
 
 tracking.originalTimestamps = timesamples;
 tracking.folder = fbasename;

@@ -66,7 +66,7 @@ addParameter(p,'tint',true,@islogical);
 
 parse(p,varargin{:});
 smooth = p.Results.smooth;
-speedThresh = p.Results.speedThresh*100;
+speedThresh = p.Results.speedThresh;
 nBins = p.Results.nBins;
 maxGap = p.Results.maxGap;
 minTime = p.Results.minTime;
@@ -319,7 +319,7 @@ if plt
                     scatter(pos{c}{ii}(n > 0 ,2),pos{c}{ii}(n > 0,3),1,'MarkerEdgeColor',[1 0 0], 'MarkerFaceColor',[0.9 0 0]);
                     axis ij;
                     axis square;
-                    xlim(round(behavior.avFrame{c}.xSize)); ylim(round(behavior.avFrame{c}.ySize));
+%                     xlim(round(behavior.avFrame{c}.xSize)); ylim(round(behavior.avFrame{c}.ySize));
                     if unit == 1
                         ylabel('Track (cm)');
                         xlabel('Track (cm)');

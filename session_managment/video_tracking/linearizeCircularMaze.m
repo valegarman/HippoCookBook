@@ -1,4 +1,4 @@
-function [behavior] = linearizeArmChoice_pablo(varargin)
+function [behavior] = linearizeCircularMaze(varargin)
 % Linearize behavior and add relevant events, acording to the euclidean distance to a virtual maze
 %
 % USAGE
@@ -62,6 +62,7 @@ saveMat = p.Results.saveMat;
 forceReload = p.Results.forceReload;
 verbose = p.Results.verbose;
 
+
 if ~isempty(dir('*Linearized.Behavior.mat')) && ~forceReload 
     disp('Linearization already computed! Loading file.');
     file = dir('*Linearized.Behavior.mat');
@@ -69,9 +70,18 @@ if ~isempty(dir('*Linearized.Behavior.mat')) && ~forceReload
     return
 end
 
+% maze = getTrials_PMaze();
+maze = getTrials_PMaze2('forceReload',true);
+
+% Arm choice
+
 cd(basepath);
 if isempty(tracking)
     tracking = LED2Tracking;
+    center_x = tracking.apparatus.centre.x;
+    center_y = tracking.apparatus.centre.y;
+    tracking.position.x = tracking.position.x - center_x;
+    tracking.position.y = tracking.position.y - center_y;
 end
 
 if isempty(armChoice)
@@ -81,10 +91,65 @@ end
 if isempty(digitalIn)
     digitalIn = getDigitalIn;
 end
-if isempty(tracking) || isempty(armChoice) || isempty(digitalIn)
+
+if isempty(tracking)  || isempty(digitalIn)
     warning('Missing components. No behaviour performed?');
     return
 end
+
+% if isempty(tracking) || isempty(armChoice) || isempty(digitalIn)
+%     warning('Missing components. No behaviour performed?');
+%     return
+% end
+
+close all;
+
+% Defining Arm and rim as states
+
+
+behavior.states.arm_rim = nan(1,length(tracking.timestamps))'; % Numeric: 1, 2 or nan (outside)
+behavior.stateNames.arm_rim = {'Arm','Rim'};
+
+% idx_arm = maze.position.polar_rho < maze.polar_rho_limits(1) & tracking.position.x > maze.pos_x_limits(1)-3 & tracking.position.x < maze.pos_x_limits(2);
+idx_arm = tracking.position.x > maze.pos_x_limits(1)-3 & tracking.position.x < maze.pos_x_limits(2);
+behavior.states.arm_rim(idx_arm) = 1; % arm positions
+
+% Adding homeport to central arm
+idx = find(isnan(behavior.states.arm_rim) & tracking.position.y >= maze.pos_y_limits(2));
+pos_linearized(idx) = tracking.position.y(idx)+ maze.pos_y_limits(2);
+behavior.states.arm_rim(idx) = 1;
+
+idx_rim = ~idx_arm & maze.position.polar_rho > maze.polar_rho_limits(1) & maze.position.polar_rho < maze.polar_rho_limits(2)+10 &...   
+    ((maze.position.polar_theta < 0 & maze.position.polar_theta < -maze.boundary{5}(2)) | ...
+    (maze.position.polar_theta > 0 & maze.position.polar_theta > maze.boundary{6}(2)));
+behavior.states.arm_rim(idx_rim) = 2;
+
+figure;
+plot(tracking.position.x,tracking.position.y,'color',[.5 .5 .5]);
+hold on;
+scatter(tracking.position.x(idx_arm), tracking.position.y(idx_arm),'k');
+scatter(tracking.position.x(idx), tracking.position.y(idx),'k');
+scatter(tracking.position.x(idx_rim), tracking.position.y(idx_rim),'r');
+
+% First the central arm is linearized
+pos_linearized = nan(size(tracking.timestamps));
+pos_linearized(behavior.states.arm_rim==1) = tracking.position.y(behavior.states.arm_rim==1)+maze.pos_y_limits(2);
+% pos_linearized(behavior.states.arm_rim==1) = tracking.position.y(behavior.states.arm_rim==1);
+
+% Finally the right return side-arm is linearized.
+pos_linearized(behavior.states.arm_rim==2 & maze.position.polar_theta > 0) = (maze.position.polar_theta(behavior.states.arm_rim==2 & maze.position.polar_theta > 0)-90) ;
+figure;
+plot(pos_linearized)
+
+% Next the left(?) return side-arm
+boundary = diff(maze.pos_y_limits);
+pos_linearized(behavior.states.arm_rim==2 & maze.position.polar_theta < 0) = -(maze.position.polar_theta(behavior.states.arm_rim==2 & maze.position.polar_theta < 0) + 90);
+
+figure;
+plot(pos_linearized)
+
+% check trajectories, generate intersection point timestamp, check left
+% and right reward...
 
 % get components
 average_frame  = tracking.avFrame.r;        % get average frames
@@ -94,107 +159,13 @@ x = tracking.position.x;
 y = tracking.position.y;
 t = tracking.timestamps;
 
-cd(basepath); cd ..; upBasepath = pwd; cd ..; up_upBasepath = pwd; cd(basepath);
-if exist([basepath filesep 'virtualMaze.mat'],'file')
-    load([basepath filesep 'virtualMaze.mat'],'maze');
-elseif exist([upBasepath filesep 'virtualMaze.mat'],'file')
-    load([upBasepath filesep 'virtualMaze.mat'],'maze');
-    disp('Virtual trajectory from session folder... copying locally...');
-    save([basepath filesep 'virtualMaze.mat'],'maze');
-elseif exist([up_upBasepath filesep 'virtualMaze.mat'],'file')
-    load([up_upBasepath filesep 'virtualMaze.mat'],'maze');
-    disp('Virtual trajectory from master folder... copying locally...');
-    save([basepath filesep 'virtualMaze.mat'],'maze');
-else 
-    % Stem arm
-    disp('Draw LOI for tracking linearization :');
-    h0 = figure;
-    hold on
-    imagesc(xMaze, yMaze,average_frame); colormap gray; caxis([0 .7]);
-    freezeColors;
-    scatter(x,y,3,t,'filled','MarkerEdgeColor','none','MarkerFaceAlpha',.5); colormap jet
-    caxis([t(1) t(end)]);
-    xlim([xMaze]); ylim([yMaze]);
-    title('Draw a polyline following animal trajectory on stem Arm only...','FontWeight','normal');
-    axis ij;
-    maze = drawcircle;
-%     maze = drawpolyline;
-    maze = [maze.Position; maze.Position(1,:)];
-    close(h0);
-    
-    editLOI = 'true';
-end
-
-if editLOI
-    disp('Edit LOI for tracking linearization:');
-    h0 = figure;
-    hold on
-    imagesc(xMaze, yMaze,average_frame); colormap gray; caxis([0 .7]);
-    freezeColors;
-    scatter(x,y,3,t,'filled','MarkerEdgeColor','none','MarkerFaceAlpha',.5); colormap jet
-    caxis([t(1) t(end)]);
-    xlim([xMaze]); ylim([yMaze]);
-    title('Move vertex to match trajectory and press Enter...','FontWeight','normal');
-    axis ij;
-    roi = images.roi.Polyline(gca,'Position',maze);
-    pause;
-    maze = [roi.Position];
-    close(h0);
-    save([basepath filesep 'virtualMaze.mat'],'maze');
-end
-
-linMazeCont =    [0   75  ... % steam 
-                128       ... % r turn
-                 181      ... % r arm
-                 256      ... % steam
-                 309      ... % left turn
-                 362];         % left arm
-             
-% gets steps along the maze
-dMaze = diff(maze,1);
-dist_vertex = hypot(dMaze(:,1),dMaze(:,2));
-cum_dist = [0; cumsum(dist_vertex,1)];
-num_points = 5000;
-dist_steps = linspace(0, cum_dist(end), num_points);
-mazeVirtual = interp1(cum_dist, maze, dist_steps);
-vlinMazeCont = interp1(cum_dist, linMazeCont, dist_steps);
-
-% correct steam linearization
-vlinMazeCont(vlinMazeCont>=linMazeCont(4)) = ...
-    vlinMazeCont(vlinMazeCont>=linMazeCont(4)) - linMazeCont(4); 
-    
-disp('Linearizing trajectory...');
-for ii = 1:length(x)
-    euc = sqrt((mazeVirtual(:,1)-x(ii)).^2 ...
-        + (mazeVirtual(:,2)-y(ii)).^2); % euclidean distance between point and virtual maze trajectory
-    [~,idEuc] = min(euc);
-    linCont(ii) = vlinMazeCont(idEuc);
-end
-
-% add path distane to correct for stam lineaization when go left
-% stem = find(linCont<=linMazeCont(2));   % timestamp stem
-% rarm = find(linCont>linMazeCont(3) & linCont < linMazeCont(4));        % timestamp r arm
-% larm = find(linCont>linMazeCont(7) & linCont< linMazeCont(8));        % timestamp l arm
-% for ii = 1:length(stem)
-%     rt =(rarm - stem(ii)); rt(rt<=0) = NaN;
-%     lt =(larm - stem(ii)); lt(lt<=0) = NaN;
-%     if min(lt) < min(rt) % if in stem and go left
-%         linCont(stem(ii)) = linCont(stem(ii)) + 170;
-%     end
-% end
-
-% check trajectories, generate intersection point timestamp, check left
-% and right reward...
 h2 = figure;
 subplot(3,1,[1 2])
 hold on
-% scatter(x,y,3,[.8 .8 .8],'filled','MarkerEdgeColor','none','MarkerFaceAlpha',.5);
-plot(mazeVirtual(:,1), mazeVirtual(:,2),'k-');
 colormap parula
 colorTraj = jet(size(armChoice.timestamps,1));
-prev = 0; arm = ones(size(linCont));
+prev = 0; arm = ones(size(pos_linearized));
 winTrial = [];
-axis ij;
 for ii = 1:size(armChoice.timestamps,1)
     winTrial = [prev armChoice.timestamps(ii)];
     prev = armChoice.timestamps(ii);
@@ -210,7 +181,7 @@ for ii = 1:size(armChoice.timestamps,1)
 
         subplot(3,1,3)
         hold on
-        plot(t(xspam),linCont(xspam),'color',colorTraj(ii,:),'lineWidth',1);
+        plot(t(xspam),pos_linearized(xspam),'color',colorTraj(ii,:),'lineWidth',1);
         % plot(t(xspam),lin(xspam),'g','lineWidth',2);
         xlabel('seconds');
 
@@ -218,11 +189,11 @@ for ii = 1:size(armChoice.timestamps,1)
             arm(xspam) = 0;
         end
         
-        [~,idxInt] = min(abs(linCont(xspam)-75)); % find point closer to 75 in lin  (intersection)
+        [~,idxInt] = min(abs(pos_linearized(xspam)-0)); % find point closer to 0 in lin  (intersection)
         intersection(ii) = t(xspam(idxInt));
         sampleIntersection(ii) = xspam(idxInt);
 
-        [~,idxInt] = min(abs(linCont(xspam)-0)); % find point closer to 0 in lin (homeDelay)
+        [~,idxInt] = min(abs(pos_linearized(xspam)-60)); % find point closer to 0 in lin (homeDelay)
         homeCage(ii) = t(xspam(idxInt));
         samplehomeCage(ii) = xspam(idxInt);
         
@@ -231,9 +202,9 @@ for ii = 1:size(armChoice.timestamps,1)
             samplehomeCage(ii) = NaN;
         end
 
-        plot([intersection(ii) intersection(ii)],[0 linMazeCont(5)],'k');
+        plot([intersection(ii) intersection(ii)],[0 60],'k');
         if ~isnan(homeCage(ii))
-            plot([homeCage(ii) homeCage(ii)],[0 linMazeCont(5)],'r');
+            plot([homeCage(ii) homeCage(ii)],[0 60],'r');
         end
 
         subplot(3,1,[1 2])
@@ -251,8 +222,7 @@ for ii = 1:size(armChoice.timestamps,1)
         end
     end
 end
-plot(mazeVirtual(:,1), mazeVirtual(:,2),'k-');
-    
+
 % interpolate events
 % rReward = digitalIn.timestampsOn{4};
 rReward = armChoice.timestamps(armChoice.visitedArm==1);
@@ -266,12 +236,12 @@ for ii = 1:length(lReward)
     [~,idx] = min(abs(lReward(ii) - t));
     p4 = plot(x(idx),y(idx),'o','MarkerFaceColor',[.1 .5 .8],'MarkerEdgeColor','k');
 end
-endDelay = armChoice.delay.timestamps(2,:);
+endDelay = armChoice.delay.timestamps(:,2);
 for ii = 1:length(endDelay)
     [~,idx] = min(abs(endDelay(ii) - t));
     p5 = plot(x(idx),y(idx),'o','MarkerFaceColor',[.8 .5 .8],'MarkerEdgeColor','k');
 end
-startDelay = armChoice.delay.timestamps(1,:);
+startDelay = armChoice.delay.timestamps(:,1);
 for ii = 1:length(startDelay)
     [~,idx] = min(abs(startDelay(ii) - t));
     p6 = plot(x(idx),y(idx),'o','MarkerFaceColor',[.5 .8 .5],'MarkerEdgeColor','k');
@@ -289,10 +259,16 @@ maps = [];
 armList = unique(arm);
 for ii = 1:length(armList)
     maps{ii}(:,1) = tracking.timestamps(arm==armList(ii));
-    maps{ii}(:,2) = linCont(arm==armList(ii));
+    maps{ii}(:,2) = pos_linearized(arm==armList(ii));
 end
-endDelay = [t(1) endDelay];
-startDelay = [t(1) startDelay];
+
+endDelay(1) = t(1);
+endDelay = endDelay';
+startDelay(1) = t(1);
+startDelay = startDelay';
+
+% endDelay = [t(1) endDelay];
+% startDelay = [t(1) startDelay];
 
 trials0 = [homeCage' [(homeCage(2:end))'; t(end)]]; % trials defined as epochs between 0 position crossings
 trialsDelay = [endDelay' [(endDelay(2:end))'; t(end)]]; % trials defined as epochs between end delays positions
@@ -307,7 +283,7 @@ end
 % populate behavior
 behavior.timestamps = tracking.timestamps;
 
-behavior.position.lin = linCont';
+behavior.position.lin = pos_linearized;
 behavior.position.x = tracking.position.x;
 behavior.position.y = tracking.position.y;
 
@@ -318,7 +294,8 @@ behavior.masks.trialsDirection = NaN;
 
 behavior.maps = maps;
 
-behavior.description = armChoice.task;
+behavior.description = 'PMaze';
+behavior.task = armChoice.task;
 
 behavior.events.startPoint = homeCage';
 behavior.events.rReward = rReward;
