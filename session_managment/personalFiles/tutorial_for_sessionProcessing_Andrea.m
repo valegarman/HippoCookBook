@@ -27,5 +27,5 @@ indexNewSession;
 % an enjoy data analysis!
 [projectResults, projectSessionResults] = ...
         loadProjectResults('project', 'InterneuronsLibrary',...
-        'analysis_project_path', 'C:\Users\valeg\Dropbox\ProjectsOnLine\interneuronsLibrary\data','loadLast',false);
+        'analysis_project_path', 'C:\Users\Andrea Gallardo\Dropbox\ProjectsOnLine\interneuronsLibrary\data','loadLast',true);
     

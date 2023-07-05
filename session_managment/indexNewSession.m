@@ -204,7 +204,11 @@ if copyFiles
     [success] = copyfile(session.general.basePath,[driveStorage_path,'\',session.animal.name,'\',session.general.name]);
     if success
         cd ..
-        rmdir(session.general.basePath,'s');
+        try 
+            rmdir(session.general.basePath,'s');
+        catch
+            warning('The session folder could not be removed!');
+        end
     end
 end
 
