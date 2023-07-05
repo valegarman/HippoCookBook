@@ -96,3 +96,4 @@ fcck1_220204_sess5,fcck1,fcck1\fcck1_220204_sess5,c57b1/6,vip/cck/ai80,"105µm (
 fcck1_220131_sess1,fcck1,fcck1\fcck1_220131_sess1,c57b1/6,vip/cck/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,41,PTLp CA1so CA1sp CA1sr CA1slm CA3,InterneuronsLibrary desVIPnhibition
 fvip1_220603_sess18,fvip1,fvip1\fvip1_220603_sess18,c57b1/6,vip/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,59,CA1 PTLp CA3,InterneuronsLibrary desVIPnhibition
 fvip1_220525_sess11,fvip1,fvip1\fvip1_220525_sess11,c57b1/6,vip/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,19,CA1sp PTLp CA3,InterneuronsLibrary desVIPnhibition
+fsst3_220909_sess1,fsst3,fsst3\fsst3_220909_sess1,c57b1/6,sst/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,38,PTLp PTLp5 PTLp6 CA1sp CA1so CA1slm CA1sr CA3sp CA3sr,InterneuronsLibrary
