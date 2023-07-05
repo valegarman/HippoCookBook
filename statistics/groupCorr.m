@@ -1,5 +1,5 @@
 
-function [corrStats, h]=groupCorr(varX,varY,varargin)
+function [corrStats, h]=groupCorr(varX, ,varargin)
 % Correlation between varX and varY, plus some handy options
 % 
 % INPUTS
