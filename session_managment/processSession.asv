@@ -167,10 +167,10 @@ if ~any(ismember(excludeAnalysis, {'3',lower('cureAnalogPulses')}))
     end
 end
 
-%% 4. Spike Features
+%% 4. Spike Features, and optogenetic responses
 % 4.1 Light responses, if available
 if ~any(ismember(excludeAnalysis, {'4',lower('spikesFeatures')}))
-    optogeneticResponses = getOptogeneticResponse('numRep',50,'force',true);
+    optogeneticResponses = getOptogeneticResponse('numRep',500,'force',true);
     % 4.2 ACG and waveform
     spikeFeatures;
 end
@@ -260,7 +260,7 @@ if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
     try
         spikes = loadSpikes;
         getSessionTracking('roiTracking','manual','forceReload',false);
-        getSessionArmChoice('task','alternation','leftArmTtl_channel',3,'rightArmTtl_channel',4,'homeDelayTtl_channel',5);
+        getSessionArmChoice('task','alternation','leftArmTtl_channel',2,'rightArmTtl_channel',3,'homeDelayTtl_channel',4);
         behaviour = getSessionLinearize('forceReload',true);  
         firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',true);
         placeFieldStats = bz_findPlaceFields1D('firingMaps',firingMaps,'maxSize',.75,'sepEdge',0.03); %% ,'maxSize',.75,'sepEdge',0.03

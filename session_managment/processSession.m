@@ -49,6 +49,7 @@ addParameter(p,'excludeAnalysis',[]); %
 addParameter(p,'useCSD_for_theta_detection',true,@islogical);
 addParameter(p,'profileType','hippocampus',@ischar); % options, 'hippocampus' and 'cortex'
 addParameter(p,'rippleMasterDetector_threshold',[1.5 3.5],@isnumeric); % [1.5 3.5]
+addParameter(p,'LED_threshold',0.98,@isnumeric);
 
 parse(p,varargin{:})
 
@@ -75,6 +76,7 @@ excludeAnalysis = p.Results.excludeAnalysis;
 useCSD_for_theta_detection = p.Results.useCSD_for_theta_detection;
 profileType = p.Results.profileType;
 rippleMasterDetector_threshold = p.Results.rippleMasterDetector_threshold;
+LED_threshold = p.Results.LED_threshold;
 
 % Deal with inputs
 prevPath = pwd;
@@ -259,8 +261,8 @@ end
 if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
     try
         spikes = loadSpikes;
-        getSessionTracking('roiTracking','manual','forceReload',false);
-        getSessionArmChoice('task','alternation','leftArmTtl_channel',3,'rightArmTtl_channel',4,'homeDelayTtl_channel',5);
+        getSessionTracking('roiTracking','manual','forceReload',false,'LED_threshold',0.5);
+        getSessionArmChoice('task','alternation','leftArmTtl_channel',2,'rightArmTtl_channel',3,'homeDelayTtl_channel',4);
         behaviour = getSessionLinearize('forceReload',true);  
         firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',true);
         placeFieldStats = bz_findPlaceFields1D('firingMaps',firingMaps,'maxSize',.75,'sepEdge',0.03); %% ,'maxSize',.75,'sepEdge',0.03
