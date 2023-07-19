@@ -59,7 +59,7 @@ addParameter(p,'roiLED',[],@ismatrix);
 addParameter(p,'forceReload',false,@islogical)
 addParameter(p,'saveFrames',true,@islogical)
 addParameter(p,'verbose',false,@islogical);
-addParameter(p,'thresh',.98,@isnumeric)
+addParameter(p,'thresh',.98,@isnumeric) % .98
 addParameter(p,'bazlerTTL',[],@isnumeric)
 addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'basler_ttl_channel',[],@isnumeric);

@@ -55,6 +55,7 @@ addParameter(p,'roisPath',[],@isfolder);
 addParameter(p,'saveMat',true,@islogical)
 addParameter(p,'forceReload',false,@islogical);
 addParameter(p,'anyMaze',false,@islogical);
+addParameter(p,'LED_threshold',0.98,@isnumeric);
 
 parse(p,varargin{:});
 basepath = p.Results.basepath;
@@ -65,6 +66,7 @@ roisPath = p.Results.roisPath;
 saveMat = p.Results.saveMat;
 forceReload = p.Results.forceReload;
 anyMaze = p.Results.anyMaze;
+LED_threshold = p.Results.LED_threshold;
 
 %% In case tracking already exists 
 if ~isempty(dir([basepath filesep '*Tracking.Behavior.mat'])) || forceReload
@@ -105,7 +107,7 @@ if ~anyMaze
                 cd([basepath filesep MergePoints.foldernames{ii}]); %cd([basepath filesep sess(ii).name]);
                 fprintf('Computing tracking in %s folder \n',MergePoints.foldernames{ii});
                  tempTracking{count}= LED2Tracking([],'convFact',convFact,'roiTracking',...
-                     roiTracking,'roiLED',roiLED,'forceReload',forceReload); % computing trajectory
+                     roiTracking,'roiLED',roiLED,'forceReload',forceReload,'thresh',LED_threshold); % computing trajectory
                  trackFolder(count) = ii; 
                 count = count + 1;
             end
