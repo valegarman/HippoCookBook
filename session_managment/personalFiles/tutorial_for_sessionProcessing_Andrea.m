@@ -19,6 +19,7 @@ batch_sessionSummary('basepath','G:\data\fPv4','cleanArtifacts',({65,[]}),'analo
 
 % 4% Processs individual sessions by by 'processSession'. Example:
 processSession('digital_optogenetic_channels',[1],'analog_optogenetic_channels',[],'promt_hippo_layers',true, 'LED_threshold',.8);
+% Revise output, if you detect any problem, use ProcessSession_notebook
 
 % 5% Index session
 indexNewSession;
