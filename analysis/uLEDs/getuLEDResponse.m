@@ -354,8 +354,8 @@ for kk = 1:length(uLEDPulses.conditionDurationID)
         if ~isnan(uLEDResponses.maxRespLED.LEDs(ii,kk))
             uLEDResponses.maxRespLED.values(ii,kk) = uLEDResponses.rateDuringPulse(ii,kk,uLEDResponses.maxRespLED.LEDs(ii,kk));
             uLEDResponses.maxRespLED.valuesBeforePulse(ii,kk) = uLEDResponses.rateBeforePulse(ii,kk,uLEDResponses.maxRespLED.LEDs(ii,kk));   
-            spikesResponses.maxRespLED.ratioBeforeAfter(ii,kk) = uLEDResponses.maxRespLED.values(ii,kk)./uLEDResponses.maxRespLED.valuesBeforePulse(ii,kk); 
-            spikesResponses.maxRespLED.ratioNoResp(ii,kk) = uLEDResponses.maxRespLED.values(ii)./nanmean(uLEDResponses.noRespLEDs.values{ii,kk});
+            uLEDResponses.maxRespLED.ratioBeforeAfter(ii,kk) = uLEDResponses.maxRespLED.values(ii,kk)./uLEDResponses.maxRespLED.valuesBeforePulse(ii,kk); 
+            uLEDResponses.maxRespLED.ratioNoResp(ii,kk) = uLEDResponses.maxRespLED.values(ii)./nanmean(uLEDResponses.noRespLEDs.values{ii,kk});
             if isnan(uLEDResponses.maxRespLED.values(ii,kk))
                 uLEDResponses.maxRespLED.LEDs(ii,kk) = NaN;
             end
