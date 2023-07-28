@@ -86,7 +86,7 @@ if ~isempty(targetFile) && ~force
     return
 end
 
-if isnan(uLEDPulses)
+if ~isstruct(uLEDPulses) && isnan(uLEDPulses)
     uLEDPulses = getuLEDPulses;
 end
 
@@ -96,19 +96,659 @@ end
 
 codes = 1:max(uLEDPulses.code);
 
-for kk = 1:length(uLEDPulses.conditionDurationID)
-    for ii = 1:spikes.numcells
-        fprintf(' **Pulses from unit %3.i/ %3.i \n',ii, size(spikes.UID,2)); %
-        for jj = 1:length(codes)
-            pulses = uLEDPulses.timestamps(uLEDPulses.code == codes(jj) & uLEDPulses.conditionID==kk,1);
-            status = InIntervals(pulses, intervals);
-            times = spikes.times; times{length(times)+1} = pulses(status==1,1); times{length(times)+1} = pulses(status==0,1); 
-            [stccg, t] = CCG(times,[],'binSize',binSize,'duration',winSize,'norm','rate');
-            in_interval.responsecurve(:,kk,jj,:) = stccg(:, 1: end - 2 , end - 1);
-            out_interval.responsecurve(:,kk,jj,:) = stccg(:, 1: end - 2 , end); s.3
+timestamps_recording = min(uLEDPulses.timestamps(:,2)):1/1250:max(uLEDPulses.timestamps(:,2));
 
+disp('Computing cell responses...');
+for kk = 1:length(uLEDPulses.conditionDurationID)
+    pulseDuration = uLEDPulses.conditionDuration(kk);
+    % generate random events for boostraping
+    nPulses = int32(length(find(uLEDPulses.conditionID == uLEDPulses.conditionDurationID(kk)))/...
+            length(unique(uLEDPulses.code(uLEDPulses.conditionID == uLEDPulses.conditionDurationID(kk)))));
+    randomEvents = [];
+    % disp('Generating boostrap template...');
+    for mm = 1:numRep
+        randomEvents{mm} = sort(randsample(timestamps_recording, nPulses))';
+    end
+    [stccg, t] = CCG([spikes.times randomEvents],[],'binSize',binSize,'duration',winSize,'norm','rate');
+    t_duringPulse = t > 0 + onset(kk) & t < pulseDuration + offset(kk); 
+    randomRatesDuringPulse = squeeze(mean(stccg(t_duringPulse, length(spikes.UID)+1:end,1:length(spikes.UID)),1));
+    uLEDResponses_interval.bootsTrapRate(:,kk) = mean(randomRatesDuringPulse,1);
+    uLEDResponses_interval.bootsTrapRateStd(:,kk) = std(randomRatesDuringPulse,[],1);
+    uLEDResponses_interval.bootsTrapRateSEM(:,kk) = std(randomRatesDuringPulse,[],1)/sqrt(numRep);
+    for jj = 1:size(randomRatesDuringPulse,2)
+        pd = fitdist(randomRatesDuringPulse(:,jj),'normal');
+        uLEDResponses_interval.bootsTrapCI(jj,kk,1:2) = pd.icdf(bootsTrapCI);
+    end
+
+    for jj = 1:length(codes)
+        pulses = uLEDPulses.timestamps(uLEDPulses.code == codes(jj) & uLEDPulses.conditionID==kk,1);
+        status = InIntervals(pulses, intervals);
+        times = spikes.times; times{length(times)+1} = pulses(status==1,1); times{length(times)+1} = pulses(status==0,1); 
+        [stccg, t] = CCG(times,[],'binSize',binSize,'duration',winSize,'norm','rate');
+        in_interval.responsecurve(:,kk,jj,:) = squeeze(stccg(:, end - 1 , 1:end-2))';
+        out_interval.responsecurve(:,kk,jj,:) = squeeze(stccg(:, end , 1:end-2))';
+        
+        t_duringPulse = t > 0 + onset(kk) & t < pulseDuration + offset(kk); 
+        t_beforePulse = t > -pulseDuration & t < 0; 
+        
+        for ii = 1:size(in_interval.responsecurve,1)
+            % in
+            in_interval.responsecurveZ(ii,kk,jj,:) = (in_interval.responsecurve(ii,kk,jj,:) - mean(in_interval.responsecurve(ii,kk,jj,t < 0)))...
+                /std(in_interval.responsecurve(ii,kk,jj,t < 0));
+            in_interval.responsecurveZSmooth(ii,kk,jj,:) = smooth(in_interval.responsecurveZ(ii,kk,jj,:));
+            in_interval.rateDuringPulse(ii,kk,jj,1) = mean(in_interval.responsecurve(ii,kk,jj,t_duringPulse));
+            in_interval.rateBeforePulse(ii,kk,jj,1) = mean(in_interval.responsecurve(ii,kk,jj,t_beforePulse));
+            in_interval.rateZDuringPulse(ii,kk,jj,1) = mean(in_interval.responsecurveZ(ii,kk,jj,t_duringPulse));
+            in_interval.rateZBeforePulse(ii,kk,jj,1) = mean(in_interval.responsecurveZ(ii,kk,jj,t_beforePulse));
+            in_interval.codes(ii,kk,jj,1) = codes(jj);
+            [h, in_interval.modulationSignificanceLevel(ii,kk,jj,1)] = kstest2(squeeze(in_interval.responsecurve(ii,kk,jj,t_duringPulse))...
+                ,squeeze(in_interval.responsecurve(ii,kk,jj,t_beforePulse)));
+            
+            ci = squeeze(uLEDResponses_interval.bootsTrapCI(ii,kk,:));
+            if in_interval.rateDuringPulse(ii,kk,jj,1) > ci(2)
+                test = 1;
+            elseif in_interval.rateDuringPulse(ii,kk,jj,1) < ci(1)
+                test = -1;
+            else
+                test = 0;
+            end
+            in_interval.bootsTrapTest(ii,kk,jj,1) = test;
+
+            if in_interval.rateZDuringPulse(ii,kk,jj,1)  > 1.96
+                    test = 1;
+            elseif in_interval.rateZDuringPulse(ii,kk,jj,1)  < -1.96
+                test = -1;
+            else
+                test = 0;
+            end
+            in_interval.zscoreTest(ii,kk,jj,1) = test;
+            in_interval.pulseDuration(ii,kk,jj,1) = uLEDPulses.conditionDuration(kk);
+
+            rasterX = [];
+            rasterY = [];
+            for zz = 1:size(pulses,1)
+                temp_spk = spikes.times{ii}(find(spikes.times{ii} - pulses(zz,1)  > salt_time(1) & spikes.times{ii} - pulses(zz,1)  < salt_time(2))) - pulses(zz,1);
+                rasterX = [rasterX; temp_spk];
+                if ~isempty(temp_spk)
+                    rasterY = [rasterY; zz * ones(size((temp_spk)))];
+                end
+            end
+            if ~isempty(rasterX)
+                [rasterHist3,c] = hist3([rasterY rasterX],{1:size(pulses,1) salt_time(1):salt_binSize:salt_time(2)});
+                in_interval.raster.rasterCount{ii,kk,jj} = rasterHist3;
+                in_interval.raster.rasterProb{ii,kk,jj} = rasterHist3/sum(rasterHist3(:));
+                in_interval.raster.TrialsNumber{ii,kk,jj} = c{1};
+                in_interval.raster.times{ii,kk,jj} = c{2};
+                in_interval.raster.rasterTrials{ii,kk,jj} = rasterY;
+                in_interval.raster.rasterSpikesTimes{ii,kk,jj} = rasterX;
+
+                time = c{2};
+                baseidx = dsearchn(time', salt_baseline');
+                tidx = dsearchn(time', [0; pulseDuration*2]);    
+                st = length(baseidx(1):baseidx(2));
+                nmbn = round(salt_win/salt_binSize);
+                v = 1:nmbn:st;
+                if any((v + nmbn - 1) > st)
+                    error('reduce window size or baseline duration')
+                end
+                [in_interval.salt.p_value(ii,kk,jj,1), in_interval.salt.I_statistics(ii,kk,jj,1)] = salt(rasterHist3(:,baseidx(1):baseidx(2)),rasterHist3(:,tidx(1):tidx(2)),salt_binSize, salt_win);
+            else
+                in_interval.raster.rasterCount{ii,kk,jj} = NaN;
+                in_interval.raster.rasterProb{ii,kk,jj} = NaN;
+                in_interval.raster.TrialsNumber{ii,kk,jj} = NaN;
+                in_interval.raster.times{ii,kk,jj} = NaN;
+                in_interval.raster.rasterTrials{ii,kk,jj} = NaN;
+                in_interval.raster.rasterSpikesTimes{ii,kk,jj} = NaN;
+                in_interval.salt.p_value(ii,kk,jj,1) = NaN;
+                in_interval.salt.I_statistics(ii,kk,jj,1) = NaN;
+            end
+
+            % out
+            out_interval.responsecurveZ(ii,kk,jj,:) = (out_interval.responsecurve(ii,kk,jj,:) - mean(out_interval.responsecurve(ii,kk,jj,t < 0)))...
+                /std(out_interval.responsecurve(ii,kk,jj,t < 0));
+            out_interval.responsecurveZSmooth(ii,kk,jj,:) = smooth(out_interval.responsecurveZ(ii,kk,jj,:));
+            out_interval.rateDuringPulse(ii,kk,jj,1) = mean(out_interval.responsecurve(ii,kk,jj,t_duringPulse));
+            out_interval.rateBeforePulse(ii,kk,jj,1) = mean(out_interval.responsecurve(ii,kk,jj,t_beforePulse));
+            out_interval.rateZDuringPulse(ii,kk,jj,1) = mean(out_interval.responsecurveZ(ii,kk,jj,t_duringPulse));
+            out_interval.rateZBeforePulse(ii,kk,jj,1) = mean(out_interval.responsecurveZ(ii,kk,jj,t_beforePulse));
+            out_interval.codes(ii,kk,jj,1) = codes(jj);
+            [h, out_interval.modulationSignificanceLevel(ii,kk,jj,1)] = kstest2(squeeze(out_interval.responsecurve(ii,kk,jj,t_duringPulse))...
+                ,squeeze(out_interval.responsecurve(ii,kk,jj,t_beforePulse)));
+            
+            ci = squeeze(uLEDResponses_interval.bootsTrapCI(ii,kk,:));
+            if out_interval.rateDuringPulse(ii,kk,jj,1) > ci(2)
+                test = 1;
+            elseif out_interval.rateDuringPulse(ii,kk,jj,1) < ci(1)
+                test = -1;
+            else
+                test = 0;
+            end
+            out_interval.bootsTrapTest(ii,kk,jj,1) = test;
+
+            if out_interval.rateZDuringPulse(ii,kk,jj,1)  > 1.96
+                    test = 1;
+            elseif out_interval.rateZDuringPulse(ii,kk,jj,1)  < -1.96
+                test = -1;
+            else
+                test = 0;
+            end
+            out_interval.zscoreTest(ii,kk,jj,1) = test;
+            out_interval.pulseDuration(ii,kk,jj,1) = uLEDPulses.conditionDuration(kk);
+
+            rasterX = [];
+            rasterY = [];
+            for zz = 1:size(pulses,1)
+                temp_spk = spikes.times{ii}(find(spikes.times{ii} - pulses(zz,1)  > salt_time(1) & spikes.times{ii} - pulses(zz,1)  < salt_time(2))) - pulses(zz,1);
+                rasterX = [rasterX; temp_spk];
+                if ~isempty(temp_spk)
+                    rasterY = [rasterY; zz * ones(size((temp_spk)))];
+                end
+            end
+            if ~isempty(rasterX)
+                [rasterHist3,c] = hist3([rasterY rasterX],{1:size(pulses,1) salt_time(1):salt_binSize:salt_time(2)});
+                out_interval.raster.rasterCount{ii,kk,jj} = rasterHist3;
+                out_interval.raster.rasterProb{ii,kk,jj} = rasterHist3/sum(rasterHist3(:));
+                out_interval.raster.TrialsNumber{ii,kk,jj} = c{1};
+                out_interval.raster.times{ii,kk,jj} = c{2};
+                out_interval.raster.rasterTrials{ii,kk,jj} = rasterY;
+                out_interval.raster.rasterSpikesTimes{ii,kk,jj} = rasterX;
+
+                time = c{2};
+                baseidx = dsearchn(time', salt_baseline');
+                tidx = dsearchn(time', [0; pulseDuration*2]);    
+                st = length(baseidx(1):baseidx(2));
+                nmbn = round(salt_win/salt_binSize);
+                v = 1:nmbn:st;
+                if any((v + nmbn - 1) > st)
+                    error('reduce window size or baseline duration')
+                end
+                [out_interval.salt.p_value(ii,kk,jj,1), out_interval.salt.I_statistics(ii,kk,jj,1)] = salt(rasterHist3(:,baseidx(1):baseidx(2)),rasterHist3(:,tidx(1):tidx(2)),salt_binSize, salt_win);
+            else
+                out_interval.raster.rasterCount{ii,kk,jj} = NaN;
+                out_interval.raster.rasterProb{ii,kk,jj} = NaN;
+                out_interval.raster.TrialsNumber{ii,kk,jj} = NaN;
+                out_interval.raster.times{ii,kk,jj} = NaN;
+                out_interval.raster.rasterTrials{ii,kk,jj} = NaN;
+                out_interval.raster.rasterSpikesTimes{ii,kk,jj} = NaN;
+                out_interval.salt.p_value(ii,kk,jj,1) = NaN;
+                out_interval.salt.I_statistics(ii,kk,jj,1) = NaN;
+            end
+        end 
+    end
+end
+out_interval.timestamps = t;
+in_interval.timestamps = t;
+uLEDResponses_interval.timestamps = t;
+
+% parse cell responses
+for kk = 1:length(uLEDPulses.conditionDurationID)
+    for ii = 1:length(spikes.UID)
+        %% in
+        in_interval.noRespLEDs.LEDs{ii,kk} = find(in_interval.bootsTrapTest(ii,kk,:) == 0);
+        in_interval.respLEDs.LEDs{ii,kk} = find(in_interval.bootsTrapTest(ii,kk,:) == 1);
+        in_interval.negRespLEDs.LEDs{ii,kk} = find(in_interval.bootsTrapTest(ii,kk,:)== -1);
+
+        ratio = squeeze(in_interval.rateDuringPulse(ii,kk,:)./in_interval.rateBeforePulse(ii,kk,:));
+        ratio(isinf(ratio)) = NaN;
+        maxRespLED = find(max(ratio)==ratio,1);
+        if length(ratio)==1 % if only 1 light, get everything in maxRespLED
+            maxRespLED = 1;
+        end
+        minRespLED = find(min(ratio)==ratio,1);
+
+        if in_interval.bootsTrapTest(ii,kk,maxRespLED) == 1
+            in_interval.maxRespLED.LEDs(ii,kk) = maxRespLED;
+        else
+            in_interval.maxRespLED.LEDs(ii,kk) = NaN;
+        end
+
+        if in_interval.bootsTrapTest(ii,kk,minRespLED) == -1
+            in_interval.minRespLED.LEDs(ii,kk) = minRespLED;
+        else
+            in_interval.minRespLED.LEDs(ii,kk) = NaN;
+        end
+
+        % noRespLEDs
+        in_interval.noRespLEDs.rate{ii,kk} = in_interval.rateDuringPulse(ii,kk,in_interval.noRespLEDs.LEDs{ii,kk});
+        in_interval.noRespLEDs.rateBeforePulse{ii,kk} = in_interval.rateBeforePulse(ii,kk,in_interval.noRespLEDs.LEDs{ii,kk});
+        in_interval.noRespLEDs.rateZ{ii,kk} = in_interval.rateZDuringPulse(ii,kk,in_interval.noRespLEDs.LEDs{ii,kk});
+        in_interval.noRespLEDs.rateZBeforePulse{ii,kk} = in_interval.rateZBeforePulse(ii,kk,in_interval.noRespLEDs.LEDs{ii,kk});
+        in_interval.noRespLEDs.ratioBeforeAfter{ii,kk} = in_interval.noRespLEDs.rate{ii,kk}./in_interval.noRespLEDs.rateBeforePulse{ii,kk}; 
+        in_interval.noRespLEDs.meanRatio(ii,kk) = mean(in_interval.noRespLEDs.ratioBeforeAfter{ii,kk});
+        in_interval.noRespLEDs.meanRateBeforePulse(ii,kk) = mean(in_interval.noRespLEDs.rateBeforePulse{ii,kk});
+        in_interval.noRespLEDs.meanRateDuringPulse(ii,kk) = mean(in_interval.noRespLEDs.rate{ii,kk});
+        if isnan(in_interval.noRespLEDs.meanRatio(ii,kk)) % if only NaN, remove LEDs
+            in_interval.noRespLEDs.LEDs{ii,kk} = [];
+            in_interval.noRespLEDs.rate{ii,kk} = [];
+            in_interval.noRespLEDs.rateBeforePulse{ii,kk} = [];
+            in_interval.noRespLEDs.rateZ{ii,kk} = [];
+            in_interval.noRespLEDs.rateZBeforePulse{ii,kk} = [];
+            in_interval.noRespLEDs.ratioBeforeAfter{ii,kk} = [];
+        end
+
+        % negRespLEDs
+        in_interval.negRespLEDs.rate{ii,kk} = in_interval.rateDuringPulse(ii,kk,in_interval.negRespLEDs.LEDs{ii,kk});
+        in_interval.negRespLEDs.rateBeforePulse{ii,kk} = in_interval.rateBeforePulse(ii,kk,in_interval.negRespLEDs.LEDs{ii,kk});  
+        in_interval.negRespLEDs.rateZ{ii,kk} = in_interval.rateZDuringPulse(ii,kk,in_interval.negRespLEDs.LEDs{ii,kk});
+        in_interval.negRespLEDs.rateZBeforePulse{ii,kk} = in_interval.rateZBeforePulse(ii,kk,in_interval.negRespLEDs.LEDs{ii,kk});  
+        in_interval.negRespLEDs.ratioBeforeAfter{ii,kk} = in_interval.negRespLEDs.rate{ii,kk}./in_interval.negRespLEDs.rateBeforePulse{ii,kk};  
+        in_interval.negRespLEDs.meanRatio(ii,kk) = mean(in_interval.negRespLEDs.ratioBeforeAfter{ii,kk});
+        in_interval.negRespLEDs.ratioNoResp(ii,kk) = mean(in_interval.negRespLEDs.rate{ii,kk})./nanmean(in_interval.noRespLEDs.rate{ii,kk});
+        in_interval.negRespLEDs.meanRateBeforePulse(ii,kk) = mean(in_interval.negRespLEDs.rateBeforePulse{ii,kk});
+        in_interval.negRespLEDs.meanRateDuringPulse(ii,kk) = mean(in_interval.negRespLEDs.rate{ii,kk});
+        if isnan(in_interval.negRespLEDs.meanRatio(ii,kk)) % if only NaN, remove LEDs
+            in_interval.negRespLEDs.LEDs{ii,kk} = [];
+            in_interval.negRespLEDs.rate{ii,kk} = [];
+            in_interval.negRespLEDs.rateBeforePulse{ii,kk} = [];
+            in_interval.negRespLEDs.rateZ{ii,kk} = [];
+            in_interval.negRespLEDs.rateZBeforePulse{ii,kk} = [];
+            in_interval.negRespLEDs.ratioBeforeAfter{ii,kk} = [];
+        end
+
+        % respLEDs
+        in_interval.respLEDs.rate{ii,kk} = in_interval.rateDuringPulse(ii,kk,in_interval.respLEDs.LEDs{ii,kk});
+        in_interval.respLEDs.rateBeforePulse{ii,kk} = in_interval.rateBeforePulse(ii,kk,in_interval.respLEDs.LEDs{ii,kk});  
+        in_interval.respLEDs.rateZ{ii,kk} = in_interval.rateZDuringPulse(ii,kk,in_interval.respLEDs.LEDs{ii,kk});
+        in_interval.respLEDs.rateZBeforePulse{ii,kk} = in_interval.rateZBeforePulse(ii,kk,in_interval.respLEDs.LEDs{ii,kk});  
+        in_interval.respLEDs.ratioBeforeAfter{ii,kk} = in_interval.respLEDs.rate{ii}./in_interval.respLEDs.rateBeforePulse{ii,kk};  
+        in_interval.respLEDs.meanRatio(ii,kk) = mean(in_interval.respLEDs.ratioBeforeAfter{ii,kk});
+        in_interval.respLEDs.ratioNoResp(ii,kk) = nanmean(in_interval.respLEDs.rate{ii,kk})./nanmean(in_interval.noRespLEDs.rate{ii,kk});
+        in_interval.respLEDs.meanRateBeforePulse(ii,kk) = mean(in_interval.respLEDs.rateBeforePulse{ii,kk});
+        in_interval.respLEDs.meanRateDuringPulse(ii,kk) = mean(in_interval.respLEDs.rate{ii,kk});
+        if isnan(in_interval.respLEDs.meanRatio(ii,kk)) % if only NaN, remove LEDs
+            in_interval.respLEDs.LEDs{ii,kk} = [];
+            in_interval.respLEDs.rate{ii,kk} = [];
+            in_interval.respLEDs.rateBeforePulse{ii,kk} = [];
+            in_interval.respLEDs.rateZ{ii,kk} = [];
+            in_interval.respLEDs.rateZBeforePulse{ii,kk} = [];
+            in_interval.respLEDs.ratioBeforeAfter{ii,kk} = [];
+        end
+
+        % maxRespLED
+        if ~isnan(in_interval.maxRespLED.LEDs(ii,kk))
+            in_interval.maxRespLED.rate(ii,kk) = in_interval.rateDuringPulse(ii,kk,in_interval.maxRespLED.LEDs(ii,kk));
+            in_interval.maxRespLED.rateBeforePulse(ii,kk) = in_interval.rateBeforePulse(ii,kk,in_interval.maxRespLED.LEDs(ii,kk));   
+            in_interval.maxRespLED.rateZ(ii,kk) = in_interval.rateZDuringPulse(ii,kk,in_interval.maxRespLED.LEDs(ii,kk));
+            in_interval.maxRespLED.rateZBeforePulse(ii,kk) = in_interval.rateZBeforePulse(ii,kk,in_interval.maxRespLED.LEDs(ii,kk));   
+            in_interval.maxRespLED.ratioBeforeAfter(ii,kk) = in_interval.maxRespLED.rate(ii,kk)./in_interval.maxRespLED.rateBeforePulse(ii,kk); 
+            in_interval.maxRespLED.ratioNoResp(ii,kk) = in_interval.maxRespLED.rate(ii)./nanmean(in_interval.noRespLEDs.rate{ii,kk});
+            if isnan(in_interval.maxRespLED.rate(ii,kk))
+                in_interval.maxRespLED.LEDs(ii,kk) = NaN;
+            end
+        else
+            in_interval.maxRespLED.rate(ii,kk) = NaN;
+            in_interval.maxRespLED.rateBeforePulse(ii,kk) = NaN;
+            in_interval.maxRespLED.rateZ(ii,kk) = NaN;
+            in_interval.maxRespLED.rateZBeforePulse(ii,kk) = NaN;
+            in_interval.maxRespLED.ratioBeforeAfter(ii,kk) = NaN;
+            in_interval.maxRespLED.ratioNoResp(ii,kk) = NaN;
+        end
+        
+        % minRespLED
+        if ~isnan(in_interval.minRespLED.LEDs(ii,kk))
+            in_interval.minRespLED.rate(ii,kk) = in_interval.rateDuringPulse(ii,kk,in_interval.minRespLED.LEDs(ii,kk));
+            in_interval.minRespLED.rateBeforePulse(ii,kk) = in_interval.rateBeforePulse(ii,kk,in_interval.minRespLED.LEDs(ii,kk));   
+            in_interval.minRespLED.rateZ(ii,kk) = in_interval.rateZDuringPulse(ii,kk,in_interval.minRespLED.LEDs(ii,kk));
+            in_interval.minRespLED.rateZBeforePulse(ii,kk) = in_interval.rateZBeforePulse(ii,kk,in_interval.minRespLED.LEDs(ii,kk));   
+            in_interval.minRespLED.ratioBeforeAfter(ii,kk) = in_interval.minRespLED.rate(ii,kk)./in_interval.minRespLED.rateBeforePulse(ii,kk);  
+            in_interval.minRespLED.ratioNoResp(ii,kk) = in_interval.minRespLED.rate(ii,kk)./nanmean(in_interval.noRespLEDs.rate{ii,kk});
+            if isnan(in_interval.minRespLED.rate(ii,kk))
+                in_interval.minRespLED.LEDs(ii,kk) = NaN;
+            end
+        else
+            in_interval.minRespLED.rate(ii,kk) = NaN;
+            in_interval.minRespLED.rateBeforePulse(ii,kk) = NaN;   
+            in_interval.minRespLED.rateZ(ii,kk) = NaN;
+            in_interval.minRespLED.rateZBeforePulse(ii,kk) = NaN;   
+            in_interval.minRespLED.ratioBeforeAfter(ii,kk) = NaN;  
+            in_interval.minRespLED.ratioNoResp(ii,kk) = NaN;
+        end
+        
+        %% out
+        out_interval.noRespLEDs.LEDs{ii,kk} = find(out_interval.bootsTrapTest(ii,kk,:) == 0);
+        out_interval.respLEDs.LEDs{ii,kk} = find(out_interval.bootsTrapTest(ii,kk,:) == 1);
+        out_interval.negRespLEDs.LEDs{ii,kk} = find(out_interval.bootsTrapTest(ii,kk,:)== -1);
+        
+        ratio = squeeze(out_interval.rateDuringPulse(ii,kk,:)./out_interval.rateBeforePulse(ii,kk,:));
+        ratio(isinf(ratio)) = NaN;
+        maxRespLED = find(max(ratio)==ratio,1);
+        if length(ratio)==1 % if only 1 light, get everything in maxRespLED
+            maxRespLED = 1;
+        end
+        minRespLED = find(min(ratio)==ratio,1);
+        
+        if out_interval.bootsTrapTest(ii,kk,maxRespLED) == 1
+            out_interval.maxRespLED.LEDs(ii,kk) = maxRespLED;
+        else
+            out_interval.maxRespLED.LEDs(ii,kk) = NaN;
+        end
+        
+        if out_interval.bootsTrapTest(ii,kk,minRespLED) == -1
+            out_interval.minRespLED.LEDs(ii,kk) = minRespLED;
+        else
+            out_interval.minRespLED.LEDs(ii,kk) = NaN;
+        end
+        
+        % noRespLEDs
+        out_interval.noRespLEDs.rate{ii,kk} = out_interval.rateDuringPulse(ii,kk,out_interval.noRespLEDs.LEDs{ii,kk});
+        out_interval.noRespLEDs.rateBeforePulse{ii,kk} = out_interval.rateBeforePulse(ii,kk,out_interval.noRespLEDs.LEDs{ii,kk});
+        out_interval.noRespLEDs.rateZ{ii,kk} = out_interval.rateZDuringPulse(ii,kk,out_interval.noRespLEDs.LEDs{ii,kk});
+        out_interval.noRespLEDs.rateZBeforePulse{ii,kk} = out_interval.rateZBeforePulse(ii,kk,out_interval.noRespLEDs.LEDs{ii,kk});
+        out_interval.noRespLEDs.ratioBeforeAfter{ii,kk} = out_interval.noRespLEDs.rate{ii,kk}./out_interval.noRespLEDs.rateBeforePulse{ii,kk}; 
+        out_interval.noRespLEDs.meanRatio(ii,kk) = mean(out_interval.noRespLEDs.ratioBeforeAfter{ii,kk});
+        out_interval.noRespLEDs.meanRateBeforePulse(ii,kk) = mean(out_interval.noRespLEDs.rateBeforePulse{ii,kk});
+        out_interval.noRespLEDs.meanRateDuringPulse(ii,kk) = mean(out_interval.noRespLEDs.rate{ii,kk});
+        if isnan(out_interval.noRespLEDs.meanRatio(ii,kk)) % if only NaN, remove LEDs
+            out_interval.noRespLEDs.LEDs{ii,kk} = [];
+            out_interval.noRespLEDs.rate{ii,kk} = [];
+            out_interval.noRespLEDs.rateBeforePulse{ii,kk} = [];
+            out_interval.noRespLEDs.rateZ{ii,kk} = [];
+            out_interval.noRespLEDs.rateZBeforePulse{ii,kk} = [];
+            out_interval.noRespLEDs.ratioBeforeAfter{ii,kk} = [];
+        end
+        
+        % negRespLEDs
+        out_interval.negRespLEDs.rate{ii,kk} = out_interval.rateDuringPulse(ii,kk,out_interval.negRespLEDs.LEDs{ii,kk});
+        out_interval.negRespLEDs.rateBeforePulse{ii,kk} = out_interval.rateBeforePulse(ii,kk,out_interval.negRespLEDs.LEDs{ii,kk});  
+        out_interval.negRespLEDs.rateZ{ii,kk} = out_interval.rateZDuringPulse(ii,kk,out_interval.negRespLEDs.LEDs{ii,kk});
+        out_interval.negRespLEDs.rateZBeforePulse{ii,kk} = out_interval.rateZBeforePulse(ii,kk,out_interval.negRespLEDs.LEDs{ii,kk});  
+        out_interval.negRespLEDs.ratioBeforeAfter{ii,kk} = out_interval.negRespLEDs.rate{ii,kk}./out_interval.negRespLEDs.rateBeforePulse{ii,kk};  
+        out_interval.negRespLEDs.meanRatio(ii,kk) = mean(out_interval.negRespLEDs.ratioBeforeAfter{ii,kk});
+        out_interval.negRespLEDs.ratioNoResp(ii,kk) = mean(out_interval.negRespLEDs.rate{ii,kk})./nanmean(out_interval.noRespLEDs.rate{ii,kk});
+        out_interval.negRespLEDs.meanRateBeforePulse(ii,kk) = mean(out_interval.negRespLEDs.rateBeforePulse{ii,kk});
+        out_interval.negRespLEDs.meanRateDuringPulse(ii,kk) = mean(out_interval.negRespLEDs.rate{ii,kk});
+        if isnan(out_interval.negRespLEDs.meanRatio(ii,kk)) % if only NaN, remove LEDs
+            out_interval.negRespLEDs.LEDs{ii,kk} = [];
+            out_interval.negRespLEDs.rate{ii,kk} = [];
+            out_interval.negRespLEDs.rateBeforePulse{ii,kk} = [];
+            out_interval.negRespLEDs.rateZ{ii,kk} = [];
+            out_interval.negRespLEDs.rateZBeforePulse{ii,kk} = [];
+            out_interval.negRespLEDs.ratioBeforeAfter{ii,kk} = [];
+        end
+        
+        % respLEDs
+        out_interval.respLEDs.rate{ii,kk} = out_interval.rateDuringPulse(ii,kk,out_interval.respLEDs.LEDs{ii,kk});
+        out_interval.respLEDs.rateBeforePulse{ii,kk} = out_interval.rateBeforePulse(ii,kk,out_interval.respLEDs.LEDs{ii,kk});  
+        out_interval.respLEDs.rateZ{ii,kk} = out_interval.rateZDuringPulse(ii,kk,out_interval.respLEDs.LEDs{ii,kk});
+        out_interval.respLEDs.rateZBeforePulse{ii,kk} = out_interval.rateZBeforePulse(ii,kk,out_interval.respLEDs.LEDs{ii,kk});  
+        out_interval.respLEDs.ratioBeforeAfter{ii,kk} = out_interval.respLEDs.rate{ii}./out_interval.respLEDs.rateBeforePulse{ii,kk};  
+        out_interval.respLEDs.meanRatio(ii,kk) = mean(out_interval.respLEDs.ratioBeforeAfter{ii,kk});
+        out_interval.respLEDs.ratioNoResp(ii,kk) = nanmean(out_interval.respLEDs.rate{ii,kk})./nanmean(out_interval.noRespLEDs.rate{ii,kk});
+        out_interval.respLEDs.meanRateBeforePulse(ii,kk) = mean(out_interval.respLEDs.rateBeforePulse{ii,kk});
+        out_interval.respLEDs.meanRateDuringPulse(ii,kk) = mean(out_interval.respLEDs.rate{ii,kk});
+        if isnan(out_interval.respLEDs.meanRatio(ii,kk)) % if only NaN, remove LEDs
+            out_interval.respLEDs.LEDs{ii,kk} = [];
+            out_interval.respLEDs.rate{ii,kk} = [];
+            out_interval.respLEDs.rateBeforePulse{ii,kk} = [];
+            out_interval.respLEDs.rateZ{ii,kk} = [];
+            out_interval.respLEDs.rateZBeforePulse{ii,kk} = [];
+            out_interval.respLEDs.ratioBeforeAfter{ii,kk} = [];
+        end
+        
+        % maxRespLED
+        if ~isnan(out_interval.maxRespLED.LEDs(ii,kk))
+            out_interval.maxRespLED.rate(ii,kk) = out_interval.rateDuringPulse(ii,kk,out_interval.maxRespLED.LEDs(ii,kk));
+            out_interval.maxRespLED.rateBeforePulse(ii,kk) = out_interval.rateBeforePulse(ii,kk,out_interval.maxRespLED.LEDs(ii,kk));   
+            out_interval.maxRespLED.rateZ(ii,kk) = out_interval.rateZDuringPulse(ii,kk,out_interval.maxRespLED.LEDs(ii,kk));
+            out_interval.maxRespLED.rateBeforePulse(ii,kk) = out_interval.rateZBeforePulse(ii,kk,out_interval.maxRespLED.LEDs(ii,kk));   
+            out_interval.maxRespLED.ratioBeforeAfter(ii,kk) = out_interval.maxRespLED.rate(ii,kk)./out_interval.maxRespLED.rateBeforePulse(ii,kk); 
+            out_interval.maxRespLED.ratioNoResp(ii,kk) = out_interval.maxRespLED.rate(ii)./nanmean(out_interval.noRespLEDs.rate{ii,kk});
+            if isnan(out_interval.maxRespLED.rate(ii,kk))
+                out_interval.maxRespLED.LEDs(ii,kk) = NaN;
+            end
+        else
+            out_interval.maxRespLED.rate(ii,kk) = NaN;
+            out_interval.maxRespLED.rateBeforePulse(ii,kk) = NaN;
+            out_interval.maxRespLED.rateZ(ii,kk) = NaN;
+            out_interval.maxRespLED.rateZBeforePulse(ii,kk) = NaN;
+            out_interval.maxRespLED.ratioBeforeAfter(ii,kk) = NaN;
+            out_interval.maxRespLED.ratioNoResp(ii,kk) = NaN;
+        end
+        
+        % minRespLED
+        if ~isnan(out_interval.minRespLED.LEDs(ii,kk))
+            out_interval.minRespLED.rate(ii,kk) = out_interval.rateDuringPulse(ii,kk,out_interval.minRespLED.LEDs(ii,kk));
+            out_interval.minRespLED.rateBeforePulse(ii,kk) = out_interval.rateBeforePulse(ii,kk,out_interval.minRespLED.LEDs(ii,kk));   
+            out_interval.minRespLED.rateZ(ii,kk) = out_interval.rateZDuringPulse(ii,kk,out_interval.minRespLED.LEDs(ii,kk));
+            out_interval.minRespLED.rateZBeforePulse(ii,kk) = out_interval.rateZBeforePulse(ii,kk,out_interval.minRespLED.LEDs(ii,kk));   
+            out_interval.minRespLED.ratioBeforeAfter(ii,kk) = out_interval.minRespLED.rate(ii,kk)./out_interval.minRespLED.rateBeforePulse(ii,kk);  
+            out_interval.minRespLED.ratioNoResp(ii,kk) = out_interval.minRespLED.rate(ii,kk)./nanmean(out_interval.noRespLEDs.rate{ii,kk});
+            if isnan(out_interval.minRespLED.rate(ii,kk))
+                out_interval.minRespLED.LEDs(ii,kk) = NaN;
+            end
+        else
+            out_interval.minRespLED.rate(ii,kk) = NaN;
+            out_interval.minRespLED.rateBeforePulse(ii,kk) = NaN;   
+            out_interval.minRespLED.rateZ(ii,kk) = NaN;
+            out_interval.minRespLED.rateZBeforePulse(ii,kk) = NaN;   
+            out_interval.minRespLED.ratioBeforeAfter(ii,kk) = NaN;  
+            out_interval.minRespLED.ratioNoResp(ii,kk) = NaN;
         end
     end
 end
+in_interval.ratioBeforeAfter = in_interval.rateDuringPulse./in_interval.rateBeforePulse;
+out_interval.ratioBeforeAfter = out_interval.rateDuringPulse./out_interval.rateBeforePulse;
+
+% find cells in non-stimulated shanks
+if isfield(spikes,'shankID')
+    spikes.shankID = ones(size(spikes.UID));
+end
+try 
+    uLEDResponses_interval.unisInNonStimulatedShanks = (spikes.shankID == uLEDPulses.nonStimulatedShank);
+catch
+    uLEDResponses_interval.unisInNonStimulatedShanks = [];
+end
+
+% parse non-responsive and responsive cells
+uLEDResponses_interval.drivenCells = [];
+for kk = 1:length(uLEDPulses.conditionDurationID)
+    for ii = 1:length(spikes.UID)
+        % in
+        if any(in_interval.bootsTrapTest(ii,kk,:)==1)
+            in_interval.drivenCells(ii,kk) = true;
+        else
+            in_interval.drivenCells(ii,kk) = false;
+        end
+
+        if any(in_interval.bootsTrapTest(ii,kk,:)==-1)
+            in_interval.inhibitedCells(ii,kk) = true;
+        else
+            in_interval.inhibitedCells(ii,kk) = false;
+        end
+        % out
+        if any(out_interval.bootsTrapTest(ii,kk,:)==1)
+            out_interval.drivenCells(ii,kk) = true;
+        else
+            out_interval.drivenCells(ii,kk) = false;
+        end
+
+        if any(out_interval.bootsTrapTest(ii,kk,:)==-1)
+            out_interval.inhibitedCells(ii,kk) = true;
+        else
+            out_interval.inhibitedCells(ii,kk) = false;
+        end
+
+        % uLEDResponses_interval
+        if any(out_interval.bootsTrapTest(ii,kk,:)==1) || any(in_interval.bootsTrapTest(ii,kk,:)==1)
+            uLEDResponses_interval.drivenCells(ii,kk) = true;
+        else
+            uLEDResponses_interval.drivenCells(ii,kk) = false;
+        end
+
+        if any(out_interval.bootsTrapTest(ii,kk,:)==-1) || any(in_interval.bootsTrapTest(ii,kk,:)==-1)
+            uLEDResponses_interval.inhibitedCells(ii,kk) = true;
+        else
+            uLEDResponses_interval.inhibitedCells(ii,kk) = false;
+        end
+    end
+end
+
+in_interval_raster = in_interval;
+out_interval_raster = out_interval;
+in_interval = rmfield(in_interval,'raster');
+out_interval = rmfield(out_interval,'raster');
+
+uLEDResponses_interval_raster = uLEDResponses_interval;
+uLEDResponses_interval_raster.in_interval = in_interval_raster;
+uLEDResponses_interval_raster.out_interval = out_interval_raster;
+
+uLEDResponses_interval.in_interval = in_interval;
+uLEDResponses_interval.out_interval = out_interval;
+
+disp('Saving...');
+save([basenameFromBasepath(pwd) '.uLEDResponse_interval.cellinfo.mat'],'uLEDResponses_interval');
+save([basenameFromBasepath(pwd) '.uLEDResponse_interval_raster.cellinfo.mat'],'uLEDResponses_interval_raster','-v7.3');
+
+if doPlot
+    statisticDots = linspace(-0.015, -0.005, 4);
+    nLEDS = size(uLEDResponses_interval.in_interval.responsecurve,3);
+    for kk = 1:length(uLEDPulses.conditionDurationID)
+        figure;
+        set(gcf,'Position',[100 -600 2500 1200]);
+        tiledlayout(10,ceil(size(spikes.UID,2)/10),'TileSpacing','tight','Padding','tight');
+        for ii = 1:size(uLEDResponses_interval.bootsTrapCI,1)
+            % subplot(10,ceil(size(spikes.UID,2)/10),ii); %
+            nexttile
+            imagesc(uLEDResponses_interval.in_interval.timestamps, 1:nLEDS, squeeze(uLEDResponses_interval.in_interval.responsecurve(ii,kk,:,:))'); caxis([0 30]); 
+            xlim(winSizePlot); ylim([-0.5 nLEDS+0.5])
+            hold on
+            plot([0 0], [0 nLEDS+2],'w','LineWidth',1.5);
+            plot([uLEDResponses_interval.in_interval.pulseDuration(ii,kk,1) uLEDResponses_interval.in_interval.pulseDuration(ii,kk,1)], [0 nLEDS+2],'color',[.5 .5 .5],'LineWidth',1.5);
+            title(num2str(ii),'FontWeight','normal','FontSize',10);
+            set(gca,'TickDir','out')
+            
+            if ii == 1
+                ylabel('LED [#][s][0-30Hz]');
+            end
+            
+            modulationSignificanceLevel = squeeze(uLEDResponses_interval.in_interval.modulationSignificanceLevel(ii,kk,:));
+            bootsTrapTest = squeeze(uLEDResponses_interval.in_interval.bootsTrapTest(ii,kk,:));
+            for mm = 1:length(modulationSignificanceLevel)
+                if bootsTrapTest(mm,1) == 1
+                    if modulationSignificanceLevel(mm) < 0.05 && modulationSignificanceLevel(mm) > 0.01
+                        plot(statisticDots(1), [mm],'ow', 'MarkerFaceColor','w','MarkerSize',3);
+                    elseif modulationSignificanceLevel(mm) < 0.01 && modulationSignificanceLevel(mm) > 0.001
+                        plot(statisticDots(1:2), [mm mm],'ow', 'MarkerFaceColor','w','MarkerSize',3);
+                    elseif modulationSignificanceLevel(mm) < 0.001 && modulationSignificanceLevel(mm) > 0.0001
+                        plot(statisticDots(1:3), [mm mm mm],'ow', 'MarkerFaceColor','w','MarkerSize',3);
+                    elseif modulationSignificanceLevel(mm) < 0.0001
+                        plot(statisticDots(1:4), [mm mm mm mm],'ow', 'MarkerFaceColor','w','MarkerSize',3);
+                    end
+                end
+            end
+        end
+        mkdir('SummaryFigures');
+        % exportgraphics(gcf,['SummaryFigures\uLEDResponse_rate_condition',num2str(kk),'_dur',num2str(uLEDResponses_interval.in_interval.pulseDuration(ii,kk,1)),'s.png']);
+        
+        figure;
+        set(gcf,'Position',[100 -600 2500 1200]);
+        tiledlayout(10,ceil(size(spikes.UID,2)/10),'TileSpacing','tight','Padding','tight');
+        for ii = 1:size(uLEDResponses_interval.bootsTrapCI,1)
+            % subplot(10,ceil(size(spikes.UID,2)/10),ii); %
+            nexttile
+            imagesc(uLEDResponses_interval.in_interval.timestamps, 1:nLEDS, squeeze(uLEDResponses_interval.in_interval.responsecurveZ(ii,kk,:,:))); caxis([-5 5]); 
+            xlim(winSizePlot); ylim([-0.5 nLEDS+0.5])
+            hold on
+            plot([0 0], [0 nLEDS+2],'w','LineWidth',1.5);
+            plot([uLEDResponses_interval.in_interval.pulseDuration(ii,kk,1) uLEDResponses_interval.in_interval.pulseDuration(ii,kk,1)], [0 nLEDS+2],'color',[.5 .5 .5],'LineWidth',1.5);
+            title(num2str(ii),'FontWeight','normal','FontSize',10);
+            set(gca,'TickDir','out')
+            
+            if ii == 1
+                ylabel('LED [#][s][+-5 s.d.]');
+            end
+            
+            modulationSignificanceLevel = squeeze(uLEDResponses_interval.in_interval.modulationSignificanceLevel(ii,kk,:));
+            bootsTrapTest = squeeze(uLEDResponses_interval.in_interval.bootsTrapTest(ii,kk,:));
+            for mm = 1:length(modulationSignificanceLevel)
+                if bootsTrapTest(mm,1) == 1
+                    if modulationSignificanceLevel(mm) < 0.05 && modulationSignificanceLevel(mm) > 0.01
+                        plot(statisticDots(1), [mm],'ow', 'MarkerFaceColor','w','MarkerSize',3);
+                    elseif modulationSignificanceLevel(mm) < 0.01 && modulationSignificanceLevel(mm) > 0.001
+                        plot(statisticDots(1:2), [mm mm],'ow', 'MarkerFaceColor','w','MarkerSize',3);
+                    elseif modulationSignificanceLevel(mm) < 0.001 && modulationSignificanceLevel(mm) > 0.0001
+                        plot(statisticDots(1:3), [mm mm mm],'ow', 'MarkerFaceColor','w','MarkerSize',3);
+                    elseif modulationSignificanceLevel(mm) < 0.0001
+                        plot(statisticDots(1:4), [mm mm mm mm],'ow', 'MarkerFaceColor','w','MarkerSize',3);
+                    end
+                end
+            end
+        end
+        % exportgraphics(gcf,['SummaryFigures\uLEDResponse_Zscored_condition',num2str(kk),'_dur',num2str(uLEDResponses_interval.in_interval.pulseDuration(ii,kk,1)),'s.png']);
+    end
+
+    % comparison in vs out
+    figure
+    nexttile
+    groupStats({uLEDResponses_interval.in_interval.maxRespLED.rate(uLEDResponses_interval.drivenCells==1),...
+        uLEDResponses_interval.out_interval.maxRespLED.rate(uLEDResponses_interval.drivenCells==1)},[],'plotType','roundPlot','inAxis',true,'Color',[.2 .2 .8; .2 .6 .6]);
+    posData = randn(length(uLEDResponses_interval.in_interval.rateDuringPulse(uLEDResponses_interval.drivenCells==1)),1)/10; 
+    posData((posData)>0.3) = posData((posData)>0.3)/2;
+    posData((posData)<-0.3) = posData((posData)<-0.3)/2;
+    in_interval_rate = uLEDResponses_interval.in_interval.maxRespLED.rate(uLEDResponses_interval.drivenCells==1);
+    out_interval_rate = uLEDResponses_interval.out_interval.maxRespLED.rate(uLEDResponses_interval.drivenCells==1);
+
+    hold on
+    plot(posData+1,uLEDResponses_interval.in_interval.rateDuringPulse(uLEDResponses_interval.drivenCells==1),'o','color',[1 1 1],...
+                       'MarkerFaceColor','k','MarkerEdgeColor','none','MarkerSize',3);
+    plot(posData+2,uLEDResponses_interval.out_interval.rateDuringPulse(uLEDResponses_interval.drivenCells==1),'o','color',[1 1 1],...
+                       'MarkerFaceColor','k','MarkerEdgeColor','none','MarkerSize',3);
+    for ii = 1:length(in_interval_rate)
+        plot([posData(ii)+1 posData(ii)+2], [in_interval_rate(ii) out_interval_rate(ii)],'color',[.5 .5 .5 .5])
+    end
+    ylim([min([in_interval_rate; out_interval_rate]) max([in_interval_rate; out_interval_rate])]);
+    ylabel('Rate (Hz)'); 
+    set(gca,'XTick',[1 2],'XTickLabel',{'In interval', 'Out interval'},'XTickLabelRotation',45)
+    
+    nexttile
+    groupStats({uLEDResponses_interval.in_interval.maxRespLED.rateZ(uLEDResponses_interval.drivenCells==1),...
+        uLEDResponses_interval.out_interval.maxRespLED.rateZ(uLEDResponses_interval.drivenCells==1)},[],'plotType','roundPlot','inAxis',true,'Color',[.2 .2 .8; .2 .6 .6]);
+    posData = randn(length(uLEDResponses_interval.in_interval.maxRespLED.rateZ(uLEDResponses_interval.drivenCells==1)),1)/10; 
+    posData((posData)>0.3) = posData((posData)>0.3)/2;
+    posData((posData)<-0.3) = posData((posData)<-0.3)/2;
+    in_interval_rate = uLEDResponses_interval.in_interval.maxRespLED.rateZ(uLEDResponses_interval.drivenCells==1);
+    out_interval_rate = uLEDResponses_interval.out_interval.maxRespLED.rateZ(uLEDResponses_interval.drivenCells==1);
+
+    hold on
+    plot(posData+1,uLEDResponses_interval.in_interval.maxRespLED.rateZ(uLEDResponses_interval.drivenCells==1),'o','color',[1 1 1],...
+                       'MarkerFaceColor','k','MarkerEdgeColor','none','MarkerSize',3);
+    plot(posData+2,uLEDResponses_interval.out_interval.maxRespLED.rateZ(uLEDResponses_interval.drivenCells==1),'o','color',[1 1 1],...
+                       'MarkerFaceColor','k','MarkerEdgeColor','none','MarkerSize',3);
+    for ii = 1:length(in_interval_rate)
+        plot([posData(ii)+1 posData(ii)+2], [in_interval_rate(ii) out_interval_rate(ii)],'color',[.5 .5 .5 .5])
+    end
+    ylim([min([in_interval_rate; out_interval_rate]) max([in_interval_rate; out_interval_rate])]);
+    ylabel('Rate (Z)'); 
+    set(gca,'XTick',[1 2],'XTickLabel',{'In interval', 'Out interval'},'XTickLabelRotation',45);
+    
+    nexttile
+    hold on
+    histogram(uLEDResponses_interval.out_interval.maxRespLED.rate(uLEDResponses_interval.drivenCells==1));
+    histogram(uLEDResponses_interval.in_interval.maxRespLED.rate(uLEDResponses_interval.drivenCells==1));
+    legend('Out','In');
+    xlabel('Rate (Hz)'); ylabel('#');
+
+    nexttile
+    hold on
+    histogram(uLEDResponses_interval.out_interval.maxRespLED.rateZ(uLEDResponses_interval.drivenCells==1));
+    histogram(uLEDResponses_interval.in_interval.maxRespLED.rateZ(uLEDResponses_interval.drivenCells==1));
+    legend('Out','In');
+    xlabel('Rate (Z)'); ylabel('#');
+
+    nexttile
+    hold on
+    histogram(uLEDResponses_interval.out_interval.maxRespLED.rate(uLEDResponses_interval.drivenCells==1) - uLEDResponses_interval.in_interval.maxRespLED.rate(uLEDResponses_interval.drivenCells==1));
+    xlabel('Out - In (Hz)');  ylabel('#');
+
+    nexttile
+    hold on
+    histogram((uLEDResponses_interval.out_interval.maxRespLED.rate(uLEDResponses_interval.drivenCells==1) - uLEDResponses_interval.in_interval.maxRespLED.rate(uLEDResponses_interval.drivenCells==1))./ ...
+        (uLEDResponses_interval.out_interval.maxRespLED.rate(uLEDResponses_interval.drivenCells==1) + uLEDResponses_interval.in_interval.maxRespLED.rate(uLEDResponses_interval.drivenCells==1)));
+    xlabel('(Out - In)/ (Out + In) (Hz)');  ylabel('#');
+
+    exportgraphics(gcf,['SummaryFigures\uLEDResponse_intervals_comparison',num2str(kk),'_dur',num2str(uLEDResponses_interval.in_interval.pulseDuration(ii,kk,1)),'s.png']);
+
+end
+cd(prevPath);
 
 end
