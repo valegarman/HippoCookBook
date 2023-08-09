@@ -23,6 +23,7 @@ function [corrStats, h]=groupCorr(varX, varY,varargin)
 %    'plotType'     Default 'XYDispersion', '3dHist'
 %    'histBins'     Default 10
 %    'labelOffset'  Default 1
+%    'plotData'     True
 % 
 % OUTPUS
 %    'corrStats'    Structure containing the statistical test results.
@@ -48,6 +49,8 @@ addParameter(p,'plotType','XYDispersion',@ischar);
 addParameter(p,'histBins',10,@isnumeric)
 addParameter(p,'labelOffset',1,@isnumeric)
 addParameter(p,'removeOutliers',false,@islogical)
+addParameter(p,'plotData',true,@islogical)
+
 
 parse(p,varargin{:});
 MarkerColor = p.Results.MarkerColor;
@@ -66,6 +69,7 @@ plotType = p.Results.plotType;
 histBins = p.Results.histBins;
 labelOffset = p.Results.labelOffset;
 removeOutliers = p.Results.removeOutliers;
+plotData = p.Results.plotData;
 
 
 % Dealing with inputs
@@ -112,6 +116,11 @@ pol = polyfit(varX(~isnan(varX+varY)),varY(~isnan(varX+varY)),1);
 corrStats.slope = pol(1);
 corrStats.intercept = pol(2);
 
+expectedY = nan(size(varY));
+expectedY(~isnan(varX+varY)) = polyval(pol,varX(~isnan(varX+varY)));
+corrStats.expected_Y = expectedY;
+corrStats.residuals = varY - expectedY;
+
 if doPrint
     fprintf('    Pearson Correlation Coeficient: %1.4f, p = %1.4e \n', corrStats.Pearson.r, corrStats.Pearson.p);
     fprintf('    Spearman"s Rho: %1.4f, p = %1.4e \n', corrStats.Spearman.r, corrStats.Spearman.p);
@@ -156,8 +165,10 @@ if doPlot
                 p11(find(min(varX)==varX),2) p11(find(min(varX)==varX),1)], BoundsColor,'LineStyle','none', 'FaceAlpha', .1);
         end
         hold on
-        scatter(varX(inBounds==1),varY(inBounds==1),MarkerSize,'filled','MarkerFaceColor',MarkerColor,'MarkerEdgeColor','none','MarkerFaceAlpha',MarkerAlpha);
-        plot(varX(inBounds==0),varY(inBounds==0),'x','MarkerSize',MarkerSize,'MarkerEdgeColor',BoundsColor);
+        if plotData
+            scatter(varX(inBounds==1),varY(inBounds==1),MarkerSize,'filled','MarkerFaceColor',MarkerColor,'MarkerEdgeColor','none','MarkerFaceAlpha',MarkerAlpha);
+            plot(varX(inBounds==0),varY(inBounds==0),'x','MarkerSize',MarkerSize,'MarkerEdgeColor',BoundsColor);
+        end
         plot([min(varX) max(varX)],feval(fitresult,[min(varX) max(varX)]),'color',MarkerColor);
     elseif strcmpi(plotType,'3dhist')
         varNaN = isnan(varX + varY);
