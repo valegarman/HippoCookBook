@@ -1,4 +1,4 @@
-function [averageCCG] = getAverageCCG_temp(varargin)
+function [averageCCG] = getAverageCCG(varargin)
 % [averageCCG] = getAverageCCG(varargin)
 %
 % Computes Psth and a several statistical measures of the cell responses.

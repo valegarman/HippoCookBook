@@ -10,7 +10,7 @@ function [optogeneticResponses] = getOptogeneticResponse(varargin)
 %                       [].
 % spikes            buzcode spikes structure, if not provided tries loadSpikes.
 % basepath          By default pwd.
-% numRep            For boostraping, default, 500. If 0, no boostraping.
+% numRep            For boostraping, default, 500. If 0, no bexpoostraping.
 % binSize           In seconds, default, 0.001.
 % winSize           In seconds, default, 0.5.
 % rasterPlot        Default true.
@@ -202,7 +202,6 @@ for i = 1:length(channels)
 end
 conditions(indxs,:) = [];
 nConditions = size(conditions,1);
-
 
 if nConditions == 2
     if abs(conditions(1,1) - conditions(2,1)) < minDuration

@@ -15,6 +15,9 @@ function uLEDPulses = getuLEDPulses(varargin)
 %   ledLayout            By default, see below
 %   saveMat              Default, true.
 %   force                Default, false;
+%   condition_epochs     Catalog pulses by recording epochs. Input should
+%                           be an array of the same size than the total of epochs 
+%                           (recording folders) 
 %
 % uLED map:
 %  S1               S2               S3               S4
@@ -39,7 +42,8 @@ function uLEDPulses = getuLEDPulses(varargin)
 %  S4L2    11
 %  S4L3    12
 %
-% MV 2020
+% MV 2022
+% MV 2023
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Defaults and Parms
 p = inputParser;
@@ -51,6 +55,8 @@ addParameter(p,'current',[],@isnumeric);
 addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'force',false,@islogical);
 addParameter(p,'duration_round_decimal',3,@isscalar);
+addParameter(p,'minNumberOfPulses',200,@isnumeric);
+addParameter(p,'condition_epochs',[]);
 
 parse(p,varargin{:});
 basepath = p.Results.basepath;
@@ -61,6 +67,8 @@ saveMat = p.Results.saveMat;
 force = p.Results.force;
 current = p.Results.current;
 duration_round_decimal = p.Results.duration_round_decimal;
+minNumberOfPulses = p.Results.minNumberOfPulses;
+condition_epochs = p.Results.condition_epochs;
 
 prevPath = pwd;
 cd(basepath);
@@ -75,6 +83,7 @@ end
 
 if isempty(ledLayout)
     if exist('ledLayout.csv')==2
+        disp('Loading LED layout from local csv...');
         ledLayoutTable = readtable('ledLayout.csv');
         ledLayout.uLEDName =    ledLayoutTable.uLEDName;
         ledLayout.channel =    ledLayoutTable.channel';
@@ -85,6 +94,7 @@ if isempty(ledLayout)
         ledLayout.LED =        ledLayoutTable.LED';
         ledLayout.probe =      ledLayoutTable.probe';
     else
+        disp('using default LED layout...');
         ledLayout.uLEDName =    {'S1L1'; 'S1L2'; 'S1L3'; 'S2L1'; 'S2L2'; 'S2L3'; 'S3L1'; 'S3L2'; 'S3L3'; 'S4L1'; 'S4L2'; 'S4L3'};
         ledLayout.channel =    [5  6  7 8  9  10 11 12 13 14 15 16];
         ledLayout.isAnalog =   [0  0  0  0  0  0  0  0  0  0  0  0];
@@ -105,10 +115,14 @@ if isempty(ledLayout)
 %     ledLayout.code =       [1  2  3  4  5  6  7  8  9 10 11 12];
 %     ledLayout.shank =      [1  1  1  2  2  2  3  3  3  4  4  4];
 %     ledLayout.LED =        [1  2  3  1  2  3  1  2  3  1  2  3];
+%     ledLayout.probe =      [1  1  1  1  1  1  1  1  1  1  1  1];
 end
 
 if isempty(analogPulses) && any(ledLayout.isAnalog)
     analogPulses = getAnalogPulses('analogCh',ledLayout.channel(ledLayout.isAnalog==1));
+    if isfield(analogPulses,'analogChannel') && ~isfield(analogPulses,'analogChannelsList')
+        analogPulses.analogChannelsList = analogPulses.analogChannel;
+    end
 end
 
 if isempty(digitalPulses) && any(ledLayout.isDigital)
@@ -120,27 +134,34 @@ timestamps = []; code = []; shank = []; LED = []; pulsesNumber = []; channel = [
 try
     for ii = 1:length(ledLayout.channel)
         if ledLayout.isAnalog(ii)
-            timestamps = [timestamps; analogPulses.timestamps(analogPulses.analogChannel==ledLayout.channel(ii),:)];
+            timestamps = [timestamps; analogPulses.timestamps(analogPulses.analogChannelsList==ledLayout.channel(ii),:)];
             
-            channel =    [channel   ; ledLayout.channel(ii) * ones(length(find(analogPulses.analogChannel==ledLayout.channel(ii))),1)];
-            isAnalog =   [isAnalog  ; ledLayout.isAnalog(ii) * ones(length(find(analogPulses.analogChannel==ledLayout.channel(ii))),1)];
-            isDigital =  [isDigital ; ledLayout.isDigital(ii) * ones(length(find(analogPulses.analogChannel==ledLayout.channel(ii))),1)];
-            code =       [code      ; ledLayout.code(ii) * ones(length(find(analogPulses.analogChannel==ledLayout.channel(ii))),1)];
-            shank =      [shank     ; ledLayout.shank(ii) * ones(length(find(analogPulses.analogChannel==ledLayout.channel(ii))),1)];
-            LED =        [LED       ; ledLayout.LED(ii) * ones(length(find(analogPulses.analogChannel==ledLayout.channel(ii))),1)];
-            probe =      [probe     ; ledLayout.probe(ii) * ones(length(find(analogPulses.analogChannel==ledLayout.channel(ii))),1)];
-            pulsesNumber(ii) = length(find(analogPulses.analogChannel==ledLayout.channel(ii)));
+            channel =    [channel   ; ledLayout.channel(ii) * ones(length(find(analogPulses.analogChannelsList==ledLayout.channel(ii))),1)];
+            isAnalog =   [isAnalog  ; ledLayout.isAnalog(ii) * ones(length(find(analogPulses.analogChannelsList==ledLayout.channel(ii))),1)];
+            isDigital =  [isDigital ; ledLayout.isDigital(ii) * ones(length(find(analogPulses.analogChannelsList==ledLayout.channel(ii))),1)];
+            code =       [code      ; ledLayout.code(ii) * ones(length(find(analogPulses.analogChannelsList==ledLayout.channel(ii))),1)];
+            shank =      [shank     ; ledLayout.shank(ii) * ones(length(find(analogPulses.analogChannelsList==ledLayout.channel(ii))),1)];
+            LED =        [LED       ; ledLayout.LED(ii) * ones(length(find(analogPulses.analogChannelsList==ledLayout.channel(ii))),1)];
+            probe =      [probe     ; ledLayout.probe(ii) * ones(length(find(analogPulses.analogChannelsList==ledLayout.channel(ii))),1)];
+            pulsesNumber(ii) = length(find(analogPulses.analogChannelsList==ledLayout.channel(ii)));
         elseif ledLayout.isDigital(ii)
-            timestamps = [timestamps; digitalPulses.ints{ledLayout.channel(ii)}];
+            temp_timestamps = digitalPulses.ints{ledLayout.channel(ii)};
+            if size(temp_timestamps,2) ~= 2 && size(temp_timestamps,1) == 2
+                temp_timestamps = temp_timestamps';
+            elseif size(temp_timestamps,2) == 2
+            else
+                error('Digital inputs were not stored correctly! Check getDigitalIn output!');
+            end
+            timestamps = [timestamps; temp_timestamps];
             
-            channel =    [channel   ; ledLayout.channel(ii) * ones(size(digitalPulses.ints{ledLayout.channel(ii)},1),1)];
-            isAnalog =   [isAnalog  ; ledLayout.isAnalog(ii) * ones(size(digitalPulses.ints{ledLayout.channel(ii)},1),1)];
-            isDigital =  [isDigital ; ledLayout.isDigital(ii) * ones(size(digitalPulses.ints{ledLayout.channel(ii)},1),1)];
-            code =       [code      ; ledLayout.code(ii) * ones(size(digitalPulses.ints{ledLayout.channel(ii)},1),1)];
-            shank =      [shank     ; ledLayout.shank(ii) * ones(size(digitalPulses.ints{ledLayout.channel(ii)},1),1)];
-            LED =        [LED       ; ledLayout.LED(ii) * ones(size(digitalPulses.ints{ledLayout.channel(ii)},1),1)];
-            probe =      [probe     ; ledLayout.probe(ii) * ones(size(digitalPulses.ints{ledLayout.channel(ii)},1),1)];
-            pulsesNumber(ii) = size(digitalPulses.ints{ledLayout.channel(ii)},1);
+            channel =    [channel   ; ledLayout.channel(ii) * ones(size(temp_timestamps,1),1)];
+            isAnalog =   [isAnalog  ; ledLayout.isAnalog(ii) * ones(size(temp_timestamps,1),1)];
+            isDigital =  [isDigital ; ledLayout.isDigital(ii) * ones(size(temp_timestamps,1),1)];
+            code =       [code      ; ledLayout.code(ii) * ones(size(temp_timestamps,1),1)];
+            shank =      [shank     ; ledLayout.shank(ii) * ones(size(temp_timestamps,1),1)];
+            LED =        [LED       ; ledLayout.LED(ii) * ones(size(temp_timestamps,1),1)];
+            probe =      [probe     ; ledLayout.probe(ii) * ones(size(temp_timestamps,1),1)];
+            pulsesNumber(ii) = size(temp_timestamps,1);
         end
     end
 catch
@@ -159,18 +180,27 @@ probe = probe(idx);
 
 duration = diff(timestamps')';
 durationRounded = round(duration,duration_round_decimal);
-zeroDurationPulses = find(durationRounded==0);
+% zeroDurationPulses = find(durationRounded==0);
 
-timestamps(zeroDurationPulses,:) = [];
-duration(zeroDurationPulses) = [];
-durationRounded(zeroDurationPulses) = [];
-channel(zeroDurationPulses) = [];
-isAnalog(zeroDurationPulses) = [];
-isDigital(zeroDurationPulses) = [];
-code(zeroDurationPulses) = [];
-shank(zeroDurationPulses) = [];
-LED(zeroDurationPulses) = [];
-probe(zeroDurationPulses) = [];
+[cnt_unique, unique_a] = hist(durationRounded,unique(durationRounded));
+uniqueToDiscard = unique_a(cnt_unique < minNumberOfPulses);
+pulsesToDiscard = zeros(size(duration));
+for ii = 1:length(uniqueToDiscard)
+    pulsesToDiscard(durationRounded == uniqueToDiscard(ii)) = 1;
+end
+pulsesToDiscard(durationRounded==0) = 1;
+pulsesToDiscard = find(pulsesToDiscard);
+
+timestamps(pulsesToDiscard,:) = [];
+duration(pulsesToDiscard) = [];
+durationRounded(pulsesToDiscard) = [];
+channel(pulsesToDiscard) = [];
+isAnalog(pulsesToDiscard) = [];
+isDigital(pulsesToDiscard) = [];
+code(pulsesToDiscard) = [];
+shank(pulsesToDiscard) = [];
+LED(pulsesToDiscard) = [];
+probe(pulsesToDiscard) = [];
 
 %% Generate output
 uLEDPulses.timestamps = timestamps;
@@ -204,12 +234,52 @@ if isempty(uLEDPulses.nonStimulatedShank)
 end
 
 % parse conditions
-uLEDPulses.conditionDuration = unique(round(uLEDPulses.durationRounded,3));
-uLEDPulses.conditionID = ones(size(code));
-for ii = 1:length(uLEDPulses.conditionDuration)
-    uLEDPulses.conditionDurationID(ii) = ii;
-    uLEDPulses.conditionID(uLEDPulses.durationRounded == uLEDPulses.conditionDuration(ii)) = uLEDPulses.conditionID(uLEDPulses.durationRounded == uLEDPulses.conditionDuration(ii)) * ii;
+if isempty(condition_epochs)
+    condition_epochs = ones(size(session.epochs));
 end
+
+uLEDPulses.conditionDuration = unique(uLEDPulses.durationRounded);
+uLEDPulses.condition_epochs_sequence = condition_epochs;
+uLEDPulses.condition_epochs = unique(condition_epochs);
+uLEDPulses.conditionEpochsID = ones(size(uLEDPulses.durationRounded));
+
+if ~isempty(condition_epochs) && length(condition_epochs) ~= length(session.epochs)
+    error('Number of defined epochs does not match with number of real epochs!');
+elseif ~isempty(condition_epochs)
+    for ii = 1:length(condition_epochs)
+        [status] = InIntervals(uLEDPulses.timestamps(:,1),[session.epochs{ii}.startTime session.epochs{ii}.stopTime]);
+        uLEDPulses.conditionEpochsID(status) = uLEDPulses.condition_epochs_sequence(ii);
+    end
+else
+end
+
+uLEDPulses.conditionDurationID = ones(size(code));
+for ii = 1:length(uLEDPulses.conditionDuration)
+    uLEDPulses.conditionDurationID(uLEDPulses.durationRounded == uLEDPulses.conditionDuration(ii)) = ii;
+end
+
+% combine duration and epochs
+conditionID = 1;
+uLEDPulses.conditionID = ones(size(code));
+uLEDPulses.conditions_table = [];
+for ii = 1:length(uLEDPulses.conditionDuration)
+    for jj = 1:length(uLEDPulses.condition_epochs)
+        uLEDPulses.conditionID(uLEDPulses.durationRounded == uLEDPulses.conditionDuration(ii) ...
+            & uLEDPulses.conditionEpochsID == uLEDPulses.condition_epochs(jj)) = conditionID;
+        uLEDPulses.conditions_table = [uLEDPulses.conditions_table; ...
+            uLEDPulses.conditionDuration(ii) uLEDPulses.condition_epochs(jj)];
+        uLEDPulses.list_of_conditions(conditionID) = conditionID;
+        conditionID = conditionID + 1;
+    end
+end
+
+if isempty(uLEDPulses.condition_epochs)
+    uLEDPulses.condition_epochs = NaN;
+    uLEDPulses.condition_epochs_sequence = NaN;
+end
+
+uLEDPulses.list_of_durations = uLEDPulses.conditions_table(:,1)';
+uLEDPulses.list_of_epochs = uLEDPulses.conditions_table(:,2)';
 
 if saveMat
     disp('Saving results...');

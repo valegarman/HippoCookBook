@@ -30,7 +30,8 @@ function [uLEDResponses] = getuLEDResponse(varargin)
 % Manu Valero 2022
 % Includes Stimulus-associated spike latency test (SALT) for positive
 % responses
-
+% TO DO: remove the for loop that goes over the cell to increase
+% performance, as in getuLEDresponses_intervals!!!
 % Parse options
 p = inputParser;
 addParameter(p,'uLEDPulses',NaN);
@@ -45,13 +46,14 @@ addParameter(p,'onset',0,@isnumeric);
 addParameter(p,'winSizePlot',[-.02 .05],@islogical);
 addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'force',false,@islogical);
-addParameter(p,'minNumberOfPulses',200,@isnumeric);
-addParameter(p,'duration_round_decimal',3,@isscalar);
+addParameter(p,'minNumberOfPulses',2000,@isnumeric);
 addParameter(p,'bootsTrapCI',[0.001 0.999],@isnumeric);
 addParameter(p,'salt_baseline',[-0.25 -0.001],@isscalar);
 addParameter(p,'salt_time',[-0.250 0.250],@isscalar);
 addParameter(p,'salt_win',[0.005],@isscalar);
 addParameter(p,'salt_binSize',[0.001],@isscalar);
+addParameter(p,'getRaster',false,@islogical);
+
 
 parse(p, varargin{:});
 uLEDPulses = p.Results.uLEDPulses;
@@ -67,12 +69,12 @@ winSizePlot = p.Results.winSizePlot;
 saveMat = p.Results.saveMat;
 force = p.Results.force;
 minNumberOfPulses = p.Results.minNumberOfPulses;
-duration_round_decimal = p.Results.duration_round_decimal;
 salt_baseline = p.Results.salt_baseline;
 salt_time = p.Results.salt_time;
 salt_win = p.Results.salt_win;
 salt_binSize = p.Results.salt_binSize;
 bootsTrapCI = p.Results.bootsTrapCI;
+getRaster = p.Results.getRaster;
 
 % Deal with inputs
 prevPath = pwd;
@@ -85,7 +87,7 @@ if ~isempty(targetFile) && ~force
     return
 end
 
-if isnan(uLEDPulses)
+if ~isstruct(uLEDPulses) && (isnan(uLEDPulses) || isempty(uLEDPulses))
     uLEDPulses = getuLEDPulses;
 end
 
@@ -98,83 +100,131 @@ uLEDResponses = [];
 codes = 1:max(uLEDPulses.code);
 timestamps_recording = min(uLEDPulses.timestamps(:,2)):1/1250:max(uLEDPulses.timestamps(:,2));
 
-if length(uLEDPulses.conditionDurationID)>length(onset) && length(onset)==1
-    onset(1:length(uLEDPulses.conditionDurationID)) = onset(1);
+if length(uLEDPulses.list_of_durations)>length(onset) && length(onset)==1
+    onset(1:length(uLEDPulses.list_of_durations)) = onset(1);
 end
-if length(uLEDPulses.conditionDurationID)>length(offset) && length(offset)==1
-    offset(1:length(uLEDPulses.conditionDurationID)) = offset(1);
+if length(uLEDPulses.list_of_durations)>length(offset) && length(offset)==1
+    offset(1:length(uLEDPulses.list_of_durations)) = offset(1);
 end
 
-for kk = 1:length(uLEDPulses.conditionDurationID)
-    fprintf('> Condition %3.i/ %3.i \n',kk, length(uLEDPulses.conditionDurationID)); %
+if ~isfield(uLEDPulses,'condition_epochs')
+    uLEDPulses.condition_epochs = NaN;
+end
+
+if ~isfield(uLEDPulses,'conditionID')
+    uLEDPulses.condition_epochs = NaN;
+end
+
+if ~isfield(uLEDPulses,'list_of_conditions')
+    uLEDPulses.list_of_conditions = unique(uLEDPulses.conditionDurationID);
+end
+
+for kk = 1:length(uLEDPulses.list_of_conditions)
+    fprintf('\n> Condition %3.i/ %3.i \n',kk, length(uLEDPulses.list_of_conditions)); %
     
-    pulseDuration = uLEDPulses.conditionDuration(kk);
     % generate random events for boostraping
-    nPulses = int32(length(find(uLEDPulses.conditionID == uLEDPulses.conditionDurationID(kk)))/...
-            length(unique(uLEDPulses.code(uLEDPulses.conditionID == uLEDPulses.conditionDurationID(kk)))));
+    nPulses = int32(length(find(uLEDPulses.conditionID == uLEDPulses.list_of_conditions(kk)))/...
+            length(unique(uLEDPulses.code(uLEDPulses.conditionID == uLEDPulses.list_of_conditions(kk)))));
     randomEvents = [];
     disp('Generating boostrap template...');
     for mm = 1:numRep
         randomEvents{mm} = sort(randsample(timestamps_recording, nPulses))';
     end
-    % loop for spike response
-    disp('Computing cell responses... ');
-    for ii = 1:length(spikes.UID)
-        fprintf(' **Pulses from unit %3.i/ %3.i \n',ii, size(spikes.UID,2)); %
-        [stccg, t] = CCG([spikes.times{ii} randomEvents],[],'binSize',binSize,'duration',winSize,'norm','rate');
+    pulseDuration = uLEDPulses.list_of_durations(kk);
+    epoch = uLEDPulses.list_of_epochs(kk);
+    condition = uLEDPulses.list_of_conditions(kk);
+    
+    [stccg, t] = CCG([spikes.times randomEvents],[],'binSize',binSize,'duration',winSize,'norm','rate');
+    fprintf('\n'); %
+    t_duringPulse = t > 0 + onset(kk) & t < pulseDuration + offset(kk); 
+    randomRatesDuringPulse = squeeze(mean(stccg(t_duringPulse, length(spikes.UID)+1:end,1:length(spikes.UID)),1));
+    uLEDResponses.bootsTrapRate(:,kk) = mean(randomRatesDuringPulse,1);
+    uLEDResponses.bootsTrapRateStd(:,kk) = std(randomRatesDuringPulse,[],1);
+    uLEDResponses.bootsTrapRateSEM(:,kk) = std(randomRatesDuringPulse,[],1)/sqrt(numRep);
+    if ~isempty(randomRatesDuringPulse)
+        for jj = 1:size(randomRatesDuringPulse,2)
+            pd = fitdist(randomRatesDuringPulse(:,jj),'normal');
+            uLEDResponses.bootsTrapCI(jj,kk,1:2) = pd.icdf(bootsTrapCI);
+        end
+    else
+        uLEDResponses.bootsTrapCI(1:size(randomRatesDuringPulse,2),kk,1:2) = NaN;
+    end
+    for jj = 1:length(codes)
+        fprintf('\n **Pulse %3.i/%3.i',jj,length(codes)); %
+        pulses = uLEDPulses.timestamps(uLEDPulses.code == codes(jj)...
+            & uLEDPulses.conditionID==uLEDPulses.list_of_conditions(kk),1);
+        if isempty(pulses)
+            pulses = [0];
+        end
+        times = spikes.times; times{length(times)+1} = pulses;
+        [stccg, t] = CCG(times,[],'binSize',binSize,'duration',winSize,'norm','rate');
+        uLEDResponses.responsecurve(:,kk,jj,:) = squeeze(stccg(:, end , 1:end-1))';
+        if length(times{end}) < minNumberOfPulses
+            uLEDResponses.responsecurve(:,kk,jj,:) = uLEDResponses.responsecurve(:,kk,jj,:) * NaN;
+        end
         t_duringPulse = t > 0 + onset(kk) & t < pulseDuration + offset(kk); 
-        randomRatesDuringPulse = mean(stccg(t_duringPulse,2:size(randomEvents,2)+1,1),1);
-        uLEDResponses.bootsTrapRate(ii,kk) = mean(randomRatesDuringPulse);
-        uLEDResponses.bootsTrapRateStd(ii,kk) = std(randomRatesDuringPulse);
-        pd = fitdist(randomRatesDuringPulse','normal');
-        uLEDResponses.bootsTrapCI(ii,kk,:) = pd.icdf(bootsTrapCI);
-        for jj = 1:length(codes)
-            pulses = uLEDPulses.timestamps(uLEDPulses.code == codes(jj) & uLEDPulses.conditionID==kk,:);
-            if length(pulses) > minNumberOfPulses
-                [stccg, t] = CCG({spikes.times{ii}, pulses(:,1)},[],'binSize',binSize,'duration',winSize,'norm','rate');
-                uLEDResponses.responsecurve(ii,kk,jj,:) = stccg(:,2,1);
-                uLEDResponses.responsecurveSmooth(ii,kk,jj,:) = smooth(stccg(:,2,1));
-                t_duringPulse = t > 0 + onset(kk) & t < pulseDuration + offset(kk); 
-                t_beforePulse = t > -pulseDuration & t < 0; 
-
-                uLEDResponses.responsecurveZ(ii,kk,jj,:) = (stccg(:,2,1) - mean(stccg(t < 0,2,1)))/std(stccg(t < 0,2,1));
-                uLEDResponses.responsecurveZSmooth(ii,kk,jj,:) = smooth(stccg(:,2,1) - mean(stccg(t < 0,2,1)))/std(stccg(t < 0,2,1));
-                uLEDResponses.rateDuringPulse(ii,kk,jj,1) = mean(stccg(t_duringPulse,2,1));
-                uLEDResponses.rateBeforePulse(ii,kk,jj,1) = mean(stccg(t_beforePulse,2,1));
-                uLEDResponses.rateZDuringPulse(ii,kk,jj,1) = mean(squeeze(uLEDResponses.responsecurveZ(ii,kk,jj,t_duringPulse)));
-                uLEDResponses.rateZBeforePulse(ii,kk,jj,1) = mean(squeeze(uLEDResponses.responsecurveZ(ii,kk,jj,t_beforePulse)));
+        t_beforePulse = t > -pulseDuration & t < 0; 
+        
+        numberOfPulses = size(pulses,1);
+        for ii = 1:size(uLEDResponses.responsecurve,1)
+            if numberOfPulses > minNumberOfPulses
+                uLEDResponses.responsecurveSmooth(ii,kk,jj,:) = smooth(uLEDResponses.responsecurve(ii,kk,jj,:));
+                uLEDResponses.responsecurveZ(ii,kk,jj,:) = (uLEDResponses.responsecurve(ii,kk,jj,:)...
+                    - mean(uLEDResponses.responsecurve(ii,kk,jj,t < 0)))...
+                    /std(uLEDResponses.responsecurve(ii,kk,jj,t < 0));
+                uLEDResponses.responsecurveZSmooth(ii,kk,jj,:) = smooth(uLEDResponses.responsecurveZ(ii,kk,jj,:));
+                uLEDResponses.rateDuringPulse(ii,kk,jj,1) = mean(uLEDResponses.responsecurve(ii,kk,jj,t_duringPulse));
+                uLEDResponses.rateBeforePulse(ii,kk,jj,1) = mean(uLEDResponses.responsecurve(ii,kk,jj,t_beforePulse));
+                uLEDResponses.rateZDuringPulse(ii,kk,jj,1) = mean(uLEDResponses.responsecurveZ(ii,kk,jj,t_duringPulse));
+                uLEDResponses.rateZBeforePulse(ii,kk,jj,1) = mean(uLEDResponses.responsecurveZ(ii,kk,jj,t_beforePulse));
                 uLEDResponses.codes(ii,kk,jj,1) = codes(jj);
-                [h, uLEDResponses.modulationSignificanceLevel(ii,kk,jj,1)] = kstest2(stccg(t_duringPulse,2,1),stccg(t_beforePulse,2,1));
-
+                uLEDResponses.pulseDuration(ii,kk,jj,1) = pulseDuration;
+                uLEDResponses.epoch(ii,kk,jj,1) = epoch;
+                uLEDResponses.condition(ii,kk,jj,1) = condition;
+                % modulation significance test
+                try 
+                    [h, uLEDResponses.modulationSignificanceLevel(ii,kk,jj,1)] = ...
+                        kstest2(squeeze(uLEDResponses.responsecurve(ii,kk,jj,t_duringPulse))...
+                        ,squeeze(uLEDResponses.responsecurve(ii,kk,jj,t_beforePulse)));
+                catch
+                    uLEDResponses.modulationSignificanceLevel(ii,kk,jj,1) = NaN;
+                end
+                
                 % Boostrap test
                 ci = squeeze(uLEDResponses.bootsTrapCI(ii,kk,:));
                 if uLEDResponses.rateDuringPulse(ii,kk,jj,1) > ci(2)
                     test = 1;
                 elseif uLEDResponses.rateDuringPulse(ii,kk,jj,1) < ci(1)
                     test = -1;
+                elseif isnan(uLEDResponses.rateDuringPulse(ii,kk,jj,1))
+                    test = NaN;
                 else
                     test = 0;
                 end
                 uLEDResponses.bootsTrapTest(ii,kk,jj,1) = test;
-
+                
                 % z-score change test
-                if mean(uLEDResponses.responsecurveZ(ii,kk,jj,t_duringPulse)) > 1.96
-                    test = 1;
-                elseif mean(uLEDResponses.responsecurveZ(ii,kk,jj,t_duringPulse)) < -1.96
+                if uLEDResponses.rateZDuringPulse(ii,kk,jj,1)  > 1.96
+                        test = 1;
+                elseif uLEDResponses.rateZDuringPulse(ii,kk,jj,1)  < -1.96
                     test = -1;
+                elseif isnan(uLEDResponses.rateZDuringPulse(ii,kk,jj,1))
+                    test = NaN;
                 else
                     test = 0;
                 end
                 uLEDResponses.zscoreTest(ii,kk,jj,1) = test;
-
+                
                 % Generating raster
                 rasterX = [];
                 rasterY = [];
-                for zz = 1:size(pulses,1)
-                    temp_spk = spikes.times{ii}(find(spikes.times{ii} - pulses(zz,1)  > salt_time(1) & spikes.times{ii} - pulses(zz,1)  < salt_time(2))) - pulses(zz,1);
-                    rasterX = [rasterX; temp_spk];
-                    if ~isempty(temp_spk)
-                        rasterY = [rasterY; zz * ones(size((temp_spk)))];
+                if getRaster
+                    for zz = 1:size(pulses,1)
+                        temp_spk = spikes.times{ii}(find(spikes.times{ii} - pulses(zz,1)  > salt_time(1) & spikes.times{ii} - pulses(zz,1)  < salt_time(2))) - pulses(zz,1);
+                        rasterX = [rasterX; temp_spk];
+                        if ~isempty(temp_spk)
+                            rasterY = [rasterY; zz * ones(size((temp_spk)))];
+                        end
                     end
                 end
                 if ~isempty(rasterX)
@@ -185,7 +235,7 @@ for kk = 1:length(uLEDPulses.conditionDurationID)
                     uLEDResponses.raster.times{ii,kk,jj} = c{2};
                     uLEDResponses.raster.rasterTrials{ii,kk,jj} = rasterY;
                     uLEDResponses.raster.rasterSpikesTimes{ii,kk,jj} = rasterX;
-
+    
                     time = c{2};
                     baseidx = dsearchn(time', salt_baseline');
                     tidx = dsearchn(time', [0; pulseDuration*2]);    
@@ -206,7 +256,7 @@ for kk = 1:length(uLEDPulses.conditionDurationID)
                     uLEDResponses.salt.p_value(ii,kk,jj,1) = NaN;
                     uLEDResponses.salt.I_statistics(ii,kk,jj,1) = NaN;
                 end
-                % multiple test test. If not boostrap, it would be 2 ways.
+                            % multiple test test. If not boostrap, it would be 2 ways.
                 if (uLEDResponses.rateDuringPulse(ii,kk,jj,1) > ci(2) || isnan(ci(2))) && uLEDResponses.modulationSignificanceLevel(ii,kk,jj,1)<0.01...
                         && mean(uLEDResponses.responsecurveZ(ii,kk,jj,t_duringPulse)) > 1.96
                     test = 1;
@@ -218,16 +268,16 @@ for kk = 1:length(uLEDPulses.conditionDurationID)
                 end
                 uLEDResponses.threeWaysTest(ii,kk,jj,1) = test;
                 uLEDResponses.threeWaysTest_and_salt(ii,kk,jj,1) = int32(test && uLEDResponses.salt.p_value(ii,kk,jj,1)<0.05);
-
+    
                 multipleTest = double([uLEDResponses.rateDuringPulse(ii,kk,jj,1) > ci(2) || isnan(ci(2)) uLEDResponses.modulationSignificanceLevel(ii,kk,jj,1)<0.01...
                     mean(uLEDResponses.responsecurveZ(ii,kk,jj,t_duringPulse)) > 1.96 uLEDResponses.salt.p_value(ii,kk,jj,1)<0.05]);
                 multipleTest_sign = -double([uLEDResponses.rateDuringPulse(ii,kk,jj,1) < ci(2) || isnan(ci(2)) uLEDResponses.modulationSignificanceLevel(ii,kk,jj,1)<0.01...
                     mean(uLEDResponses.responsecurveZ(ii,kk,jj,t_duringPulse)) < -1.96 uLEDResponses.salt.p_value(ii,kk,jj,1)<0.05]);
-
+    
                 if any(multipleTest_sign([1 3])==-1)
                     multipleTest([1 3]) = multipleTest_sign([1 3]);
                 end
-
+    
                 multipleTest_string = [];
                 for zz = 1:length(multipleTest)
                     switch multipleTest(zz)
@@ -241,9 +291,9 @@ for kk = 1:length(uLEDPulses.conditionDurationID)
                 end
                 uLEDResponses.multipleTest(ii,kk,jj,:) = multipleTest;
                 uLEDResponses.multipleTest_string{ii,kk,jj} = multipleTest_string;
-                
+                    
                 uLEDResponses.numberOfPulses(ii,kk,jj,1) = size(pulses,1);
-                uLEDResponses.pulseDuration(ii,kk,jj,1) = uLEDPulses.conditionDuration(kk);
+                uLEDResponses.pulseDuration(ii,kk,jj,1) = pulseDuration;
             else
                 uLEDResponses.responsecurve(ii,kk,jj,:) = nan(winSize/binSize + 1,1);
                 uLEDResponses.responsecurveSmooth(ii,kk,jj,:) = nan(winSize/binSize + 1,1);
@@ -277,14 +327,21 @@ for kk = 1:length(uLEDPulses.conditionDurationID)
                 
                 uLEDResponses.numberOfPulses(ii,kk,jj,1) = NaN;
                 uLEDResponses.pulseDuration(ii,kk,jj,1) =NaN;
+                uLEDResponses.epoch(ii,kk,jj,1) = NaN;
+                uLEDResponses.condition(ii,kk,jj,1) = NaN;
             end
         end
-        uLEDResponses.timestamps = t;
     end
+    uLEDResponses.timestamps = t;
+    uLEDResponses.list_of_conditions = uLEDPulses.list_of_conditions;
+    uLEDResponses.list_of_durations = uLEDPulses.list_of_durations;
+    uLEDResponses.list_of_epochs = uLEDPulses.list_of_epochs;
+    uLEDResponses.conditions_table = uLEDPulses.conditions_table;
 end
+fprintf('\n'); %
 
 % parse cell responses
-for kk = 1:length(uLEDPulses.conditionDurationID)
+for kk = 1:length(uLEDPulses.list_of_conditions)
     for ii = 1:length(spikes.UID)
         uLEDResponses.noRespLEDs.LEDs{ii,kk} = find(uLEDResponses.bootsTrapTest(ii,kk,:) == 0);
         uLEDResponses.respLEDs.LEDs{ii,kk} = find(uLEDResponses.bootsTrapTest(ii,kk,:) == 1);
@@ -338,7 +395,7 @@ for kk = 1:length(uLEDPulses.conditionDurationID)
         % respLEDs
         uLEDResponses.respLEDs.values{ii,kk} = uLEDResponses.rateDuringPulse(ii,kk,uLEDResponses.respLEDs.LEDs{ii,kk});
         uLEDResponses.respLEDs.valuesBeforePulse{ii,kk} = uLEDResponses.rateBeforePulse(ii,kk,uLEDResponses.respLEDs.LEDs{ii,kk});  
-        uLEDResponses.respLEDs.ratioBeforeAfter{ii,kk} = uLEDResponses.respLEDs.values{ii}./uLEDResponses.respLEDs.valuesBeforePulse{ii,kk};  
+        uLEDResponses.respLEDs.ratioBeforeAfter{ii,kk} = uLEDResponses.respLEDs.values{ii,kk}./uLEDResponses.respLEDs.valuesBeforePulse{ii,kk};  
         uLEDResponses.respLEDs.meanRatio(ii,kk) = mean(uLEDResponses.respLEDs.ratioBeforeAfter{ii,kk});
         uLEDResponses.respLEDs.ratioNoResp(ii,kk) = nanmean(uLEDResponses.respLEDs.values{ii,kk})./nanmean(uLEDResponses.noRespLEDs.values{ii,kk});
         uLEDResponses.respLEDs.meanRateBeforePulse(ii,kk) = mean(uLEDResponses.respLEDs.valuesBeforePulse{ii,kk});
@@ -391,7 +448,7 @@ uLEDResponses.unisInNonStimulatedShanks = (spikes.shankID == uLEDPulses.nonStimu
 
 % parse non-responsive and responsive cells, only in group 1 (no manipulated)
 uLEDResponses.drivenCells = [];
-for kk = 1:length(uLEDPulses.conditionDurationID)
+for kk = 1:length(uLEDPulses.list_of_conditions)
     for ii = 1:length(spikes.UID)
         if any(uLEDResponses.bootsTrapTest(ii,kk,:)==1)
             uLEDResponses.drivenCells(ii,kk) = 1;
@@ -409,14 +466,16 @@ end
 
 uLEDResponses_raster = uLEDResponses;
 uLEDResponses = rmfield(uLEDResponses,'raster');
-disp('Saving...');
-save([basenameFromBasepath(pwd) '.uLEDResponse.cellinfo.mat'],'uLEDResponses');
-save([basenameFromBasepath(pwd) '.uLEDResponse_raster.cellinfo.mat'],'uLEDResponses_raster','-v7.3');
+if saveMat
+    disp('Saving...');
+    save([basenameFromBasepath(pwd) '.uLEDResponse.cellinfo.mat'],'uLEDResponses');
+    save([basenameFromBasepath(pwd) '.uLEDResponse_raster.cellinfo.mat'],'uLEDResponses_raster','-v7.3');
+end
 
 if doPlot
     statisticDots = linspace(-0.015, -0.005, 4);
     nLEDS = size(uLEDResponses.responsecurve,3);
-    for kk = 1:length(uLEDPulses.conditionDurationID)
+    for kk = 1:length(uLEDPulses.list_of_conditions)
         figure;
         set(gcf,'Position',[100 -600 2500 1200]);
         tiledlayout(10,ceil(size(spikes.UID,2)/10),'TileSpacing','tight','Padding','tight');
@@ -429,7 +488,7 @@ if doPlot
             plot([0 0], [0 nLEDS+2],'w','LineWidth',1.5);
             plot([uLEDResponses.pulseDuration(ii,kk,1) uLEDResponses.pulseDuration(ii,kk,1)], [0 nLEDS+2],'color',[.5 .5 .5],'LineWidth',1.5);
             title(num2str(ii),'FontWeight','normal','FontSize',10);
-            set(gca,'TickDir','out')
+            set(gca,'TickDir','out');
             
             if ii == 1
                 ylabel('LED [#][s][0-30Hz]');
@@ -451,6 +510,7 @@ if doPlot
                 end
             end
         end
+        colormap(jet);
         exportgraphics(gcf,['SummaryFigures\uLEDResponse_rate_condition',num2str(kk),'_dur',num2str(uLEDResponses.pulseDuration(ii,kk,1)),'s.png']);
         
         figure;
@@ -487,6 +547,7 @@ if doPlot
                 end
             end
         end
+        colormap(jet);
         exportgraphics(gcf,['SummaryFigures\uLEDResponse_Zscored_condition',num2str(kk),'_dur',num2str(uLEDResponses.pulseDuration(ii,kk,1)),'s.png']);
     end
 end
