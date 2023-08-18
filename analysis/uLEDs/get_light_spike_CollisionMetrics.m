@@ -250,7 +250,23 @@ collision_metrics.rateZ_ligh_spike_collision = uLEDResponses_InInterval.maxZPuls
 collision_metrics.uLEDResponses_OutInterval  = uLEDResponses_OutInterval;
 collision_metrics.uLEDResponses_InInterval   = uLEDResponses_InInterval;
 
-% 
+% select pairs
+figure
+nexttile
+groupCorr(collision_metrics.rate_only_light(prePyr_select),collision_metrics.rate_difference(prePyr_select),...
+        'inAxis',true,'MarkerColor',color_pyr,'labelOffset',2);
+groupCorr(collision_metrics.rate_only_light(preInt_select),collision_metrics.rate_difference(preInt_select),...
+        'inAxis',true,'MarkerColor',color_int,'labelOffset',2);
+ylabel('Rate difference (Hz)'); xlabel('Rate during light (Hz)');
+
+nexttile
+groupCorr(collision_metrics.rateZ_only_light(prePyr_select),collision_metrics.rateZ_difference(prePyr_select),...
+        'inAxis',true,'MarkerColor',color_pyr,'labelOffset',2);
+groupCorr(collision_metrics.rateZ_only_light(preInt_select),collision_metrics.rateZ_difference(preInt_select),...
+        'inAxis',true,'MarkerColor',color_int,'labelOffset',2);
+ylabel('Rate difference (Std)'); xlabel('Rate during light (Std)');
+
+collision_metrics.rate_difference
 
 if saveMat
     disp(' Saving results...');
@@ -280,7 +296,7 @@ if doPlot
     title(strcat('Spike light collision ',{' '}, label));
     
     nexttile
-    groupCorr(collision_metrics.rate_difference(prePyr_select), collision_metrics.rateZ_only_light(prePyr_select),...
+    groupCorr(collision_metrics.rate_difference(prePyr_select), collision_metrics.rate_only_light(prePyr_select),...
         'inAxis',true,'MarkerColor',color_pyr);
     groupCorr(collision_metrics.rate_difference(preInt_select), collision_metrics.rate_only_light(preInt_select),...
         'inAxis',true,'MarkerColor',color_int,'labelOffset',2);
@@ -324,7 +340,9 @@ if doPlot
     saveas(gcf,strcat('SummaryFigures\Light_spike_Collision_',label,'.png'));
 
     % visualize pairs
-    keyboard;
+    
+    
+
     
 end
 

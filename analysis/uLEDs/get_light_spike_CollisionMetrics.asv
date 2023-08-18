@@ -214,6 +214,9 @@ collision_metrics.candidate_int_pyr_pairs = collision_metrics.is_pre_interneuron
 collision_metrics.candidate_pyr_pyr_pairs = collision_metrics.is_pre_interneuron==0 & ...
         collision_metrics.is_lightResponsive & collision_metrics.is_rate_before_similar_factor & ...
         collision_metrics.is_post_pyramidalCell & not_same_cell;
+preInt_select = collision_metrics.candidate_int_pyr_pairs;
+collision_metrics.putative_int_pyr_pairs = ...
+    collision_metrics.rate_difference(preInt_select) > rate_change_threshold;
 
 pre_post_CCG = [];
 pre_waveforms = [];
@@ -251,7 +254,8 @@ collision_metrics.uLEDResponses_OutInterval  = uLEDResponses_OutInterval;
 collision_metrics.uLEDResponses_InInterval   = uLEDResponses_InInterval;
 
 % select pairs
-
+prePyr_select = collision_metrics.candidate_pyr_pyr_pairs;
+preInt_select = collision_metrics.candidate_int_pyr_pairs;
 
 if saveMat
     disp(' Saving results...');
@@ -281,7 +285,7 @@ if doPlot
     title(strcat('Spike light collision ',{' '}, label));
     
     nexttile
-    groupCorr(collision_metrics.rate_difference(prePyr_select), collision_metrics.rateZ_only_light(prePyr_select),...
+    groupCorr(collision_metrics.rate_difference(prePyr_select), collision_metrics.rate_only_light(prePyr_select),...
         'inAxis',true,'MarkerColor',color_pyr);
     groupCorr(collision_metrics.rate_difference(preInt_select), collision_metrics.rate_only_light(preInt_select),...
         'inAxis',true,'MarkerColor',color_int,'labelOffset',2);
@@ -325,7 +329,23 @@ if doPlot
     saveas(gcf,strcat('SummaryFigures\Light_spike_Collision_',label,'.png'));
 
     % visualize pairs
-   
+    figure
+    subplot(1,3,[2 3]);
+    groupCorr(collision_metrics.rate_only_light(preInt_select),collision_metrics.rate_difference(preInt_select),...
+            'inAxis',true,'MarkerColor',color_int,'MarkerSize',15);
+    xlabel('Rate during light (Hz)');
+    ax = axis;
+    plot(ax(1:2), [rate_change_threshold rate_change_threshold], '-r');
+    ylim([-5 15]);
+    subplot(1,3,[1]);
+    hold on
+    [counts, edges] = histcounts(collision_metrics.rate_difference(preInt_select),[-5:.5:15]);
+    bins = edges(1:end-1)+ diff(edges(1:2))/2;
+    barh(bins, counts,'FaceColor',color_int,'EdgeColor','none','BarWidth',1);
+    ax = axis;
+    plot(ax(1:2), [rate_change_threshold rate_change_threshold], '-r');
+    ylim([-5 15]); ylabel('Rate difference [Hz]');
+    
 
     
 end

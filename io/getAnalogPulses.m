@@ -28,6 +28,7 @@ function [pulses] = getAnalogPulses(varargin)
 % eventID       Numeric ID for classifying various event types (C X 1)
 % eventIDlabels label for classifying various event types defined in eventID (cell array C X 1)  
 % intsPeriods   Stimulation periods, as defined by perioLag
+% autodetect    Default, true
 %
 % Manu-BuzsakiLab 2018, 2022
 
@@ -42,6 +43,7 @@ addParameter(p,'groupPulses',false,@islogical);
 addParameter(p,'basepath',pwd,@ischar);
 addParameter(p,'useGPU',true,@islogical);
 addParameter(p,'overwrite',false,@islogical);
+addParameter(p,'autodetect',false,@islogical);
 
 parse(p, varargin{:});
 offset = p.Results.offset;
@@ -53,6 +55,7 @@ groupPulses = p.Results.groupPulses;
 basepath = p.Results.basepath;
 useGPU = p.Results.useGPU;
 overwrite = p.Results.overwrite;
+autodetect = p.Results.autodetect;
 
 prevPath = pwd;
 cd(basepath);
@@ -73,6 +76,11 @@ if exist([filetarget '.pulses.events.mat'],'file')
         end
         return
     end
+end
+
+if autodetect && isempty(analogChannelsList)
+    pulses = [];
+    return
 end
 
 analogFile = []; IntanBuzEd = [];
