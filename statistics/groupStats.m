@@ -552,7 +552,7 @@ if doPlot
             view([90 90]); 
         end
     
-    elseif strcmpi(plotType,'onyData')
+    elseif strcmpi(plotType,'onlyData')
         
         hold on
         % plot([.5 max(pos)+.5],[0 0],'color',[.7 .7 .7]);

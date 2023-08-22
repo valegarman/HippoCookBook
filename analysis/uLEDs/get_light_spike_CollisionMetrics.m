@@ -18,6 +18,7 @@ addParameter(p,'saveMat',true,@islogical); %
 addParameter(p,'rate_change_threshold',5,@isnumeric); % 
 addParameter(p,'spikes',[],@isstruct); % 
 addParameter(p,'interpolate_pulse_sides',true,@islogical); % 
+addParameter(p,'update_cell_metrics',true,@islogical); % 
 
 parse(p, uLEDResponses_interval, varargin{:});
 basepath = p.Results.basepath;
@@ -31,6 +32,7 @@ saveMat = p.Results.saveMat;
 rate_change_threshold = p.Results.rate_change_threshold;
 spikes = p.Results.spikes;
 interpolate_pulse_sides = p.Results.interpolate_pulse_sides;
+update_cell_metrics = p.Results.update_cell_metrics;
 
 % Deal with inputs
 prevPath = pwd;
@@ -246,27 +248,20 @@ collision_metrics.rateZ_only_light           = uLEDResponses_OutInterval.maxZPul
 collision_metrics.rate_ligh_spike_collision  = uLEDResponses_InInterval.maxRatePulse;
 collision_metrics.rateZ_ligh_spike_collision = uLEDResponses_InInterval.maxZPulse;
 % 
+preInt_select = collision_metrics.candidate_int_pyr_pairs;
+collision_metrics.putative_int_pyr_pairs = ...
+    collision_metrics.rate_difference > rate_change_threshold & preInt_select;
 
 collision_metrics.uLEDResponses_OutInterval  = uLEDResponses_OutInterval;
 collision_metrics.uLEDResponses_InInterval   = uLEDResponses_InInterval;
 
+collision_metrics.putative_int_pyr_pairs_list = ...
+    [collision_metrics.uLEDResponses_InInterval.presynapticID(collision_metrics.putative_int_pyr_pairs)...
+    collision_metrics.uLEDResponses_InInterval.postsynapticID(collision_metrics.putative_int_pyr_pairs)];
+
 % select pairs
-figure
-nexttile
-groupCorr(collision_metrics.rate_only_light(prePyr_select),collision_metrics.rate_difference(prePyr_select),...
-        'inAxis',true,'MarkerColor',color_pyr,'labelOffset',2);
-groupCorr(collision_metrics.rate_only_light(preInt_select),collision_metrics.rate_difference(preInt_select),...
-        'inAxis',true,'MarkerColor',color_int,'labelOffset',2);
-ylabel('Rate difference (Hz)'); xlabel('Rate during light (Hz)');
-
-nexttile
-groupCorr(collision_metrics.rateZ_only_light(prePyr_select),collision_metrics.rateZ_difference(prePyr_select),...
-        'inAxis',true,'MarkerColor',color_pyr,'labelOffset',2);
-groupCorr(collision_metrics.rateZ_only_light(preInt_select),collision_metrics.rateZ_difference(preInt_select),...
-        'inAxis',true,'MarkerColor',color_int,'labelOffset',2);
-ylabel('Rate difference (Std)'); xlabel('Rate during light (Std)');
-
-collision_metrics.rate_difference
+prePyr_select = collision_metrics.candidate_pyr_pyr_pairs;
+preInt_select = collision_metrics.candidate_int_pyr_pairs;
 
 if saveMat
     disp(' Saving results...');
@@ -274,10 +269,17 @@ if saveMat
     save([filename '.lightSpikeCollisions.cellinfo.mat'],'collision_metrics','-v7.3');
 end
 
+if update_cell_metrics
+    cell_metrics.putativeConnections.inhibitory = collision_metrics.putative_int_pyr_pairs_list;
+    filename = split(pwd,filesep); filename = filename{end};
+    save([filename '.cell_metrics.cellinfo.mat'],'cell_metrics');
+end
+
 %% plots
 if doPlot
     color_pyr = [.9 .3 .3];
     color_int = [.3 .3 .9];
+    color_wint = [.3 .9 .9];
     
     prePyr_select = collision_metrics.candidate_pyr_pyr_pairs;
     preInt_select = collision_metrics.candidate_int_pyr_pairs;
@@ -340,9 +342,70 @@ if doPlot
     saveas(gcf,strcat('SummaryFigures\Light_spike_Collision_',label,'.png'));
 
     % visualize pairs
+    figure
+    subplot(2,3,[1 2]);
+    groupCorr(log10(collision_metrics.rate_only_light(preInt_select)),(collision_metrics.rate_difference(preInt_select)),...
+            'inAxis',true,'MarkerColor',color_int,'MarkerSize',15);
+    ax = axis;
+    plot(ax(1:2), [rate_change_threshold rate_change_threshold], '-r');
+    putative_inh_pairs = collision_metrics.putative_int_pyr_pairs;
+    plot(log10(collision_metrics.rate_only_light(putative_inh_pairs)), collision_metrics.rate_difference(putative_inh_pairs),'ok');
+    xlabel('Rate during light (Hz)'); ylabel('Rate difference [Hz]');
+    LogScale('x',10);  
+    ax1 = ax;
+    subplot(2,3,[3]);
+    hold on
+    [counts, edges] = histcounts(collision_metrics.rate_difference(preInt_select),[-5:.5:15]);
+    bins = edges(1:end-1)+ diff(edges(1:2))/2;
+    barh(bins, counts,'FaceColor',color_int,'EdgeColor','none','BarWidth',1);
+    barh(bins(bins>rate_change_threshold), counts(bins>rate_change_threshold),...
+        'FaceColor',[.5 .5 .5],'EdgeColor','none','BarWidth',1,'FaceAlpha',.3);
+    ax = axis;
+    plot(ax(1:2), [rate_change_threshold rate_change_threshold], '-r');
+    ylim(ax1(3:4)); 
+    xlabel('Counts');
     
-    
+    non_putative_inh_pairs = collision_metrics.is_lightResponsive & ~putative_inh_pairs;
+    subplot(2,2,3);
+    hold on
+    plotFill(collision_metrics.uLEDResponses_InInterval.timestamps,...
+        collision_metrics.uLEDResponses_InInterval.responsecurve(putative_inh_pairs,:)','color',[.1 .1 .1],'smoothOpt',5,'style','filled');
+    plotFill(collision_metrics.uLEDResponses_InInterval.timestamps,...
+        collision_metrics.uLEDResponses_OutInterval.responsecurve(putative_inh_pairs,:)','color',[.8 .1 .1],'smoothOpt',5,'style','filled');
+    plotFill(collision_metrics.uLEDResponses_InInterval.timestamps,...
+        collision_metrics.uLEDResponses_OutInterval.responsecurve(putative_inh_pairs,:)' ...
+        - collision_metrics.uLEDResponses_InInterval.responsecurve(putative_inh_pairs,:)'...
+        ,'color',[.1 .1 .1],'smoothOpt',5,'style','edge');
+    plotFill(collision_metrics.uLEDResponses_InInterval.timestamps,...
+        collision_metrics.uLEDResponses_OutInterval.responsecurve(non_putative_inh_pairs,:)' ...
+        - collision_metrics.uLEDResponses_InInterval.responsecurve(non_putative_inh_pairs,:)'...
+        ,'color',[.9 .9 .1],'smoothOpt',5,'style','edge');
+    xlim([-.02 .04]);
+    ylabel('Hz'); xlabel('Time (s)');
 
+    subplot(2,2,4);
+    hold on
+    pyr = strcmpi(cell_metrics.putativeCellType,'Pyramidal cell');
+    nw = strcmpi(cell_metrics.putativeCellType,'Narrow Interneuron');
+    ww = strcmpi(cell_metrics.putativeCellType,'Wide Interneuron');
+    scatter(cell_metrics.troughToPeak(pyr),cell_metrics.burstIndex_Royer2012(pyr),40,'filled',...
+        'MarkerFaceColor',color_pyr,'MarkerEdgeColor','none','MarkerFaceAlpha',.5);
+    scatter(cell_metrics.troughToPeak(nw),cell_metrics.burstIndex_Royer2012(nw),40,'filled',...
+        'MarkerFaceColor',color_int,'MarkerEdgeColor','none','MarkerFaceAlpha',.5);
+    scatter(cell_metrics.troughToPeak(ww),cell_metrics.burstIndex_Royer2012(ww),40,'filled',...
+        'MarkerFaceColor',color_wint,'MarkerEdgeColor','none','MarkerFaceAlpha',.5);
+
+    for ii = 1:length(cell_metrics.putativeConnections.excitatory) 
+        pre_post = [cell_metrics.putativeConnections.excitatory(ii,1) cell_metrics.putativeConnections.excitatory(ii,2)];
+        plot(cell_metrics.troughToPeak(pre_post),...
+            cell_metrics.burstIndex_Royer2012(pre_post),'-','color',[.4 .1 .1 .5]);
+    end
+
+    for ii = 1:length(collision_metrics.putative_int_pyr_pairs_list) 
+        pre_post = [collision_metrics.putative_int_pyr_pairs_list(ii,1) collision_metrics.putative_int_pyr_pairs_list(ii,2)];
+        plot(cell_metrics.troughToPeak(pre_post),...
+            cell_metrics.burstIndex_Royer2012(pre_post),'-','color',[.1 .1 .4]);
+    end
     
 end
 
