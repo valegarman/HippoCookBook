@@ -131,7 +131,7 @@ end
 
 %% Collect pulses
 timestamps = []; code = []; shank = []; LED = []; pulsesNumber = []; channel = []; isAnalog = []; isDigital = []; probe = [];
-try
+% try
     for ii = 1:length(ledLayout.channel)
         if ledLayout.isAnalog(ii)
             timestamps = [timestamps; analogPulses.timestamps(analogPulses.analogChannelsList==ledLayout.channel(ii),:)];
@@ -149,6 +149,7 @@ try
             if size(temp_timestamps,2) ~= 2 && size(temp_timestamps,1) == 2
                 temp_timestamps = temp_timestamps';
             elseif size(temp_timestamps,2) == 2
+            elseif isempty(temp_timestamps)
             else
                 error('Digital inputs were not stored correctly! Check getDigitalIn output!');
             end
@@ -164,9 +165,9 @@ try
             pulsesNumber(ii) = size(temp_timestamps,1);
         end
     end
-catch
+% catch
     warning('Problem collecting pulses!!');
-end
+% end
 
 [~, idx] = sort(timestamps(:,1));
 timestamps = timestamps(idx,:);

@@ -444,7 +444,7 @@ end
 uLEDResponses.ratioBeforeAfter = uLEDResponses.rateDuringPulse./uLEDResponses.rateBeforePulse;
 
 % find cells in non-stimulated shanks
-uLEDResponses.unisInNonStimulatedShanks = (spikes.shankID == uLEDPulses.nonStimulatedShank);
+uLEDResponses.unisInNonStimulatedShanks = ismember(spikes.shankID,uLEDPulses.nonStimulatedShank);
 
 % parse non-responsive and responsive cells, only in group 1 (no manipulated)
 uLEDResponses.drivenCells = [];

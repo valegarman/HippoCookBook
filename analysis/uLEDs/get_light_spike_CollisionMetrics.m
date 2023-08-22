@@ -259,6 +259,15 @@ collision_metrics.putative_int_pyr_pairs_list = ...
     [collision_metrics.uLEDResponses_InInterval.presynapticID(collision_metrics.putative_int_pyr_pairs)...
     collision_metrics.uLEDResponses_InInterval.postsynapticID(collision_metrics.putative_int_pyr_pairs)];
 
+pyr = strcmpi(cell_metrics.putativeCellType,'Pyramidal cell');
+nw = strcmpi(cell_metrics.putativeCellType,'Narrow Interneuron');
+ww = strcmpi(cell_metrics.putativeCellType,'Wide Interneuron');
+
+collision_metrics.inhibitory_connection_probability = size(collision_metrics.putative_int_pyr_pairs_list,1)/(length(find(pyr)) * (length(find(nw)) + length(find(ww))));
+collision_metrics.excitatory_connection_probability = size(cell_metrics.putativeConnections.excitatory,1)/(length(find(pyr)) * (length(find(nw)) + length(find(ww))));
+collision_metrics.inhibitory_connectionsOut = histcounts(collision_metrics.putative_int_pyr_pairs_list(:,1),[0:length(cell_metrics.UID)]+.5);
+collision_metrics.inhibitory_connectionsIn = histcounts(collision_metrics.putative_int_pyr_pairs_list(:,2),[0:length(cell_metrics.UID)]+.5);
+
 % select pairs
 prePyr_select = collision_metrics.candidate_pyr_pyr_pairs;
 preInt_select = collision_metrics.candidate_int_pyr_pairs;
@@ -345,13 +354,13 @@ if doPlot
     figure
     subplot(2,3,[1 2]);
     groupCorr(log10(collision_metrics.rate_only_light(preInt_select)),(collision_metrics.rate_difference(preInt_select)),...
-            'inAxis',true,'MarkerColor',color_int,'MarkerSize',15);
+        'inAxis',true,'MarkerColor',color_int,'MarkerSize',15);
     ax = axis;
     plot(ax(1:2), [rate_change_threshold rate_change_threshold], '-r');
     putative_inh_pairs = collision_metrics.putative_int_pyr_pairs;
     plot(log10(collision_metrics.rate_only_light(putative_inh_pairs)), collision_metrics.rate_difference(putative_inh_pairs),'ok');
     xlabel('Rate during light (Hz)'); ylabel('Rate difference [Hz]');
-    LogScale('x',10);  
+    LogScale('x',10);
     ax1 = ax;
     subplot(2,3,[3]);
     hold on
@@ -362,32 +371,27 @@ if doPlot
         'FaceColor',[.5 .5 .5],'EdgeColor','none','BarWidth',1,'FaceAlpha',.3);
     ax = axis;
     plot(ax(1:2), [rate_change_threshold rate_change_threshold], '-r');
-    ylim(ax1(3:4)); 
+    ylim(ax1(3:4));
     xlabel('Counts');
-    
     non_putative_inh_pairs = collision_metrics.is_lightResponsive & ~putative_inh_pairs;
     subplot(2,2,3);
     hold on
     plotFill(collision_metrics.uLEDResponses_InInterval.timestamps,...
-        collision_metrics.uLEDResponses_InInterval.responsecurve(putative_inh_pairs,:)','color',[.1 .1 .1],'smoothOpt',5,'style','filled');
+    collision_metrics.uLEDResponses_InInterval.responsecurve(putative_inh_pairs,:)','color',[.1 .1 .1],'smoothOpt',5,'style','filled');
     plotFill(collision_metrics.uLEDResponses_InInterval.timestamps,...
-        collision_metrics.uLEDResponses_OutInterval.responsecurve(putative_inh_pairs,:)','color',[.8 .1 .1],'smoothOpt',5,'style','filled');
+    collision_metrics.uLEDResponses_OutInterval.responsecurve(putative_inh_pairs,:)','color',[.8 .1 .1],'smoothOpt',5,'style','filled');
     plotFill(collision_metrics.uLEDResponses_InInterval.timestamps,...
-        collision_metrics.uLEDResponses_OutInterval.responsecurve(putative_inh_pairs,:)' ...
+    collision_metrics.uLEDResponses_OutInterval.responsecurve(putative_inh_pairs,:)' ...
         - collision_metrics.uLEDResponses_InInterval.responsecurve(putative_inh_pairs,:)'...
         ,'color',[.1 .1 .1],'smoothOpt',5,'style','edge');
     plotFill(collision_metrics.uLEDResponses_InInterval.timestamps,...
-        collision_metrics.uLEDResponses_OutInterval.responsecurve(non_putative_inh_pairs,:)' ...
+    collision_metrics.uLEDResponses_OutInterval.responsecurve(non_putative_inh_pairs,:)' ...
         - collision_metrics.uLEDResponses_InInterval.responsecurve(non_putative_inh_pairs,:)'...
         ,'color',[.9 .9 .1],'smoothOpt',5,'style','edge');
     xlim([-.02 .04]);
     ylabel('Hz'); xlabel('Time (s)');
-
     subplot(2,2,4);
     hold on
-    pyr = strcmpi(cell_metrics.putativeCellType,'Pyramidal cell');
-    nw = strcmpi(cell_metrics.putativeCellType,'Narrow Interneuron');
-    ww = strcmpi(cell_metrics.putativeCellType,'Wide Interneuron');
     scatter(cell_metrics.troughToPeak(pyr),cell_metrics.burstIndex_Royer2012(pyr),40,'filled',...
         'MarkerFaceColor',color_pyr,'MarkerEdgeColor','none','MarkerFaceAlpha',.5);
     scatter(cell_metrics.troughToPeak(nw),cell_metrics.burstIndex_Royer2012(nw),40,'filled',...
@@ -395,17 +399,23 @@ if doPlot
     scatter(cell_metrics.troughToPeak(ww),cell_metrics.burstIndex_Royer2012(ww),40,'filled',...
         'MarkerFaceColor',color_wint,'MarkerEdgeColor','none','MarkerFaceAlpha',.5);
 
-    for ii = 1:length(cell_metrics.putativeConnections.excitatory) 
+    for ii = 1:length(cell_metrics.putativeConnections.excitatory)
         pre_post = [cell_metrics.putativeConnections.excitatory(ii,1) cell_metrics.putativeConnections.excitatory(ii,2)];
         plot(cell_metrics.troughToPeak(pre_post),...
-            cell_metrics.burstIndex_Royer2012(pre_post),'-','color',[.4 .1 .1 .5]);
+            cell_metrics.burstIndex_Royer2012(pre_post),'-','color',[.4 .1 .1 .2]);
     end
 
-    for ii = 1:length(collision_metrics.putative_int_pyr_pairs_list) 
+    for ii = 1:length(collision_metrics.putative_int_pyr_pairs_list)
         pre_post = [collision_metrics.putative_int_pyr_pairs_list(ii,1) collision_metrics.putative_int_pyr_pairs_list(ii,2)];
         plot(cell_metrics.troughToPeak(pre_post),...
             cell_metrics.burstIndex_Royer2012(pre_post),'-','color',[.1 .1 .4]);
     end
+
+    text(0.1, .9,[num2str(size(cell_metrics.putativeConnections.excitatory,1)) 'exc pairs (' num2str(round(collision_metrics.excitatory_connection_probability,2)) ' prob)'],"Units","normalized");
+    text(0.1, .8,[num2str(size(collision_metrics.putative_int_pyr_pairs_list,1)) 'inh pairs (' num2str(round(collision_metrics.inhibitory_connection_probability,2)) ' prob)'],"Units","normalized");
+    ylabel('Bursting Index (Royer2012)'); xlabel('Through to peak (ms)');
+    mkdir('SummaryFigures/')
+    saveas(gcf,strcat('SummaryFigures\Light_spike_Collision_pairs_',label,'.png'));
     
 end
 
