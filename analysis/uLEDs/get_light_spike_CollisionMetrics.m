@@ -405,7 +405,7 @@ if doPlot
             cell_metrics.burstIndex_Royer2012(pre_post),'-','color',[.4 .1 .1 .2]);
     end
 
-    for ii = 1:length(collision_metrics.putative_int_pyr_pairs_list)
+    for ii = 1:size(collision_metrics.putative_int_pyr_pairs_list,1)
         pre_post = [collision_metrics.putative_int_pyr_pairs_list(ii,1) collision_metrics.putative_int_pyr_pairs_list(ii,2)];
         plot(cell_metrics.troughToPeak(pre_post),...
             cell_metrics.burstIndex_Royer2012(pre_post),'-','color',[.1 .1 .4]);
