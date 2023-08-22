@@ -107,7 +107,7 @@ if isempty(spikes)
     spikes = loadSpikes('getWaveformsFromDat',false);
 end
 
-pulsesAnalog.timestamps = []; pulsesAnalog.analogChannelsListannel = [];
+pulsesAnalog.timestamps = []; pulsesAnalog.analogChannelsList = [];
 if strcmpi(analogChannelsList,'all')
     pulsesAnalog = getAnalogPulses;
 else
@@ -132,8 +132,8 @@ end
 
 pulses.timestamps = [pulsesAnalog.timestamps; pulsesDigital.timestamps];  % combine pulses
 pulses.channel = [pulsesAnalog.analogChannelsList; pulsesDigital.digitalChannelsList + lastAnalogChannels];  % combine pulses
-pulses.analogChannelsListannel = [pulsesAnalog.analogChannelsList; nan(size(pulsesDigital.digitalChannelsList))];  % 
-pulses.digitalChannelsListannel = [nan(size(pulsesAnalog.analogChannelsList)); pulsesDigital.digitalChannelsList];  % 
+pulses.analogChannelsList = [pulsesAnalog.analogChannelsList; nan(size(pulsesDigital.digitalChannelsList))];  % 
+pulses.digitalChannelsList = [nan(size(pulsesAnalog.analogChannelsList)); pulsesDigital.digitalChannelsList];  % 
 pulses.duration = round(pulses.timestamps(:,2) - pulses.timestamps(:,1),3);  % 
 pulses.isAnalog = [ones(size(pulsesAnalog.analogChannelsList)); zeros(size(pulsesDigital.digitalChannelsList))];
 pulses.isDigital = [zeros(size(pulsesAnalog.analogChannelsList)); ones(size(pulsesDigital.digitalChannelsList))];
@@ -222,7 +222,16 @@ if nConditions == 2
         nConditions = size(conditions,1);
     end
 end
-        
+
+toRemove = find(pulses.duration< minDuration);
+pulses.timestamps(toRemove) = [];
+pulses.channel(toRemove) = [];
+pulses.analogChannelsList(toRemove) = [];
+pulses.digitalChannelsList(toRemove) = [];
+pulses.duration(toRemove) = [];
+pulses.isAnalog(toRemove) = [];
+pulses.isDigital(toRemove) = [];
+
 
 %%
 spikes = loadSpikes;
@@ -234,6 +243,39 @@ for kk = 1:numRep
     randomEvents{kk} = sort(randsample(timestamps_recording, nPulses))';
 end
 disp('Computing responses...');
+
+for jj = 1:nConditions
+    fprintf('\n Condition %3.i / %3.i \n', jj, nConditions)
+
+    % generate events for boostraping
+    nPulses = length(find(pulses.channel == conditions(jj,2) & pulses.duration == conditions(jj,1)));
+    randomEvents = [];
+    for mm = 1:numRep
+        randomEvents{mm} = sort(randsample(timestamps_recording, nPulses))';
+    end
+    pulseDuration = conditions(jj,1);
+    [stccg, t] = CCG([spikes.times randomEvents],[],'binSize',binSize,'duration',winSize,'norm','rate');
+    fprintf('\n'); %
+    t_duringPulse = t > 0 + onset(kk) & t < pulseDuration + offset(kk); 
+    randomRatesDuringPulse = squeeze(mean(stccg(t_duringPulse, length(spikes.UID)+1:end,1:length(spikes.UID)),1));
+    uLEDResponses.bootsTrapRate(:,kk) = mean(randomRatesDuringPulse,1);
+    uLEDResponses.bootsTrapRateStd(:,kk) = std(randomRatesDuringPulse,[],1);
+    uLEDResponses.bootsTrapRateSEM(:,kk) = std(randomRatesDuringPulse,[],1)/sqrt(numRep);
+    if ~isempty(randomRatesDuringPulse)
+        for jj = 1:size(randomRatesDuringPulse,2)
+            pd = fitdist(randomRatesDuringPulse(:,jj),'normal');
+            uLEDResponses.bootsTrapCI(jj,kk,1:2) = pd.icdf(bootsTrapCI);
+        end
+    else
+        uLEDResponses.bootsTrapCI(1:size(randomRatesDuringPulse,2),kk,1:2) = NaN;
+    end
+
+end
+
+
+
+
+
 for ii = 1:length(spikes.UID)
     fprintf(' **Pulses from unit %3.i/ %3.i \n',ii, size(spikes.UID,2)); %\n
     if numRep > 0

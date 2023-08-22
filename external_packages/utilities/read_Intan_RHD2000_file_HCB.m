@@ -33,10 +33,17 @@ end
 % file = d(end).name;
 
 tic;
-filename = [path,file];
+filename = adapt_filesep([path,file]);
 fid = fopen(filename, 'r');
 
 s = dir(filename);
+if isempty(s)
+    s = dir('*.rhd');
+    path = [s.folder filesep];
+    file = s.name;
+    filename = [path, file];
+    fid = fopen(filename, 'r');
+end
 filesize = s.bytes;
 
 % Check 'magic number' at beginning of file to make sure this is an Intan
