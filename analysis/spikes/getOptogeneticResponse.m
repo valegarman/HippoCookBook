@@ -528,9 +528,15 @@ end
 optogeneticResponses.responseMetrics = responseMetrics;
 
 if saveMat
+    
+    optogeneticResponses_raster = optogeneticResponses;
+    optogeneticResponses = rmfield(optogeneticResponses,'raster');
     disp(' Saving results...');
     filename = split(pwd,filesep); filename = filename{end};
     save([filename '.optogeneticResponse.cellinfo.mat'],'optogeneticResponses','-v7.3');
+    if getRaster
+        save([basenameFromBasepath(pwd) '.optogeneticResponse_raster.cellinfo.mat'],'optogeneticResponses_raster','-v7.3');
+    end
 end
 
 if saveEventsFile

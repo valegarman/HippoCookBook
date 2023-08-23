@@ -50,6 +50,7 @@ addParameter(p,'useCSD_for_theta_detection',true,@islogical);
 addParameter(p,'profileType','hippocampus',@ischar); % options, 'hippocampus' and 'cortex'
 addParameter(p,'rippleMasterDetector_threshold',[1.5 3.5],@isnumeric); % [1.5 3.5]
 addParameter(p,'LED_threshold',0.98,@isnumeric);
+addParameter(p,'createLegacySummaryFolder',true,@islogical);
 
 parse(p,varargin{:})
 
@@ -77,10 +78,25 @@ useCSD_for_theta_detection = p.Results.useCSD_for_theta_detection;
 profileType = p.Results.profileType;
 rippleMasterDetector_threshold = p.Results.rippleMasterDetector_threshold;
 LED_threshold = p.Results.LED_threshold;
+createLegacySummaryFolder = p.Results.createLegacySummaryFolder;
 
 % Deal with inputs
 prevPath = pwd;
 cd(basepath);
+
+if createLegacySummaryFolder
+    if exist('SummaryFigures') == 7
+        d = strrep(strrep(string(datetime),' ','_'),':','_');
+        cd('SummaryFigures\');
+        legacyFolderName = strcat('legacy',strrep(strrep(string(datetime),' ','_'),':','_'),'_SummaryFigures');
+        mkdir(legacyFolderName)
+        allFigures = dir('*.png');
+        for ii = 1:length(allFigures)
+            movefile(allFigures(ii).name,[char(legacyFolderName) filesep allFigures(ii).name]);
+        end
+        cd(basepath);
+    end
+end
 
 for ii = 1:length(excludeAnalysis)
     excludeAnalysis{ii} = num2str(excludeAnalysis{ii});
@@ -213,7 +229,7 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     getSpikesRank('events','upstates');
 
     % 8.2 Ripples
-    ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'removeOptogeneticStimulation',true,'thresholds',rippleMasterDetector_threshold,'eventSpikeThreshold', false);
+    ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'removeOptogeneticStimulation',true,'thresholds',rippleMasterDetector_threshold,'eventSpikeThreshold', true);
     psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'min_pulsesNumber',10);
     getSpikesRank('events','ripples');
 
@@ -280,7 +296,13 @@ if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
             'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
         psth_reward = spikesPsth([behaviour.events.lReward; behaviour.events.rReward],'numRep',100,'saveMat',false,...
             'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
-
+        
+        if all(isnan(behaviour.events.startPoint))
+            behaviour.events.startPoint = NaN;
+        end
+        if all(isnan(behaviour.events.intersection))
+            behaviour.events.intersection = NaN;
+        end
         psth_intersection = spikesPsth([behaviour.events.intersection],'numRep',100,'saveMat',false,...
             'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
         psth_startPoint = spikesPsth([behaviour.events.startPoint],'numRep',100,'saveMat',false,...
