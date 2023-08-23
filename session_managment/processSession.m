@@ -296,7 +296,13 @@ if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
             'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
         psth_reward = spikesPsth([behaviour.events.lReward; behaviour.events.rReward],'numRep',100,'saveMat',false,...
             'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
-
+        
+        if all(isnan(behaviour.events.startPoint))
+            behaviour.events.startPoint = NaN;
+        end
+        if all(isnan(behaviour.events.intersection))
+            behaviour.events.intersection = NaN;
+        end
         psth_intersection = spikesPsth([behaviour.events.intersection],'numRep',100,'saveMat',false,...
             'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
         psth_startPoint = spikesPsth([behaviour.events.startPoint],'numRep',100,'saveMat',false,...
