@@ -145,10 +145,11 @@ for i = 1:numRep
     randomEvents{i} = sort(randsample(timestamps_recording,nEvents))';
 end
 
+t = [];
 disp('Computing responses...');
 for ii = 1:length(spikes.UID)
     fprintf(' **Events from unit %3.i/ %3.i \n',ii, size(spikes.UID,2));
-    if numRep > 0
+    if numRep > 0 & ~isnan(timestamps) 
         [stccg, t] = CCG([spikes.times{ii} randomEvents],[],'binSize',binSize,'duration',winSize,'norm','rate');
         for jj = 1:nConditions
 %             t_duringPulse = t > 0 & t < conditions(jj,1);

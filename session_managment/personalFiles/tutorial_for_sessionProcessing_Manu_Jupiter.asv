@@ -29,9 +29,9 @@ indexNewSession;
         loadProjectResults('project', 'InterneuronsLibrary',...
         'analysis_project_path', 'C:\Users\valeg\Dropbox\ProjectsOnLine\interneuronsLibrary\data','loadLast',false);
 
-
 % PS. uLED sessions
 pulses = getAnalogPulses('manualThr',true,'overwrite',true); % 1-index
 getDigitalIn;
-optogeneticResponses = getOptogeneticResponse('numRep',50,'force',true,...
-    'analogChannelsList',[3 4 5 6 7 8],'digitalChannelsList',[11 12 13 14 15 16]);
+processSession('digital_optogenetic_channels',[11 12 13 14 15 16],'analog_optogenetic_channels',[3 4 5 6 7 8],'promt_hippo_layers',true,'profileType','hippocampus','force_analogPulsesDetection',false);
+NotebookMonoSynBition;
+

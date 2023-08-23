@@ -54,7 +54,6 @@ addParameter(p,'salt_win',[0.005],@isscalar);
 addParameter(p,'salt_binSize',[0.001],@isscalar);
 addParameter(p,'getRaster',false,@islogical);
 
-
 parse(p, varargin{:});
 uLEDPulses = p.Results.uLEDPulses;
 basepath = p.Results.basepath;

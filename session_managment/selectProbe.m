@@ -185,7 +185,17 @@ if parameters.force || isempty(chanCoords)
     save([basenameFromBasepath(pwd) '.chanCoords.channelInfo.mat'],'chanCoords','supplier','descriptiveName');
 end
 
+if
+end
+
 if parameters.updateSessionFile
+
+    for ii = 1
+        session.extracellular.electrodeGroups.channels
+
+        session.extracellular.chanCoords
+    end
+
     session = loadSession(parameters.basepath);
     session.animal.probeImplants{1}.probe = probe_type;
     session.animal.probeImplants{1}.layout = probe_type;
