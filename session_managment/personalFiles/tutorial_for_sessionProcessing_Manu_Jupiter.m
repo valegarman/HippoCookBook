@@ -32,4 +32,11 @@ indexNewSession;
 % PS. uLED sessions
 pulses = getAnalogPulses('manualThr',true,'overwrite',true); % 1-index
 getDigitalIn;
+<<<<<<< HEAD
 processSession('digital_optogenetic_channels',[11 12 13 14 15 16],'analog_optogenetic_channels',[3 4 5 6 7 8],'promt_hippo_layers',true,'profileType','hippocampus','force_analogPulsesDetection',false);
+=======
+uLEDPulses = getuLEDPulses('Current',6);
+processSession('digital_optogenetic_channels',[11 12 13 14 15 16],'analog_optogenetic_channels',[3 4 5 6 7 8],'promt_hippo_layers',true,'profileType','hippocampus','force_analogPulsesDetection',false);   
+[uLEDResponses] = getuLEDResponse;
+NotebookMonoSynBition;
+>>>>>>> 388c77676c655de48ab559fd41f88ba87d0a0a53
