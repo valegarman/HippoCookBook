@@ -255,6 +255,13 @@ for ii = 1:length(spikes.UID)
             psth.bootsTrapTest(ii,jj,1) = NaN;
             psth.zscoreTest(ii,jj,1) = NaN;
             psth.threeWaysTest(ii,jj,1) = NaN;
+
+            psth.raster.rasterCount{ii,jj} = NaN;
+            psth.raster.rasterProb{ii,jj} = NaN;
+            psth.raster.TrialsNumber{ii,jj} = NaN;
+            psth.raster.times{ii,jj} = NaN;
+            psth.raster.rasterTrials{ii,jj} = NaN;
+            psth.raster.rasterSpikesTimes{ii,jj} = NaN;
         end
     end
     psth.timestamps = t;
