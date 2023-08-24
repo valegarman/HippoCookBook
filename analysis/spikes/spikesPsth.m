@@ -97,7 +97,7 @@ end
 % default detection parameters
 if strcmpi(eventType,'slowOscillations')
     if isempty(timestamps)
-        UDStates = detectUD;
+        UDStates = detectUpsDowns;
         timestamps = UDStates.timestamps.DOWN;
     end
     warning('Using default parameters for slow oscillations!');
