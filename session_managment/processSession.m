@@ -224,7 +224,7 @@ end
 if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     % Trying changes in detecUD_temp
     % 8.1 Up and downs
-    UDStates = detectUD('plotOpt', true,'forceDetect',true','NREMInts','all');
+    UDStates = detectUpsDowns('plotOpt', true,'forceDetect',true','NREMInts','all');
     psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true);
     getSpikesRank('events','upstates');
 

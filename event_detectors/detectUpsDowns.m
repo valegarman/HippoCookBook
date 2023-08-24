@@ -1,4 +1,4 @@
-function [UDStates] = detectUD(varargin)
+function [UDStates] = detectUpsDowns(varargin)
 % Detect up and down states from LFP.
 %
 % USAGE
