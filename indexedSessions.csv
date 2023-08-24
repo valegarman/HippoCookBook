@@ -102,3 +102,4 @@ fcck1_220204_sess5,fcck1,fcck1\fcck1_220204_sess5,c57b1/6,vip/cck/ai80,"105µm (
 fsst3_220921_sess8,fsst3,fsst3\fsst3_220921_sess8,c57b1/6,sst/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,11,CA1sp CA1so CA1slm CA1sr CA3sp DG CA3sr PTLp5 PTLp2_3 PTLp6,InterneuronsLibrary
 fsst3_220922_sess9,fsst3,fsst3\fsst3_220922_sess9,c57b1/6,sst/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,14,CA1sp CA1so PTLp5 PTLp2_3 CA1slm CA1sr CA3sp DG,InterneuronsLibrary
 fcamk1_200902_sess13,fcamk1,fcamk1\fcamk1_200902_sess13,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linearmaze,37,CA1sp CA1so,uLEDiscotheque InterneuronsLibrary
+fcamk3_201030_sess12,fcamk3,fcamk3\fcamk3_201030_sess12,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze linear maze,47,CA1sp CA1so,uLEDiscotheque InterneuronsLibrary
