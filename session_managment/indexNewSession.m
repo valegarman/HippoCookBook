@@ -181,7 +181,7 @@ if removeDatFiles
     % Remove kilosort .phy
     if ~isempty(dir('Kilosort*'))
         file = dir('Kilosort*');
-        cd(file.name);
+        cd(file(end).name);
         if exist('.phy','dir')
             rmdir('.phy','s');
         end
