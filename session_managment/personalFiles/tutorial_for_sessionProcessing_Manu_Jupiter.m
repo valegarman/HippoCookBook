@@ -32,7 +32,8 @@ indexNewSession;
 % PS. uLED sessions
 pulses = getAnalogPulses('manualThr',true,'overwrite',true); % 1-index
 getDigitalIn;
-uLEDPulses = getuLEDPulses('Current',6);
+uLEDPulses = getuLEDPulses('Current',2.7);
 processSession('digital_optogenetic_channels',[11 12 13 14 15 16],'analog_optogenetic_channels',[3 4 5 6 7 8],'promt_hippo_layers',true,'profileType','hippocampus','force_analogPulsesDetection',false);
+% something werid with the pulses... to check!!!
 [uLEDResponses] = getuLEDResponse;
 NotebookMonoSynBition;

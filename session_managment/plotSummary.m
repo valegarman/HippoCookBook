@@ -598,7 +598,7 @@ for ii = 1:length(UID)
 
         
         if isfield(behavior,'psth_intersection') && isstruct(behavior.psth_intersection) && ...
-                ~isempty(behavior.psth_intersection.timestamps)
+                ~isempty(behavior.psth_intersection.timestamps) && all(~isnan(behavior.psth_intersection.rateDuringPulse))
             subplot(5,5,19)
             hold on
             t_win = behavior.psth_intersection.timestamps > -2 & behavior.psth_intersection.timestamps < 2;
@@ -613,7 +613,7 @@ for ii = 1:length(UID)
         end
         
         if isfield(behavior,'psth_startPoint') && isstruct(behavior.psth_startPoint) && ...
-                ~isempty(behavior.psth_startPoint.timestamps)
+                ~isempty(behavior.psth_startPoint.timestamps) && all(~isnan(behavior.psth_startPoint.rateDuringPulse))
             subplot(5,5,23)
             hold on
             t_win = behavior.psth_startPoint.timestamps > -2 & behavior.psth_startPoint.timestamps < 2;
