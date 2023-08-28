@@ -26,8 +26,9 @@ indexNewSession;
 % 6% Once a database has been created, use loadProjectResults to stack results for all sessions
 % an enjoy data analysis!
 [projectResults, projectSessionResults] = ...
-        loadProjectResults('project', 'InterneuronsLibrary',...
-        'analysis_project_path', 'C:\Users\valeg\Dropbox\ProjectsOnLine\interneuronsLibrary\data','loadLast',false);
+        loadProjectResults('project', 'uLEDiscotheque',...
+        'analysis_project_path', 'C:\Users\valeg\Dropbox\ProjectsOnLine\interneuronsLibrary\data','loadLast',false); 
+% other projects include InterneuronsLibrary, desVIPnhibition, etc
 
 % PS. uLED sessions
 pulses = getAnalogPulses('manualThr',true,'overwrite',true); % 1-index
