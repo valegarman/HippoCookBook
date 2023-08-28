@@ -39,7 +39,7 @@ addParameter(p,'spikes',[],@isstruct);
 addParameter(p,'numRep',500,@isnumeric);
 addParameter(p,'binSize',0.001,@isnumeric);
 addParameter(p,'winSize',1,@isnumeric);
-addParameter(p,'rasterPlot',true,@islogical);
+addParameter(p,'getRaster',true,@islogical);
 addParameter(p,'ratePlot',true,@islogical);
 addParameter(p,'winSizePlot',[-.1 .5],@isnumeric);
 addParameter(p,'saveMat',true,@islogical);
@@ -48,11 +48,14 @@ addParameter(p,'force',false,@islogical);
 addParameter(p,'eventType',date,@ischar);
 addParameter(p,'event_ints',[-0.02 0.02],@isnumeric);
 addParameter(p,'baseline_ints',[-0.5 -0.46],@isnumeric);
-addParameter(p,'min_pulsesNumber',100,@isnumeric);
+addParameter(p,'minNumberOfPulses',100,@isnumeric);
 addParameter(p,'win_Z',[],@isnumeric);
-addParameter(p,'win_raster',[-.5 .5],@isnumeric);
-addParameter(p,'binSize_raster',[0.001],@isnumeric);
 addParameter(p,'restrictIntervals',[],@isnumeric);
+addParameter(p,'bootsTrapCI',[0.001 0.999],@isnumeric);
+addParameter(p,'salt_baseline',[-0.25 -0.001],@isscalar);
+addParameter(p,'raster_time',[-0.250 0.250],@isnumeric);
+addParameter(p,'salt_win',[0.01],@isscalar);
+addParameter(p,'salt_binSize',[0.001],@isscalar);
 
 parse(p, timestamps,varargin{:});
 
@@ -61,8 +64,8 @@ spikes = p.Results.spikes;
 numRep = p.Results.numRep;
 binSize = p.Results.binSize;
 winSize = p.Results.winSize;
-rasterPlot = p.Results.rasterPlot;
-ratePlot = p.Results.rasterPlot;
+getRaster = p.Results.getRaster;
+ratePlot = p.Results.ratePlot;
 winSizePlot = p.Results.winSizePlot;
 saveMat = p.Results.saveMat;
 savePlot = p.Results.savePlot;
@@ -70,16 +73,23 @@ force = p.Results.force;
 eventType = p.Results.eventType;
 event_ints = p.Results.event_ints;
 baseline_ints = p.Results.baseline_ints;
-min_pulsesNumber = p.Results.min_pulsesNumber;
+minNumberOfPulses = p.Results.minNumberOfPulses;
 win_Z = p.Results.win_Z;
-win_raster = p.Results.win_raster;
-binSize_raster = p.Results.binSize_raster;
 restrictIntervals = p.Results.restrictIntervals;
+bootsTrapCI = p.Results.bootsTrapCI;
+salt_baseline = p.Results.salt_baseline;
+raster_time = p.Results.raster_time;
+salt_win = p.Results.salt_win;
+salt_binSize = p.Results.salt_binSize;
 
 %% Session Template
 % Deal with inputs
 prevPath = pwd;
 cd(basepath);
+
+if minNumberOfPulses < 2
+    error('Number of pulses should be lager than 1');
+end
 
 session = loadSession;
 if (exist([session.general.name '.' eventType '_psth.cellinfo.mat'],'file') || ...
@@ -97,7 +107,7 @@ end
 % default detection parameters
 if strcmpi(eventType,'slowOscillations')
     if isempty(timestamps)
-        UDStates = detectUD;
+        UDStates = detectUpsDowns;
         timestamps = UDStates.timestamps.DOWN;
     end
     warning('Using default parameters for slow oscillations!');
@@ -138,124 +148,217 @@ timestamps_recording = timestamps(1):1/1250:timestamps(end);
 nConditions = size(timestamps,2);
 % We can implement different conditions (if timestamps : mxn instead mx1)
 % TO DO ??
-disp('Generating bootstrap template...');
-nEvents = int32(size(timestamps,1));
-randomEvents = [];
-for i = 1:numRep
-    randomEvents{i} = sort(randsample(timestamps_recording,nEvents))';
-end
 
 t = [];
 disp('Computing responses...');
-for ii = 1:length(spikes.UID)
-    fprintf(' **Events from unit %3.i/ %3.i \n',ii, size(spikes.UID,2));
-    if numRep > 0 & ~isnan(timestamps) 
-        [stccg, t] = CCG([spikes.times{ii} randomEvents],[],'binSize',binSize,'duration',winSize,'norm','rate');
-        for jj = 1:nConditions
-%             t_duringPulse = t > 0 & t < conditions(jj,1);
-            t_duringPulse = t > event_ints(1) & t < event_ints(2);
-            randomRatesDuringPulse = nanmean(stccg(t_duringPulse,2:size(randomEvents,2)+1,1),1);
-            psth.bootsTrapRate(ii,jj) = mean(randomRatesDuringPulse);
-            psth.bootsTrapRateStd(ii,jj) = std(randomRatesDuringPulse);
-            pd = fitdist(randomRatesDuringPulse','normal');
-            psth.bootsTrapCI(ii,jj,:) = pd.icdf([.001 0.999]);
+jj = 1;
+
+disp('Generating bootstrap template...');
+nEvents = int32(size(timestamps,1));
+randomEvents = [];
+
+for i = 1:numRep
+    randomEvents{i} = sort(randsample(timestamps_recording,nEvents))';
+end
+pulseDuration = abs(diff(event_ints));
+if ~isnan(timestamps)
+    [stccg, t] = CCG([spikes.times randomEvents],[],'binSize',binSize,'duration',winSize,'norm','rate');
+    fprintf('\n'); %
+    t_duringPulse = t > event_ints(1) & t < event_ints(2);
+    randomRatesDuringPulse = squeeze(mean(stccg(t_duringPulse, length(spikes.UID)+1:end,1:length(spikes.UID)),1));
+    psth.bootsTrapRate(:,jj) = mean(randomRatesDuringPulse,1);
+    psth.bootsTrapRateStd(:,jj) = std(randomRatesDuringPulse,[],1);
+    psth.bootsTrapRateSEM(:,jj) = std(randomRatesDuringPulse,[],1)/sqrt(numRep);
+    if ~isempty(randomRatesDuringPulse)
+        for ii = 1:size(randomRatesDuringPulse,2)
+            pd = fitdist(randomRatesDuringPulse(:,ii),'normal');
+            psth.bootsTrapCI(ii,jj,1:2) = pd.icdf(bootsTrapCI);
         end
     else
-        psth.bootsTrapRate(ii,1:nConditions) = NaN;
-        psth.bootsTrapRateStd(ii,1:nConditions) = NaN;
-        psth.bootsTrapCI(ii,1:nConditions,:) = nan(nConditions,2);
+        psth.bootsTrapCI(1:size(randomRatesDuringPulse,2),1:2) = NaN;
     end
-    for jj = 1:nConditions
-        nPulses = length(timestamps);
-        if nPulses > min_pulsesNumber
-            [stccg, t] = CCG({spikes.times{ii}, timestamps},[],'binSize',binSize,'duration',winSize,'norm','rate');
-            psth.responsecurve(ii,jj,:) = stccg(:,2,1);
-            psth.responsecurveSmooth(ii,jj,:) = smooth(stccg(:,2,1));
-            t_duringPulse = t > event_ints(1) & t < event_ints(2);
-            t_beforePulse = t > baseline_ints(1) & t < baseline_ints(2);
-            t_Z = t<=-0.1;
-            psth.responsecurveZ(ii,jj,:) = (stccg(:,2,1) - mean(stccg(t_Z,2,1)))/std(stccg(t_Z,2,1));
-            psth.responsecurveZSmooth(ii,jj,:) = smooth((stccg(:,2,1) - mean(stccg(t_Z,2,1)))/std(stccg(t_Z,2,1)));
-            psth.rateDuringPulse(ii,jj,1) = mean(stccg(t_duringPulse,2,1));
-            psth.rateBeforePulse(ii,jj,1) = mean(stccg(t_beforePulse,2,1));
-            psth.rateZDuringPulse(ii,jj,1) = mean(squeeze(psth.responsecurveZ(ii,jj,t_duringPulse)));
-            [h, psth.modulationSignificanceLevel(ii,jj,1)] = kstest2(stccg(t_duringPulse,2,1),stccg(t_beforePulse,2,1));
-            ci = squeeze(psth.bootsTrapCI(ii,jj,:));
-            
-            % Boostrap test
-            if psth.rateDuringPulse(ii,jj,1) > ci(2)
-                test = 1;
-            elseif psth.rateDuringPulse(ii,jj,1) < ci(1)
-                test = -1;
-            else
-                test = 0;
-            end
-            psth.bootsTrapTest(ii,jj,1) = test;
-            
-            % z-score change test
-            if mean(psth.responsecurveZ(ii,jj,t_duringPulse)) > 1.96
-                test = 1;
-            elseif mean(psth.responsecurveZ(ii,jj,t_duringPulse)) < -1.96
-                test = -1;
-            else
-                test = 0;
-            end
-            psth.zscoreTest(ii,jj,1) = test;
-            
-            % 3 ways test. If not boostrap, it would be 2 ways.
-            if (psth.rateDuringPulse(ii,jj,1) > ci(2) || isnan(ci(2))) && psth.modulationSignificanceLevel(ii,jj,1)<0.05...
-                    && mean(psth.responsecurveZ(ii,jj,t_duringPulse)) > 1.96
-                test = 1;
-            elseif (psth.rateDuringPulse(ii,jj,1) < ci(1) || isnan(ci(1))) && psth.modulationSignificanceLevel(ii,jj,1)<0.05 ...
-                    && mean(psth.responsecurveZ(ii,jj,t_duringPulse)) < -1.96
-                test = -1;
-            else
-                test = 0;
-            end
-            psth.threeWaysTest(ii,jj,1) = test;
-            
-            % raster plot
-            rasterX = [];
-            rasterY = [];
-            for zz = 1:size(timestamps,1)
-                temp_spk = spikes.times{ii}(find(spikes.times{ii} - timestamps(zz,1)  > win_raster(1) & spikes.times{ii} - timestamps(zz,1)  < win_raster(2))) - timestamps(zz,1);
+else
+    psth.bootsTrapRate(1:spikes.numcells,jj) = NaN;
+    psth.bootsTrapRateStd(1:spikes.numcells,jj) = NaN;
+    psth.bootsTrapRateSEM(1:spikes.numcells,jj) = NaN;
+     psth.bootsTrapCI(1:spikes.numcells,jj,1:2) = NaN;
+end
+
+if ~isempty(timestamps) && all(~isnan(timestamps))
+    pul = timestamps;
+else
+    pul = [0];
+end
+disp('Computing responses...');
+times = spikes.times; times{length(times)+1} = pul;
+[stccg, t] = CCG(times,[],'binSize',binSize,'duration',winSize,'norm','rate'); fprintf('\n'); %
+
+psth.responsecurve(:,jj,:) = squeeze(stccg(:, end , 1:end-1))';
+if length(times{end}) < minNumberOfPulses
+    psth.responsecurve(:,jj,:) = psth.responsecurve(:,jj,:) * NaN;
+end
+t_duringPulse = t > event_ints(1) & t < event_ints(2);
+t_beforePulse = t > baseline_ints(1) & t < baseline_ints(2);
+t_Z = t<=event_ints(1);
+
+numberOfPulses = size(pul,1);
+for ii = 1:size(psth.responsecurve,1)
+    if numberOfPulses > minNumberOfPulses
+        psth.responsecurveSmooth(ii,jj,:) = smooth(psth.responsecurve(ii,jj,:));
+        psth.responsecurveZ(ii,jj,:) = (psth.responsecurve(ii,jj,:)...
+            - mean(psth.responsecurve(ii,jj,t_Z)))...
+            /std(psth.responsecurve(ii,jj,t_Z));
+        psth.responsecurveZSmooth(ii,jj,:) = smooth(psth.responsecurveZ(ii,jj,:));
+        psth.rateDuringPulse(ii,jj,1) = mean(psth.responsecurve(ii,jj,t_duringPulse));
+        psth.rateBeforePulse(ii,jj,1) = mean(psth.responsecurve(ii,jj,t_beforePulse));
+        psth.rateZDuringPulse(ii,jj,1) = mean(psth.responsecurveZ(ii,jj,t_duringPulse));
+        psth.rateZBeforePulse(ii,jj,1) = mean(psth.responsecurveZ(ii,jj,t_beforePulse));
+        psth.durationPerPulse(ii,jj,1) = t(find(t_duringPulse,1,'last')+1) - t(find(t_duringPulse,1,'first')-1);
+        psth.pulseDuration(ii,jj,1) = pulseDuration;
+        psth.condition(ii,jj,1) = jj;
+
+        try
+            [h, psth.modulationSignificanceLevel(ii,jj,1)] = ...
+                 kstest2(squeeze(psth.responsecurve(ii,jj,t_duringPulse))...
+                ,squeeze(psth.responsecurve(ii,jj,t_beforePulse)));
+        catch
+             psth.modulationSignificanceLevel(ii,jj,1) = NaN;
+        end
+        
+        % Boostrap test
+        ci = squeeze(psth.bootsTrapCI(ii,jj,:));
+        if psth.rateDuringPulse(ii,jj,1) > ci(2)
+            test = 1;
+        elseif psth.rateDuringPulse(ii,jj,1) < ci(1)
+            test = -1;
+        elseif isnan(psth.rateDuringPulse(ii,jj,1))
+                test = NaN;
+        else
+            test = 0;
+        end
+        psth.bootsTrapTest(ii,jj,1) = test;
+        
+        % z-score change test
+        if mean(psth.responsecurveZ(ii,jj,t_duringPulse)) > 1.96
+            test = 1;
+        elseif mean(psth.responsecurveZ(ii,jj,t_duringPulse)) < -1.96
+             test = -1;
+        elseif isnan(psth.rateZDuringPulse(ii,jj,1))
+            test = NaN;
+        else
+            test = 0;
+        end
+        psth.zscoreTest(ii,jj,1) = test;
+
+        % Generating raster
+        rasterX = [];
+        rasterY = [];
+        if getRaster
+            for zz = 1:size(pul,1)
+                temp_spk = spikes.times{ii}(find(spikes.times{ii} - pul(zz,1)  > raster_time(1) & spikes.times{ii} - pul(zz,1)  < raster_time(2))) - pul(zz,1);
                 rasterX = [rasterX; temp_spk];
                 if ~isempty(temp_spk)
                     rasterY = [rasterY; zz * ones(size((temp_spk)))];
                 end
             end
-            
-            if ~isempty(rasterX)
-                [rasterHist3,c] = hist3([rasterY rasterX],{1:size(timestamps,1) win_raster(1):binSize_raster:win_raster(2)});
-                
-                psth.raster.rasterCount{ii,jj} = rasterHist3;
-                psth.raster.rasterProb{ii,jj} = rasterHist3/sum(rasterHist3(:));
-                psth.raster.TrialsNumber{ii,jj} = c{1};
-                psth.raster.times{ii,jj} = c{2};
-                psth.raster.rasterTrials{ii,jj} = rasterY;
-                psth.raster.rasterSpikesTimes{ii,jj} = rasterX;
-            else
-                psth.raster.rasterCount{ii,jj} = NaN;
-                psth.raster.rasterProb{ii,jj} = NaN;
-                psth.raster.TrialsNumber{ii,jj} = NaN;
-                psth.raster.times{ii,jj} = NaN;
-                psth.raster.rasterTrials{ii,jj} = NaN;
-                psth.raster.rasterSpikesTimes{ii,jj} = NaN;
-            end
-            
-        else
-            %psth.responsecurve(ii,jj,:) = nan(duration/binSize + 1,1);
-            %psth.responsecurveZ(ii,jj,:) = nan(duration/binSize + 1,1);
-            psth.responsecurve(ii,jj,:) = NaN;
-            psth.responsecurveZ(ii,jj,:) = NaN;
-            psth.modulationSignificanceLevel(ii,jj,1) = NaN;
-            psth.rateDuringPulse(ii,jj,1) = NaN;
-            psth.rateBeforePulse(ii,jj,1) = NaN;
-            psth.rateZDuringPulse(ii,jj,1) = NaN;
-            psth.bootsTrapTest(ii,jj,1) = NaN;
-            psth.zscoreTest(ii,jj,1) = NaN;
-            psth.threeWaysTest(ii,jj,1) = NaN;
         end
+        if ~isempty(rasterX)
+            [rasterHist3,c] = hist3([rasterY rasterX],{1:size(pul,1) raster_time(1):salt_binSize:raster_time(2)});
+            psth.raster.rasterCount{ii,jj} = rasterHist3;
+            psth.raster.rasterProb{ii,jj} = rasterHist3/sum(rasterHist3(:));
+            psth.raster.TrialsNumber{ii,jj} = c{1};
+            psth.raster.times{ii,jj} = c{2};
+            psth.raster.rasterTrials{ii,jj} = rasterY;
+            psth.raster.rasterSpikesTimes{ii,jj} = rasterX;
+
+            time  = c{2};
+            % running salt
+            baseidx = dsearchn(time', salt_baseline');
+            tidx = dsearchn(time', [0; pulseDuration*2]);      
+
+            st = length(baseidx(1):baseidx(2));
+            nmbn = round(salt_win/salt_binSize);
+            v = 1:nmbn:st;
+            if any((v + nmbn - 1) > st)
+                error('reduce window size or baseline duration')
+            end
+
+            [psth.salt.p_value(ii,jj,1), psth.salt.I_statistics(ii,jj,1)] = salt(rasterHist3(:,baseidx(1):baseidx(2)),rasterHist3(:,tidx(1):tidx(2)),salt_binSize, salt_win);
+        else
+            psth.raster.rasterCount{ii,jj} = NaN;
+            psth.raster.rasterProb{ii,jj} = NaN;
+            psth.raster.TrialsNumber{ii,jj} = NaN;
+            psth.raster.times{ii,jj} = NaN;
+            psth.raster.rasterTrials{ii,jj} = NaN;
+            psth.raster.rasterSpikesTimes{ii,jj} = NaN;
+            psth.salt.p_value(ii,jj,1) = NaN;
+            psth.salt.I_statistics(ii,jj,1) = NaN;
+        end
+        
+        % multiple test test. If not boostrap, it would be 2 ways.
+        if (psth.rateDuringPulse(ii,jj,1) > ci(2) || isnan(ci(2))) && psth.modulationSignificanceLevel(ii,jj,1)<0.01...
+                && mean(psth.responsecurveZ(ii,jj,t_duringPulse)) > 1.96
+            test = 1;
+        elseif (psth.rateDuringPulse(ii,jj,1) < ci(1) || isnan(ci(1))) && psth.modulationSignificanceLevel(ii,jj,1)<0.01 ...
+                && mean(psth.responsecurveZ(ii,jj,t_duringPulse)) < -1.96
+            test = -1;
+        else
+            test = 0;
+        end
+        psth.threeWaysTest(ii,jj,1) = test;
+        psth.threeWaysTest_and_salt(ii,jj,1) = test && psth.salt.p_value(ii,jj,1)<0.05;
+            
+        multipleTest = double([psth.rateDuringPulse(ii,jj,1) > ci(2) || isnan(ci(2)) psth.modulationSignificanceLevel(ii,jj,1)<0.01...
+            mean(psth.responsecurveZ(ii,jj,t_duringPulse)) > 1.96 psth.salt.p_value(ii,jj,1)<0.05]);
+        multipleTest_sign = -double([psth.rateDuringPulse(ii,jj,1) < ci(2) || isnan(ci(2)) psth.modulationSignificanceLevel(ii,jj,1)<0.01...
+            mean(psth.responsecurveZ(ii,jj,t_duringPulse)) < -1.96 psth.salt.p_value(ii,jj,1)<0.05]);
+        
+        if any(multipleTest_sign([1 3])==-1)
+            multipleTest([1 3]) = multipleTest_sign([1 3]);
+        end
+            
+        multipleTest_string = [];
+        for zz = 1:length(multipleTest)
+            switch multipleTest(zz)
+                case -1
+                    multipleTest_string = strcat(multipleTest_string, '-');
+                case 0
+                    multipleTest_string = strcat(multipleTest_string, '=');
+                case 1
+                    multipleTest_string = strcat(multipleTest_string, '+');
+            end
+        end
+        psth.multipleTest(ii,jj,:) = multipleTest;
+        psth.multipleTest_string{ii,jj} = multipleTest_string;
+
+    else
+        psth.responsecurve(ii,jj,:) = NaN * psth.responsecurve(ii,jj,:) ;
+        psth.responsecurveZ(ii,jj,:) = NaN * psth.responsecurve(ii,jj,:) ;
+        psth.modulationSignificanceLevel(ii,jj,1) = NaN;
+        psth.rateDuringPulse(ii,jj,1) = NaN;
+        psth.rateBeforePulse(ii,jj,1) = NaN;
+        psth.rateZDuringPulse(ii,jj,1) = NaN;
+         psth.rateZBeforePulse(ii,jj,1) = NaN;
+        psth.bootsTrapTest(ii,jj,1) = NaN;
+        psth.zscoreTest(ii,jj,1) = NaN;
+        psth.threeWaysTest(ii,jj,1) = NaN;
+        psth.durationPerPulse(ii,jj,1) = NaN;
+        psth.pulseDuration(ii,jj,1) = pulseDuration;
+        
+        psth.raster.rasterCount{ii,jj} = NaN;
+        psth.raster.rasterProb{ii,jj} = NaN;
+        psth.raster.TrialsNumber{ii,jj} = NaN;
+        psth.raster.times{ii,jj} = NaN;
+        psth.raster.rasterTrials{ii,jj} = NaN;
+        psth.raster.rasterSpikesTimes{ii,jj} = NaN;
+        
+        psth.salt.p_value(ii,jj,1) = NaN;
+        psth.salt.I_statistics(ii,jj,1) = NaN;
+        
+        psth.threeWaysTest_and_salt(ii,jj,1) = NaN;
+        
+        psth.multipleTest(ii,jj,:) = nan(1,4);
+        psth.multipleTest_string{ii,jj} = NaN;
     end
     psth.timestamps = t;
 end
@@ -316,16 +419,9 @@ if nConditions == 1
     end
 end
 
+raster = psth.raster;
 if saveMat
-    try
-        disp('Saving results...');
-        save([basenameFromBasepath(pwd) '.' eventType '_psth.cellinfo.mat'],'psth');
-    catch
-        disp('Saving results...');
-        save([basenameFromBasepath(pwd) '.' eventType '_psth.cellinfo.mat'],'psth','-v7.3');
-    end
     disp('Saving results...');
-
     raster = psth.raster;
     psth = rmfield(psth,'raster');
     save([basenameFromBasepath(pwd) '.' eventType '_psth.cellinfo.mat'],'psth','-v7.3');
@@ -334,44 +430,50 @@ end
 
 % PLOTS
 % 1. Rasters plot
-if rasterPlot && any(any(~isnan(psth.responsecurve)))
-    t = psth.timestamps;
-    st = timestamps;
-    if length(st) > 5000 % if more than 5000
-        st = randsample(st, 5000);
-        st = sort(st);
-    end
+if getRaster && any(any(~isnan(psth.responsecurve)))
+    tt = psth.timestamps;
+    % st = timestamps;
+    % if length(st) > 5000 % if more than 5000
+    %     st = randsample(st, 5000);
+    %     st = sort(st);
+    % end
     disp('   Plotting spikes raster and psth...');
     % [stccg, t] = CCG([spikes.times st],[],'binSize',0.005,'duration',1);
     figure;
     set(gcf,'Position',[200 -500 2500 1200]);
     for jj = 1:size(spikes.UID,2)
-        fprintf(' **Events from unit %3.i/ %3.i \n',jj, size(spikes.UID,2)); %\n
-        rast_x = []; rast_y = [];
-        for kk = 1:length(st)
-            temp_rast = spikes.times{jj} - st(kk);
-            temp_rast = temp_rast(temp_rast>winSizePlot(1) & temp_rast<winSizePlot(2));
-            rast_x = [rast_x temp_rast'];
-            rast_y = [rast_y kk*ones(size(temp_rast))'];
-        end
+        % fprintf(' **Events from unit %3.i/ %3.i \n',jj, size(spikes.UID,2)); %\n
+        % rast_x = []; rast_y = [];
+        % for kk = 1:length(st)
+        %     temp_rast = spikes.times{jj} - st(kk);
+        %     temp_rast = temp_rast(temp_rast>winSizePlot(1) & temp_rast<winSizePlot(2));
+        %     rast_x = [rast_x temp_rast'];
+        %     rast_y = [rast_y kk*ones(size(temp_rast))'];
+        % end
+        rast_x = raster.rasterSpikesTimes{jj};
+        rast_y = raster.rasterTrials{jj};
 
         % spikeResponse = [spikeResponse; zscore(squeeze(stccg(:,end,jj)))'];
         resp = psth.responsecurveSmooth(jj,:);
         subplot(7,ceil(size(spikes.UID,2)/7),jj); % autocorrelogram
-        plot(rast_x, rast_y,'.','MarkerSize',1)
+        plot(rast_x, rast_y,'.','MarkerSize',1,'color',[.6 .6 .6])
         hold on
-        plot(t(t>winSizePlot(1) & t<winSizePlot(2)), resp(t>winSizePlot(1) & t<winSizePlot(2)) * kk/max(resp)/2,'k','LineWidth',2);
-        xlim([winSizePlot(1) winSizePlot(2)]); ylim([0 kk]);
-        if psth.threeWaysTest(jj) == 0
-            title(num2str(jj),'FontWeight','normal','FontSize',10);
-        elseif psth.threeWaysTest(jj) == -1
-            title([num2str(jj) '(-)'],'FontWeight','normal','FontSize',10);
-        elseif psth.threeWaysTest(jj) == 1
-            title([num2str(jj) '(+)'],'FontWeight','normal','FontSize',10);
-        end
+        kk = length(pul);
+        plot(tt(tt>raster_time(1) & tt<raster_time(2)), resp(tt>raster_time(1) & tt<raster_time(2)) * kk/max(resp)/2,'k','LineWidth',2);
+        xlim([raster_time(1) raster_time(2)]); ylim([0 kk]);
+
+        title([num2str(jj) ' (' psth.multipleTest_string{jj} ')'],'FontWeight','normal','FontSize',10);
+        % if psth.threeWaysTest(jj) == 0
+        %     title(num2str(jj),'FontWeight','normal','FontSize',10);
+        % elseif psth.threeWaysTest(jj) == -1
+        %     title([num2str(jj) '(-)'],'FontWeight','normal','FontSize',10);
+        % elseif psth.threeWaysTest(jj) == 1
+        %     title([num2str(jj) '(+)'],'FontWeight','normal','FontSize',10);
+        % end
 
         if jj == 1
-            ylabel('Trial');
+            title([num2str(jj) ' (' psth.multipleTest_string{jj} '), (Bootstrapping, kstest, zscore, salt)'],'FontWeight','normal','FontSize',10);
+            ylabel('Event #');
         elseif jj == size(spikes.UID,2)
             xlabel('Time (s)');
         else

@@ -244,18 +244,13 @@ pulses.isDigital(toRemove) = [];
 %%
 spikes = loadSpikes;
 % generate random events for boostraping
-disp('Generating boostrap template...');
-nPulses = int32(size(pulses.timestamps,1));
-randomEvents = [];
-for kk = 1:numRep
-    randomEvents{kk} = sort(randsample(timestamps_recording, nPulses))';
-end
 disp('Computing responses...');
 
 for jj = 1:nConditions
     fprintf('\n Condition %3.i / %3.i \n', jj, nConditions)
 
     % generate events for boostraping
+    disp('Generating boostrap template...');
     nPulses = length(find(pulses.channel == conditions(jj,2) & pulses.duration == conditions(jj,1)));
     randomEvents = [];
     for mm = 1:numRep

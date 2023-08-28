@@ -166,7 +166,7 @@ timestamps = []; code = []; shank = []; LED = []; pulsesNumber = []; channel = [
         end
     end
 % catch
-    warning('Problem collecting pulses!!');
+    % warning('Problem collecting pulses!!');
 % end
 
 [~, idx] = sort(timestamps(:,1));

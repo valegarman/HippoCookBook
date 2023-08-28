@@ -321,7 +321,7 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
                 uLEDResponses.threeWaysTest(ii,kk,jj,1) = NaN;
                 uLEDResponses.threeWaysTest_and_salt(ii,kk,jj,1) = NaN;
 
-                uLEDResponses.multipleTest(ii,kk,jj,:) = NaN;
+                uLEDResponses.multipleTest(ii,kk,jj,:) = [NaN NaN NaN NaN];
                 uLEDResponses.multipleTest_string{ii,kk,jj} = NaN;
                 
                 uLEDResponses.numberOfPulses(ii,kk,jj,1) = NaN;

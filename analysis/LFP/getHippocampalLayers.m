@@ -94,6 +94,11 @@ set(gcf,'Position',[100 100 1400 600])
 nShanks = length(session.extracellular.electrodeGroups.channels);
 index = reshape(1:2*nShanks, nShanks, 2).';
 
+%
+data = lfp.data;
+eventTwin = [-.05 .05];
+twin_rip = eventTwin * session.extracellular.srLfp;
+
 zscor_xnan = @(x) bsxfun(@rdivide, bsxfun(@minus, x, mean(x,'omitnan')), std(x, 'omitnan'));
 for i = 1:length(session.extracellular.electrodeGroups.channels)
     if ~all(ismember(session.extracellular.electrodeGroups.channels{i},session.channelTags.Bad.channels))
@@ -170,18 +175,42 @@ for i = 1:length(session.extracellular.electrodeGroups.channels)
                 ppmean3 = ppmean3(I);
                 p3 = plot(ppmean3 + 20,flip(nC),'color',[.2 .2 .2]);
                 plot(ppmean3 + 20,flip(nC),'o','color',[.2 .2 .2],'MarkerFaceColor',[.2 .2 .2]);
-                ylim([min(nC) max(nC) + 4]);
+                ylim([min(nC) - 1 max(nC) + 4]);
                 ax = axis;
                 set(gca,'YTick',[1:length(ppmean)],'YtickLabels',flip(session.extracellular.electrodeGroups.channels{i})); 
-
+                
                 contourf((evCsd.timestamps  + max(evCsd.timestamps))/14 + ax(2),(nC(2:end-1)),evCsd.data',40,'LineColor','none');hold on;
                 targetWin = evCsd.timestamps > -10 & evCsd.timestamps < 10;
                 csd_profile = (mean(evCsd.data(targetWin,:)) - nanmean(mean(evCsd.data(targetWin,:))))/nanstd(mean(evCsd.data(targetWin,:)));
                 tt = (evCsd.timestamps  + max(evCsd.timestamps))/14 + ax(2); tt = tt(int32(length(tt)/2));
-                plot([nan tt + csd_profile nan], nC,'k');
+                plot([nan tt + csd_profile nan], nC,'w');
                 colormap(jet); caxis([-max(abs(evCsd.data(:))) max(abs(evCsd.data(:)))]);
                 ax = axis;
                 title(['Shank ', num2str(i), ' of ', num2str(length(session.extracellular.electrodeGroups.channels))],'FontWeight','normal');
+
+                % plotting ripples
+                events = ripples{i}.peaks;
+                events = events((events + twin_rip(2) <= size(data,1)) & (events - twin_rip(1) > 0));
+                events(events <= abs(twin_rip(1))) = [];
+                lfp_temp = nan(-twin_rip(1)+twin_rip(2)+1,length(lfp.channels),length(events));
+                for e = 1:length(events)
+                    lfp_temp(:,:,e) = data(int32(events(e)+twin_rip(1):events(e)+twin_rip(2)),lfp.channels);
+                end
+                lfp_avg = nanmean(lfp_temp,3);
+    
+                for ii = 1:size(lfp_avg,2)
+                    % lfp_avg(:,ii) = lfp_avg(:,ii) - mean(lfp_avg(:,ii));
+                    lfp_avg(:,ii) = lfp_avg(:,ii) - lfp_avg(1,ii);
+                end
+                lfp_avg_norm = (lfp_avg./std(lfp_avg(:)))*.5;
+                lfp_event_ts = linspace(45,58,size(lfp_avg_norm,1));
+                clear lfp_temp lfp_avg
+                
+                ch_order = session.extracellular.electrodeGroups.channels{i};
+                ch_position = flip(1:length(ch_order));
+                for jj = 1:length(ch_order)
+                    plot(lfp_event_ts, lfp_avg_norm(:,ch_order(jj))+ch_position(jj),'color',[.2 .2 .2]);
+                end
 
                 unsigned_area = [max(nC)+0.5  max(nC)+0.5+4];
                 fill([ax([1 2 2 1 1])],[unsigned_area([1 1 2 2 1])],[.7 .7 .7],'EdgeColor','none');
@@ -254,7 +283,7 @@ for i = 1:length(session.extracellular.electrodeGroups.channels)
                 close(fp);
 
                 channel_list = [flip(session.extracellular.electrodeGroups.channels{i}) NaN(1,10)];
-                channels{i}.pyramidal = channel_list(pyr)
+                channels{i}.pyramidal = channel_list(pyr);
                 channels{i}.radiatum = channel_list(rad);
                 channels{i}.slm = channel_list(slm);
                 channels{i}.oriens = channel_list(or);
@@ -321,7 +350,7 @@ for i = 1:length(session.extracellular.electrodeGroups.channels)
             text(find(session.extracellular.electrodeGroups.channels{i} == channels{i}.slm), ax(4),'Slm','color',[.1 .8 .1]);
         end
 
-        legend([p1 p2], '[3-12 Hz]', '120 240 Hz','Location','southeast');
+        legend([p1 p2 p3], '3-12 Hz', '20 100 Hz','120 240 Hz','Location','southeast');
         set(gca,'TickDir','out','XTick',nC,'XTickLabelRotation',45); xlabel('Channels'); ylabel('dB');
         
         

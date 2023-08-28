@@ -224,13 +224,13 @@ end
 if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     % Trying changes in detecUD_temp
     % 8.1 Up and downs
-    UDStates = detectUD('plotOpt', true,'forceDetect',true','NREMInts','all');
-    psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true);
+    UDStates = detectUpsDowns('plotOpt', true,'forceDetect',true','NREMInts','all');
+    psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true,'minNumberOfPulses',10);
     getSpikesRank('events','upstates');
 
     % 8.2 Ripples
     ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'removeOptogeneticStimulation',true,'thresholds',rippleMasterDetector_threshold,'eventSpikeThreshold', true);
-    psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'min_pulsesNumber',10);
+    psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10);
     getSpikesRank('events','ripples');
 
     % 8.3 Theta intervals
@@ -291,11 +291,11 @@ if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
     try 
         behaviour = getSessionLinearize;
         psth_lReward = spikesPsth([behaviour.events.lReward],'numRep',100,'saveMat',false,...
-            'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
+            'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1],'raster_time',[-2 2]);
         psth_rReward = spikesPsth([behaviour.events.rReward],'numRep',100,'saveMat',false,...
-            'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
+            'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1],'raster_time',[-2 2]);
         psth_reward = spikesPsth([behaviour.events.lReward; behaviour.events.rReward],'numRep',100,'saveMat',false,...
-            'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
+            'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1],'raster_time',[-2 2]);
         
         if all(isnan(behaviour.events.startPoint))
             behaviour.events.startPoint = NaN;
@@ -304,9 +304,9 @@ if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
             behaviour.events.intersection = NaN;
         end
         psth_intersection = spikesPsth([behaviour.events.intersection],'numRep',100,'saveMat',false,...
-            'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
+            'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1],'raster_time',[-2 2]);
         psth_startPoint = spikesPsth([behaviour.events.startPoint],'numRep',100,'saveMat',false,...
-            'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
+            'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1],'raster_time',[-2 2]);
 
         behaviour.psth_lReward = psth_lReward;
         behaviour.psth_rReward = psth_rReward;
@@ -315,10 +315,14 @@ if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
         behaviour.psth_startPoint = psth_startPoint; 
         behavior = behaviour; % british to american :)
         save([basenameFromBasepath(pwd) '.behavior.cellinfo.mat'],'behavior');
+    catch
+        warning('Psth on behaviour events was not possible...');
     end
 
     try
         speedCorr = getSpeedCorr('numQuantiles',20,'force',true);
+    catch
+        warning('Speed\rate correlation analysis was not possible!');
     end
 end
 
