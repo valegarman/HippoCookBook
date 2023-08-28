@@ -184,7 +184,7 @@ else
      psth.bootsTrapCI(1:spikes.numcells,jj,1:2) = NaN;
 end
 
-if ~isempty(timestamps) && ~isnan(timestamps)
+if ~isempty(timestamps) && all(~isnan(timestamps))
     pul = timestamps;
 else
     pul = [0];

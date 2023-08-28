@@ -191,6 +191,7 @@ for i = 1:length(session.extracellular.electrodeGroups.channels)
                 % plotting ripples
                 events = ripples{i}.peaks;
                 events = events((events + twin_rip(2) <= size(data,1)) & (events - twin_rip(1) > 0));
+                events(events <= abs(twin_rip(1))) = [];
                 lfp_temp = nan(-twin_rip(1)+twin_rip(2)+1,length(lfp.channels),length(events));
                 for e = 1:length(events)
                     lfp_temp(:,:,e) = data(int32(events(e)+twin_rip(1):events(e)+twin_rip(2)),lfp.channels);
