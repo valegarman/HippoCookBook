@@ -105,4 +105,5 @@ fcamk1_200902_sess13,fcamk1,fcamk1\fcamk1_200902_sess13,c57b1/6,camkii/ai32,"ule
 fcamk3_201030_sess12,fcamk3,fcamk3\fcamk3_201030_sess12,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze linear maze,47,CA1sp CA1so,uLEDiscotheque InterneuronsLibrary
 fcamk1_200904_sess15,fcamk1,fcamk1\fcamk1_200904_sess15,c57,camkii/ai32,"uled-12led-32ch-4shanks",linear maze,59,CA1sp CA1so CA1sr,uLEDiscotheque InterneuronsLibrary
 fcamk3_201103_sess14,fcamk3,fcamk3\fcamk3_201103_sess14,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze linear maze,44,CA1sp CA1so CA1sr,uLEDiscotheque InterneuronsLibrary
-fcamk1_200908_sess16,fcamk1,fcamk1\fcamk1_200908_sess16,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze,59,CA1sp CA1so,uLEDiscotheque InterneuronsLibrary 
+fcamk1_200908_sess16,fcamk1,fcamk1\fcamk1_200908_sess16,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze,59,CA1sp CA1so,uLEDiscotheque InterneuronsLibrary
+fpv5_220701_sess5,fpv5,fpv5\fpv5_220701_sess5,c57b1/6,vip/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",postsleep,19,CA1sp CA1so PTLp6 PTLp5 CA1slm CA1sr CA3sp CA3sr DG,InterneuronsLibrary
