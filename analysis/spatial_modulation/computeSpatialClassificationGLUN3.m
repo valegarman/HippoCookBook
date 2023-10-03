@@ -1,4 +1,4 @@
-function [spatialModulation] = computeSpatialClassification(varargin)
+function [spatialModulation] = computeSpatialClassificationGLUN3(varargin)
 
 %   spatialModulation = computeSpatialClassification(varargin)
 %       
@@ -71,75 +71,20 @@ is_periodic_aux = zeros(1,length(spikes.UID));
 if tint
     var_coherence = ['spatial_corr2_sc_r_map_1'];
 else
-    if isfield(spatialModulation,'map_2_description') & ~isfield(spatialModulation,'map_3_description')
-        if strcmpi(spatialModulation.map_1_description,'Open Field')
-            var_coherence = ['spatial_corr_sc_r_map_1'];
-            var_bitsPerSpike = ['bitsPerSpike_map_1'];
-            var_bitsPerSecond = ['bitsPerSec_map_1'];
-            firingFieldSize_var = ['firingFieldSize_map_1'];
-            selectivity_var = ['selectivity_map_1'];
-            PF_size_var = ['PF_size_map_1'];
-            border_var = ['borderIndex_map_1'];
-            periodic_var = ['periodicFiring_map_1'];
-            shuffling_var = ['shuffling_map_1'];
-            rateMaps_var = ['map_1_rateMaps'];
-            firingFieldSize_var = ['firingFieldSize_map_1'];
-            maxRate_var = ['maxRate_map_1'];
-            placeField_var = ['is_placeField_map_1'];
-            var_maps = 1;
-
-        elseif strcmpi(spatialModulation.map_2_description,'Open Field')
-            var_coherence = ['spatial_corr_sc_r_map_2'];
-            var_bitsPerSpike = ['bitsPerSpike_map_2'];
-            var_bitsPerSecond = ['bitsPerSec_map_2'];
-            firingFieldSize_var = ['firingFieldSize_map_2'];
-            selectivity_var = ['selectivity_map_2'];
-            PF_size_var = ['PF_size_map_2'];
-            border_var = ['borderIndex_map_2'];
-            periodic_var = ['periodicFiring_map_2'];
-            shuffling_var = ['shuffling_map_2'];
-            rateMaps_var = ['map_2_rateMaps'];
-            firingFieldSize_var = ['firingFieldSize_map_2'];
-            maxRate_var = ['maxRate_map_2'];
-            placeField_var = ['is_placeField_map_2'];
-            var_maps = 2;
-        end
-        
-    elseif isfield(spatialModulation,'map_2_description') & isfield(spatialModulation,'map_3_description')   
-        if strcmpi(spatialModulation.map_1_description,'Open Field')
-            var_coherence = ['spatial_corr_sc_r_map_1'];
-            var_bitsPerSpike = ['bitsPerSpike_map_1'];
-            var_bitsPerSecond = ['bitsPerSec_map_1'];
-            firingFieldSize_var = ['firingFieldSize_map_1'];
-            selectivity_var = ['selectivity_map_1'];
-            PF_size_var = ['PF_size_map_1'];
-            border_var = ['borderIndex_map_1'];
-            periodic_var = ['periodicFiring_map_1'];
-            shuffling_var = ['shuffling_map_1'];
-            rateMaps_var = ['map_1_rateMaps'];
-            firingFieldSize_var = ['firingFieldSize_map_1'];
-            maxRate_var = ['maxRate_map_1'];
-            placeField_var = ['is_placeField_map_1'];
-            var_maps = 1;
-        end
-    
-    elseif ~isfield(spatialModulation,'map_2_description') & ~isfield(spatialModulation,'map_3_description')
-        
-            var_coherence = ['spatial_corr_sc_r_map_3'];
-            var_bitsPerSpike = ['bitsPerSpike_map_3'];
-            var_bitsPerSecond = ['bitsPerSec_map_3'];
-            firingFieldSize_var = ['firingFieldSize_map_3'];
-            selectivity_var = ['selectivity_map_3'];
-            PF_size_var = ['PF_size_map_3'];
-            border_var = ['borderIndex_map_3'];
-            periodic_var = ['periodicFiring_map_3'];
-            shuffling_var = ['shuffling_map_3'];
-            rateMaps_var = ['map_3_rateMaps'];
-            firingFieldSize_var = ['firingFieldSize_map_3'];
-            maxRate_var = ['maxRate_map_3'];
-            placeField_var = ['is_placeField_map_3'];
-            var_maps = 3;
-    end
+    var_coherence = ['spatial_corr_sc_r_map_1'];
+    var_bitsPerSpike = ['bitsPerSpike_map_1'];
+    var_bitsPerSecond = ['bitsPerSec_map_1'];
+    firingFieldSize_var = ['firingFieldSize_map_1'];
+    selectivity_var = ['selectivity_map_1'];
+    PF_size_var = ['PF_size_map_1'];
+    border_var = ['borderIndex_map_1'];
+    periodic_var = ['periodicFiring_map_1'];
+    shuffling_var = ['shuffling_map_1'];
+    rateMaps_var = ['map_1_rateMaps'];
+    firingFieldSize_var = ['firingFieldSize_map_1'];
+    maxRate_var = ['maxRate_map_1'];
+    placeField_var = ['is_placeField_map_1'];
+    var_maps = 1;
 end
 
 if tint
@@ -373,7 +318,9 @@ for ii = 1:length(spikes.UID)
     scatter(behavior.maps{var_maps}(n > 0 ,2),behavior.maps{var_maps}(n > 0,3),1,'MarkerEdgeColor',[1 0 0], 'MarkerFaceColor',[0.9 0 0]);
     axis ij
     axis square
-    xlabel('cm'); ylabel(['Stability: ', num2str(round(stability,3))]);
+    xlabel('cm'); 
+    ylabel('cm')
+%     ylabel(['Stability: ', num2str(round(stability,3))]);
 %     set(gca,'YTick',[0 20 40 60 80 100],'YTickLabel',{'0','20','40','60','90','100'});
     
     ax = subplot(2,2,2);

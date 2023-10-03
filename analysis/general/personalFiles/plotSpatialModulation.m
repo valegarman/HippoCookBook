@@ -204,7 +204,7 @@ end
 session = loadSession;
 if length(firingMaps.rateMaps{1}) == 1
     numSubplots = 5;
-elseif length(firingMaps.rateMaps{1}) == 2
+elseif length(firingMaps.rateMaps{1}) == 2 || length(firingMaps.rateMaps{1}) == 3
     numSubplots = 6;
 end
 
@@ -425,7 +425,7 @@ for ii = 1:length(UID)
                         hold on;
                         plot(behavior.maps{jj}(:,2),behavior.maps{jj}(:,3),'color',[0.7 0.7 0.7]);
                         t = behavior.maps{jj}(:,1);
-                        dt = diff(t); dt(end+1) = dt(end); de(dt > firingMaps.params.maxGap) = firingMaps.params.maxGap;
+                        dt = diff(t); dt(end+1) = dt(end); dt(dt > firingMaps.params.maxGap) = firingMaps.params.maxGap;
                         n = CountInIntervals(spikes.times{ii},[t t+dt]);
                         scatter(behavior.maps{jj}(n > 0 ,2),behavior.maps{jj}(n > 0,3),1,'MarkerEdgeColor',[1 0 0], 'MarkerFaceColor',[0.9 0 0]);
                         axis ij;

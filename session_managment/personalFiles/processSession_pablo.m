@@ -61,9 +61,9 @@ addParameter(p,'profileType','hippocampus',@ischar); % options, 'hippocampus' an
 addParameter(p,'showTetrodes',true,@islogical);
 addParameter(p,'twoHalvesAnalysis',true,@islogical);
 addParameter(p,'gridAnalysis',false,@islogical);
-addParameter(p,'randomization',false,@islogical);
+addParameter(p,'randomization',true,@islogical);
 addParameter(p,'tint',true,@islogical);
-addParameter(p,'speedThresh',0,@isnumeric);
+addParameter(p,'speedThresh',1,@isnumeric);
 
 parse(p,varargin{:})
 
@@ -258,13 +258,15 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true,'min_pulsesNumber',0);
     getSpikesRank('events','upstates');
     
-    % 8.2 Ripples
+%     % 8.2 Ripples
 %     if ~isempty(dir('*MergePoints.events.mat'));
 %         file = dir('*MergePoints.events.mat');
 %         load(file.name);
 %     end
 %     ts_maze = MergePoints.timestamps(2,:);
 %     ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'removeOptogeneticStimulation',true,'eventSpikeThreshold',false,'excludeIntervals',ts_maze); % [1.5 3.5]
+    
+    ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'removeOptogeneticStimulation',true,'eventSpikeThreshold',false,'excludeIntervals',ts); % [1.5 3.5]
     
     ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'removeOptogeneticStimulation',true,'eventSpikeThreshold',false); % [1.5 3.5]
     psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'min_pulsesNumber',0);
@@ -306,8 +308,8 @@ if ~any(ismember(excludeAnalysis, {'10',lower('cellMetrics')}))
     
     getACGPeak('force',true);
 
-    getAverageCCG('force',true);
-    getAverageCCGPerSubSession('force',true);
+    getAverageCCG('force',true,'skipStimulationPeriods',false);
+    getAverageCCGPerSubSession('force',true,'skipStimulationPeriods',false);
     getSpikesReturnPlot('force',true);
 %     computeAverageCCG('force',true);
     
@@ -336,33 +338,33 @@ if ~any(ismember(excludeAnalysis, {'13',lower('spatialModulation')}))
         spikes = loadSpikes;
         getSessionTracking('convFact',tracking_pixel_cm,'roiTracking','manual','anyMaze',anyMaze);
         
-        try
-            createSessionPMazeDigitalIn;
-        catch
-            warning('Not possible lo create TTls for PMaze');
-        end
+%         try
+%             createSessionPMazeDigitalIn;
+%         catch
+%             warning('Not possible lo create TTls for PMaze');
+%         end
         
-        try
-            getSessionArmChoice('task','alternation');
-        catch
-            warning('No arm choice available to compute.');
-        end
+%         try
+%             getSessionArmChoice('task','alternation');
+%         catch
+%             warning('No arm choice available to compute.');
+%         end
 %         try
 %             getSessionYMazeChoice('forceReload',true);
 %         catch
 %             warning('No YMaze arm choice available to compute.');
 %         end
-        try
-            getSessionCircularMazeArmChoice('task','alternation')
-        catch
-            warning('No circular arm choice available to compute.');
-        end
-        try
-            getSessionPMazeArmChoice();
-            getTrials_PMaze();
-        catch
-            warning('PMaze arm choice not possible to compute...');
-        end
+%         try
+%             getSessionCircularMazeArmChoice('task','alternation')
+%         catch
+%             warning('No circular arm choice available to compute.');
+%         end
+%         try
+%             getSessionPMazeArmChoice();
+%             getTrials_PMaze();
+%         catch
+%             warning('PMaze arm choice not possible to compute...');
+%         end
         
         behavior = getSessionBehavior('forceReload',true,'linearizePMaze',true);
         
@@ -377,7 +379,7 @@ if ~any(ismember(excludeAnalysis, {'13',lower('spatialModulation')}))
             firingTrialsMap = firingMapPerTrial_pablo;
         end
         spatialModulation = computeSpatialModulation('force',true,'tint',false,'gridAnalysis',gridAnalysis,'randomization',randomization,'speedThresh',speedThresh);
-        spatialModulation_tint = computeSpatialModulation('force',true,'tint',true,'gridAnalysis',gridAnalysis,'randomization',randomization,'speedThresh',speedThresh);
+%         spatialModulation_tint = computeSpatialModulation('force',true,'tint',true,'gridAnalysis',gridAnalysis,'randomization',randomization,'speedThresh',speedThresh);
         
         if twoHalvesAnalysis
             firingMaps2Halves = firingMap2Halves(behavior,spikes,'pixelsPerCm',pixelsPerCm,'speedThresh',speedThresh,'saveMat',true,'tint',false);
@@ -464,9 +466,11 @@ if ~any(ismember(excludeAnalysis, {'13',lower('spatialModulation')}))
                 'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
             psth_rReward = spikesPsth([behavior.events.rReward],'numRep',100,'saveMat',false,...
                 'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
-            
+            psth_Reward = spikesPsth([behavior.events.rReward; behavior.events.lReward],'numRep',100,'saveMat',false,...
+                'min_pulsesNumber',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1]);
             behavior.psth_lReward = psth_lReward;
             behavior.psth_rReward = psth_rReward;
+            behavior.psth_reward = psth_Reward;
             save([basenameFromBasepath(pwd) '.behavior.cellinfo.mat'],'behavior');
         end
     end
@@ -513,7 +517,7 @@ if ~any(ismember(excludeAnalysis, {'14',lower('summary')}))
         plotSummary_pablo();
     elseif strcmpi(project,'SubiculumProject')
         plotSpatialModulation('gridAnalysis',gridAnalysis,'tint',false);
-        plotSpatialModulation('gridAnalysis',gridAnalysis,'tint',true);
+%         plotSpatialModulation('gridAnalysis',gridAnalysis,'tint',true);
 %         plotSummary_subiculum();
         plotSummary_pablo();
     elseif strcmpi(project,'MK801Project')

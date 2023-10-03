@@ -264,7 +264,7 @@ if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
         behaviour = getSessionLinearize('forceReload',true);  
         firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',true);
         placeFieldStats = bz_findPlaceFields1D('firingMaps',firingMaps,'maxSize',.75,'sepEdge',0.03); %% ,'maxSize',.75,'sepEdge',0.03
-        firingTrialsMap = firingMapPerTrial('force',true);
+        firingTrialsMap = firingMapPerTrial('force',true,'saveMat',true);
         spatialModulation = getSpatialModulation('force',true);
     catch
         warning('Not possible to run spatial modulation...');

@@ -176,18 +176,15 @@ for i=1:length(sess_folders)
 
                             % We are going to create the digitalIn.event.mat
                             % file
-<<<<<<< HEAD
                             
-=======
->>>>>>> 58bb47033a3c33922f586aaec67719ddf7455501
 %                             if ~isempty(din_signals)
 %                                 digitalIn = pap_getDigitalIn(din_signals,'all','fs',sample_rate);
 %                             end
 %                             
 %                             % We are going to create the analogIn.event.mat
-                            if ~isempty(ain_signals)
-                                pulses = pap_getAnalogIn(ain_signals,'all','fs',sample_rate);
-                            end
+%                             if ~isempty(ain_signals)
+%                                 pulses = pap_getAnalogIn(ain_signals,'all','fs',sample_rate);
+%                             end
                         end
 
                     end

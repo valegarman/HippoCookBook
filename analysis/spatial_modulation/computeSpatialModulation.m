@@ -210,11 +210,12 @@ if length(firingMaps.rateMaps{1}) > 1
             else
                 % 1 Spatial corr 2D
                 % Finding position bins where animal spent more than minTime
-                idx = find(firingMaps.occupancyUnSmooth{ii}{maps_pairs(jj,1)} > minTime & firingMaps.occupancyUnSmooth{ii}{maps_pairs(jj,2)} > minTime);
-                [rho,pval] = corrcoef(firingMaps.rateMaps{ii}{maps_pairs(jj,1)}(idx),firingMaps.rateMaps{ii}{maps_pairs(jj,2)}(idx));
-                spatialModulation.(['corr_maps_' num2str(maps_pairs(jj,1)) '_' num2str(maps_pairs(jj,2))])(ii,1) = rho(1,2);
-                spatialModulation.(['corr_pval_maps_' num2str(maps_pairs(jj,1)) '_' num2str(maps_pairs(jj,2))])(ii,1) = pval(1,2);
-                clear rho pval
+                
+%                 idx = find(firingMaps.occupancyUnSmooth{ii}{maps_pairs(jj,1)} > minTime & firingMaps.occupancyUnSmooth{ii}{maps_pairs(jj,2)} > minTime);
+%                 [rho,pval] = corrcoef(firingMaps.rateMaps{ii}{maps_pairs(jj,1)}(idx),firingMaps.rateMaps{ii}{maps_pairs(jj,2)}(idx));
+%                 spatialModulation.(['corr_maps_' num2str(maps_pairs(jj,1)) '_' num2str(maps_pairs(jj,2))])(ii,1) = rho(1,2);
+%                 spatialModulation.(['corr_pval_maps_' num2str(maps_pairs(jj,1)) '_' num2str(maps_pairs(jj,2))])(ii,1) = pval(1,2);
+%                 clear rho pval
             end
         end
     end
@@ -392,31 +393,47 @@ for jj = 1:length(firingMaps.rateMaps{1})
 end
 
 % Firing Field Size
-for jj = 1:length(firingMaps.rateMaps{1})
-    for ii = 1:length(firingMaps.UID)
-        if ~(size(firingMaps.rateMaps{ii}{jj},1) == 1) % not linearize
-            [firingFieldSize] = getFiringFieldSize('z',firingMaps.rateMaps{ii}{jj},'debug',false);
-            spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.size = firingFieldSize.size;
-            spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.sizeperc = firingFieldSize.sizeperc;
-            spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.data = firingFieldSize.data;
-            spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.positionx = firingFieldSize.positionx;
-            spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.positiony = firingFieldSize.positiony;
-            spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.MaxF = firingFieldSize.MaxF;
-            spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.numFF = firingFieldSize.numFF;
-            spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.FFarea = firingFieldSize.FFarea;
-            spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.FFareatot = firingFieldSize.FFareatot;
-            spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.maxFr = firingFieldSize.maxFr;
-            spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.meanFr = firingFieldSize.meanFr;
-            spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.Serr = firingFieldSize.Serr;
-            
-            % isPlaceCell: maxFr(any FF) > 1, at least one FF
-            if firingFieldSize.numFF >=  1 && firingFieldSize.maxFr > 1
-                spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.isPlaceCell = 1;
-            else
-                spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.isPlaceCell = 0;
+try
+    for jj = 1:length(firingMaps.rateMaps{1})
+        for ii = 1:length(firingMaps.UID)
+            if ~(size(firingMaps.rateMaps{ii}{jj},1) == 1) % not linearize
+                [firingFieldSize] = getFiringFieldSize('z',firingMaps.rateMaps{ii}{jj},'debug',false);
+                spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.size = firingFieldSize.size;
+                spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.sizeperc = firingFieldSize.sizeperc;
+                spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.data = firingFieldSize.data;
+                spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.positionx = firingFieldSize.positionx;
+                spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.positiony = firingFieldSize.positiony;
+                spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.MaxF = firingFieldSize.MaxF;
+                spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.numFF = firingFieldSize.numFF;
+                spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.FFarea = firingFieldSize.FFarea;
+                spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.FFareatot = firingFieldSize.FFareatot;
+                spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.maxFr = firingFieldSize.maxFr;
+                spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.meanFr = firingFieldSize.meanFr;
+                spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.Serr = firingFieldSize.Serr;
+
+                % isPlaceCell: maxFr(any FF) > 1, at least one FF
+                if firingFieldSize.numFF >=  1 && firingFieldSize.maxFr > 1
+                    spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.isPlaceCell = 1;
+                else
+                    spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.isPlaceCell = 0;
+                end
             end
         end
     end
+catch
+    spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.size = NaN;
+    spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.sizeperc = NaN;
+    spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.data = NaN;
+    spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.positionx = NaN;
+    spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.positiony = NaN;
+    spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.MaxF = NaN;
+    spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.numFF = NaN;
+    spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.FFarea = NaN;
+    spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.FFareatot = NaN;
+    spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.maxFr = NaN;
+    spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.meanFr = NaN;
+    spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.Serr = NaN;
+    spatialModulation.(['firingFieldSize_map_' num2str(jj)]){ii}.isPlaceCell = 0;
 end
 
 % Border Index
@@ -438,24 +455,35 @@ end
 
 % Periodic Firing
 
-if periodicFiring
-    for jj = 1:length(firingMaps.rateMaps{1})
-        for ii = 1:length(firingMaps.UID)
-            if ~(size(firingMaps.rateMaps{ii}{jj},1) == 1) % Not linearize
-                periodic = getPeriodicFiring('z',firingMaps.rateMapsUnSmooth{ii}{jj},'unit',ii,'tint',tint);
-                
-                spatialModulation.(['periodicFiring_map_' num2str(jj)]){ii}.maxPolar = periodic.maxPolar;
-                spatialModulation.(['periodicFiring_map_' num2str(jj)]){ii}.posPolar = periodic.posPolar;
-                spatialModulation.(['periodicFiring_map_' num2str(jj)]){ii}.theta = periodic.theta;
-                spatialModulation.(['periodicFiring_map_' num2str(jj)]){ii}.Orient = periodic.Orient;
-                spatialModulation.(['periodicFiring_map_' num2str(jj)]){ii}.frec = periodic.frec;
-                spatialModulation.(['periodicFiring_map_' num2str(jj)]){ii}.periodicComponents = periodic.periodicComponents;
-                spatialModulation.(['periodicFiring_map_' num2str(jj)]){ii}.BC = periodic.BC;
-                spatialModulation.(['periodicFiring_map_' num2str(jj)]){ii}.TFP = periodic.TFP;
-                
+try
+    if periodicFiring
+        for jj = 1:length(firingMaps.rateMaps{1})
+            for ii = 1:length(firingMaps.UID)
+                if ~(size(firingMaps.rateMaps{ii}{jj},1) == 1) % Not linearize
+                    periodic = getPeriodicFiring('z',firingMaps.rateMapsUnSmooth{ii}{jj},'unit',ii,'tint',tint);
+
+                    spatialModulation.(['periodicFiring_map_' num2str(jj)]){ii}.maxPolar = periodic.maxPolar;
+                    spatialModulation.(['periodicFiring_map_' num2str(jj)]){ii}.posPolar = periodic.posPolar;
+                    spatialModulation.(['periodicFiring_map_' num2str(jj)]){ii}.theta = periodic.theta;
+                    spatialModulation.(['periodicFiring_map_' num2str(jj)]){ii}.Orient = periodic.Orient;
+                    spatialModulation.(['periodicFiring_map_' num2str(jj)]){ii}.frec = periodic.frec;
+                    spatialModulation.(['periodicFiring_map_' num2str(jj)]){ii}.periodicComponents = periodic.periodicComponents;
+                    spatialModulation.(['periodicFiring_map_' num2str(jj)]){ii}.BC = periodic.BC;
+                    spatialModulation.(['periodicFiring_map_' num2str(jj)]){ii}.TFP = periodic.TFP;
+
+                end
             end
         end
     end
+catch
+    spatialModulation.(['periodicFiring_map_' num2str(jj)]){ii}.maxPolar = NaN;
+    spatialModulation.(['periodicFiring_map_' num2str(jj)]){ii}.posPolar = NaN;
+    spatialModulation.(['periodicFiring_map_' num2str(jj)]){ii}.theta = NaN;
+    spatialModulation.(['periodicFiring_map_' num2str(jj)]){ii}.Orient = NaN;
+    spatialModulation.(['periodicFiring_map_' num2str(jj)]){ii}.frec = NaN;
+    spatialModulation.(['periodicFiring_map_' num2str(jj)]){ii}.periodicComponents = NaN;
+    spatialModulation.(['periodicFiring_map_' num2str(jj)]){ii}.BC = NaN;
+    spatialModulation.(['periodicFiring_map_' num2str(jj)]){ii}.TFP = NaN;
 end
 
 % Grid Analysis
@@ -708,7 +736,7 @@ if randomization
     end
 end
 
-
+spatialModulation.speedThresh = speedThresh;
 if saveMat
     if tint
         try
