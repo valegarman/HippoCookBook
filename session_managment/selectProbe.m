@@ -19,7 +19,8 @@ function chanCoords = selectProbe(varargin)
 %                           maps for tetrodes (Pablo Abad)
 %
 %% Manuel Valero 2022
-
+% TO DO: We have to make a database (csv file) of probes to feed the
+% menu... As it is, is super prone to errors....
 %% Defaults and Params
 p = inputParser;
 
@@ -57,10 +58,10 @@ end
 % if empty or force
 if parameters.force || isempty(chanCoords)
     if ~showTetrodes
-        listOfProbes = {'Select probe...','A5x12-16-Buz-lin-5mm-100-200-160-177', 'CambridgeNeurotech-E1-64ch', 'CambridgeNeurotech-H2-64ch', 'uLED-12LED-32Ch-4Shanks','DiagnosticBiochip-128-6-128ch', 'Buzsaki64(64 ch, 8 shanks, staggered)',... 
+        listOfProbes = {'Select probe...','A5x12-16-Buz-lin-5mm-100-200-160-177', 'CambridgeNeurotech-E1-64ch', 'CambridgeNeurotech-H2-64ch','CambridgeNeurotech-H3-64ch', 'CambridgeNeurotech-H3-64ch-reversed', 'uLED-12LED-32Ch-4Shanks','DiagnosticBiochip-128-6-128ch', 'Buzsaki64(64 ch, 8 shanks, staggered)',... 
             'DiagnosticBiochip-128-6-128ch&uLED-12LED-32Ch-4Shanks','UtahArray-96ch','A5x12-16-Buz-lin-5mm-100-200-160-177-Allego','Not included'};
     else
-        listOfProbes = {'Select probe...','A5x12-16-Buz-lin-5mm-100-200-160-177', 'CambridgeNeurotech-E1-64ch', 'CambridgeNeurotech-H2-64ch', 'uLED-12LED-32Ch-4Shanks','DiagnosticBiochip-128-6-128ch', 'Buzsaki64(64 ch, 8 shanks, staggered)', 'NeuroNexus-A8x1-tet-2mm-200-121(32ch,8 shanks,tetrode)',...,
+        listOfProbes = {'Select probe...','A5x12-16-Buz-lin-5mm-100-200-160-177', 'CambridgeNeurotech-E1-64ch', 'CambridgeNeurotech-H2-64ch','CambridgeNeurotech-H3-64ch', 'CambridgeNeurotech-H3-64ch-reversed', 'uLED-12LED-32Ch-4Shanks','DiagnosticBiochip-128-6-128ch', 'Buzsaki64(64 ch, 8 shanks, staggered)', 'NeuroNexus-A8x1-tet-2mm-200-121(32ch,8 shanks,tetrode)',...,
                             'DiagnosticBiochip-128-6-128ch&uLED-12LED-32Ch-4Shanks','UtahArray-96ch','A5x12-16-Buz-lin-5mm-100-200-160-177-Allego','Tetrodes-32ch(8t-4c)-C57-4', 'Tetrodes-32ch(8t-4c)-C57-5','Tetrodes-32ch(8t-4c)-C57-3','Qtrode-32ch-IPO430','Tetrode-16ch-IPO149','Tetrodes-16ch(4t-HPF)-IPO447','Not included'};
     end
     
@@ -114,6 +115,16 @@ if parameters.force || isempty(chanCoords)
             coord_path = dir([directory.path filesep 'session_files'...
                 filesep 'probes_coordinates' filesep ...
                 'electrodes_coordinates_CambridgeNeurotech-H2-64ch.chanCoords.channelInfo.mat']);
+            supplier = 'CambridgeNeurotech';
+        case lower('CambridgeNeurotech-H3-64ch')
+            coord_path = dir([directory.path filesep 'session_files'...
+                filesep 'probes_coordinates' filesep ...
+                'electrodes_coordinates_CambridgeNeurotech-H3-64ch.chanCoords.channelInfo.mat']);
+            supplier = 'CambridgeNeurotech';
+        case lower('CambridgeNeurotech-H3-64ch-reversed')
+            coord_path = dir([directory.path filesep 'session_files'...
+                filesep 'probes_coordinates' filesep ...
+                'electrodes_coordinates_CambridgeNeurotech-H3-64ch-reversed.chanCoords.channelInfo.mat']);
             supplier = 'CambridgeNeurotech';
         case lower('NeuroNexus-A8x1-tet-2mm-200-121(32ch,8 shanks,tetrode)')
             coord_path = dir([directory.path filesep 'session_files' ...

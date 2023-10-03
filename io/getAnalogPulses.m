@@ -28,6 +28,7 @@ function [pulses] = getAnalogPulses(varargin)
 % eventID       Numeric ID for classifying various event types (C X 1)
 % eventIDlabels label for classifying various event types defined in eventID (cell array C X 1)  
 % intsPeriods   Stimulation periods, as defined by perioLag
+% autodetect    Default, true
 %
 % Manu-BuzsakiLab 2018, 2022
 
@@ -42,6 +43,7 @@ addParameter(p,'groupPulses',false,@islogical);
 addParameter(p,'basepath',pwd,@ischar);
 addParameter(p,'useGPU',true,@islogical);
 addParameter(p,'overwrite',false,@islogical);
+addParameter(p,'autodetect',true,@islogical);
 
 parse(p, varargin{:});
 offset = p.Results.offset;
@@ -53,6 +55,7 @@ groupPulses = p.Results.groupPulses;
 basepath = p.Results.basepath;
 useGPU = p.Results.useGPU;
 overwrite = p.Results.overwrite;
+autodetect = p.Results.autodetect;
 
 prevPath = pwd;
 cd(basepath);
@@ -69,15 +72,50 @@ if exist([filetarget '.pulses.events.mat'],'file')
             pulses.duration = pulses.duration(maskPulses,:);
             pulses.eventGroupID = pulses.eventGroupID(maskPulses,:);
             pulses.analogChannelsList = pulses.analogChannelsList(maskPulses,:);
-            
+
         end
         return
     end
 end
 
+if ~autodetect && isempty(analogChannelsList)
+    disp('Skipping!!');
+    pulses = [];
+    return
+end
+
 analogFile = []; IntanBuzEd = [];
 f=dir('analogin.dat');                                                     % check file
-if isempty(f) || f.bytes == 0                                              % if analogin is empty or doesn't exist
+if ~isempty(analogChannelsList) && ~(isempty(f) || f.bytes == 0)
+    disp('Using the provided list of analog channel on analogin.dat file!');
+    analogFile = 'analogin.dat';  
+    try [amplifier_channels, notes, aux_input_channels, spike_triggers,...         
+        board_dig_in_channels, supply_voltage_channels, frequency_parameters, board_adc_channels ] =...
+        read_Intan_RHD2000_file_HCB;
+    catch
+        disp('File ''info.rhd'' not found. (Type ''help <a href="matlab:help loadAnalog">loadAnalog</a>'' for details) ');
+    end
+    if ~exist('board_adc_channels')
+        disp('Trying intan metadata from recording folder...');
+        filetarget = split(filetarget,'_'); filetarget = filetarget{1};
+        localPaths = dir([filetarget, '*']);
+        cd(localPaths(1).name);
+        [amplifier_channels, notes, aux_input_channels, spike_triggers,...         
+        board_dig_in_channels, supply_voltage_channels, frequency_parameters, board_adc_channels ] =...
+        read_Intan_RHD2000_file_HCB;
+        cd ..
+    end
+    samplingRate = frequency_parameters.board_adc_sample_rate;
+    nChannels = length(board_adc_channels); % ADC input info from header file
+    if isempty(analogChannelsList)
+        analogChannelsList = 1:nChannels;
+    end
+    fileTargetAnalogIn =  dir('analogin*.dat');
+    mAnalogIn = memmapfile(fullfile(basepath,fileTargetAnalogIn.name),'Format','uint16','Writable', true);
+    dataAnalogIn = reshape(mAnalogIn.Data,size(board_adc_channels,2),[]);
+    IntanBuzEd = 0;
+
+elseif isempty(f) || f.bytes == 0                                              % if analogin is empty or doesn't exist
     warning('analogin.dat file is empty or does not exist, was the recording made in Intan Buzsaki edition?');
     
     f = dir('*amplifier*.dat');                                        % is exist amplifier
@@ -191,7 +229,7 @@ for jj = 1 : length(analogChannelsList)
     locsA = find(diff(dBin)==1)/samplingRate; % start of pulses
     locsB = find(diff(dBin)==-1)/samplingRate; % end of pulses
     
-    if useGPU
+    if useGPU && ~ismac
         temp = gpuArray(locsA(1:min([length(locsA) length(locsB)])));
     else
         temp = (locsA(1:min([length(locsA) length(locsB)])));

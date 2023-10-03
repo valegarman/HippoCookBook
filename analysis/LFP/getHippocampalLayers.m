@@ -91,24 +91,29 @@ powerProfile_hfo = powerSpectrumProfile(hfo_bandpass,'showfig',true,'saveMat',tr
 %% Computing Hippocampal Layers by looking at powerSpectrum profiles for theta and hfo
 f = figure;
 set(gcf,'Position',[100 100 1400 600])
-nShanks = length(session.extracellular.spikeGroups.channels);
+nShanks = length(session.extracellular.electrodeGroups.channels);
 index = reshape(1:2*nShanks, nShanks, 2).';
 
+%
+data = lfp.data;
+eventTwin = [-.05 .05];
+twin_rip = eventTwin * session.extracellular.srLfp;
+
 zscor_xnan = @(x) bsxfun(@rdivide, bsxfun(@minus, x, mean(x,'omitnan')), std(x, 'omitnan'));
-for i = 1:length(session.extracellular.spikeGroups.channels)
-    if ~all(ismember(session.extracellular.spikeGroups.channels{i},session.channelTags.Bad.channels))
+for i = 1:length(session.extracellular.electrodeGroups.channels)
+    if ~all(ismember(session.extracellular.electrodeGroups.channels{i},session.channelTags.Bad.channels))
         % Channel slm : Channel with bigger theta and gamma amplitude
-        theta_gamma = zscor_xnan(powerProfile_theta.mean(ismember(powerProfile_theta.channels,session.extracellular.spikeGroups.channels{i}))) + zscor_xnan(powerProfile_gamma.mean(ismember(powerProfile_theta.channels,session.extracellular.spikeGroups.channels{i})));
-        ch = find(ismember(powerProfile_theta.channels,session.extracellular.spikeGroups.channels{i}));
-        channels{i}.slm = powerProfile_theta.channels(find(powerProfile_theta.mean == max(powerProfile_theta.mean(ismember(powerProfile_theta.channels,session.extracellular.spikeGroups.channels{i}))))); % 1-index, corresponds to -1 in xml
+        theta_gamma = zscor_xnan(powerProfile_theta.mean(ismember(powerProfile_theta.channels,session.extracellular.electrodeGroups.channels{i}))) + zscor_xnan(powerProfile_gamma.mean(ismember(powerProfile_theta.channels,session.extracellular.electrodeGroups.channels{i})));
+        ch = find(ismember(powerProfile_theta.channels,session.extracellular.electrodeGroups.channels{i}));
+        channels{i}.slm = powerProfile_theta.channels(find(powerProfile_theta.mean == max(powerProfile_theta.mean(ismember(powerProfile_theta.channels,session.extracellular.electrodeGroups.channels{i}))))); % 1-index, corresponds to -1 in xml
         
         % Channel pyramidal : Channel with bigger amplitude for hfo - theta/2;
-        hfo_theta = zscor_xnan(powerProfile_hfo.mean(ismember(powerProfile_theta.channels,session.extracellular.spikeGroups.channels{i}))) - zscor_xnan(powerProfile_theta.mean(ismember(powerProfile_theta.channels,session.extracellular.spikeGroups.channels{i})));
-        ch = find(ismember(powerProfile_theta.channels,session.extracellular.spikeGroups.channels{i}));
+        hfo_theta = zscor_xnan(powerProfile_hfo.mean(ismember(powerProfile_theta.channels,session.extracellular.electrodeGroups.channels{i}))) - zscor_xnan(powerProfile_theta.mean(ismember(powerProfile_theta.channels,session.extracellular.electrodeGroups.channels{i})));
+        ch = find(ismember(powerProfile_theta.channels,session.extracellular.electrodeGroups.channels{i}));
         channels{i}.pyramidal = powerProfile_theta.channels(ch(find(hfo_theta == max(hfo_theta)))); % 1-index, corresponds to /1 in xml
     
         % channels above pyr
-        channelsAbovePyr = session.extracellular.spikeGroups.channels{i}(1:find(ismember(session.extracellular.spikeGroups.channels{i},channels{i}.pyramidal))-1);
+        channelsAbovePyr = session.extracellular.electrodeGroups.channels{i}(1:find(ismember(session.extracellular.electrodeGroups.channels{i},channels{i}.pyramidal))-1);
         if isempty(channelsAbovePyr)
             channelsAbovePyr = NaN;
         end
@@ -128,15 +133,15 @@ for i = 1:length(session.extracellular.spikeGroups.channels)
         % Ripples [2 5]
         ripples{i} = findRipples(channels{i}.pyramidal,'thresholds',[2 5],'passband',[80 200],'durations',[20 150],'saveMat',false,'restrict',restrict);
         if isempty(ripples{i}.peaks)
-            [~,maxHFOChannel] = max(powerProfile_hfo.mean(session.extracellular.spikeGroups.channels{i}));
-            maxHFOChannel = session.extracellular.spikeGroups.channels{i}(maxHFOChannel);
+            [~,maxHFOChannel] = max(powerProfile_hfo.mean(session.extracellular.electrodeGroups.channels{i}));
+            maxHFOChannel = session.extracellular.electrodeGroups.channels{i}(maxHFOChannel);
             ripples{i} = findRipples(maxHFOChannel,'thresholds',[.01 .05],'passband',[80 200],'durations',[20 150],'saveMat',false,'restrict',restrict);
         end
         
         twin = 0.1;
-        [evCsd,lfpAvg] = bz_eventCSD(lfp,ripples{i}.peaks,'channels',session.extracellular.spikeGroups.channels{i},'twin',[twin twin],'plotLFP',false,'plotCSD',false);
+        [evCsd,lfpAvg] = bz_eventCSD(lfp,ripples{i}.peaks,'channels',session.extracellular.electrodeGroups.channels{i},'twin',[twin twin],'plotLFP',false,'plotCSD',false);
         csdRippleProfile = [NaN mean(evCsd.data(find(evCsd.timestamps > -10 & evCsd.timestamps < 10),:)) NaN];
-        shank_channels = session.extracellular.spikeGroups.channels{i};
+        shank_channels = session.extracellular.electrodeGroups.channels{i};
         csdRippleProfile(find(ismember(shank_channels,shank_channels(1:find(shank_channels == channels{i}.pyramidal))))) = NaN;
         channels{i}.radiatum = shank_channels(find(csdRippleProfile == min(csdRippleProfile)));
         % Just in case it detects two radiatum channels
@@ -152,36 +157,60 @@ for i = 1:length(session.extracellular.spikeGroups.channels)
             if promt
                 fp = figure;
                 set(gcf,'Position',[100 100 500 500]);
-                [lia,locb] = ismember(powerProfile_theta.channels,session.extracellular.spikeGroups.channels{i});
+                [lia,locb] = ismember(powerProfile_theta.channels,session.extracellular.electrodeGroups.channels{i});
                 [B,I] = sort(locb (locb > 0));
                 hold on
-                ppmean = powerProfile_theta.mean(ismember(powerProfile_theta.channels,session.extracellular.spikeGroups.channels{i}));
+                ppmean = powerProfile_theta.mean(ismember(powerProfile_theta.channels,session.extracellular.electrodeGroups.channels{i}));
                 ppmean = ppmean(I);
                 nC = 1:length(ppmean);
                 p1 = plot(ppmean,flip(nC),'color',[.8 .2 .2]);
                 plot(ppmean,flip(nC),'o','color',[.8 .2 .2],'MarkerFaceColor',[.8 .2 .2]);
                 % Gamma
-                ppmean2 = powerProfile_gamma.mean(ismember(powerProfile_theta.channels,session.extracellular.spikeGroups.channels{i}));
+                ppmean2 = powerProfile_gamma.mean(ismember(powerProfile_theta.channels,session.extracellular.electrodeGroups.channels{i}));
                 ppmean2 = ppmean2(I);
                 p2 = plot(ppmean2 + 10,flip(nC),'color',[.2 .8 .2]);
                 plot(ppmean2 + 10,flip(nC),'o','color',[.2 .8 .2],'MarkerFaceColor',[.2 .8 .2]);
                 % HFO
-                ppmean3 = powerProfile_hfo.mean(ismember(powerProfile_hfo.channels,session.extracellular.spikeGroups.channels{i}));
+                ppmean3 = powerProfile_hfo.mean(ismember(powerProfile_hfo.channels,session.extracellular.electrodeGroups.channels{i}));
                 ppmean3 = ppmean3(I);
                 p3 = plot(ppmean3 + 20,flip(nC),'color',[.2 .2 .2]);
                 plot(ppmean3 + 20,flip(nC),'o','color',[.2 .2 .2],'MarkerFaceColor',[.2 .2 .2]);
-                ylim([min(nC) max(nC) + 4]);
+                ylim([min(nC) - 1 max(nC) + 4]);
                 ax = axis;
-                set(gca,'YTick',[1:length(ppmean)],'YtickLabels',flip(session.extracellular.spikeGroups.channels{i})); 
-
+                set(gca,'YTick',[1:length(ppmean)],'YtickLabels',flip(session.extracellular.electrodeGroups.channels{i})); 
+                
                 contourf((evCsd.timestamps  + max(evCsd.timestamps))/14 + ax(2),(nC(2:end-1)),evCsd.data',40,'LineColor','none');hold on;
                 targetWin = evCsd.timestamps > -10 & evCsd.timestamps < 10;
                 csd_profile = (mean(evCsd.data(targetWin,:)) - nanmean(mean(evCsd.data(targetWin,:))))/nanstd(mean(evCsd.data(targetWin,:)));
                 tt = (evCsd.timestamps  + max(evCsd.timestamps))/14 + ax(2); tt = tt(int32(length(tt)/2));
-                plot([nan tt + csd_profile nan], nC,'k');
+                plot([nan tt + csd_profile nan], nC,'w');
                 colormap(jet); caxis([-max(abs(evCsd.data(:))) max(abs(evCsd.data(:)))]);
                 ax = axis;
-                title(['Shank ', num2str(i), ' of ', num2str(length(session.extracellular.spikeGroups.channels))],'FontWeight','normal');
+                title(['Shank ', num2str(i), ' of ', num2str(length(session.extracellular.electrodeGroups.channels))],'FontWeight','normal');
+
+                % plotting ripples
+                events = ripples{i}.peaks;
+                events = events((events + twin_rip(2) <= size(data,1)) & (events - twin_rip(1) > 0));
+                events(events <= abs(twin_rip(1))) = [];
+                lfp_temp = nan(-twin_rip(1)+twin_rip(2)+1,length(lfp.channels),length(events));
+                for e = 1:length(events)
+                    lfp_temp(:,:,e) = data(int32(events(e)+twin_rip(1):events(e)+twin_rip(2)),lfp.channels);
+                end
+                lfp_avg = nanmean(lfp_temp,3);
+    
+                for ii = 1:size(lfp_avg,2)
+                    % lfp_avg(:,ii) = lfp_avg(:,ii) - mean(lfp_avg(:,ii));
+                    lfp_avg(:,ii) = lfp_avg(:,ii) - lfp_avg(1,ii);
+                end
+                lfp_avg_norm = (lfp_avg./std(lfp_avg(:)))*.5;
+                lfp_event_ts = linspace(45,58,size(lfp_avg_norm,1));
+                clear lfp_temp lfp_avg
+                
+                ch_order = session.extracellular.electrodeGroups.channels{i};
+                ch_position = flip(1:length(ch_order));
+                for jj = 1:length(ch_order)
+                    plot(lfp_event_ts, lfp_avg_norm(:,ch_order(jj))+ch_position(jj),'color',[.2 .2 .2]);
+                end
 
                 unsigned_area = [max(nC)+0.5  max(nC)+0.5+4];
                 fill([ax([1 2 2 1 1])],[unsigned_area([1 1 2 2 1])],[.7 .7 .7],'EdgeColor','none');
@@ -189,7 +218,7 @@ for i = 1:length(session.extracellular.spikeGroups.channels)
 
 
                 if ~isnan(channels{i}.pyramidal)
-                    l1 = plot(ax(1:2),ones(2,1)*find(flip(session.extracellular.spikeGroups.channels{i}) == channels{i}.pyramidal),'color',[.8 .2 1],'LineWidth',2);
+                    l1 = plot(ax(1:2),ones(2,1)*find(flip(session.extracellular.electrodeGroups.channels{i}) == channels{i}.pyramidal),'color',[.8 .2 1],'LineWidth',2);
                     t1 = text(l1.XData(2),l1.YData(2),'Pyr','color',[.8 .2 1],'FontSize',12);
                 else
                     l1 = plot(ax(1:2),ones(2,1)*max(nC) + 0,'color',[.8 .2 1],'LineWidth',2);
@@ -197,7 +226,7 @@ for i = 1:length(session.extracellular.spikeGroups.channels)
                 end
 
                 if ~isnan(channels{i}.oriens)
-                    l2 = plot(ax(1:2),ones(2,1)*find(flip(session.extracellular.spikeGroups.channels{i}) == channels{i}.oriens),'color',[.2 .2 1],'LineWidth',2);
+                    l2 = plot(ax(1:2),ones(2,1)*find(flip(session.extracellular.electrodeGroups.channels{i}) == channels{i}.oriens),'color',[.2 .2 1],'LineWidth',2);
                     t2 = text(l2.XData(2),l2.YData(2),'Or','color',[.2 .2 1],'FontSize',12);
                 else
                     l2 = plot(ax(1:2),ones(2,1)*max(nC) + 1,'color',[.2 .2 1],'LineWidth',2);
@@ -205,14 +234,14 @@ for i = 1:length(session.extracellular.spikeGroups.channels)
                 end
 
                 if ~isnan(channels{i}.radiatum)
-                    l3 = plot(ax(1:2),ones(2,1)*find(flip(session.extracellular.spikeGroups.channels{i}) == channels{i}.radiatum),'color',[.5 .5 .1],'LineWidth',2);
+                    l3 = plot(ax(1:2),ones(2,1)*find(flip(session.extracellular.electrodeGroups.channels{i}) == channels{i}.radiatum),'color',[.5 .5 .1],'LineWidth',2);
                     t3 = text(l3.XData(2),l3.YData(2),'Rad','color',[.5 .5 .1],'FontSize',12);
                 else
                     l3 = plot(ax(1:2),ones(2,1)* max(nC) + 2,'color',[.5 .5 .1],'LineWidth',2);
                     t3 = text(l3.XData(2),l3.YData(2),'Rad','color',[.5 .5 .1],'FontSize',12);
                 end
                 if ~isnan(channels{i}.slm)
-                    l4 = plot(ax(1:2),ones(2,1)*find(flip(session.extracellular.spikeGroups.channels{i}) == channels{i}.slm),'color',[.8 .1 .1],'LineWidth',2);
+                    l4 = plot(ax(1:2),ones(2,1)*find(flip(session.extracellular.electrodeGroups.channels{i}) == channels{i}.slm),'color',[.8 .1 .1],'LineWidth',2);
                     t4 = text(l4.XData(2),l4.YData(2),'Slm','color',[.8 .1 .1]);
                 else
                     l4 = plot(ax(1:2),ones(2,1)* max(nC) + 3,'color',[.8 .1 .1],'LineWidth',2);
@@ -253,8 +282,8 @@ for i = 1:length(session.extracellular.spikeGroups.channels)
                 pause(2);
                 close(fp);
 
-                channel_list = [flip(session.extracellular.spikeGroups.channels{i}) NaN(1,10)];
-                channels{i}.pyramidal = channel_list(pyr)
+                channel_list = [flip(session.extracellular.electrodeGroups.channels{i}) NaN(1,10)];
+                channels{i}.pyramidal = channel_list(pyr);
                 channels{i}.radiatum = channel_list(rad);
                 channels{i}.slm = channel_list(slm);
                 channels{i}.oriens = channel_list(or);
@@ -266,62 +295,62 @@ for i = 1:length(session.extracellular.spikeGroups.channels)
         title(['Shank : ', num2str(i)]);
         hold on
         % Theta
-        [lia,locb] = ismember(powerProfile_theta.channels,session.extracellular.spikeGroups.channels{i});
+        [lia,locb] = ismember(powerProfile_theta.channels,session.extracellular.electrodeGroups.channels{i});
         [B,I] = sort(locb (locb > 0));
-        dev1 = powerProfile_theta.mean(ismember(powerProfile_theta.channels,session.extracellular.spikeGroups.channels{i})) - powerProfile_theta.ic95(ismember(powerProfile_theta.channels,session.extracellular.spikeGroups.channels{i}));
+        dev1 = powerProfile_theta.mean(ismember(powerProfile_theta.channels,session.extracellular.electrodeGroups.channels{i})) - powerProfile_theta.ic95(ismember(powerProfile_theta.channels,session.extracellular.electrodeGroups.channels{i}));
         dev1 = dev1(I);
-        dev2 = powerProfile_theta.mean(ismember(powerProfile_theta.channels,session.extracellular.spikeGroups.channels{i})) + powerProfile_theta.ic95(ismember(powerProfile_theta.channels,session.extracellular.spikeGroups.channels{i}));   
+        dev2 = powerProfile_theta.mean(ismember(powerProfile_theta.channels,session.extracellular.electrodeGroups.channels{i})) + powerProfile_theta.ic95(ismember(powerProfile_theta.channels,session.extracellular.electrodeGroups.channels{i}));   
         dev2 = dev2(I);
-%         nC = powerProfile_theta.channels(ismember(powerProfile_theta.channels,session.extracellular.spikeGroups.channels{i}));
+%         nC = powerProfile_theta.channels(ismember(powerProfile_theta.channels,session.extracellular.electrodeGroups.channels{i}));
         nC = 1:length(dev1);
         hold on
         fill([nC flip(nC)],[dev1 flip(dev2)],[.8 .2 .2],'FaceAlpha',.2,'EdgeColor','none');
-        ppmean = powerProfile_theta.mean(ismember(powerProfile_theta.channels,session.extracellular.spikeGroups.channels{i}));
+        ppmean = powerProfile_theta.mean(ismember(powerProfile_theta.channels,session.extracellular.electrodeGroups.channels{i}));
         ppmean = ppmean(I);
         p1 = plot(nC,ppmean,'color',[.8 .2 .2]);
         % Gamma
-        dev1 = powerProfile_gamma.mean(ismember(powerProfile_gamma.channels,session.extracellular.spikeGroups.channels{i})) - powerProfile_gamma.ic95(ismember(powerProfile_gamma.channels,session.extracellular.spikeGroups.channels{i}));
+        dev1 = powerProfile_gamma.mean(ismember(powerProfile_gamma.channels,session.extracellular.electrodeGroups.channels{i})) - powerProfile_gamma.ic95(ismember(powerProfile_gamma.channels,session.extracellular.electrodeGroups.channels{i}));
         dev1 = dev1(I);
-        dev2 = powerProfile_gamma.mean(ismember(powerProfile_gamma.channels,session.extracellular.spikeGroups.channels{i})) + powerProfile_gamma.ic95(ismember(powerProfile_gamma.channels,session.extracellular.spikeGroups.channels{i}));   
+        dev2 = powerProfile_gamma.mean(ismember(powerProfile_gamma.channels,session.extracellular.electrodeGroups.channels{i})) + powerProfile_gamma.ic95(ismember(powerProfile_gamma.channels,session.extracellular.electrodeGroups.channels{i}));   
         dev2 = dev2(I);
         fill([nC flip(nC)],[dev1 flip(dev2)] + 10,[.2 .8 .2],'FaceAlpha',.2,'EdgeColor','none');
-        ppmean2 = powerProfile_gamma.mean(ismember(powerProfile_theta.channels,session.extracellular.spikeGroups.channels{i}));
+        ppmean2 = powerProfile_gamma.mean(ismember(powerProfile_theta.channels,session.extracellular.electrodeGroups.channels{i}));
         ppmean2 = ppmean2(I);
         p2 = plot(nC, ppmean2 + 10,'color',[.2 .8 .2]);
         xlim([min(nC) max(nC)]);
         ax = axis;
         
         % HFO
-        dev1 = powerProfile_hfo.mean(ismember(powerProfile_hfo.channels,session.extracellular.spikeGroups.channels{i})) - powerProfile_hfo.ic95(ismember(powerProfile_theta.channels,session.extracellular.spikeGroups.channels{i}));
+        dev1 = powerProfile_hfo.mean(ismember(powerProfile_hfo.channels,session.extracellular.electrodeGroups.channels{i})) - powerProfile_hfo.ic95(ismember(powerProfile_theta.channels,session.extracellular.electrodeGroups.channels{i}));
         dev1 = dev1(I);
-        dev2 = powerProfile_hfo.mean(ismember(powerProfile_hfo.channels,session.extracellular.spikeGroups.channels{i})) + powerProfile_hfo.ic95(ismember(powerProfile_theta.channels,session.extracellular.spikeGroups.channels{i}));
+        dev2 = powerProfile_hfo.mean(ismember(powerProfile_hfo.channels,session.extracellular.electrodeGroups.channels{i})) + powerProfile_hfo.ic95(ismember(powerProfile_theta.channels,session.extracellular.electrodeGroups.channels{i}));
         dev2 = dev2(I);
         fill([nC flip(nC)],[dev1 flip(dev2)] + 20,[.2 .2 .2],'FaceAlpha',.2,'EdgeColor','none');
-        ppmean3 = powerProfile_hfo.mean(ismember(powerProfile_hfo.channels,session.extracellular.spikeGroups.channels{i}));
+        ppmean3 = powerProfile_hfo.mean(ismember(powerProfile_hfo.channels,session.extracellular.electrodeGroups.channels{i}));
         ppmean3 = ppmean3(I);
         p3 = plot(nC, ppmean3 + 20,'color',[.2 .2 .2]);
         xlim([min(nC) max(nC)]);
         ax = axis;
-        set(gca,'XTick',[1:length(ppmean)],'XtickLabels',session.extracellular.spikeGroups.channels{i}); 
+        set(gca,'XTick',[1:length(ppmean)],'XtickLabels',session.extracellular.electrodeGroups.channels{i}); 
         
         if ~isnan(channels{i}.pyramidal)
-            plot([find(session.extracellular.spikeGroups.channels{i} == channels{i}.pyramidal) find(session.extracellular.spikeGroups.channels{i} == channels{i}.pyramidal)],ax(3:4),'color',[.8 .2 1]);
-            text(find(session.extracellular.spikeGroups.channels{i} == channels{i}.pyramidal), ax(4),'Pyr','color',[.8 .2 1]);
+            plot([find(session.extracellular.electrodeGroups.channels{i} == channels{i}.pyramidal) find(session.extracellular.electrodeGroups.channels{i} == channels{i}.pyramidal)],ax(3:4),'color',[.8 .2 1]);
+            text(find(session.extracellular.electrodeGroups.channels{i} == channels{i}.pyramidal), ax(4),'Pyr','color',[.8 .2 1]);
         end
         if ~isnan(channels{i}.oriens)
-            plot([find(session.extracellular.spikeGroups.channels{i} == channels{i}.oriens) find(session.extracellular.spikeGroups.channels{i} == channels{i}.oriens)],ax(3:4),'color',[.2 .2 1]);
-            text(find(session.extracellular.spikeGroups.channels{i} == channels{i}.oriens), ax(4),'Or','color',[.2 .2 1]);
+            plot([find(session.extracellular.electrodeGroups.channels{i} == channels{i}.oriens) find(session.extracellular.electrodeGroups.channels{i} == channels{i}.oriens)],ax(3:4),'color',[.2 .2 1]);
+            text(find(session.extracellular.electrodeGroups.channels{i} == channels{i}.oriens), ax(4),'Or','color',[.2 .2 1]);
         end
         if ~isnan(channels{i}.radiatum)
-            plot([find(session.extracellular.spikeGroups.channels{i} == channels{i}.radiatum) find(session.extracellular.spikeGroups.channels{i} == channels{i}.radiatum)],ax(3:4),'color',[.5 .5 .1]);
-            text(find(session.extracellular.spikeGroups.channels{i} == channels{i}.radiatum), ax(4),'Rad','color',[.5 .5 .1]);
+            plot([find(session.extracellular.electrodeGroups.channels{i} == channels{i}.radiatum) find(session.extracellular.electrodeGroups.channels{i} == channels{i}.radiatum)],ax(3:4),'color',[.5 .5 .1]);
+            text(find(session.extracellular.electrodeGroups.channels{i} == channels{i}.radiatum), ax(4),'Rad','color',[.5 .5 .1]);
         end
         if ~isnan(channels{i}.slm)
-            plot([find(session.extracellular.spikeGroups.channels{i} == channels{i}.slm) find(session.extracellular.spikeGroups.channels{i} == channels{i}.slm)],ax(3:4),'color',[.1 .8 .1]);
-            text(find(session.extracellular.spikeGroups.channels{i} == channels{i}.slm), ax(4),'Slm','color',[.1 .8 .1]);
+            plot([find(session.extracellular.electrodeGroups.channels{i} == channels{i}.slm) find(session.extracellular.electrodeGroups.channels{i} == channels{i}.slm)],ax(3:4),'color',[.1 .8 .1]);
+            text(find(session.extracellular.electrodeGroups.channels{i} == channels{i}.slm), ax(4),'Slm','color',[.1 .8 .1]);
         end
 
-        legend([p1 p2], '[3-12 Hz]', '120 240 Hz','Location','southeast');
+        legend([p1 p2 p3], '3-12 Hz', '20 100 Hz','120 240 Hz','Location','southeast');
         set(gca,'TickDir','out','XTick',nC,'XTickLabelRotation',45); xlabel('Channels'); ylabel('dB');
         
         
@@ -332,23 +361,23 @@ for i = 1:length(session.extracellular.spikeGroups.channels)
             contourf(evCsd.timestamps,(nC(2:end-1)),evCsd.data',40,'LineColor','none');hold on;
             box off; colormap(jet); caxis([-max(abs(evCsd.data(:))) max(abs(evCsd.data(:)))]);
             xs = [evCsd.timestamps(1) evCsd.timestamps(end)];
-    %         set(gca,'YTick',[nC(2:end-1)],'YtickLabels',session.extracellular.spikeGroups.channels{i}(nC(2:end-1)));
+    %         set(gca,'YTick',[nC(2:end-1)],'YtickLabels',session.extracellular.electrodeGroups.channels{i}(nC(2:end-1)));
 
             if ~isnan(channels{i}.pyramidal)
-                plot(xs, [find(session.extracellular.spikeGroups.channels{i} == channels{i}.pyramidal) find(session.extracellular.spikeGroups.channels{i} == channels{i}.pyramidal)],'color',[.8 .2 1]);
-                text(xs(2), find(session.extracellular.spikeGroups.channels{i} == channels{i}.pyramidal),'Pyr','color',[.8 .2 1]);
+                plot(xs, [find(session.extracellular.electrodeGroups.channels{i} == channels{i}.pyramidal) find(session.extracellular.electrodeGroups.channels{i} == channels{i}.pyramidal)],'color',[.8 .2 1]);
+                text(xs(2), find(session.extracellular.electrodeGroups.channels{i} == channels{i}.pyramidal),'Pyr','color',[.8 .2 1]);
             end
             if ~isnan(channels{i}.oriens)
-                plot(xs,[find(session.extracellular.spikeGroups.channels{i} == channels{i}.oriens) find(session.extracellular.spikeGroups.channels{i} == channels{i}.oriens)],'color',[.2 .2 1]);
-                text(xs(2),find(session.extracellular.spikeGroups.channels{i} == channels{i}.oriens),'Or','color',[.2 .2 1]);
+                plot(xs,[find(session.extracellular.electrodeGroups.channels{i} == channels{i}.oriens) find(session.extracellular.electrodeGroups.channels{i} == channels{i}.oriens)],'color',[.2 .2 1]);
+                text(xs(2),find(session.extracellular.electrodeGroups.channels{i} == channels{i}.oriens),'Or','color',[.2 .2 1]);
             end
             if ~isnan(channels{i}.radiatum)
-                plot(xs,[find(session.extracellular.spikeGroups.channels{i} == channels{i}.radiatum) find(session.extracellular.spikeGroups.channels{i} == channels{i}.radiatum)],'color',[.5 .5 1]);
-                text(xs(2),find(session.extracellular.spikeGroups.channels{i} == channels{i}.radiatum),'Rad','color',[.5 .5 1]);
+                plot(xs,[find(session.extracellular.electrodeGroups.channels{i} == channels{i}.radiatum) find(session.extracellular.electrodeGroups.channels{i} == channels{i}.radiatum)],'color',[.5 .5 1]);
+                text(xs(2),find(session.extracellular.electrodeGroups.channels{i} == channels{i}.radiatum),'Rad','color',[.5 .5 1]);
             end
             if ~isnan(channels{i}.slm)
-                plot(xs,[find(session.extracellular.spikeGroups.channels{i} == channels{i}.slm) find(session.extracellular.spikeGroups.channels{i} == channels{i}.slm)],'color',[.1 .8 1]);
-                text(xs(2),find(session.extracellular.spikeGroups.channels{i} == channels{i}.slm),'Slm','color',[.1 .8 1]);
+                plot(xs,[find(session.extracellular.electrodeGroups.channels{i} == channels{i}.slm) find(session.extracellular.electrodeGroups.channels{i} == channels{i}.slm)],'color',[.1 .8 1]);
+                text(xs(2),find(session.extracellular.electrodeGroups.channels{i} == channels{i}.slm),'Slm','color',[.1 .8 1]);
             end
             ylim([min(nC) max(nC)]);
             set(gca,'TickDir','out','YDir','reverse'); ylabel('Channels'); xlabel('Time [s]');
@@ -371,12 +400,12 @@ catch
     disp('No brain regions detected! Skiping...');
 end
 
-for i = 1:length(session.extracellular.spikeGroups.channels)
-    if ~all(ismember(session.extracellular.spikeGroups.channels{i},session.channelTags.Bad.channels))
+for i = 1:length(session.extracellular.electrodeGroups.channels)
+    if ~all(ismember(session.extracellular.electrodeGroups.channels{i},session.channelTags.Bad.channels))
         % Biggest theta Power
-        maxTheta(i) = max(powerProfile_theta.mean((ismember(powerProfile_theta.channels,session.extracellular.spikeGroups.channels{i}))));
+        maxTheta(i) = max(powerProfile_theta.mean((ismember(powerProfile_theta.channels,session.extracellular.electrodeGroups.channels{i}))));
         % Biggest hfo oscillations
-        maxHfo(i) = max(powerProfile_hfo.mean((ismember(powerProfile_hfo.channels,session.extracellular.spikeGroups.channels{i}))));
+        maxHfo(i) = max(powerProfile_hfo.mean((ismember(powerProfile_hfo.channels,session.extracellular.electrodeGroups.channels{i}))));
         % Number of Ripples
         numRipples(i) = length(ripples{i}.timestamps);
     end
