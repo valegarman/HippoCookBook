@@ -68,7 +68,8 @@ try
         load(file.name);
     end
     
-    optogenetic_responses = getOptogeneticResponse;
+%     optogenetic_responses = getOptogeneticResponse;
+    optogenetic_responses = [];
 catch  
     optogenetic_responses = [];
 end

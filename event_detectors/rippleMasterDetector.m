@@ -290,7 +290,7 @@ if isnumeric(eventSpikeThreshold) || eventSpikeThreshold
     ripples = eventSpikingTreshold(ripples,[],'spikingThreshold',eventSpikeThreshold,'shanksID',eventSpikeThreshold_shanks);
 end
 
-plotRippleChannel('rippleChannel',rippleChannel,'ripples',ripples); % to do, run this after ripple detection
+% plotRippleChannel('rippleChannel',rippleChannel,'ripples',ripples); % to do, run this after ripple detection
 % EventExplorer(pwd, ripples)
 
 %% Ripple Stats

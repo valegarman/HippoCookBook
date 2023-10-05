@@ -26,6 +26,7 @@ addParameter(p,'use_deltaThetaEpochs',true, @islogical);
 addParameter(p,'excludePlot',[]);
 addParameter(p,'gridAnalysis',false,@islogical);
 addParameter(p,'tint',true,@islogical);
+addParameter(p,'numSubplots',[],@isnumeric);
 
 parse(p,varargin{:})
 
@@ -37,6 +38,7 @@ use_deltaThetaEpochs = p.Results.use_deltaThetaEpochs;
 excludePlot = p.Results.excludePlot;
 gridAnalysis = p.Results.gridAnalysis;
 tint = p.Results.tint;
+numSubplots = p.Results.numSubplots;
 
 % Color rules
 color_R99 = [.9 .0 .0];
@@ -180,26 +182,31 @@ else
     end
 end
 
+
 % firing maps 2 halves
 if tint
     targetFile = dir('*.firingMapsAvg2Halves_tint.cellinfo.mat');
     if ~isempty(targetFile)
         load(targetFile.name);
     else
-        firingMaps = [];
+        firingMaps2Halves = [];
     end
 else
     targetFile = dir('*.firingMapsAvg2Halves.cellinfo.mat');
     if ~isempty(targetFile)
         load(targetFile.name);
     else
-        firingMaps = [];
+        firingMaps2Halves = [];
     end
 end
 
 
 session = loadSession;
-
+if length(firingMaps.rateMaps{1}) == 1
+    numSubplots = 5;
+elseif length(firingMaps.rateMaps{1}) == 2 || length(firingMaps.rateMaps{1}) == 3
+    numSubplots = 6;
+end
 
 for ii = 1:length(UID)
     % putative cell type
@@ -212,23 +219,23 @@ for ii = 1:length(UID)
     end
          
     % Plotting
-    figure('units','normalized','outerposition',[0 0 1 1])
+    gcf = figure('units','normalized','outerposition',[0 0 1 1]);
     
     % Waveform
-    subplot(5,5,length(findobj(gcf,'type','axes'))+1)
+    subplot(numSubplots,numSubplots,length(findobj(gcf,'type','axes'))+1)
     hold on;
     plot(cell_metrics.waveforms.time{1},all_waveforms(:,ii),'color',color);
     axis tight; xlabel('ms'); ylabel('Waveform amp (SD)');
     title(['Cell: ', num2str(ii)]);
     
     % ACG
-    subplot(5,5,length(findobj(gcf,'type','axes'))+1)
+    subplot(numSubplots,numSubplots,length(findobj(gcf,'type','axes'))+1)
     plot(acg_time,acg(:,ii),'color',color);
     axis tight; xlabel('ms'); ylabel('ACG (prob)');
     title(['Cell type: ', num2str(cell_metrics.putativeCellType{ii})]);
     
     % ACG Peak
-    subplot(5,5,length(findobj(gcf,'type','axes'))+1)
+    subplot(numSubplots,numSubplots,length(findobj(gcf,'type','axes'))+1)
     plot(acgPeak.acg_time,acgPeak.acg_smoothed_norm(:,ii),'color',color);
     XTick = [-2 -1 0 1];
     set(gca,'XTick',XTick);
@@ -238,7 +245,7 @@ for ii = 1:length(UID)
     axis tight;
     
     % Cell position
-    subplot(5,5,length(findobj(gcf,'type','axes'))+1)
+    subplot(numSubplots,numSubplots,length(findobj(gcf,'type','axes'))+1)
     hold on;
     scatter(cell_metrics.general.chanCoords.x+100, cell_metrics.general.chanCoords.y,10,[.9 .9 .9],"filled");
     scatter(cell_metrics.trilat_x(ii)+100, cell_metrics.trilat_y(ii),30,color,'x','LineWidth',2);
@@ -249,7 +256,7 @@ for ii = 1:length(UID)
     title(['Region: ', num2str(cell_metrics.brainRegion{ii})]);
     
     % Firing Rate Stability
-    subplot(5,5,length(findobj(gcf,'type','axes'))+1)
+    subplot(numSubplots,numSubplots,length(findobj(gcf,'type','axes'))+1)
     plot(spikemat.timestamps/60, spikemat.data(:,ii),'color',color);
     set(gca,'YScale','log');
     title(['Stability: ' num2str(round(cell_metrics.firingRateInstability(ii),2))],'FontWeight','normal');
@@ -257,7 +264,7 @@ for ii = 1:length(UID)
     xlabel('Time (min)'); ylabel('Rate (Hz)');
     
     % Firing rate states
-    subplot(5,5,length(findobj(gcf,'type','axes'))+1)
+    subplot(numSubplots,numSubplots,length(findobj(gcf,'type','axes'))+1)
     plot(1:5,states_rate(ii,:),'color',color);
     set(gca,'YScale','log');
     set(gca,'XTick',[1:5],'XTickLabel',{'All','Wake','Run','NREM','REM'},'XTickLabelRotation',45);
@@ -276,13 +283,13 @@ for ii = 1:length(UID)
 %     ylabel('Index (SD)'); xlim([.8 3.4]);
     
     % Average CCG
-    subplot(5,5,length(findobj(gcf,'type','axes'))+1)
+    subplot(numSubplots,numSubplots,length(findobj(gcf,'type','axes'))+1)
     plot(averageCCG.timestamps,averageCCG.ZmedianCCG(ii,:),'color',color);
     axis tight
     xlabel('Time (s)'); ylabel('Rate (SD)');
     
     % Ripples
-    subplot(5,5,length(findobj(gcf,'type','axes'))+1)
+    subplot(numSubplots,numSubplots,length(findobj(gcf,'type','axes'))+1)
     hold on;
     t_win = ripplesResponses.timestamps > -0.25 & ripplesResponses.timestamps < 0.25;
     plot(ripplesResponses.timestamps(t_win),ripplesResponses.responsecurveZSmooth(ii,t_win),'color',color);
@@ -292,7 +299,7 @@ for ii = 1:length(UID)
     xlabel('Ripple center (s)'); ylabel('Rate (SD)');
     
     % ripple phase
-    subplot(5,5,length(findobj(gcf,'type','axes'))+1)
+    subplot(numSubplots,numSubplots,length(findobj(gcf,'type','axes'))+1)
     hold on
     x_wave = 0:0.01:4*pi;
     y_wave = cos(x_wave)*2;
@@ -303,7 +310,7 @@ for ii = 1:length(UID)
     set(gca,'XTick',[0:2*pi:4*pi],'XTickLabel',{'0', '2\pi', '4\pi'});
     
     % theta
-    subplot(5,5,length(findobj(gcf,'type','axes'))+1)
+    subplot(numSubplots,numSubplots,length(findobj(gcf,'type','axes'))+1)
     hold on
     x_wave = 0:0.01:4*pi;
     y_wave = cos(x_wave)*2;
@@ -314,7 +321,7 @@ for ii = 1:length(UID)
     set(gca,'XTick',[0:2*pi:4*pi],'XTickLabel',{'0', '2\pi', '4\pi'});
     
     % lgamma
-    subplot(5,5,length(findobj(gcf,'type','axes'))+1)
+    subplot(numSubplots,numSubplots,length(findobj(gcf,'type','axes'))+1)
     hold on
     x_wave = 0:0.01:4*pi;
     y_wave = cos(x_wave)*2;
@@ -325,7 +332,7 @@ for ii = 1:length(UID)
     set(gca,'XTick',[0:2*pi:4*pi],'XTickLabel',{'0', '2\pi', '4\pi'});
     
     % hgamma
-    subplot(5,5,length(findobj(gcf,'type','axes'))+1)
+    subplot(numSubplots,numSubplots,length(findobj(gcf,'type','axes'))+1)
     hold on
     x_wave = 0:0.01:4*pi;
     y_wave = cos(x_wave)*2;
@@ -337,7 +344,7 @@ for ii = 1:length(UID)
     
     % speed
     if ~isempty(speedCorr)
-        subplot(5,5,length(findobj(gcf,'type','axes'))+1)
+        subplot(numSubplots,numSubplots,length(findobj(gcf,'type','axes'))+1)
         plot(log10(speedCorr.prc_vals),speedVals(ii,:),'color',color);
         LogScale('x',10);
         axis tight
@@ -347,7 +354,7 @@ for ii = 1:length(UID)
     % Behavior
     if ~isempty(behavior)
         if isfield(behavior,'psth_lReward') && isstruct(behavior.psth_lReward)
-            subplot(5,5,length(findobj(gcf,'type','axes'))+1)
+            subplot(numSubplots,numSubplots,length(findobj(gcf,'type','axes'))+1)
             hold on;
             t_win = behavior.psth_lReward.timestamps > -2 & behavior.psth_lReward.timestamps < 2;
             plot(behavior.psth_lReward.timestamps(t_win),behavior.psth_lReward.responsecurveZSmooth(ii,t_win),'color',color);
@@ -356,12 +363,21 @@ for ii = 1:length(UID)
         end
         
         if isfield(behavior,'psth_rReward') && isstruct(behavior.psth_rReward)
-            subplot(5,5,length(findobj(gcf,'type','axes'))+1)
+            subplot(numSubplots,numSubplots,length(findobj(gcf,'type','axes'))+1)
             hold on;
             t_win = behavior.psth_rReward.timestamps > -2 & behavior.psth_rReward.timestamps < 2;
             plot(behavior.psth_rReward.timestamps(t_win),behavior.psth_rReward.responsecurveZSmooth(ii,t_win),'color',color);
             axis tight
             xlabel('rReward time (s)'); ylabel('Rate (SD)');       
+        end
+        
+        if isfield(behavior,'psth_reward') && isstruct(behavior.psth_reward)
+            subplot(numSubplots,numSubplots,length(findobj(gcf,'type','axes'))+1)
+            hold on;
+            t_win = behavior.psth_reward.timestamps > -2 & behavior.psth_reward.timestamps < 2;
+            plot(behavior.psth_reward.timestamps(t_win),behavior.psth_reward.responsecurveZSmooth(ii,t_win),'color',color);
+            axis tight
+            xlabel('reward time (s)'); ylabel('Rate (SD)');       
         end
     end
     
@@ -371,13 +387,20 @@ for ii = 1:length(UID)
     else
         behavior = [];
     end
+
     % Spatial Modulation rateMaps
     if ~isempty(firingMaps) && ~any(ismember(excludePlot,{lower('spatialModulation')}))
         for jj = 1:length(firingMaps.rateMaps{ii})
+%                 if length(firingMaps.cmBin) == 2
+%                     timestamps = 0:round(firingMaps.cmBin{jj},1):round(firingMaps.cmBin{jj},1)*(length(firingMaps.rateMaps{1}{jj})-1);
+%                 else
+%                     timestamps = 0:round(firingMaps.cmBin,1):round(firingMaps.cmBin,1)*(length(firingMaps.rateMaps{1}{jj})-1);
+%                 end
                 timestamps = 0:round(firingMaps.cmBin{jj},1):round(firingMaps.cmBin{jj},1)*(length(firingMaps.rateMaps{1}{jj})-1);
+
                 if ~isempty(firingMaps2Halves) && ~isempty(firingMaps2Halves.rateMaps{ii}{jj})
                     for kk = 1:length(firingMaps2Halves.rateMaps{ii}{jj})
-                        subplot(5,5,length(findobj(gcf,'type','axes'))+1)
+                        subplot(numSubplots,numSubplots,length(findobj(gcf,'type','axes'))+1)
                         if size(firingMaps2Halves.rateMaps{ii}{jj}{kk},1) > 1
                             hold on;
                             plot(firingMaps2Halves.pos{jj}{kk}(:,2),firingMaps2Halves.pos{jj}{kk}(:,3),'color',[0.7 0.7 0.7]);
@@ -387,7 +410,7 @@ for ii = 1:length(UID)
                             scatter(firingMaps2Halves.pos{jj}{kk}(n > 0 ,2),firingMaps2Halves.pos{jj}{kk}(n > 0,3),1,'MarkerEdgeColor',[1 0 0], 'MarkerFaceColor',[0.9 0 0]);
                             axis ij;
                             axis square;
-                            xlim(round(behavior.avFrame{jj}.xSize)); ylim(round(behavior.avFrame{jj}.ySize));
+%                             xlim(round(behavior.avFrame{jj}.xSize)); ylim(round(behavior.avFrame{jj}.ySize));
                             if kk == 1
                                 title(['Map ', num2str(jj) ,' 1st Half']);
                             elseif kk == 2
@@ -398,16 +421,16 @@ for ii = 1:length(UID)
                     end
 
                     if size(firingMaps.rateMaps{ii}{jj},1) > 1
-                        subplot(5,5,length(findobj(gcf,'type','axes'))+1)
+                        subplot(numSubplots,numSubplots,length(findobj(gcf,'type','axes'))+1)
                         hold on;
                         plot(behavior.maps{jj}(:,2),behavior.maps{jj}(:,3),'color',[0.7 0.7 0.7]);
                         t = behavior.maps{jj}(:,1);
-                        dt = diff(t); dt(end+1) = dt(end); de(dt > firingMaps.params.maxGap) = firingMaps.params.maxGap;
+                        dt = diff(t); dt(end+1) = dt(end); dt(dt > firingMaps.params.maxGap) = firingMaps.params.maxGap;
                         n = CountInIntervals(spikes.times{ii},[t t+dt]);
                         scatter(behavior.maps{jj}(n > 0 ,2),behavior.maps{jj}(n > 0,3),1,'MarkerEdgeColor',[1 0 0], 'MarkerFaceColor',[0.9 0 0]);
                         axis ij;
                         axis square;
-                        xlim(round(behavior.avFrame{jj}.xSize)); ylim(round(behavior.avFrame{jj}.ySize));
+%                         xlim(round(behavior.avFrame{jj}.xSize)); ylim(round(behavior.avFrame{jj}.ySize));
                         title(['Map ', num2str(jj)]);
                         try
                             if ~isempty(spatialModulation2Halves)
@@ -421,7 +444,7 @@ for ii = 1:length(UID)
                     
                     end
                 else
-                    subplot(5,5,length(findobj(gcf,'type','axes'))+1)
+                    subplot(numSubplots,numSubplots,length(findobj(gcf,'type','axes'))+1)
                     plot(timestamps, firingMaps.rateMaps{ii}{jj},'color',color);
                     xlim(timestamps([1 end]));
                     xlabel('cm'); ylabel(['Map ',num2str(jj),' (-3 to 3 SD)']);
@@ -436,7 +459,7 @@ for ii = 1:length(UID)
                 if ~isempty(firingMaps2Halves) && ~isempty(firingMaps2Halves.rateMaps{ii}{jj})
                     
                     for kk = 1:length(firingMaps2Halves.rateMaps{ii}{jj})
-                        subplot(5,5,length(findobj(gcf,'type','axes'))+1)
+                        subplot(numSubplots,numSubplots,length(findobj(gcf,'type','axes'))+1)
                         imagesc(firingMaps2Halves.rateMaps{ii}{jj}{kk});
                         colormap(jet(15))
                         axis ij;
@@ -449,7 +472,7 @@ for ii = 1:length(UID)
                         end
                     end
                     
-                    ax = subplot(5,5,length(findobj(gcf,'type','axes'))+1)
+                    ax = subplot(numSubplots,numSubplots,length(findobj(gcf,'type','axes'))+1)
                     imagesc(firingMaps.rateMaps{ii}{jj});
                     colormap(jet(15))
                     axis ij;
@@ -519,7 +542,7 @@ for ii = 1:length(UID)
                     ylabel(ax,['BitsPerSecond: ', num2str(round(bitsPerSecond,3))],'Color',color_bitsPerSecond);
                     xlabel(ax,['BitsPerSpike: ' num2str(round(bitsPerSpike,3))],'color',color_bitsPerSpike);
                     firingFieldSize_var = ['firingFieldSize_map_',num2str(jj)];
-                    title(['Max FR: ', num2str(spatialModulation.(firingFieldSize_var).maxFr{ii})]); 
+                    title(['Max FR: ', num2str(spatialModulation.(firingFieldSize_var){ii}.maxFr)]); 
                 end
             end
         end
@@ -530,7 +553,7 @@ for ii = 1:length(UID)
     if ~isempty(spatialModulation)
         for jj = 1:length(firingMaps.rateMaps{ii})
             if size(firingMaps.rateMaps{ii}{jj},1) > 1 % 2D spatial map
-                subplot(5,5,length(findobj(gcf,'type','axes'))+1)
+                subplot(numSubplots,numSubplots,length(findobj(gcf,'type','axes'))+1)
                 spatialAutoCorr_var = ['spatialAutoCorr_map_',num2str(jj)];
                 spatialAutoCorr = spatialModulation.(spatialAutoCorr_var){ii}.r;
                 imagesc(spatialAutoCorr);
@@ -548,7 +571,7 @@ for ii = 1:length(UID)
     if ~isempty(spatialModulation) && gridAnalysis
         for jj = 1:length(firingMaps.rateMaps{ii})
             if size(firingMaps.rateMaps{ii}{jj},1) > 1 % 2D spatial map
-                subplot(5,5,length(findobj(gcf,'type','axes'))+1)
+                subplot(numSubplots,numSubplots,length(findobj(gcf,'type','axes'))+1)
                 grid_var = ['grid_map_',num2str(jj)];
                 gridMap = spatialModulation.(grid_var){ii};
                 autoCorr = gridMap.autoCorr;

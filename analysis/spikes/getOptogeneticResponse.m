@@ -10,7 +10,7 @@ function [optogeneticResponses] = getOptogeneticResponse(varargin)
 %                       [].
 % spikes            buzcode spikes structure, if not provided tries loadSpikes.
 % basepath          By default pwd.
-% numRep            For boostraping, default, 500. If 0, no boostraping.
+% numRep            For boostraping, default, 500. If 0, no bexpoostraping.
 % binSize           In seconds, default, 0.001.
 % winSize           In seconds, default, 0.5.
 % rasterPlot        Default true.
@@ -49,6 +49,10 @@ addParameter(p,'salt_baseline',[-0.25 -0.001],@isscalar);
 addParameter(p,'salt_time',[-0.250 0.250],@isscalar);
 addParameter(p,'salt_win',[0.01],@isscalar);
 addParameter(p,'salt_binSize',[0.001],@isscalar);
+addParameter(p,'bootsTrapCI',[0.001 0.999],@isnumeric);
+addParameter(p,'onset',0,@isnumeric);
+addParameter(p,'offset',0,@isnumeric);
+addParameter(p,'getRaster',true,@islogical);
 
 parse(p, varargin{:});
 analogChannelsList = p.Results.analogChannelsList;
@@ -71,6 +75,10 @@ salt_baseline = p.Results.salt_baseline;
 salt_time = p.Results.salt_time;
 salt_win = p.Results.salt_win;
 salt_binSize = p.Results.salt_binSize;
+bootsTrapCI = p.Results.bootsTrapCI;
+onset = p.Results.onset;
+offset = p.Results.offset;
+getRaster = p.Results.getRaster;
 
 % Deal with inputs
 prevPath = pwd;
@@ -107,7 +115,7 @@ if isempty(spikes)
     spikes = loadSpikes('getWaveformsFromDat',false);
 end
 
-pulsesAnalog.timestamps = []; pulsesAnalog.analogChannelsListannel = [];
+pulsesAnalog.timestamps = []; pulsesAnalog.analogChannelsList = [];
 if strcmpi(analogChannelsList,'all')
     pulsesAnalog = getAnalogPulses;
 else
@@ -132,8 +140,8 @@ end
 
 pulses.timestamps = [pulsesAnalog.timestamps; pulsesDigital.timestamps];  % combine pulses
 pulses.channel = [pulsesAnalog.analogChannelsList; pulsesDigital.digitalChannelsList + lastAnalogChannels];  % combine pulses
-pulses.analogChannelsListannel = [pulsesAnalog.analogChannelsList; nan(size(pulsesDigital.digitalChannelsList))];  % 
-pulses.digitalChannelsListannel = [nan(size(pulsesAnalog.analogChannelsList)); pulsesDigital.digitalChannelsList];  % 
+pulses.analogChannelsList = [pulsesAnalog.analogChannelsList; nan(size(pulsesDigital.digitalChannelsList))];  % 
+pulses.digitalChannelsList = [nan(size(pulsesAnalog.analogChannelsList)); pulsesDigital.digitalChannelsList];  % 
 pulses.duration = round(pulses.timestamps(:,2) - pulses.timestamps(:,1),3);  % 
 pulses.isAnalog = [ones(size(pulsesAnalog.analogChannelsList)); zeros(size(pulsesDigital.digitalChannelsList))];
 pulses.isDigital = [zeros(size(pulsesAnalog.analogChannelsList)); ones(size(pulsesDigital.digitalChannelsList))];
@@ -203,7 +211,6 @@ end
 conditions(indxs,:) = [];
 nConditions = size(conditions,1);
 
-
 if nConditions == 2
     if abs(conditions(1,1) - conditions(2,1)) < minDuration
         conditions(2,3) = conditions(2,3) + conditions(1,3);
@@ -223,89 +230,126 @@ if nConditions == 2
         nConditions = size(conditions,1);
     end
 end
-        
+
+toRemove = find(pulses.duration< minDuration);
+pulses.timestamps(toRemove,:) = [];
+pulses.channel(toRemove) = [];
+pulses.analogChannelsList(toRemove) = [];
+pulses.digitalChannelsList(toRemove) = [];
+pulses.duration(toRemove) = [];
+pulses.isAnalog(toRemove) = [];
+pulses.isDigital(toRemove) = [];
+
 
 %%
 spikes = loadSpikes;
 % generate random events for boostraping
-disp('Generating boostrap template...');
-nPulses = int32(size(pulses.timestamps,1));
-randomEvents = [];
-for kk = 1:numRep
-    randomEvents{kk} = sort(randsample(timestamps_recording, nPulses))';
-end
 disp('Computing responses...');
-for ii = 1:length(spikes.UID)
-    fprintf(' **Pulses from unit %3.i/ %3.i \n',ii, size(spikes.UID,2)); %\n
-    if numRep > 0
-        [stccg, t] = CCG([spikes.times{ii} randomEvents],[],'binSize',binSize,'duration',winSize,'norm','rate');
-        for jj = 1:nConditions
-            t_duringPulse = t > 0 & t < conditions(jj,1); 
-            randomRatesDuringPulse = nanmean(stccg(t_duringPulse,2:size(randomEvents,2)+1,1),1);
-            optogeneticResponses.bootsTrapRate(ii,jj) = mean(randomRatesDuringPulse);
-            optogeneticResponses.bootsTrapRateStd(ii,jj) = std(randomRatesDuringPulse);
-            pd = fitdist(randomRatesDuringPulse','normal');
-            optogeneticResponses.bootsTrapCI(ii,jj,:) = pd.icdf([.001 0.999]);
+
+for jj = 1:nConditions
+    fprintf('\n Condition %3.i / %3.i \n', jj, nConditions)
+
+    % generate events for boostraping
+    disp('Generating boostrap template...');
+    nPulses = length(find(pulses.channel == conditions(jj,2) & pulses.duration == conditions(jj,1)));
+    randomEvents = [];
+    for mm = 1:numRep
+        randomEvents{mm} = sort(randsample(timestamps_recording, nPulses))';
+    end
+    pulseDuration = conditions(jj,1);
+    [stccg, t] = CCG([spikes.times randomEvents],[],'binSize',binSize,'duration',winSize,'norm','rate');
+    fprintf('\n'); %
+    t_duringPulse = t > 0 + onset & t < pulseDuration + offset; 
+    randomRatesDuringPulse = squeeze(mean(stccg(t_duringPulse, length(spikes.UID)+1:end,1:length(spikes.UID)),1));
+    optogeneticResponses.bootsTrapRate(:,jj) = mean(randomRatesDuringPulse,1);
+    optogeneticResponses.bootsTrapRateStd(:,jj) = std(randomRatesDuringPulse,[],1);
+    optogeneticResponses.bootsTrapRateSEM(:,jj) = std(randomRatesDuringPulse,[],1)/sqrt(numRep);
+    if ~isempty(randomRatesDuringPulse)
+        for ii = 1:size(randomRatesDuringPulse,2)
+            pd = fitdist(randomRatesDuringPulse(:,ii),'normal');
+            optogeneticResponses.bootsTrapCI(ii,jj,1:2) = pd.icdf(bootsTrapCI);
         end
     else
-        optogeneticResponses.bootsTrapRate(ii,1:nConditions) = NaN;
-        optogeneticResponses.bootsTrapRateStd(ii,1:nConditions) = NaN;
-        optogeneticResponses.bootsTrapCI(ii,1:nConditions,:) = nan(nConditions,2);
+        optogeneticResponses.bootsTrapCI(1:size(randomRatesDuringPulse,2),jj,1:2) = NaN;
     end
-    for jj = 1:nConditions
-        pul = pulses.timestamps(pulses.channel == conditions(jj,2) & pulses.duration == conditions(jj,1),:);
-        isAnalog = median(pulses.isAnalog(pulses.channel == conditions(jj,2) & pulses.duration == conditions(jj,1)));
-        channelPulse = median(pulses.channel(pulses.channel == conditions(jj,2) & pulses.duration == conditions(jj,1)));
-        
-        nPulses = length(pul);
-        pulseDuration = conditions(jj,1);
-        if nPulses > 100
-            [stccg, t] = CCG({spikes.times{ii}, pul(:,1)},[],'binSize',binSize,'duration',winSize,'norm','rate');
-            optogeneticResponses.responsecurve(ii,jj,:) = stccg(:,2,1);
-            optogeneticResponses.responsecurveSmooth(ii,jj,:) = smooth(stccg(:,2,1));
-            t_duringPulse = t > 0 & t < pulseDuration; 
-            t_beforePulse = t > -pulseDuration & t < 0; 
-            optogeneticResponses.responsecurveZ(ii,jj,:) = (stccg(:,2,1) - mean(stccg(t < 0,2,1)))/std(stccg(t < 0,2,1));
-            optogeneticResponses.responsecurveZSmooth(ii,jj,:) = smooth((stccg(:,2,1) - mean(stccg(t < 0,2,1)))/std(stccg(t < 0,2,1)));
-            optogeneticResponses.rateDuringPulse(ii,jj,1) = mean(stccg(t_duringPulse,2,1));
-            optogeneticResponses.rateBeforePulse(ii,jj,1) = mean(stccg(t_beforePulse,2,1));
-            optogeneticResponses.rateZDuringPulse(ii,jj,1) = mean(squeeze(optogeneticResponses.responsecurveZ(ii,jj,t_duringPulse)));
+
+    pul = pulses.timestamps(pulses.channel == conditions(jj,2) & pulses.duration == conditions(jj,1),1);
+    isAnalog = median(pulses.isAnalog(pulses.channel == conditions(jj,2) & pulses.duration == conditions(jj,1)));
+    channelPulse = median(pulses.channel(pulses.channel == conditions(jj,2) & pulses.duration == conditions(jj,1)));
+    if isempty(pulses)
+        pul = [0];
+    end
+    times = spikes.times; times{length(times)+1} = pul;
+    [stccg, t] = CCG(times,[],'binSize',binSize,'duration',winSize,'norm','rate'); fprintf('\n'); %
+    optogeneticResponses.responsecurve(:,jj,:) = squeeze(stccg(:, end , 1:end-1))';
+    if length(times{end}) < minNumberOfPulses
+        optogeneticResponses.responsecurve(:,jj,:) = optogeneticResponses.responsecurve(:,jj,:) * NaN;
+    end
+    t_duringPulse = t > 0 + onset & t < pulseDuration + offset; 
+    t_beforePulse = t > -pulseDuration & t < 0; 
+    
+    numberOfPulses = size(pul,1);
+    for ii = 1:size(optogeneticResponses.responsecurve,1)
+        if numberOfPulses > minNumberOfPulses
+            optogeneticResponses.responsecurveSmooth(ii,jj,:) = smooth(optogeneticResponses.responsecurve(ii,jj,:));
+            optogeneticResponses.responsecurveZ(ii,jj,:) = (optogeneticResponses.responsecurve(ii,jj,:)...
+                    - mean(optogeneticResponses.responsecurve(ii,jj,t < 0)))...
+                    /std(optogeneticResponses.responsecurve(ii,jj,t < 0));
+            optogeneticResponses.responsecurveZSmooth(ii,jj,:) = smooth(optogeneticResponses.responsecurveZ(ii,jj,:));
+            optogeneticResponses.rateDuringPulse(ii,jj,1) = mean(optogeneticResponses.responsecurve(ii,jj,t_duringPulse));
+            optogeneticResponses.rateBeforePulse(ii,jj,1) = mean(optogeneticResponses.responsecurve(ii,jj,t_beforePulse));
+            optogeneticResponses.rateZDuringPulse(ii,jj,1) = mean(optogeneticResponses.responsecurveZ(ii,jj,t_duringPulse));
+            optogeneticResponses.rateZBeforePulse(ii,jj,1) = mean(optogeneticResponses.responsecurveZ(ii,jj,t_beforePulse));
             optogeneticResponses.durationPerPulse(ii,jj,1) = t(find(t_duringPulse,1,'last')+1) - t(find(t_duringPulse,1,'first')-1);
+            optogeneticResponses.pulseDuration(ii,jj,1) = pulseDuration;
             optogeneticResponses.isAnalog(ii,jj,1) = isAnalog;
             optogeneticResponses.isDigital(ii,jj,1) = ~isAnalog;
             optogeneticResponses.channelPulse(ii,jj,1) = channelPulse;
+            optogeneticResponses.condition(ii,jj,1) = jj;
             
-            [h, optogeneticResponses.modulationSignificanceLevel(ii,jj,1)] = kstest2(stccg(t_duringPulse,2,1),stccg(t_beforePulse,2,1));
-            ci = squeeze(optogeneticResponses.bootsTrapCI(ii,jj,:));
-            
+            try
+                [h, optogeneticResponses.modulationSignificanceLevel(ii,jj,1)] = ...
+                     kstest2(squeeze(optogeneticResponses.responsecurve(ii,jj,t_duringPulse))...
+                        ,squeeze(optogeneticResponses.responsecurve(ii,jj,t_beforePulse)));
+            catch
+                 optogeneticResponses.modulationSignificanceLevel(ii,jj,1) = NaN;
+            end
+
             % Boostrap test
+            ci = squeeze(optogeneticResponses.bootsTrapCI(ii,jj,:));
             if optogeneticResponses.rateDuringPulse(ii,jj,1) > ci(2)
                 test = 1;
             elseif optogeneticResponses.rateDuringPulse(ii,jj,1) < ci(1)
                 test = -1;
+            elseif isnan(optogeneticResponses.rateDuringPulse(ii,jj,1))
+                    test = NaN;
             else
                 test = 0;
             end
             optogeneticResponses.bootsTrapTest(ii,jj,1) = test;
-            
+
             % z-score change test
             if mean(optogeneticResponses.responsecurveZ(ii,jj,t_duringPulse)) > 1.96
                 test = 1;
             elseif mean(optogeneticResponses.responsecurveZ(ii,jj,t_duringPulse)) < -1.96
-                test = -1;
+                 test = -1;
+            elseif isnan(optogeneticResponses.rateZDuringPulse(ii,jj,1))
+                test = NaN;
             else
                 test = 0;
             end
             optogeneticResponses.zscoreTest(ii,jj,1) = test;
-            
+             
             % Generating raster
             rasterX = [];
             rasterY = [];
-            for zz = 1:size(pul,1)
-                temp_spk = spikes.times{ii}(find(spikes.times{ii} - pul(zz,1)  > salt_time(1) & spikes.times{ii} - pul(zz,1)  < salt_time(2))) - pul(zz,1);
-                rasterX = [rasterX; temp_spk];
-                if ~isempty(temp_spk)
-                    rasterY = [rasterY; zz * ones(size((temp_spk)))];
+            if getRaster
+                for zz = 1:size(pul,1)
+                    temp_spk = spikes.times{ii}(find(spikes.times{ii} - pul(zz,1)  > salt_time(1) & spikes.times{ii} - pul(zz,1)  < salt_time(2))) - pul(zz,1);
+                    rasterX = [rasterX; temp_spk];
+                    if ~isempty(temp_spk)
+                        rasterY = [rasterY; zz * ones(size((temp_spk)))];
+                    end
                 end
             end
             if ~isempty(rasterX)
@@ -340,7 +384,7 @@ for ii = 1:length(spikes.UID)
                 optogeneticResponses.salt.p_value(ii,jj,1) = NaN;
                 optogeneticResponses.salt.I_statistics(ii,jj,1) = NaN;
             end
-                        
+
             % multiple test test. If not boostrap, it would be 2 ways.
             if (optogeneticResponses.rateDuringPulse(ii,jj,1) > ci(2) || isnan(ci(2))) && optogeneticResponses.modulationSignificanceLevel(ii,jj,1)<0.01...
                     && mean(optogeneticResponses.responsecurveZ(ii,jj,t_duringPulse)) > 1.96
@@ -376,14 +420,14 @@ for ii = 1:length(spikes.UID)
             end
             optogeneticResponses.multipleTest(ii,jj,:) = multipleTest;
             optogeneticResponses.multipleTest_string{ii,jj} = multipleTest_string;
-
         else
-            optogeneticResponses.responsecurve(ii,jj,:) = nan; %nan(pulseDuration/binSize + 1,1);
-            optogeneticResponses.responsecurveZ(ii,jj,:) = nan; %(pulseDuration/binSize + 1,1);
+            optogeneticResponses.responsecurve(ii,jj,:) = NaN * optogeneticResponses.responsecurve(ii,jj,:) ;
+            optogeneticResponses.responsecurveZ(ii,jj,:) = NaN * optogeneticResponses.responsecurve(ii,jj,:) ;
             optogeneticResponses.modulationSignificanceLevel(ii,jj,1) = NaN;
             optogeneticResponses.rateDuringPulse(ii,jj,1) = NaN;
             optogeneticResponses.rateBeforePulse(ii,jj,1) = NaN;
             optogeneticResponses.rateZDuringPulse(ii,jj,1) = NaN;
+             optogeneticResponses.rateZBeforePulse(ii,jj,1) = NaN;
             optogeneticResponses.bootsTrapTest(ii,jj,1) = NaN;
             optogeneticResponses.zscoreTest(ii,jj,1) = NaN;
             optogeneticResponses.threeWaysTest(ii,jj,1) = NaN;
@@ -391,6 +435,7 @@ for ii = 1:length(spikes.UID)
             optogeneticResponses.isAnalog(ii,jj,1) = isAnalog;
             optogeneticResponses.isDigital(ii,jj,1) = ~isAnalog;
             optogeneticResponses.channelPulse(ii,jj,1) = channelPulse;
+            optogeneticResponses.pulseDuration(ii,jj,1) = pulseDuration;
             
             optogeneticResponses.raster.rasterCount{ii,jj} = NaN;
             optogeneticResponses.raster.rasterProb{ii,jj} = NaN;
@@ -407,8 +452,9 @@ for ii = 1:length(spikes.UID)
             optogeneticResponses.multipleTest(ii,jj,:) = nan(1,4);
             optogeneticResponses.multipleTest_string{ii,jj} = NaN;
         end
+        optogeneticResponses.timestamps = t;
     end
-    optogeneticResponses.timestamps = t;
+
 end
 
 % find intervals
@@ -477,9 +523,15 @@ end
 optogeneticResponses.responseMetrics = responseMetrics;
 
 if saveMat
+    
+    optogeneticResponses_raster = optogeneticResponses;
+    optogeneticResponses = rmfield(optogeneticResponses,'raster');
     disp(' Saving results...');
     filename = split(pwd,filesep); filename = filename{end};
     save([filename '.optogeneticResponse.cellinfo.mat'],'optogeneticResponses','-v7.3');
+    if getRaster
+        save([basenameFromBasepath(pwd) '.optogeneticResponse_raster.cellinfo.mat'],'optogeneticResponses_raster','-v7.3');
+    end
 end
 
 if saveEventsFile

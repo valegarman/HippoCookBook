@@ -27,6 +27,7 @@ function [stats,h] = groupStats(y,group,varargin)
 %                       'BoxLinesStd','dispersionStd', 'fillStd', 'fillSEM'
 %                        'medianBall', 'violinPlot','meanBall'
 %    'plotData'     Plot data points, default false.
+%    'plotConnectors' Default, false
 %    'repeatedMeasures' Default, false
 %    'dataColor'    For data points and lines, Default [.7 .7 .7];
 %    'dataAlpha'    For data points and lines, Default .5;
@@ -67,6 +68,7 @@ addParameter(p,'FaceEdge',[],@isnumeric);
 addParameter(p,'roundPlotSize',15,@isnumeric);
 addParameter(p,'roundPlotCenterColor',[]);
 addParameter(p,'x_position',[]);
+addParameter(p,'plotConnectors',false,@islogical);
 
 parse(p,varargin{:});
 color = p.Results.color;
@@ -90,7 +92,7 @@ FaceEdge = p.Results.FaceEdge;
 roundPlotSize = p.Results.roundPlotSize;
 x_position = p.Results.x_position;
 roundPlotCenterColor = p.Results.roundPlotCenterColor;
-
+plotConnectors = p.Results.plotConnectors;
 
 % Dealing with inputs
 if size(y,1) < size(y,2)
@@ -190,9 +192,20 @@ if isempty(roundPlotCenterColor)
     roundPlotCenterColor = color;
 end
 
-
 for i=1:length(ind)                                                        % grouping data
     yC{i}=y(group==ind(i));
+    ySize(i) = length(yC{i});
+end
+
+if plotConnectors
+    if ~range(ySize)==0
+        warning('Number of elements is different across groups. Connectors can not be shown');
+        plotConnectors = false;
+    end
+    yColumns = [];
+    for i=1:length(ind)          
+        yColumns = [yColumns yC{i}];
+    end
 end
 
 stats.groupsIndex = ind;
@@ -340,7 +353,7 @@ if length(yC) == 2
         stats.wilconxonSignedRank.testName = 'Wilcoxon paired signed-rank test';
     
         % paired-sample t-test.
-        [p2,h2,ci2,stats2] = ttest(yC{1},yC{2});
+        [h2,p2,ci2,stats2] = ttest(yC{1},yC{2});
         stats.pairedtTest.p = p2;
         stats.pairedtTest.h = h2;
         stats.pairedtTest.stats = stats2;
@@ -348,7 +361,7 @@ if length(yC) == 2
     end
 
     % two-sample t-test.
-    [p2,h2,ci2,stats2] = ttest2(yC{1},yC{2});
+    [h2,p2,ci2,stats2] = ttest2(yC{1},yC{2});
     stats.tTest.p = p2;
     stats.tTest.h = h2;
     stats.tTest.stats = stats2;
@@ -503,17 +516,35 @@ if doPlot
             m = stats.descriptive.median(ii);
             s1 = stats.descriptive.q25(ii);
             s2 = stats.descriptive.q75(ii);
-            if plotData
+            if plotData && ~plotConnectors
                 posData = randn(length(find(group==ind(ii))),1)/10; 
                 posData((posData)>0.3) = posData((posData)>0.3)/2;
                 posData((posData)<-0.3) = posData((posData)<-0.3)/2;
                 plot(pos(ii)+ posData, y(group==ind(ii)),'o','color',[1 1 1],...
                        'MarkerFaceColor','k','MarkerEdgeColor','none','MarkerSize',dataSize);
             end
+
             plot(pos(ii)-0.1, m,'o','MarkerFaceColor',roundPlotCenterColor(ii,:),'MarkerEdgeColor',color(ii,:),'MarkerSize',roundPlotSize);
             plot([pos(ii)-0.1 pos(ii)-0.1], [s1 s2],'-','MarkerFaceColor',color(ii,:),'MarkerEdgeColor',color(ii,:),...
                 'MarkerSize',dataSize,'color',color(ii,:),'LineWidth',2)
         end
+        if plotConnectors
+            posData = randn(ySize(1),1)/10; 
+            posData((posData)>0.3) = posData((posData)>0.3)/2;
+            posData((posData)<-0.3) = posData((posData)<-0.3)/2;
+            if plotData
+                for ii = 1:length(ind) 
+                    plot(pos(ii)+ posData, y(group==ind(ii)),'o','color',[1 1 1],...
+                           'MarkerFaceColor','k','MarkerEdgeColor','none','MarkerSize',dataSize);
+                end
+            end
+
+            for ii = 1:length(yC{1}) 
+                plot(pos + posData(ii,:), yColumns(ii,:),'-','color',[.1 .1 .1 .5]);
+            end
+
+        end
+
         xlim([.5 max(pos)+.5]);
         set(gca,'xtick',[],'TickDir','out');
         grid off
@@ -521,7 +552,7 @@ if doPlot
             view([90 90]); 
         end
     
-    elseif strcmpi(plotType,'onyData')
+    elseif strcmpi(plotType,'onlyData')
         
         hold on
         % plot([.5 max(pos)+.5],[0 0],'color',[.7 .7 .7]);

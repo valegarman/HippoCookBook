@@ -1,4 +1,4 @@
-function [UDStates] = detectUD(varargin)
+function [UDStates] = detectUpsDowns(varargin)
 % Detect up and down states from LFP.
 %
 % USAGE
@@ -83,6 +83,7 @@ addParameter(p,'noPrompts',true,@islogical);
 addParameter(p,'spikeThreshold',.25,@isnumeric);
 addParameter(p,'skipCluster',[],@isnumeric);
 addParameter(p,'useparfor',true,@islogical);
+addParameter(p,'excludeIntervals',[],@isnumeric);
 
 parse(p,varargin{:})
 basepath = p.Results.basepath;
@@ -102,6 +103,7 @@ saveMat = p.Results.saveMat;
 spikeThreshold = p.Results.spikeThreshold;
 skipCluster = p.Results.skipCluster;
 useparfor = p.Results.useparfor;
+excludeIntervals = p.Results.excludeIntervals;
 
 %% Collect pieces
 if exist([basenameFromBasepath(pwd) '.UDStates.events.mat'],'file') && ~forceDetect
@@ -110,6 +112,11 @@ if exist([basenameFromBasepath(pwd) '.UDStates.events.mat'],'file') && ~forceDet
     return
 end
 tlfp = getLFP(1,'basepath',basepath,'noPrompts',noPrompts);
+if ~isempty(excludeIntervals)
+    [a,b] = InIntervals(tlfp.timestamps,excludeIntervals);
+%     tlfp.timestamps(a) = nan(1,length(find(a)));
+    tlfp.data(a,:) = nan(1,length(find(a)));
+end
 if ischar(NREMInts) && strcmpi(NREMInts,'all')
     NREMInts = [0 tlfp.duration];                                          % Consider all file as NREMInts
 elseif isempty(NREMInts)                                                   % if empty, try to generate
@@ -210,6 +217,11 @@ clear gamm delt avGamma stdGamma gdCorr dscore
 
 %% find states
 lfp = getLFP(ch,'basepath',basepath,'noPrompts',noPrompts);
+if ~isempty(excludeIntervals)
+    [a,b] = InIntervals(lfp.timestamps,excludeIntervals);
+%     lfp.timestamps(a) = [];
+    lfp.data(a,:) = nan(1,length(find(a)));
+end
 gammaLFP = bz_Filter(lfp,'passband',filterparams.gamma,'filter','fir1','order',4);
 smoothGamm = smoothGamm * session.extracellular.srLfp;
 envGamm = movmean(gammaLFP.data.^2,smoothGamm);

@@ -94,7 +94,7 @@ addParameter(p,'type','lll',@ischar);
 addParameter(p,'mode','discard',@ischar);
 addParameter(p,'maxDistance',5,@isnumeric);
 addParameter(p,'sample_rate',30,@isnumeric);
-addParameter(p,'bndbox',[],@isstruct);
+addParameter(p,'bndbox',[]);
 addParameter(p,'var2binby','position',@ischar);
 addParameter(p,'pixelsmetre',[],@isnumeric);
 addParameter(p,'binsize',[],@isnumeric);

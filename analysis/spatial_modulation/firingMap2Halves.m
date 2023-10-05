@@ -66,7 +66,7 @@ addParameter(p,'tint',true,@islogical);
 
 parse(p,varargin{:});
 smooth = p.Results.smooth;
-speedThresh = p.Results.speedThresh*100;
+speedThresh = p.Results.speedThresh;
 nBins = p.Results.nBins;
 maxGap = p.Results.maxGap;
 minTime = p.Results.minTime;
@@ -133,19 +133,19 @@ try
     end
 
     % Check if bin size is different for same conditions
-    uniqueParadigms = unique(behavior.description);
-    for ii = 1:length(uniqueParadigms)
-%         sameParadigm = find(strcmpi(behavior.description,uniqueParadigms{ii}));
-        sameParadigm = find(ismember(behavior.description,uniqueParadigms{ii}));
-        if length(sameParadigm) > 1
-            if ~isequal(nBins{sameParadigm(1)},nBins{sameParadigm(2)})
-                disp('Correcting number of bins for same paradigm...');
-                [mx,ind] = max([nBins{sameParadigm(1)} nBins{sameParadigm(2)}]);
-                [mn,indx] = min([nBins{sameParadigm(1)} nBins{sameParadigm(2)}]);
-                nBins{sameParadigm(indx)} = nBins{sameParadigm(ind)};
-            end
-        end
-    end
+%     uniqueParadigms = unique(behavior.description);
+%     for ii = 1:length(uniqueParadigms)
+% %         sameParadigm = find(strcmpi(behavior.description,uniqueParadigms{ii}));
+%         sameParadigm = find(ismember(behavior.description,uniqueParadigms{ii}));
+%         if length(sameParadigm) > 1
+%             if ~isequal(nBins{sameParadigm(1)},nBins{sameParadigm(2)})
+%                 disp('Correcting number of bins for same paradigm...');
+%                 [mx,ind] = max([nBins{sameParadigm(1)} nBins{sameParadigm(2)}]);
+%                 [mn,indx] = min([nBins{sameParadigm(1)} nBins{sameParadigm(2)}]);
+%                 nBins{sameParadigm(indx)} = nBins{sameParadigm(ind)};
+%             end
+%         end
+%     end
 catch
     disp('Not possible to compute nBins based on apparatus ...');
 end
@@ -319,7 +319,7 @@ if plt
                     scatter(pos{c}{ii}(n > 0 ,2),pos{c}{ii}(n > 0,3),1,'MarkerEdgeColor',[1 0 0], 'MarkerFaceColor',[0.9 0 0]);
                     axis ij;
                     axis square;
-                    xlim(round(behavior.avFrame{c}.xSize)); ylim(round(behavior.avFrame{c}.ySize));
+%                     xlim(round(behavior.avFrame{c}.xSize)); ylim(round(behavior.avFrame{c}.ySize));
                     if unit == 1
                         ylabel('Track (cm)');
                         xlabel('Track (cm)');

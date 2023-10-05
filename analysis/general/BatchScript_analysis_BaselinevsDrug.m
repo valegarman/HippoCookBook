@@ -2,12 +2,12 @@
 
 clear; close all
 targetProject= 'MK801Project';
-cd('F:\data');
-database_path = 'F:\data';
+cd('J:\data');
+database_path = 'J:\data';
 HCB_directory = what('GLUN3Project'); 
 
 % sessionsTable = readtable([HCB_directory.path filesep 'indexedSessions_MK801Project.csv']); % the variable is called allSessions
-sessionsTable = readtable(['C:\Users\Jorge\Documents\GitHub\MK801Project',filesep,'indexedSessions_GLUN3Project.csv']);
+sessionsTable = readtable(['C:\Users\Jorge\Documents\GitHub\MK801Project',filesep,'indexedSessions_MK801Project_Drugs.csv']);
 forceReload = false;
 
 win_resp = [-0.025 0.025];
@@ -22,23 +22,25 @@ notchFilter = false;
 
 plt = true;
 
-force = false;
+force = true;
 forceLfp = true;
-forceACGPeak = false;
+forceACGPeak = true;
 forceBehavior = true;
+forceACG = true;
 
-for ii = 7:length(sessionsTable.SessionName)
+for ii = 1:length(sessionsTable.SessionName)
     if strcmpi(sessionsTable.Project{ii}, targetProject) || strcmpi('all', targetProject)
         
         fprintf(' > %3.i/%3.i session \n',ii, length(sessionsTable.SessionName)); %\n
         cd([database_path filesep sessionsTable.Path{ii}]);
-        
+        mkdir('BaselinevsDrug')
         close all;
         % Load session info
         session = loadSession();
         spikes = loadSpikes();
         
-%         cell_metrics = CellExplorer('basepath',pwd);
+%         getAverageCCG('force',true,'skipStimulationPeriods',false);
+%         spatialModulation = computeSpatialClassificationGLUN3('tint',false);
         
         ts_Baseline = [];
         ts_Drug = [];
@@ -46,15 +48,15 @@ for ii = 7:length(sessionsTable.SessionName)
         ts_Maze1Drug = [];
         count = 1;
         for jj = 1:length(session.epochs)
-            session.epochs{jj}.behavioralParadigm;
-            if strcmpi(session.epochs{jj}.behavioralParadigm , 'PreSleep') | strcmpi(session.epochs{jj}.behavioralParadigm, 'Maze1Baseline')  | strcmpi(session.epochs{jj}.behavioralParadigm, 'InterMazeBaseline') | strcmpi(session.epochs{jj}.behavioralParadigm, 'Maze2Baseline') | strcmpi(session.epochs{jj}.behavioralParadigm, 'Maze3Baseline') | strcmpi(session.epochs{jj}.behavioralParadigm, 'LongSleepBaseline')
+            session.epochs{jj}.behavioralParadigm
+            if strcmpi(session.epochs{jj}.behavioralParadigm , 'PreSleep') | strcmpi(session.epochs{jj}.behavioralParadigm, 'Maze') | strcmpi(session.epochs{jj}.behavioralParadigm, 'PostSleep') | strcmpi(session.epochs{jj}.behavioralParadigm, 'Maze1Baseline')  | strcmpi(session.epochs{jj}.behavioralParadigm, 'InterMazeBaseline') | strcmpi(session.epochs{jj}.behavioralParadigm, 'Maze2Baseline') | strcmpi(session.epochs{jj}.behavioralParadigm, 'Maze3Baseline') | strcmpi(session.epochs{jj}.behavioralParadigm, 'LongSleepBaseline')
                 
                 ts_Baseline = [ts_Baseline ; session.epochs{jj}.startTime session.epochs{jj}.stopTime];
                 
 %             elseif strcmpi(session.epochs{jj}.behavioralParadigm , 'InjectionInterTrial') | strcmpi(session.epochs{jj}.behavioralParadigm , 'Maze1Drug') | strcmpi(session.epochs{jj}.behavioralParadigm , 'InterMazeDrug') | strcmpi(session.epochs{jj}.behavioralParadigm , 'Maze2Drug') | strcmpi(session.epochs{jj}.behavioralParadigm , 'Maze3Drug') | strcmpi(session.epochs{jj}.behavioralParadigm , 'LongSleepDrug')
             elseif strcmpi(session.epochs{jj}.behavioralParadigm , 'Maze1Drug') | strcmpi(session.epochs{jj}.behavioralParadigm , 'InterMazeDrug') | strcmpi(session.epochs{jj}.behavioralParadigm , 'Maze2Drug') | strcmpi(session.epochs{jj}.behavioralParadigm , 'Maze3Drug') | strcmpi(session.epochs{jj}.behavioralParadigm , 'LongSleepDrug')
     
-                ts_Drug = [ts_Drug session.epochs{jj}.startTime session.epochs{jj}.stopTime];
+                ts_Drug = [ts_Drug; session.epochs{jj}.startTime session.epochs{jj}.stopTime];
             end
         end
         
@@ -64,9 +66,9 @@ for ii = 7:length(sessionsTable.SessionName)
         end
         
         for jj = 1:length(session.epochs)
-            if strcmpi(session.epochs{jj}.behavioralParadigm,'Maze1Baseline')
+            if strcmpi(session.epochs{jj}.behavioralParadigm,'Maze1Baseline') | strcmpi(session.epochs{jj}.behavioralParadigm,'Maze3Baseline')
                 ts_Maze1Baseline = [session.epochs{jj}.startTime session.epochs{jj}.stopTime];
-            elseif strcmpi(session.epochs{jj}.behavioralParadigm,'Maze1Drug')
+            elseif strcmpi(session.epochs{jj}.behavioralParadigm,'Maze1Drug') | strcmpi(session.epochs{jj}.behavioralParadigm,'Maze3Drug')
                 ts_Maze1Drug = [session.epochs{jj}.startTime session.epochs{jj}.stopTime];
             end
         end
@@ -85,7 +87,9 @@ for ii = 7:length(sessionsTable.SessionName)
             end
 
             ts_theta = thetaEpochs.intervals;
-
+            
+            session.analysisTags.channel1 = thetaEpochs.channel;
+            session.analysisTags.channel2 = thetaEpochs.channel;
             lfp1w = getLFP(session.analysisTags.channel1,'noPrompts',true);
             lfp2w = getLFP(session.analysisTags.channel2,'noPrompts',true);
 
@@ -503,13 +507,63 @@ for ii = 7:length(sessionsTable.SessionName)
 
             saveas(gca,['BaselineVsDrug\coherogram_Maze1Drug.png']);   
             
+            
+            % BASELINE VS DRUG
+            close all;
+
+            figure('position',[200 115 1300 800])
+            subplot(1,2,1)
+            plotFill(f,nanmean(S1_Maze1Baseline_theta),'color',[0 0 0]); xlim([1 200]); ylim([-2 2]); 
+            ax = axis;
+            hold on;
+            plotFill(f,nanmean(S1_Maze1Drug_theta),'color',[1 0 0]); 
+            xlim([1 200]); ylim([-2 2]);
+            fill([theta_passband flip(theta_passband)],[ax([3 3 4 4])],[.8 .6 .6],'EdgeColor','none','FaceAlpha',.1);
+            fill([lgamma_passband flip(lgamma_passband)],[ax([3 3 4 4])],[.8 .4 .4],'EdgeColor','none','FaceAlpha',.1);
+            fill([hgamma_passband flip(hgamma_passband)],[ax([3 3 4 4])],[.8 .2 .2],'EdgeColor','none','FaceAlpha',.1);
+            ylabel('Maze1BaselineDrug [r]'); xlabel('Freq [Hz]'); 
+
+            subplot(1,2,2)
+            plotFill(f,nanmean(S1_Maze1Baseline),'color',[0 0 0]); xlim([1 200]); ylim([-2 2]); 
+            ax = axis;
+            hold on;
+            plotFill(f,nanmean(S1_Maze1Drug),'color',[1 0 0]); 
+            xlim([1 200]); ylim([-2 2]);
+            fill([theta_passband flip(theta_passband)],[ax([3 3 4 4])],[.8 .6 .6],'EdgeColor','none','FaceAlpha',.1);
+            fill([lgamma_passband flip(lgamma_passband)],[ax([3 3 4 4])],[.8 .4 .4],'EdgeColor','none','FaceAlpha',.1);
+            fill([hgamma_passband flip(hgamma_passband)],[ax([3 3 4 4])],[.8 .2 .2],'EdgeColor','none','FaceAlpha',.1);
+            ylabel('Maze1BaselineDrug [r]'); xlabel('Freq [Hz]'); 
+
+            saveas(gca,['BaselineVsDrug\coherogram_Maze1BaselineDrugS1.png']); 
+            
+            
+            figure('position',[200 115 1300 800])
+            subplot(1,2,1)
+            plotFill(f,nanmean(S2_Maze1Baseline_theta),'color',[0 0 0]); xlim([1 200]); ylim([-2 2]); 
+            ax = axis;
+            hold on;
+            plotFill(f,nanmean(S2_Maze1Drug_theta),'color',[1 0 0]); 
+            xlim([1 200]); ylim([-2 2]);
+            fill([theta_passband flip(theta_passband)],[ax([3 3 4 4])],[.8 .6 .6],'EdgeColor','none','FaceAlpha',.1);
+            fill([lgamma_passband flip(lgamma_passband)],[ax([3 3 4 4])],[.8 .4 .4],'EdgeColor','none','FaceAlpha',.1);
+            fill([hgamma_passband flip(hgamma_passband)],[ax([3 3 4 4])],[.8 .2 .2],'EdgeColor','none','FaceAlpha',.1);
+            ylabel('Maze1BaselineDrug [r]'); xlabel('Freq [Hz]'); 
+
+            subplot(1,2,2)
+            plotFill(f,nanmean(S2_Maze1Baseline),'color',[0 0 0]); xlim([1 200]); ylim([-2 2]); 
+            ax = axis;
+            hold on;
+            plotFill(f,nanmean(S2_Maze1Drug),'color',[1 0 0]); 
+            xlim([1 200]); ylim([-2 2]);
+            fill([theta_passband flip(theta_passband)],[ax([3 3 4 4])],[.8 .6 .6],'EdgeColor','none','FaceAlpha',.1);
+            fill([lgamma_passband flip(lgamma_passband)],[ax([3 3 4 4])],[.8 .4 .4],'EdgeColor','none','FaceAlpha',.1);
+            fill([hgamma_passband flip(hgamma_passband)],[ax([3 3 4 4])],[.8 .2 .2],'EdgeColor','none','FaceAlpha',.1);
+            ylabel('Maze1BaselineDrug [r]'); xlabel('Freq [Hz]');
+            
+            saveas(gca,['BaselineVsDrug\coherogram_Maze1BaselineDrugS2.png']);
+            
         end
-    
-    
-    
-        % ======================================
-        % THETA/GAMMA MODULATION
-        % ======================================
+        
         
 
         % ======================================
@@ -518,178 +572,155 @@ for ii = 7:length(sessionsTable.SessionName)
         
         
         % Baseline
-        try
-             if isempty(dir('*.OpenField_Baseline.mat')) | isempty(dir('*.OpenField_Drug.mat')) | forceBehavior
-                performance = getSessionPerformance('includeIntervals',ts_Baseline);
-
-                OpenField = performance.OpenField;
-                if isfield(performance,'YMaze')
-                    YMaze = performance.YMaze;
-                end
-                performance = OpenField;
-                save([session.general.name,'.OpenField_Baseline.mat'],'performance');
-
-                if exist('YMaze','var')  
-                    performance = YMaze;
-                else
-                    performance.meanSpeed = NaN;
-                    performance.distance = NaN;
-                end
-                save([session.general.name,'.YMaze_Baseline.mat'],'performance');
-             end
-            clear performance; clear OpenField; clear YMaze;
-
-            % Drug
-           if isempty(dir('*.YMaze_Baseline.mat')) | isempty(dir('*.YMaze_Drug.mat')) | forceBehavior
-               performance = getSessionPerformance('includeIntervals',ts_Drug);
-
-                OpenField = performance.OpenField;
-                if isfield(performance,'YMaze')
-                    YMaze = performance.YMaze;
-                end
-                performance = OpenField;
-                save([session.general.name,'.OpenField_Drug.mat'],'performance');
-
-                if exist('YMaze','var')  
-                    performance = YMaze;
-                    
-                else
-                    performance.meanSpeed = NaN;
-                    performance.distance = NaN;
-                end
-                save([session.general.name,'.YMaze_Drug.mat'],'performance');
-           end
-           
-           clear performance; clear OpenField; clear YMaze;
-        catch
-        end
+%         try
+%              if isempty(dir('*.OpenField_Baseline.mat')) | isempty(dir('*.OpenField_Drug.mat')) | forceBehavior
+%                 performance = getSessionPerformance('includeIntervals',ts_Baseline);
+% 
+%                 OpenField = performance.OpenField;
+%                 if isfield(performance,'YMaze')
+%                     YMaze = performance.YMaze;
+%                 end
+%                 performance = OpenField;
+%                 save([session.general.name,'.OpenField_Baseline.mat'],'performance');
+% 
+%                 if exist('YMaze','var')  
+%                     performance = YMaze;
+%                 else
+%                     performance.meanSpeed = NaN;
+%                     performance.distance = NaN;
+%                 end
+%                 save([session.general.name,'.YMaze_Baseline.mat'],'performance');
+%              end
+%             clear performance; clear OpenField; clear YMaze;
+% 
+%             % Drug
+%            if isempty(dir('*.YMaze_Baseline.mat')) | isempty(dir('*.YMaze_Drug.mat')) | forceBehavior
+%                performance = getSessionPerformance('includeIntervals',ts_Drug);
+% 
+%                 OpenField = performance.OpenField;
+%                 if isfield(performance,'YMaze')
+%                     YMaze = performance.YMaze;
+%                 end
+%                 performance = OpenField;
+%                 save([session.general.name,'.OpenField_Drug.mat'],'performance');
+% 
+%                 if exist('YMaze','var')  
+%                     performance = YMaze;
+%                     
+%                 else
+%                     performance.meanSpeed = NaN;
+%                     performance.distance = NaN;
+%                 end
+%                 save([session.general.name,'.YMaze_Drug.mat'],'performance');
+%            end
+%            
+%            clear performance; clear OpenField; clear YMaze;
+%         catch
+%         end
         
         
         % ======================================
         % 1. UP-DOWN psth
         % ======================================
         
-        if isempty(dir('*.slowOscillations_Baseline_psth.cellinfo.mat')) | isempty(dir('*.slowOscillations_Drug_psth.cellinfo.mat')) | force
-            
-            UDStates = detectUD('plotOpt', true,'forceDetect',false','NREMInts','all');
-
-            % Baseline
-
-            psthUD_Baseline = spikesPsth([],'eventType','slowOscillations','restrictIntervals',ts_Baseline,'numRep',500,'force',true,'min_pulsesNumber',0,'saveMat',false,'savePlot',false,'rasterPlot',false,'ratePlot',false);
-
-            t = psthUD_Baseline.timestamps;
-            winSizePlot = [-0.5 0.5];
-            figure('position',[200 115 1300 800])
-            subplot(1,2,1)
-            imagesc([t(1) t(end)],[1 size(psthUD_Baseline.responsecurve,1)],...
-                psthUD_Baseline.responsecurveSmooth); caxis([0 10]); colormap(jet);
-            set(gca,'TickDir','out'); xlim([winSizePlot(1) winSizePlot(2)]);
-            title('Rate [0 to 10 Hz]','FontWeight','normal','FontSize',10);
-            ylabel('Cells');
-            xlabel('Time');
-
-            subplot(1,2,2)
-            imagesc([t(1) t(end)],[1 size(psthUD_Baseline.responsecurve,1)],...
-                psthUD_Baseline.responsecurveZSmooth); caxis([-3 3]); colormap(jet);
-            set(gca,'TickDir','out'); xlim([winSizePlot(1) winSizePlot(2)]);
-            title('Z Rate [-3 to 3 SD]','FontWeight','normal','FontSize',10);
-            ylabel('Cells');
-            xlabel('Time');
-            mkdir('BaselineVsDrug');
-
-            saveas(gca,['BaselinevsDrug\spikesPsthRate_slowOscillations_Baseline.png']);
-
-            raster = psthUD_Baseline.raster;
-            psth = rmfield(psthUD_Baseline,'raster');
-
-            save([session.general.name,'.slowOscillations_Baseline_psth.cellinfo.mat'],'psth','-v7.3');
-            save([session.general.name,'.slowOscillations_Baseline_raster.cellinfo.mat'],'raster','-v7.3');
-            
-            
-            % Drug
-            if ~isempty(ts_Drug)
-                psthUD_Drug = spikesPsth([],'eventType','slowOscillations','restrictIntervals',ts_Drug,'numRep',500,'force',true,'min_pulsesNumber',0,'saveMat',false,'savePlot',false,'rasterPlot',false,'ratePlot',false);
-
-                t = psthUD_Drug.timestamps;
-                winSizePlot = [-0.5 0.5];
-                figure('position',[200 115 1300 800])
-                subplot(1,2,1)
-                imagesc([t(1) t(end)],[1 size(psthUD_Drug.responsecurve,1)],...
-                    psthUD_Drug.responsecurveSmooth); caxis([0 10]); colormap(jet);
-                set(gca,'TickDir','out'); xlim([winSizePlot(1) winSizePlot(2)]);
-                title('Rate [0 to 10 Hz]','FontWeight','normal','FontSize',10);
-                ylabel('Cells');
-                xlabel('Time');
-
-                subplot(1,2,2)
-                imagesc([t(1) t(end)],[1 size(psthUD_Drug.responsecurve,1)],...
-                    psthUD_Drug.responsecurveZSmooth); caxis([-3 3]); colormap(jet);
-                set(gca,'TickDir','out'); xlim([winSizePlot(1) winSizePlot(2)]);
-                title('Z Rate [-3 to 3 SD]','FontWeight','normal','FontSize',10);
-                ylabel('Cells');
-                xlabel('Time');
-                mkdir('BaselineVsDrug');
-
-                saveas(gca,['BaselinevsDrug\spikesPsthRate_slowOscillations_Druge.png']);
-
-                raster = psthUD_Drug.raster;
-                psth = rmfield(psthUD_Drug,'raster');
-
-                save([session.general.name,'.slowOscillations_Drug_psth.cellinfo.mat'],'psth','-v7.3');
-                save([session.general.name,'.slowOscillations_Drug_raster.cellinfo.mat'],'raster','-v7.3');
-            else
-                raster = [];
-                psth = [];
-                save([session.general.name,'.slowOscillations_Drug_psth.cellinfo.mat'],'psth','-v7.3');
-                save([session.general.name,'.slowOscillations_Drug_raster.cellinfo.mat'],'raster','-v7.3');
-            end
-        end
+%         if isempty(dir('*.slowOscillations_Baseline_psth.cellinfo.mat')) | isempty(dir('*.slowOscillations_Drug_psth.cellinfo.mat')) | force
+%             
+%             UDStates = detectUD('plotOpt', true,'forceDetect',false','NREMInts','all');
+% 
+%             % Baseline
+% 
+%             psthUD_Baseline = spikesPsth([],'eventType','slowOscillations','restrictIntervals',ts_Baseline,'numRep',500,'force',true,'min_pulsesNumber',0,'saveMat',false,'savePlot',false,'rasterPlot',false,'ratePlot',false);
+% 
+%             t = psthUD_Baseline.timestamps;
+%             winSizePlot = [-0.5 0.5];
+%             figure('position',[200 115 1300 800])
+%             subplot(1,2,1)
+%             imagesc([t(1) t(end)],[1 size(psthUD_Baseline.responsecurve,1)],...
+%                 psthUD_Baseline.responsecurveSmooth); caxis([0 10]); colormap(jet);
+%             set(gca,'TickDir','out'); xlim([winSizePlot(1) winSizePlot(2)]);
+%             title('Rate [0 to 10 Hz]','FontWeight','normal','FontSize',10);
+%             ylabel('Cells');
+%             xlabel('Time');
+% 
+%             subplot(1,2,2)
+%             imagesc([t(1) t(end)],[1 size(psthUD_Baseline.responsecurve,1)],...
+%                 psthUD_Baseline.responsecurveZSmooth); caxis([-3 3]); colormap(jet);
+%             set(gca,'TickDir','out'); xlim([winSizePlot(1) winSizePlot(2)]);
+%             title('Z Rate [-3 to 3 SD]','FontWeight','normal','FontSize',10);
+%             ylabel('Cells');
+%             xlabel('Time');
+%             mkdir('BaselineVsDrug');
+% 
+%             saveas(gca,['BaselinevsDrug\spikesPsthRate_slowOscillations_Baseline.png']);
+% 
+%             raster = psthUD_Baseline.raster;
+%             psth = rmfield(psthUD_Baseline,'raster');
+% 
+%             save([session.general.name,'.slowOscillations_Baseline_psth.cellinfo.mat'],'psth','-v7.3');
+%             save([session.general.name,'.slowOscillations_Baseline_raster.cellinfo.mat'],'raster','-v7.3');
+%             
+%             
+%             % Drug
+%             if ~isempty(ts_Drug)
+%                 psthUD_Drug = spikesPsth([],'eventType','slowOscillations','restrictIntervals',ts_Drug,'numRep',500,'force',true,'min_pulsesNumber',0,'saveMat',false,'savePlot',false,'rasterPlot',false,'ratePlot',false);
+% 
+%                 t = psthUD_Drug.timestamps;
+%                 winSizePlot = [-0.5 0.5];
+%                 figure('position',[200 115 1300 800])
+%                 subplot(1,2,1)
+%                 imagesc([t(1) t(end)],[1 size(psthUD_Drug.responsecurve,1)],...
+%                     psthUD_Drug.responsecurveSmooth); caxis([0 10]); colormap(jet);
+%                 set(gca,'TickDir','out'); xlim([winSizePlot(1) winSizePlot(2)]);
+%                 title('Rate [0 to 10 Hz]','FontWeight','normal','FontSize',10);
+%                 ylabel('Cells');
+%                 xlabel('Time');
+% 
+%                 subplot(1,2,2)
+%                 imagesc([t(1) t(end)],[1 size(psthUD_Drug.responsecurve,1)],...
+%                     psthUD_Drug.responsecurveZSmooth); caxis([-3 3]); colormap(jet);
+%                 set(gca,'TickDir','out'); xlim([winSizePlot(1) winSizePlot(2)]);
+%                 title('Z Rate [-3 to 3 SD]','FontWeight','normal','FontSize',10);
+%                 ylabel('Cells');
+%                 xlabel('Time');
+%                 mkdir('BaselineVsDrug');
+% 
+%                 saveas(gca,['BaselinevsDrug\spikesPsthRate_slowOscillations_Druge.png']);
+% 
+%                 raster = psthUD_Drug.raster;
+%                 psth = rmfield(psthUD_Drug,'raster');
+% 
+%                 save([session.general.name,'.slowOscillations_Drug_psth.cellinfo.mat'],'psth','-v7.3');
+%                 save([session.general.name,'.slowOscillations_Drug_raster.cellinfo.mat'],'raster','-v7.3');
+%             else
+%                 raster = [];
+%                 psth = [];
+%                 save([session.general.name,'.slowOscillations_Drug_psth.cellinfo.mat'],'psth','-v7.3');
+%                 save([session.general.name,'.slowOscillations_Drug_raster.cellinfo.mat'],'raster','-v7.3');
+%             end
+%         end
         
         % =================================
         % SPIKES RANK SLOW OSCILLATIONS
         % =================================
         
-        if isempty(dir('*.spikesRank_upStates_Baseline.mat')) | isempty(dir('*.spikesRank_upStates_Drug.mat')) | force
-            
-            % Baseline
-            spkEventTimes = [];
-            spkEventTimes = getSpikesRank('events','upstates','includeIntervals',ts_Baseline);
-            
-            save([session.general.name,'.spikesRank_upStates_Baseline.mat'],'spkEventTimes');
-            
-            % Drug
-            
-            spkEventTimes = [];
-            try
-                spkEventTimes = getSpikesRank('events','upstates','includeIntervals',ts_Drug);
-            catch
-                spkEventTimes = NaN;
-            end
-            save([session.general.name,'.spikesRank_upStates_Drug.mat'],'spkEventTimes');            
-        end
-        
-        % ================================
-        % SPIKES RANK RIPPLES
-        % =================================
-        
-        if isempty(dir('*.spikesRank_ripples_Baseline.mat')) | isempty(dir('*.spikesRank_ripples_Drug.mat')) | force
-            
-            % Baseline
-            spkEventTimes = [];
-            spkEventTimes = getSpikesRank('events','ripples','includeIntervals',ts_Baseline);
-            
-            save([session.general.name,'.spikesRank_ripples_Baseline.mat'],'spkEventTimes');
-            
-            % Drug
-            
-            spkEventTimes = [];
-            try
-                spkEventTimes = getSpikesRank('events','ripples','includeIntervals',ts_Drug);
-            catch
-                spkEventTimes = NaN;
-            end
-            save([session.general.name,'.spikesRank_ripples_Drug.mat'],'spkEventTimes');            
-        end
+%         if isempty(dir('*.spikesRank_upStates_Baseline.mat')) | isempty(dir('*.spikesRank_upStates_Drug.mat')) | force
+%             
+%             % Baseline
+%             spkEventTimes = [];
+%             spkEventTimes = getSpikesRank('events','upstates','includeIntervals',ts_Baseline);
+%             
+%             save([session.general.name,'.spikesRank_upStates_Baseline.mat'],'spkEventTimes');
+%             
+%             % Drug
+%             
+%             spkEventTimes = [];
+%             try
+%                 spkEventTimes = getSpikesRank('events','upstates','includeIntervals',ts_Drug);
+%             catch
+%                 spkEventTimes = NaN;
+%             end
+%             save([session.general.name,'.spikesRank_upStates_Drug.mat'],'spkEventTimes');            
+%         end
         
         
         
@@ -963,6 +994,29 @@ for ii = 7:length(sessionsTable.SessionName)
                 save([session.general.name,'.ripples_Drug_psth.cellinfo.mat'],'psth','-v7.3');
                 save([session.general.name,'.ripples_Drug_raster.cellinfo.mat'],'raster','-v7.3');
             end
+        end
+        
+        % ================================
+        % SPIKES RANK RIPPLES
+        % =================================
+        
+        if isempty(dir('*.spikesRank_ripples_Baseline.mat')) | isempty(dir('*.spikesRank_ripples_Drug.mat')) | force
+            
+            % Baseline
+            spkEventTimes = [];
+            spkEventTimes = getSpikesRank('events','ripples','includeIntervals',ts_Baseline);
+            
+            save([session.general.name,'.spikesRank_ripples_Baseline.mat'],'spkEventTimes');
+            
+            % Drug
+            
+            spkEventTimes = [];
+            try
+                spkEventTimes = getSpikesRank('events','ripples','includeIntervals',ts_Drug);
+            catch
+                spkEventTimes = NaN;
+            end
+            save([session.general.name,'.spikesRank_ripples_Drug.mat'],'spkEventTimes');            
         end
         
         % =================================
@@ -1534,37 +1588,37 @@ for ii = 7:length(sessionsTable.SessionName)
         % 5. CELL METRICS        
         % ===============================
         
-%         if isempty(dir('*.cell_metrics_Baseline.cellinfo.mat')) | isempty(dir('*.cell_metrics_Drug.cellinfo.mat')) | force
-%             try
-%                 if ~isempty(dir([session.general.name,'.optogeneticPulses.events.mat']))
-%                     file = dir([session.general.name,'.optogeneticPulses.events.mat']);
-%                     load(file.name);
-%                 end
-%                     excludeManipulationIntervals = optoPulses.stimulationEpochs;
-%             catch
-%                 warning('Not possible to get manipulation periods. Running CellMetrics withouth excluding manipulation epochs');
-%                 excludeManipulationIntervals = [];
-%             end
-%             
-%             % Baseline
-%             
-%             cell_metrics_Baseline = ProcessCellMetrics('session', session,'restrictToIntervals',ts_Baseline,'manualAdjustMonoSyn',false,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',{'deepSuperficial'},'forceReload',true,'saveMat',false);
-% 
-%             cell_metrics = cell_metrics_Baseline;
-%             save([session.general.name,'.cell_metrics_Baseline.cellinfo.mat'],'cell_metrics');
-%             
-%             % Drug
-%             
-%             if ~isempty(ts_Drug)
-%                 cell_metrics_Drug = ProcessCellMetrics('session', session,'restrictToIntervals',ts_Drug,'manualAdjustMonoSyn',false,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',{'deepSuperficial'},'forceReload',true,'saveMat',false);
-% 
-%                 cell_metrics = cell_metrics_Drug;
-%                 save([session.general.name,'.cell_metrics_Drug.cellinfo.mat'],'cell_metrics');
-%             else
-%                 cell_metrics = [];
-%                 save([session.general.name,'.cell_metrics_Drug.cellinfo.mat'],'cell_metrics');
-%             end
-%         end
+        if isempty(dir('*.cell_metrics_Baseline.cellinfo.mat')) | isempty(dir('*.cell_metrics_Drug.cellinfo.mat')) | force
+            try
+                if ~isempty(dir([session.general.name,'.optogeneticPulses.events.mat']))
+                    file = dir([session.general.name,'.optogeneticPulses.events.mat']);
+                    load(file.name);
+                end
+                    excludeManipulationIntervals = optoPulses.stimulationEpochs;
+            catch
+                warning('Not possible to get manipulation periods. Running CellMetrics withouth excluding manipulation epochs');
+                excludeManipulationIntervals = [];
+            end
+            
+            % Baseline
+            
+            cell_metrics_Baseline = ProcessCellMetrics('session', session,'restrictToIntervals',ts_Baseline,'manualAdjustMonoSyn',false,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',{'deepSuperficial'},'forceReload',true,'saveMat',false);
+
+            cell_metrics = cell_metrics_Baseline;
+            save([session.general.name,'.cell_metrics_Baseline.cellinfo.mat'],'cell_metrics');
+            
+            % Drug
+            
+            if ~isempty(ts_Drug)
+                cell_metrics_Drug = ProcessCellMetrics('session', session,'restrictToIntervals',ts_Drug,'manualAdjustMonoSyn',false,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',{'deepSuperficial'},'forceReload',true,'saveMat',false);
+
+                cell_metrics = cell_metrics_Drug;
+                save([session.general.name,'.cell_metrics_Drug.cellinfo.mat'],'cell_metrics');
+            else
+                cell_metrics = [];
+                save([session.general.name,'.cell_metrics_Drug.cellinfo.mat'],'cell_metrics');
+            end
+        end
         
         % ===============================
         % 6. ACG PEAK ( dependent upon cell_metrics);
@@ -1776,7 +1830,7 @@ for ii = 7:length(sessionsTable.SessionName)
         % 7. AVERAGE CCG
         % ==============================
         
-        if isempty(dir('*.averageCCG_Baseline.cellinfo.mat')) | isempty(dir('*.averageCCG_Drug.cellinfo.mat')) | force
+        if isempty(dir('*.averageCCG_Baseline.cellinfo.mat')) | isempty(dir('*.averageCCG_Drug.cellinfo.mat')) | forceACG
             
             winSizePlot = [-.3 .3];
             

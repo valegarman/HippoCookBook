@@ -293,26 +293,39 @@ for jj = 1:length(firingMaps2Halves.rateMaps{1})
     end
 end
 
+
 % Firing Field Size
-for jj = 1:length(firingMaps2Halves.rateMaps{1})
-    for ii = 1:length(firingMaps2Halves.UID)
-        if ~isempty(firingMaps2Halves.rateMaps{ii}{jj}) % 2D
-            for kk = 1:length(firingMaps2Halves.rateMaps{ii}{jj})
-                
-                [firingFieldSize] = getFiringFieldSize('z',firingMaps2Halves.rateMaps{ii}{jj}{kk});
-                
-                spatialModulation.(['firingFieldSize_map_' num2str(jj),'_half_',num2str(kk)]).size{ii} = firingFieldSize.size;
-                spatialModulation.(['firingFieldSize_map_' num2str(jj),'_half_',num2str(kk)]).sizeperc{ii} = firingFieldSize.sizeperc;
-                spatialModulation.(['firingFieldSize_map_' num2str(jj),'_half_',num2str(kk)]).data{ii} = firingFieldSize.data;
-                spatialModulation.(['firingFieldSize_map_' num2str(jj),'_half_',num2str(kk)]).positionx{ii} = firingFieldSize.positionx;
-                spatialModulation.(['firingFieldSize_map_' num2str(jj),'_half_',num2str(kk)]).positiony{ii} = firingFieldSize.positiony;
-                spatialModulation.(['firingFieldSize_map_' num2str(jj),'_half_',num2str(kk)]).MaxF{ii} = firingFieldSize.MaxF;
-                spatialModulation.(['firingFieldSize_map_' num2str(jj),'_half_',num2str(kk)]).numFF{ii} = firingFieldSize.numFF;
-                spatialModulation.(['firingFieldSize_map_' num2str(jj),'_half_',num2str(kk)]).FFarea{ii} = firingFieldSize.FFarea;
-                spatialModulation.(['firingFieldSize_map_' num2str(jj),'_half_',num2str(kk)]).FFareatot{ii} = firingFieldSize.FFareatot;
+try
+    for jj = 1:length(firingMaps2Halves.rateMaps{1})
+        for ii = 1:length(firingMaps2Halves.UID)
+            if ~isempty(firingMaps2Halves.rateMaps{ii}{jj}) % 2D
+                for kk = 1:length(firingMaps2Halves.rateMaps{ii}{jj})
+
+                    [firingFieldSize] = getFiringFieldSize('z',firingMaps2Halves.rateMaps{ii}{jj}{kk});
+
+                    spatialModulation.(['firingFieldSize_map_' num2str(jj),'_half_',num2str(kk)]).size{ii} = firingFieldSize.size;
+                    spatialModulation.(['firingFieldSize_map_' num2str(jj),'_half_',num2str(kk)]).sizeperc{ii} = firingFieldSize.sizeperc;
+                    spatialModulation.(['firingFieldSize_map_' num2str(jj),'_half_',num2str(kk)]).data{ii} = firingFieldSize.data;
+                    spatialModulation.(['firingFieldSize_map_' num2str(jj),'_half_',num2str(kk)]).positionx{ii} = firingFieldSize.positionx;
+                    spatialModulation.(['firingFieldSize_map_' num2str(jj),'_half_',num2str(kk)]).positiony{ii} = firingFieldSize.positiony;
+                    spatialModulation.(['firingFieldSize_map_' num2str(jj),'_half_',num2str(kk)]).MaxF{ii} = firingFieldSize.MaxF;
+                    spatialModulation.(['firingFieldSize_map_' num2str(jj),'_half_',num2str(kk)]).numFF{ii} = firingFieldSize.numFF;
+                    spatialModulation.(['firingFieldSize_map_' num2str(jj),'_half_',num2str(kk)]).FFarea{ii} = firingFieldSize.FFarea;
+                    spatialModulation.(['firingFieldSize_map_' num2str(jj),'_half_',num2str(kk)]).FFareatot{ii} = firingFieldSize.FFareatot;
+                end
             end
         end
     end
+catch
+    spatialModulation.(['firingFieldSize_map_' num2str(jj),'_half_',num2str(kk)]).size{ii} = NaN;
+    spatialModulation.(['firingFieldSize_map_' num2str(jj),'_half_',num2str(kk)]).sizeperc{ii} = NaN;
+    spatialModulation.(['firingFieldSize_map_' num2str(jj),'_half_',num2str(kk)]).data{ii} = NaN;
+    spatialModulation.(['firingFieldSize_map_' num2str(jj),'_half_',num2str(kk)]).positionx{ii} = NaN;
+    spatialModulation.(['firingFieldSize_map_' num2str(jj),'_half_',num2str(kk)]).positiony{ii} = NaN;
+    spatialModulation.(['firingFieldSize_map_' num2str(jj),'_half_',num2str(kk)]).MaxF{ii} = NaN;
+    spatialModulation.(['firingFieldSize_map_' num2str(jj),'_half_',num2str(kk)]).numFF{ii} = NaN;
+    spatialModulation.(['firingFieldSize_map_' num2str(jj),'_half_',num2str(kk)]).FFarea{ii} = NaN;
+    spatialModulation.(['firingFieldSize_map_' num2str(jj),'_half_',num2str(kk)]).FFareatot{ii} = NaN;
 end
 
 % Border Index

@@ -211,18 +211,22 @@ parfor ii = 1:numR
 %     shuffling.bitsPerSpike{ii} = skaggs.bitsPerSpike;
     
     % Firing Field Size
-    [firingFieldSize] = getFiringFieldSize('z',map.z,'debug',false);
-    
-    
-    shuffling{ii}.firingFieldSize.size = firingFieldSize.size;
-    shuffling{ii}.firingFieldSize.sizeperc = firingFieldSize.sizeperc;
-    shuffling{ii}.firingFieldSize.data = firingFieldSize.data;
-    shuffling{ii}.firingFieldSize.positionx = firingFieldSize.positionx;
-    shuffling{ii}.firingFieldSize.positiony = firingFieldSize.positiony;
-    shuffling{ii}.firingFieldSize.MaxF = firingFieldSize.MaxF;
-    shuffling{ii}.firingFieldSize.numFF = firingFieldSize.numFF;
-    shuffling{ii}.firingFieldSize.FFarea = firingFieldSize.FFarea;
-    shuffling{ii}.firingFieldSize.FFareatot = firingFieldSize.FFareatot;
+    try
+        [firingFieldSize] = getFiringFieldSize('z',map.z,'debug',false);
+
+
+        shuffling{ii}.firingFieldSize.size = firingFieldSize.size;
+        shuffling{ii}.firingFieldSize.sizeperc = firingFieldSize.sizeperc;
+        shuffling{ii}.firingFieldSize.data = firingFieldSize.data;
+        shuffling{ii}.firingFieldSize.positionx = firingFieldSize.positionx;
+        shuffling{ii}.firingFieldSize.positiony = firingFieldSize.positiony;
+        shuffling{ii}.firingFieldSize.MaxF = firingFieldSize.MaxF;
+        shuffling{ii}.firingFieldSize.numFF = firingFieldSize.numFF;
+        shuffling{ii}.firingFieldSize.FFarea = firingFieldSize.FFarea;
+        shuffling{ii}.firingFieldSize.FFareatot = firingFieldSize.FFareatot;
+    catch
+        
+    end
     
     
 %     shuffling.firingFieldSize.size{ii} = firingFieldSize.size;

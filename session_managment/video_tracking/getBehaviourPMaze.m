@@ -90,103 +90,20 @@ x = tracking.position.x;
 y = tracking.position.y;
 t = tracking.timestamps;
 
-if isfield(tracking,'zone')
-    zone = tracking.zone;
-end
+
+
+
+
+
+
 
 % generate events
 maps = [];
-
-%     maps{ii}(:,1) = tracking.timestamps(arm==armList(ii));
-%     maps{ii}(:,2) = linCont(arm==armList(ii));
 maps{1}(:,1) = tracking.timestamps;
 maps{1}(:,2) = tracking.position.x;
 maps{1}(:,3) = tracking.position.y;
 
-%% Get events (animal entering a zone)
-try
-    for ii = 1:length(tracking.zone.bndgbox)
-        if ~strcmpi(tracking.zone.bndgbox{ii}.name,'Main')
-%             xv{ii} = [tracking.zone.xmin{ii} tracking.zone.xmax{ii} tracking.zone.xmax{ii} tracking.zone.xmin{ii} tracking.zone.xmin{ii}];
-%             yv{ii} = [tracking.zone.ymin{ii} tracking.zone.ymin{ii} tracking.zone.ymax{ii} tracking.zone.ymax{ii} tracking.zone.ymin{ii}];
-%             [in{ii},on{ii}] = inpolygon(tracking.position.x,tracking.position.y, xv{ii}, yv{ii});
 
-            xv{ii} = [tracking.zone.bndgbox{ii}.bndgbox.Vertices(1,1) tracking.zone.bndgbox{ii}.bndgbox.Vertices(2,1) tracking.zone.bndgbox{ii}.bndgbox.Vertices(3,1) tracking.zone.bndgbox{ii}.bndgbox.Vertices(4,1)];
-            yv{ii} = [tracking.zone.bndgbox{ii}.bndgbox.Vertices(1,2) tracking.zone.bndgbox{ii}.bndgbox.Vertices(2,2) tracking.zone.bndgbox{ii}.bndgbox.Vertices(3,2) tracking.zone.bndgbox{ii}.bndgbox.Vertices(4,2)];
-
-            [in{ii},on{ii}] = inpolygon(tracking.position.x,tracking.position.y, xv{ii},yv{ii});
-            a{ii} = diff(in{ii});
-            entry.(tracking.zone.name{ii}).sample = find(a{ii} == 1)+1;
-            entry.(tracking.zone.name{ii}).ts = t(entry.(tracking.zone.name{ii}).sample);
-            exit.(tracking.zone.name{ii}).sample = find(a{ii} == -1)+1;
-            exit.(tracking.zone.name{ii}).ts = t(exit.(tracking.zone.name{ii}).sample);
-    %         entry_sample{ii} = find(a{ii} == 1)+1;
-    %         exit_sample{ii} = find(a{ii} == -1)+1;
-    %         entry_ts{ii} = t(entry_sample{ii});
-    %         exit_ts{ii} = t(exit_sample{ii});
-        end
-    end
-    
-    left = entry.leftReward.ts;
-    right = entry.(flds{ii}).ts;
-    homeDelay = entry.(flds{ii}).ts;
-    decision = entry.(flds{ii}).ts;
-    
-    flds = fields(entry);
-    for ii = 1:length(flds)
-        first_ttl(ii) = min(entry.(flds{ii}).ts);
-    end
-    
-    decisionTtl(1) = entry.decision.ts(1);
-    [ttl1, ttl1_index] = min(first_ttl);
-    while ttl1_index == 3
-        first_ttl(ttl1_index) = NaN;
-        [ttl1, ttl1_index] = min(first_ttl);
-    end
-    
-    if ttl1_index == 1
-        leftRewardTtl(1) = first_ttl(ttl1_index);
-    elseif ttl1_index == 2
-        rightRewardTtl(1) = first_ttl(ttl1_index);
-    end
-    
-    
-    
-    
-    
-    h1 = figure;
-    plot(tracking.position.x, tracking.position.y, 'Color', [0.5 0.5 0.5])
-    hold on;
-    axis ij;
-    plot(tracking.apparatus.bndgbox,'FaceAlpha',0);
-    for ii = 1:length(tracking.zone.bndgbox)
-        plot(tracking.zone.bndgbox{ii}.bndgbox,'FaceAlpha',0);
-%         rectangle('Position',[tracking.zone.xmin{ii} tracking.zone.ymin{ii} tracking.zone.xmax{ii}-tracking.zone.xmin{ii} tracking.zone.ymax{ii}-tracking.zone.ymin{ii}],'EdgeColor','b');
-%         hold on;
-        try
-            scatter(tracking.position.x(in{ii}),tracking.position.y(in{ii}),3,'k');
-            hold on;
-            scatter(tracking.position.x(entry.(tracking.zone.name{ii}).sample),tracking.position.y(entry.(tracking.zone.name{ii}).sample),15,'g');
-            scatter(tracking.position.x(exit.(tracking.zone.name{ii}).sample),tracking.position.y(exit.(tracking.zone.name{ii}).sample),15,'r'); 
-
-    %         scatter(tracking.position.x(entry_sample{ii}),tracking.position.y(entry_sample{ii}),15,'g');
-    %         scatter(tracking.position.x(exit_sample{ii}),tracking.position.y(exit_sample{ii}),15,'r'); 
-        catch
-            disp('No zones to plot...');
-        end
-    end    
-    xlim(tracking.avFrame.xSize);
-    ylim(tracking.avFrame.ySize);
-    mkdir('Behavior');
-    saveas(h1,'Behavior\Behavior_inZone.png');
-    close(h1);
-catch
-    h1 = figure;
-    plot(tracking.position.x, tracking.position.y, 'Color', [0.5 0.5 0.5])
-    hold on;
-    axis ij;
-    disp('There are not zones declared. Skipping...');
-end
 
 %% Output
 behavior.masks = [];

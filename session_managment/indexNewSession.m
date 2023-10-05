@@ -16,7 +16,8 @@ addParameter(p,'hippoCookBook_path','HippoCookBook',@isstring);
 addParameter(p,'removeDatFiles',true,@islogical);
 addParameter(p,'removeDat',false,@islogical);
 addParameter(p,'copyFiles',true,@islogical);
-addParameter(p,'driveStorage_path','W:\Buzsakilabspace\Datasets\ValeroM',@isdir);
+% addParameter(p,'driveStorage_path','W:\Buzsakilabspace\Datasets\ValeroM',@isdir);
+addParameter(p,'driveStorage_path','Z:\',@isdir);
 addParameter(p,'driveStorage_name','Research',@isstring);
 
 parse(p,varargin{:})
@@ -144,7 +145,7 @@ commandToExecute = ['git pull'];
 system(commandToExecute);
 % Git Push
 commandToExecute = ['git push'];
-system(commandToExecute);e
+system(commandToExecute);
 
 cd(basepath)     
 
@@ -180,7 +181,7 @@ if removeDatFiles
     % Remove kilosort .phy
     if ~isempty(dir('Kilosort*'))
         file = dir('Kilosort*');
-        cd(file.name);
+        cd(file(end).name);
         if exist('.phy','dir')
             rmdir('.phy','s');
         end
@@ -203,7 +204,11 @@ if copyFiles
     [success] = copyfile(session.general.basePath,[driveStorage_path,'\',session.animal.name,'\',session.general.name]);
     if success
         cd ..
-        rmdir(session.general.basePath,'s');
+        try 
+            rmdir(session.general.basePath,'s');
+        catch
+            warning('The session folder could not be removed!');
+        end
     end
 end
 

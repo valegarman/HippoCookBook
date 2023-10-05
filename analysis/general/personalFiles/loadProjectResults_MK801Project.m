@@ -111,7 +111,6 @@ if ~isempty(prePath)
 end
 %% load cellexplorer results
 cell_metrics = loadCellMetricsBatch('basepaths',sessions.basepaths);
-% disp('Close when done exploring...');
 cell_metrics = CellExplorer('metrics',cell_metrics);% run CELLEXPLORER when adding new data
 close(gcf);
 
@@ -122,6 +121,14 @@ close(gcf);
 cell_metrics_Drug = loadCellMetricsBatch('basepaths',sessions.basepaths,'basenames',sessions.basenames_Baseline,'saveAs','cell_metrics_Drug');
 cell_metrics_Drug = CellExplorer('metrics',cell_metrics_Drug);
 close(gcf);
+
+% cell_metrics_Maze1Baseline = loadCellMetricsBatch('basepaths',sessions.basepaths,'basenames',sessions.basenames_Baseline,'saveAs','cell_metrics_Maze1Baseline');
+% cell_metrics_Maze1Baseline = CellExplorer('metrics',cell_metrics_Maze1Baseline);
+% close(gcf);
+% 
+% cell_metrics_Maze1Drug = loadCellMetricsBatch('basepaths',sessions.basepaths,'basenames',sessions.basenames_Baseline,'saveAs','cell_metrics_Maze1Drug');
+% cell_metrics_Maze1Drug = CellExplorer('metrics',cell_metrics_Maze1Drug);
+% close(gcf);
 
 %% collect data per session
 if saveSummaries
@@ -153,7 +160,7 @@ for ii = 1:length(sessions.basepaths)
     try
         drug = cell(0); 
         for i = 1:length(session.epochs)
-            if contains(session.epochs{i}.behavioralParadigm, 'Maze1') | contains(session.epochs{i}.behavioralParadigm, 'Maze2') | contains(session.epochs{i}.behavioralParadigm,'Maze3')
+            if strcmp(session.epochs{i}.behavioralParadigm, 'Maze1Baseline')
                 drug{1, length(drug)+1} = lower(session.epochs{i}.notes);
                 drug{1, length(drug)+1} = ' ';
             end
@@ -240,28 +247,22 @@ for ii = 1:length(sessions.basepaths)
         warning('Not possible to load averageCCG_Drug');
     end
     
-    % average CCG No Ripples
+%     try
+%         targetFile = dir('*.averageCCG_Maze1Baseline.cellinfo.mat'); load(targetFile.name);
+%         projectSessionResults.averageCCG_Maze1Baseline{ii} = averageCCG;
+%         clear averageCCG
+%     catch
+%         warning('Not possible to load averageCCG_Maze1Baseline');
+%     end
     
-%     targetFile = dir('*.averageCCGNoRipples.cellinfo.mat'); load(targetFile.name);
-%     projectSessionResults.averageCCGNoRipples{ii} = averageCCG;
-%     clear averageCCG
-    
-    try
-        targetFile = dir('*.averageCCGNoRipples_Baseline.cellinfo.mat'); load(targetFile.name);
-        projectSessionResults.averageCCGNoRipples_Baseline{ii} = averageCCG;
-        clear averageCCG
-    catch
-        warning('Not possible to load CCGNoRipples_Baseline');
-    end
-    
-    try
-        targetFile = dir('*.averageCCGNoRipples_Drug.cellinfo.mat'); load(targetFile.name);
-        projectSessionResults.averageCCGNoRipples_Drug{ii} = averageCCG;
-        clear averageCCG
-    catch
-        warning('Not possible to load CCGNoRipples_Drug');
-    end
-    
+%     try
+%         targetFile = dir('*.averageCCG_Maze1Drug.cellinfo.mat'); load(targetFile.name);
+%         projectSessionResults.averageCCG_Maze1Drug{ii} = averageCCG;
+%         clear averageCCG
+%     catch
+%         warning('Not possible to load averageCCG_Maze1Drug');
+%     end
+        
     % ripples
     targetFile = dir('*.ripples.events.mat'); load(targetFile.name);
     projectSessionResults.ripples{ii} = ripples;
@@ -323,183 +324,168 @@ for ii = 1:length(sessions.basepaths)
         warning('Not possible to load ripples_Drug_psth');
     end
     
-    % downStates
-    targetFile = dir('*.slowOscillations_psth.cellinfo.mat'); 
-    slowOsciResponses = importdata(targetFile.name);
-    if lightVersion
-        if isfield(slowOsciResponses,'raster')
-            slowOsciResponses = rmfield(slowOsciResponses,'raster');
-        end
-    end
-    projectSessionResults.slowOsciResponses{ii} = slowOsciResponses;
-    clear slowOsciResponses
-    
-    try
-        targetFile = dir('*.slowOscillations_Baseline_psth.cellinfo.mat'); 
-        slowOsciResponses = importdata(targetFile.name);
-        if lightVersion
-            if isfield(slowOsciResponses,'raster')
-                slowOsciResponses = rmfield(slowOsciResponses,'raster');
-            end
-        end
-        projectSessionResults.slowOsciResponses_Baseline{ii} = slowOsciResponses;
-        clear slowOsciResponses
-    catch
-        warning('Not possible to load slowOscillations_Baseline_psth');
-    end
-        
-    try
-        targetFile = dir('*.slowOscillations_Drug_psth.cellinfo.mat'); 
-        slowOsciResponses = importdata(targetFile.name);
-        if lightVersion
-            if isfield(slowOsciResponses,'raster')
-                slowOsciResponses = rmfield(slowOsciResponses,'raster');
-            end
-        end
-        projectSessionResults.slowOsciResponses_Drug{ii} = slowOsciResponses;
-        clear slowOsciResponses
-    catch
-        warning('Not possible to load slowOscillations_Drug_psth');
-    end
-    
-    % Spikes Rank
-    try
-        targetFile = dir('*.spikesRank_upStates_Baseline.mat'); 
-        slowOsciSpikesRank = importdata(targetFile.name);
-        projectSessionResults.slowOsciSpikesRank_Baseline{ii} = slowOsciSpikesRank;
-        clear slowOsciSpikesRank
-    catch
-        warning('Not possible to load spikesRank_upStates_Baseline');
-    end
-    
-    try
-        targetFile = dir('*.spikesRank_upStates_Drug.mat'); 
-        slowOsciSpikesRank = importdata(targetFile.name);
-        projectSessionResults.slowOsciSpikesRank_Drug{ii} = slowOsciSpikesRank;
-        clear slowOsciSpikesRank
-    catch
-        warning('Not possible to load spikesRank_upStates_Drug');
-    end
-    
-    % Ripples Rank 
-    try
-        targetFile = dir('*.spikesRank_ripples_Baseline.mat');
-        ripplesSpikesRank = importdata(targetFile.name);
-        projectSessionResults.ripplesSpikesRank_Baseline{ii} = ripplesSpikesRank;
-        clear ripplesSpikesRank;
-    catch
-        warning('Not possible to load spikesRank_ripples_Baseline');
-    end
-    
-    try
-        targetFile = dir('*.spikesRank_ripples_Drug.mat');
-        ripplesSpikesRank = importdata(targetFile.name);
-        projectSessionResults.ripplesSpikesRank_Drug{ii} = ripplesSpikesRank;
-        clear ripplesSpikesRank;
-    catch
-        warning('Not possible to load spikesRank_ripples_Drug');
-    end
-    
     % Phase Locking
     try
-        targetFile = dir('*.theta_*Baseline.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+        targetFile = dir('*.theta_6-12_Baseline.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
         projectSessionResults.thetaModulation_Baseline{ii} = thetaMod;
         clear thetaMod
     catch
         warning('Not possible to load theta_Baseline_PhaseLockingData');
     end
     
+%     try
+%         targetFile = dir('*.theta_6-12_Maze1Baseline.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+%         projectSessionResults.thetaModulation_Maze1Baseline{ii} = thetaMod;
+%         clear thetaMod
+%     catch
+%         warning('Not possible to load theta_Maze1Baseline_PhaseLockingData');
+%     end
+    
     try
-        targetFile = dir('*.theta_*Drug.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+        targetFile = dir('*.theta_6-12_Drug.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
         projectSessionResults.thetaModulation_Drug{ii} = thetaMod;
         clear thetaMod
     catch
         warning('Not possible to load theta_Drug_PhaseLockingData');
     end
     
-    % theta REM phase_locking
-    try
-        targetFile = dir('*.thetaREM_*Baseline.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
-        projectSessionResults.thetaREMModulation_Baseline{ii} = thetaREMMod;
-        clear thetaREMMod
-    catch
-       warning('There is no REM sleep Baseline detected.'); 
-    end
+%     try
+%         targetFile = dir('*.theta_6-12_Maze1Drug.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+%         projectSessionResults.thetaModulation_Maze1Drug{ii} = thetaMod;
+%         clear thetaMod
+%     catch
+%         warning('Not possible to load theta_Maze1Drug_PhaseLockingData');
+%     end
     
-    try
-        targetFile = dir('*.thetaREM_*Drug.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
-        projectSessionResults.thetaREMModulation_Drug{ii} = thetaREMMod;
-        clear thetaREMMod
-    catch
-       warning('There is no REM sleep Drug detected.'); 
-    end
-    
+   
     % theta run phase_locking
     try
-        targetFile = dir('*.thetaRun_*Baseline.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+        targetFile = dir('*.thetaRun_6-12_Baseline.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
         projectSessionResults.thetaRunModulation_Baseline{ii} = thetaRunMod;
         clear thetaRunMod
     catch
         warning('Not possible to load thetaRun_Baseline_PhaseLockingData');
     end
+    
+%     try
+%         targetFile = dir('*.thetaRun_6-12_Maze1Baseline.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+%         projectSessionResults.thetaRunModulation_Maze1Baseline{ii} = thetaRunMod;
+%         clear thetaRunMod
+%     catch
+%         warning('Not possible to load thetaRun_Maze1Baseline_PhaseLockingData');
+%     end
  
     try
-        targetFile = dir('*.thetaRun_*Drug.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+        targetFile = dir('*.thetaRun_6-12_Drug.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
         projectSessionResults.thetaRunModulation_Drug{ii} = thetaRunMod;
         clear thetaRunMod
     catch
         warning('Not possible to load thetaRun_Drug_PhaseLockingData');
     end
     
+%     try
+%         targetFile = dir('*.thetaRun_6-12_Maze1Drug.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+%         projectSessionResults.thetaRunModulation_Maze1Drug{ii} = thetaRunMod;
+%         clear thetaRunMod
+%     catch
+%         warning('Not possible to load thetaRun_Maze1Drug_PhaseLockingData');
+%     end
+    
     % lgamma phase_locking
     try
-        targetFile = dir('*.lgamma_*Baseline.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+        targetFile = dir('*.lgamma_20-60_Baseline.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
         projectSessionResults.lGammaModulation_Baseline{ii} = lgammaMod;
         clear lgammaMod
     catch
         warning('Not possible to load lgamma_Baseline_PhaseLockingData');
     end
     
+%     try
+%         targetFile = dir('*.lgamma_20-60_Maze1Baseline.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+%         projectSessionResults.lGammaModulation_Maze1Baseline{ii} = lgammaMod;
+%         clear lgammaMod
+%     catch
+%         warning('Not possible to load lgamma_Maze1Baseline_PhaseLockingData');
+%     end
+    
     try
-        targetFile = dir('*.lgamma_*Drug.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+        targetFile = dir('*.lgamma_20-60_Drug.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
         projectSessionResults.lGammaModulation_Drug{ii} = lgammaMod;
         clear lgammaMod
     catch
         warning('Not possible to load lgamma_Drug_PhaseLockingData');
     end
     
+%     try
+%         targetFile = dir('*.lgamma_20-60_Maze1Drug.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+%         projectSessionResults.lGammaModulation_Maze1Drug{ii} = lgammaMod;
+%         clear lgammaMod
+%     catch
+%         warning('Not possible to load lgamma_Maze1Drug_PhaseLockingData');
+%     end
+    
     % hgamma phase_locking
     try
-        targetFile = dir('*.hgamma_*Baseline.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+        targetFile = dir('*.hgamma_60-100_Baseline.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
         projectSessionResults.hGammaModulation_Baseline{ii} = hgammaMod;
         clear hgammaMod
     catch
         warning('Not possible to load hgamma_Baseline_PhaseLockingData');
     end
     
+%     try
+%         targetFile = dir('*.hgamma_60-100_Maze1Baseline.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+%         projectSessionResults.hGammaModulation_Maze1Baseline{ii} = hgammaMod;
+%         clear hgammaMod
+%     catch
+%         warning('Not possible to load hgamma_Maze1Baseline_PhaseLockingData');
+%     end
+    
     try
-        targetFile = dir('*.hgamma_*Drug.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+        targetFile = dir('*.hgamma_60-100_Drug.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
         projectSessionResults.hGammaModulation_Drug{ii} = hgammaMod;
         clear hgammaMod
     catch
         warning('Not possible to load hgamma_Drug_PhaseLockingData');
     end
     
+%     try
+%         targetFile = dir('*.hgamma_60-100_Maze1Drug.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+%         projectSessionResults.hGammaModulation_Maze1Drug{ii} = hgammaMod;
+%         clear hgammaMod
+%     catch
+%         warning('Not possible to load hgamma_Maze1Drug_PhaseLockingData');
+%     end
+    
     % ripple phase_locking
    
-    try targetFile = dir('*.ripple_*Baseline.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+    try targetFile = dir('*.ripple_120-200_Baseline.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
         projectSessionResults.rippleMod_Baseline{ii} = rippleMod;
         clear rippleMod
     catch
         projectSessionResults.rippleMod_Baseline{ii} = NaN;
     end
+    
+%     try targetFile = dir('*.ripple_120-200_Maze1Baseline.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+%         projectSessionResults.rippleMod_Maze1Baseline{ii} = rippleMod;
+%         clear rippleMod
+%     catch
+%         projectSessionResults.rippleMod_Maze1Baseline{ii} = NaN;
+%     end
        
-    try targetFile = dir('*.ripple_*Drug.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+    try targetFile = dir('*.ripple_120-200_Drug.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
         projectSessionResults.rippleMod_Drug{ii} = rippleMod;
         clear rippleMod
     catch
         projectSessionResults.rippleMod_Drug{ii} = NaN;
     end
+    
+%     try targetFile = dir('*.ripple_120-200_Maze1Drug.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+%         projectSessionResults.rippleMod_Maze1Drug{ii} = rippleMod;
+%         clear rippleMod
+%     catch
+%         projectSessionResults.rippleMod_Maze1Drug{ii} = NaN;
+%     end
     
     % spatial modulation
     targetFile = dir('*spatialModulation.cellinfo.mat');
@@ -543,6 +529,14 @@ for ii = 1:length(sessions.basepaths)
     catch
         projectSessionResults.speedCorr_Baseline{ii} = NaN;
     end
+    
+%     targetFile = dir('*.speedCorrs_Maze1Baseline.cellinfo.mat'); 
+%     try load(targetFile.name);
+%         projectSessionResults.speedCorr_Maze1Baseline{ii} = speedCorrs;
+%         clear speedCorr
+%     catch
+%         projectSessionResults.speedCorr_Maze1Baseline{ii} = NaN;
+%     end
        
     targetFile = dir('*.speedCorrs_Drug.cellinfo.mat'); 
     try load(targetFile.name);
@@ -551,6 +545,14 @@ for ii = 1:length(sessions.basepaths)
     catch
         projectSessionResults.speedCorr_Drug{ii} = NaN;
     end
+    
+%     targetFile = dir('*.speedCorrs_Maze1Drug.cellinfo.mat'); 
+%     try load(targetFile.name);
+%         projectSessionResults.speedCorr_Maze1Drug{ii} = speedCorrs;
+%         clear speedCorr
+%     catch
+%         projectSessionResults.speedCorr_Maze1Drug{ii} = NaN;
+%     end
     
     % coherogram
     try
@@ -709,7 +711,6 @@ try projectResults.optogeneticResponses = stackSessionResult(projectSessionResul
 catch
     warning('Optogenetics response was not staked!');
 end
-
 try projectResults.ripplesResponses = stackSessionResult(projectSessionResults.ripplesResponses, projectSessionResults.numcells);
 catch
     warning('Ripple response was not staked!');
@@ -732,20 +733,16 @@ catch
 end
 try projectResults.averageCCG_Drug = stackSessionResult(projectSessionResults.averageCCG_Drug, projectSessionResults.numcells);
 catch
-    warning('averageCCG Baseline was not staked!');
+    warning('averageCCG Drug was not staked!');
 end
-% try projectResults.averageCCGNoRipples = stackSessionResult(projectSessionResults.averageCCGNoRipples,projectSessionResults.numcells);
+% try projectResults.averageCCG_Maze1Baseline = stackSessionResult(projectSessionResults.averageCCG_Maze1Baseline, projectSessionResults.numcells);
 % catch
-%     warning('averageCCGNoRipples was not stacked!');
+%     warning('averageCCG Maze1Baseline was not staked!');
 % end
-try projectResults.averageCCGNoRipples_Baseline = stackSessionResult(projectSessionResults.averageCCGNoRipples_Baseline,projectSessionResults.numcells);
-catch
-    warning('averageCCGNoRipples Baseline was not stacked!');
-end
-try projectResults.averageCCGNoRipples_Drug = stackSessionResult(projectSessionResults.averageCCGNoRipples_Drug,projectSessionResults.numcells);
-catch
-    warning('averageCCGNoRipples Drug was not stacked!');
-end
+% try projectResults.averageCCG_Maze1Drug = stackSessionResult(projectSessionResults.averageCCG_Maze1Drug, projectSessionResults.numcells);
+% catch
+%     warning('averageCCG Maze1Drug was not staked!');
+% end
 try projectResults.thetaModulation = stackSessionResult(projectSessionResults.thetaModulation, projectSessionResults.numcells);
 catch
     warning('theta modulation was not staked!');
@@ -758,18 +755,14 @@ try projectResults.thetaModulation_Drug = stackSessionResult(projectSessionResul
 catch
     warning('theta modulation Drug was not staked!');
 end
-try projectResults.thetaREMModulation = stackSessionResult(projectSessionResults.thetaREMModulation, projectSessionResults.numcells);
-catch
-    warning('theta REM modulation was not staked!');
-end
-try projectResults.thetaREMModulation_Baseline = stackSessionResult(projectSessionResults.thetaREMModulation_Baseline, projectSessionResults.numcells);
-catch
-    warning('theta REM modulation Baseline was not staked!');
-end
-try projectResults.thetaREMModulation_Drug = stackSessionResult(projectSessionResults.thetaREMModulation_Drug, projectSessionResults.numcells);
-catch
-    warning('theta REM modulation Drug was not staked!');
-end
+% try projectResults.thetaModulation_Maze1Baseline = stackSessionResult(projectSessionResults.thetaModulation_Maze1Baseline, projectSessionResults.numcells);
+% catch
+%     warning('theta modulation Maze1Baseline was not staked!');
+% end
+% try projectResults.thetaModulation_Maze1Drug = stackSessionResult(projectSessionResults.thetaModulation_Maze1Drug, projectSessionResults.numcells);
+% catch
+%     warning('theta modulation Maze1Drug was not staked!');
+% end
 try projectResults.thetaRunModulation = stackSessionResult(projectSessionResults.thetaRunModulation, projectSessionResults.numcells);
 catch
     warning('theta run modulation was not staked!');
@@ -782,6 +775,14 @@ try projectResults.thetaRunModulation_Drug = stackSessionResult(projectSessionRe
 catch
     warning('theta run modulation Drug was not staked!');
 end
+% try projectResults.thetaRunModulation_Maze1Baseline = stackSessionResult(projectSessionResults.thetaRunModulation_Maze1Baseline, projectSessionResults.numcells);
+% catch
+%     warning('theta run modulation Maze1Baseline was not staked!');
+% end
+% try projectResults.thetaRunModulation_Maze1Drug = stackSessionResult(projectSessionResults.thetaRunModulation_Maze1Drug, projectSessionResults.numcells);
+% catch
+%     warning('theta run modulation Maze1Drug was not staked!');
+% end
 try projectResults.lGammaModulation = stackSessionResult(projectSessionResults.lGammaModulation, projectSessionResults.numcells);
 catch
     warning('lGamma modulation was not staked!');
@@ -794,6 +795,14 @@ try projectResults.lGammaModulation_Drug = stackSessionResult(projectSessionResu
 catch
     warning('lGamma modulation Drug was not staked!');
 end
+% try projectResults.lGammaModulation_Maze1Baseline = stackSessionResult(projectSessionResults.lGammaModulation_Maze1Baseline, projectSessionResults.numcells);
+% catch
+%     warning('lGamma modulation Maze1Baseline was not staked!');
+% end
+% try projectResults.lGammaModulation_Maze1Drug = stackSessionResult(projectSessionResults.lGammaModulation_Maze1Drug, projectSessionResults.numcells);
+% catch
+%     warning('lGamma modulation Maze1Drug was not staked!');
+% end
 try projectResults.hGammaModulation = stackSessionResult(projectSessionResults.hGammaModulation, projectSessionResults.numcells);
 catch
     warning('HGamma modulation was not staked!');
@@ -806,6 +815,14 @@ try projectResults.hGammaModulation_Drug = stackSessionResult(projectSessionResu
 catch
     warning('HGamma modulation Drug was not staked!');
 end
+% try projectResults.hGammaModulation_Maze1Baseline = stackSessionResult(projectSessionResults.hGammaModulation_Maze1Baseline, projectSessionResults.numcells);
+% catch
+%     warning('HGamma modulation Maze1Baseline was not staked!');
+% end
+% try projectResults.hGammaModulation_Maze1Drug = stackSessionResult(projectSessionResults.hGammaModulation_Maze1Drug, projectSessionResults.numcells);
+% catch
+%     warning('HGamma modulation Maze1Drug was not staked!');
+% end
 try projectResults.ripplePhaseModulation = stackSessionResult(projectSessionResults.rippleMod, projectSessionResults.numcells);
 catch
     warning('Ripple phase modulation  was not staked!');
@@ -817,18 +834,6 @@ end
 try projectResults.ripplePhaseModulation_Drug = stackSessionResult(projectSessionResults.rippleMod_Drug, projectSessionResults.numcells);
 catch
     warning('Ripple phase modulation Drug was not staked!');
-end
-try projectResults.slowOsciResponses = stackSessionResult(projectSessionResults.slowOsciResponses, projectSessionResults.numcells);
-catch
-    warning('Slow oscillation responses was not staked!');
-end
-try projectResults.slowOsciResponses_Baseline = stackSessionResult(projectSessionResults.slowOsciResponses_Baseline, projectSessionResults.numcells);
-catch
-    warning('Slow oscillation responses Baseline was not staked!');
-end
-try projectResults.slowOsciResponses_Drug = stackSessionResult(projectSessionResults.slowOsciResponses_Drug, projectSessionResults.numcells);
-catch
-    warning('Slow oscillation responses Drug was not staked!');
 end
 try projectResults.behavior = stackSessionResult(projectSessionResults.behavior, projectSessionResults.numcells);
 catch
@@ -851,6 +856,14 @@ try projectResults.speedCorr_Drug = stackSessionResult(projectSessionResults.spe
 catch
     warning('Speed corr Drug was not stack!');
 end
+% try projectResults.speedCorr_Maze1Baseline = stackSessionResult(projectSessionResults.speedCorr_Maze1Baseline, projectSessionResults.numcells);
+% catch
+%     warning('Speed corr Maze1Baseline was not stack!');
+% end
+% try projectResults.speedCorr_Maze1Drug = stackSessionResult(projectSessionResults.speedCorr_Maze1Drug, projectSessionResults.numcells);
+% catch
+%     warning('Speed corr Maze1Drug was not stack!');
+% end
 try projectResults.acgPeak = stackSessionResult(projectSessionResults.acgPeak, projectSessionResults.numcells);
 catch
     warning('ACG peak was not stack!');
@@ -862,18 +875,6 @@ end
 try projectResults.acgPeak_Drug = stackSessionResult(projectSessionResults.acgPeak_Drug, projectSessionResults.numcells);
 catch
     warning('ACG peak Drug was not stack!');
-end
-try projectResults.slowOsciSpikesRank_Baseline = stackSessionResult(projectSessionResults.slowOsciSpikesRank_Baseline, projectSessionResults.numcells);
-catch
-    warning('Slow Osc Spikes rank Baseline was not stack!');
-end
-try projectResults.slowOsciSpikesRank_Drug = stackSessionResult(projectSessionResults.slowOsciSpikesRank_Drug, projectSessionResults.numcells);
-catch
-    warning('Slow Osc Spikes rank Drug was not stack!');
-end
-try projectResults.ripplesSpikesRank_Drug = stackSessionResult(projectSessionResults.ripplesSpikesRank_Drug, projectSessionResults.numcells);
-catch
-    warning('Ripples Spikes rank Drug was not stack!');
 end
 
 % Ripples Baseline
@@ -904,14 +905,14 @@ try
 catch
     warning('Coherogram Non Theta Epochs Drug was not stack!');
 end
-try projectResults.coherogram_Maze1Baseline = stackSessionResult(projectSessionResults.coherogram_Maze1Baseline,ones(1,length(projectSessionResults.numcells)));
-catch
-    warning('Coherogram Maze 1 Baseline was not stack');
-end
-try projectResults.coherogram_Maze1Drug = stackSessionResult(projectSessionResults.coherogram_Maze1Drug,ones(1,length(projectSessionResults.numcells)));
-catch
-    warning('Coherogram Maze 1 Drug was not stack');
-end
+% try projectResults.coherogram_Maze1Baseline = stackSessionResult(projectSessionResults.coherogram_Maze1Baseline,ones(1,length(projectSessionResults.numcells)));
+% catch
+%     warning('Coherogram Maze 1 Baseline was not stack');
+% end
+% try projectResults.coherogram_Maze1Drug = stackSessionResult(projectSessionResults.coherogram_Maze1Drug,ones(1,length(projectSessionResults.numcells)));
+% catch
+%     warning('Coherogram Maze 1 Drug was not stack');
+% end
 try projectResults.coherogram_NonThetaEpochsMaze1Baseline = stackSessionResult(projectSessionResults.coherogram_NonThetaEpochsMaze1Baseline,ones(1,length(projectSessionResults.numcells)));
 catch
     warning('Coherogram Non Theta Epochs Maze 1 Baseline was not stack');
@@ -942,6 +943,8 @@ end
 projectResults.cell_metrics = cell_metrics;
 projectResults.cell_metrics_Baseline = cell_metrics_Baseline;
 projectResults.cell_metrics_Drug = cell_metrics_Drug;
+% projectResults.cell_metrics_Maze1Baseline = cell_metrics_Maze1Baseline;
+% projectResults.cell_metrics_Maze1Drug = cell_metrics_Maze1Drug;
 
 % session, genetic line, experimentalSubject, drug
 counCell = 1;
@@ -965,6 +968,9 @@ for ii = 1:length(projectSessionResults.numcells)
         end
         
         ripple_channel = projectSessionResults.session{ii}.analysisTags.rippleChannel;
+        if isempty(ripple_channel)
+            ripple_channel = projectSessionResults.ripples{ii}.detectorinfo.detectionchannel;
+        end
         flds = fields(projectSessionResults.session{ii}.brainRegions);
         for kk = 1:length(flds)
             if ismember(ripple_channel,projectSessionResults.session{ii}.brainRegions.(flds{kk}).channels)
@@ -974,6 +980,7 @@ for ii = 1:length(projectSessionResults.numcells)
         projectSessionResults.rippleRegion{ii} = rippleRegion;
         
         theta_channel = projectSessionResults.session{ii}.analysisTags.thetaChannel;
+        theta_channel = ripple_channel;
         flds = fields(projectSessionResults.session{ii}.brainRegions);
         for kk = 1:length(flds)
             if ismember(theta_channel,projectSessionResults.session{ii}.brainRegions.(flds{kk}).channels)
