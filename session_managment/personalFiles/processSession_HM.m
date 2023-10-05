@@ -111,8 +111,14 @@ if length(excludeAnalysis) == 0
 end
 excludeAnalysis = lower(excludeAnalysis);
 
+getSessionStimulation();
+
 try
     quadrants = getSessionQuadrants('force',true);
+    
+    psth_1 = spikesPsth([pulses.timestampsOn{1}'],'numRep',100,'saveMat',false,...
+                'min_pulsesNumber',1,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-1 1],'binSize',0.01, 'win_Z',[-3 -1]);
+    
     
     psth_quadrants_correct = spikesPsth([quadrants.ts(quadrants.choice == 1)],'numRep',100,'saveMat',false,...
                 'min_pulsesNumber',1,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-1 1],'binSize',0.01, 'win_Z',[-3 -1]);
