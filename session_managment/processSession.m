@@ -150,7 +150,7 @@ if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))
 
     session = gui_session(session);
 
-    selectProbe('force',true); % choose probe
+%     selectProbe('force',true); % choose probe
 end
 
 %% 2. Remove previous cellinfo.spikes.mat and computes spikes again (manual clustered)
@@ -188,7 +188,7 @@ end
 %% 4. Spike Features, and optogenetic responses
 % 4.1 Light responses, if available
 if ~any(ismember(excludeAnalysis, {'4',lower('spikesFeatures')}))
-    optogeneticResponses = getOptogeneticResponse('numRep',500,'force',true);
+%     optogeneticResponses = getOptogeneticResponse('numRep',500,'force',true);
     % 4.2 ACG and waveform
     spikeFeatures;
 end
@@ -212,11 +212,12 @@ if ~any(ismember(excludeAnalysis, {'6',lower('powerProfiles')}))
     powerProfile_theta = powerSpectrumProfile(theta_bandpass,'showfig',true,'forceDetect',true);
     powerProfile_gamma = powerSpectrumProfile(gamma_bandpass,'showfig',true,'forceDetect',true);
     powerProfile_hfo = powerSpectrumProfile(hfo_bandpass,'showfig',true,'forceDetect',true);
+
 end
 
 %% 7. Getting Hippocampal Layers
 if ~any(ismember(excludeAnalysis, {'7',lower('getHippocampalLayers')}))
-    [hippocampalLayers] = getHippocampalLayers('force',true,'promt',promt_hippo_layers);
+%     [hippocampalLayers] = getHippocampalLayers('force',true,'promt',promt_hippo_layers);
 end
 
 
@@ -224,8 +225,13 @@ end
 if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     % Trying changes in detecUD_temp
     % 8.1 Up and downs
+<<<<<<< HEAD
+    UDStates = detectUD('plotOpt', true,'forceDetect',true','NREMInts','all');
+%     psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true);
+=======
     UDStates = detectUpsDowns('plotOpt', true,'forceDetect',true','NREMInts','all');
     psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true,'minNumberOfPulses',10);
+>>>>>>> 412eb6c149e8ffa0f85f46b3aaaf6d9572b8d322
     getSpikesRank('events','upstates');
 
     % 8.2 Ripples
@@ -247,11 +253,11 @@ end
 %% 10. Cell metrics
 % Exclude manipulation intervals for computing CellMetrics
 if ~any(ismember(excludeAnalysis, {'10',lower('cellMetrics')}))
-    if strcmpi(profileType,'hippocampus')
-        session = assignBrainRegion('showPowerProfile','theta','showEvent','ripples','eventTwin',[-0.05 0.05]); % hfo slowOscilations [-.5 .5]
-    elseif strcmpi(profileType,'cortex')
-        session = assignBrainRegion('showPowerProfile','hfo','showEvent','slowOscilations','eventTwin',[-.5 .5]); % hfo slowOscilations [-.5 .5]
-    end
+%     if strcmpi(profileType,'hippocampus')
+%         session = assignBrainRegion('showPowerProfile','theta','showEvent','ripples','eventTwin',[-0.05 0.05]); % hfo slowOscilations [-.5 .5]
+%     elseif strcmpi(profileType,'cortex')
+%         session = assignBrainRegion('showPowerProfile','hfo','showEvent','slowOscilations','eventTwin',[-.5 .5]); % hfo slowOscilations [-.5 .5]
+%     end
     
     if isempty(excludeManipulationIntervals)
         try
@@ -264,6 +270,7 @@ if ~any(ismember(excludeAnalysis, {'10',lower('cellMetrics')}))
             warning('Not possible to get manipulation periods. Running CellMetrics withouth excluding manipulation epochs');
         end
     end
+    session = loadSession();
     cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true);
     
     getACGPeak('force',true);

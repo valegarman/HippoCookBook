@@ -436,7 +436,7 @@ if ~any(ismember(excludeAnalysis, {'13',lower('spatialModulation')}))
             behavior.psth_reward = psth_reward;
             behavior.psth_intersection = psth_intersection;
             behavior.psth_startPoint = psth_startPoint; 
-            behavior = behavior; % british to american :)
+            behavior = behavior; % british to american :)1
             save([basenameFromBasepath(pwd) '.behavior.cellinfo.mat'],'behavior');
         end
     end

@@ -111,6 +111,25 @@ if length(excludeAnalysis) == 0
 end
 excludeAnalysis = lower(excludeAnalysis);
 
+<<<<<<< HEAD
+getSessionStimulation();
+
+try
+    quadrants = getSessionQuadrants('force',true);
+    
+    psth_1 = spikesPsth([pulses.timestampsOn{1}'],'numRep',100,'saveMat',false,...
+                'min_pulsesNumber',1,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-1 1],'binSize',0.01, 'win_Z',[-3 -1]);
+    
+    
+    psth_quadrants_correct = spikesPsth([quadrants.ts(quadrants.choice == 1)],'numRep',100,'saveMat',false,...
+                'min_pulsesNumber',1,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-1 1],'binSize',0.01, 'win_Z',[-3 -1]);
+            
+    psth_quadrants_incorrect = spikesPsth([quadrants.ts(quadrants.choice == 0)],'numRep',100,'saveMat',false,...
+                'min_pulsesNumber',1,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-1 1],'binSize',0.01, 'win_Z',[-3 -1]);
+catch
+    warning('Not possible to run getQuadrants...');
+end
+=======
 % try
 %     quadrants = getSessionQuadrants('force',true);
 %     
@@ -122,6 +141,7 @@ excludeAnalysis = lower(excludeAnalysis);
 % catch
 %     warning('Not possible to run getQuadrants...');
 % end
+>>>>>>> 412eb6c149e8ffa0f85f46b3aaaf6d9572b8d322
 
 %% 1. Runs sessionTemplate
 if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))

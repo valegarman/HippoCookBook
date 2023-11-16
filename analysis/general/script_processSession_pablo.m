@@ -116,6 +116,8 @@ indexNewSession_pablo('basepath',bpath,'project','SocialProject');
 createProbe('excel_file','electrodes_coordinates_Buzsaki64(64 ch, 8 shanks, staggered)');
 createProbe('excel_file','electrodes_coordinates_A5x12-16-Buz-lin-5mm-100-200-160-177-Allego');
 
+<<<<<<< HEAD
+=======
 % ---- fSUB1 --------
 
 % fSUB1_161122_sess5 (TMaze)
@@ -127,14 +129,21 @@ indexNewSession_pablo('basepath',bpath,'project','SubiculumProject');
 bpath = 'J:\data\fSUB1\fSUB1_171122_sess6';
 processSession_pablo('basepath',bpath,'promt_hippo_layers',false,'anymaze_ttl_channel',2,'rippleChannel',47,'thetaChannel',47,'tint',true,'speedThresh',1,'gridAnalysis',false,'randomization',true);
 
+>>>>>>> 412eb6c149e8ffa0f85f46b3aaaf6d9572b8d322
 % fSUB1_110223_sess33 (Open Field)
 bpath = 'C:\DATA\fSUB1\fSUB1_110223_sess33';
 processSession_pablo('basepath',bpath,'promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',43,'SWChannel',43,'thetaChannel',43,'tint',true,'speedThresh',0,'gridAnalysis',true,'randomization',true);
 indexNewSession_pablo('basepath',bpath,'project','SUBProject');
 
+<<<<<<< HEAD
+% HPS22_010621_sess22 (TMaze)
+bpath = 'K:\HPS22_010621_sess22';
+processSession_pablo('basepath',bpath,'promt_hippo_layers',true,'anymaze_ttl_channel',2,'rippleChannel',30,'thetaChannel',30,'tint',true,'speedThresh',0,'gridAnalysis',true,'randomization',true);
+=======
 % fSUB1_181122_sess7 (TMaze)
 bpath = 'D:\fSUB1\fSUB1_181122_sess7';
 processSession_pablo('basepath',bpath,'promt_hippo_layers',false,'anymaze_ttl_channel',2,'rippleChannel',47,'thetaChannel',47,'tint',true,'speedThresh',1,'gridAnalysis',false,'randomization',true);
+>>>>>>> 412eb6c149e8ffa0f85f46b3aaaf6d9572b8d322
 indexNewSession_pablo('basepath',bpath,'project','SubiculumProject');
 
 % fSUB1_211122_sess8 (TMaze)
