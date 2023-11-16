@@ -125,11 +125,11 @@ try
         end
     elseif any(ismember(behavior.description,'YMaze Apparatus'))
         behavior = getSessionBehavior();
-        nBins = cell(1,length(behavior.maps_whole));
-        nPix2BinBy = cell(1,length(behavior.maps_whole));
-        Fs_tracking = cell(1,length(behavior.maps_whole));
-        bndbox = cell(1,length(behavior.maps_whole));
-        pixelsmetre = cell(1,length(behavior.maps_whole));
+        nBins = cell(1,length(behavior.maps));
+        nPix2BinBy = cell(1,length(behavior.maps));
+        Fs_tracking = cell(1,length(behavior.maps));
+        bndbox = cell(1,length(behavior.maps));
+        pixelsmetre = cell(1,length(behavior.maps));
         for i = 1:length(tracking.folders)
             fld{i} = find(ismember(behavior.description,tracking.apparatus{i}.name));
         end

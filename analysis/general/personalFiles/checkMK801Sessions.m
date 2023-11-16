@@ -1,5 +1,19 @@
 %% ======== CHECKING MK801/GLUN3 SESSIONS ================
 
+%% IPO14370_200723_sess15 MK801 (WT)
+
+%% IPO14370_260723_sess18 (WT)
+
+basepath = '';
+cd(basepath);
+
+session = loadSession();
+TheStateEditor_temp(session.general.name);
+
+
+
+
+
 %% HPS22_100621_sess26 MK801 (Wildtype)
 
 bpath = 'F:\data\HPS22\HPS22_100621_sess26';

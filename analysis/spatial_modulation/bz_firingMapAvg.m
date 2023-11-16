@@ -139,6 +139,7 @@ firingMaps.params.nBins = nBins;
 firingMaps.params.maxGap = maxGap;
 firingMaps.params.mode = mode;
 firingMaps.params.maxDistance = maxDistance;
+firingMaps.params.speedThresh = speedThresh;
 firingMaps.cmBin = cmBin;
 
 for unit = 1:length(spikes.times)

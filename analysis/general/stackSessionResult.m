@@ -182,7 +182,7 @@ for ii = 1:length(names)
         for jj = 1:length(toStack)
             % stack by the cells in first dimension
             values = permute(toStack{jj}.(names{ii}),dim_sorted);
-            temp = nan(dims);
+                temp = nan(dims);
             temp(1:size(values,1),1:size(values,2),1:size(values,3),1:size(values,4),1:size(values,5),1:size(values,6)) = values;
             temp = temp(1:numCells(jj),:,:,:,:,:); %temp(isnan(temp(:,1)),:,:,:,:,:) = [];
             stacked.(names{ii}) = cat(1,stacked.(names{ii}),temp);

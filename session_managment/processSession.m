@@ -280,7 +280,7 @@ if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
         getSessionTracking('roiTracking','manual','forceReload',false,'LED_threshold',LED_threshold,'convFact',tracking_pixel_cm);
         getSessionArmChoice('task','alternation','leftArmTtl_channel',leftArmTtl_channel,'rightArmTtl_channel',rightArmTtl_channel,'homeDelayTtl_channel',homeDelayTtl_channel);
         behaviour = getSessionLinearize('forceReload',true);  
-        firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',true);
+        firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',true,'speedThresh',0.1);
         placeFieldStats = bz_findPlaceFields1D('firingMaps',firingMaps,'maxSize',.75,'sepEdge',0.03); %% ,'maxSize',.75,'sepEdge',0.03
         firingTrialsMap = firingMapPerTrial('force',true,'saveMat',true);
         spatialModulation = getSpatialModulation('force',true);
@@ -314,7 +314,7 @@ if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
         behaviour.psth_intersection = psth_intersection;
         behaviour.psth_startPoint = psth_startPoint; 
         behavior = behaviour; % british to american :)
-        save([basenameFromBasepath(pwd) '.behavior.cellinfo.mat'],'behavior');
+        save([basenameFromBasepath(pwd) '.behavior.cellinfo.mat'],'behavior','-v7.3');
     catch
         warning('Psth on behaviour events was not possible...');
     end

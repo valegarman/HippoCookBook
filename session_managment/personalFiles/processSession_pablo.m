@@ -254,8 +254,8 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
 %     ts_maze = MergePoints.timestamps(2,:);
 %     UDStates = detectUD('plotOpt', true,'forceDetect',true','NREMInts','all','excludeIntervals',ts_maze);
 
-    UDStates = detectUD('plotOpt', true,'forceDetect',true','NREMInts','all');
-    psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true,'min_pulsesNumber',0);
+    UDStates = detectUpsDowns('plotOpt', true,'forceDetect',true','NREMInts','all');
+    psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true,'minNumberOfPulses',10);
     getSpikesRank('events','upstates');
     
 %     % 8.2 Ripples
@@ -266,10 +266,10 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
 %     ts_maze = MergePoints.timestamps(2,:);
 %     ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'removeOptogeneticStimulation',true,'eventSpikeThreshold',false,'excludeIntervals',ts_maze); % [1.5 3.5]
     
-    ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'removeOptogeneticStimulation',true,'eventSpikeThreshold',false,'excludeIntervals',ts); % [1.5 3.5]
+%     ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'removeOptogeneticStimulation',true,'eventSpikeThreshold',false,'excludeIntervals',ts); % [1.5 3.5]
     
     ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'removeOptogeneticStimulation',true,'eventSpikeThreshold',false); % [1.5 3.5]
-    psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'min_pulsesNumber',0);
+    psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10);
     getSpikesRank('events','ripples');
     
     % 8.3 Theta intervals
@@ -302,6 +302,7 @@ if ~any(ismember(excludeAnalysis, {'10',lower('cellMetrics')}))
     catch
         warning('Not possible to get manipulation periods. Running CellMetrics withouth excluding manipulation epochs');
     end
+    
     cell_metrics = ProcessCellMetrics('session', session,'manualAdjustMonoSyn',false,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',{'deepSuperficial'},'forceReload',true);
     
     cell_metrics = CellExplorer('basepath',pwd);
@@ -503,10 +504,17 @@ if ~any(ismember(excludeAnalysis, {'13',lower('spatialModulation')}))
     
     try
         phasePrecession = computePhasePrecession();
+        [data,stats] = computePhasePrecessionv1();
     catch
         warning('Not possible to compute Phase Precession...');
     end
 end
+
+%% 
+    
+% getLFPMap('passband',[6 12],'speedThresh',0,'nBins',20);
+% getLFPMapv2('passband',[6 12],'speedThresh',0,'nBins',20);
+
 
 %% 14. Summary per cell
 if ~any(ismember(excludeAnalysis, {'14',lower('summary')}))

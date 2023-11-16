@@ -194,8 +194,8 @@ count2 = 1;
 for ii = 1:length(efields)
     if (strcmpi(behaviorTemp.(efields{ii}).description,'Linear Track  N-S') | strcmpi(behaviorTemp.(efields{ii}).description,'PMaze')) 
         for jj = 1:length(directionList)
-            maps{count}(:,1) = timestamps(direction' == directionList(jj) & recMask == ii);
-            maps{count}(:,2) = lin(direction' == directionList(jj) & recMask==ii);
+            maps{count}(:,1) = timestamps(direction == directionList(jj) & recMask == ii);
+            maps{count}(:,2) = lin(direction == directionList(jj) & recMask==ii);
             maps_whole{count} = NaN;
             description{count} = behaviorTemp.(efields{ii}).description;
             description2{count} = NaN;
