@@ -98,17 +98,27 @@ if strcmpi(project,'MK801Project')
         end
     end
     drug = unique(drug);
-    drug = drug{2};
+    if ~isempty(drug)
+        drug = drug{2};
+    else
+        drug = 'no';
+    end
     sessionEntry = {lower(sessionName), lower(session.animal.name), lower(generalPath), lower(session.animal.strain),...
     lower(session.animal.geneticLine), [behav{:}], spikes.numcells,  [brainRegions{:}], drug,project};
 
     sessionEntry = cell2table(sessionEntry,"VariableNames",["SessionName", "Subject", "Path", "Strain", "GeneticLine", "Behavior", "numCells", "brainRegions", "Drug", "Project"]);
-else
+elseif strcmpi(project,'SubiculumProject')
     sessionEntry = {lower(sessionName), lower(session.animal.name), lower(generalPath), lower(session.animal.strain),...
     lower(session.animal.geneticLine), [behav{:}], spikes.numcells,  [brainRegions{:}], project};
 
     sessionEntry = cell2table(sessionEntry,"VariableNames",["SessionName", "Subject", "Path", "Strain", "GeneticLine", "Behavior", "numCells", "brainRegions", "Project"]);
+    
+elseif strcmpi(project,'HMProject')
+    sessionEntry = {lower(sessionName), lower(session.animal.name), lower(generalPath), [behav{:}], spikes.numcells, [brainRegions{:}], project};
+    
+    sessionEntry = cell2table(sessionEntry,"VariableNames",["SessionName", "Subject", "Path", "Behavior", "numCells", "brainRegions", "Project"]);
 end
+
 sessionsTable = [sessionsTable; sessionEntry];
 writetable(sessionsTable,[indexedSessionCSV_path filesep indexedSessionCSV_name,'.csv']); % the variable is called allSessions
 

@@ -113,8 +113,11 @@ tint = p.Results.tint;
 
 % Default firingMapsAvg
 if isempty(firingMaps)
-    firingMaps = load([basepath filesep basename '.firingMapsAvg2Halves_tint.cellinfo.mat']);
-    firingMaps_tint = firingMaps.firingMaps2Halves;
+    try
+        firingMaps = load([basepath filesep basename '.firingMapsAvg2Halves_tint.cellinfo.mat']);
+        firingMaps_tint = firingMaps.firingMaps2Halves;
+    catch
+    end
     
     firingMaps = load([basepath filesep basename '.firingMapsAvg2Halves.cellinfo.mat']);
     firingMaps= firingMaps.firingMaps2Halves;
@@ -123,15 +126,18 @@ end
 
 % Find place fields
 % TINT
-for unit = 1:length(firingMaps_tint.rateMaps)
-    for c = 1:length(firingMaps_tint.rateMaps{unit})
-        if ~isempty(firingMaps_tint.rateMaps{unit}{c})
-            for kk = 1:length(firingMaps_tint.rateMaps{unit}{c})
-               mapStats_tint{unit,1}{c}{kk} = findPlaceField2D('rateMap',firingMaps_tint.rateMaps{unit}{c}{kk},'countMap',firingMaps_tint.countMaps{unit}{c}{kk},'occupancyMap',firingMaps_tint.occupancy{unit}{c}{kk},'useColorBar',false);
-               sizeMaze_tint{c}{kk} = size(firingMaps_tint.rateMaps{unit}{c}{kk});
+try
+    for unit = 1:length(firingMaps_tint.rateMaps)
+        for c = 1:length(firingMaps_tint.rateMaps{unit})
+            if ~isempty(firingMaps_tint.rateMaps{unit}{c})
+                for kk = 1:length(firingMaps_tint.rateMaps{unit}{c})
+                   mapStats_tint{unit,1}{c}{kk} = findPlaceField2D('rateMap',firingMaps_tint.rateMaps{unit}{c}{kk},'countMap',firingMaps_tint.countMaps{unit}{c}{kk},'occupancyMap',firingMaps_tint.occupancy{unit}{c}{kk},'useColorBar',false);
+                   sizeMaze_tint{c}{kk} = size(firingMaps_tint.rateMaps{unit}{c}{kk});
+                end
             end
         end
     end
+catch
 end
 
 % FMA TOOLBOX
@@ -182,36 +188,38 @@ if saveMat
 end
 
 % TINT
-placeFieldStats_tint = {};
-
-% inherit required fields from spikes cellinfo struct
-placeFieldStats_tint.UID = firingMaps_tint.UID;
-placeFieldStats_tint.sessionName = firingMaps_tint.sessionName;
 try
-    placeFieldStats_tint.region = firingMaps_tint.region;
+    placeFieldStats_tint = {};
+
+    % inherit required fields from spikes cellinfo struct
+    placeFieldStats_tint.UID = firingMaps_tint.UID;
+    placeFieldStats_tint.sessionName = firingMaps_tint.sessionName;
+    try
+        placeFieldStats_tint.region = firingMaps_tint.region;
+    catch
+    %     placeFieldStats.region = spikes.region;
+    end
+
+    placeFieldStats_tint.params.sizeMaze = sizeMaze;
+    placeFieldStats_tint.params.threshold = threshold;
+    placeFieldStats_tint.params.minSize = minSize;
+    placeFieldStats_tint.params.maxSize = maxSize;
+    placeFieldStats_tint.params.sepEdge = sepEdge;
+    placeFieldStats_tint.params.minPeak = minPeak;
+    placeFieldStats_tint.params.minPeak2nd = minPeak2nd;
+    placeFieldStats_tint.params.verbose = verbose;
+    placeFieldStats_tint.params.savemat = saveMat;
+
+    placeFieldStats_tint.mapStats = mapStats_tint;
+
+    placeFieldStats2Halves_tint = placeFieldStats_tint;
+
+    if saveMat
+       save([basepath,filesep,placeFieldStats_tint.sessionName '.placeFields2Halves_tint.cellinfo.mat'],'placeFieldStats2Halves_tint'); 
+    end
+
 catch
-%     placeFieldStats.region = spikes.region;
 end
-
-placeFieldStats_tint.params.sizeMaze = sizeMaze;
-placeFieldStats_tint.params.threshold = threshold;
-placeFieldStats_tint.params.minSize = minSize;
-placeFieldStats_tint.params.maxSize = maxSize;
-placeFieldStats_tint.params.sepEdge = sepEdge;
-placeFieldStats_tint.params.minPeak = minPeak;
-placeFieldStats_tint.params.minPeak2nd = minPeak2nd;
-placeFieldStats_tint.params.verbose = verbose;
-placeFieldStats_tint.params.savemat = saveMat;
-
-placeFieldStats_tint.mapStats = mapStats_tint;
-
-placeFieldStats2Halves_tint = placeFieldStats_tint;
-
-if saveMat
-   save([basepath,filesep,placeFieldStats_tint.sessionName '.placeFields2Halves_tint.cellinfo.mat'],'placeFieldStats2Halves_tint'); 
-end
-
-
 % =======================
 %   PLOT 
 % =======================
@@ -275,58 +283,60 @@ end
 close all;
 
 % TINT
-
-for c = 1:length(firingMaps_tint.rateMaps{1})
-    for unit = 1:size(firingMaps_tint.UID,2)
-        if ~isempty(firingMaps_tint.rateMaps{unit}{c})
-            figure,
-            set(gcf,'Position',[100 -100 2500 1200])
-            for kk = 1:length(firingMaps_tint.rateMaps{unit}{c})
-                subplot(1,2,kk);
-                sizeMazeX = size(firingMaps_tint.rateMaps{unit}{c}{kk},1);
-                sizeMazeY = size(firingMaps_tint.rateMaps{unit}{c}{kk},2);
-                if isfield(firingMaps_tint,'cmBin')
-                    xtrack = linspace(0,sizeMazeX*firingMaps_tint.cmBin{c},sizeMazeX);
-                    ytrack = linspace(0,sizeMazeY*firingMaps_tint.cmBin{c},sizeMazeY);
-                else
-                    xtrack = linspace(0,sizeMazeX,sizeMazeX);
-                    ytrack = linspace(0,sizeMazeY,sizeMazeY);
-                end
-                imagesc(xtrack,ytrack,firingMaps_tint.rateMaps{unit}{c}{kk});
-                if sum(sum(firingMaps_tint.rateMaps{unit}{c}{kk}))>0
-                    hold on
-                    for ii = 1:size(mapStats{unit}{c}{kk}.field,3)
-                        try
-        %                 plot(xtrack(find(mapStats{unit}{c}.field{ii}(:,:))),firingMaps.rateMaps{unit}{c}(mapStats{unit}{c}.field{ii}(:,:)==1),'linewidth',2)
-        %                 plot([1 1]*xtrack(mapStats{unit}{c}.x(ii)),[0 firingMaps.rateMaps{unit}{c}(mapStats{unit}{c}.x(ii))],'--k')
+try
+    for c = 1:length(firingMaps_tint.rateMaps{1})
+        for unit = 1:size(firingMaps_tint.UID,2)
+            if ~isempty(firingMaps_tint.rateMaps{unit}{c})
+                figure,
+                set(gcf,'Position',[100 -100 2500 1200])
+                for kk = 1:length(firingMaps_tint.rateMaps{unit}{c})
+                    subplot(1,2,kk);
+                    sizeMazeX = size(firingMaps_tint.rateMaps{unit}{c}{kk},1);
+                    sizeMazeY = size(firingMaps_tint.rateMaps{unit}{c}{kk},2);
+                    if isfield(firingMaps_tint,'cmBin')
+                        xtrack = linspace(0,sizeMazeX*firingMaps_tint.cmBin{c},sizeMazeX);
+                        ytrack = linspace(0,sizeMazeY*firingMaps_tint.cmBin{c},sizeMazeY);
+                    else
+                        xtrack = linspace(0,sizeMazeX,sizeMazeX);
+                        ytrack = linspace(0,sizeMazeY,sizeMazeY);
+                    end
+                    imagesc(xtrack,ytrack,firingMaps_tint.rateMaps{unit}{c}{kk});
+                    if sum(sum(firingMaps_tint.rateMaps{unit}{c}{kk}))>0
+                        hold on
+                        for ii = 1:size(mapStats{unit}{c}{kk}.field,3)
+                            try
+            %                 plot(xtrack(find(mapStats{unit}{c}.field{ii}(:,:))),firingMaps.rateMaps{unit}{c}(mapStats{unit}{c}.field{ii}(:,:)==1),'linewidth',2)
+            %                 plot([1 1]*xtrack(mapStats{unit}{c}.x(ii)),[0 firingMaps.rateMaps{unit}{c}(mapStats{unit}{c}.x(ii))],'--k')
+                            end
                         end
                     end
+                    if max(max(firingMaps_tint.rateMaps{unit}{c}{kk})) < 10
+        %             ylim([0 10]);
+                    end
+                    colormap(jet(15));
+                    axis square
+                    if useColorBar
+                        c1 = colorbar;
+                        ylabel(c1,'FR (Hz)');
+                    end       
+                    if unit == 1
+                        ylabel('Track (cm)');
+                        xlabel('Track (cm)');
+                    end
+                    axis ij
+                    ax = gca;
+                    ax.TitleFontSizeMultiplier = 1;
+                    if kk == 1
+                        title([num2str(unit),' 1st half' ],'FontWeight','normal','FontSize',10);
+                    elseif kk == 2
+                        title([num2str(unit),' 2nd halg'],'FontWeight','normal','FontSize',10);
+                    end
                 end
-                if max(max(firingMaps_tint.rateMaps{unit}{c}{kk})) < 10
-    %             ylim([0 10]);
-                end
-                colormap(jet(15));
-                axis square
-                if useColorBar
-                    c1 = colorbar;
-                    ylabel(c1,'FR (Hz)');
-                end       
-                if unit == 1
-                    ylabel('Track (cm)');
-                    xlabel('Track (cm)');
-                end
-                axis ij
-                ax = gca;
-                ax.TitleFontSizeMultiplier = 1;
-                if kk == 1
-                    title([num2str(unit),' 1st half' ],'FontWeight','normal','FontSize',10);
-                elseif kk == 2
-                    title([num2str(unit),' 2nd halg'],'FontWeight','normal','FontSize',10);
-                end
+                saveas(gcf,[basepath,filesep,'2Halves',filesep ,'firingField_' num2str(unit) '_tint.png'],'png');
             end
-            saveas(gcf,[basepath,filesep,'2Halves',filesep ,'firingField_' num2str(unit) '_tint.png'],'png');
         end
     end
+catch
 end
 close all;
 

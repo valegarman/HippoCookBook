@@ -9,7 +9,8 @@ function [] = createNSFiles(varargin)
 %   basepath        General path to create files. By default pwd
 %   overwrite       Overwrite the created files. Default: false
 %   isNotchFilter   Apply Notch filter to the .dat files. Default: false
-%
+
+
 % Created by Pablo Abad 2022
 
 %% Defaults and Parms
@@ -177,9 +178,9 @@ for i=1:length(sess_folders)
                             % We are going to create the digitalIn.event.mat
                             % file
 <<<<<<< HEAD
-                            
 =======
->>>>>>> 58bb47033a3c33922f586aaec67719ddf7455501
+                            
+>>>>>>> 412eb6c149e8ffa0f85f46b3aaaf6d9572b8d322
 %                             if ~isempty(din_signals)
 %                                 digitalIn = pap_getDigitalIn(din_signals,'all','fs',sample_rate);
 %                             end

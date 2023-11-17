@@ -53,6 +53,7 @@ if skipStimulationPeriods
     end
 end
 
+cd(basepath);
 if ~isempty(excludeIntervals)
     warning('Excluding intervals...');
     for ii = 1:length(spikes.times)

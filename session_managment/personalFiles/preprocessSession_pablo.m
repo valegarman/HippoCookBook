@@ -137,8 +137,8 @@ try
         session.analysisTags.anymaze_ttl_channel = anymaze_ttl_channel;
     end
     % Change least Significant Bit 
-%     session.extracellular.leastSignificantBit = 1;
-%     save([basepath filesep session.general.name,'.session.mat'],'session','-v7.3');
+    session.extracellular.leastSignificantBit = 1;
+    save([basepath filesep session.general.name,'.session.mat'],'session','-v7.3');
 catch
     warning('it seems that CellExplorer is not on your path');
 end
@@ -157,7 +157,7 @@ disp('Concatenate session folders...');
 concatenateDats(pwd,0,1);
 
 %% Get analog and digital pulses
-if  ~isempty(analogChannelsList)
+ if  ~isempty(analogChannelsList)
     if changeAnalogInputs
         changeAnalogIn; 
     end

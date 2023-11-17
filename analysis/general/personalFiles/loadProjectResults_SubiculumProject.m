@@ -110,21 +110,21 @@ if ~isempty(prePath)
    end
 end
 %% load cellexplorer results
-% cell_metrics = loadCellMetricsBatch('basepaths',sessions.basepaths);
-% cell_metrics = CellExplorer('metrics',cell_metrics);% run CELLEXPLORER when adding new data
-% close(gcf);
-% 
-% cell_metrics_PreSleep = loadCellMetricsBatch('basepaths',sessions.basepaths,'saveAs','cell_metrics_PreSleep');
-% cell_metrics_PreSleep = CellExplorer('metrics',cell_metrics_PreSleep);
-% close(gcf);
-% 
-% cell_metrics_Maze = loadCellMetricsBatch('basepaths',sessions.basepaths,'saveAs','cell_metrics_Maze');
-% cell_metrics_Maze = CellExplorer('metrics',cell_metrics_Maze);
-% close(gcf);
-% 
-% cell_metrics_PostSleep = loadCellMetricsBatch('basepaths',sessions.basepaths,'saveAs','cell_metrics_PostSleep');
-% cell_metrics_PostSleep = CellExplorer('metrics',cell_metrics_PostSleep);
-% close(gcf);
+cell_metrics = loadCellMetricsBatch('basepaths',sessions.basepaths);
+cell_metrics = CellExplorer('metrics',cell_metrics);% run CELLEXPLORER when adding new data
+close(gcf);
+
+cell_metrics_PreSleep = loadCellMetricsBatch('basepaths',sessions.basepaths,'saveAs','cell_metrics_PreSleep');
+cell_metrics_PreSleep = CellExplorer('metrics',cell_metrics_PreSleep);
+close(gcf);
+
+cell_metrics_Maze = loadCellMetricsBatch('basepaths',sessions.basepaths,'saveAs','cell_metrics_Maze');
+cell_metrics_Maze = CellExplorer('metrics',cell_metrics_Maze);
+close(gcf);
+
+cell_metrics_PostSleep = loadCellMetricsBatch('basepaths',sessions.basepaths,'saveAs','cell_metrics_PostSleep');
+cell_metrics_PostSleep = CellExplorer('metrics',cell_metrics_PostSleep);
+close(gcf);
 
 %% collect data per session
 if saveSummaries
@@ -298,7 +298,7 @@ for ii = 1:length(sessions.basepaths)
     end
     
     % Phase Locking
-    targetFile = dir('*theta_*PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+    targetFile = dir('*theta_6-12.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
     projectSessionResults.thetaModulation{ii} = thetaMod;
     clear thetaMod
     
@@ -327,7 +327,7 @@ for ii = 1:length(sessions.basepaths)
     end
     
     % theta REM phase_locking
-    targetFile = dir('*.thetaREM_*.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+    targetFile = dir('*.thetaREM_6-12.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
     projectSessionResults.thetaREMModulation{ii} = thetaREMMod;
     clear thetaREMMod
     
@@ -357,7 +357,7 @@ for ii = 1:length(sessions.basepaths)
     
     % theta run phase_locking
     
-    targetFile = dir('*.thetaRun_*.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+    targetFile = dir('*.thetaRun_6-12.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
     projectSessionResults.thetaRunModulation{ii} = thetaRunMod;
     clear thetaRunMod
         
@@ -387,7 +387,7 @@ for ii = 1:length(sessions.basepaths)
     
     % lgamma phase_locking
     
-    targetFile = dir('*.lgamma_*.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+    targetFile = dir('*.lgamma_20-60.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
     projectSessionResults.lGammaModulation{ii} = lgammaMod;
     clear lgammaMod
         
@@ -417,7 +417,7 @@ for ii = 1:length(sessions.basepaths)
     
     % hgamma phase_locking
     
-    targetFile = dir('*.hgamma_*.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+    targetFile = dir('*.hgamma_60-100.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
     projectSessionResults.hGammaModulation{ii} = hgammaMod;
     clear hgammaMod
         
@@ -447,7 +447,7 @@ for ii = 1:length(sessions.basepaths)
     
     % ripple phase_locking
    
-    targetFile = dir('*.ripple_*.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+    targetFile = dir('*.ripple_120-200.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
     projectSessionResults.rippleMod{ii} = rippleMod;
     clear rippleMod
     
@@ -676,10 +676,29 @@ try projectResults.ripplePhaseModulation_PostSleep = stackSessionResult(projectS
 catch
     warning('Ripple phase modulation Baseline was not staked!');
 end
-% try projectResults.behavior = stackSessionResult(projectSessionResults.behavior, projectSessionResults.numcells);
-% catch
-%     warning('Behaviour responses were not stack!');
-% end
+try projectResults.behavior = stackSessionResult(projectSessionResults.behavior, projectSessionResults.numcells);
+catch
+    warning('Behaviour responses were not stack!');
+end
+try
+    for ii = 1:length(projectSessionResults.spatialModulation)
+        projectSessionResults.spatialModulation{ii}.bitsPerSec_map_1 = projectSessionResults.spatialModulation{ii}.bitsPerSec_map_1';
+        projectSessionResults.spatialModulation{ii}.bitsPerSpike_map_1 = projectSessionResults.spatialModulation{ii}.bitsPerSpike_map_1';
+%         projectSessionResults.spatialModulation{ii}.firingFieldSize_map_1 = projectSessionResults.spatialModulation{ii}.firingFieldSize_map_1';
+%         projectSessionResults.spatialModulation{ii}.borderIndex_map_1 = projectSessionResults.spatialModulation{ii}.borderIndex_map_1';
+%         projectSessionResults.spatialModulation{ii}.periodicFiring_map_1 = projectSessionResults.spatialModulation{ii}.periodicFiring_map_1';
+        projectSessionResults.spatialModulation{ii}.spatialAutoCorr_map_1 = projectSessionResults.spatialModulation{ii}.spatialAutoCorr_map_1';
+    %     projectSessionResults.spatialModulation{ii}.maxRate_map_1 = projectSessionResults.spatialModulation{ii}.maxRate_map_1';
+        projectSessionResults.spatialModulation{ii}.is_coherence = projectSessionResults.spatialModulation{ii}.is_coherence';
+        projectSessionResults.spatialModulation{ii}.is_bitsPerSpike = projectSessionResults.spatialModulation{ii}.is_bitsPerSpike';
+        projectSessionResults.spatialModulation{ii}.is_bitsPerSec = projectSessionResults.spatialModulation{ii}.is_bitsPerSec';
+        projectSessionResults.spatialModulation{ii}.is_spatial = projectSessionResults.spatialModulation{ii}.is_spatial';
+        projectSessionResults.spatialModulation{ii}.is_border = projectSessionResults.spatialModulation{ii}.is_border';
+        projectSessionResults.spatialModulation{ii}.is_periodic = projectSessionResults.spatialModulation{ii}.is_periodic';
+        projectSessionResults.spatialModulation{ii}.is_placeCells = projectSessionResults.spatialModulation{ii}.is_placeCells';
+    end 
+catch
+end
 try
     projectResults.spatialModulation = stackSessionResult(projectSessionResults.spatialModulation, projectSessionResults.numcells);
 catch

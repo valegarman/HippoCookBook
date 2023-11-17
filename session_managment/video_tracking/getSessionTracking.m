@@ -180,7 +180,11 @@ if count > 1 % if traking
         if anyMaze
             avFrame{ii} = tempTracking{ii}.avFrame;
             apparatus{ii} = tempTracking{ii}.apparatus;
-            zone{ii} = tempTracking{ii}.zone;
+            if isfield(tempTracking{ii},zone)
+                zone{ii} = tempTracking{ii}.zone;
+            else
+                zone{ii} = [];
+            end
             pixelsmetre{ii} = tempTracking{ii}.pixelsmetre;
         end
     end

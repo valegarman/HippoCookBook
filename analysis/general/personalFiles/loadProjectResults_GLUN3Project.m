@@ -111,7 +111,6 @@ if ~isempty(prePath)
 end
 %% load cellexplorer results
 cell_metrics = loadCellMetricsBatch('basepaths',sessions.basepaths);
-% disp('Close when done exploring...');
 cell_metrics = CellExplorer('metrics',cell_metrics);% run CELLEXPLORER when adding new data
 close(gcf);
 
@@ -146,10 +145,11 @@ for ii = 1:length(sessions.basepaths)
     projectSessionResults.geneticLine{ii} = session.animal.geneticLine;
     projectSessionResults.expSubject{ii} = session.animal.name;
     
+    
     try
         drug = cell(0); 
         for i = 1:length(session.epochs)
-            if contains(session.epochs{i}.behavioralParadigm, 'Maze1') | contains(session.epochs{i}.behavioralParadigm, 'Maze2') | contains(session.epochs{i}.behavioralParadigm,'Maze3')
+            if contains(session.epochs{i}.behavioralParadigm, 'Maze1') | contains(session.epochs{i}.behavioralParadigm, 'Maze2') | contains(session.epochs{i}.behavioralParadigm,'Maze3') | contains(session.epochs{i}.behavioralParadigm,'Maze')
                 drug{1, length(drug)+1} = lower(session.epochs{i}.notes);
                 drug{1, length(drug)+1} = ' ';
             end
@@ -158,7 +158,23 @@ for ii = 1:length(sessions.basepaths)
         drug = drug{2};
         projectSessionResults.drug{ii} = drug;
     catch
+        projectSessionResults.drug{ii} = NaN;
         warning('No drug detected in this session...');
+    end
+    
+    try
+        for i = 1:length(session.epochs)
+            if contains(session.epochs{i}.behavioralParadigm, 'Maze') 
+                if contains(session.epochs{i}.environment,'PC')
+                    isPCParadigm = 1;
+                else
+                    isPCParadigm = 0;
+                end
+                projectSessionResults.isPCParadigm{ii} = isPCParadigm;
+            end
+        end
+    catch
+        
     end
     
     clear session
@@ -218,14 +234,19 @@ for ii = 1:length(sessions.basepaths)
         warning('Not possible to load averageCCG_Baseline');
     end
     
-    % average CCG No Ripples
-    targetFile = dir('*.averageCCGNoRipples_Baseline.cellinfo.mat'); load(targetFile.name);
-    projectSessionResults.averageCCGNoRipples_Baseline{ii} = averageCCG;
-    clear averageCCG
+%     average CCG No Ripples
+    try
+        targetFile = dir('*.averageCCGNoRipples_Baseline.cellinfo.mat'); load(targetFile.name);
+        projectSessionResults.averageCCGNoRipples_Baseline{ii} = averageCCG;
+        clear averageCCG
+    catch
+        warning('Not possible to load averageCCGNoRopples_Baseline');
+    end
     
     % ripples
     targetFile = dir('*.ripples.events.mat'); load(targetFile.name);
     projectSessionResults.ripples{ii} = ripples;
+    projectSessionResults.numRipples(ii) = length(ripples.peaks);
     clear ripples;
     
     try
@@ -262,15 +283,19 @@ for ii = 1:length(sessions.basepaths)
     end
     
     % downStates
-    targetFile = dir('*.slowOscillations_psth.cellinfo.mat'); 
-    slowOsciResponses = importdata(targetFile.name);
-    if lightVersion
-        if isfield(slowOsciResponses,'raster')
-            slowOsciResponses = rmfield(slowOsciResponses,'raster');
+    try
+        targetFile = dir('*.slowOscillations_psth.cellinfo.mat'); 
+        slowOsciResponses = importdata(targetFile.name);
+        if lightVersion
+            if isfield(slowOsciResponses,'raster')
+                slowOsciResponses = rmfield(slowOsciResponses,'raster');
+            end
         end
+        projectSessionResults.slowOsciResponses{ii} = slowOsciResponses;
+        clear slowOsciResponses
+    catch
+        warning('Not possible to load slowOscillations. Quitting...');
     end
-    projectSessionResults.slowOsciResponses{ii} = slowOsciResponses;
-    clear slowOsciResponses
     
     try
         targetFile = dir('*.slowOscillations_Baseline_psth.cellinfo.mat'); 
@@ -307,8 +332,12 @@ for ii = 1:length(sessions.basepaths)
     end
     
     % Phase Locking
+%     targetFile = dir('*.theta_*.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+%     projectSessionResults.thetaModulation{ii} = thetaMod;
+%     clear thetaMod
+    
     try
-        targetFile = dir('*.theta_*Baseline.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+        targetFile = dir('*.theta_6-12_Baseline.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
         projectSessionResults.thetaModulation_Baseline{ii} = thetaMod;
         clear thetaMod
     catch
@@ -317,7 +346,7 @@ for ii = 1:length(sessions.basepaths)
     
     % theta REM phase_locking
     try
-        targetFile = dir('*.thetaREM_*Baseline.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+        targetFile = dir('*.thetaREM_6-12_Baseline.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
         projectSessionResults.thetaREMModulation_Baseline{ii} = thetaREMMod;
         clear thetaREMMod
     catch
@@ -325,8 +354,12 @@ for ii = 1:length(sessions.basepaths)
     end
     
     % theta run phase_locking
+%     targetFile = dir('*.thetaRun_*.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+%     projectSessionResults.thetaRunModulation{ii} = thetaRunMod;
+%     clear thetaRunMod
+    
     try
-        targetFile = dir('*.thetaRun_*Baseline.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+        targetFile = dir('*.thetaRun_6-12_Baseline.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
         projectSessionResults.thetaRunModulation_Baseline{ii} = thetaRunMod;
         clear thetaRunMod
     catch
@@ -334,8 +367,13 @@ for ii = 1:length(sessions.basepaths)
     end
  
     % lgamma phase_locking
+    
+%     targetFile = dir('*.lgamma_*.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+%     projectSessionResults.lGammaModulation{ii} = lgammaMod;
+%     clear lgammaMod
+        
     try
-        targetFile = dir('*.lgamma_*Baseline.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+        targetFile = dir('*.lgamma_20-60_Baseline.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
         projectSessionResults.lGammaModulation_Baseline{ii} = lgammaMod;
         clear lgammaMod
     catch
@@ -343,8 +381,13 @@ for ii = 1:length(sessions.basepaths)
     end
     
     % hgamma phase_locking
+    
+%     targetFile = dir('*.hgamma_*.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+%     projectSessionResults.hGammaModulation{ii} = hgammaMod;
+%     clear hgammaMod
+        
     try
-        targetFile = dir('*.hgamma_*Baseline.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+        targetFile = dir('*.hgamma_60-100_Baseline.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
         projectSessionResults.hGammaModulation_Baseline{ii} = hgammaMod;
         clear hgammaMod
     catch
@@ -353,7 +396,11 @@ for ii = 1:length(sessions.basepaths)
     
     % ripple phase_locking
    
-    try targetFile = dir('*.ripple_*Baseline.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+%     targetFile = dir('*.ripple_*.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+%     projectSessionResults.rippleMod{ii} = rippleMod;
+%     clear rippleMod
+        
+    try targetFile = dir('*.ripple_120-200_Baseline.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
         projectSessionResults.rippleMod_Baseline{ii} = rippleMod;
         clear rippleMod
     catch
@@ -574,6 +621,16 @@ try projectResults.behavior = stackSessionResult(projectSessionResults.behavior,
 catch
     warning('Behaviour responses were not stack!');
 end
+
+% try
+%     for ii = 1:length(projectSessionResults.spatialModulation)
+%         projectSessionResults.spatialModulation{ii}.bitsPerSec_map_1 = projectSessionResults.spatialModulation{ii}.bitsPerSec_map_1';
+%         projectSessionResults.spatialModulation{ii}.bitsPerSpike_map_1 = projectSessionResults.spatialModulation{ii}.bitsPerSpike_map_1';
+%         projectSessionResults.spatialModulation{ii}.spatialAutoCorr_map_1 = projectSessionResults.spatialModulation{ii}.spatialAutoCorr_map_1';
+%     end 
+% catch
+% end
+
 try
     projectResults.spatialModulation = stackSessionResult(projectSessionResults.spatialModulation, projectSessionResults.numcells);
 catch
@@ -604,6 +661,10 @@ catch
     warning('Ripples Spikes rank Baseline was not stack!');
 end
 
+try projectResults.ripples = stackSessionResult(projectSessionResults.ripples, projectSessionResults.numRipples);
+catch
+    warning('Slow Osc Spikes rank Drug was not stack!');
+end
 % Ripples Baseline
 try projectResults.ripples_Baseline = stackSessionResult(projectSessionResults.ripples_Baseline, projectSessionResults.numRipples_Baseline);
 catch
@@ -664,7 +725,13 @@ for ii = 1:length(projectSessionResults.numcells)
             warning('No drug detected in this session...');
         end
         
-        ripple_channel = projectSessionResults.session{ii}.analysisTags.rippleChannel;
+        % Place cell paradigm
+        
+        projectResults.isPCParadigm{counCell} = projectSessionResults.isPCParadigm{ii};
+        
+        
+%         ripple_channel = projectSessionResults.session{ii}.analysisTags.rippleChannel;
+        ripple_channel = projectSessionResults.ripples{ii}.detectorinfo.detectionchannel;
         flds = fields(projectSessionResults.session{ii}.brainRegions);
         for kk = 1:length(flds)
             if ismember(ripple_channel,projectSessionResults.session{ii}.brainRegions.(flds{kk}).channels)
@@ -673,15 +740,16 @@ for ii = 1:length(projectSessionResults.numcells)
         end
         projectSessionResults.rippleRegion{ii} = rippleRegion;
         
-        theta_channel = projectSessionResults.session{ii}.analysisTags.thetaChannel;
-        flds = fields(projectSessionResults.session{ii}.brainRegions);
-        for kk = 1:length(flds)
-            if ismember(theta_channel,projectSessionResults.session{ii}.brainRegions.(flds{kk}).channels)
-                thetaRegion = flds{kk};
-            end
-        end
-        projectSessionResults.thetaRegion{ii} = thetaRegion;
+%         theta_channel = projectSessionResults.session{ii}.analysisTags.thetaChannel;
+%         flds = fields(projectSessionResults.session{ii}.brainRegions);
+%         for kk = 1:length(flds)
+%             if ismember(theta_channel,projectSessionResults.session{ii}.brainRegions.(flds{kk}).channels)
+%                 thetaRegion = flds{kk};
+%             end
+%         end
+%         projectSessionResults.thetaRegion{ii} = thetaRegion;
         
+        projectSessionResults.thetaRegion{ii} = rippleRegion;
         % ripple Region
         try
             projectResults.rippleRegion{counCell} = rippleRegion;
@@ -691,13 +759,19 @@ for ii = 1:length(projectSessionResults.numcells)
         end
         
         % theta Region
+%         try
+%             projectResults.thetaRegion{counCell} = thetaRegion;
+%         catch
+%             warning('Not possible to assign theta Region');
+%             projectResults.thetaRegion{counCell} = 'Undefined';
+%         end
+        
         try
-            projectResults.thetaRegion{counCell} = thetaRegion;
+            projectResults.thetaRegion{counCell} = rippleRegion;
         catch
             warning('Not possible to assign theta Region');
             projectResults.thetaRegion{counCell} = 'Undefined';
         end
-        
         
         counCell = counCell + 1;
     end
@@ -705,6 +779,7 @@ end
 
 % Ripples information
 counRipple = 1;
+
 for ii = 1:length(projectSessionResults.numRipples_Baseline)
     
     for jj = 1:projectSessionResults.numRipples_Baseline(ii)
@@ -725,22 +800,22 @@ for ii = 1:length(projectSessionResults.numRipples_Baseline)
 end
 
 % Coherogram information
-for ii = 1:length(projectSessionResults.coherogram_Baseline)
-    % geneticLine
-    projectResults.coherogram_Baseline.geneticLine{ii} = lower(projectSessionResults.geneticLine{ii});
-    
-    % expSubject
-    projectResults.coherogram_Baseline.expSubject{ii} = lower(projectSessionResults.expSubject{ii});
-    
-    % drug
-    projectResults.coherogram_Baseline.drug{ii} = lower(projectSessionResults.drug{ii});
-    
-    % region 1
-    projectResults.coherogram_Baseline.lfp1Regions{ii} = lower(projectSessionResults.coherogram_Baseline{ii}.lfp1Region);
-    
-    % region 2
-    projectResults.coherogram_Baseline.lfp2Regions{ii} = lower(projectSessionResults.coherogram_Baseline{ii}.lfp2Region);
-end
+% for ii = 1:length(projectSessionResults.coherogram_Baseline)
+%     % geneticLine
+%     projectResults.coherogram_Baseline.geneticLine{ii} = lower(projectSessionResults.geneticLine{ii});
+%     
+%     % expSubject
+%     projectResults.coherogram_Baseline.expSubject{ii} = lower(projectSessionResults.expSubject{ii});
+%     
+%     % drug
+%     projectResults.coherogram_Baseline.drug{ii} = lower(projectSessionResults.drug{ii});
+%     
+%     % region 1
+%     projectResults.coherogram_Baseline.lfp1Regions{ii} = lower(projectSessionResults.coherogram_Baseline{ii}.lfp1Region);
+%     
+%     % region 2
+%     projectResults.coherogram_Baseline.lfp2Regions{ii} = lower(projectSessionResults.coherogram_Baseline{ii}.lfp2Region);
+% end
     
    
 projectResults.sessionList = unique(projectResults.session);

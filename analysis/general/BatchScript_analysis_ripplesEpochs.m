@@ -1,12 +1,12 @@
 %% BatchScript_analysis_ripplesPerSubsession
 
 clear; close all
-targetProject= 'SubiculumProject';
+targetProject= 'MK801Project';
 cd('D:');
-database_path = 'D:\';
-HCB_directory = what('SubiculumProject'); 
+database_path = 'J:\data\';
+HCB_directory = what('MK801Project'); 
 
-sessionsTable = readtable([HCB_directory.path filesep 'indexedSessions_SubiculumProject.csv']); % the variable is called allSessions
+sessionsTable = readtable([HCB_directory.path filesep 'indexedSessions_MK801Project_drugs.csv']); % the variable is called allSessions
 forceReload = false;
 
 win_resp = [-0.025 0.025];
@@ -18,7 +18,7 @@ lgamma_passband = [20 60];
 hgamma_passband = [60 100];
 
 for ii = 1:length(sessionsTable.SessionName)
-    if strcmpi(sessionsTable.Project{ii}, targetProject) || strcmpi('all', targetProject)
+%     if strcmpi(sessionsTable.Project{ii}, targetProject) || strcmpi('all', targetProject) 
         fprintf(' > %3.i/%3.i session \n',ii, length(sessionsTable.SessionName)); %\n
         cd([database_path filesep sessionsTable.Path{ii}]);
         
@@ -26,6 +26,9 @@ for ii = 1:length(sessionsTable.SessionName)
         session = loadSession();
         spikes = loadSpikes();
         
+%         spatialModulation = computeSpatialClassification('tint',false);
+
+                    
         try
             targetFile = dir('*.ripples.events.mat'); load(targetFile.name);
             rippleChannel = session.analysisTags.rippleChannel;
@@ -75,6 +78,7 @@ for ii = 1:length(sessionsTable.SessionName)
                 % ================================
                 % 1. Ripples 
                 % ================================
+            if isempty(dir([session.general.name,'.ripples_',session.epochs{jj}.behavioralParadigm,'.events.mat']))
 
                 try
                     figure('position',[200 115 1300 800]);
@@ -116,7 +120,7 @@ for ii = 1:length(sessionsTable.SessionName)
                     ripples_epoch.rippleStats.data.spectralEntropy = ripples.rippleStats.data.spectralEntropy(:,ts_ripples)';
                     ripples_epoch.rippleStats.data.fastRippleIndex = ripples.rippleStats.data.fastRippleIndex(:,ts_ripples)';
                     ripples_epoch.rippleStats.data.multiTapperFreq = ripples.rippleStats.data.multiTapperFreq(ts_ripples,:);
-                    ripples_epoch.rippleStats.data.interRippleFrequency = ripples.rippleStats.data.interRippleFrequency(ts_ripples,:);
+%                     ripples_epoch.rippleStats.data.interRippleFrequency = ripples.rippleStats.data.interRippleFrequency(ts_ripples,:);
 
                     ripples_epoch.rippleStats.data.incidence = length(ripples_epoch.peaks) / (ts(2)-ts(1));
 
@@ -161,12 +165,13 @@ for ii = 1:length(sessionsTable.SessionName)
                 catch
                     warning('Not possible lo run ripplesEpochs...');
                 end
+            end
                 
             % ========================
             % 2. Ripples PSTH 
             % =======================
                     
-            if isempty(dir(['ripples_',session.epochs{jj}.behavioralParadigm,'.events.mat']))
+            if isempty(dir([session.general.name,'.ripples_',session.epochs{jj}.behavioralParadigm,'.cellinfo.mat']))
                 try
 
                     psthRipples_epoch = spikesPsth([],'eventType','ripples','restrictIntervals',ts,'numRep',500,'force',true,'min_pulsesNumber',0,'saveMat',false,'savePlot',false,'rasterPlot',false,'ratePlot',false);
@@ -208,46 +213,122 @@ for ii = 1:length(sessionsTable.SessionName)
             % =============================
             
 %             spatialModulation = computeSpatialClassification('tint',false);
+%             spatialModulation = computeSpatialClassificationN('tint',false);
 %             spatialModulation_tint = computeSpatialClassification('tint',true);
             
             % ===============================
             % 4. PHASE MODULATION
             % ===============================
-                        
-            phaseMod_epoch = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel,'thetaChannel',thetaChannel,'lgammaChannel',thetaChannel,'hgammaChannel',thetaChannel,'restrictIntervals',ts,'plotting',false,'saveMat',false);
+            if isempty(dir([session.general.name,'.ripple_',num2str(ripple_passband(1)),'-',num2str(ripple_passband(end)),...
+                    '_',session.epochs{jj}.behavioralParadigm,'.cellinfo.mat']))
+                
+                phaseMod_epoch = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel,'thetaChannel',thetaChannel,'lgammaChannel',thetaChannel,'hgammaChannel',thetaChannel,'restrictIntervals',ts,'plotting',false,'saveMat',false);
 
-            rippleMod = phaseMod_epoch.ripples;
-            SWMod = phaseMod_epoch.SharpWave;
-            thetaMod = phaseMod_epoch.theta;
-            lgammaMod = phaseMod_epoch.lgamma;
-            hgammaMod = phaseMod_epoch.hgamma;
-            thetaRunMod = phaseMod_epoch.thetaRunMod;
-            thetaREMMod = phaseMod_epoch.thetaREMMod;
+                rippleMod = phaseMod_epoch.ripples;
+                SWMod = phaseMod_epoch.SharpWave;
+                thetaMod = phaseMod_epoch.theta;
+                lgammaMod = phaseMod_epoch.lgamma;
+                hgammaMod = phaseMod_epoch.hgamma;
+                thetaRunMod = phaseMod_epoch.thetaRunMod;
+                thetaREMMod = phaseMod_epoch.thetaREMMod;
 
-            save([session.general.name,'.ripple_',num2str(ripple_passband(1)),'-',num2str(ripple_passband(end)),...
-                '_',session.epochs{jj}.behavioralParadigm,'.cellinfo.mat'],'rippleMod');
+                save([session.general.name,'.ripple_',num2str(ripple_passband(1)),'-',num2str(ripple_passband(end)),...
+                    '_',session.epochs{jj}.behavioralParadigm,'.cellinfo.mat'],'rippleMod');
 
-            save([session.general.name,'.SW_',num2str(SW_passband(1)),'-',num2str(SW_passband(end)),...
-                '_',session.epochs{jj}.behavioralParadigm,'.cellinfo.mat'],'SWMod');
+                save([session.general.name,'.SW_',num2str(SW_passband(1)),'-',num2str(SW_passband(end)),...
+                    '_',session.epochs{jj}.behavioralParadigm,'.cellinfo.mat'],'SWMod');
 
-            save([session.general.name,'.theta_',num2str(theta_passband(1)),'-',num2str(theta_passband(end)),...
-                '_',session.epochs{jj}.behavioralParadigm,'.cellinfo.mat'],'thetaMod');
+                save([session.general.name,'.theta_',num2str(theta_passband(1)),'-',num2str(theta_passband(end)),...
+                    '_',session.epochs{jj}.behavioralParadigm,'.cellinfo.mat'],'thetaMod');
 
-            save([session.general.name,'.lgamma_',num2str(lgamma_passband(1)),'-',num2str(lgamma_passband(end)),...
-                '_',session.epochs{jj}.behavioralParadigm,'.cellinfo.mat'],'lgammaMod');
+                save([session.general.name,'.lgamma_',num2str(lgamma_passband(1)),'-',num2str(lgamma_passband(end)),...
+                    '_',session.epochs{jj}.behavioralParadigm,'.cellinfo.mat'],'lgammaMod');
 
-            save([session.general.name,'.hgamma_',num2str(hgamma_passband(1)),'-',num2str(hgamma_passband(end)),...
-                '_',session.epochs{jj}.behavioralParadigm,'.cellinfo.mat'],'hgammaMod');
+                save([session.general.name,'.hgamma_',num2str(hgamma_passband(1)),'-',num2str(hgamma_passband(end)),...
+                    '_',session.epochs{jj}.behavioralParadigm,'.cellinfo.mat'],'hgammaMod');
 
-            save([session.general.name,'.thetaRun_',num2str(theta_passband(1)),'-',num2str(theta_passband(end)),...
-                '_',session.epochs{jj}.behavioralParadigm,'.cellinfo.mat'],'thetaRunMod');
+                save([session.general.name,'.thetaRun_',num2str(theta_passband(1)),'-',num2str(theta_passband(end)),...
+                    '_',session.epochs{jj}.behavioralParadigm,'.cellinfo.mat'],'thetaRunMod');
 
-            save([session.general.name,'.thetaREM_',num2str(theta_passband(1)),'-',num2str(theta_passband(end)),...
-                '_',session.epochs{jj}.behavioralParadigm,'.cellinfo.mat'],'thetaREMMod');
+                save([session.general.name,'.thetaREM_',num2str(theta_passband(1)),'-',num2str(theta_passband(end)),...
+                    '_',session.epochs{jj}.behavioralParadigm,'.cellinfo.mat'],'thetaREMMod');
+            end
+            
+            %======================
+            % 5. CELL METRICS 
+            % ======================
+            if isempty(dir([session.general.name,'.cell_metrics_',session.epochs{jj}.behavioralParadigm,'.cellinfo.mat']))
+                try
+                    if ~isempty(dir([session.general.name,'.optogeneticPulses.events.mat']))
+                        file = dir([session.general.name,'.optogeneticPulses.events.mat']);
+                        load(file.name);
+                    end
+                    excludeManipulationIntervals = optoPulses.stimulationEpochs;
+                catch
+                    warning('Not possible to get manipulation periods. Running CellMetrics withouth excluding manipulation epochs');
+                    excludeManipulationIntervals = [];
+                end
+
+                cell_metrics_epoch = ProcessCellMetrics('session', session,'restrictToIntervals',ts,'manualAdjustMonoSyn',false,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',{'deepSuperficial'},'forceReload',true,'saveMat',false);
+
+                cell_metrics = cell_metrics_epoch;
+                save([session.general.name,'.cell_metrics_',session.epochs{jj}.behavioralParadigm,'.cellinfo.mat'],'cell_metrics');
+            end
+            
+            
+            % ========================
+            % 2. CCG
+            % ========================
+            
+            if isempty(dir([session.general.name,'.averageCCG_',session.epochs{jj}.behavioralParadigm,'.cellinfo.mat']))
+                winSizePlot = [-.3 .3];
+
+                averageCCG_epoch = getAverageCCG('force',true,'includeIntervals',ts,'savemat',false,'plotOpt',false,'saveFig',false);
+
+                averageCCG = averageCCG_epoch;
+                save([session.general.name,'.averageCCG_',session.epochs{jj}.behavioralParadigm,'.cellinfo.mat'],'averageCCG');
+
+                t_ccg = averageCCG_epoch.timestamps;
+                allCcg = averageCCG_epoch.allCcg;
+                indCell = [1:size(allCcg,2)];
+
+                figure('position',[200 115 1300 800])
+                for kk = 1:size(spikes.UID,2)
+                    % fprintf(' **CCG from unit %3.i/ %3.i \n',kk, size(spikes.UID,2)); %\n
+                    subplot(7,ceil(size(spikes.UID,2)/7),kk);
+                    cc = zscore(squeeze(allCcg(:,kk,indCell(indCell~=kk)))',[],2); % get crosscorr
+                    imagesc(t_ccg,1:max(indCell)-1,cc)
+                    set(gca,'YDir','normal'); colormap jet; caxis([-abs(max(cc(:))) abs(max(cc(:)))])
+                    hold on
+                    zmean = mean(zscore(squeeze(allCcg(:,kk,indCell(indCell~=kk)))',[],2));
+                    zmean = zmean - min(zmean); zmean = zmean/max(zmean) * (max(indCell)-1) * std(zmean);
+                    plot(t_ccg, zmean,'k','LineWidth',2);
+                    xlim([winSizePlot(1) winSizePlot(2)]); ylim([0 max(indCell)-1]);
+                    title(num2str(kk),'FontWeight','normal','FontSize',10);
+
+                    if kk == 1
+                        ylabel('Cell');
+                    elseif kk == size(spikes.UID,2)
+                        xlabel('Time (s)');
+                    else
+                        set(gca,'YTick',[],'XTick',[]);
+                    end
+                end
+                saveas(gca,['Epochs\allCellsAverageCCG_',session.epochs{jj}.behavioralParadigm,'.png']);
+
+                figure('position',[200 115 1300 800])
+                imagesc([t_ccg(1) t_ccg(end)],[1 size(averageCCG_epoch.ZmeanCCG,1)],...
+                    averageCCG_epoch.ZmeanCCG); caxis([-3 3]); colormap(jet);
+                set(gca,'TickDir','out'); xlabel('Time'); ylabel('Cells'); xlim([winSizePlot(1) winSizePlot(2)]);
+                title('Grand CCG average','FontWeight','normal','FontSize',10);
+
+                saveas(gca,['Epochs\grandCCGAverage_',session.epochs{jj}.behavioralParadigm,'.png']);
+            end
 
             
         end
-    end
+        getAverageCCG('force',true);
+%     end
     close all;
 end
 

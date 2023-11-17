@@ -157,7 +157,6 @@ if plotLFP
     xlabel('time (ms)');ylabel('channel');title('LFP');   
     plot([0 0],ylim,'--r');hold on;
 
-       
 elseif plotCSD  
      cmax = max(max(CSD)); 
      taxis = (-(twin(1)/samplingRate):(1/samplingRate):(twin(2)/samplingRate))*1e3;
