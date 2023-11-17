@@ -27,7 +27,7 @@ indexNewSession;
 % an enjoy data analysis!
 [projectResults, projectSessionResults] = ...
         loadProjectResults('project', 'uLEDiscotheque',...
-        'analysis_project_path', 'C:\Users\valeg\Dropbox\ProjectsOnLine\interneuronsLibrary\data','loadLast',false); 
+        'analysis_project_path', adapt_filesep([dropbox_path '\ProjectsOnLine\monoSynBition\data']),'loadLast',false); 
 % other projects include InterneuronsLibrary, desVIPnhibition, etc
 
 % PS. uLED sessions
