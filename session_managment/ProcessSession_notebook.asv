@@ -77,20 +77,17 @@ session = assignBrainRegion('showPowerProfile','theta','showEvent','ripples'); %
 % Basically, if you have change anything above, a good practice is running
 % this code again (but unless you merge or discard cells in phy, you don´t
 % have to validate the monosynpatic connections again)
-    
-if ~isempty(dir([session.general.name,'.optogeneticPulses.events.mat']))
-    file = dir([session.general.name,'.optogeneticPulses.events.mat']);
-    load(file.name);
+    try
+        if ~isempty(dir([session.general.name,'.optogeneticPulses.events.mat']))
+            file = dir([session.general.name,'.optogeneticPulses.events.mat']);
+            load(file.name);
+        end
+            excludeManipulationIntervals = optoPulses.stimulationEpochs;
+    catch
+        warning('Not possible to get manipulation periods. Running CellMetrics withouth excluding manipulation epochs');
+    end
 end
-excludeManipulationIntervals = optoPulses.stimulationEpochs;
-
 cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true);
-
-getACGPeak('force',true);
-
-getAverageCCG('force',true);
-    
-getSpikesReturnPlot('force',true);
 
 %% 9. Spatial modulation
 % Open session folder with behaviour (with a video, normaly .avi, file). If
