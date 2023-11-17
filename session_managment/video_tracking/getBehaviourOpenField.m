@@ -171,10 +171,10 @@ if exist('zone','var') && ~isempty(zone)
     behavior.zone = zone;
 end
 
-behavior.masks.arm = NaN;
-behavior.masks.direction = nan(length(behavior.timestamps),1);
+behavior.masks.arm = nan(1,length(behavior.timestamps));
+behavior.masks.direction = nan(1,length(behavior.timestamps));
 behavior.masks.trials = nan(length(behavior.timestamps),1);
-behavior.masks.trialsDirection = NaN;
+behavior.masks.trialsDirection = nan(length(behavior.timestamps),1);
 
 behavior.maps = maps;
 behavior.maps_whole = NaN;

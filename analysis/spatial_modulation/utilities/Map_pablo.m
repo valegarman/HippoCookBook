@@ -94,10 +94,11 @@ addParameter(p,'type','lll',@ischar);
 addParameter(p,'mode','discard',@ischar);
 addParameter(p,'maxDistance',5,@isnumeric);
 addParameter(p,'sample_rate',30,@isnumeric);
-addParameter(p,'bndbox',[],@isstruct);
+addParameter(p,'bndbox',[]);
 addParameter(p,'var2binby','position',@ischar);
 addParameter(p,'pixelsmetre',[],@isnumeric);
 addParameter(p,'binsize',[],@isnumeric);
+addParameter(p,'speed',[]);
 
 parse(p,varargin{:});
 
@@ -113,6 +114,7 @@ bndbox = p.Results.bndbox;
 var2binby = p.Results.var2binby;
 pixelsmetre = p.Results.pixelsmetre;
 binsize = p.Results.binsize;
+speed = p.Results.speed;
 
 % Default values
 map.x = [];
@@ -210,10 +212,24 @@ else
     map.timeUnSmoothSec = map.timeUnSmooth/sample_rate;
 	map.count = Smooth(Interpolate2(map.x,map.y,map.count,valid,mode,maxDistance),smooth,'type',type(1:2))';
 	map.time = Smooth(Interpolate2(map.x,map.y,map.time,valid,mode,maxDistance),smooth,'type',type(1:2))';
+%     map.speed = Accumulate([x y],n,nBins);
 	if pointProcess
         map.zUnSmooth = map.countUnSmooth./(map.timeUnSmooth+eps);
 		map.z = map.count./(map.time+eps);
-	else
+    else
+        map.zUnSmooth = Accumulate([x y],z(:,2),nBins)';
+        
+        b = ones(2);
+        c = ones(size(map.x,2),size(map.y,2));
+        c(map.timeUnSmooth == 0) = 0;
+        denom = filter2(b, c);
+        denom(denom==0) = NaN;
+        fpositions = filter2(b, map.timeUnSmooth);
+        fpositions = fpositions./denom;
+        
+        f = filter2(b,map.zUnSmooth);
+        ff = f./fpositions;
+        
 		map.z = Accumulate([x y],z(:,2),nBins)';
 		map.z = Smooth(Interpolate2(map.x,map.y,map.z,valid,mode,maxDistance),smooth,'type',type(1:2)).';
 		map.z = map.z./(map.count+eps);

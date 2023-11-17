@@ -426,22 +426,22 @@ if exist('zone','var')
     end    
 else
     name_zones = [];
-    center_zones_x{i} = [];
-    center_zones_y{i} = [];
-    boundingbox_zones_x{i} = [];
-    boundingbox_zones_y{i} = [];
-    boundingbox_zones_w{i} = [];
-    boundingbox_zones.h{i} = [];
-    boundingbox_zones_X{i} = [];
-    boundingbox_zones_Y{i} = [];
+    center_zones_x{1} = [];
+    center_zones_y{1} = [];
+    boundingbox_zones_x{1} = [];
+    boundingbox_zones_y{1} = [];
+    boundingbox_zones_w{1} = [];
+    boundingbox_zones.h{1} = [];
+    boundingbox_zones_X{1} = [];
+    boundingbox_zones_Y{1} = [];
         
-    boundingbox_zones_xmin{i} = [];
-    boundingbox_zones_xmax{i} = [];
-    boundingbox_zones_ymin{i} = [];
-    boundingbox_zones_ymax{i} = [];
+    boundingbox_zones_xmin{1} = [];
+    boundingbox_zones_xmax{1} = [];
+    boundingbox_zones_ymin{1} = [];
+    boundingbox_zones_ymax{1} = [];
         
-    xMaze_zones{i} = [];
-    yMaze_zones{i} = [];
+    xMaze_zones{1} = [];
+    yMaze_zones{1} = [];
         
 end
 
@@ -576,32 +576,34 @@ hold on;
 bndgbox = polyshape([boundingbox_xmin boundingbox_xmin boundingbox_xmax boundingbox_xmax boundingbox_xmin], [boundingbox_ymin boundingbox_ymax, boundingbox_ymax, boundingbox_ymin boundingbox_ymin]);
 plot(bndgbox,'FaceAlpha',0);
 
-for i=1:num_zones
-    
-    boundingbox_zones_xmin{i} = boundingbox_zones_xmin{i} - xMaze(1);
-    boundingbox_zones_xmax{i} = boundingbox_zones_xmax{i} - xMaze(1);
-    boundingbox_zones_ymin{i} = boundingbox_zones_ymin{i} - yMaze(1);
-    boundingbox_zones_ymax{i} = boundingbox_zones_ymax{i} - yMaze(1);
-    
-    bndgbox_zones{i} = polyshape([boundingbox_zones_xmin{i} boundingbox_zones_xmin{i} boundingbox_zones_xmax{i} boundingbox_zones_xmax{i} boundingbox_zones_xmin{i}], [boundingbox_zones_ymin{i} boundingbox_zones_ymax{i}, boundingbox_zones_ymax{i}, boundingbox_zones_ymin{i} boundingbox_zones_ymin{i}])
-    
-%     try
-%         if strcmpi(apparatus_name,'Object Recognition') || strcmpi(apparatus_name,'Social Interaction') && ~strcmpi(zone{i}.name.Text,'OUT')
-%             % Need to plot the zones as a circle
-%             center = [center_zones_x{i} center_zones_y{i}];
-%             radius = [boundingbox_zones_h{i}];
-%             viscircles(center,radius/2);
-%         end
-%     catch
-%         if strcmpi(apparatus_name,'Object Recognition') || strcmpi(apparatus_name,'Social Interaction') && ~strcmpi(zone.name.Text,'OUT')
-%             % Need to plot the zones as a circle
-%             center = [center_zones_x{i} center_zones_y{i}];
-%             radius = [boundingbox_zones_h{i}];
-%             viscircles(center,radius/2);
-%         end
-%     end
-%         plot([boundingbox_zones_xmin{i} boundingbox_zones_xmin{i} boundingbox_zones_xmax{i} boundingbox_zones_xmax{i} boundingbox_zones_xmin{i}],[boundingbox_zones_ymin{i} boundingbox_zones_ymax{i}, boundingbox_zones_ymax{i}, boundingbox_zones_ymin{i} boundingbox_zones_ymin{i}],'b');
-        plot(bndgbox_zones{i},'FaceAlpha',0);
+if exist('num_zones','var')
+    for i=1:num_zones
+
+        boundingbox_zones_xmin{i} = boundingbox_zones_xmin{i} - xMaze(1);
+        boundingbox_zones_xmax{i} = boundingbox_zones_xmax{i} - xMaze(1);
+        boundingbox_zones_ymin{i} = boundingbox_zones_ymin{i} - yMaze(1);
+        boundingbox_zones_ymax{i} = boundingbox_zones_ymax{i} - yMaze(1);
+
+        bndgbox_zones{i} = polyshape([boundingbox_zones_xmin{i} boundingbox_zones_xmin{i} boundingbox_zones_xmax{i} boundingbox_zones_xmax{i} boundingbox_zones_xmin{i}], [boundingbox_zones_ymin{i} boundingbox_zones_ymax{i}, boundingbox_zones_ymax{i}, boundingbox_zones_ymin{i} boundingbox_zones_ymin{i}])
+
+    %     try
+    %         if strcmpi(apparatus_name,'Object Recognition') || strcmpi(apparatus_name,'Social Interaction') && ~strcmpi(zone{i}.name.Text,'OUT')
+    %             % Need to plot the zones as a circle
+    %             center = [center_zones_x{i} center_zones_y{i}];
+    %             radius = [boundingbox_zones_h{i}];
+    %             viscircles(center,radius/2);
+    %         end
+    %     catch
+    %         if strcmpi(apparatus_name,'Object Recognition') || strcmpi(apparatus_name,'Social Interaction') && ~strcmpi(zone.name.Text,'OUT')
+    %             % Need to plot the zones as a circle
+    %             center = [center_zones_x{i} center_zones_y{i}];
+    %             radius = [boundingbox_zones_h{i}];
+    %             viscircles(center,radius/2);
+    %         end
+    %     end
+    %         plot([boundingbox_zones_xmin{i} boundingbox_zones_xmin{i} boundingbox_zones_xmax{i} boundingbox_zones_xmax{i} boundingbox_zones_xmin{i}],[boundingbox_zones_ymin{i} boundingbox_zones_ymax{i}, boundingbox_zones_ymax{i}, boundingbox_zones_ymin{i} boundingbox_zones_ymin{i}],'b');
+            plot(bndgbox_zones{i},'FaceAlpha',0);
+    end
 end
 
 if strcmpi(apparatus_name,'Linear Track  N-S') || isempty(apparatus_name)
@@ -773,12 +775,12 @@ else
 %     if ~verbose
 %         close(h2);
 %     end
-    bndgbox_zones_aux = bndgbox_zones;
-    bndgbox_zones = [];
-    for ii = 1:num_zones
-        bndgbox_zones{ii}.name = name_zones{ii};
-        bndgbox_zones{ii}.bndgbox = bndgbox_zones_aux{ii};
-    end
+%     bndgbox_zones_aux = bndgbox_zones;
+%     bndgbox_zones = [];
+%     for ii = 1:num_zones
+%         bndgbox_zones{ii}.name = name_zones{ii};
+%         bndgbox_zones{ii}.bndgbox = bndgbox_zones_aux{ii};
+%     end
 end
 
 
@@ -911,12 +913,12 @@ if checkZones & strcmpi(apparatus_name,'TMaze')
 %     if ~verbose
 %         close(h2);
 %     end
-    bndgbox_zones_aux = bndgbox_zones;
-    bndgbox_zones = [];
-    for ii = 1:num_zones
-        bndgbox_zones{ii}.name = name_zones{ii};
-        bndgbox_zones{ii}.bndgbox = bndgbox_zones_aux{ii};
-    end
+%     bndgbox_zones_aux = bndgbox_zones;
+%     bndgbox_zones = [];
+%     for ii = 1:num_zones
+%         bndgbox_zones{ii}.name = name_zones{ii};
+%         bndgbox_zones{ii}.bndgbox = bndgbox_zones_aux{ii};
+%     end
 end
 
 %% OUTPUT

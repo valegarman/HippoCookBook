@@ -21,8 +21,11 @@ TheStateEditor(session.general.name);
 % 2.2 If no clear bimodalities are visible, run scoring with different
 % channels and include noisy ignoretime epochs
 ignoretime = [];
-ThetaChannels = [17]; % choose theta channels (ideally SLM)
-SWChannels = [36 26]; % choose slow wave channels (ideally superficial cortex)
+ThetaChannels = [20 46 19 45 21 43]; % choose theta channels (ideally SLM)
+SWChannels = [30 36 26]; % choose slow wave channels (ideally superficial cortex)
+
+% if EMG is not been quantified correctly, try discarting channels with
+bz_EMGFromLFP(pwd,'rejectChannels',[51 58 52 57 49 60 50 59 54 55 53 56],'overwrite', true);
 
 targetFile = (dir('*optogeneticPulses.events.mat'));
 if ~isempty(targetFile)
@@ -30,7 +33,7 @@ if ~isempty(targetFile)
 else
     pulses.stimulationEpochs = [];
 end
-SleepScoreMaster(pwd,'noPrompts',true,'ignoretime',[pulses.stimulationEpochs; ignoretime], 'overwrite', true, 'ThetaChannels', ThetaChannels, 'SWChannels', SWChannels);
+SleepScoreMaster(pwd,'noPrompts',true,'ignoretime',[pulses.stimulationEpochs; ignoretime], 'overwrite', true, 'ThetaChannels', ThetaChannels, 'SWChannels', SWChannels,'rejectChannels',[51 58 52 57 49 60 50 59 54 55 53 56]);
 
 % 2.3 As the last resource, you can edit the epochs in TheStateEditor. IT
 % IS NOT WORKING!!!!!
@@ -68,24 +71,26 @@ computeCofiringModulation;
 
 %% 7. Brain region
 % Revise assignBrainRegion output. If disagreements or out of date, run again
-session = assignBrainRegion('showPowerProfile','theta','showEvent','ripples','eventTwin',[-.5 .5]); % hfo slowOscilations [-.5 .5]
+session = assignBrainRegion('showPowerProfile','theta','showEvent','ripples'); % hfo slowOscilations [-.5 .5]
 
 %% 8. Cell metrics
 % Basically, if you have change anything above, a good practice is running
 % this code again (but unless you merge or discard cells in phy, you don´t
 % have to validate the monosynpatic connections again)
-if isempty(excludeManipulationIntervals)
-    try
-        if ~isempty(dir([session.general.name,'.optogeneticPulses.events.mat']))
-            file = dir([session.general.name,'.optogeneticPulses.events.mat']);
-            load(file.name);
-        end
-            excludeManipulationIntervals = optoPulses.stimulationEpochs;
-    catch
-        warning('Not possible to get manipulation periods. Running CellMetrics withouth excluding manipulation epochs');
-    end
+    
+if ~isempty(dir([session.general.name,'.optogeneticPulses.events.mat']))
+    file = dir([session.general.name,'.optogeneticPulses.events.mat']);
+    load(file.name);
 end
+excludeManipulationIntervals = optoPulses.stimulationEpochs;
+
 cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true);
+
+getACGPeak('force',true);
+
+getAverageCCG('force',true);
+    
+getSpikesReturnPlot('force',true);
 
 %% 9. Spatial modulation
 % Open session folder with behaviour (with a video, normaly .avi, file). If

@@ -133,19 +133,19 @@ try
     end
 
     % Check if bin size is different for same conditions
-    uniqueParadigms = unique(behavior.description);
-    for ii = 1:length(uniqueParadigms)
-%         sameParadigm = find(strcmpi(behavior.description,uniqueParadigms{ii}));
-        sameParadigm = find(ismember(behavior.description,uniqueParadigms{ii}));
-        if length(sameParadigm) > 1
-            if ~isequal(nBins{sameParadigm(1)},nBins{sameParadigm(2)})
-                disp('Correcting number of bins for same paradigm...');
-                [mx,ind] = max([nBins{sameParadigm(1)} nBins{sameParadigm(2)}]);
-                [mn,indx] = min([nBins{sameParadigm(1)} nBins{sameParadigm(2)}]);
-                nBins{sameParadigm(indx)} = nBins{sameParadigm(ind)};
-            end
-        end
-    end
+%     uniqueParadigms = unique(behavior.description);
+%     for ii = 1:length(uniqueParadigms)
+% %         sameParadigm = find(strcmpi(behavior.description,uniqueParadigms{ii}));
+%         sameParadigm = find(ismember(behavior.description,uniqueParadigms{ii}));
+%         if length(sameParadigm) > 1
+%             if ~isequal(nBins{sameParadigm(1)},nBins{sameParadigm(2)})
+%                 disp('Correcting number of bins for same paradigm...');
+%                 [mx,ind] = max([nBins{sameParadigm(1)} nBins{sameParadigm(2)}]);
+%                 [mn,indx] = min([nBins{sameParadigm(1)} nBins{sameParadigm(2)}]);
+%                 nBins{sameParadigm(indx)} = nBins{sameParadigm(ind)};
+%             end
+%         end
+%     end
 catch
     disp('Not possible to compute nBins based on apparatus ...');
 end

@@ -111,8 +111,15 @@ if length(excludeAnalysis) == 0
 end
 excludeAnalysis = lower(excludeAnalysis);
 
+<<<<<<< HEAD
+getSessionStimulation();
+
 try
     quadrants = getSessionQuadrants('force',true);
+    
+    psth_1 = spikesPsth([pulses.timestampsOn{1}'],'numRep',100,'saveMat',false,...
+                'min_pulsesNumber',1,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-1 1],'binSize',0.01, 'win_Z',[-3 -1]);
+    
     
     psth_quadrants_correct = spikesPsth([quadrants.ts(quadrants.choice == 1)],'numRep',100,'saveMat',false,...
                 'min_pulsesNumber',1,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-1 1],'binSize',0.01, 'win_Z',[-3 -1]);
@@ -122,6 +129,19 @@ try
 catch
     warning('Not possible to run getQuadrants...');
 end
+=======
+% try
+%     quadrants = getSessionQuadrants('force',true);
+%     
+%     psth_quadrants_correct = spikesPsth([quadrants.ts(quadrants.choice == 1)],'numRep',100,'saveMat',false,...
+%                 'min_pulsesNumber',1,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-1 1],'binSize',0.01, 'win_Z',[-3 -1]);
+%             
+%     psth_quadrants_incorrect = spikesPsth([quadrants.ts(quadrants.choice == 0)],'numRep',100,'saveMat',false,...
+%                 'min_pulsesNumber',1,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-1 1],'binSize',0.01, 'win_Z',[-3 -1]);
+% catch
+%     warning('Not possible to run getQuadrants...');
+% end
+>>>>>>> 412eb6c149e8ffa0f85f46b3aaaf6d9572b8d322
 
 %% 1. Runs sessionTemplate
 if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))
@@ -142,22 +162,7 @@ if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))
         if isempty(rejectChannels)
             rejectChannels = session.channelTags.Bad.channels; % 1-index
         end
-        if ~isfield(session.analysisTags,'bazler_ttl_channel')
-            session.analysisTags.bazler_ttl_channel = bazler_ttl_channel;
-        end
-        if ~isfield(session.analysisTags,'anymaze_ttl_channel')
-            session.analysisTags.anymaze_ttl_channel = anymaze_ttl_channel;
-        end
         
-        if ~isfield(session.analysisTags,'leftArmTtl_channel')
-            session.analysisTags.leftArmTtl_channel = leftArmTtl_channel;
-        end
-        if ~isfield(session.analysisTags,'rightArmTtl_channel')
-            session.analysisTags.rightArmTtl_channel = rightArmTtl_channel;
-        end
-        if ~isfield(session.analysisTags,'homeDelayTtl_channel')
-            session.analysisTags.homeDelayTtl_channel = homeDelayTtl_channel;
-        end
         if ~isfield(session.analysisTags,'rippleChannel')
             session.analysisTags.rippleChannel = rippleChannel;
         end
@@ -166,15 +171,6 @@ if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))
         end
         if ~isfield(session.analysisTags,'thetaChannel')
             session.analysisTags.thetaChannel = thetaChannel;
-        end
-        if ~isfield(session.analysisTags,'CA1Channel')
-            session.analysisTags.CA1Channel = CA1Channel;
-        end
-        if ~isfield(session.analysisTags,'SUBChannel')
-            session.analysisTags.SUBChannel = SUBChannel;
-        end
-        if ~isfield(session.analysisTags,'PFCChannel')
-            session.analysisTags.PFCChannel = PFCChannel;
         end
                
         save([basepath filesep session.general.name,'.session.mat'],'session','-v7.3');
@@ -201,21 +197,21 @@ if ~any(ismember(excludeAnalysis, {'2',lower('loadSpikes')}))
 end
 
 %% 3. Analog pulses detection
-if ~any(ismember(excludeAnalysis, {'3',lower('cureAnalogPulses')}))
-    if force_analogPulsesDetection || isempty(dir([session.general.name,'_original.dat']))
-        disp('Getting analog Pulses...')
-        pulses = getAnalogPulses('analogChannelsList',analog_optogenetic_channels,'manualThr',manual_analog_pulses_threshold,'overwrite',force_analogPulsesDetection); % 1-index
-    else
-        try
-            if ~isempty(dir([session.general.name,'.pulses.events.mat']))
-                file = dir([session.general.name,'.pulses.events.mat']);
-                load(file.name);
-            end
-        catch
-            warning('Problems with analogPulses');
-        end
-    end
-end
+% if ~any(ismember(excludeAnalysis, {'3',lower('cureAnalogPulses')}))
+%     if force_analogPulsesDetection || isempty(dir([session.general.name,'_original.dat']))
+%         disp('Getting analog Pulses...')
+%         pulses = getAnalogPulses('analogChannelsList',analog_optogenetic_channels,'manualThr',manual_analog_pulses_threshold,'overwrite',force_analogPulsesDetection); % 1-index
+%     else
+%         try
+%             if ~isempty(dir([session.general.name,'.pulses.events.mat']))
+%                 file = dir([session.general.name,'.pulses.events.mat']);
+%                 load(file.name);
+%             end
+%         catch
+%             warning('Problems with analogPulses');
+%         end
+%     end
+% end
 
 %% 4. Spike Features
 % 4.1 Light responses, if available
@@ -254,7 +250,7 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true);
 
     % 8.2 Ripples
-    ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'removeOptogeneticStimulation',true); % [1.5 3.5]
+    ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'removeOptogeneticStimulation',true,'eventSpikeThreshold',false); % [1.5 3.5]
     psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true);
 
     % 8.3 Theta intervals
@@ -264,7 +260,7 @@ end
 %% 8. Phase Modulation
 if ~any(ismember(excludeAnalysis, {'9',lower('phaseModulation')}))
     % LFP-spikes modulation
-    [phaseMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel);
+    [phaseMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel,'thetaChannel',thetaChannel,'lgammaChannel',lgammaChannel,'hgammaChannel',hgammaChannel);
     computeCofiringModulation;
 end
 
@@ -284,6 +280,7 @@ if ~any(ismember(excludeAnalysis, {'10',lower('cellMetrics')}))
         end
             excludeManipulationIntervals = optoPulses.stimulationEpochs;
     catch
+        excludeManipulationIntervals = [];
         warning('Not possible to get manipulation periods. Running CellMetrics withouth excluding manipulation epochs');
     end
     cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'excludeMetrics',{'deepSuperficial'},'forceReload',true);
@@ -303,9 +300,94 @@ if ~any(ismember(excludeAnalysis,{'11',lower('lfpAnalysis')}))
     cohgram = computeCohgram('force',true);
 end
 
+imagination1 = computeImagination('channel',6);
+
+
+semanticWords1 = computeSemanticWords('channel',1);
+semanticWords2 = computeSemanticWords('channel',2);
+semanticWords3 = computeSemanticWords('channel',3);
+semanticWords4 = computeSemanticWords('channel',4);
+semanticWords5 = computeSemanticWords('channel',5);
+
+semanticWords9 = computeSemanticWords('channel',9);
+
+
+onomatopeyas1 = computeOnomatopeyas('channel',2);
+onomatopeyas1 = computeOnomatopeyas('channel',6);
+onomatopeyas2 = computeOnomatopeyas('channel',7);
+onomatopeyas3 = computeOnomatopeyas('channel',8);
+onomatopeyas4 = computeOnomatopeyas('channel',10);
+onomatopeyas5 = computeOnomatopeyas('channel',11);
+
+
+file = dir('*pulses.events.mat');
+load(file.name);
+
+file = dir('*semantic_words.mat');
+load(file.name);
+indexes = cell2mat(words(:,2));
+
+% PSTH
+behavior = [];
+psth_general = spikesPsth([pulses.timestampsOn{1}'],'numRep',100,'saveMat',false,...
+    'min_PulsesNumber',5,'winSize',6,'binSize', 0.01,'event_ints',[0.8 1.5],'baseline_ints',[-0.4 -0.1],'winSizePlot',[-1 2]);
+
+psth_visualObject = spikesPsth(pulses.timestampsOn{1}(indexes == 1)','numRep',100,'saveMat',false,...
+    'min_PulsesNumber',5,'winSize',6,'binSize', 0.01,'event_ints',[0.8 1.5],'baseline_ints',[-0.4 -0.1],'winSizePlot',[-1 2]);
+
+psth_spatial = spikesPsth(pulses.timestampsOn{1}(indexes == 2)','numRep',100,'saveMat',false,...
+    'min_PulsesNumber',5,'winSize',6,'binSize', 0.01,'event_ints',[0.8 1.5],'baseline_ints',[-0.4 -0.1],'winSizePlot',[-1 2]);
+
+psth_abstract = spikesPsth(pulses.timestampsOn{1}(indexes == 3)','numRep',100,'saveMat',false,...
+    'min_PulsesNumber',5,'winSize',6,'binSize', 0.01,'event_ints',[0.8 1.5],'baseline_ints',[-0.4 -0.1],'winSizePlot',[-1 2]);
+
+psth_actions = spikesPsth(pulses.timestampsOn{1}(indexes == 4)','numRep',100,'saveMat',false,...
+    'min_PulsesNumber',5,'winSize',6,'binSize', 0.01,'event_ints',[0.8 1.5],'baseline_ints',[-0.4 -0.1],'winSizePlot',[-1 2]);
+
+% psth_familiar = spikesPsth(pulses.timestampsOn{9}(indexes == 5)','numRep',100,'saveMat',false,...
+%     'min_PulsesNumber',5,'winSize',6,'binSize', 0.01,'event_ints',[0.8 1.5],'baseline_ints',[-0.4 -0.1],'winSizePlot',[-1 2]);
+
+behavior.psth_general = psth_general;
+behavior.psth_visualObject = psth_visualObject;
+behavior.psth_spatial = psth_spatial;
+behavior.psth_abstract = psth_abstract;
+behavior.psth_actions = psth_actions;
+% behavior.psth_familiar = psth_familiar;
+
+save([basenameFromBasepath(pwd) '.behavior.cellinfo.mat'],'behavior');
+
+% ONOMATOPEYAS
+file = dir('*onomatopeyas_3.mat');
+load(file.name);
+
+file = dir('*pulses.events.mat');
+load(file.name);
+indexes = cell2mat(onomatopeyas(:,2:3));
+
+onomat = [];
+
+psth_primer = spikesPsth([pulses.timestampsOn{8}(indexes(:,1) == 1)'],'numRep',100,'saveMat',false,...
+    'min_PulsesNumber',5,'winSize',6,'binSize', 0.01,'event_ints',[0.8 1.5],'baseline_ints',[-0.4 -0.1],'winSizePlot',[-1 2]);
+
+psth_stim = spikesPsth(pulses.timestampsOn{8}(indexes(:,1) == 2)','numRep',100,'saveMat',false,...
+    'min_PulsesNumber',5,'winSize',6,'binSize', 0.01,'event_ints',[0.8 1.5],'baseline_ints',[-0.4 -0.1],'winSizePlot',[-1 2]);
+
+psth_coherent = spikesPsth([pulses.timestampsOn{8}(indexes(:,1) == 2 & indexes(:,2) == 1)'],'numRep',100,'saveMat',false,...
+    'min_PulsesNumber',5,'winSize',6,'binSize', 0.01,'event_ints',[0.8 1.5],'baseline_ints',[-0.4 -0.1],'winSizePlot',[-1 2]);
+
+psth_noncoherent = spikesPsth(pulses.timestampsOn{8}(indexes(:,1) == 2 & indexes(:,2) == 0)','numRep',100,'saveMat',false,...
+    'min_PulsesNumber',5,'winSize',6,'binSize', 0.01,'event_ints',[0.8 1.5],'baseline_ints',[-0.4 -0.1],'winSizePlot',[-1 2]);
+
+onomat.psth_primer = psth_primer;
+onomat.psth_stim = psth_stim;
+onomat.psth_coherent = psth_coherent;
+onomat.psth_noncoherent = psth_noncoherent;
+
+save([basenameFromBasepath(pwd) '.onomatopeyas.cellinfo.mat'],'onomat');
+
 %% 11. Summary per cell
 if ~any(ismember(excludeAnalysis, {'14',lower('summary')}))
-    plotSummary_HM();   
+    plotSummary_pablo();   
 end
 
 cd(prevPath);

@@ -92,6 +92,7 @@ elseif strcmpi(task,'alternation')
         % 0 is left, 1 is right
         armChoice.visitedArm = [zeros(size(digitalIn.timestampsOn{leftArmTtl_channel}))'; ones(size(digitalIn.timestampsOn{rightArmTtl_channel}))'];
         armChoice.delay.timestamps = digitalIn.ints{homeDelayTtl_channel};
+%         armChoice.delay.timestamps = digitalIn.timestampsOn{homeDelayTtl_channel};
         armChoice.delay.delay = diff(armChoice.delay.timestamps')';
         
         if size(armChoice.visitedArm,1) < size(digitalIn.timestampsOn{homeDelayTtl_channel},2) - 10
@@ -130,8 +131,8 @@ elseif strcmpi(task,'alternation')
             armChoice.delay.dur = nanmean(armChoice.delay.timestamps(:,2) - armChoice.delay.timestamps(:,1));
             armChoice.delay.durations = round(armChoice.delay.timestamps(:,2) - armChoice.delay.timestamps(:,1),0);
             armChoice.delay.durations = [NaN; armChoice.delay.durations];
-            armChoice.delay.timestamps = [NaN NaN; armChoice.delay.timestamps];
-            
+            armChoice.delay.timestamps = [NaN NaN ;armChoice.delay.timestamps];
+%             armChoice.delay.timestamps = [armChoice.delay.timestamps];
             armChoice.choice = [NaN; abs(diff(armChoice.visitedArm))]; % 1 is right, 0 is wrong
             armChoice.performance = nansum(armChoice.choice)/(length(armChoice.choice) - 1);
         
