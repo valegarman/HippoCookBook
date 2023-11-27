@@ -21,7 +21,7 @@ batch_sessionSummary('basepath','G:\data\fPv4','cleanArtifacts',({65,[]}),'analo
 processSession('digital_optogenetic_channels',1,'analog_optogenetic_channels',[],'promt_hippo_layers',true,'profileType','hippocampus');
 
 % 5% Index session
-indexNewSession('copyFiles', false);
+indexNewSession('copyFiles', true);
 
 % 6% Once a database has been created, use loadProjectResults to stack results for all sessions
 % an enjoy data analysis!

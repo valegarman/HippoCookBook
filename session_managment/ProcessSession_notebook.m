@@ -41,7 +41,7 @@ TheStateEditor(session.general.name);
 
 %% 3. Hippocampal layers
 % Revise hippocapmal layer definition. Upon disagrements, run again
-hippocampalLayers] = getHippocampalLayers('force',true,'promt',promt_hippo_layers);
+hippocampalLayers = getHippocampalLayers('force',true,'promt',true);
 
 %% 4. Ripples
 % Revise number of ripples, shape and channel. You can also specifiy a
@@ -49,16 +49,16 @@ hippocampalLayers] = getHippocampalLayers('force',true,'promt',promt_hippo_layer
 % analysis.
 rippleChannel = [];
 SWChannel = [];
-eventSpikeThreshold_shanks = [1 2 3 4 5];
+eventSpikeThreshold_shanks = [3]; % which shanks will be accounted for the spike threshold 
 rippleMasterDetector_threshold = [1.5 3.5];
 ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'removeOptogeneticStimulation',true,'thresholds',rippleMasterDetector_threshold,...
-        'eventSpikeThreshold_shanks',[1 2 3 4 5]);
+        'eventSpikeThreshold_shanks',eventSpikeThreshold_shanks);
 
 %% 5. Theta epochs
 % Revise channel definition, theta band in thetaEpochs.png and cells
 % rhytmicity. If bad, you can change useCSD_for_theta_detection to false,
 % or change powerThreshold, even the channel
-useCSD_for_theta_detection = true;
+useCSD_for_theta_detection = false;
 powerThreshold = 1;
 channel = [];
 thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'powerThreshold',powerThreshold,'channel', channel);
