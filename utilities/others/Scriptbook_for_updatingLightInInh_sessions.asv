@@ -14,20 +14,19 @@ uLEDPulses = getuLEDPulses('Current',3,'force',true,'ledLayout','ledLayoutScienc
 
 processSession('digital_optogenetic_channels',[11 12 13 14 15 16],'analog_optogenetic_channels',[3 4 5 6 7 8],...
     'promt_hippo_layers',true,'profileType','hippocampus','force_analogPulsesDetection',false,...
-    'bazler_ttl_channel',1,'leftArmTtl_channel',3,'leftArmTtl_channel',4,'useCSD_for_theta_detection',false);
-close all
+    'bazler_ttl_channel',1,'leftArmTtl_channel',3,'leftArmTtl_channel',4);
 % for ripple detection, follow this steps:
 % 1. Copy ripple file from NEURAL
 % 2. Run this code;
 targetFile = dir("*ripples.events.mat"); load(targetFile.name);
 ripples.detectorinfo.detectionchannel = ripples.detectorinfo.detectionchannel + 1;
 ripples = computeRippleStats('ripples',ripples,'rippleChannel',ripples.detectorinfo.detectionchannel);
-session = loadSession;
-save([session.general.name , '.ripples.events.mat'],'ripples');
+SW = findSharpWaves('ripples',ripples,'rippleChannel',ripples.detectorinfo.detectionchannel,'SWChannel',[],...
+        'passband',[120 200],'SWpassband',[2 10]);
 psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10);
 getSpikesRank('events','ripples');
 
-[uLEDResponses] = getuLEDResponse('force',true);
+[uLEDResponses] = getuLEDResponse;
 script_tempWin_LightInInh;
 indexNewSession('copyFiles', true);
 

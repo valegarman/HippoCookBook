@@ -172,7 +172,7 @@ end
 if ~any(ismember(excludeAnalysis, {'3',lower('cureAnalogPulses')}))
     if force_analogPulsesDetection || isempty(dir([session.general.name,'_original.dat']))
         disp('Getting analog Pulses...')
-        pulses = getAnalogPulses('analogChannelsList',analog_optogenetic_channels,'manualThr',manual_analog_pulses_threshold,'overwrite',force_analogPulsesDetection); % 1-index
+        pulses = getAnalogPulses('analogChannelsList',analog_optogenetic_channels,'manualThr',manual_analog_pulses_threshold,'force',force_analogPulsesDetection); % 1-index
     else
         try
             if ~isempty(dir([session.general.name,'.pulses.events.mat']))
@@ -217,7 +217,7 @@ end
 
 %% 7. Getting Hippocampal Layers
 if ~any(ismember(excludeAnalysis, {'7',lower('getHippocampalLayers')}))
-%     [hippocampalLayers] = getHippocampalLayers('force',true,'promt',promt_hippo_layers);
+     [hippocampalLayers] = getHippocampalLayers('force',true,'promt',promt_hippo_layers);
 end
 
 
@@ -248,11 +248,11 @@ end
 %% 10. Cell metrics
 % Exclude manipulation intervals for computing CellMetrics
 if ~any(ismember(excludeAnalysis, {'10',lower('cellMetrics')}))
-%     if strcmpi(profileType,'hippocampus')
-%         session = assignBrainRegion('showPowerProfile','theta','showEvent','ripples','eventTwin',[-0.05 0.05]); % hfo slowOscilations [-.5 .5]
-%     elseif strcmpi(profileType,'cortex')
-%         session = assignBrainRegion('showPowerProfile','hfo','showEvent','slowOscilations','eventTwin',[-.5 .5]); % hfo slowOscilations [-.5 .5]
-%     end
+    if strcmpi(profileType,'hippocampus')
+        session = assignBrainRegion('showPowerProfile','theta','showEvent','ripples','eventTwin',[-0.05 0.05]); % hfo slowOscilations [-.5 .5]
+    elseif strcmpi(profileType,'cortex')
+        session = assignBrainRegion('showPowerProfile','hfo','showEvent','slowOscilations','eventTwin',[-.5 .5]); % hfo slowOscilations [-.5 .5]
+    end
     
     if isempty(excludeManipulationIntervals)
         try

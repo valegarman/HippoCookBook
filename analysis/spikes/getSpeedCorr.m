@@ -157,8 +157,8 @@ for j = 1:length(spikes.times)
                 end
             end
 
-            speed_fr_corr(j,1) = corr(prc_vals',  speed_val(:,j,1), 'rows', 'complete', 'type', 'Spearman');
-            speed_fr_corr(j,2) = corr(prc_vals',  speed_val(:,j,2), 'rows', 'complete', 'type', 'Spearman');
+            [speed_fr_corr(j,1), speed_fr_corr_pval(j,1)] = corr(prc_vals',  speed_val(:,j,1), 'rows', 'complete', 'type', 'Spearman');
+            [speed_fr_corr(j,2), speed_fr_corr_pval(j,2)] = corr(prc_vals',  speed_val(:,j,2), 'rows', 'complete', 'type', 'Spearman');
             b1 = polyfit(prc_vals, speed_val(:,j,1), 2);
             b2 = polyfit(prc_vals, speed_val(:,j,2), 2);
     %             b1 = [ones(length(prc_vals),1) prc_vals' (prc_vals').^2]\speed_val(:,j,1);

@@ -49,9 +49,9 @@ hippocampalLayers = getHippocampalLayers('force',true,'promt',true);
 % analysis.
 rippleChannel = [];
 SWChannel = [];
-eventSpikeThreshold_shanks = [3]; % which shanks will be accounted for the spike threshold 
-rippleMasterDetector_threshold = [1.5 3.5];
-ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'removeOptogeneticStimulation',true,'thresholds',rippleMasterDetector_threshold,...
+eventSpikeThreshold_shanks = []; % which shanks will be accounted for the spike threshold 
+rippleMasterDetector_threshold = [1.5 3.5]; % [1.5 3.5]
+ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'removeOptogeneticStimulation',false,'thresholds',rippleMasterDetector_threshold,...
         'eventSpikeThreshold_shanks',eventSpikeThreshold_shanks);
 
 %% 5. Theta epochs

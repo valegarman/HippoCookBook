@@ -9,10 +9,10 @@ function [digitalIn] = getDigitalIn(ch,varargin)
 % <OPTIONALS>
 % fs            Sampling frequency (in Hz), default 30000, or try to
 %               recover for rhd 
-% offset        Offset subtracted (in seconds), default 0.
 % periodLag     How long a pulse has to be far from other pulses to be consider a different stimulation period (in seconds, default 5s)    
 % filename      File to get pulses from. Default, digitalin.dat file with folder
 %               name in current directory
+% overwrite     false
 %
 %
 % OUTPUTS
@@ -35,17 +35,17 @@ end
 
 p = inputParser;
 addParameter(p,'fs',30000,@isnumeric)
-addParameter(p,'offset',0,@isnumeric)
 addParameter(p,'filename',[],@isstring)
 addParameter(p,'periodLag',5,@isnumeric)
+addParameter(p,'overwrite',false,@isnumeric)
 
 parse(p, varargin{:});
 fs = p.Results.fs;
-offset = p.Results.offset;
 filename = p.Results.filename;
 lag = p.Results.periodLag;
+overwrite = p.Results.overwrite;
 
-if ~isempty(dir('*DigitalIn.events.mat'))
+if ~isempty(dir('*DigitalIn.events.mat')) && overwrite == false
     disp('Digital pulses already detected! Loading file.');
     file = dir('*DigitalIn.events.mat');
     load(file.name);
