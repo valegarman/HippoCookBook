@@ -655,6 +655,11 @@ indexNewSession('basepath',bpath,'copyFiles',false,'removeDatFiles',false);
 
 %% fVIP2
 
+% fVIP2_220812_sess6
+bpath = 'L:\fVIP2_220812_sess6'; 
+processSession('basepath',bpath);
+indexNewSession('basepath',bpath,'copyFiles',false);
+
 % fVIP2_220818_sess10
 bpath = 'L:\fVIP2_220818_sess10'; 
 processSession('basepath',bpath);

@@ -217,11 +217,7 @@ end
 
 %% 7. Getting Hippocampal Layers
 if ~any(ismember(excludeAnalysis, {'7',lower('getHippocampalLayers')}))
-<<<<<<< HEAD
     [hippocampalLayers] = getHippocampalLayers('force',true,'promt',promt_hippo_layers);
-=======
-     [hippocampalLayers] = getHippocampalLayers('force',true,'promt',promt_hippo_layers);
->>>>>>> fa398449a7bc11ad8b6b5516aca19bbc7475db25
 end
 
 
@@ -229,13 +225,11 @@ end
 if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     % Trying changes in detecUD_temp
     % 8.1 Up and downs
-<<<<<<< HEAD
     
 %     UDStates = detectUD('plotOpt', true,'forceDetect',true','NREMInts','all');
 %     psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true);
 
-=======
->>>>>>> fa398449a7bc11ad8b6b5516aca19bbc7475db25
+
     UDStates = detectUpsDowns('plotOpt', true,'forceDetect',true','NREMInts','all');
     psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true,'minNumberOfPulses',10);
     getSpikesRank('events','upstates');
