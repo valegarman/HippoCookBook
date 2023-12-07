@@ -363,7 +363,9 @@ end
 speedCorrs.speedVals     = permute(speed_val, [2 1 3]);
 speedCorrs.prc_vals      = prc_vals;
 speedCorrs.corrCoeff     = speed_fr_corr;
-speedCorrs.corrCoeff_pval = speed_fr_corr_pval;
+try
+    speedCorrs.corrCoeff_pval = speed_fr_corr_pval;
+end
 speedCorrs.leastSquares  = ls;
 
 if saveMat

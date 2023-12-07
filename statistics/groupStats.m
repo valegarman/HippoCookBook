@@ -30,6 +30,7 @@ function [stats,h] = groupStats(y,group,varargin)
 %    'plotConnectors' Default, false
 %    'repeatedMeasures' Default, false
 %    'dataColor'    For data points and lines, Default [.7 .7 .7];
+%    'cloudColor'   For data plots, Default [1 1 1];   
 %    'dataAlpha'    For data points and lines, Default .5;
 %    'posOffset'    When 'inAxis', it adds an offset to the group numbers.
 %                       Default 0
@@ -38,6 +39,7 @@ function [stats,h] = groupStats(y,group,varargin)
 %    'x_position'  Specify x position of groups, by default 1:n
 %    'roundPlotCenterColor' Center color for medianBall, meanBall, and
 %                   roundplots
+%    ' isCircular' 1 for circular statistics. Default false.
 % 
 % OUTPUS
 %    'stats'    Structure containing the statistical test results.
@@ -60,6 +62,7 @@ addParameter(p,'plotType','boxplot',@ischar); % violinPlot boxplot
 addParameter(p,'plotData',false,@islogical);
 addParameter(p,'repeatedMeasures',false,@islogical);
 addParameter(p,'dataColor',[.7 .7 .7],@isnumeric);
+addParameter(p,'cloudColor',[0 0 0],@isnumeric);
 addParameter(p,'dataAlpha',.25,@isnumeric);
 addParameter(p,'dataSize',3,@isnumeric);
 addParameter(p,'posOffset',0,@isnumeric);
@@ -84,6 +87,7 @@ plotType = p.Results.plotType;
 plotData = p.Results.plotData;
 repeatedMeasures = p.Results.repeatedMeasures;
 dataColor = p.Results.dataColor;
+cloudColor = p.Results.cloudColor;
 dataAlpha = p.Results.dataAlpha;
 dataSize = p.Results.dataSize;
 posOffset = p.Results.posOffset;
@@ -226,6 +230,7 @@ for ii = 1:length(yC)
     yC{ii}(find(isinf(yC{ii}))) = NaN;
 end
 
+
 % DESCRIPTIVE 
 for ii = 1 : size(yC,2)
     fprintf('%i %8.2f +/- %1.2f \n', ind(ii),nanmean(yC{ii}), nanstd(yC{ii}));
@@ -280,7 +285,7 @@ for ii=1:length(ind)
         stats.oneSample.signrank.zval(ii) = NaN;
     end
     stats.oneSample.signrank.signedrank(ii) = statsS.signedrank;
-    
+
     [hT, pT, ~,statsT] = ttest(yC{ii});
     stats.oneSample.ttest.p(ii) = pS;
     stats.oneSample.ttest.h(ii) = hS;
@@ -306,7 +311,7 @@ if repeatedMeasures
         pA = pA(1);
         pK = NaN; tblK{2,5} = NaN; statsK = NaN;
     end
-    
+
     stats.r_anova.p = pA;
     stats.r_anova.tbl = tblA;
     stats.r_anova.stats = statsA;
@@ -318,7 +323,7 @@ else
     if size(groupAll,2) > 1                                                % more than 1 way only anovan
         code = mat2cell(groupAll, size(groupAll,1), ones(1,size(groupAll,2)));
         [pA,tblA,statsA]=anovan(y,code,'model','interaction','display','off');
-        
+
         stats.anova.p = pA;
         stats.anova.tbl = tblA;
         stats.anova.stats = statsA;
@@ -336,6 +341,7 @@ else
     end
 end
 
+
 % if two groups
 if length(yC) == 2
     %  Mann-Whitney U-test.
@@ -343,7 +349,7 @@ if length(yC) == 2
     stats.mannWhitney_U.p = p2;
     stats.mannWhitney_U.h = h2;
     stats.mannWhitney_U.stats = stats2;
-    
+
     % Wilcoxon signed rank test for paired observation
     if length(yC{1})==length(yC{2})
         [p2,h2,stats2] = signrank(yC{1},yC{2});
@@ -351,7 +357,7 @@ if length(yC) == 2
         stats.wilconxonSignedRank.h = h2;
         stats.wilconxonSignedRank.stats = stats2;
         stats.wilconxonSignedRank.testName = 'Wilcoxon paired signed-rank test';
-    
+
         % paired-sample t-test.
         [h2,p2,ci2,stats2] = ttest(yC{1},yC{2});
         stats.pairedtTest.p = p2;
@@ -366,7 +372,7 @@ if length(yC) == 2
     stats.tTest.h = h2;
     stats.tTest.stats = stats2;
     stats.tTest.ci = ci2;
-    
+
     if length(yC{1})==length(yC{2})
         % Wilcoxon signed rank test for paired observation
         [p2,h2,stats2] = signrank(yC{1},yC{2});
@@ -386,7 +392,7 @@ if length(yC) == 2
         stats.wilconxonSignedRank.h = NaN;
         stats.wilconxonSignedRank.stats = NaN;
         stats.wilconxonSignedRank.testName = 'Not possible to run wilcoxon paired signed-rank test';
-        
+
         stats.pairedtTest.p = NaN;
         stats.pairedtTest.h = NaN;
         stats.pairedtTest.stats = NaN;
@@ -521,7 +527,10 @@ if doPlot
                 posData((posData)>0.3) = posData((posData)>0.3)/2;
                 posData((posData)<-0.3) = posData((posData)<-0.3)/2;
                 plot(pos(ii)+ posData, y(group==ind(ii)),'o','color',[1 1 1],...
-                       'MarkerFaceColor','k','MarkerEdgeColor','none','MarkerSize',dataSize);
+                       'MarkerFaceColor',cloudColor,'MarkerEdgeColor','none','MarkerSize',dataSize);
+                   
+%                 scatter(pos(ii)+ posData, y(group==ind(ii)),'o','filled','MarkerEdgeColor','none','MarkerFaceColor','k',...
+%                     'MarkerFaceAlpha',0.4);
             end
 
             plot(pos(ii)-0.1, m,'o','MarkerFaceColor',roundPlotCenterColor(ii,:),'MarkerEdgeColor',color(ii,:),'MarkerSize',roundPlotSize);
@@ -529,7 +538,7 @@ if doPlot
                 'MarkerSize',dataSize,'color',color(ii,:),'LineWidth',2)
         end
         if plotConnectors
-            posData = randn(ySize(1),1)/10; 
+            posData = randn(ySize(1),1)/10; S
             posData((posData)>0.3) = posData((posData)>0.3)/2;
             posData((posData)<-0.3) = posData((posData)<-0.3)/2;
             if plotData
@@ -662,7 +671,7 @@ if doPlot
             hold on
             for ii = 1:length(ind) 
                plot(pos(ii)*ones(length(find(group==ind(ii))),1)+rand(length(find(group==ind(ii))),1)/2-.25, y(group==ind(ii)),'o',...
-                   'MarkerSize',dataSize,'MarkerEdgeColor','none','MarkerFaceColor','k');
+                   'MarkerSize',dataSize,'MarkerEdgeColor','none','MarkerFaceColor',cloudColor);
             end
         end
         if strcmpi(orientation, 'horizontal')
@@ -821,7 +830,7 @@ if doPlot
             gs2(find(gs==posLin(ii))) = pos(ii);
         end
         
-        sigstar(num2cell(gs2,2),ps);
+        sigstar_aux(num2cell(gs2,2),ps);
     end
 end
 

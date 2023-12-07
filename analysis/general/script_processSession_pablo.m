@@ -653,6 +653,12 @@ bpath = 'J:\data\fVIP1\fVIP1_220603_sess18';
 processSession('basepath',bpath);
 indexNewSession('basepath',bpath,'copyFiles',false,'removeDatFiles',false);
 
+%% fVIP2
+
+% fVIP2_220818_sess10
+bpath = 'L:\fVIP2_220818_sess10'; 
+processSession('basepath',bpath);
+indexNewSession('basepath',bpath,'copyFiles',false);
 
 %% IPO16559 (WT)
 % IPO16559_090623_sess1 (Open Field)

@@ -799,6 +799,8 @@ for ii = 1:length(sessions.basepaths)
         projectSessionResults.coherogram_NonThetaEpochsBaseline{ii}.coherogram_mean = nanmean(cohgram.NonThetaEpochs.coherogram);
         projectSessionResults.coherogram_NonThetaEpochsBaseline{ii}.phase_mean = nanmean(cohgram.NonThetaEpochs.phase);
         
+        projectSessionResults.coherogram_Baseline{ii}.S1_aux_mean = nanmean(cohgram.S1_aux);
+        projectSessionResults.coherogram_NonThetaEpochsBaseline{ii}.S1_aux_mean = nanmean(cohgram.NonThetaEpochs.S1_aux);
         clear cohgram
     catch
         projectSessionResults.coherogram_Baseline{ii} = NaN;
@@ -821,9 +823,12 @@ for ii = 1:length(sessions.basepaths)
         projectSessionResults.coherogram_NonThetaEpochsDrug{ii}.coherogram_mean = nanmean(cohgram.NonThetaEpochs.coherogram);
         projectSessionResults.coherogram_NonThetaEpochsDrug{ii}.phase_mean = nanmean(cohgram.NonThetaEpochs.phase);
         
+        projectSessionResults.coherogram_Drug{ii}.S1_aux_mean = nanmean(cohgram.S1_aux);
+        projectSessionResults.coherogram_NonThetaEpochsDrug{ii}.S1_aux_mean = nanmean(cohgram.NoNThetaEpochs.S1_aux);
+        
         clear cohgram
     catch
-        projectSessionResults.coherogram_Baseline{ii} = NaN;
+        projectSessionResults.coherogram_Drug{ii} = NaN;
     end
     
     
@@ -840,6 +845,9 @@ for ii = 1:length(sessions.basepaths)
         projectSessionResults.coherogram_NonThetaEpochsMaze1Baseline{ii}.S2_mean = nanmean(cohgram.NonThetaEpochs.S2);
         projectSessionResults.coherogram_NonThetaEpochsMaze1Baseline{ii}.coherogram_mean = nanmean(cohgram.NonThetaEpochs.coherogram);
         projectSessionResults.coherogram_NonThetaEpochsMaze1Baseline{ii}.phase_mean = nanmean(cohgram.NonThetaEpochs.phase);
+        
+        projectSessionResults.coherogram_Maze1Baseline{ii}.S1_aux_mean = nanmean(cohgram.S1_aux);
+        projectSessionResults.coherogram_NonThetaEpochsMaze1Baseline{ii}.S1_aux_mean = nanmean(cohgram.NoNThetaEpochs.S1_aux);
         
         clear cohgram
     catch
@@ -860,6 +868,9 @@ for ii = 1:length(sessions.basepaths)
         projectSessionResults.coherogram_NonThetaEpochsMaze1Drug{ii}.coherogram_mean = nanmean(cohgram.NonThetaEpochs.coherogram);
         projectSessionResults.coherogram_NonThetaEpochsMaze1Drug{ii}.phase_mean = nanmean(cohgram.NonThetaEpochs.phase);
         
+        projectSessionResults.coherogram_Maze1Drug{ii}.S1_aux_mean = nanmean(cohgram.S1_aux);
+        projectSessionResults.coherogram_NonThetaEpochsMaze1Drug{ii}.S1_aux_mean = nanmean(cohgram.NonThetaEpochs.S1_aux);
+        
         clear cohgram
     catch
         projectSessionResults.coherogram_Maze1Drug{ii} = NaN;
@@ -879,6 +890,9 @@ for ii = 1:length(sessions.basepaths)
         projectSessionResults.coherogram_NonThetaEpochsMaze2Baseline{ii}.coherogram_mean = nanmean(cohgram.NonThetaEpochs.coherogram);
         projectSessionResults.coherogram_NonThetaEpochsMaze2Baseline{ii}.phase_mean = nanmean(cohgram.NonThetaEpochs.phase);
         
+        projectSessionResults.coherogram_Maze2Baseline{ii}.S1_aux_mean = nanmean(cohgram.S1_aux);
+        projectSessionResults.coherogram_NonThetaEpochsMaze2Baseline{ii}.S1_aux_mean = nanmean(cohgram.NonThetaEpochs.S1_aux);
+        
         clear cohgram
     catch
         projectSessionResults.coherogram_Maze2Baseline{ii} = NaN;
@@ -897,6 +911,9 @@ for ii = 1:length(sessions.basepaths)
         projectSessionResults.coherogram_NonThetaEpochsMaze2Drug{ii}.S2_mean = nanmean(cohgram.NonThetaEpochs.S2);
         projectSessionResults.coherogram_NonThetaEpochsMaze2Drug{ii}.coherogram_mean = nanmean(cohgram.NonThetaEpochs.coherogram);
         projectSessionResults.coherogram_NonThetaEpochsMaze2Drug{ii}.phase_mean = nanmean(cohgram.NonThetaEpochs.phase);
+        
+        projectSessionResults.coherogram_Maze2Drug{ii}.S1_aux_mean = nanmean(cohgram.S1_aux);
+        projectSessionResults.coherogram_NonThetaEpochsMaze2Drug{ii}.S1_aux_mean = nanmean(cohgram.NonThetaEpochs.S1_aux);
         
         clear cohgram
     catch
