@@ -21,13 +21,13 @@ batch_sessionSummary('basepath','G:\data\fPv4','cleanArtifacts',({65,[]}),'analo
 processSession('digital_optogenetic_channels',1,'analog_optogenetic_channels',[],'promt_hippo_layers',true,'profileType','hippocampus');
 
 % 5% Index session
-indexNewSession;
+indexNewSession('copyFiles', true);
 
 % 6% Once a database has been created, use loadProjectResults to stack results for all sessions
 % an enjoy data analysis!
 [projectResults, projectSessionResults] = ...
         loadProjectResults('project', 'uLEDiscotheque',...
-        'analysis_project_path', 'C:\Users\valeg\Dropbox\ProjectsOnLine\interneuronsLibrary\data','loadLast',false); 
+        'analysis_project_path', adapt_filesep([dropbox_path '\ProjectsOnLine\monoSynBition\data']),'loadLast',false); 
 % other projects include InterneuronsLibrary, desVIPnhibition, etc
 
 % PS. uLED sessions

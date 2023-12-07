@@ -50,7 +50,7 @@ p = inputParser;
 addParameter(p,'basepath',pwd,@isdir);
 addParameter(p,'analogPulses',[],@isstruct);
 addParameter(p,'digitalPulses',[],@isstruct);
-addParameter(p,'ledLayout',[],@iscell);
+addParameter(p,'ledLayout',[]);
 addParameter(p,'current',[],@isnumeric);
 addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'force',false,@islogical);
@@ -80,12 +80,11 @@ if ~isempty(targetFile) && ~force
     return
 end
 
-
 if isempty(ledLayout)
     if exist('ledLayout.csv')==2
         disp('Loading LED layout from local csv...');
         ledLayoutTable = readtable('ledLayout.csv');
-        ledLayout.uLEDName =    ledLayoutTable.uLEDName;
+        ledLayout.uLEDName =   ledLayoutTable.uLEDName;
         ledLayout.channel =    ledLayoutTable.channel';
         ledLayout.isAnalog =   ledLayoutTable.isAnalog';
         ledLayout.isDigital =  ledLayoutTable.isDigital';
@@ -116,6 +115,25 @@ if isempty(ledLayout)
 %     ledLayout.shank =      [1  1  1  2  2  2  3  3  3  4  4  4];
 %     ledLayout.LED =        [1  2  3  1  2  3  1  2  3  1  2  3];
 %     ledLayout.probe =      [1  1  1  1  1  1  1  1  1  1  1  1];
+elseif strcmpi(ledLayout,'ledLayoutScience2022')
+    directoryHCB = what('HippoCookBook');
+    disp('Loading LED layout from HippoCookBook...');
+    layoutPath = [directoryHCB.path filesep 'session_files\uled_layouts\ledLayoutScience2022.csv'];
+    ledLayoutTable = readtable(layoutPath);
+    ledLayout = [];
+    ledLayout.uLEDName =   ledLayoutTable.uLEDName;
+    ledLayout.channel =    ledLayoutTable.channel';
+    ledLayout.isAnalog =   ledLayoutTable.isAnalog';
+    ledLayout.isDigital =  ledLayoutTable.isDigital';
+    ledLayout.code =       ledLayoutTable.code';
+    ledLayout.shank =      ledLayoutTable.shank';
+    ledLayout.LED =        ledLayoutTable.LED';
+    ledLayout.probe =      ledLayoutTable.probe';
+
+    ledLayoutTable = [ledLayout.uLEDName num2cell([ledLayout.channel', ledLayout.isAnalog', ledLayout.isDigital', ledLayout.code',...
+            ledLayout.shank', ledLayout.LED', ledLayout.probe'])];
+    ledLayoutTable = cell2table(ledLayoutTable,"VariableNames",["uLEDName" ,"channel", "isAnalog", "isDigital", "code", "shank", "LED", "probe"]);
+    writetable(ledLayoutTable,'ledLayout.csv');
 end
 
 if isempty(analogPulses) && any(ledLayout.isAnalog)

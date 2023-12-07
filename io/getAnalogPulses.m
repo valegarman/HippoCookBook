@@ -16,7 +16,7 @@ function [pulses] = getAnalogPulses(varargin)
 % groupPulses   Group manually train of pulses (default, false)
 % basepath      Path with analog data files to get pulses from.
 % useGPU        Default, true
-% overwrite     Force detection, default false.
+% force     Force detection, default false.
 %
 % OUTPUTS
 %               pulses - events struct with the following fields
@@ -42,7 +42,7 @@ addParameter(p,'manualThr',false,@islogical);
 addParameter(p,'groupPulses',false,@islogical);
 addParameter(p,'basepath',pwd,@ischar);
 addParameter(p,'useGPU',true,@islogical);
-addParameter(p,'overwrite',false,@islogical);
+addParameter(p,'force',false,@islogical);
 addParameter(p,'autodetect',true,@islogical);
 
 parse(p, varargin{:});
@@ -54,7 +54,7 @@ analogChannelsList = p.Results.analogChannelsList;
 groupPulses = p.Results.groupPulses;
 basepath = p.Results.basepath;
 useGPU = p.Results.useGPU;
-overwrite = p.Results.overwrite;
+force = p.Results.force;
 autodetect = p.Results.autodetect;
 
 prevPath = pwd;
@@ -62,7 +62,7 @@ cd(basepath);
 
 filetarget = split(pwd,filesep); filetarget = filetarget{end};
 if exist([filetarget '.pulses.events.mat'],'file') 
-    if ~overwrite % || exist([filetarget '.pulses.events.mat'],'file') 
+    if ~force % || exist([filetarget '.pulses.events.mat'],'file') 
         disp('Pulses already detected! Loading file.');
         load([filetarget '.pulses.events.mat']);
         if ~isempty(analogChannelsList) && isnumeric(analogChannelsList)

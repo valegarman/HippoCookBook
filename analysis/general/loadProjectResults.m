@@ -241,9 +241,12 @@ for ii = 1:length(sessions.basepaths)
     end
     
     % ACG peak
-    targetFile = dir('*.ACGPeak.cellinfo.mat'); load(targetFile.name);
-    projectSessionResults.acgPeak{ii} = acgPeak;
-    clear acgPeak
+    % targetFile = dir('*.ACGPeak.cellinfo.mat'); load(targetFile.name);
+    try projectSessionResults.acgPeak{ii} = acgPeak;
+        clear acgPeak
+    catch
+        projectSessionResults.acgPeak{ii} = NaN;
+    end
     
     % speedCorr
     targetFile = dir('*.speedCorr.cellinfo.mat'); 
@@ -252,6 +255,24 @@ for ii = 1:length(sessions.basepaths)
         clear speedCorr
     catch
         projectSessionResults.speedCorr{ii} = NaN;
+    end
+
+    % uLEDResponse
+    targetFile = dir('*uLEDResponse.cellinfo.mat');
+    try load(targetFile.name);
+        projectSessionResults.uLEDResponse{ii} =  uLEDResponses;
+        clear uLEDResponses
+    catch
+        projectSessionResults.uLEDResponse{ii} = NaN;
+    end
+
+    % light spike collision
+    targetFile = dir('*lightSpikeCollisions.cellinfo.mat');
+    try load(targetFile.name);
+        projectSessionResults.lightSpikeCollision{ii} =  collision_metrics;
+        clear collision_metrics
+    catch
+        projectSessionResults.lightSpikeCollision{ii} = NaN;
     end
     
     if includeLFP
@@ -313,16 +334,15 @@ catch
 end
 try projectResults.behavior = stackSessionResult(projectSessionResults.behavior, projectSessionResults.numcells);
 catch
-    warning('Behaviour responses were not stack!');
+    warning('Behaviour responses were not staked!');
 end
-try
-    projectResults.spatialModulation = stackSessionResult(projectSessionResults.spatialModulation, projectSessionResults.numcells);
+try projectResults.spatialModulation = stackSessionResult(projectSessionResults.spatialModulation, projectSessionResults.numcells);
 catch
-    warning('Satial modulation was not stack!');
+    warning('Satial modulation was not staked!');
 end
 try projectResults.speedCorr = stackSessionResult(projectSessionResults.speedCorr, projectSessionResults.numcells);
 catch
-    warning('Speed corr was not stack!');
+    warning('Speed corr was not staked!');
 end
 try projectResults.acgPeak = stackSessionResult(projectSessionResults.acgPeak, projectSessionResults.numcells);
 catch
@@ -330,7 +350,15 @@ catch
 end
 try projectResults.slowOsciSpikesRank = stackSessionResult(projectSessionResults.slowOsciSpikesRank, projectSessionResults.numcells);
 catch
-    warning('Slow Osc Spikes rank was not stack!');
+    warning('Slow Osc Spikes rank was not stacked!');
+end
+try projectResults.uLEDResponse = stackSessionResult(projectSessionResults.uLEDResponse, projectSessionResults.numcells);
+catch
+    warning('uLEDResponses were not staked!');
+end
+try projectResults.lightSpikeCollision = stackSessionResult(projectSessionResults.lightSpikeCollision, projectSessionResults.numcells);
+catch
+    warning('lightSpikeCollisions were not staked!');
 end
 
 projectResults.cell_metrics = cell_metrics;

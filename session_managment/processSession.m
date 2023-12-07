@@ -172,7 +172,7 @@ end
 if ~any(ismember(excludeAnalysis, {'3',lower('cureAnalogPulses')}))
     if force_analogPulsesDetection || isempty(dir([session.general.name,'_original.dat']))
         disp('Getting analog Pulses...')
-        pulses = getAnalogPulses('analogChannelsList',analog_optogenetic_channels,'manualThr',manual_analog_pulses_threshold,'overwrite',force_analogPulsesDetection); % 1-index
+        pulses = getAnalogPulses('analogChannelsList',analog_optogenetic_channels,'manualThr',manual_analog_pulses_threshold,'force',force_analogPulsesDetection); % 1-index
     else
         try
             if ~isempty(dir([session.general.name,'.pulses.events.mat']))
@@ -217,7 +217,11 @@ end
 
 %% 7. Getting Hippocampal Layers
 if ~any(ismember(excludeAnalysis, {'7',lower('getHippocampalLayers')}))
+<<<<<<< HEAD
     [hippocampalLayers] = getHippocampalLayers('force',true,'promt',promt_hippo_layers);
+=======
+     [hippocampalLayers] = getHippocampalLayers('force',true,'promt',promt_hippo_layers);
+>>>>>>> fa398449a7bc11ad8b6b5516aca19bbc7475db25
 end
 
 
@@ -225,10 +229,13 @@ end
 if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     % Trying changes in detecUD_temp
     % 8.1 Up and downs
+<<<<<<< HEAD
     
 %     UDStates = detectUD('plotOpt', true,'forceDetect',true','NREMInts','all');
 %     psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true);
 
+=======
+>>>>>>> fa398449a7bc11ad8b6b5516aca19bbc7475db25
     UDStates = detectUpsDowns('plotOpt', true,'forceDetect',true','NREMInts','all');
     psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true,'minNumberOfPulses',10);
     getSpikesRank('events','upstates');

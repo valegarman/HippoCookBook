@@ -15,8 +15,10 @@ computerName = (strtrim(computerName));
             dp = 'W:\buzsakilab\Buzsakilabspace\Datasets\ValeroM';
         case 'Manuels-MacBook-Pro.local'
             dp = '/Volumes/NEURAL';
+        case 'DESKTOP-1SBCILE'
+            dp = 'Z:\';
         otherwise
-            dp = [];
+            error('Computer name not found! Not possible to retrieve database path!');
     end
 
 end
