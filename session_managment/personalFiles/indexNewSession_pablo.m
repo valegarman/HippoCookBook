@@ -89,7 +89,7 @@ end
 brainRegions(end) = [];
 
 
-if strcmpi(project,'MK801Project')
+if strcmpi(project,'MK801Project') | strcmpi(project,'AlzheimerProject')
     drug = cell(0); 
     for i = 1:length(session.epochs)
         if contains(session.epochs{i}.behavioralParadigm, 'Maze1') | contains(session.epochs{i}.behavioralParadigm, 'Maze2') | contains(session.epochs{i}.behavioralParadigm, 'Maze3')

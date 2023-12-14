@@ -221,79 +221,79 @@ for ii = 1:length(sessionsTable.SessionName)
         % =======================================
         
         % GENERAL
-        try
-            targetFile = dir([session.general.name,'.cell_metrics.cellinfo.mat']); load (targetFile.name);
-        catch
-        end
-        
-        % Baseline OF
-        spikemat = bz_SpktToSpkmat(spikes,'dt',30,'units','rate','win',[ts_Maze1Baseline(1) ts_Maze1Baseline(2)]);
-        spikemat.UID = spikemat.UID';
-        spikemat.data = spikemat.data';
-        
-        figure;
-        set(gcf,'Position',[100 -100 2500 1200])
-        for jj = 1:size(spikes.UID,2)
-            fprintf(' **Spikes from unit %3.i/ %3.i \n',jj, size(spikes.UID,2)); %\n
-            subplot(7,ceil(size(spikes.UID,2)/7),jj); % autocorrelogram
-            bar(spikemat.data(jj,:));
-            
-            title(cell_metrics.putativeCellType{jj});
-            if jj == 1
-                ylabel('FR (Hz)');
-                set(gca,'XTick',[20 173],'XTickLabel',{'0','60'});
-            elseif jj == size(spikes.UID,2)
-                set(gca,'XTick',[20 173],'XTickLabel',{'0','60'});
-            else
-                set(gca,'YTick',[],'XTick',[]);
-            end
-        end
-        save(gcf,'SummaryFigures\spikeProgression.png');
-        
-        
-        wn = [ts_injectionInterTrial(1)-10*60 ts_injectionInterTrial(2)+60*60];
-        spikemat = bz_SpktToSpkmat(spikes,'dt',30,'units','rate','win',wn);
-        spikemat.UID = spikemat.UID';
-        spikemat.data = spikemat.data';
-        
-        figure;
-        set(gcf,'Position',[100 -100 2500 1200])
-        for jj = 1:size(spikes.UID,2)
-            fprintf(' **Spikes from unit %3.i/ %3.i \n',jj, size(spikes.UID,2)); %\n
-            subplot(7,ceil(size(spikes.UID,2)/7),jj); % autocorrelogram
-            bar(spikemat.data(jj,:));
-            
-            title(cell_metrics.putativeCellType{jj});
-            if jj == 1
-                ylabel('FR (Hz)');
-                set(gca,'XTick',[20 173],'XTickLabel',{'0','60'});
-            elseif jj == size(spikes.UID,2)
-                set(gca,'XTick',[20 173],'XTickLabel',{'0','60'});
-            else
-                set(gca,'YTick',[],'XTick',[]);
-            end
-        end
-        save(gcf,'SummaryFigures\spikeProgression.png');
-        
-        firingRateProgression = spikemat;
-        save([session.general.name,'.firingRateProgression.cellinfo.mat'],'firingRateProgression');
-        
-        % MAZE1BASELINE
-        
-        
-        wn = [ts_Maze1Baseline(2)-ts_Maze1Baseline(1)];
-        wn_step = wn/60/4;
-        window = [ts_Maze1Baseline(1) ts_Maze1Baseline(1)+wn_step; ts_Maze1Baseline(1)+wn_step ts_Maze1Baseline(1)+wn_step*2];
-
-        spikemat_Baseline = bz_SpktToSpkmat(spikes,'dt',30,'units','rate','win',ts_Maze1Baseline);
-        spikemat_Baseline = bz_SpktToSpkmat(spikes,'dt',30,'units','rate','win',window);
-        spikemat.UID = spikemat.UID';
-        spikemat.data = spikemat.data';
-        figure;
-        bar(spikemat.data(1,:));
-        
-        
-        % MAZE1DRUG
+%         try
+%             targetFile = dir([session.general.name,'.cell_metrics.cellinfo.mat']); load (targetFile.name);
+%         catch
+%         end
+%         
+%         % Baseline OF
+%         spikemat = bz_SpktToSpkmat(spikes,'dt',30,'units','rate','win',[ts_Maze1Baseline(1) ts_Maze1Baseline(2)]);
+%         spikemat.UID = spikemat.UID';
+%         spikemat.data = spikemat.data';
+%         
+%         figure;
+%         set(gcf,'Position',[100 -100 2500 1200])
+%         for jj = 1:size(spikes.UID,2)
+%             fprintf(' **Spikes from unit %3.i/ %3.i \n',jj, size(spikes.UID,2)); %\n
+%             subplot(7,ceil(size(spikes.UID,2)/7),jj); % autocorrelogram
+%             bar(spikemat.data(jj,:));
+%             
+%             title(cell_metrics.putativeCellType{jj});
+%             if jj == 1
+%                 ylabel('FR (Hz)');
+%                 set(gca,'XTick',[20 173],'XTickLabel',{'0','60'});
+%             elseif jj == size(spikes.UID,2)
+%                 set(gca,'XTick',[20 173],'XTickLabel',{'0','60'});
+%             else
+%                 set(gca,'YTick',[],'XTick',[]);
+%             end
+%         end
+%         save(gcf,'SummaryFigures\spikeProgression.png');
+%         
+%         
+%         wn = [ts_injectionInterTrial(1)-10*60 ts_injectionInterTrial(2)+60*60];
+%         spikemat = bz_SpktToSpkmat(spikes,'dt',30,'units','rate','win',wn);
+%         spikemat.UID = spikemat.UID';
+%         spikemat.data = spikemat.data';
+%         
+%         figure;
+%         set(gcf,'Position',[100 -100 2500 1200])
+%         for jj = 1:size(spikes.UID,2)
+%             fprintf(' **Spikes from unit %3.i/ %3.i \n',jj, size(spikes.UID,2)); %\n
+%             subplot(7,ceil(size(spikes.UID,2)/7),jj); % autocorrelogram
+%             bar(spikemat.data(jj,:));
+%             
+%             title(cell_metrics.putativeCellType{jj});
+%             if jj == 1
+%                 ylabel('FR (Hz)');
+%                 set(gca,'XTick',[20 173],'XTickLabel',{'0','60'});
+%             elseif jj == size(spikes.UID,2)
+%                 set(gca,'XTick',[20 173],'XTickLabel',{'0','60'});
+%             else
+%                 set(gca,'YTick',[],'XTick',[]);
+%             end
+%         end
+%         save(gcf,'SummaryFigures\spikeProgression.png');
+%         
+%         firingRateProgression = spikemat;
+%         save([session.general.name,'.firingRateProgression.cellinfo.mat'],'firingRateProgression');
+%         
+%         % MAZE1BASELINE
+%         
+%         
+%         wn = [ts_Maze1Baseline(2)-ts_Maze1Baseline(1)];
+%         wn_step = wn/60/4;
+%         window = [ts_Maze1Baseline(1) ts_Maze1Baseline(1)+wn_step; ts_Maze1Baseline(1)+wn_step ts_Maze1Baseline(1)+wn_step*2];
+% 
+%         spikemat_Baseline = bz_SpktToSpkmat(spikes,'dt',30,'units','rate','win',ts_Maze1Baseline);
+%         spikemat_Baseline = bz_SpktToSpkmat(spikes,'dt',30,'units','rate','win',window);
+%         spikemat.UID = spikemat.UID';
+%         spikemat.data = spikemat.data';
+%         figure;
+%         bar(spikemat.data(1,:));
+%         
+%         
+%         % MAZE1DRUG
         
         
         
