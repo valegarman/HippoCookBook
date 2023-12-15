@@ -230,8 +230,10 @@ for ii = 1:length(file)
         % Checking tracking
         
         if ii == trackingSubSession
-            
-            tracking = anyMazeTracking_SR('name',name{jj},'arena',arena{jj},'anyMaze_ttl_channel',anyMaze_ttl_channel);
+            try
+                tracking = anyMazeTracking_SR('name',name{jj},'arena',arena{jj},'anyMaze_ttl_channel',anyMaze_ttl_channel);
+            catch
+            end
 
         end
         
@@ -245,10 +247,13 @@ for ii = 1:length(file)
         end
         
         if ii == trackingSubSession
-            % tracking
-            movefile([expName,'_',date,'.Tracking.Behavior.mat'],[generalPath, name{jj}, filesep, name{jj},'_',date,'_',timeRec, filesep, name{jj},'_',date,'.Tracking.Behavior.mat']);
-            mkdir([generalPath, name{jj}, filesep, name{jj},'_',date,'_',timeRec, filesep]);
-            movefile([generalPath,expName,'_',date,filesep,'Behavior'],[generalPath, name{jj}, filesep, name{jj},'_',date,'_',timeRec, filesep, 'Behavior']);
+            try
+                % tracking
+                movefile([expName,'_',date,'.Tracking.Behavior.mat'],[generalPath, name{jj}, filesep, name{jj},'_',date,'_',timeRec, filesep, name{jj},'_',date,'.Tracking.Behavior.mat']);
+                mkdir([generalPath, name{jj}, filesep, name{jj},'_',date,'_',timeRec, filesep]);
+                movefile([generalPath,expName,'_',date,filesep,'Behavior'],[generalPath, name{jj}, filesep, name{jj},'_',date,'_',timeRec, filesep, 'Behavior']);
+            catch
+            end
         end
     end
     

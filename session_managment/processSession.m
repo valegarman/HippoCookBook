@@ -217,7 +217,7 @@ end
 
 %% 7. Getting Hippocampal Layers
 if ~any(ismember(excludeAnalysis, {'7',lower('getHippocampalLayers')}))
-     [hippocampalLayers] = getHippocampalLayers('force',true,'promt',promt_hippo_layers);
+    [hippocampalLayers] = getHippocampalLayers('force',true,'promt',promt_hippo_layers);
 end
 
 
@@ -225,6 +225,11 @@ end
 if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     % Trying changes in detecUD_temp
     % 8.1 Up and downs
+    
+%     UDStates = detectUD('plotOpt', true,'forceDetect',true','NREMInts','all');
+%     psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true);
+
+
     UDStates = detectUpsDowns('plotOpt', true,'forceDetect',true','NREMInts','all');
     psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true,'minNumberOfPulses',10);
     getSpikesRank('events','upstates');
@@ -235,7 +240,7 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     getSpikesRank('events','ripples');
 
     % 8.3 Theta intervals
-    thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'powerThreshold',1);
+    thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'powerThreshold',1,'channel',34);
 end
 
 %% 9. Phase Modulation

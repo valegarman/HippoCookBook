@@ -17,8 +17,13 @@ computerName = (strtrim(computerName));
             dp = '/Volumes/NEURAL';
         case 'DESKTOP-1SBCILE'
             dp = 'Z:\';
+<<<<<<< HEAD
         case 'IMW02691'
             dp = 'Z:\';
+=======
+        case 'MountainJorge'
+            dp = [];
+>>>>>>> 917727d382d59f19d76c839fcc9db74328ca608b
         otherwise
             error('Computer name not found! Not possible to retrieve database path!');
     end

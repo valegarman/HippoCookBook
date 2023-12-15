@@ -7,7 +7,7 @@ database_path = 'J:\data';
 HCB_directory = what('GLUN3Project'); 
 
 % sessionsTable = readtable([HCB_directory.path filesep 'indexedSessions_MK801Project.csv']); % the variable is called allSessions
-sessionsTable = readtable(['C:\Users\Jorge\Documents\GitHub\MK801Project',filesep,'indexedSessions_MK801Project_drugs.csv']);
+sessionsTable = readtable(['C:\Users\Jorge\Documents\GitHub\MK801Project',filesep,'indexedSessions_MK801Project.csv']);
 forceReload = false;
 
 win_resp = [-0.025 0.025];
@@ -38,12 +38,25 @@ for ii = 1:length(sessionsTable.SessionName)
         close all;
         % Load session info
         session = loadSession();
-        spikes = loadSpikes();
+%         spikes = loadSpikes();
         
-        % CHECKING BRAIN STATES
-        % The State Editor
-%         TheStateEditor_temp(session.general.name);
-        
+       % Update electrodeGroups in brainRegions
+       
+%        brainRegionList = fields(session.brainRegions);
+%         
+%        for jj = 1:length(brainRegionList)
+%             for kk = 1:length(session.brainRegions.(brainRegionList{jj}).channels)
+%                     for ll = 1:length(session.extracellular.electrodeGroups.channels)  
+%                         if ismember(session.brainRegions.(brainRegionList{jj}).channels(kk),session.extracellular.electrodeGroups.channels{ll}); 
+%                             group{jj}{kk} = ll;
+%                         end
+%                     end
+%             end
+%             
+%             session.brainRegions.(brainRegionList{jj}).electrodeGroups = unique(cell2mat(group{jj}));
+%        end
+       
+       save([session.general.name,'.session.mat'],'session');
         
 %         getAverageCCG('force',true,'skipStimulationPeriods',false);
 %         spatialModulation = computeSpatialClassificationGLUN3('tint',false);
@@ -1350,7 +1363,7 @@ for ii = 1:length(sessionsTable.SessionName)
             cohgram.NonThetaEpochs.S1 = S1_Drug;
             cohgram.NonThetaEpochs.S2 = S2_Drug;
             cohgram.NonThetaEpochs.phase = phase_Drug;
-            cohgram.NoNThetaEpochs.S1_aux = S1_Drug_aux;
+            cohgram.NonThetaEpochs.S1_aux = S1_Drug_aux;
             
             cohgram.lfp1Channel = lfp1w.channels;
             cohgram.lfp1Region = lfp1w.region;
@@ -1425,31 +1438,40 @@ for ii = 1:length(sessionsTable.SessionName)
             % MAZE1 BASELINE
             
             if ~isempty(ts_Maze1Baseline)
+                
+                
                 t_Maze1Baseline = t(InIntervals(t,ts_Maze1Baseline));
                 coherogram_Maze1Baseline = coherogram(InIntervals(t,ts_Maze1Baseline),:);
                 phase_Maze1Baseline = phase(InIntervals(t,ts_Maze1Baseline),:);
                 S1_Maze1Baseline = S1_det(InIntervals(t,ts_Maze1Baseline),:);
                 S2_Maze1Baseline = S2_det(InIntervals(t,ts_Maze1Baseline),:);
+                
+                S1_Maze1Baseline_aux = S1_aux(InIntervals(t,ts_Maze1Baseline),:);
 
                 t_Maze1Baseline_theta = t(InIntervals(t_Maze1Baseline,ts_theta));
                 coherogram_Maze1Baseline_theta = coherogram_Maze1Baseline(InIntervals(t_Maze1Baseline,ts_theta),:);
                 phase_Maze1Baseline_theta = phase_Maze1Baseline(InIntervals(t_Maze1Baseline,ts_theta),:);
                 S1_Maze1Baseline_theta = S1_Maze1Baseline(InIntervals(t_Maze1Baseline,ts_theta),:);
                 S2_Maze1Baseline_theta = S2_Maze1Baseline(InIntervals(t_Maze1Baseline,ts_theta),:);
+                
+                S1_Maze1Baseline_aux_theta = S1_Baseline_aux(InIntervals(t_Maze1Baseline,ts_theta),:);
 
+                cohgram = [];
                 cohgram.t = t_Maze1Baseline_theta;
                 cohgram.f = f;
                 cohgram.coherogram = coherogram_Maze1Baseline_theta;
                 cohgram.S1 = S1_Maze1Baseline_theta;
                 cohgram.S2 = S2_Maze1Baseline_theta;
                 cohgram.phase = phase_Maze1Baseline_theta;
-
+                cohgram.S1_aux = S1_Maze1Baseline_aux_theta;
+                
                 cohgram.NonThetaEpochs.t = t_Maze1Baseline;
                 cohgram.NonThetaEpochs.f = f;
                 cohgram.NonThetaEpochs.coherogram = coherogram_Maze1Baseline;
                 cohgram.NonThetaEpochs.S1 = S1_Maze1Baseline;
                 cohgram.NonThetaEpochs.S2 = S2_Maze1Baseline;
                 cohgram.NonThetaEpochs.phase = phase_Maze1Baseline;
+                cohgram.NonThetaEpochs.S1_aux = S1_Maze1Baseline_aux;
 
                 cohgram.lfp1Channel = lfp1w.channels;
                 cohgram.lfp1Region = lfp1w.region;
@@ -1528,17 +1550,22 @@ for ii = 1:length(sessionsTable.SessionName)
             % MAZE1 DRUG
             
             if ~isempty(ts_Maze1Drug)
+                
                 t_Maze1Drug = t(InIntervals(t,ts_Maze1Drug));
                 coherogram_Maze1Drug = coherogram(InIntervals(t,ts_Maze1Drug),:);
                 phase_Maze1Drug = phase(InIntervals(t,ts_Maze1Drug),:);
                 S1_Maze1Drug = S1_det(InIntervals(t,ts_Maze1Drug),:);
                 S2_Maze1Drug = S2_det(InIntervals(t,ts_Maze1Drug),:);
+                
+                S1_Maze1Drug_aux = S1_aux(InIntervals(t,ts_Maze1Drug),:);
 
                 t_Maze1Drug_theta = t(InIntervals(t_Maze1Drug,ts_theta));
                 coherogram_Maze1Drug_theta = coherogram_Maze1Drug(InIntervals(t_Maze1Drug,ts_theta),:);
                 phase_Maze1Drug_theta = phase_Maze1Drug(InIntervals(t_Maze1Drug,ts_theta),:);
                 S1_Maze1Drug_theta = S1_Maze1Drug(InIntervals(t_Maze1Drug,ts_theta),:);
                 S2_Maze1Drug_theta = S2_Maze1Drug(InIntervals(t_Maze1Drug,ts_theta),:);
+                
+                S1_Maze1Drug_aux_theta = S1_Baseline_aux(InIntervals(t_Maze1Drug,ts_theta),:);
 
                 cohgram = [];
                 cohgram.t = t_Maze1Drug_theta;
@@ -1547,13 +1574,15 @@ for ii = 1:length(sessionsTable.SessionName)
                 cohgram.S1 = S1_Maze1Drug_theta;
                 cohgram.S2 = S2_Maze1Drug_theta;
                 cohgram.phase = phase_Maze1Drug_theta;
-
+                cohgram.S1_aux = S1_Maze1Drug_aux_theta;
+                
                 cohgram.NonThetaEpochs.t = t_Maze1Drug;
                 cohgram.NonThetaEpochs.f = f;
                 cohgram.NonThetaEpochs.coherogram = coherogram_Maze1Drug;
                 cohgram.NonThetaEpochs.S1 = S1_Maze1Drug;
                 cohgram.NonThetaEpochs.S2 = S2_Maze1Drug;
                 cohgram.NonThetaEpochs.phase = phase_Maze1Drug;
+                cohgram.NonThetaEpochs.S1_aux = S1_Maze1Drug_aux;
 
                 cohgram.lfp1Channel = lfp1w.channels;
                 cohgram.lfp1Region = lfp1w.region;
@@ -1685,6 +1714,7 @@ for ii = 1:length(sessionsTable.SessionName)
             
             % MAZE2 BASELINE
             if ~isempty(ts_Maze2Baseline)
+                
                 t_Maze2Baseline = t(InIntervals(t,ts_Maze2Baseline));
                 coherogram_Maze2Baseline = coherogram(InIntervals(t,ts_Maze2Baseline),:);
                 phase_Maze2Baseline = phase(InIntervals(t,ts_Maze2Baseline),:);
@@ -1697,6 +1727,7 @@ for ii = 1:length(sessionsTable.SessionName)
                 S1_Maze2Baseline_theta = S1_Maze2Baseline(InIntervals(t_Maze2Baseline,ts_theta),:);
                 S2_Maze2Baseline_theta = S2_Maze2Baseline(InIntervals(t_Maze2Baseline,ts_theta),:);
 
+                cohgram = [];
                 cohgram.t = t_Maze2Baseline_theta;
                 cohgram.f = f;
                 cohgram.coherogram = coherogram_Maze2Baseline_theta;
@@ -1787,6 +1818,7 @@ for ii = 1:length(sessionsTable.SessionName)
             
             % MAZE2 DRUG
             if ~isempty(ts_Maze2Drug)
+                
                 t_Maze2Drug = t(InIntervals(t,ts_Maze2Drug));
                 coherogram_Maze2Drug = coherogram(InIntervals(t,ts_Maze2Drug),:);
                 phase_Maze2Drug = phase(InIntervals(t,ts_Maze2Drug),:);
@@ -1889,6 +1921,7 @@ for ii = 1:length(sessionsTable.SessionName)
             
             % MAZE3 BASELINE
             if ~isempty(ts_Maze3Baseline)
+                
                 t_Maze3Baseline = t(InIntervals(t,ts_Maze3Baseline));
                 coherogram_Maze3Baseline = coherogram(InIntervals(t,ts_Maze3Baseline),:);
                 phase_Maze3Baseline = phase(InIntervals(t,ts_Maze3Baseline),:);
@@ -1901,6 +1934,7 @@ for ii = 1:length(sessionsTable.SessionName)
                 S1_Maze3Baseline_theta = S1_Maze3Baseline(InIntervals(t_Maze3Baseline,ts_theta),:);
                 S2_Maze3Baseline_theta = S2_Maze3Baseline(InIntervals(t_Maze3Baseline,ts_theta),:);
 
+                cohgram = [];
                 cohgram.t = t_Maze3Baseline_theta;
                 cohgram.f = f;
                 cohgram.coherogram = coherogram_Maze3Baseline_theta;
@@ -1991,6 +2025,7 @@ for ii = 1:length(sessionsTable.SessionName)
             
             % MAZE3 DRUG
             if ~isempty(ts_Maze3Drug)
+                
                 t_Maze3Drug = t(InIntervals(t,ts_Maze3Drug));
                 coherogram_Maze3Drug = coherogram(InIntervals(t,ts_Maze3Drug),:);
                 phase_Maze3Drug = phase(InIntervals(t,ts_Maze3Drug),:);
@@ -5900,6 +5935,8 @@ for ii = 1:length(sessionsTable.SessionName)
         % 5. CELL METRICS        
         % ===============================
         
+%         TheStateEditor_temp(session.general.name);
+%         
 %         if isempty(dir('*.cell_metrics_Baseline.cellinfo.mat')) | isempty(dir('*.cell_metrics_Drug.cellinfo.mat')) | force
 %             try
 %                 if ~isempty(dir([session.general.name,'.optogeneticPulses.events.mat']))
@@ -6019,7 +6056,7 @@ for ii = 1:length(sessionsTable.SessionName)
 %             end
 %             
 %         end
-%         
+        
 %         % ===============================
 %         % 6. ACG PEAK ( dependent upon cell_metrics);
 %         % ===============================

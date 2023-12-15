@@ -484,14 +484,17 @@ boundingbox_ymax = boundingbox_ymax - yMaze(1);
 
 if isempty(anyMazeTtl)
     digitalIn = getDigitalIn;
-    anyMazeTtl = digitalIn.timestampsOn{anyMaze_ttl_channel};
-    anyMazeTtl_start = digitalIn.timestampsOn{1};
-    if isempty(anyMazeTtl_start) & ~isempty(anyMazeTtl)
-        anyMazeTtl_start = anyMazeTtl(1);
-    elseif isempty(anyMazeTtl_start) & isempty(anyMazeTtl)
-        anyMazeTtl_start = 0;
+    try
+        anyMazeTtl = digitalIn.timestampsOn{anyMaze_ttl_channel};
+        anyMazeTtl_start = digitalIn.timestampsOn{1};
+        if isempty(anyMazeTtl_start) & ~isempty(anyMazeTtl)
+            anyMazeTtl_start = anyMazeTtl(1);
+        elseif isempty(anyMazeTtl_start) & isempty(anyMazeTtl)
+            anyMazeTtl_start = 0;
+        end
+    catch
+       anyMazeTtl_start = 0;
     end
-    
 end
 % match anymaze frames con ttl pulses
 % if length(anyMazeTtl) == length(x)

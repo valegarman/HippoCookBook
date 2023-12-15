@@ -162,7 +162,7 @@ for i = 1:numRep
 end
 pulseDuration = abs(diff(event_ints));
 if ~isnan(timestamps)
-    [stccg, t] = CCG([spikes.times randomEvents],[],'binSize',binSize,'duration',winSize,'norm','rate');
+    [stccg, t] = CCG([spikes.times randomEvents],[],'binSize',binSize,'duration',winSize,'norm','rate','Fs',1/session.extracellular.sr);
     fprintf('\n'); %
     t_duringPulse = t > event_ints(1) & t < event_ints(2);
     randomRatesDuringPulse = squeeze(mean(stccg(t_duringPulse, length(spikes.UID)+1:end,1:length(spikes.UID)),1));
@@ -191,7 +191,7 @@ else
 end
 disp('Computing responses...');
 times = spikes.times; times{length(times)+1} = pul;
-[stccg, t] = CCG(times,[],'binSize',binSize,'duration',winSize,'norm','rate'); fprintf('\n'); %
+[stccg, t] = CCG(times,[],'binSize',binSize,'duration',winSize,'norm','rate','Fs',1/session.extracellular.sr); fprintf('\n'); %
 
 psth.responsecurve(:,jj,:) = squeeze(stccg(:, end , 1:end-1))';
 if length(times{end}) < minNumberOfPulses

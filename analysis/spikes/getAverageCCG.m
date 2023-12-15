@@ -71,6 +71,10 @@ useCellType = p.Results.useCellType;
 prevPath = pwd;
 cd(basepath);
 
+% Load session
+session = loadSession();
+
+
 targetFile = dir('*.averageCCG.cellinfo.mat');
 if ~isempty(targetFile) && ~force
     disp('Average CCG already computed! Loading file...');
@@ -114,7 +118,7 @@ if includeIntervals(1)>0 || includeIntervals(2)<Inf
 end
 
 % do ccg
-[allCcg, t_ccg] = CCG(spikes.times,[],'binSize',binSize,'duration',winSize);
+[allCcg, t_ccg] = CCG(spikes.times,[],'binSize',binSize,'duration',winSize,'Fs',1/session.extracellular.sr);
 indCell = [1:size(allCcg,2)];
 for jj = 1 : length(spikes.times)
     ccMedian(jj,:) = nanmedian(squeeze(allCcg(:,jj,indCell(indCell~=jj))),2); % zCCG

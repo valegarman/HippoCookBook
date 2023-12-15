@@ -653,6 +653,17 @@ bpath = 'J:\data\fVIP1\fVIP1_220603_sess18';
 processSession('basepath',bpath);
 indexNewSession('basepath',bpath,'copyFiles',false,'removeDatFiles',false);
 
+%% fVIP2
+
+% fVIP2_220812_sess6
+bpath = 'L:\fVIP2_220812_sess6'; 
+processSession('basepath',bpath);
+indexNewSession('basepath',bpath,'copyFiles',false);
+
+% fVIP2_220818_sess10
+bpath = 'L:\fVIP2_220818_sess10'; 
+processSession('basepath',bpath);
+indexNewSession('basepath',bpath,'copyFiles',false);
 
 %% IPO16559 (WT)
 % IPO16559_090623_sess1 (Open Field)
@@ -871,6 +882,42 @@ indexNewSession_pablo('basepath',bpath,'project','MK801Project');
 bpath = 'K:\fCamk7\fCamk7_220510_sess128'; 
 processSession_pablo('basepath',bpath,'promt_hippo_layers',true,'rippleChannel',[],'thetaChannel',[]);
 indexNewSession_pablo('basepath',bpath,'project','MK801Project');
+
+
+%% APP039033 (WT)
+
+% APP039033_131023_sess1
+bpath = 'J:\data\APP039033\APP039033_131023_sess1'; 
+processSession_pablo('basepath',bpath,'promt_hippo_layers',true,'rippleChannel',[],'thetaChannel',[]);
+indexNewSession_pablo('basepath',bpath,'project','AlzheimerProject');
+
+% APP039033_161023_sess2
+bpath = 'J:\data\APP039033\APP039033_161023_sess2'; 
+processSession_pablo('basepath',bpath,'promt_hippo_layers',true,'rippleChannel',[],'thetaChannel',[]);
+indexNewSession_pablo('basepath',bpath,'project','AlzheimerProject');
+
+% APP039033_171023_sess3
+bpath = 'J:\data\APP039033\APP039033_170223_sess3'; 
+processSession_pablo('basepath',bpath,'promt_hippo_layers',true,'rippleChannel',[],'thetaChannel',[]);
+indexNewSession_pablo('basepath',bpath,'project','AlzheimerProject');
+
+% APP039033_251023_sess8
+bpath = 'J:\data\APP039033\APP039033_251023_sess8'; 
+processSession_pablo('basepath',bpath,'promt_hippo_layers',true,'rippleChannel',[],'thetaChannel',[]);
+indexNewSession_pablo('basepath',bpath,'project','AlzheimerProject');
+
+% APP039033_261023_sess9
+bpath = 'J:\data\APP039033\APP039033_261023_sess9'; 
+processSession_pablo('basepath',bpath,'promt_hippo_layers',true,'rippleChannel',[],'thetaChannel',[]);
+indexNewSession_pablo('basepath',bpath,'project','AlzheimerProject');
+
+% APP039033_301023_sess11
+bpath = 'J:\data\APP039033\APP039033_301023_sess11'; 
+processSession_pablo('basepath',bpath,'promt_hippo_layers',true,'rippleChannel',[],'thetaChannel',[]);
+indexNewSession_pablo('basepath',bpath,'project','AlzheimerProject');
+
+
+
 
 
 
