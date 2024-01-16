@@ -1,5 +1,5 @@
 SessionName,Subject,Path,Strain,GeneticLine,Optogenetics,Behavior,numCells,brainRegions,Project
-fnkx9_200818_sess2,fnkx9,fNkx9\fNkx9_200818_sess2,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,66,CA1so CA1sp CA1sr CA1slm CA3 DG PTLp5 PTLp6 PTLp2_3,InterneuronsLibrary neuroGli2d"
+"fnkx9_200818_sess2,fnkx9,fNkx9\fNkx9_200818_sess2,c57b1/6,id2/dlx/ai80,""105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,66,CA1so CA1sp CA1sr CA1slm CA3 DG PTLp5 PTLp6 PTLp2_3,InterneuronsLibrary neuroGli2d"
 "fnkx8_200911_sess19,fnkx8,fNkx8\fNkx8_200911_sess19,c57b1/6,id2/dlx/ai80,""105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)"",tmaze,96,PTLp CA1sp CA1sr CA1slm CA3 DG,InterneuronsLibrary"
 "fnkx8_200817_sess1,fnkx8,fNkx8\fNkx8_200817_sess1,c57b1/6,id2/dlx/ai80,""105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)"",tmaze,26,PTLp CA1so CA1sp CA1sr CA1slm CA3 DG,InterneuronsLibrary"
 "fnkx8_200818_sess2,fnkx8,fNkx8\fNkx8_200818_sess2,c57b1/6,id2/dlx/ai80,""105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)"",tmaze,40,PTLp CA1sp CA1sr CA1so CA1slm CA3 DG,InterneuronsLibrary"
