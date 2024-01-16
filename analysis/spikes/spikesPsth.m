@@ -19,7 +19,7 @@ function [psth] = spikesPsth(timestamps,varargin)
 %   eventType - default, date, other options: slowOscillations, ripples...
 %   event_ints - interval around events timestamps to compute cell reponses
 %   baseline_ints - interval before events timestamps to compute baseline
-%   min_pulsesNumber - minimum number of pulses to create pulses entry, default 100
+%   minNumberOfPulses - minimum number of pulses to create pulses entry, default 100
 %   win_Z - Interval arround events to compting Zscore mean and SD. By
 %       default [-winSize/2 -events_ints(1)];
 %

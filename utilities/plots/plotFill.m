@@ -21,7 +21,8 @@ function h = plotFill(datax,datay,varargin)
 %    'faceAlpha'    Default, 0.5
 %    'excluding'
 %                   Default, all false
-
+%    'type'         'Median', 'Mean'
+%
 % 
 % OUTPUS
 %    'h'            Figure handle.
@@ -40,6 +41,7 @@ addParameter(p,'duplicate_x',false,@islogical);
 addParameter(p,'faceAlpha',0.5,@isnumeric);
 addParameter(p,'lineStyle','-');
 addParameter(p,'excluding',[]);
+addParameter(p,'type','mean',@ischar);
 
 parse(p,varargin{:});
 color = p.Results.color;
@@ -53,6 +55,7 @@ duplicate_x = p.Results.duplicate_x;
 lineStyle = p.Results.lineStyle;
 faceAlpha = p.Results.faceAlpha;
 excluding = p.Results.excluding;
+type = p.Results.type;
 
 % Deal with inputs
 if length(datax) ~= size(datay,1)
@@ -134,8 +137,17 @@ if strcmpi(yscale,'circular')
 
 else
     if ~isempty(datay(noNan,:))
-        [x1, y1] = fillformat(datax(noNan), smooth(nanmean(datay(noNan,:),2),smoothOpt),...
-            smooth(nanstd(datay(noNan,:),[],2) * f1,smoothOpt));
+        if strcmpi(type, 'mean')
+            [x1, y1] = fillformat(datax(noNan), smooth(nanmean(datay(noNan,:),2),smoothOpt),...
+                smooth(nanstd(datay(noNan,:),[],2) * f1,smoothOpt));
+            trace = smooth(nanmean(datay,2),smoothOpt);
+        elseif strcmpi(type, 'median')
+            [x1, y1] = fillformat(datax(noNan), smooth(nanmedian(datay(noNan,:),2),smoothOpt),...
+                smooth(nanstd(datay(noNan,:),[],2) * f1,smoothOpt));
+            trace = smooth(nanmedian(datay,2),smoothOpt);
+        else
+            error('Type not recognized!');
+        end
         if ~isempty(find(isinf(y1)))
             x1(find(isinf(y1))) = [];
             y1(find(isinf(y1))) = [];
@@ -151,13 +163,13 @@ else
         hold on
         if strcmpi(style,'alpha')
             fill(x1, y1, color,'EdgeColor','none','faceAlpha',faceAlpha);
-            h = plot(datax, smooth(nanmean(datay,2),smoothOpt),lineStyle,'lineWidth',1,'color',color);
+            h = plot(datax, trace,lineStyle,'lineWidth',1,'color',color);
         elseif strcmpi(style,'white')
             fill(x1, y1, [1 1 1],'EdgeColor',color);
-            h = plot(datax, smooth(nanmean(datay,2),smoothOpt),lineStyle,'lineWidth',1,'color',color);
+            h = plot(datax, trace,lineStyle,'lineWidth',1,'color',color);
         elseif strcmpi(style,'inverted')
             fill(x1, y1, color,'EdgeColor','none','faceAlpha',faceAlpha);
-            h = plot(datax, smooth(nanmean(datay,2),smoothOpt),lineStyle,'lineWidth',1,'color',[1 1 1]);
+            h = plot(datax, trace,lineStyle,'lineWidth',1,'color',[1 1 1]);
         elseif strcmpi(style,'filled') 
             h = fill(x1, y1, color,'EdgeColor','none','faceAlpha',faceAlpha);
         elseif strcmpi(style,'edge') 
