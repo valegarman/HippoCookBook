@@ -47,26 +47,29 @@ hippocampalLayers = getHippocampalLayers('force',true,'promt',true);
 % Revise number of ripples, shape and channel. You can also specifiy a
 % different trhresold or restrict the shanks for the spikeThreshold
 % analysis.
-rippleChannel = [];
-SWChannel = [];
-eventSpikeThreshold_shanks = []; % which shanks will be accounted for the spike threshold 
+rippleChannel = [4];
+SWChannel = [44];
+eventSpikeThreshold_shanks = [4 5]; % which shanks will be accounted for the spike threshold 
 rippleMasterDetector_threshold = [1.5 3.5]; % [1.5 3.5]
-ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'removeOptogeneticStimulation',false,'thresholds',rippleMasterDetector_threshold,...
-        'eventSpikeThreshold_shanks',eventSpikeThreshold_shanks);
+eventSpikeThreshold = 1;
+ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'removeOptogeneticStimulation',false,'thresholds',rippleMasterDetector_threshold,'eventSpikeThreshold_shanks', eventSpikeThreshold_shanks,'eventSpikeThreshold',eventSpikeThreshold);
+psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10);
+getSpikesRank('events','ripples');
 
 %% 5. Theta epochs
 % Revise channel definition, theta band in thetaEpochs.png and cells
 % rhytmicity. If bad, you can change useCSD_for_theta_detection to false,
 % or change powerThreshold, even the channel
-useCSD_for_theta_detection = false;
+useCSD_for_theta_detection = true;
 powerThreshold = 1;
-channel = [];
+channel = [18];
 thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'powerThreshold',powerThreshold,'channel', channel);
 
 %% 6. Phase modulation
 % NOTE!! If you have re-detected ripples or theta, you must run this code
 % again with the same channel definition!!!
-[phaseMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel);
+thetaChannel = [15];
+[phaseMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel,'thetaChannel',thetaChannel);
 computeCofiringModulation;
 
 %% 7. Brain region
