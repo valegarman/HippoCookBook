@@ -533,9 +533,9 @@ if doPlot
 %                     'MarkerFaceAlpha',0.4);
             end
 
-            plot(pos(ii)-0.1, m,'o','MarkerFaceColor',roundPlotCenterColor(ii,:),'MarkerEdgeColor',color(ii,:),'MarkerSize',roundPlotSize);
             plot([pos(ii)-0.1 pos(ii)-0.1], [s1 s2],'-','MarkerFaceColor',color(ii,:),'MarkerEdgeColor',color(ii,:),...
                 'MarkerSize',dataSize,'color',color(ii,:),'LineWidth',2)
+            plot(pos(ii)-0.1, m,'o','MarkerFaceColor',roundPlotCenterColor(ii,:),'MarkerEdgeColor',color(ii,:),'MarkerSize',roundPlotSize);
         end
         if plotConnectors
             posData = randn(ySize(1),1)/10; S
