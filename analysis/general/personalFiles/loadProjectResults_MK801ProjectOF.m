@@ -1,4 +1,4 @@
-function [projectResults, projectSessionResults] =  loadProjectResults_MK801Project(varargin)
+function [projectResults, projectSessionResults] =  loadProjectResults_MK801ProjectOF(varargin)
 % [projectResults, projectSessionResults] =  loadProjectResults_MK801Project(varargin)
 %
 %   Load and stack all results for a given project
@@ -114,38 +114,6 @@ cell_metrics = loadCellMetricsBatch('basepaths',sessions.basepaths);
 cell_metrics = CellExplorer('metrics',cell_metrics);% run CELLEXPLORER when adding new data
 close(gcf);
 
-cell_metrics_Baseline = loadCellMetricsBatch('basepaths',sessions.basepaths,'basenames',sessions.basenames_Baseline,'saveAs','cell_metrics_Baseline');
-cell_metrics_Baseline = CellExplorer('metrics',cell_metrics_Baseline);
-close(gcf);
-
-cell_metrics_Drug = loadCellMetricsBatch('basepaths',sessions.basepaths,'basenames',sessions.basenames_Baseline,'saveAs','cell_metrics_Drug');
-cell_metrics_Drug = CellExplorer('metrics',cell_metrics_Drug);
-close(gcf);
-
-cell_metrics_MazeBaseline = loadCellMetricsBatch('basepaths',sessions.basepaths,'basenames',sessions.basenames_Baseline,'saveAs','cell_metrics_MazeBaseline');
-cell_metrics_MazeBaseline = CellExplorer('metrics',cell_metrics_MazeBaseline);
-close(gcf);
-
-cell_metrics_MazeDrug = loadCellMetricsBatch('basepaths',sessions.basepaths,'basenames',sessions.basenames_Baseline,'saveAs','cell_metrics_MazeDrug');
-cell_metrics_MazeDrug = CellExplorer('metrics',cell_metrics_MazeDrug);
-close(gcf);
-
-
-% cell_metrics_Maze1Baseline = loadCellMetricsBatch('basepaths',sessions.basepaths,'basenames',sessions.basenames_Baseline,'saveAs','cell_metrics_Maze1Baseline');
-% cell_metrics_Maze1Baseline = CellExplorer('metrics',cell_metrics_Maze1Baseline);
-% close(gcf);
-% 
-% cell_metrics_Maze1Drug = loadCellMetricsBatch('basepaths',sessions.basepaths,'basenames',sessions.basenames_Baseline,'saveAs','cell_metrics_Maze1Drug');
-% cell_metrics_Maze1Drug = CellExplorer('metrics',cell_metrics_Maze1Drug);
-% close(gcf);
-% 
-% cell_metrics_Maze2Baseline = loadCellMetricsBatch('basepaths',sessions.basepaths,'basenames',sessions.basenames_Baseline,'saveAs','cell_metrics_Maze2Baseline');
-% cell_metrics_Maze2Baseline = CellExplorer('metrics',cell_metrics_Maze2Baseline);
-% close(gcf);
-% 
-% cell_metrics_Maze2Drug = loadCellMetricsBatch('basepaths',sessions.basepaths,'basenames',sessions.basenames_Baseline,'saveAs','cell_metrics_Maze2Drug');
-% cell_metrics_Maze2Drug = CellExplorer('metrics',cell_metrics_Maze2Drug);
-% close(gcf);
 
 %% collect data per session
 if saveSummaries
@@ -166,7 +134,6 @@ for ii = 1:length(sessions.basepaths)
     % get some useful fields
     spikes = loadSpikes;
     projectSessionResults.numcells(ii) = spikes.numcells;
-    
     
     % session name!!
     session = loadSession;
@@ -190,7 +157,7 @@ for ii = 1:length(sessions.basepaths)
         warning('No drug detected in this session...');
     end
     
-%     clear session
+    clear session
     % spikes
     if includeSpikes
         if lightVersion
@@ -201,11 +168,6 @@ for ii = 1:length(sessions.basepaths)
     end
     clear spikes
     
-    try
-        targetFile = dir('*cell_metrics_Baseline.cellinfo.mat'); cm = load(targetFile.name);
-        projectSessionResults.cell_metrics_Baseline{ii} = cm;
-        clear cm
-    end
     % optogenetic responses
     try
         targetFile = dir('*.optogeneticResponse.cellinfo.mat'); load(targetFile.name);
@@ -247,204 +209,6 @@ for ii = 1:length(sessions.basepaths)
         clear acgPeak
     catch
         warning('Not possible to load ACGPeak_Drug');
-    end
-    
-    
-    % Comodulogram
-    try
-        targetFile = dir(['*Comodulogram_Baseline.mat']); load(targetFile.name);
-        projectSessionResults.Comodulogram_Baseline{ii} = CFC;
-        clear CFC
-    catch
-        warning('Not possible to load Comodulogram Baseline...');
-    end
-    
-    try
-        targetFile = dir(['*Comodulogram_Baseline_theta.mat']); load(targetFile.name);
-        projectSessionResults.Comodulogram_Baseline_theta{ii} = CFC;
-        clear CFC
-    catch
-        warning('Not possible to load Comodulogram Baseline theta...');
-    end
-    
-    try
-        targetFile = dir(['*Comodulogram_Drug.mat']); load(targetFile.name);
-        projectSessionResults.Comodulogram_Drug{ii} = CFC;
-        clear CFC
-    catch
-        warning('Not possible to load Comodulogram Baseline...');
-    end
-    
-    try
-        targetFile = dir(['*Comodulogram_Drug_theta.mat']); load(targetFile.name);
-        projectSessionResults.Comodulogram_Drug_theta{ii} = CFC;
-        clear CFC
-    catch
-        warning('Not possible to load Comodulogram Baseline_theta...');
-    end
-    
-    try
-        targetFile = dir(['*Comodulogram_MazeBaseline.mat']); load(targetFile.name);
-        projectSessionResults.Comodulogram_MazeBaseline{ii} = CFC;
-        clear CFC
-    catch
-        warning('Not possible to load Comodulogram Baseline...');
-    end
-    
-    try
-        targetFile = dir(['*Comodulogram_MazeBaseline_theta.mat']); load(targetFile.name);
-        projectSessionResults.Comodulogram_MazeBaseline_theta{ii} = CFC;
-        clear CFC
-    catch
-        warning('Not possible to load Comodulogram Baseline theta...');
-    end
-    
-    try
-        targetFile = dir(['*Comodulogram_MazeDrug.mat']); load(targetFile.name);
-        projectSessionResults.Comodulogram_MazeDrug{ii} = CFC;
-        clear CFC
-    catch
-        warning('Not possible to load Comodulogram Baseline...');
-    end
-    
-    try
-        targetFile = dir(['*Comodulogram_MazeDrug_theta.mat']); load(targetFile.name);
-        projectSessionResults.Comodulogram_MazeDrug_theta{ii} = CFC;
-        clear CFC
-    catch
-        warning('Not possible to load Comodulogram Baseline theta...');
-    end
-    
-    % lGamma CFC
-    
-    try
-        targetFile = dir(['*lgamma_CFC_Baseline.mat']); load(targetFile.name);
-        projectSessionResults.lgamma_CFC_Baseline{ii} = CFC;
-        clear CFC
-    catch
-        warning('Not possible to load Comodulogram Baseline...');
-    end
-    
-    try
-        targetFile = dir(['*lgamma_CFC_Baseline_theta.mat']); load(targetFile.name);
-        projectSessionResults.lgamma_CFC_Baseline_theta{ii} = CFC;
-        clear CFC
-    catch
-        warning('Not possible to load Comodulogram Baseline theta...');
-    end
-    
-    try
-        targetFile = dir(['*lgamma_CFC_Drug.mat']); load(targetFile.name);
-        projectSessionResults.lgamma_CFC_Drug{ii} = CFC;
-        clear CFC
-    catch
-        warning('Not possible to load Comodulogram Baseline...');
-    end
-    
-    try
-        targetFile = dir(['*lgamma_CFC_Drug_theta.mat']); load(targetFile.name);
-        projectSessionResults.lgamma_CFC_Drug_theta{ii} = CFC;
-        clear CFC
-    catch
-        warning('Not possible to load Comodulogram Baseline theta...');
-    end
-    
-    try
-        targetFile = dir(['*lgamma_CFC_MazeBaseline.mat']); load(targetFile.name);
-        projectSessionResults.lgamma_CFC_MazeBaseline{ii} = CFC;
-        clear CFC
-    catch
-        warning('Not possible to load Comodulogram Baseline...');
-    end
-    
-    try
-        targetFile = dir(['*lgamma_CFC_MazeBaseline_theta.mat']); load(targetFile.name);
-        projectSessionResults.lgamma_CFC_MazeBaseline_theta{ii} = CFC;
-        clear CFC
-    catch
-        warning('Not possible to load Comodulogram Baseline theta...');
-    end
-    
-    try
-        targetFile = dir(['*lgamma_CFC_MazeDrug.mat']); load(targetFile.name);
-        projectSessionResults.lgamma_CFC_MazeDrug{ii} = CFC;
-        clear CFC
-    catch
-        warning('Not possible to load Comodulogram Baseline...');
-    end
-    
-    try
-        targetFile = dir(['*lgamma_CFC_MazeDrug_theta.mat']); load(targetFile.name);
-        projectSessionResults.lgamma_CFC_MazeDrug_theta{ii} = CFC;
-        clear CFC
-    catch
-        warning('Not possible to load Comodulogram Baseline theta...');
-    end
-    
-    % hGamma CFC
-    
-    try
-        targetFile = dir(['*hgamma_CFC_Baseline.mat']); load(targetFile.name);
-        projectSessionResults.hgamma_CFC_Baseline{ii} = CFC;
-        clear CFC
-    catch
-        warning('Not possible to load Comodulogram Baseline...');
-    end
-    
-    try
-        targetFile = dir(['*hgamma_CFC_Baseline_theta.mat']); load(targetFile.name);
-        projectSessionResults.hgamma_CFC_Baseline_theta{ii} = CFC;
-        clear CFC
-    catch
-        warning('Not possible to load Comodulogram Baseline theta...');
-    end
-    
-    try
-        targetFile = dir(['*hgamma_CFC_Drug.mat']); load(targetFile.name);
-        projectSessionResults.hgamma_CFC_Drug{ii} = CFC;
-        clear CFC
-    catch
-        warning('Not possible to load Comodulogram Baseline...');
-    end
-    
-    try
-        targetFile = dir(['*hgamma_CFC_Drug_theta.mat']); load(targetFile.name);
-        projectSessionResults.hgamma_CFC_Drug_theta{ii} = CFC;
-        clear CFC
-    catch
-        warning('Not possible to load Comodulogram Baseline theta...');
-    end
-    
-    try
-        targetFile = dir(['*hgamma_CFC_MazeBaseline.mat']); load(targetFile.name);
-        projectSessionResults.hgamma_CFC_MazeBaseline{ii} = CFC;
-        clear CFC
-    catch
-        warning('Not possible to load Comodulogram Baseline...');
-    end
-    
-    try
-        targetFile = dir(['*hgamma_CFC_MazeBaseline_theta.mat']); load(targetFile.name);
-        projectSessionResults.hgamma_CFC_MazeBaseline_theta{ii} = CFC;
-        clear CFC
-    catch
-        warning('Not possible to load Comodulogram Baseline theta...');
-    end
-    
-    try
-        targetFile = dir(['*hgamma_CFC_MazeDrug.mat']); load(targetFile.name);
-        projectSessionResults.hgamma_CFC_MazeDrug{ii} = CFC;
-        clear CFC
-    catch
-        warning('Not possible to load Comodulogram Baseline...');
-    end
-    
-    try
-        targetFile = dir(['*hgamma_CFC_MazeDrug_theta.mat']); load(targetFile.name);
-        projectSessionResults.hgamma_CFC_MazeDrug_theta{ii} = CFC;
-        clear CFC
-    catch
-        warning('Not possible to load Comodulogram Baseline theta...');
     end
     
     % monoSynaptic connections
@@ -799,8 +563,6 @@ for ii = 1:length(sessions.basepaths)
         projectSessionResults.coherogram_NonThetaEpochsBaseline{ii}.coherogram_mean = nanmean(cohgram.NonThetaEpochs.coherogram);
         projectSessionResults.coherogram_NonThetaEpochsBaseline{ii}.phase_mean = nanmean(cohgram.NonThetaEpochs.phase);
         
-        projectSessionResults.coherogram_Baseline{ii}.S1_aux_mean = nanmean(cohgram.S1_aux);
-        projectSessionResults.coherogram_NonThetaEpochsBaseline{ii}.S1_aux_mean = nanmean(cohgram.NonThetaEpochs.S1_aux);
         clear cohgram
     catch
         projectSessionResults.coherogram_Baseline{ii} = NaN;
@@ -823,12 +585,9 @@ for ii = 1:length(sessions.basepaths)
         projectSessionResults.coherogram_NonThetaEpochsDrug{ii}.coherogram_mean = nanmean(cohgram.NonThetaEpochs.coherogram);
         projectSessionResults.coherogram_NonThetaEpochsDrug{ii}.phase_mean = nanmean(cohgram.NonThetaEpochs.phase);
         
-        projectSessionResults.coherogram_Drug{ii}.S1_aux_mean = nanmean(cohgram.S1_aux);
-        projectSessionResults.coherogram_NonThetaEpochsDrug{ii}.S1_aux_mean = nanmean(cohgram.NoNThetaEpochs.S1_aux);
-        
         clear cohgram
     catch
-        projectSessionResults.coherogram_Drug{ii} = NaN;
+        projectSessionResults.coherogram_Baseline{ii} = NaN;
     end
     
     
@@ -845,9 +604,6 @@ for ii = 1:length(sessions.basepaths)
         projectSessionResults.coherogram_NonThetaEpochsMaze1Baseline{ii}.S2_mean = nanmean(cohgram.NonThetaEpochs.S2);
         projectSessionResults.coherogram_NonThetaEpochsMaze1Baseline{ii}.coherogram_mean = nanmean(cohgram.NonThetaEpochs.coherogram);
         projectSessionResults.coherogram_NonThetaEpochsMaze1Baseline{ii}.phase_mean = nanmean(cohgram.NonThetaEpochs.phase);
-        
-        projectSessionResults.coherogram_Maze1Baseline{ii}.S1_aux_mean = nanmean(cohgram.S1_aux);
-        projectSessionResults.coherogram_NonThetaEpochsMaze1Baseline{ii}.S1_aux_mean = nanmean(cohgram.NoNThetaEpochs.S1_aux);
         
         clear cohgram
     catch
@@ -868,59 +624,11 @@ for ii = 1:length(sessions.basepaths)
         projectSessionResults.coherogram_NonThetaEpochsMaze1Drug{ii}.coherogram_mean = nanmean(cohgram.NonThetaEpochs.coherogram);
         projectSessionResults.coherogram_NonThetaEpochsMaze1Drug{ii}.phase_mean = nanmean(cohgram.NonThetaEpochs.phase);
         
-        projectSessionResults.coherogram_Maze1Drug{ii}.S1_aux_mean = nanmean(cohgram.S1_aux);
-        projectSessionResults.coherogram_NonThetaEpochsMaze1Drug{ii}.S1_aux_mean = nanmean(cohgram.NonThetaEpochs.S1_aux);
-        
         clear cohgram
     catch
         projectSessionResults.coherogram_Maze1Drug{ii} = NaN;
     end
         
-    try
-        targetFile = dir('*.coherogram_Maze2Baseline.mat'); load(targetFile.name);
-        projectSessionResults.coherogram_Maze2Baseline{ii} = cohgram;
-        
-        projectSessionResults.coherogram_Maze2Baseline{ii}.S1_mean = nanmean(cohgram.S1);
-        projectSessionResults.coherogram_Maze2Baseline{ii}.S2_mean = nanmean(cohgram.S2);
-        projectSessionResults.coherogram_Maze2Baseline{ii}.coherogram_mean = nanmean(cohgram.coherogram);
-        projectSessionResults.coherogram_Maze2Baseline{ii}.phase_mean = nanmean(cohgram.phase);
-        
-        projectSessionResults.coherogram_NonThetaEpochsMaze2Baseline{ii}.S1_mean = nanmean(cohgram.NonThetaEpochs.S1);
-        projectSessionResults.coherogram_NonThetaEpochsMaze2Baseline{ii}.S2_mean = nanmean(cohgram.NonThetaEpochs.S2);
-        projectSessionResults.coherogram_NonThetaEpochsMaze2Baseline{ii}.coherogram_mean = nanmean(cohgram.NonThetaEpochs.coherogram);
-        projectSessionResults.coherogram_NonThetaEpochsMaze2Baseline{ii}.phase_mean = nanmean(cohgram.NonThetaEpochs.phase);
-        
-        projectSessionResults.coherogram_Maze2Baseline{ii}.S1_aux_mean = nanmean(cohgram.S1_aux);
-        projectSessionResults.coherogram_NonThetaEpochsMaze2Baseline{ii}.S1_aux_mean = nanmean(cohgram.NonThetaEpochs.S1_aux);
-        
-        clear cohgram
-    catch
-        projectSessionResults.coherogram_Maze2Baseline{ii} = NaN;
-    end
-    
-    try
-        targetFile = dir('*.coherogram_Maze2Drug.mat'); load(targetFile.name);
-        projectSessionResults.coherogram_Maze2Drug{ii} = cohgram;
-        
-        projectSessionResults.coherogram_Maze2Drug{ii}.S1_mean = nanmean(cohgram.S1);
-        projectSessionResults.coherogram_Maze2Drug{ii}.S2_mean = nanmean(cohgram.S2);
-        projectSessionResults.coherogram_Maze2Drug{ii}.coherogram_mean = nanmean(cohgram.coherogram);
-        projectSessionResults.coherogram_Maze2Drug{ii}.phase_mean = nanmean(cohgram.phase);
-        
-        projectSessionResults.coherogram_NonThetaEpochsMaze2Drug{ii}.S1_mean = nanmean(cohgram.NonThetaEpochs.S1);
-        projectSessionResults.coherogram_NonThetaEpochsMaze2Drug{ii}.S2_mean = nanmean(cohgram.NonThetaEpochs.S2);
-        projectSessionResults.coherogram_NonThetaEpochsMaze2Drug{ii}.coherogram_mean = nanmean(cohgram.NonThetaEpochs.coherogram);
-        projectSessionResults.coherogram_NonThetaEpochsMaze2Drug{ii}.phase_mean = nanmean(cohgram.NonThetaEpochs.phase);
-        
-        projectSessionResults.coherogram_Maze2Drug{ii}.S1_aux_mean = nanmean(cohgram.S1_aux);
-        projectSessionResults.coherogram_NonThetaEpochsMaze2Drug{ii}.S1_aux_mean = nanmean(cohgram.NonThetaEpochs.S1_aux);
-        
-        clear cohgram
-    catch
-        projectSessionResults.coherogram_Maze2Drug{ii} = NaN;
-    end
-    
-    
     % Open Field Behavior performance
     targetFile = dir('*OpenField_Baseline.mat');
     try
@@ -993,126 +701,6 @@ end
 try projectResults.optogeneticResponses = stackSessionResult(projectSessionResults.optogeneticResponses, projectSessionResults.numcells);
 catch
     warning('Optogenetics response was not staked!');
-end
-try projectResults.comodulogram_Baseline = stackSessionResult(projectSessionResults.Comodulogram_Baseline, ones(1,length(projectSessionResults.numcells)));
-    for ii = 1:length(projectSessionResults.numcells)
-        projectResults.comodulogram_Baseline.comodulogram(:,:,ii) = double(projectSessionResults.Comodulogram_Baseline{ii}.Comodulogram);
-    end
-catch
-    warning('Comodulogram Baseline response was not staked!');
-end
-try projectResults.comodulogram_Baseline_theta = stackSessionResult(projectSessionResults.Comodulogram_Baseline_theta, ones(1,length(projectSessionResults.numcells)));
-    for ii = 1:length(projectSessionResults.numcells)
-        projectResults.comodulogram_Baseline_theta.comodulogram(:,:,ii) = double(projectSessionResults.Comodulogram_Baseline_theta{ii}.Comodulogram);
-    end
-catch
-    warning('Comodulogram Baseline theta response was not staked!');
-end
-try projectResults.comodulogram_Drug = stackSessionResult(projectSessionResults.Comodulogram_Drug, ones(1,length(projectSessionResults.numcells)));
-    for ii = 1:length(projectSessionResults.numcells)
-        projectResults.comodulogram_Drug.comodulogram(:,:,ii) = double(projectSessionResults.Comodulogram_Drug{ii}.Comodulogram);
-    end
-catch
-    warning('Comodulogram Drug response was not staked!');
-end
-try projectResults.comodulogram_Drug_theta = stackSessionResult(projectSessionResults.Comodulogram_Drug_theta, ones(1,length(projectSessionResults.numcells)));
-    for ii = 1:length(projectSessionResults.numcells)
-        projectResults.comodulogram_Drug_theta.comodulogram(:,:,ii) = double(projectSessionResults.Comodulogram_Drug_theta{ii}.Comodulogram);
-    end
-catch
-    warning('Comodulogram Drug response was not staked!');
-end
-try projectResults.comodulogram_MazeBaseline = stackSessionResult(projectSessionResults.Comodulogram_MazeBaseline, ones(1,length(projectSessionResults.numcells)));
-    for ii = 1:length(projectSessionResults.numcells)
-        projectResults.comodulogram_MazeBaseline.comodulogram(:,:,ii) = double(projectSessionResults.Comodulogram_MazeBaseline{ii}.Comodulogram);
-    end
-catch
-    warning('Comodulogram NazeBaseline was not staked!');
-end
-try projectResults.comodulogram_MazeBaseline_theta = stackSessionResult(projectSessionResults.Comodulogram_MazeBaseline_theta, ones(1,length(projectSessionResults.numcells)));
-    for ii = 1:length(projectSessionResults.numcells)
-        projectResults.comodulogram_MazeBaseline_theta.comodulogram(:,:,ii) = double(projectSessionResults.Comodulogram_MazeBaseline_theta{ii}.Comodulogram);
-    end
-catch
-    warning('Comodulogram NazeBaseline was not staked!');
-end
-try projectResults.comodulogram_MazeDrug = stackSessionResult(projectSessionResults.Comodulogram_MazeDrug, ones(1,length(projectSessionResults.numcells)));
-    for ii = 1:length(projectSessionResults.numcells)
-        projectResults.comodulogram_MazeDrug.comodulogram(:,:,ii) = double(projectSessionResults.Comodulogram_MazeDrug{ii}.Comodulogram);
-    end
-catch
-    warning('Comodulogram MazeDrug response was not staked!');
-end
-try projectResults.comodulogram_MazeDrug_theta = stackSessionResult(projectSessionResults.Comodulogram_MazeDrug_theta, ones(1,length(projectSessionResults.numcells)));
-    for ii = 1:length(projectSessionResults.numcells)
-        projectResults.comodulogram_MazeDrug_theta.comodulogram(:,:,ii) = double(projectSessionResults.Comodulogram_MazeDrug_theta{ii}.Comodulogram);
-    end
-catch
-    warning('Comodulogram MazeDrug response was not staked!');
-end
-try projectResults.lgamma_CFC_Baseline = stackSessionResult(projectSessionResults.lgamma_CFC_Baseline, ones(1,length(projectSessionResults.numcells)));
-catch
-    warning('lgamma CFC Baseline response was not staked!');
-end
-try projectResults.lgamma_CFC_Baseline_theta = stackSessionResult(projectSessionResults.lgamma_CFC_Baseline_theta, ones(1,length(projectSessionResults.numcells)));
-catch
-    warning('lgamma CFC Baseline response was not staked!');
-end
-try projectResults.lgamma_CFC_Drug = stackSessionResult(projectSessionResults.lgamma_CFC_Drug, ones(1,length(projectSessionResults.numcells)));
-catch
-    warning('lgamma CFC Baseline response was not staked!');
-end
-try projectResults.lgamma_CFC_Drug_theta = stackSessionResult(projectSessionResults.lgamma_CFC_Drug_theta, ones(1,length(projectSessionResults.numcells)));
-catch
-    warning('lgamma CFC Baseline response was not staked!');
-end
-try projectResults.lgamma_CFC_MazeBaseline = stackSessionResult(projectSessionResults.lgamma_CFC_MazeBaseline, ones(1,length(projectSessionResults.numcells)));
-catch
-    warning('lgamma CFC Baseline response was not staked!');
-end
-try projectResults.lgamma_CFC_MazeBaseline_theta = stackSessionResult(projectSessionResults.lgamma_CFC_MazeBaseline_theta, ones(1,length(projectSessionResults.numcells)));
-catch
-    warning('lgamma CFC Baseline response was not staked!');
-end
-try projectResults.lgamma_CFC_MazeDrug = stackSessionResult(projectSessionResults.lgamma_CFC_MazeDrug, ones(1,length(projectSessionResults.numcells)));
-catch
-    warning('lgamma CFC Baseline response was not staked!');
-end
-try projectResults.lgamma_CFC_MazeDrug_theta = stackSessionResult(projectSessionResults.lgamma_CFC_MazeDrug_theta, ones(1,length(projectSessionResults.numcells)));
-catch
-    warning('lgamma CFC Baseline response was not staked!');
-end
-try projectResults.hgamma_CFC_Baseline = stackSessionResult(projectSessionResults.hgamma_CFC_Baseline, ones(1,length(projectSessionResults.numcells)));
-catch
-    warning('lgamma CFC Baseline response was not staked!');
-end
-try projectResults.hgamma_CFC_Baseline_theta = stackSessionResult(projectSessionResults.hgamma_CFC_Baseline_theta, ones(1,length(projectSessionResults.numcells)));
-catch
-    warning('lgamma CFC Baseline response was not staked!');
-end
-try projectResults.hgamma_CFC_Drug = stackSessionResult(projectSessionResults.hgamma_CFC_Drug, ones(1,length(projectSessionResults.numcells)));
-catch
-    warning('lgamma CFC Baseline response was not staked!');
-end
-try projectResults.hgamma_CFC_Drug_theta = stackSessionResult(projectSessionResults.hgamma_CFC_Drug_theta, ones(1,length(projectSessionResults.numcells)));
-catch
-    warning('lgamma CFC Baseline response was not staked!');
-end
-try projectResults.hgamma_CFC_MazeBaseline = stackSessionResult(projectSessionResults.hgamma_CFC_MazeBaseline, ones(1,length(projectSessionResults.numcells)));
-catch
-    warning('lgamma CFC Baseline response was not staked!');
-end
-try projectResults.hgamma_CFC_MazeBaseline_theta = stackSessionResult(projectSessionResults.hgamma_CFC_MazeBaseline_theta, ones(1,length(projectSessionResults.numcells)));
-catch
-    warning('lgamma CFC Baseline response was not staked!');
-end
-try projectResults.hgamma_CFC_MazeDrug = stackSessionResult(projectSessionResults.hgamma_CFC_MazeDrug, ones(1,length(projectSessionResults.numcells)));
-catch
-    warning('lgamma CFC Baseline response was not staked!');
-end
-try projectResults.hgamma_CFC_MazeDrug_theta = stackSessionResult(projectSessionResults.hgamma_CFC_MazeDrug_theta, ones(1,length(projectSessionResults.numcells)));
-catch
-    warning('lgamma CFC Baseline response was not staked!');
 end
 try projectResults.mono_res = stackSessionResult(projectSessionResults.mono_res, projectSessionResults.numcells);
 catch
@@ -1312,11 +900,11 @@ try
 catch
     warning('Coherogram Non Theta Epochs Drug was not stack!');
 end
-try projectResults.coherogram_Maze1Baseline = stackSessionResult(projectSessionResults.coherogram_Maze1Baseline,ones(1,length(projectSessionResults.numcells)));
+try projectResults.coherogram_MazeBaseline = stackSessionResult(projectSessionResults.coherogram_MazeBaseline,ones(1,length(projectSessionResults.numcells)));
 catch
     warning('Coherogram Maze 1 Baseline was not stack');
 end
-try projectResults.coherogram_Maze1Drug = stackSessionResult(projectSessionResults.coherogram_Maze1Drug,ones(1,length(projectSessionResults.numcells)));
+try projectResults.coherogram_MazeDrug = stackSessionResult(projectSessionResults.coherogram_MazeDrug,ones(1,length(projectSessionResults.numcells)));
 catch
     warning('Coherogram Maze 1 Drug was not stack');
 end
@@ -1348,16 +936,7 @@ catch
 end
 
 projectResults.cell_metrics = cell_metrics;
-projectResults.cell_metrics_Baseline = cell_metrics_Baseline;
-projectResults.cell_metrics_Drug = cell_metrics_Drug;
-projectResults.cell_metrics_MazeBaseline = cell_metrics_MazeBaseline;
-projectResults.cell_metrics_MazeDrug = cell_metrics_MazeDrug;
 
-
-% projectResults.cell_metrics_Maze1Baseline = cell_metrics_Maze1Baseline;
-% projectResults.cell_metrics_Maze1Drug = cell_metrics_Maze1Drug;
-% projectResults.cell_metrics_Maze2Baseline = cell_metrics_Maze2Baseline;
-% projectResults.cell_metrics_Maze2Drug = cell_metrics_Maze2Drug;
 
 % session, genetic line, experimentalSubject, drug
 counCell = 1;

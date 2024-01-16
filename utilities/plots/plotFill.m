@@ -58,7 +58,7 @@ excluding = p.Results.excluding;
 type = p.Results.type;
 
 % Deal with inputs
-if length(datax) ~= size(datay,1)
+if length(datax) ~= size(datay,1) | length(datax) == size(datay,1)
     datay = datay';
     if length(datax) ~= size(datay,1)
         error('Dimenssion do not match');

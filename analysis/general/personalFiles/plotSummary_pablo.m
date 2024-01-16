@@ -158,13 +158,13 @@ hold on
 if length(find(all_nw) == 1) == 1
     plot(cell_metrics.waveforms.time{1}, all_waveforms(:,all_nw),'color',nw_color);
 else
-    plotFill(cell_metrics.waveforms.time{1}, all_waveforms(:,all_nw),'style','filled','color',nw_color,'faceAlpha',0.9);
+    plotFill(cell_metrics.waveforms.time{1}, all_waveforms(:,all_nw)','style','filled','color',nw_color,'faceAlpha',0.9);
 end
-plotFill(cell_metrics.waveforms.time{1}, all_waveforms(:,all_pyr),'style','filled','color',pyr_color,'faceAlpha',0.9);
+plotFill(cell_metrics.waveforms.time{1}, all_waveforms(:,all_pyr)','style','filled','color',pyr_color,'faceAlpha',0.9);
 if length(find(all_ww) == 1) == 1
     plot(cell_metrics.waveforms.time{1},all_waveforms(:,all_ww),'color',ww_color);
 else
-    plotFill(cell_metrics.waveforms.time{1}, all_waveforms(:,all_ww),'style','filled','color',ww_color,'faceAlpha',0.9);
+    plotFill(cell_metrics.waveforms.time{1}, all_waveforms(:,all_ww)','style','filled','color',ww_color,'faceAlpha',0.9);
 end
 
 scatter(cell_metrics.troughToPeak(all_pyr),rand(length(find(all_pyr)),1)/10 + 2,20,pyr_color,'filled');
@@ -176,16 +176,16 @@ axis tight; xlabel('ms'); ylabel('Waveform amp (SD)');
 % acg
 subplot(6,6,2)
 hold on
-plotFill(acg_time, acg(:,all_pyr),'style','filled','color',pyr_color,'faceAlpha',0.7);
+plotFill(acg_time, acg(:,all_pyr)','style','filled','color',pyr_color,'faceAlpha',0.7);
 if length(find(all_nw == 1)) == 1
     plot(acg_time, acg(:,all_nw),'color',nw_color);
 else
-    plotFill(acg_time, acg(:,all_nw),'style','filled','color',nw_color,'faceAlpha',0.7);
+    plotFill(acg_time, acg(:,all_nw)','style','filled','color',nw_color,'faceAlpha',0.7);
 end
 if length(find(all_ww) == 1) == 1
     plot(acg_time,acg(:,all_ww),'color',ww_color);
 else
-    plotFill(acg_time, acg(:,all_ww),'style','filled','color',ww_color,'faceAlpha',0.7);
+    plotFill(acg_time, acg(:,all_ww)','style','filled','color',ww_color,'faceAlpha',0.7);
 end
 scatter(rand(length(find(all_pyr)),1)*2 + 52, cell_metrics.acg_tau_rise(all_pyr)/1000,20,pyr_color,'filled');
 scatter(rand(length(find(all_nw)),1)*2 + 55, cell_metrics.acg_tau_rise(all_nw)/1000,20,nw_color,'filled');
@@ -196,16 +196,16 @@ axis tight; xlabel('ms'); ylabel('ACG (prob)');
 % ACG Peak
 subplot(6,6,3)
 hold on
-plotFill(acgPeak.acg_time, acgPeak.acg_smoothed_norm(:,all_pyr),'style','filled','color',pyr_color,'faceAlpha',0.7);
+plotFill(acgPeak.acg_time, acgPeak.acg_smoothed_norm(:,all_pyr)','style','filled','color',pyr_color,'faceAlpha',0.7);
 if length(find(all_nw == 1)) == 1
     plot(acgPeak.acg_time, acgPeak.acg_smoothed_norm(:,all_nw),'color',nw_color);
 else
-    plotFill(acgPeak.acg_time, acgPeak.acg_smoothed_norm(:,all_nw),'style','filled','color',nw_color,'faceAlpha',0.7);
+    plotFill(acgPeak.acg_time, acgPeak.acg_smoothed_norm(:,all_nw)','style','filled','color',nw_color,'faceAlpha',0.7);
 end
 if length(find(all_ww) == 1) == 1
     plot(acgPeak.acg_time,acgPeak.acg_smoothed_norm(:,all_ww),'color',ww_color);
 else
-    plotFill(acgPeak.acg_time, acgPeak.acg_smoothed_norm(:,all_ww),'style','filled','color',ww_color,'faceAlpha',0.7);
+    plotFill(acgPeak.acg_time, acgPeak.acg_smoothed_norm(:,all_ww)','style','filled','color',ww_color,'faceAlpha',0.7);
 end
 
 scatter(acgPeak.acg_time(acgPeak.acgPeak_sample(all_pyr)),rand(length(find(all_pyr)),1)/100 + 0.03,20,pyr_color,'filled');
@@ -249,16 +249,16 @@ pie(categorical(cell_metrics.brainRegion))
 % firing rate
 subplot(6,6,6)
 hold on
-plotFill(spikemat.timestamps/60, spikemat.data(:,all_pyr),'color',pyr_color,'yscale','log','style','filled','smoothOpt',10);
+plotFill(spikemat.timestamps/60, spikemat.data(:,all_pyr)','color',pyr_color,'yscale','log','style','filled','smoothOpt',10);
 if length(find(all_nw == 1)) == 1
     plot(spikemat.timestamps/60, spikemat.data(:,all_nw),'color',nw_color);
 else
-    plotFill(spikemat.timestamps/60, spikemat.data(:,all_nw),'color',nw_color,'yscale','log','style','filled','smoothOpt',10);
+    plotFill(spikemat.timestamps/60, spikemat.data(:,all_nw)','color',nw_color,'yscale','log','style','filled','smoothOpt',10);
 end
 if length(find(all_ww) == 1) == 1
     plot(spikemat.timestamps/60,spikemat.data(:,all_ww),'color',ww_color);
 else
-    plotFill(spikemat.timestamps/60, spikemat.data(:,all_ww),'color',ww_color,'yscale','log','style','filled','smoothOpt',10);
+    plotFill(spikemat.timestamps/60, spikemat.data(:,all_ww)','color',ww_color,'yscale','log','style','filled','smoothOpt',10);
 end
 
 title(['Stability:', num2str(round(mean(cell_metrics.firingRateInstability),2)) char(177)...
@@ -381,7 +381,7 @@ if length(find(all_ww == 1)) == 1
 else
     plotFill(rippleMod.phasebins_wide_doubled,rippleMod.phasedistro_wide_smoothZ_doubled(all_ww,:),'color',ww_color,'style','filled');
 end
-plotFill(rippleMod.phasebins_wide_doubled,rippleMod.phasedistro_wide_smoothZ_doubled(all_pyr,:)','color',pyr_color,'style','filled');
+plotFill(rippleMod.phasebins_wide_doubled,rippleMod.phasedistro_wide_smoothZ_doubled(all_pyr,:),'color',pyr_color,'style','filled');
 
 scatter(rand(length(find(all_pyr)),1)/2 + 12.6, rippleMod.phasestats.r(all_pyr)*5,20,pyr_color,'filled');
 scatter(rand(length(find(all_nw)),1)/2 + 13.1, rippleMod.phasestats.r(all_nw)*5,20,nw_color,'filled');
@@ -425,7 +425,7 @@ if length(find(all_ww == 1)) == 1
 else
     plotFill(thetaMod.phasebins_wide_doubled,thetaMod.phasedistro_wide_smoothZ_doubled(all_ww,:),'color',ww_color,'style','filled');
 end
-plotFill(thetaMod.phasebins_wide_doubled,thetaMod.phasedistro_wide_smoothZ_doubled(all_pyr,:)','color',pyr_color,'style','filled');
+plotFill(thetaMod.phasebins_wide_doubled,thetaMod.phasedistro_wide_smoothZ_doubled(all_pyr,:),'color',pyr_color,'style','filled');
 
 scatter(rand(length(find(all_pyr)),1)/2 + 12.6, thetaMod.phasestats.r(all_pyr)*5,20,pyr_color,'filled');
 scatter(rand(length(find(all_nw)),1)/2 + 13.1, thetaMod.phasestats.r(all_nw)*5,20,nw_color,'filled');
@@ -470,7 +470,7 @@ if length(find(all_ww == 1)) == 1
 else
     plotFill(lgammaMod.phasebins_wide_doubled,lgammaMod.phasedistro_wide_smoothZ_doubled(all_ww,:),'color',ww_color,'style','filled');
 end
-plotFill(lgammaMod.phasebins_wide_doubled,lgammaMod.phasedistro_wide_smoothZ_doubled(all_pyr,:)','color',pyr_color,'style','filled');
+plotFill(lgammaMod.phasebins_wide_doubled,lgammaMod.phasedistro_wide_smoothZ_doubled(all_pyr,:),'color',pyr_color,'style','filled');
 
 scatter(rand(length(find(all_pyr)),1)/2 + 12.6, lgammaMod.phasestats.r(all_pyr)*5,20,pyr_color,'filled');
 scatter(rand(length(find(all_nw)),1)/2 + 13.1, lgammaMod.phasestats.r(all_nw)*5,20,nw_color,'filled');
@@ -500,7 +500,7 @@ if length(find(all_ww == 1)) == 1
 else
     plotFill(hgammaMod.phasebins_wide_doubled,hgammaMod.phasedistro_wide_smoothZ_doubled(all_ww,:),'color',ww_color,'style','filled');
 end
-plotFill(hgammaMod.phasebins_wide_doubled,hgammaMod.phasedistro_wide_smoothZ_doubled(all_pyr,:)','color',pyr_color,'style','filled');
+plotFill(hgammaMod.phasebins_wide_doubled,hgammaMod.phasedistro_wide_smoothZ_doubled(all_pyr,:),'color',pyr_color,'style','filled');
 
 scatter(rand(length(find(all_pyr)),1)/2 + 12.6, hgammaMod.phasestats.r(all_pyr)*5,20,pyr_color,'filled');
 scatter(rand(length(find(all_nw)),1)/2 + 13.1, hgammaMod.phasestats.r(all_nw)*5,20,nw_color,'filled');
@@ -533,7 +533,7 @@ if ~isempty(speedCorr)
     if length(find(all_pyr == 1)) ~= size(speedVals(all_pyr),2)
         plotFill(log10(speedCorr.prc_vals),speedVals(all_pyr,:),'color',pyr_color,'style','filled');
     else
-        plotFill(log10(speedCorr.prc_vals),speedVals(all_pyr,:)','color',pyr_color,'style','filled');
+        plotFill(log10(speedCorr.prc_vals),speedVals(all_pyr,:),'color',pyr_color,'style','filled');
     end
     scatter(rand(length(find(all_pyr)),1)/5 + 1.3, 1+speedCorr.speedScore(all_pyr)*2,20,pyr_color,'filled');
     scatter(rand(length(find(all_nw)),1)/5 +  1.4, 1+speedCorr.speedScore(all_nw)*2,20,nw_color,'filled');

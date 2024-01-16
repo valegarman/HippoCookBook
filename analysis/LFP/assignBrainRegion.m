@@ -24,6 +24,8 @@ function session = assignBrainRegion(varargin)
 %
 %%  Manuel Valero 2022
 % Modified by Pablo Abad to include CA2 and CA3 layers
+% TODO: Need to add electrodeGroups in the brainRegion output for opening
+% with NeuroScope2
 
 %% Dealing with inputs
 p = inputParser;
@@ -251,6 +253,7 @@ close(fig);
 for ii = 1:length(brainRegions_list)
     if ~isempty(brainRegions_list{ii})
         brainRegions.(listOfRegions{brainRegions_number(ii)}).channels = brainRegions_list{ii};
+%         brainRegions.(listOfRegions{brainRegions_number(ii)}).electrodeGroups = brainRegions_list{ii};
     end
 end
 

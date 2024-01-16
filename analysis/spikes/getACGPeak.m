@@ -131,9 +131,9 @@ if showFig
     % set(gcf,'Position',get(0,'screensize'));
     subplot(2,2,[1 2])
     hold on;
-    plotFill(acg_time,acg_smoothed_norm(:,all_pyr),'Color',pyr_color);
-    plotFill(acg_time,acg_smoothed_norm(:,all_nw),'Color',nw_color);
-    plotFill(acg_time,acg_smoothed_norm(:,all_ww),'Color',ww_color);
+    plotFill(acg_time,acg_smoothed_norm(:,all_pyr)','Color',pyr_color);
+    plotFill(acg_time,acg_smoothed_norm(:,all_nw)','Color',nw_color);
+    plotFill(acg_time,acg_smoothed_norm(:,all_ww)','Color',ww_color);
     if ~isempty(find(optoTagged))
         plot(acg_time,acg_smoothed_norm(:,optoTagged),'Color',cell_color);
     end

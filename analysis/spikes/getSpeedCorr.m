@@ -103,7 +103,8 @@ for j = 1:length(spikes.UID)
         
         c(:,1) = vel;
         c(:,2) = fr(b);
-        speedScore(j) = corr(c(:,1), c(:,2), 'rows', 'complete', 'type', 'Spearman');
+        [speedScore(j), speedScore_pval(j)]= corr(c(:,1), c(:,2), 'rows', 'complete', 'type', 'Spearman');
+        
         clear c;
     catch
         speedScore(j) = NaN;
@@ -111,6 +112,7 @@ for j = 1:length(spikes.UID)
 end
 
 speedCorrs.speedScore = speedScore;
+speedCorrs.speedScore_pval = speedScore_pval;
 %% quantile-based analysis
 
 run_time = behavior.timestamps;
@@ -155,8 +157,8 @@ for j = 1:length(spikes.times)
                 end
             end
 
-            speed_fr_corr(j,1) = corr(prc_vals',  speed_val(:,j,1), 'rows', 'complete', 'type', 'Spearman');
-            speed_fr_corr(j,2) = corr(prc_vals',  speed_val(:,j,2), 'rows', 'complete', 'type', 'Spearman');
+            [speed_fr_corr(j,1), speed_fr_corr_pval(j,1)] = corr(prc_vals',  speed_val(:,j,1), 'rows', 'complete', 'type', 'Spearman');
+            [speed_fr_corr(j,2), speed_fr_corr_pval(j,2)] = corr(prc_vals',  speed_val(:,j,2), 'rows', 'complete', 'type', 'Spearman');
             b1 = polyfit(prc_vals, speed_val(:,j,1), 2);
             b2 = polyfit(prc_vals, speed_val(:,j,2), 2);
     %             b1 = [ones(length(prc_vals),1) prc_vals' (prc_vals').^2]\speed_val(:,j,1);
@@ -179,7 +181,7 @@ for j = 1:length(spikes.times)
                 [status,~,~]       = InIntervals(t, epochs);
                 speed_val(i, j)  = nanmean(inst_fr(status));
             end
-            speed_fr_corr(j) = corr(prc_vals',speed_val(:,j), 'rows', 'complete', 'type', 'Spearman');
+            [speed_fr_corr(j), speed_fr_corr_pval(j)] = corr(prc_vals',speed_val(:,j), 'rows', 'complete', 'type', 'Spearman');
             b1 = polyfit(prc_vals, speed_val(:,j), 2);
             ls(j,1) = b1(3);
             ls(j,2) = b1(2);
@@ -361,6 +363,9 @@ end
 speedCorrs.speedVals     = permute(speed_val, [2 1 3]);
 speedCorrs.prc_vals      = prc_vals;
 speedCorrs.corrCoeff     = speed_fr_corr;
+try
+    speedCorrs.corrCoeff_pval = speed_fr_corr_pval;
+end
 speedCorrs.leastSquares  = ls;
 
 if saveMat

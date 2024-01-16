@@ -134,7 +134,7 @@ preprocessSession('basepath','J:\fCamk7\fCamk7_220509_sess27','cleanArtifacts',(
 
 preprocessSession('basepath','K:\fCr4_220429_sess17','cleanArtifacts',[],'analogChannelsList',[],'digitalChannelsList',[],'bazler_ttl_channel',10,'getPos',false);
 preprocessSession('basepath','J:\fCamk7\fCamk7_220511_sess29','cleanArtifacts',[],'analogChannelsList',[],'digitalChannelsList',[],'bazler_ttl_channel',10,'getPos',false);
-preprocessSession('basepath','J:\fCamk7\fCamk7_220514_sess30','cleanArtifacts',[],'analogChannelsList',[],'digitalChannelsList',[],'bazler_ttl_channel',10,'getPos',false);
+preprocessSession('basepath','K:\fCamk7\fCamk7_220514_sess30','cleanArtifacts',[],'analogChannelsList',[],'digitalChannelsList',[],'bazler_ttl_channel',10,'getPos',false);
 
 preprocessSession('basepath','D:\fCamk7\fCamk7_220514_sess30','cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'bazler_ttl_channel',10,'getPos',true);
 
@@ -264,7 +264,7 @@ changeFilesName('Z:\FLR\FL4\FL4_080322');
 changeFilesName('Z:\FLR\FL4\FL4_090322');
 changeFilesName('Z:\FLR\FL4\FL4_100322');
 changeFilesName('Z:\FLR\FL4\FL4_110322','socialParadigm',true);
-changeFilesName('basepath','Z:\FLR\FL4\FL4_170322','generalPath','Z:\FLR','socialParadigm',true);
+changeFilesName('basepath','K:\fSUB3_231123','generalPath','K:\');
 changeFilesName('basepath','Z:\FLR\FL4\FL4_180322','generalPath','Z:\FLR','socialParadigm',true);
 changeFilesName('basepath','Z:\FLR\FL4\FL4_210322','generalPath','Z:\FLR','socialParadigm',true);
 changeFilesName('basepath','Z:\FLR\FL4\FL4_220322','generalPath','Z:\FLR','socialParadigm',true);
@@ -272,7 +272,7 @@ changeFilesName('basepath','Z:\FLR\FL4\FL4_220322','generalPath','Z:\FLR','socia
 basepath = 'D:\FLR\FL4';
 cd(basepath);
 arrangeSessionFolder;
-createFiles('basepath',basepath);
+createFiles('basepath','K:\fSUB3');
 
 basepath = 'D:\FLR\FL4\FL4_080322_sess1';
 preprocessSession_pablo('basepath',basepath,'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'anymaze_ttl_channel',2,'getPos',true,'sessionSummary',true,'anyMaze',true);
@@ -496,7 +496,7 @@ preprocessSession_pablo('basepath','C:\DATA\fSUB1\fSUB1_060223_sess28','analysis
 preprocessSession_pablo('basepath','C:\DATA\fSUB1\fSUB1_120223_sess34','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'changeAnalogInputs',false,'getPos',false,'sessionSummary',false);
 preprocessSession_pablo('basepath','C:\DATA\fSUB1\fSUB1_100223_sess32','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'changeAnalogInputs',false,'getPos',false,'sessionSummary',false);
 preprocessSession_pablo('basepath','C:\DATA\fSUB1\fSUB1_261222_sess25','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'changeAnalogInputs',false,'getPos',false,'sessionSummary',false);
-preprocessSession_pablo('basepath','D:\fSUB1\fSUB1_221222_sess24','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'changeAnalogInputs',false,'getPos',false,'sessionSummary',false);
+preprocessSession_pablo('basepath','D:\fSUB1\fSUB1_210223_sess40','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'changeAnalogInputs',false,'getPos',false,'sessionSummary',false);
 
 
 %% fSUB2
@@ -508,11 +508,8 @@ preprocessSession_pablo('basepath','J:\fSUB2\fSUB2_160223_sess7','analysisPath',
 bpath = 'J:\data\HM2';
 createNSFiles('basepath',bpath,'nChannels',96);
 preprocessSession_pablo('basepath','C:\DATA\HM2\HM2_090223_sess3','cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'bazler_ttl_channel',10,'getPos',false,'sessionSummary',false);
-<<<<<<< HEAD
 
 preprocessSession_pablo('basepath','J:\fSUB2\fSUB2_220223_sess10','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'changeAnalogInputs',false,'getPos',false,'sessionSummary',false);
-=======
->>>>>>> 412eb6c149e8ffa0f85f46b3aaaf6d9572b8d322
 
 
 %% HMX
@@ -572,20 +569,41 @@ preprocessSession_pablo('basepath','J:\data\IPO11700\IPO11700_020823_sess22','cl
 
 preprocessSession_pablo('basepath','C:\DATA\HM2\HM2_28042_sess4','cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'bazler_ttl_channel',10,'getPos',false,'sessionSummary',false);
 
+%% Open Ephys Files
+basepath = 'L:\fSUB3\fSUB3_081123\2023-11-08_09-40-31';
+changeFilesName_OE('basepath',basepath,'generalPath','L:\fSUB3');
+cd('L:\fSUB3');
+arrangeSessionFolder()
+
+%% fSUB3
+changeFilesName('basepath','L:\fSUB3\fSUB3_091123','generalPath','L:\fSUB3','socialParadigm',false);
+basepath = 'L:\fSUB3';
+cd(basepath);
+arrangeSessionFolder;
+createFiles('basepath',basepath);
+
+preprocessSession_pablo('basepath','J:\data\APP039033\APP039033_291123_sess29','cleanArtifacts',({[],[]}),'anymaze_ttl_channel',2,'getPos',false,'sessionSummary',false);
 
 
-<<<<<<< HEAD
-%%
+%% SEVERAL SIMULTANEOUS RECORDINGS
 
-preprocessSession_pablo('basepath','C:\DATA\IPO11700_280723_sess19','cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'bazler_ttl_channel',10,'getPos',false,'sessionSummary',false);
+basepath = 'K:\Exp_301123';
+changeFilesName_SR('basepath',basepath,'generalPath','K:\','name',{'APP039033','fSUB3'},'arena',{'1','2'});
+createFiles_SR('basepath',basepath,'generalPath','K:\','name',{'APP039033','fSUB3'},'arena',{1,2});
 
-% preprocessSession_pablo('basepath','J:\fSUB1\fSUB1_181122_sess7','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'changeAnalogInputs',false,'getPos',false,'sessionSummary',false);
-% 
-%% C:\DATA\IPO14369_260723_sess17 
 
-preprocessSession_pablo('basepath','D:\IPO14369_270623_sess18','cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'bazler_ttl_channel',10,'getPos',false,'sessionSummary',false);
 
-preprocessSession_pablo('basepath','D:\Recordings\IPO14369\IPO14369_030823_sess20','cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'bazler_ttl_channel',10,'getPos',false,'sessionSummary',false);
-=======
->>>>>>> 412eb6c149e8ffa0f85f46b3aaaf6d9572b8d322
+basepath = 'K:\Exp_201123';
+createFiles_SR('basepath',basepath,'generalPath','K:\','name',{'APP0329033','fSUB3'},'arena',{1,2});
+
+basepath = 'J:\data\Exps-Files\Exp_281123';
+createFiles_SR('basepath',basepath,'generalPath','J:\data\','name',{'APP039033','fSUB3'},'arena',{1,2});
+
+basepath = 'K:\APP0329033';
+cd(basepath);
+arrangeSessionFolder;
+
+
+
+
 

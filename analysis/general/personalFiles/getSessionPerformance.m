@@ -62,14 +62,20 @@ for ii = 1:length(subsessions)
     end
     
     distance = max(cumsum(dist))/100;
+    ts = tracking.timestamps(status);
+    start = ts(1);
+    stop = ts(end);
+    distance_perc = distance / ((stop-start)/60);
     meanSpeed = mean(speed.velocity(tracking.events.subSessionsMask == subsessions(ii)));
     
     if strcmpi(behavior.description{subsessions(ii)},'Open Field')
         performance.OpenField.meanSpeed = meanSpeed;
         performance.OpenField.distance = distance;
+        performance.OpenField.distance_perc = distance_perc;
     elseif strcmpi(behavior.description{subsessions(ii)},'YMaze Apparatus')
         performance.YMaze.meanSpeed = meanSpeed;
         performance.YMaze.distance = distance;
+        performance.YMaze.distance_perc = distance_perc;
     end
     figure;
     plot(xPos,yPos);

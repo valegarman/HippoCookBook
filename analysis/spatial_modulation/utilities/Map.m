@@ -236,10 +236,12 @@ else
 	if pointProcess
         map.zUnSmooth = map.countUnSmooth./(map.timeUnSmooth+eps);
 		map.z = map.count./(map.time+eps);
-	else
+    else
+                
 		map.z = Accumulate([x y],z(:,2),nBins)';
 		map.z = Smooth(Interpolate2(map.x,map.y,map.z,valid,mode,maxDistance),smooth,'type',type(1:2)).';
 		map.z = map.z./(map.count+eps);
+        
 	end
 end
 

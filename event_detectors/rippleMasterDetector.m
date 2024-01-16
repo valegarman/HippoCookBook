@@ -74,7 +74,8 @@ function [ripples,SW] = rippleMasterDetector(varargin)
 %
 %    See also bz_Filter, bz_RippleStats, bz_SaveRippleEvents, bz_PlotRippleStats.
 %   
-%   Develop by Manu Valero and Pablo Abad 2022. Buzsaki Lab.
+%   Develop by Manu Valero and Pablo Abad 2022. Buzsaki Lab. Based on
+%   bz_findRipples
 warning('this function is under development and may not work... yet')
 
 %% Default values
