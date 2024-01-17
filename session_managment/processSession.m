@@ -240,7 +240,7 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     getSpikesRank('events','ripples');
 
     % 8.3 Theta intervals
-    thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'powerThreshold',1,'channel',34);
+    thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'powerThreshold',1);
 end
 
 %% 9. Phase Modulation
