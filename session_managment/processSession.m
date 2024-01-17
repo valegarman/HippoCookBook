@@ -271,7 +271,7 @@ if ~any(ismember(excludeAnalysis, {'10',lower('cellMetrics')}))
         end
     end
     session = loadSession();
-    cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true);
+    cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true); % after CellExplorar
     
     getACGPeak('force',true);
 
