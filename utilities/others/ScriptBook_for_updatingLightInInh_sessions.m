@@ -1,7 +1,6 @@
 
 %% ScriptBook_for_updatingLightInInh_sessions
-% Andrea Gallardo and Manu Valero, 2023
-
+% Marta Picco and Manu Valero, 2023
 pulses = getAnalogPulses('manualThr',true,'overwrite',true); % 1-index   
 getDigitalIn;
 uLEDPulses = getuLEDPulses('Current',3,'force',true,'ledLayout','ledLayoutScience2022');
