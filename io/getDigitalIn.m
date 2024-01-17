@@ -1,11 +1,10 @@
 
-function [digitalIn] = getDigitalIn(ch,varargin)
+function [digitalIn] = getDigitalIn(varargin)
 % [digitalIn] = getDigitalIn(ch,varargin)
 %
 % Find digital In pulses
 %
 % INPUTS
-% ch            Default all.
 % <OPTIONALS>
 % fs            Sampling frequency (in Hz), default 30000, or try to
 %               recover for rhd 
@@ -13,7 +12,6 @@ function [digitalIn] = getDigitalIn(ch,varargin)
 % filename      File to get pulses from. Default, digitalin.dat file with folder
 %               name in current directory
 % overwrite     false
-%
 %
 % OUTPUTS
 %               digitalIn - events struct with the following fields
@@ -29,23 +27,19 @@ function [digitalIn] = getDigitalIn(ch,varargin)
 % Based on Process_IntanDigitalChannels by P Petersen
 
 % Parse options
-if exist('ch') ~= 1
-    ch = 'all';
-end
-
 p = inputParser;
 addParameter(p,'fs',30000,@isnumeric)
 addParameter(p,'filename',[],@isstring)
 addParameter(p,'periodLag',5,@isnumeric)
-addParameter(p,'overwrite',false,@isnumeric)
+addParameter(p,'force',false,@islogical)
 
 parse(p, varargin{:});
 fs = p.Results.fs;
 filename = p.Results.filename;
 lag = p.Results.periodLag;
-overwrite = p.Results.overwrite;
+force = p.Results.force;
 
-if ~isempty(dir('*DigitalIn.events.mat')) && overwrite == false
+if ~isempty(dir('*DigitalIn.events.mat')) && force == false
     disp('Digital pulses already detected! Loading file.');
     file = dir('*DigitalIn.events.mat');
     load(file.name);

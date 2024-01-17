@@ -1,8 +1,9 @@
 
 %% ScriptBook_for_updatingLightInInh_sessions
 % Marta Picco and Manu Valero, 2023
-pulses = getAnalogPulses('manualThr',true,'overwrite',true); % 1-index   
-getDigitalIn;
+pulses = getAnalogPulses('manualThr',true,'force',true); % 1-index   
+close all;
+getDigitalIn('force', true);
 uLEDPulses = getuLEDPulses('Current',3,'force',true,'ledLayout','ledLayoutScience2022');
 % important, in the Extracellular tab, update Electrode groups and Spike groups witht following info:
 % Group         Channel
