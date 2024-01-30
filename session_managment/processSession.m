@@ -270,7 +270,7 @@ if ~any(ismember(excludeAnalysis, {'10',lower('cellMetrics')}))
             warning('Not possible to get manipulation periods. Running CellMetrics withouth excluding manipulation epochs');
         end
     end
-    session = loadSession();
+    session = loadSession;
     cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true); % after CellExplorar
     
     getACGPeak('force',true);
