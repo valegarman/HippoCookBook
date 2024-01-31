@@ -12,6 +12,10 @@ addParameter(p,'plt',true,@islogical);
 addParameter(p,'basepath',pwd,@isfolder);
 addParameter(p,'force',false,@islogical);
 addParameter(p,'restrictIntervals',[],@isnumeric);
+addParameter(p,'restrict_to',[0 Inf],@isscalar);
+addParameter(p,'restrict_to_baseline',true,@islogical);
+addParameter(p,'restrict_to_manipulation',false,@islogical);
+addParameter(p,'save_as','speedCorrs',@ischar);
 
 parse(p,varargin{:});
 saveMat = p.Results.saveMat;
@@ -24,7 +28,11 @@ trials = p.Results.trials;
 plt = p.Results.plt;
 basepath = p.Results.basepath;
 force = p.Results.force;
-restrictIntervals = p.Results.restrictIntervals;
+restrict_to = p.Results.restrictIntervals;
+restrict_to = p.Results.restrict_to;
+restrict_to_baseline = p.Results.restrict_to_baseline;
+restrict_to_manipulation = p.Results.restrict_to_manipulation;
+save_as = p.Results.save_as;
 
 % Deal with inputs
 prevPath = pwd;
@@ -57,16 +65,48 @@ else
     return
 end
 
+ints = [];
+if restrict_to_manipulation
+    list_of_manipulations = list_of_manipulations_names;
+    session = loadSession;
+    for ii = 1:length(session.epochs)
+        if ismember(session.epochs{ii}.behavioralParadigm, list_of_manipulations)
+            ints = [session.epochs{ii}.startTime session.epochs{end}.stopTime];
+            warning('Epoch with manipulations found! Restricting analysis to manipulation interval!');
+            save_as = 'speedCorrs_post';
+        end
+    end
+    if isempty(ints)
+        error('Epoch with manipulation not found!!');
+    end
+elseif restrict_to_baseline
+    list_of_manipulations = list_of_manipulations_names;
+    session = loadSession;
+    for ii = 1:length(session.epochs)
+        if ismember(session.epochs{ii}.behavioralParadigm, list_of_manipulations)
+            ints = [0 session.epochs{ii}.startTime];
+            warning('Epoch with manipulations found! Restricting analysis to baseline interval!');
+        end
+    end
+    if isempty(ints)
+        ints = [0 Inf];
+    end
+else
+    ints = [0 Inf];
+end
+restrict_ints = IntersectIntervals([ints; restrict_to]);
+
 % Get Spikes
 if ~isempty(dir([session.general.name, '.spikes.cellinfo.mat']))
     disp('Spikes.cellinfo.mat found. Loading file');
     file = dir([[session.general.name, '.spikes.cellinfo.mat']]);
     load(file.name);
-    if ~isempty(restrictIntervals)
-       for ii = 1:length(spikes.UID)
-           [status] = InIntervals(spikes.times{ii},restrictIntervals);
-           spikes.times{ii} = spikes.times{ii}(status);
-       end
+    if any(restrict_ints ~= [0 Inf])
+        warning('Restricting analysis for intervals...');
+        for ii = 1:length(spikes.times)
+            [status] = InIntervals(spikes.times{ii},restrict_ints);
+            spikes.times{ii} = spikes.times{ii}(status);
+        end 
     end
 end
 
@@ -231,7 +271,7 @@ if mkplt
                     ' speed score: ' num2str(speedScore(i)) ])
                 xlabel('speed [cm/s]')
                 ylabel('FR [Hz]')
-                saveas(gcf, [pwd filesep 'speed_corrs' filesep 'Cell_' num2str(i) '.jpg']);
+                saveas(gcf, [pwd filesep save_as filesep 'Cell_' num2str(i) '.jpg']);
             end
         catch
             disp(['problem with cell ' num2str(i)])
@@ -251,7 +291,10 @@ if mkplt
     axis square
     xlabel('speed [cm/s]')
     ylabel('FR [Hz]')
-    saveas(gcf, [pwd filesep 'speed_corrs' filesep 'all_cells.jpg']);
+    try saveas(gcf, [pwd filesep save_as filesep 'all_cells.jpg']);
+    catch
+        saveas(gcf, [pwd filesep 'speed_corrs' filesep 'all_cells.jpg']);
+    end
     close
 end
 
@@ -283,7 +326,7 @@ if plt
                 title('Right trials Z Rate [-3 to 3 SD]');
             end
         end
-        saveas(gcf, [session.general.basePath filesep 'SummaryFigures' filesep 'Speed Rate Map per Trial_unsorted.png']);
+        saveas(gcf, [session.general.basePath filesep 'SummaryFigures' filesep  'Speed Rate Map per Trial_unsorted' save_as '.png']);
         
         % Rate map and field for each trial type sorted by each trial type
         figure,
@@ -319,7 +362,7 @@ if plt
                 title('Right trials Z Rate [-3 to 3 SD]');
             end
         end
-        saveas(gcf, [session.general.basePath filesep 'SummaryFigures' filesep 'Speed Rate Map per Trial_sorted.png']);
+        saveas(gcf, [session.general.basePath filesep 'SummaryFigures' filesep 'Speed Rate Map per Trial_sorted' save_as '.png']);
         
         figure,
         for i = 1:length(trialType)
@@ -356,7 +399,7 @@ if plt
                 title('Right trials Z Rate [-3 to 3 SD]');
             end
         end
-        saveas(gcf, [session.general.basePath filesep 'SummaryFigures' filesep 'Speed Rate Map per Trial_sorted by left trial.png']);
+        saveas(gcf, [session.general.basePath filesep 'SummaryFigures' filesep 'Speed Rate Map per Trial_sorted by left trial' save_as '.png']);
     else
     end
 end
@@ -369,7 +412,7 @@ end
 speedCorrs.leastSquares  = ls;
 
 if saveMat
-    save([basename, '.speedCorrs.cellinfo.mat'], 'speedCorrs');
+    save([basename, '.' save_as '.cellinfo.mat'], 'speedCorrs');
 end
 close all;
 cd(prevPath);

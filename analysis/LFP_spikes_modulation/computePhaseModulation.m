@@ -59,7 +59,11 @@ addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'skipStimulationPeriods',true,@islogical);
 addParameter(p,'excludeIntervals',[],@isnumeric);
 addParameter(p,'powerThresh',0,@isnumeric);
-addParameter(p,'restrictIntervals',[],@isnumeric);
+addParameter(p,'restrictIntervals',[],@isnumeric); % this is a synonim of restrict_to, kept for funcionality
+addParameter(p,'restrict_to',[0 Inf],@isscalar);
+addParameter(p,'restrict_to_baseline',true,@islogical);
+addParameter(p,'restrict_to_manipulation',false,@islogical);
+addParameter(p,'save_as','_PhaseLockingData',@ischar);
 
 parse(p,varargin{:})
 
@@ -82,7 +86,11 @@ saveMat = p.Results.saveMat;
 skipStimulationPeriods = p.Results.skipStimulationPeriods;
 excludeIntervals = p.Results.excludeIntervals;
 powerThresh = p.Results.powerThresh;
-restrictIntervals = p.Results.restrictIntervals;
+restrict_to = p.Results.restrictIntervals;
+restrict_to = p.Results.restrict_to;
+restrict_to_baseline = p.Results.restrict_to_baseline;
+restrict_to_manipulation = p.Results.restrict_to_manipulation;
+save_as = p.Results.save_as;
 
 %% Session template
 % session = sessionTemplate(basepath,'showGUI',false);
@@ -117,10 +125,42 @@ if ~isempty(excludeIntervals)
     end
 end
 
-if ~isempty(restrictIntervals)
+ints = [];
+if restrict_to_manipulation
+    list_of_manipulations = list_of_manipulations_names;
+    session = loadSession;
+    for ii = 1:length(session.epochs)
+        if ismember(session.epochs{ii}.behavioralParadigm, list_of_manipulations)
+            ints = [session.epochs{ii}.startTime session.epochs{end}.stopTime];
+            warning('Epoch with manipulations found! Restricting analysis to manipulation interval!');
+            save_as = '_PhaseLockingData_post';
+        end
+    end
+    if isempty(ints)
+        error('Epoch with manipulation not found!!');
+    end
+elseif restrict_to_baseline
+    list_of_manipulations = list_of_manipulations_names;
+    session = loadSession;
+    for ii = 1:length(session.epochs)
+        if ismember(session.epochs{ii}.behavioralParadigm, list_of_manipulations)
+            ints = [0 session.epochs{ii}.startTime];
+            warning('Epoch with manipulations found! Restricting analysis to baseline interval!');
+        end
+    end
+    if isempty(ints)
+        ints = [0 Inf];
+    end
+else
+    ints = [0 Inf];
+end
+
+restrict_ints = IntersectIntervals([ints; restrict_to]);
+
+if any(restrict_ints ~= [0 Inf])
     warning('Restricting analysis for intervals...');
     for ii = 1:length(spikes.times)
-        [status] = InIntervals(spikes.times{ii},restrictIntervals);
+        [status] = InIntervals(spikes.times{ii},restrict_ints);
         spikes.times{ii} = spikes.times{ii}(status);
     end 
 end
@@ -311,7 +351,7 @@ if plotting
                 set(gca,'YTick',[],'XTick',[]);
             end
         end
-        saveas(gcf,['SummaryFigures\ripple_',num2str(ripple_passband(1)),'-',num2str(ripple_passband(end)),'_PhaseModulation.png']);
+        saveas(gcf,['SummaryFigures\ripple_',num2str(ripple_passband(1)),'-',num2str(ripple_passband(end)),save_as, '.png']);
     end
     
     % Sharpwave Modulation
@@ -338,7 +378,7 @@ if plotting
                 set(gca,'YTick',[],'XTick',[]);
             end
         end
-        saveas(gcf,['SummaryFigures\SW_',num2str(SW_passband(1)),'-',num2str(SW_passband(end)),'_PhaseModulation.png']);
+        saveas(gcf,['SummaryFigures\SW_',num2str(SW_passband(1)),'-',num2str(SW_passband(end)), save_as, '.png']);
     end
     
     % Theta Modulation
@@ -365,7 +405,7 @@ if plotting
                 set(gca,'YTick',[],'XTick',[]);
             end
         end
-        saveas(gcf,['SummaryFigures\theta_',num2str(theta_passband(1)),'-',num2str(theta_passband(end)),'_PhaseModulation.png']);
+        saveas(gcf,['SummaryFigures\theta_',num2str(theta_passband(1)),'-',num2str(theta_passband(end)), save_as, '.png']);
     end
     
     % LowGama Modulation
@@ -392,7 +432,7 @@ if plotting
                 set(gca,'YTick',[],'XTick',[]);
             end
         end
-        saveas(gcf,['SummaryFigures\lGamma_',num2str(lgamma_passband(1)),'-',num2str(lgamma_passband(end)),'_PhaseModulation.png']);
+        saveas(gcf,['SummaryFigures\lGamma_',num2str(lgamma_passband(1)),'-',num2str(lgamma_passband(end)), save_as, '.png']);
     end
     
     % High Modulation
@@ -419,7 +459,7 @@ if plotting
                 set(gca,'YTick',[],'XTick',[]);
             end
         end
-        saveas(gcf,['SummaryFigures\hGamma_',num2str(hgamma_passband(1)),'-',num2str(hgamma_passband(end)),'_PhaseModulation.png']);
+        saveas(gcf,['SummaryFigures\hGamma_',num2str(hgamma_passband(1)),'-',num2str(hgamma_passband(end)),save_as ,'.png']);
     end
 
     % ThetaRUN Modulation
@@ -446,7 +486,7 @@ if plotting
                 set(gca,'YTick',[],'XTick',[]);
             end
         end
-        saveas(gcf,['SummaryFigures\thetaRun_',num2str(theta_passband(1)),'-',num2str(theta_passband(end)),'_PhaseModulation.png']);
+        saveas(gcf,['SummaryFigures\thetaRun_',num2str(theta_passband(1)),'-',num2str(theta_passband(end)), save_as, '.png']);
     end
 
     % ThetaREM Modulation
@@ -473,7 +513,7 @@ if plotting
                 set(gca,'YTick',[],'XTick',[]);
             end
         end
-        saveas(gcf,['SummaryFigures\thetaREM_',num2str(theta_passband(1)),'-',num2str(theta_passband(end)),'_PhaseModulation.png']);
+        saveas(gcf,['SummaryFigures\thetaREM_',num2str(theta_passband(1)),'-',num2str(theta_passband(end)), save_as,'.png']);
     end
     end
 
@@ -493,37 +533,37 @@ if saveMat
     % Ripple 
     if ismember('rippleModulation',bandsToCompute)
         save([session.general.name,'.ripple_',num2str(ripple_passband(1)),'-',num2str(ripple_passband(end)),...
-            '.PhaseLockingData.cellinfo.mat'],'rippleMod');
+            '.', save_as, '.cellinfo.mat'],'rippleMod');
     end
     % Sharp Wave
     if ismember('SWModulation',bandsToCompute)
         save([session.general.name,'.SW_',num2str(SW_passband(1)),'-',num2str(SW_passband(end)),...
-            '.PhaseLockingData.cellinfo.mat'],'SWMod');
+            '.', save_as, '.cellinfo.mat'],'SWMod');
     end
     % Theta
     if ismember('thetaModulation',bandsToCompute)
         save([session.general.name,'.theta_',num2str(theta_passband(1)),'-',num2str(theta_passband(end)),...
-            '.PhaseLockingData.cellinfo.mat'],'thetaMod');
+            '.', save_as, '.cellinfo.mat'],'thetaMod');
     end
     % Low Gamma
     if ismember('lgammaModulation',bandsToCompute)
         save([session.general.name,'.lgamma_',num2str(lgamma_passband(1)),'-',num2str(lgamma_passband(end)),...
-            '.PhaseLockingData.cellinfo.mat'],'lgammaMod');
+            '.', save_as, '.cellinfo.mat'],'lgammaMod');
     end
     % High Gamma
     if ismember('hgammaModulation',bandsToCompute)
         save([session.general.name,'.hgamma_',num2str(hgamma_passband(1)),'-',num2str(hgamma_passband(end)),...
-            '.PhaseLockingData.cellinfo.mat'],'hgammaMod');
+            '.', save_as,'.cellinfo.mat'],'hgammaMod');
     end
     % ThetaRun
     if ismember('thetaRunModulation',bandsToCompute)
         save([session.general.name,'.thetaRun_',num2str(theta_passband(1)),'-',num2str(theta_passband(end)),...
-            '.PhaseLockingData.cellinfo.mat'],'thetaRunMod');
+            '.', save_as, '.cellinfo.mat'],'thetaRunMod');
     end
     % thetaREM
     if ismember('thetaRunModulation',bandsToCompute)
         save([session.general.name,'.thetaREM_',num2str(theta_passband(1)),'-',num2str(theta_passband(end)),...
-            '.PhaseLockingData.cellinfo.mat'],'thetaREMMod');
+            '.', save_as, '.cellinfo.mat'],'thetaREMMod');
     end
 end
 
