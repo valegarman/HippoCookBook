@@ -49,13 +49,19 @@ addParameter(p,'eventType',date,@ischar);
 addParameter(p,'event_ints',[-0.02 0.02],@isnumeric);
 addParameter(p,'baseline_ints',[-0.5 -0.46],@isnumeric);
 addParameter(p,'minNumberOfPulses',100,@isnumeric);
-addParameter(p,'win_Z',[],@isnumeric);
+% addParameter(p,'win_Z',[],@isnumeric);
 addParameter(p,'restrictIntervals',[],@isnumeric);
 addParameter(p,'bootsTrapCI',[0.001 0.999],@isnumeric);
 addParameter(p,'salt_baseline',[-0.25 -0.001],@isscalar);
 addParameter(p,'raster_time',[-0.250 0.250],@isnumeric);
 addParameter(p,'salt_win',[0.01],@isscalar);
 addParameter(p,'salt_binSize',[0.001],@isscalar);
+addParameter(p,'restrict_to',[0 Inf],@isscalar);
+addParameter(p,'restrict_to_baseline',true,@islogical);
+addParameter(p,'restrict_to_manipulation',false,@islogical);
+addParameter(p,'save_as','_psth',@ischar);
+addParameter(p,'save_raster_as','_raster',@ischar);
+
 
 parse(p, timestamps,varargin{:});
 
@@ -74,13 +80,18 @@ eventType = p.Results.eventType;
 event_ints = p.Results.event_ints;
 baseline_ints = p.Results.baseline_ints;
 minNumberOfPulses = p.Results.minNumberOfPulses;
-win_Z = p.Results.win_Z;
+% win_Z = p.Results.win_Z;
 restrictIntervals = p.Results.restrictIntervals;
 bootsTrapCI = p.Results.bootsTrapCI;
 salt_baseline = p.Results.salt_baseline;
 raster_time = p.Results.raster_time;
 salt_win = p.Results.salt_win;
 salt_binSize = p.Results.salt_binSize;
+restrict_to = p.Results.restrict_to;
+restrict_to_baseline = p.Results.restrict_to_baseline;
+restrict_to_manipulation = p.Results.restrict_to_manipulation;
+save_as = p.Results.save_as;
+save_raster_as = p.Results.save_raster_as;
 
 %% Session Template
 % Deal with inputs
@@ -100,9 +111,9 @@ if (exist([session.general.name '.' eventType '_psth.cellinfo.mat'],'file') || .
     return
 end
 
-if isempty(win_Z)
-    win_Z = [-winSize/2 -event_ints(1)];
-end
+% if isempty(win_Z)
+%     win_Z = [-winSize/2 -event_ints(1)];
+% end
 
 % default detection parameters
 if strcmpi(eventType,'slowOscillations')
@@ -116,7 +127,7 @@ if strcmpi(eventType,'slowOscillations')
     winSizePlot = [-0.5 0.5];
     event_ints = [-0.05 0.05];
     baseline_ints = [-0.5 0.4];
-    win_Z = [-0.5 -0.1];
+    % win_Z = [-0.5 -0.1];
 elseif strcmpi(eventType,'ripples')
     if isempty(timestamps)
         ripples = rippleMasterDetector;
@@ -128,7 +139,7 @@ elseif strcmpi(eventType,'ripples')
     winSizePlot = [-0.5 0.5];
     event_ints = [-0.025 0.025];
     baseline_ints = [-0.5 -0.5 + diff(event_ints)];
-    win_Z = [-0.5 -0.1];
+    % win_Z = [-0.5 -0.1];
 end
 
 %% Spikes
@@ -141,6 +152,39 @@ if isempty(spikes)
         end
     end
 end
+
+ints = [];
+if restrict_to_manipulation
+    list_of_manipulations = list_of_manipulations_names;
+    session = loadSession;
+    for ii = 1:length(session.epochs)
+        if ismember(session.epochs{ii}.behavioralParadigm, list_of_manipulations)
+            ints = [session.epochs{ii}.startTime session.epochs{end}.stopTime];
+            warning('Epoch with manipulations found! Restricting analysis to manipulation interval!');
+            save_as = '_post';
+        end
+    end
+    if isempty(ints)
+        error('Epoch with manipulation not found!!');
+    end
+elseif restrict_to_baseline
+    list_of_manipulations = list_of_manipulations_names;
+    session = loadSession;
+    for ii = 1:length(session.epochs)
+        if ismember(session.epochs{ii}.behavioralParadigm, list_of_manipulations)
+            ints = [0 session.epochs{ii}.startTime];
+            warning('Epoch with manipulations found! Restricting analysis to baseline interval!');
+        end
+    end
+    if isempty(ints)
+        ints = [0 Inf];
+    end
+else
+    ints = [0 Inf];
+end
+
+restrict_ints = IntersectIntervals([ints; restrict_to]);
+timestamps = Restrict(timestamps, restrict_ints);
 
 %% Get cell response
 psth = [];
@@ -181,7 +225,7 @@ else
     psth.bootsTrapRate(1:spikes.numcells,jj) = NaN;
     psth.bootsTrapRateStd(1:spikes.numcells,jj) = NaN;
     psth.bootsTrapRateSEM(1:spikes.numcells,jj) = NaN;
-     psth.bootsTrapCI(1:spikes.numcells,jj,1:2) = NaN;
+    psth.bootsTrapCI(1:spikes.numcells,jj,1:2) = NaN;
 end
 
 if ~isempty(timestamps) && all(~isnan(timestamps))
@@ -362,6 +406,7 @@ for ii = 1:size(psth.responsecurve,1)
     end
     psth.timestamps = t;
 end
+psth.restricted_intervals = restrict_ints;
 
 % Some metrics reponses
 responseMetrics = [];
@@ -424,8 +469,8 @@ if saveMat
     disp('Saving results...');
     raster = psth.raster;
     psth = rmfield(psth,'raster');
-    save([basenameFromBasepath(pwd) '.' eventType '_psth.cellinfo.mat'],'psth','-v7.3');
-    save([basenameFromBasepath(pwd) '.' eventType '_raster.cellinfo.mat'],'raster','-v7.3');
+    save([basenameFromBasepath(pwd) '.' eventType save_as '.cellinfo.mat'],'psth','-v7.3');
+    save([basenameFromBasepath(pwd) '.' eventType save_raster_as '.cellinfo.mat'],'raster','-v7.3');
 end
 
 % PLOTS
@@ -481,7 +526,7 @@ if getRaster && any(any(~isnan(psth.responsecurve)))
         end
     end
     if savePlot
-        saveas(gcf,['SummaryFigures\spikesPsthRaster_', eventType ,'.png']); 
+        saveas(gcf,['SummaryFigures\' save_raster_as eventType '.png']); 
     end
 end
 % 2. Rate plot
@@ -519,7 +564,7 @@ if ratePlot && any(any(~isnan(psth.responsecurve)))
     end
 end          
 if savePlot
-    saveas(gcf,['SummaryFigures\spikesPsthRate_',eventType,'.png']); 
+    saveas(gcf,['SummaryFigures\' save_as eventType,'.png']); 
 end
 
 cd(prevPath);

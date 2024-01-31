@@ -46,7 +46,11 @@ addParameter(p,'winIndex',[-.01 .01],@isnumeric);
 addParameter(p,'interp0',[-.01 .01],@isnumeric);
 addParameter(p,'useBrainRegions',true,@islogical);
 addParameter(p,'useDistinctShanks',true,@islogical);
-addParameter(p,'useCellType',true,@islogical);
+% addParameter(p,'useCellType',true,@islogical); work in progress
+addParameter(p,'restrict_to',[0 Inf],@isscalar);
+addParameter(p,'restrict_to_baseline',true,@islogical);
+addParameter(p,'restrict_to_manipulation',false,@islogical);
+addParameter(p,'save_as','averageCCG',@ischar);
 
 parse(p, varargin{:});
 basepath = p.Results.basepath;
@@ -65,7 +69,11 @@ winIndex = p.Results.winIndex;
 interp0 = p.Results.interp0;
 useBrainRegions = p.Results.useBrainRegions;
 useDistinctShanks = p.Results.useDistinctShanks;
-useCellType = p.Results.useCellType;
+% useCellType = p.Results.useCellType;
+restrict_to = p.Results.restrict_to;
+restrict_to_baseline = p.Results.restrict_to_baseline;
+restrict_to_manipulation = p.Results.restrict_to_manipulation;
+save_as = p.Results.save_as;
 
 % Deal with inputs
 prevPath = pwd;
@@ -74,13 +82,43 @@ cd(basepath);
 % Load session
 session = loadSession();
 
-
 targetFile = dir('*.averageCCG.cellinfo.mat');
 if ~isempty(targetFile) && ~force
     disp('Average CCG already computed! Loading file...');
     load(targetFile.name);
     return
 end
+
+ints = [];
+if restrict_to_manipulation
+    list_of_manipulations = list_of_manipulations_names;
+    session = loadSession;
+    for ii = 1:length(session.epochs)
+        if ismember(session.epochs{ii}.behavioralParadigm, list_of_manipulations)
+            ints = [session.epochs{ii}.startTime session.epochs{end}.stopTime];
+            warning('Epoch with manipulations found! Restricting analysis to manipulation interval!');
+            save_as = 'averageCCG_post';
+        end
+    end
+    if isempty(ints)
+        error('Epoch with manipulation not found!!');
+    end
+elseif restrict_to_baseline
+    list_of_manipulations = list_of_manipulations_names;
+    session = loadSession;
+    for ii = 1:length(session.epochs)
+        if ismember(session.epochs{ii}.behavioralParadigm, list_of_manipulations)
+            ints = [0 session.epochs{ii}.startTime];
+            warning('Epoch with manipulations found! Restricting analysis to baseline interval!');
+        end
+    end
+    if isempty(ints)
+        ints = [0 Inf];
+    end
+else
+    ints = [0 Inf];
+end
+restrict_ints = IntersectIntervals([ints; restrict_to]);
 
 if isempty(spikes)
     spikes = loadSpikes('getWaveformsFromDat',false);
@@ -115,6 +153,14 @@ if includeIntervals(1)>0 || includeIntervals(2)<Inf
         [status] = InIntervals(spikes.times{ii},includeIntervals);
         spikes.times{ii} = spikes.times{ii}(status);
     end
+end
+
+if any(restrict_ints ~= [0 Inf])
+    warning('Restricting analysis for intervals...');
+    for ii = 1:length(spikes.times)
+        [status] = InIntervals(spikes.times{ii},restrict_ints);
+        spikes.times{ii} = spikes.times{ii}(status);
+    end 
 end
 
 % do ccg
@@ -640,7 +686,7 @@ end
 if saveMat
     disp('Saving results...');
     filename = split(pwd,filesep); filename = filename{end};
-    save([filename '.averageCCG.cellinfo.mat'],'averageCCG');
+    save([filename, '.', save_as, '.cellinfo.mat'],'averageCCG');
 end
 
 if plotOpt
@@ -679,7 +725,7 @@ if plotOpt
     set(gca,'TickDir','out'); xlabel('Time'); ylabel('Cells'); xlim([winSizePlot(1) winSizePlot(2)]);
     title('Grand CCG average','FontWeight','normal','FontSize',10);
     if saveFig
-        saveas(gcf,['SummaryFigures\grandCCGAverage.png']);
+        saveas(gcf,['SummaryFigures\' save_as '.png']);
     end
     
     % by BrainRegion
@@ -707,7 +753,7 @@ if plotOpt
             end
         end
         if saveFig
-            saveas(gcf,['SummaryFigures\CCGAvgPerRegion.png']); 
+            saveas(gcf,['SummaryFigures\', save_as,'PerRegion.png']); 
         end
     end
     
@@ -737,7 +783,7 @@ if plotOpt
             end
         end
         if saveFig
-            saveas(gcf,['SummaryFigures\CCGAvgPerShank.png']);
+            saveas(gcf,['SummaryFigures\', save_as, 'PerShank.png']);
         end      
     end
     
