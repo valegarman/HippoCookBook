@@ -279,7 +279,7 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     getSpikesRank('events','ripples');
 
     % 8.3 Theta intervals
-    thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'powerThreshold',1,'channel',34);
+    thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'powerThreshold',1);
 end
 
 %% 9. Phase Modulation
@@ -309,8 +309,9 @@ if ~any(ismember(excludeAnalysis, {'10',lower('cellMetrics')}))
             warning('Not possible to get manipulation periods. Running CellMetrics withouth excluding manipulation epochs');
         end
     end
-    session = loadSession();
-    cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludePulsesIntervals,'forceReload',true,'restrictToIntervals',restrict_ints); % after CellExplorar
+
+    session = loadSession;
+    cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true); % after CellExplorar
     
     getACGPeak('force',true);
 

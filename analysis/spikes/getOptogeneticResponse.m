@@ -181,7 +181,13 @@ if ~isempty(digitalChannelsList)
     end
 end
 
+
 pulses.timestamps = [pulsesAnalog.timestamps; pulsesDigital.timestamps];  % combine pulses
+if isempty(pulses.timestamps)
+    optogeneticResponses = [];
+    return 
+end
+
 pulses.channel = [pulsesAnalog.analogChannelsList; pulsesDigital.digitalChannelsList + lastAnalogChannels];  % combine pulses
 pulses.analogChannelsList = [pulsesAnalog.analogChannelsList; nan(size(pulsesDigital.digitalChannelsList))];  % 
 pulses.digitalChannelsList = [nan(size(pulsesAnalog.analogChannelsList)); pulsesDigital.digitalChannelsList];  % 
