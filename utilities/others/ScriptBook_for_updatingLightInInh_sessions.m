@@ -36,7 +36,6 @@ close all;
 close all;
 indexNewSession('copyFiles', true);
 
-<<<<<<< HEAD
 %% version for no pulses
 pulses = getAnalogPulses('manualThr',true,'force',true); % 1-index   
 close all;
@@ -119,5 +118,3 @@ getSpikesReturnPlot('force',true,'restrict_to_manipulation',true);
 
 getSpeedCorr('numQuantiles',20,'force',true);
 getSpeedCorr('numQuantiles',20,'force',true, 'restrict_to_manipulation',true);
-
->>>>>>> e3e8d2624fea2ba10a71b0a61d71415553fba87c

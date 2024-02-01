@@ -114,18 +114,13 @@ if skipStimulationPeriods
         warning('Skip stimulation periods not possible...');
     end
 end
-<<<<<<< HEAD
-if exist('optogenetic_responses','var')
-    if isfield(optogenetic_responses, 'stimulationEpochs')
-        excludeIntervals = [excludeIntervals; optogenetic_responses.stimulationEpochs];
-    end
-=======
+
 if exist('optogenetic_responses','var') && isfield(optogenetic_responses, 'stimulationEpochs')
     excludeIntervals = [excludeIntervals; optogenetic_responses.stimulationEpochs];
 else
     excludeIntervals = [];
->>>>>>> e3e8d2624fea2ba10a71b0a61d71415553fba87c
 end
+
 if ~isempty(excludeIntervals)
     warning('Excluding intervals...');
     for ii = 1:length(spikes.times)
