@@ -48,7 +48,10 @@ addParameter(p,'saveMat',true,@islogical)
 addParameter(p,'lfp',[])
 addParameter(p,'forceDetect',false,@islogical)
 addParameter(p,'useParfor',true,@islogical)
-addParameter(p,'rejectChannels',[],@isnumeric);
+addParameter(p,'restrict_to',[0 Inf],@isscalar);
+addParameter(p,'restrict_to_baseline',true,@islogical);
+addParameter(p,'restrict_to_manipulation',false,@islogical);
+addParameter(p,'save_as','PowerSpectrumProfile',@ischar);
 
 parse(p,varargin{:})
 showfig = p.Results.showfig;
@@ -59,8 +62,11 @@ lfp = p.Results.lfp;
 dt = p.Results.dt;
 forceDetect = p.Results.forceDetect;
 useParfor = p.Results.useParfor;
-rejectChannels = p.Results.rejectChannels;
 basepath = p.Results.basepath;
+restrict_to = p.Results.restrict_to;
+restrict_to_baseline = p.Results.restrict_to_baseline;
+restrict_to_manipulation = p.Results.restrict_to_manipulation;
+save_as = p.Results.save_as;
 
 %% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 % Resolving inputs   
@@ -96,6 +102,38 @@ end
   
 %% Dealing with channels input
 channels = 1:session.extracellular.nChannels;
+ints = [];
+if restrict_to_manipulation
+    list_of_manipulations = list_of_manipulations_names;
+    session = loadSession;
+    for ii = 1:length(session.epochs)
+        if ismember(session.epochs{ii}.behavioralParadigm, list_of_manipulations)
+            ints = [session.epochs{ii}.startTime session.epochs{end}.stopTime];
+            warning('Epoch with manipulations found! Restricting analysis to manipulation interval!');
+            save_as = 'PowerSpectrumProfile_post';
+        end
+    end
+    if isempty(ints)
+        error('Epoch with manipulation not found!!');
+    end
+elseif restrict_to_baseline
+    list_of_manipulations = list_of_manipulations_names;
+    session = loadSession;
+    for ii = 1:length(session.epochs)
+        if ismember(session.epochs{ii}.behavioralParadigm, list_of_manipulations)
+            ints = [0 session.epochs{ii}.startTime];
+            warning('Epoch with manipulations found! Restricting analysis to baseline interval!');
+        end
+    end
+    if isempty(ints)
+        ints = [0 Inf];
+    end
+else
+    ints = [0 Inf];
+end
+
+restrict_ints = IntersectIntervals([ints; restrict_to]);
+
 %% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 % Calculate spectrogram per channel
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
@@ -111,7 +149,7 @@ disp('Calculating spectrograms channelwise')
 if useParfor
     parfor (ii = 1:length(channels),18)
         fprintf('Channel %3.i/%3.i, ',ii, length(channels));
-        lfp = getLFP(channels(ii),'noPrompts', true); % now channels are 1-index an getLFP_temp is also 1-index
+        lfp = getLFP(channels(ii),'noPrompts', true,'restrict', restrict_ints); % now channels are 1-index an getLFP_temp is also 1-index
         [S,t,f] = mtspecgramc_fast(single(lfp.data),[4 2],params);
         S = 10 * log10(S);
         S(find(isinf(S))) = NaN;
@@ -124,7 +162,7 @@ if useParfor
     end
 else
     if isempty(lfp)
-        lfp = getLFP('all','noPrompts', true);
+        lfp = getLFP('all','noPrompts', true,'restrict',restrict_ints);
     end
     for ii = 1:length(channels)
         fprintf('Channel %3.i/%3.i ,\n',ii, length(channels));
@@ -159,13 +197,14 @@ powerProfile.channels = powerProfileChannels;
 %% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 % Saving the result to basename.PowerSpectrumProfile_frange.channelinfo.mat
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-powerProfile.processinginfo.function = 'bz_PowerSpectrumProfile';
+powerProfile.processinginfo.function = 'powerSpectrumProfile';
 powerProfile.processinginfo.date = now;
 powerProfile.processinginfo.params.winSize = winSize;
 powerProfile.processinginfo.params.dt = dt;
 powerProfile.processinginfo.params.frange = frange;
+powerProfile.processinginfo.restricted_intervals = restrict_ints;
 if saveMat
-    save([session.general.name,'.PowerSpectrumProfile_',num2str(frange(1)),'_',num2str(frange(2)),'.channelinfo.mat'],'powerProfile');
+    save([session.general.name,'.' save_as , '_',num2str(frange(1)),'_',num2str(frange(2)),'.channelinfo.mat'],'powerProfile');
 end
 
 
@@ -199,7 +238,7 @@ if showfig
     if ~exist('SummaryFigures','dir')
         mkdir('SummaryFigures')
     end
-    saveas(gcf,['SummaryFigures\PowerSpectrumProfile_',num2str(frange(1)),'_',num2str(frange(2)),'.png']);
+    saveas(gcf,['SummaryFigures\', save_as,'_',num2str(frange(1)),'_',num2str(frange(2)),'.png']);
 
 end
 

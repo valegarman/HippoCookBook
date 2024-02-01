@@ -53,13 +53,13 @@ end
 
 if showTagCells
     optogenetic_responses = getOptogeneticResponse;
-    if ~cells_responsive_to_any_pulse
-        UID = find(optogenetic_responses.threeWaysTest(:,optogenetic_responses.pulseDuration==lightPulseDuration)==1);
-    else
-        UID = find(any((optogenetic_responses.threeWaysTest==1)',1)');
+    if ~isempty(optogenetic_responses)
+        if ~cells_responsive_to_any_pulse
+            UID = find(optogenetic_responses.threeWaysTest(:,optogenetic_responses.pulseDuration==lightPulseDuration)==1);
+        else
+            UID = find(any((optogenetic_responses.threeWaysTest==1)',1)');
+        end        
     end
-    
-    clear optogenetic_responses
 end
 
 % collecting pieces
@@ -154,7 +154,7 @@ end
 
 session = loadSession;
 
-if isempty(UID)
+if isempty(UID) || showTagCells == false
     showTagCells = false;
     UID = 1;
 end
@@ -165,62 +165,70 @@ for ii = 1:length(UID)
     set(gcf,'Position',get(0,'screensize'));
     
     % opto response
-    subplot(5,5,1)
-    hold on
-    imagesc_ranked(optogenetic_responses.timestamps, [1:length(find(all_pyr))], squeeze(optogenetic_responses.responsecurveZSmooth(all_pyr,1,:)),[-3 3],...
-        optogenetic_responses.rateZDuringPulse(all_pyr,1));
-
-    imagesc_ranked(optogenetic_responses.timestamps, [length(find(all_pyr)) + 5 (length(find(all_pyr))+ length(find(all_nw)) + 5)], squeeze(optogenetic_responses.responsecurveZSmooth(all_nw,1,:)),[-3 3],...
-        optogenetic_responses.rateZDuringPulse(all_nw,1));
-
-    imagesc_ranked(optogenetic_responses.timestamps,...
-        [(length(find(all_pyr)) + length(find(all_nw)) + 10) (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)], squeeze(optogenetic_responses.responsecurveZSmooth(all_ww,1,:)),[-3 3],...
-        optogenetic_responses.rateZDuringPulse(all_ww,1));
-    xlim([-0.05 0.3]);
-    ylim([0 (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)]);
-    xlabel('s'); ylabel('Light resp (-3 to 3 SD)');
-    set(gca,'YTick',[0 (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)],'YTickLabel',[0 length(all_pyr)]);
-    title([{session.animal.geneticLine;[basenameFromBasepath(pwd)]}],'FontWeight','normal');
+    if exist('optogenetic_responses','var')
+        if ~isempty(optogenetic_responses)
+            subplot(5,5,1)
+            hold on
+            imagesc_ranked(optogenetic_responses.timestamps, [1:length(find(all_pyr))], squeeze(optogenetic_responses.responsecurveZSmooth(all_pyr,1,:)),[-3 3],...
+                optogenetic_responses.rateZDuringPulse(all_pyr,1));
+        
+            imagesc_ranked(optogenetic_responses.timestamps, [length(find(all_pyr)) + 5 (length(find(all_pyr))+ length(find(all_nw)) + 5)], squeeze(optogenetic_responses.responsecurveZSmooth(all_nw,1,:)),[-3 3],...
+                optogenetic_responses.rateZDuringPulse(all_nw,1));
+        
+            imagesc_ranked(optogenetic_responses.timestamps,...
+                [(length(find(all_pyr)) + length(find(all_nw)) + 10) (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)], squeeze(optogenetic_responses.responsecurveZSmooth(all_ww,1,:)),[-3 3],...
+                optogenetic_responses.rateZDuringPulse(all_ww,1));
+            xlim([-0.05 0.3]);
+            ylim([0 (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)]);
+            xlabel('s'); ylabel('Light resp (-3 to 3 SD)');
+            set(gca,'YTick',[0 (length(find(all_pyr)) + length(find(all_nw)) + length(find(all_ww)) + 10)],'YTickLabel',[0 length(all_pyr)]);
+            title([{session.animal.geneticLine;[basenameFromBasepath(pwd)]}],'FontWeight','normal');
+        end
+    end
     
     subplot(5,5,2)
-    if showTagCells
-        if ~cells_responsive_to_any_pulse
-            st = optogenetic_responses.pulses.timestamps(optogenetic_responses.pulses.duration==0.1);
-        else
-            [~,maxCh] = max(optogenetic_responses.rateDuringPulse(UID(ii),:));
-            st = optogenetic_responses.pulses.timestamps(optogenetic_responses.channels(maxCh)==optogenetic_responses.pulses.channel);
-        end
+    if exist('optogenetic_responses','var')
+        if ~isempty(optogenetic_responses)
+            if showTagCells 
+                if ~cells_responsive_to_any_pulse
+                    st = optogenetic_responses.pulses.timestamps(optogenetic_responses.pulses.duration==0.1);
+                else
+                    [~,maxCh] = max(optogenetic_responses.rateDuringPulse(UID(ii),:));
+                    st = optogenetic_responses.pulses.timestamps(optogenetic_responses.channels(maxCh)==optogenetic_responses.pulses.channel);
+                end
+                
+                rast_x = []; rast_y = [];
+                for kk = 1:length(st)
+                    temp_rast = spikes.times{UID(ii)} - st(kk);
+                    temp_rast = temp_rast(temp_rast>winSizePlot_opto(1) & temp_rast<winSizePlot_opto(2));
+                    rast_x = [rast_x temp_rast'];
+                    rast_y = [rast_y kk*ones(size(temp_rast))'];
+                end
         
-        rast_x = []; rast_y = [];
-        for kk = 1:length(st)
-            temp_rast = spikes.times{UID(ii)} - st(kk);
-            temp_rast = temp_rast(temp_rast>winSizePlot_opto(1) & temp_rast<winSizePlot_opto(2));
-            rast_x = [rast_x temp_rast'];
-            rast_y = [rast_y kk*ones(size(temp_rast))'];
+                % spikeResponse = [spikeResponse; zscore(squeeze(stccg(:,end,jj)))'];
+                if ~cells_responsive_to_any_pulse
+                    resp = squeeze(optogenetic_responses.responsecurveSmooth(UID(ii),find(optogenetic_responses.pulseDuration==0.1),:));
+                else
+                    resp = squeeze(optogenetic_responses.responsecurveSmooth(UID(ii),maxCh,:));
+                end
+                t = optogenetic_responses.timestamps;
+                yyaxis left
+                hold on
+                plot(rast_x, rast_y,'.','MarkerSize',1,'color',[.6 .6 .6]);
+                xlim([winSizePlot_opto(1) winSizePlot_opto(2)]); ylim([0 kk*1.1]);
+                ylabel('Pulses');
+                plot([0 0.1],[kk*1.05 kk*1.05],'-','color',[0 0.6 0.6],'LineWidth',1.5);
+                xlabel('Time (s)'); 
+        
+                yyaxis right
+                plot(t(t>winSizePlot_opto(1) & t<winSizePlot_opto(2)), resp(t>winSizePlot_opto(1) & t<winSizePlot_opto(2)),'k','LineWidth',2);
+                ylabel('Rate (Hz)'); 
+                title([basenameFromBasepath(pwd),' UID: ', num2str(UID(ii)),' (', num2str(ii),'/',num2str(length(UID)),' CluID: ',num2str(spikes.cluID(UID(ii))),')'],'FontWeight','normal');
+            else
+                axis off
+                title('No light responsive cells','FontWeight','normal');
+            end
         end
-
-        % spikeResponse = [spikeResponse; zscore(squeeze(stccg(:,end,jj)))'];
-        if ~cells_responsive_to_any_pulse
-            resp = squeeze(optogenetic_responses.responsecurveSmooth(UID(ii),find(optogenetic_responses.pulseDuration==0.1),:));
-        else
-            resp = squeeze(optogenetic_responses.responsecurveSmooth(UID(ii),maxCh,:));
-        end
-        t = optogenetic_responses.timestamps;
-        yyaxis left
-        hold on
-        plot(rast_x, rast_y,'.','MarkerSize',1,'color',[.6 .6 .6]);
-        xlim([winSizePlot_opto(1) winSizePlot_opto(2)]); ylim([0 kk*1.1]);
-        ylabel('Pulses');
-        plot([0 0.1],[kk*1.05 kk*1.05],'-','color',[0 0.6 0.6],'LineWidth',1.5);
-        xlabel('Time (s)'); 
-
-        yyaxis right
-        plot(t(t>winSizePlot_opto(1) & t<winSizePlot_opto(2)), resp(t>winSizePlot_opto(1) & t<winSizePlot_opto(2)),'k','LineWidth',2);
-        ylabel('Rate (Hz)'); 
-        title([basenameFromBasepath(pwd),' UID: ', num2str(UID(ii)),' (', num2str(ii),'/',num2str(length(UID)),' CluID: ',num2str(spikes.cluID(UID(ii))),')'],'FontWeight','normal');
-    else
-        axis off
-        title('No light responsive cells','FontWeight','normal');
     end
 
     % waveform

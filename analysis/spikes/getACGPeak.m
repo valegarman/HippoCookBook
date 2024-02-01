@@ -26,7 +26,11 @@ addParameter(p,'minPeakTime',15,@isnumeric);
 addParameter(p,'lightPulseDuration',0.1,@isnumeric);
 addParameter(p,'force',false,@islogical);
 addParameter(p,'debug',false,@islogical);
-addParameter(p,'restrictIntervals',[],@isnumeric);
+addParameter(p,'restrictIntervals',[],@isnumeric);  % this is a synonim of restrict_to, kept for funcionality
+addParameter(p,'restrict_to',[0 Inf],@isscalar);
+addParameter(p,'restrict_to_baseline',true,@islogical);
+addParameter(p,'restrict_to_manipulation',false,@islogical);
+addParameter(p,'save_as','ACGPeak',@ischar);
 
 parse(p,varargin{:});
 
@@ -39,7 +43,11 @@ minPeakTime = p.Results.minPeakTime;
 lightPulseDuration = p.Results.lightPulseDuration;
 force = p.Results.force;
 debug = p.Results.debug;
-restrictIntervals = p.Results.restrictIntervals;
+restrict_to = p.Results.restrictIntervals;
+restrict_to = p.Results.restrict_to;
+restrict_to_baseline = p.Results.restrict_to_baseline;
+restrict_to_manipulation = p.Results.restrict_to_manipulation;
+save_as = p.Results.save_as;
 
 %% Load session
 % session = sessionTemplate(basepath);
@@ -51,15 +59,47 @@ if ~isempty(dir([session.general.name,'.ACGPeak.cellinfo.mat'])) & ~force
     return
 end
 
+ints = [];
+if restrict_to_manipulation
+    list_of_manipulations = list_of_manipulations_names;
+    session = loadSession;
+    for ii = 1:length(session.epochs)
+        if ismember(session.epochs{ii}.behavioralParadigm, list_of_manipulations)
+            ints = [session.epochs{ii}.startTime session.epochs{end}.stopTime];
+            warning('Epoch with manipulations found! Restricting analysis to manipulation interval!');
+            save_as = 'ACGPeak_post';
+        end
+    end
+    if isempty(ints)
+        error('Epoch with manipulation not found!!');
+    end
+elseif restrict_to_baseline
+    list_of_manipulations = list_of_manipulations_names;
+    session = loadSession;
+    for ii = 1:length(session.epochs)
+        if ismember(session.epochs{ii}.behavioralParadigm, list_of_manipulations)
+            ints = [0 session.epochs{ii}.startTime];
+            warning('Epoch with manipulations found! Restricting analysis to baseline interval!');
+        end
+    end
+    if isempty(ints)
+        ints = [0 Inf];
+    end
+else
+    ints = [0 Inf];
+end
+restrict_ints = IntersectIntervals([ints; restrict_to]);
+
 try
     if isempty(UID)
         spikes = loadSpikes;
         UID = spikes.UID;
-        if ~isempty(restrictIntervals)
-            for ii = 1:length(spikes.UID)
-                ts = InIntervals(spikes.times{ii},restrictIntervals);
-                spikes.times{ii} = spikes.times{ii}(ts);
-            end
+        if any(restrict_ints ~= [0 Inf])
+            warning('Restricting analysis for intervals...');
+            for ii = 1:length(spikes.times)
+                [status] = InIntervals(spikes.times{ii},restrict_ints);
+                spikes.times{ii} = spikes.times{ii}(status);
+            end 
         end
     end
     
@@ -127,7 +167,7 @@ end
 acg_time_samples = acg_time;
 acg_time = log10(cell_metrics.general.acgs.log10);
 if showFig
-    gcf = figure;
+    f = figure;
     % set(gcf,'Position',get(0,'screensize'));
     subplot(2,2,[1 2])
     hold on;
@@ -174,7 +214,7 @@ if showFig
     axis tight; ylabel('Count'); xlabel('bin number'); xlim([0 60])
     
     if saveFig
-        saveas(gcf,['SummaryFigures\ACGPeak.png']); 
+        saveas(f,['SummaryFigures\' save_as '.png']); 
     end
 end
 
@@ -192,7 +232,7 @@ acgPeak.acgPeak_sample = acgPeak_sample;
 acgPeak.offset = offset;
 
 if saveMat
-    save([session.general.name,'.ACGPeak.cellinfo.mat'],'acgPeak');
+    save([session.general.name,'.' save_as '.cellinfo.mat'],'acgPeak');
 end
 
 end

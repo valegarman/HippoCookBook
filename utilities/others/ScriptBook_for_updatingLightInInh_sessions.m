@@ -36,6 +36,7 @@ close all;
 close all;
 indexNewSession('copyFiles', true);
 
+<<<<<<< HEAD
 %% version for no pulses
 pulses = getAnalogPulses('manualThr',true,'force',true); % 1-index   
 close all;
@@ -68,3 +69,55 @@ computeCofiringModulation;
 
 close all;
 indexNewSession('copyFiles', true);
+=======
+%%  for sessions with manipulations (CNO and DMSO)
+session = loadSession;
+session = gui_session(session); % explore once last time! :)
+
+uLEDResponses = getuLEDResponse('force',true);
+uLEDResponses_post = getuLEDResponse('force',true,'restrict_to_manipulation',true);
+
+getOptogeneticResponse('numRep',500,'force',true);
+getOptogeneticResponse('numRep',500,'force',true,'restrict_to_manipulation',true);
+
+powerSpectrumProfile([6 12],'showfig',true,'forceDetect',true);
+powerSpectrumProfile([6 12],'showfig',true,'forceDetect',true,'restrict_to_manipulation',true);
+
+powerSpectrumProfile([20 100],'showfig',true,'forceDetect',true);
+powerSpectrumProfile([20 100],'showfig',true,'forceDetect',true,'restrict_to_manipulation',true);
+
+powerSpectrumProfile([100 500],'showfig',true,'forceDetect',true);
+powerSpectrumProfile([100 500],'showfig',true,'forceDetect',true,'restrict_to_manipulation',true);
+
+spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true,'minNumberOfPulses',10);
+spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true,'minNumberOfPulses',10,'restrict_to_manipulation',true);
+
+spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10);
+spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10,'restrict_to_manipulation',true);
+
+computePhaseModulation;
+computePhaseModulation('restrict_to_manipulation',true);
+
+if ~isempty(dir([session.general.name,'.optogeneticPulses.events.mat']))
+    file = dir([session.general.name,'.optogeneticPulses.events.mat']);
+    load(file.name);
+end
+excludeManipulationIntervals = optoPulses.stimulationEpochs;
+ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true,'restrictToIntervals',...
+    uLEDResponses.restricted_interval,'manualAdjustMonoSyn',false);
+cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true,...
+    'restrictToIntervals',uLEDResponses.restricted_interval,'manualAdjustMonoSyn',false,'saveAs','cell_metrics_post');
+
+getACGPeak('force',true);
+getACGPeak('force',true,'restrict_to_manipulation',true);
+
+getAverageCCG('force',true);
+getAverageCCG('force',true,'restrict_to_manipulation',true);
+    
+getSpikesReturnPlot('force',true);
+getSpikesReturnPlot('force',true,'restrict_to_manipulation',true);
+
+getSpeedCorr('numQuantiles',20,'force',true);
+getSpeedCorr('numQuantiles',20,'force',true, 'restrict_to_manipulation',true);
+
+>>>>>>> e3e8d2624fea2ba10a71b0a61d71415553fba87c
