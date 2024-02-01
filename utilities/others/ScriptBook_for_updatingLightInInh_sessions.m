@@ -68,7 +68,7 @@ computeCofiringModulation;
 
 close all;
 indexNewSession('copyFiles', true);
-=======
+
 %%  for sessions with manipulations (CNO and DMSO)
 session = loadSession;
 session = gui_session(session); % explore once last time! :)
