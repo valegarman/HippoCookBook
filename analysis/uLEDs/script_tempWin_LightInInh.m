@@ -114,7 +114,7 @@ for zz = 1
     save('uLEDResponses_interval_30ms_50ms.mat','uLEDResponses_interval','collision_metrics_30_50');
     clear uLEDResponses_interval
 
-    monosyn_inh_win = [0.040 0.060]; % 30to50
+    monosyn_inh_win = [0.040 0.060]; % 40to60
     parfor mm = 1:spikes.numcells
         disp(mm);
         uLEDResponses_interval{mm} = getuLEDResponse_intervals([spikes_times{mm} + monosyn_inh_win(1) spikes_times{mm} + monosyn_inh_win(2)],...
