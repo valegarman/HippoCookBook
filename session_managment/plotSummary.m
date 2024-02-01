@@ -165,7 +165,7 @@ for ii = 1:length(UID)
     set(gcf,'Position',get(0,'screensize'));
     
     % opto response
-    if exist(optogenetic_responses,'var')
+    if exist('optogenetic_responses','var')
         if ~isempty(optogenetic_responses)
             subplot(5,5,1)
             hold on
@@ -187,7 +187,7 @@ for ii = 1:length(UID)
     end
     
     subplot(5,5,2)
-    if exist(optogenetic_responses,'var')
+    if exist('optogenetic_responses','var')
         if ~isempty(optogenetic_responses)
             if showTagCells 
                 if ~cells_responsive_to_any_pulse

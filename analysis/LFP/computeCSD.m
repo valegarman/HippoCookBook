@@ -34,6 +34,7 @@ function [ csd ] = computeCSD (lfp, varargin)
 
 % Antonio FR, 7/18
 % Manuel Valero (migrate to HippoCookBook, adding interpolating, badchannels, etc), 2022
+% NCL-MV, Generate error if requesting first or last channel 2024
 
 %% Parse inputs
 
@@ -200,7 +201,7 @@ end
 CSD = diff(data,2,2);
 CSD = [nan(size(CSD,1),1) CSD nan(size(CSD,1),1);];
 
-if any(channelToRetrieve ~= channels)
+if any(channelToRetrieve ~= channels) && ~(channelToRetrieve == channels(1) || channelToRetrieve == channels(end))
     CSD = CSD(:,find(channels==channelToRetrieve));
     channels = channelToRetrieve;
 end
