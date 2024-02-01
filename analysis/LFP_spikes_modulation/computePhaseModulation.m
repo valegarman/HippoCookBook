@@ -107,7 +107,9 @@ if skipStimulationPeriods
     end
 end
 if exist('optogenetic_responses','var')
-    excludeIntervals = [excludeIntervals; optogenetic_responses.stimulationEpochs];
+    if isfield(optogenetic_responses, 'stimulationEpochs')
+        excludeIntervals = [excludeIntervals; optogenetic_responses.stimulationEpochs];
+    end
 end
 if ~isempty(excludeIntervals)
     warning('Excluding intervals...');

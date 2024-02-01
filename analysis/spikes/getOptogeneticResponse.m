@@ -148,6 +148,11 @@ pulses.isDigital = [zeros(size(pulsesAnalog.analogChannelsList)); ones(size(puls
 
 % get cell response
 optogeneticResponses = [];
+if isempty(pulses.timestamps)
+    warning('No pulses were found!');
+    return
+end
+
 pulseDuration = unique(round(pulses.duration,duration_round_decimal)); % because code only codes for channel, we take minimum duration channel for responses
 channels = unique(pulses.channel); % code per channel, channel x duration should be implemented... 
 timestamps_recording = min(pulses.timestamps(:,2)):1/1250:max(pulses.timestamps(:,2));
