@@ -32,6 +32,10 @@ addParameter(p,'excludeIntervals',[],@isnumeric);
 addParameter(p,'computeCellTypeAverages',true,@islogical);
 addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'force',false,@islogical);
+addParameter(p,'restrict_to',[0 Inf],@isscalar);
+addParameter(p,'restrict_to_baseline',true,@islogical);
+addParameter(p,'restrict_to_manipulation',false,@islogical);
+addParameter(p,'save_as','spikesReturnPlot',@ischar);
 
 parse(p, varargin{:});
 
@@ -45,6 +49,10 @@ plot_logxyaxis = p.Results.plot_logxyaxis;
 computeCellTypeAverages = p.Results.computeCellTypeAverages;
 saveMat = p.Results.saveMat;
 force = p.Results.force;
+restrict_to = p.Results.restrict_to;
+restrict_to_baseline = p.Results.restrict_to_baseline;
+restrict_to_manipulation = p.Results.restrict_to_manipulation;
+save_as = p.Results.save_as;
 
 % Deal with inputs
 prevPath = pwd;
@@ -82,6 +90,44 @@ if ~isempty(excludeIntervals)
         [status] = InIntervals(spikes.times{ii},excludeIntervals);
         spikes.times{ii} = spikes.times{ii}(~status);
     end
+end
+
+ints = [];
+if restrict_to_manipulation
+    list_of_manipulations = list_of_manipulations_names;
+    session = loadSession;
+    for ii = 1:length(session.epochs)
+        if ismember(session.epochs{ii}.behavioralParadigm, list_of_manipulations)
+            ints = [session.epochs{ii}.startTime session.epochs{end}.stopTime];
+            warning('Epoch with manipulations found! Restricting analysis to manipulation interval!');
+            save_as = 'spikesReturnPlot_post';
+        end
+    end
+    if isempty(ints)
+        error('Epoch with manipulation not found!!');
+    end
+elseif restrict_to_baseline
+    list_of_manipulations = list_of_manipulations_names;
+    session = loadSession;
+    for ii = 1:length(session.epochs)
+        if ismember(session.epochs{ii}.behavioralParadigm, list_of_manipulations)
+            ints = [0 session.epochs{ii}.startTime];
+            warning('Epoch with manipulations found! Restricting analysis to baseline interval!');
+        end
+    end
+    if isempty(ints)
+        ints = [0 Inf];
+    end
+else
+    ints = [0 Inf];
+end
+restrict_ints = IntersectIntervals([ints; restrict_to]);
+if any(restrict_ints ~= [0 Inf])
+    warning('Restricting analysis for intervals...');
+    for ii = 1:length(spikes.times)
+        [status] = InIntervals(spikes.times{ii},restrict_ints);
+        spikes.times{ii} = spikes.times{ii}(status);
+    end 
 end
 
 % compute return plot
@@ -151,7 +197,7 @@ if doPlot
             % set(gca,'YTick',[],'XTick',[]);
         end
     end
-    saveas(gcf,['SummaryFigures\spikesReturnPlot.png']); 
+    saveas(gcf,['SummaryFigures\' save_as '.png']); 
     
     if isfield(spikesReturnPlot, 'cellTypes')
         for jj = 1:size(ax,2)
@@ -164,7 +210,7 @@ if doPlot
                     colormap(ax(jj),cmap_pyr);
             end
         end
-        saveas(gcf,['SummaryFigures\spikesReturnPlot.png']); 
+        saveas(gcf,['SummaryFigures\' save_as '.png']); 
             
         figure
         set(gcf,'Position',[100 100 900 400]);
@@ -204,7 +250,7 @@ if doPlot
             ylabel('ISI n+1 (s)');
             xlabel('ISI (s)');
         end
-        saveas(gcf,['SummaryFigures\spikesReturnPlot_cellType.png']); 
+        saveas(gcf,['SummaryFigures\' save_as '_cellType.png']); 
             
     end
     
@@ -212,7 +258,7 @@ end
 
 if saveMat
     disp('Saving results...');
-    save([basenameFromBasepath(pwd) '.spikesReturnPlot.cellinfo.mat'],'spikesReturnPlot');
+    save([basenameFromBasepath(pwd) '.' save_as '.cellinfo.mat'],'spikesReturnPlot');
 end
 
 cd(prevPath);

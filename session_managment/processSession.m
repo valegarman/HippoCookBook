@@ -33,7 +33,7 @@ addParameter(p,'hfo_bandpass',[100 500], @isnumeric);
 addParameter(p,'rejectChannels',[],@isnumeric); % 0-index
 addParameter(p,'force_analogPulsesDetection',true,@islogical);
 addParameter(p,'force_loadingSpikes',true,@islogical);
-addParameter(p,'excludeManipulationIntervals',[],@isnumeric);
+addParameter(p,'excludePulsesIntervals',[],@isnumeric);
 addParameter(p,'rippleChannel',[],@isnumeric);% manually selecting ripple Channel in case getHippocampalLayers does not provide a right output
 addParameter(p,'SWChannel',[],@isnumeric); % manually selecting SW Channel in case getHippocampalLayers does not provide a right output
 addParameter(p,'digital_optogenetic_channels',[],@isnumeric);
@@ -51,6 +51,10 @@ addParameter(p,'profileType','hippocampus',@ischar); % options, 'hippocampus' an
 addParameter(p,'rippleMasterDetector_threshold',[1.5 3.5],@isnumeric); % [1.5 3.5]
 addParameter(p,'LED_threshold',0.98,@isnumeric);
 addParameter(p,'createLegacySummaryFolder',true,@islogical);
+addParameter(p,'restrict_to',[0 Inf],@isscalar);
+addParameter(p,'restrict_to_baseline',true,@islogical);
+addParameter(p,'restrict_to_manipulation',false,@islogical);
+addParameter(p,'subname',[],@ischar);
 
 parse(p,varargin{:})
 
@@ -61,7 +65,7 @@ hfo_bandpass = p.Results.hfo_bandpass;
 rejectChannels = p.Results.rejectChannels;
 force_analogPulsesDetection = p.Results.force_analogPulsesDetection;
 force_loadingSpikes = p.Results.force_loadingSpikes;
-excludeManipulationIntervals = p.Results.excludeManipulationIntervals;
+excludePulsesIntervals = p.Results.excludePulsesIntervals;
 rippleChannel = p.Results.rippleChannel;
 SWChannel = p.Results.SWChannel;
 digital_optogenetic_channels = p.Results.digital_optogenetic_channels;
@@ -79,6 +83,10 @@ profileType = p.Results.profileType;
 rippleMasterDetector_threshold = p.Results.rippleMasterDetector_threshold;
 LED_threshold = p.Results.LED_threshold;
 createLegacySummaryFolder = p.Results.createLegacySummaryFolder;
+addParameter(p,'restrict_to',[0 Inf],@isscalar);
+addParameter(p,'restrict_to_baseline',true,@islogical);
+addParameter(p,'restrict_to_manipulation',false,@islogical);
+addParameter(p,'subname',[],@ischar);
 
 % Deal with inputs
 prevPath = pwd;
@@ -153,6 +161,38 @@ if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))
     selectProbe('force',true); % choose probe
 end
 
+ints = [];
+if restrict_to_manipulation
+    list_of_manipulations = list_of_manipulations_names;
+    session = loadSession;
+    for ii = 1:length(session.epochs)
+        if ismember(session.epochs{ii}.behavioralParadigm, list_of_manipulations)
+            ints = [session.epochs{ii}.startTime session.epochs{end}.stopTime];
+            warning('Epoch with manipulations found! Restricting analysis to manipulation interval!');
+            subname = '_post';
+        end
+    end
+    if isempty(ints)
+        error('Epoch with manipulation not found!!');
+    end
+elseif restrict_to_baseline
+    list_of_manipulations = list_of_manipulations_names;
+    session = loadSession;
+    for ii = 1:length(session.epochs)
+        if ismember(session.epochs{ii}.behavioralParadigm, list_of_manipulations)
+            ints = [0 session.epochs{ii}.startTime];
+            warning('Epoch with manipulations found! Restricting analysis to baseline interval!');
+        end
+    end
+    if isempty(ints)
+        ints = [0 Inf];
+    end
+else
+    ints = [0 Inf];
+end
+
+restrict_ints = IntersectIntervals([ints; restrict_to]);
+
 %% 2. Remove previous cellinfo.spikes.mat and computes spikes again (manual clustered)
 if ~any(ismember(excludeAnalysis, {'2',lower('loadSpikes')}))
     disp('Loading Spikes...')
@@ -188,7 +228,7 @@ end
 %% 4. Spike Features, and optogenetic responses
 % 4.1 Light responses, if available
 if ~any(ismember(excludeAnalysis, {'4',lower('spikesFeatures')}))
-    optogeneticResponses = getOptogeneticResponse('numRep',500,'force',true);
+    getOptogeneticResponse('numRep',500,'force',true,'restrict_to', restrict_ints);
     % 4.2 ACG and waveform
     spikeFeatures;
 end
@@ -209,9 +249,9 @@ end
 
 %% 6. Power Profiles
 if ~any(ismember(excludeAnalysis, {'6',lower('powerProfiles')}))
-    powerProfile_theta = powerSpectrumProfile(theta_bandpass,'showfig',true,'forceDetect',true);
-    powerProfile_gamma = powerSpectrumProfile(gamma_bandpass,'showfig',true,'forceDetect',true);
-    powerProfile_hfo = powerSpectrumProfile(hfo_bandpass,'showfig',true,'forceDetect',true);
+    powerSpectrumProfile(theta_bandpass,'showfig',true,'forceDetect',true,'restrict_to',restrict_ints);
+    powerSpectrumProfile(gamma_bandpass,'showfig',true,'forceDetect',true,'restrict_to',restrict_ints);
+    powerSpectrumProfile(hfo_bandpass,'showfig',true,'forceDetect',true,'restrict_to',restrict_ints);
 
 end
 
@@ -229,14 +269,13 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
 %     UDStates = detectUD('plotOpt', true,'forceDetect',true','NREMInts','all');
 %     psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true);
 
-
     UDStates = detectUpsDowns('plotOpt', true,'forceDetect',true','NREMInts','all');
-    psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true,'minNumberOfPulses',10);
+    psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true,'minNumberOfPulses',10,'restrict_to',restrict_ints);
     getSpikesRank('events','upstates');
 
     % 8.2 Ripples
     ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'removeOptogeneticStimulation',true,'thresholds',rippleMasterDetector_threshold,'eventSpikeThreshold', false);
-    psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10);
+    psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10,'restrict_to',restrict_ints);
     getSpikesRank('events','ripples');
 
     % 8.3 Theta intervals
@@ -246,7 +285,7 @@ end
 %% 9. Phase Modulation
 if ~any(ismember(excludeAnalysis, {'9',lower('phaseModulation')}))
     % LFP-spikes modulation
-    [phaseMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel);
+    [phaseMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel,'restrict_to',restrict_ints);
     computeCofiringModulation;
 end
 
@@ -259,18 +298,19 @@ if ~any(ismember(excludeAnalysis, {'10',lower('cellMetrics')}))
         session = assignBrainRegion('showPowerProfile','hfo','showEvent','slowOscilations','eventTwin',[-.5 .5]); % hfo slowOscilations [-.5 .5]
     end
     
-    if isempty(excludeManipulationIntervals)
+    if isempty(excludePulsesIntervals)
         try
             if ~isempty(dir([session.general.name,'.optogeneticPulses.events.mat']))
                 file = dir([session.general.name,'.optogeneticPulses.events.mat']);
                 load(file.name);
             end
-                excludeManipulationIntervals = optoPulses.stimulationEpochs;
+                excludePulsesIntervals = optoPulses.stimulationEpochs;
         catch
             warning('Not possible to get manipulation periods. Running CellMetrics withouth excluding manipulation epochs');
         end
     end
-    session = loadSession();
+
+    session = loadSession;
     cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true); % after CellExplorar
     
     getACGPeak('force',true);

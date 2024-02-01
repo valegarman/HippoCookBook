@@ -53,6 +53,11 @@ addParameter(p,'bootsTrapCI',[0.001 0.999],@isnumeric);
 addParameter(p,'onset',0,@isnumeric);
 addParameter(p,'offset',0,@isnumeric);
 addParameter(p,'getRaster',true,@islogical);
+addParameter(p,'restrict_to',[0 Inf],@isscalar);
+addParameter(p,'restrict_to_baseline',true,@islogical);
+addParameter(p,'restrict_to_manipulation',false,@islogical);
+addParameter(p,'save_as','optogeneticResponse',@ischar);
+addParameter(p,'save_pulses_as','optogeneticPulses',@ischar);
 
 parse(p, varargin{:});
 analogChannelsList = p.Results.analogChannelsList;
@@ -79,6 +84,11 @@ bootsTrapCI = p.Results.bootsTrapCI;
 onset = p.Results.onset;
 offset = p.Results.offset;
 getRaster = p.Results.getRaster;
+restrict_to = p.Results.restrict_to;
+restrict_to_baseline = p.Results.restrict_to_baseline;
+restrict_to_manipulation = p.Results.restrict_to_manipulation;
+save_as = p.Results.save_as;
+save_pulses_as = p.Results.save_pulses_as;
 
 % Deal with inputs
 prevPath = pwd;
@@ -90,6 +100,39 @@ if ~isempty(targetFile) && ~force
     load(targetFile.name);
     return
 end
+
+ints = [];
+if restrict_to_manipulation
+    list_of_manipulations = list_of_manipulations_names;
+    session = loadSession;
+    for ii = 1:length(session.epochs)
+        if ismember(session.epochs{ii}.behavioralParadigm, list_of_manipulations)
+            ints = [session.epochs{ii}.startTime session.epochs{end}.stopTime];
+            warning('Epoch with manipulations found! Restricting analysis to manipulation interval!');
+            save_as = 'optogeneticResponse_post';
+            save_pulses_as = 'optogeneticPulses_post';
+        end
+    end
+    if isempty(ints)
+        error('Epoch with manipulation not found!!');
+    end
+elseif restrict_to_baseline
+    list_of_manipulations = list_of_manipulations_names;
+    session = loadSession;
+    for ii = 1:length(session.epochs)
+        if ismember(session.epochs{ii}.behavioralParadigm, list_of_manipulations)
+            ints = [0 session.epochs{ii}.startTime];
+            warning('Epoch with manipulations found! Restricting analysis to baseline interval!');
+        end
+    end
+    if isempty(ints)
+        ints = [0 Inf];
+    end
+else
+    ints = [0 Inf];
+end
+
+restrict_ints = IntersectIntervals([ints; restrict_to]);
 
 %% Digital and Analog Pulses
 if isnan(analogChannelsList)
@@ -138,13 +181,30 @@ if ~isempty(digitalChannelsList)
     end
 end
 
+
 pulses.timestamps = [pulsesAnalog.timestamps; pulsesDigital.timestamps];  % combine pulses
+if isempty(pulses.timestamps)
+    optogeneticResponses = [];
+    return 
+end
+
 pulses.channel = [pulsesAnalog.analogChannelsList; pulsesDigital.digitalChannelsList + lastAnalogChannels];  % combine pulses
 pulses.analogChannelsList = [pulsesAnalog.analogChannelsList; nan(size(pulsesDigital.digitalChannelsList))];  % 
 pulses.digitalChannelsList = [nan(size(pulsesAnalog.analogChannelsList)); pulsesDigital.digitalChannelsList];  % 
 pulses.duration = round(pulses.timestamps(:,2) - pulses.timestamps(:,1),3);  % 
 pulses.isAnalog = [ones(size(pulsesAnalog.analogChannelsList)); zeros(size(pulsesDigital.digitalChannelsList))];
 pulses.isDigital = [zeros(size(pulsesAnalog.analogChannelsList)); ones(size(pulsesDigital.digitalChannelsList))];
+
+% restrict_pulses
+status = InIntervals(pulses.timestamps(:,1),restrict_ints);
+pulses.timestamps = pulses.timestamps(status,:);
+pulses.channel = pulses.channel(status,:);
+pulses.analogChannelsList = pulses.analogChannelsList(status,:);
+pulses.digitalChannelsList = pulses.digitalChannelsList(status,:);
+pulses.duration = pulses.duration(status,:);
+pulses.isAnalog = pulses.isAnalog(status,:);
+pulses.isDigital = pulses.isDigital(status,:);
+pulses.restricted_intervals = restrict_ints;
 
 % get cell response
 optogeneticResponses = [];
@@ -239,7 +299,6 @@ pulses.digitalChannelsList(toRemove) = [];
 pulses.duration(toRemove) = [];
 pulses.isAnalog(toRemove) = [];
 pulses.isDigital(toRemove) = [];
-
 
 %%
 spikes = loadSpikes;
@@ -452,10 +511,10 @@ for jj = 1:nConditions
             optogeneticResponses.multipleTest(ii,jj,:) = nan(1,4);
             optogeneticResponses.multipleTest_string{ii,jj} = NaN;
         end
-        optogeneticResponses.timestamps = t;
+        optogeneticResponses.timestamps = t;   
     end
-
 end
+optogeneticResponses.restricted_intervals = restrict_ints;
 
 % find intervals
 lag = 20; % max interval between pulses, in seconds
@@ -523,14 +582,13 @@ end
 optogeneticResponses.responseMetrics = responseMetrics;
 
 if saveMat
-    
     optogeneticResponses_raster = optogeneticResponses;
     optogeneticResponses = rmfield(optogeneticResponses,'raster');
     disp(' Saving results...');
     filename = split(pwd,filesep); filename = filename{end};
-    save([filename '.optogeneticResponse.cellinfo.mat'],'optogeneticResponses','-v7.3');
+    save([filename '.' save_as '.cellinfo.mat'],'optogeneticResponses','-v7.3');
     if getRaster
-        save([basenameFromBasepath(pwd) '.optogeneticResponse_raster.cellinfo.mat'],'optogeneticResponses_raster','-v7.3');
+        save([basenameFromBasepath(pwd) '.' save_as '.cellinfo.mat'],'optogeneticResponses_raster','-v7.3');
     end
 end
 
@@ -539,7 +597,7 @@ if saveEventsFile
     filename = split(pwd,filesep); filename = filename{end};
     optoPulses = optogeneticResponses.pulses;
     optoPulses.stimulationEpochs = stimulationEpochs;
-    save([filename '.optogeneticPulses.events.mat'],'optoPulses');
+    save([filename '.' save_pulses_as '.events.mat'],'optoPulses');
 end
 
 % PLOTS
@@ -588,7 +646,7 @@ if rasterPlot
                 set(gca,'YTick',[],'XTick',[]);
             end
         end
-        saveas(gcf,['SummaryFigures\OptogenticRespRaster_ch',num2str(conditions(ii,2)),'_dur',num2str(conditions(ii,1)),'ch.png']); 
+        saveas(gcf,['SummaryFigures\' save_as 'Raster_ch',num2str(conditions(ii,2)),'_dur',num2str(conditions(ii,1)),'ch.png']); 
 %         close(gcf);
     end
 end
@@ -634,7 +692,7 @@ if ratePlot
         hold on
         plot([0 median(optogeneticResponses.durationPerPulse(:,ii,:))],[-1.5 -1.5],'color',[0 0.6 0.6],'LineWidth',2);
     end
-    saveas(gcf,['SummaryFigures\optogeneticPulsesPsth.png']); 
+    saveas(gcf,['SummaryFigures\' save_as 'Psth.png']); 
 end          
 
 
