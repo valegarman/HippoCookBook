@@ -51,10 +51,6 @@ addParameter(p,'profileType','hippocampus',@ischar); % options, 'hippocampus' an
 addParameter(p,'rippleMasterDetector_threshold',[1.5 3.5],@isnumeric); % [1.5 3.5]
 addParameter(p,'LED_threshold',0.98,@isnumeric);
 addParameter(p,'createLegacySummaryFolder',true,@islogical);
-addParameter(p,'restrict_to',[0 Inf],@isscalar);
-addParameter(p,'restrict_to_baseline',true,@islogical);
-addParameter(p,'restrict_to_manipulation',false,@islogical);
-addParameter(p,'subname',[],@ischar);
 
 parse(p,varargin{:})
 
@@ -83,10 +79,6 @@ profileType = p.Results.profileType;
 rippleMasterDetector_threshold = p.Results.rippleMasterDetector_threshold;
 LED_threshold = p.Results.LED_threshold;
 createLegacySummaryFolder = p.Results.createLegacySummaryFolder;
-addParameter(p,'restrict_to',[0 Inf],@isscalar);
-addParameter(p,'restrict_to_baseline',true,@islogical);
-addParameter(p,'restrict_to_manipulation',false,@islogical);
-addParameter(p,'subname',[],@ischar);
 
 % Deal with inputs
 prevPath = pwd;
