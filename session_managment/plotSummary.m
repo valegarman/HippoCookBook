@@ -1,4 +1,4 @@
-gitpfunction [] = plotSummary(varargin)
+function [] = plotSummary(varargin)
 %        [] = getSummaryPerCells(varargin)
 %
 % Display summary plots for a given cell in a single figures. By default
