@@ -51,6 +51,9 @@ addParameter(p,'profileType','hippocampus',@ischar); % options, 'hippocampus' an
 addParameter(p,'rippleMasterDetector_threshold',[1.5 3.5],@isnumeric); % [1.5 3.5]
 addParameter(p,'LED_threshold',0.98,@isnumeric);
 addParameter(p,'createLegacySummaryFolder',true,@islogical);
+addParameter(p,'restrict_to',[0 Inf],@isscalar);
+addParameter(p,'restrict_to_baseline',true,@islogical);
+addParameter(p,'restrict_to_manipulation',false,@islogical);
 
 parse(p,varargin{:})
 
@@ -79,6 +82,9 @@ profileType = p.Results.profileType;
 rippleMasterDetector_threshold = p.Results.rippleMasterDetector_threshold;
 LED_threshold = p.Results.LED_threshold;
 createLegacySummaryFolder = p.Results.createLegacySummaryFolder;
+restrict_to = p.Results.restrict_to;
+restrict_to_baseline = p.Results.restrict_to_baseline;
+restrict_to_manipulation = p.Results.restrict_to_manipulation;
 
 % Deal with inputs
 prevPath = pwd;
@@ -162,7 +168,6 @@ if restrict_to_manipulation
         if ismember(session.epochs{ii}.behavioralParadigm, list_of_manipulations)
             ints = [session.epochs{ii}.startTime session.epochs{end}.stopTime];
             warning('Epoch with manipulations found! Restricting analysis to manipulation interval!');
-            subname = '_post';
         end
     end
     if isempty(ints)
