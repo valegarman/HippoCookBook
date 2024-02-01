@@ -53,6 +53,10 @@ addParameter(p,'salt_time',[-0.250 0.250],@isscalar);
 addParameter(p,'salt_win',[0.005],@isscalar);
 addParameter(p,'salt_binSize',[0.001],@isscalar);
 addParameter(p,'getRaster',false,@islogical);
+addParameter(p,'restrict_to',[0 Inf],@isscalar);
+addParameter(p,'restrict_to_baseline',true,@islogical);
+addParameter(p,'restrict_to_manipulation',false,@islogical);
+addParameter(p,'save_as','uLEDResponse',@ischar);
 
 parse(p, varargin{:});
 uLEDPulses = p.Results.uLEDPulses;
@@ -74,6 +78,10 @@ salt_win = p.Results.salt_win;
 salt_binSize = p.Results.salt_binSize;
 bootsTrapCI = p.Results.bootsTrapCI;
 getRaster = p.Results.getRaster;
+restrict_to = p.Results.restrict_to;
+restrict_to_baseline = p.Results.restrict_to_baseline;
+restrict_to_manipulation = p.Results.restrict_to_manipulation;
+save_as = p.Results.save_as;
 
 % Deal with inputs
 prevPath = pwd;
@@ -94,10 +102,43 @@ if isempty(spikes)
     spikes = loadSpikes('getWaveformsFromDat',false);
 end
 
-% Get cell responses!!
+ints = [];
+if restrict_to_manipulation
+    list_of_manipulations = list_of_manipulations_names;
+    session = loadSession;
+    for ii = 1:length(session.epochs)
+        if ismember(session.epochs{ii}.behavioralParadigm, list_of_manipulations)
+            ints = [session.epochs{ii}.startTime session.epochs{end}.stopTime];
+            warning('Epoch with manipulations found! Restricting analysis to manipulation interval!');
+            save_as = 'uLEDResponse_post';
+        end
+    end
+    if isempty(ints)
+        error('Epoch with manipulation not found!!');
+    end
+elseif restrict_to_baseline
+    list_of_manipulations = list_of_manipulations_names;
+    session = loadSession;
+    for ii = 1:length(session.epochs)
+        if ismember(session.epochs{ii}.behavioralParadigm, list_of_manipulations)
+            ints = [0 session.epochs{ii}.startTime];
+            warning('Epoch with manipulations found! Restricting analysis to baseline interval!');
+        end
+    end
+    if isempty(ints)
+        ints = [0 Inf];
+    end
+else
+    ints = [0 Inf];
+end
+
+restrict_ints = IntersectIntervals([ints; restrict_to]);
+
+% Get cell responses!! :)
 uLEDResponses = [];
 codes = 1:max(uLEDPulses.code);
 timestamps_recording = min(uLEDPulses.timestamps(:,2)):1/1250:max(uLEDPulses.timestamps(:,2));
+timestamps_recording = Restrict(timestamps_recording,restrict_ints);
 
 if length(uLEDPulses.list_of_durations)>length(onset) && length(onset)==1
     onset(1:length(uLEDPulses.list_of_durations)) = onset(1);
@@ -118,22 +159,24 @@ if ~isfield(uLEDPulses,'list_of_conditions')
     uLEDPulses.list_of_conditions = unique(uLEDPulses.conditionDurationID);
 end
 
+session = loadSession;
 for kk = 1:length(uLEDPulses.list_of_conditions)
     fprintf('\n> Condition %3.i/ %3.i \n',kk, length(uLEDPulses.list_of_conditions)); %
     
     % generate random events for boostraping
-    nPulses = int32(length(find(uLEDPulses.conditionID == uLEDPulses.list_of_conditions(kk)))/...
-            length(unique(uLEDPulses.code(uLEDPulses.conditionID == uLEDPulses.list_of_conditions(kk)))));
+    nPulses = int32(length(find(uLEDPulses.conditionID == uLEDPulses.list_of_conditions(kk) & ...
+        InIntervals(uLEDPulses.timestamps,restrict_ints)))/...
+        length(unique(uLEDPulses.code(uLEDPulses.conditionID == uLEDPulses.list_of_conditions(kk)))));
     randomEvents = [];
     disp('Generating boostrap template...');
     for mm = 1:numRep
-        randomEvents{mm} = sort(randsample(timestamps_recording, nPulses))';
+        randomEvents{mm} = sort(randsample(timestamps_recording, nPulses));
     end
     pulseDuration = uLEDPulses.list_of_durations(kk);
     epoch = uLEDPulses.list_of_epochs(kk);
     condition = uLEDPulses.list_of_conditions(kk);
     
-    [stccg, t] = CCG([spikes.times randomEvents],[],'binSize',binSize,'duration',winSize,'norm','rate');
+    [stccg, t] = CCG([spikes.times randomEvents],[],'binSize',binSize,'duration',winSize,'norm','rate','Fs',1/session.extracellular.sr);
     fprintf('\n'); %
     t_duringPulse = t > 0 + onset(kk) & t < pulseDuration + offset(kk); 
     randomRatesDuringPulse = squeeze(mean(stccg(t_duringPulse, length(spikes.UID)+1:end,1:length(spikes.UID)),1));
@@ -149,14 +192,15 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
         uLEDResponses.bootsTrapCI(1:size(randomRatesDuringPulse,2),kk,1:2) = NaN;
     end
     for jj = 1:length(codes)
-        fprintf('\n **Pulse %3.i/%3.i',jj,length(codes)); %
+        fprintf('\n **Pulse %3.i/%3.i ',jj,length(codes)); %
         pulses = uLEDPulses.timestamps(uLEDPulses.code == codes(jj)...
             & uLEDPulses.conditionID==uLEDPulses.list_of_conditions(kk),1);
+        pulses = Restrict(pulses, restrict_ints);
         if isempty(pulses)
             pulses = [0];
         end
         times = spikes.times; times{length(times)+1} = pulses;
-        [stccg, t] = CCG(times,[],'binSize',binSize,'duration',winSize,'norm','rate');
+        [stccg, t] = CCG(times,[],'binSize',binSize,'duration',winSize,'norm','rate','Fs',1/session.extracellular.sr);
         uLEDResponses.responsecurve(:,kk,jj,:) = squeeze(stccg(:, end , 1:end-1))';
         if length(times{end}) < minNumberOfPulses
             uLEDResponses.responsecurve(:,kk,jj,:) = uLEDResponses.responsecurve(:,kk,jj,:) * NaN;
@@ -336,6 +380,7 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
     uLEDResponses.list_of_durations = uLEDPulses.list_of_durations;
     uLEDResponses.list_of_epochs = uLEDPulses.list_of_epochs;
     uLEDResponses.conditions_table = uLEDPulses.conditions_table;
+    uLEDResponses.restricted_interval = restrict_ints;
 end
 fprintf('\n'); %
 
@@ -467,8 +512,8 @@ uLEDResponses_raster = uLEDResponses;
 uLEDResponses = rmfield(uLEDResponses,'raster');
 if saveMat
     disp('Saving...');
-    save([basenameFromBasepath(pwd) '.uLEDResponse.cellinfo.mat'],'uLEDResponses');
-    save([basenameFromBasepath(pwd) '.uLEDResponse_raster.cellinfo.mat'],'uLEDResponses_raster','-v7.3');
+    save([basenameFromBasepath(pwd) '.' save_as '.cellinfo.mat'],'uLEDResponses');
+    save([basenameFromBasepath(pwd) '.' save_as '_raster.cellinfo.mat'],'uLEDResponses_raster','-v7.3');
 end
 
 if doPlot
@@ -510,7 +555,7 @@ if doPlot
             end
         end
         colormap(jet);
-        exportgraphics(gcf,['SummaryFigures\uLEDResponse_rate_condition',num2str(kk),'_dur',num2str(uLEDResponses.pulseDuration(ii,kk,1)),'s.png']);
+        exportgraphics(gcf,['SummaryFigures\', save_as, '_rate_condition' ,num2str(kk),'_dur',num2str(uLEDResponses.pulseDuration(ii,kk,1)),'s.png']);
         
         figure;
         set(gcf,'Position',[100 -600 2500 1200]);
@@ -547,7 +592,7 @@ if doPlot
             end
         end
         colormap(jet);
-        exportgraphics(gcf,['SummaryFigures\uLEDResponse_Zscored_condition',num2str(kk),'_dur',num2str(uLEDResponses.pulseDuration(ii,kk,1)),'s.png']);
+        exportgraphics(gcf,['SummaryFigures\', save_as ,'_Zscored_condition', num2str(kk),'_dur',num2str(uLEDResponses.pulseDuration(ii,kk,1)),'s.png']);
     end
 end
 
