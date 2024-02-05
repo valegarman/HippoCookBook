@@ -51,7 +51,7 @@ addParameter(p,'profileType','hippocampus',@ischar); % options, 'hippocampus' an
 addParameter(p,'rippleMasterDetector_threshold',[1.5 3.5],@isnumeric); % [1.5 3.5]
 addParameter(p,'LED_threshold',0.98,@isnumeric);
 addParameter(p,'createLegacySummaryFolder',true,@islogical);
-addParameter(p,'restrict_to',[0 Inf],@isscalar);
+addParameter(p,'restrict_to',[0 Inf],@isnumeric);
 addParameter(p,'restrict_to_baseline',true,@islogical);
 addParameter(p,'restrict_to_manipulation',false,@islogical);
 
@@ -340,11 +340,11 @@ if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
     try 
         behaviour = getSessionLinearize;
         psth_lReward = spikesPsth([behaviour.events.lReward],'numRep',100,'saveMat',false,...
-            'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1],'raster_time',[-2 2]);
+            'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01,'raster_time',[-2 2]);
         psth_rReward = spikesPsth([behaviour.events.rReward],'numRep',100,'saveMat',false,...
-            'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1],'raster_time',[-2 2]);
+            'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'raster_time',[-2 2]);
         psth_reward = spikesPsth([behaviour.events.lReward; behaviour.events.rReward],'numRep',100,'saveMat',false,...
-            'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1],'raster_time',[-2 2]);
+            'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'raster_time',[-2 2]);
         
         if all(isnan(behaviour.events.startPoint))
             behaviour.events.startPoint = NaN;
@@ -353,9 +353,9 @@ if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
             behaviour.events.intersection = NaN;
         end
         psth_intersection = spikesPsth([behaviour.events.intersection],'numRep',100,'saveMat',false,...
-            'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1],'raster_time',[-2 2]);
+            'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'raster_time',[-2 2]);
         psth_startPoint = spikesPsth([behaviour.events.startPoint],'numRep',100,'saveMat',false,...
-            'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1],'raster_time',[-2 2]);
+            'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'raster_time',[-2 2]);
 
         behaviour.psth_lReward = psth_lReward;
         behaviour.psth_rReward = psth_rReward;
