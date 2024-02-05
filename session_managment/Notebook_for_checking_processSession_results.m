@@ -49,9 +49,9 @@ hippocampalLayers = getHippocampalLayers('force',true,'promt',true);
 % Revise number of ripples, shape and channel. You can also specifiy a
 % different trhresold or restrict the shanks for the spikeThreshold
 % analysis.
-rippleChannel = [19];
-SWChannel = [21];
-eventSpikeThreshold_shanks = [3]; % which shanks will be accounted for the spike threshold 
+rippleChannel = [56];
+SWChannel = [18];
+eventSpikeThreshold_shanks = [1 2 3 4 5]; % which shanks will be accounted for the spike threshold 
 rippleMasterDetector_threshold = [1.5 3.5]; % [1.5 3.5]
 eventSpikeThreshold = 1;
 ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'removeOptogeneticStimulation',false,'thresholds',rippleMasterDetector_threshold,'eventSpikeThreshold_shanks', eventSpikeThreshold_shanks,'eventSpikeThreshold',eventSpikeThreshold);
@@ -64,7 +64,7 @@ getSpikesRank('events','ripples');
 % or change powerThreshold, even the channel
 useCSD_for_theta_detection = true;
 powerThreshold = 1;
-channel = [21];
+channel = [];
 thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'powerThreshold',powerThreshold,'channel', channel);
 
 %% 6. Phase modulation
