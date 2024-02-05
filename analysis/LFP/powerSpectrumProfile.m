@@ -48,7 +48,7 @@ addParameter(p,'saveMat',true,@islogical)
 addParameter(p,'lfp',[])
 addParameter(p,'forceDetect',false,@islogical)
 addParameter(p,'useParfor',true,@islogical)
-addParameter(p,'restrict_to',[0 Inf],@isscalar);
+addParameter(p,'restrict_to',[0 Inf],@isnumeric);
 addParameter(p,'restrict_to_baseline',true,@islogical);
 addParameter(p,'restrict_to_manipulation',false,@islogical);
 addParameter(p,'save_as','PowerSpectrumProfile',@ischar);

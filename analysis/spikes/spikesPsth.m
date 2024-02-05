@@ -56,7 +56,7 @@ addParameter(p,'salt_baseline',[-0.25 -0.001],@isscalar);
 addParameter(p,'raster_time',[-0.250 0.250],@isnumeric);
 addParameter(p,'salt_win',[0.01],@isscalar);
 addParameter(p,'salt_binSize',[0.001],@isscalar);
-addParameter(p,'restrict_to',[0 Inf],@isscalar);
+addParameter(p,'restrict_to',[0 Inf],@isnumeric);
 addParameter(p,'restrict_to_baseline',true,@islogical);
 addParameter(p,'restrict_to_manipulation',false,@islogical);
 addParameter(p,'save_as','_psth',@ischar);
@@ -188,6 +188,10 @@ timestamps = Restrict(timestamps, restrict_ints);
 
 %% Get cell response
 psth = [];
+if isempty(timestamps)
+    return
+end
+
 timestamps_recording = timestamps(1):1/1250:timestamps(end);
 nConditions = size(timestamps,2);
 % We can implement different conditions (if timestamps : mxn instead mx1)

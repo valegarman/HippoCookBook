@@ -60,10 +60,10 @@ addParameter(p,'skipStimulationPeriods',true,@islogical);
 addParameter(p,'excludeIntervals',[],@isnumeric);
 addParameter(p,'powerThresh',0,@isnumeric);
 addParameter(p,'restrictIntervals',[],@isnumeric); % this is a synonim of restrict_to, kept for funcionality
-addParameter(p,'restrict_to',[0 Inf],@isscalar);
+addParameter(p,'restrict_to',[0 Inf],@isnumeric);
 addParameter(p,'restrict_to_baseline',true,@islogical);
 addParameter(p,'restrict_to_manipulation',false,@islogical);
-addParameter(p,'save_as','_PhaseLockingData',@ischar);
+addParameter(p,'save_as','PhaseLockingData',@ischar);
 
 parse(p,varargin{:})
 
