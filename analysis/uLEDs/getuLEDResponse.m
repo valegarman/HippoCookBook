@@ -134,6 +134,8 @@ end
 
 restrict_ints = IntersectIntervals([ints; restrict_to]);
 
+
+
 % Get cell responses!! :)
 uLEDResponses = [];
 codes = 1:max(uLEDPulses.code);
