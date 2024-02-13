@@ -47,7 +47,7 @@ addParameter(p,'interp0',[-.01 .01],@isnumeric);
 addParameter(p,'useBrainRegions',true,@islogical);
 addParameter(p,'useDistinctShanks',true,@islogical);
 % addParameter(p,'useCellType',true,@islogical); work in progress
-addParameter(p,'restrict_to',[0 Inf],@isscalar);
+addParameter(p,'restrict_to',[0 Inf],@isnumeric);
 addParameter(p,'restrict_to_baseline',true,@islogical);
 addParameter(p,'restrict_to_manipulation',false,@islogical);
 addParameter(p,'save_as','averageCCG',@ischar);
