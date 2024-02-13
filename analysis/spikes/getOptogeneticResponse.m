@@ -53,7 +53,7 @@ addParameter(p,'bootsTrapCI',[0.001 0.999],@isnumeric);
 addParameter(p,'onset',0,@isnumeric);
 addParameter(p,'offset',0,@isnumeric);
 addParameter(p,'getRaster',true,@islogical);
-addParameter(p,'restrict_to',[0 Inf],@isscalar);
+addParameter(p,'restrict_to',[0 Inf],@isnumeric);
 addParameter(p,'restrict_to_baseline',true,@islogical);
 addParameter(p,'restrict_to_manipulation',false,@islogical);
 addParameter(p,'save_as','optogeneticResponse',@ischar);

@@ -3,6 +3,33 @@ function [im, idx] = imagesc_ranked(x,y,C,cax,sortingVariable,varargin)
 % function im = imagesc_sorted(x,y,C,cax,sortingVariable);
 % Run imagesc after sorting C by sortingVariable
 
+%% Parse inputs
+p = inputParser;
+addParameter(p,'interpOpt',false);
+addParameter(p,'smoothOpt',false);
+
+parse(p,varargin{:});
+interpOpt = p.Results.interpOpt;
+smoothOpt = p.Results.smoothOpt;
+
+if size(C,1) ~= length(sortingVariable)
+    C = C';
+end
+
+if interpOpt
+    for ii = 1:size(C,1)
+        C_smooth(ii,:) = interp(C(ii,:),interpOpt);
+    end
+    C = C_smooth;
+    x = linspace(x(1),x(end),size(C_smooth,2));
+end
+
+if smoothOpt
+    for ii = 1:size(C,1)
+        C(ii,:) = smooth(C(ii,:),interpOpt);
+    end
+end
+
 if ndims(C)>2
     C = squeeze(C);
 end
