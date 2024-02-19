@@ -250,7 +250,6 @@ if ~any(ismember(excludeAnalysis, {'6',lower('powerProfiles')}))
     powerSpectrumProfile(theta_bandpass,'showfig',true,'forceDetect',true,'restrict_to',restrict_ints);
     powerSpectrumProfile(gamma_bandpass,'showfig',true,'forceDetect',true,'restrict_to',restrict_ints);
     powerSpectrumProfile(hfo_bandpass,'showfig',true,'forceDetect',true,'restrict_to',restrict_ints);
-
 end
 
 %% 7. Getting Hippocampal Layers
@@ -263,10 +262,6 @@ end
 if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     % Trying changes in detecUD_temp
     % 8.1 Up and downs
-    
-%     UDStates = detectUD('plotOpt', true,'forceDetect',true','NREMInts','all');
-%     psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true);
-
     UDStates = detectUpsDowns('plotOpt', true,'forceDetect',true','NREMInts','all');
     psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true,'minNumberOfPulses',10,'restrict_to',restrict_ints);
     getSpikesRank('events','upstates');
@@ -309,7 +304,7 @@ if ~any(ismember(excludeAnalysis, {'10',lower('cellMetrics')}))
     end
 
     session = loadSession;
-    cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludePulsesIntervals,'forceReload',true); % after CellExplorar
+    cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true); % after CellExplorar
     
     getACGPeak('force',true);
 
@@ -340,11 +335,11 @@ if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
     try 
         behaviour = getSessionLinearize;
         psth_lReward = spikesPsth([behaviour.events.lReward],'numRep',100,'saveMat',false,...
-            'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1],'raster_time',[-2 2]);
+            'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01,'raster_time',[-2 2]);
         psth_rReward = spikesPsth([behaviour.events.rReward],'numRep',100,'saveMat',false,...
-            'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1],'raster_time',[-2 2]);
+            'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'raster_time',[-2 2]);
         psth_reward = spikesPsth([behaviour.events.lReward; behaviour.events.rReward],'numRep',100,'saveMat',false,...
-            'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1],'raster_time',[-2 2]);
+            'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'raster_time',[-2 2]);
         
         if all(isnan(behaviour.events.startPoint))
             behaviour.events.startPoint = NaN;
@@ -353,9 +348,9 @@ if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
             behaviour.events.intersection = NaN;
         end
         psth_intersection = spikesPsth([behaviour.events.intersection],'numRep',100,'saveMat',false,...
-            'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1],'raster_time',[-2 2]);
+            'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'raster_time',[-2 2]);
         psth_startPoint = spikesPsth([behaviour.events.startPoint],'numRep',100,'saveMat',false,...
-            'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'win_Z',[-3 -1],'raster_time',[-2 2]);
+            'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'raster_time',[-2 2]);
 
         behaviour.psth_lReward = psth_lReward;
         behaviour.psth_rReward = psth_rReward;
