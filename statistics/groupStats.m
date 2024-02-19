@@ -68,7 +68,7 @@ addParameter(p,'dataSize',3,@isnumeric);
 addParameter(p,'posOffset',0,@isnumeric);
 addParameter(p,'fillAlpha',.5,@isnumeric);
 addParameter(p,'FaceEdge',[],@isnumeric);
-addParameter(p,'roundPlotSize',15,@isnumeric);
+addParameter(p,'roundPlotSize',10,@isnumeric);
 addParameter(p,'roundPlotCenterColor',[]);
 addParameter(p,'x_position',[]);
 addParameter(p,'plotConnectors',false,@islogical);

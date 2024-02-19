@@ -49,10 +49,10 @@ hippocampalLayers = getHippocampalLayers('force',true,'promt',true);
 % Revise number of ripples, shape and channel. You can also specifiy a
 % different trhresold or restrict the shanks for the spikeThreshold
 % analysis.
-rippleChannel = [56];
-SWChannel = [18];
-eventSpikeThreshold_shanks = [1 2 3 4 5]; % which shanks will be accounted for the spike threshold 
-rippleMasterDetector_threshold = [1.5 3.5]; % [1.5 3.5]
+rippleChannel = [27];
+SWChannel = [43];
+eventSpikeThreshold_shanks = [4 5]; % which shanks will be accounted for the spike threshold 
+rippleMasterDetector_threshold = [1 2]; % [1.5 3.5]
 eventSpikeThreshold = 1;
 ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'removeOptogeneticStimulation',false,'thresholds',rippleMasterDetector_threshold,'eventSpikeThreshold_shanks', eventSpikeThreshold_shanks,'eventSpikeThreshold',eventSpikeThreshold);
 psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10);
