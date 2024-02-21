@@ -15,7 +15,8 @@ batch_preprocessSession('basepath','X:\data\fCr1','analysisPath','F:\fCr1','clea
 % <OPTIONAL> If summary was not processed, it can be run in batch by 'batch_preprocessSession'
 batch_sessionSummary('basepath','G:\data\fPv4','cleanArtifacts',({65,[]}),'analogChannelsList',65,'digitalChannelsList',0);
 
-%% 
+%% FARE SOLO QUESTO FINO AL 5% 
+
 % 3% CLEAN SESSIONS MANUALLY BY PHY - the one i did using phy2 
 
 % 4% Processs individual sessions by by 'processSession'. Example:
@@ -24,10 +25,12 @@ processSession('digital_optogenetic_channels',[1],'analog_optogenetic_channels',
                                                                                                                    % promt_hippo_layers always put 'true', if analisys is done in cortex put 'false'
 
 % 5% Revise output using ProcessSession_notebook
-edit ProcessSession_notebook.m
+edit Notebook_for_checking_processSession_results.m
 
 % 5% Index session
 indexNewSession;
+
+%%
 
 % 6% Once a database has been created, use loadProjectResults to stack results for all sessions
 % an enjoy data analysis!
