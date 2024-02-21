@@ -127,4 +127,8 @@ fcamk3_201113_sess22,fcamk3,fcamk3\fcamk3_201113_sess22,c57b1/6,camkii/ai32,"ule
 fcamk3_201106_sess17,fcamk3,fcamk3\fcamk3_201106_sess17,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze linear maze,46,CA1sp CA1sr CA1so,uLEDiscotheque InterneuronsLibrary LightInInh
 fcamk3_201116_sess23,fcamk3,fcamk3\fcamk3_201116_sess23,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze linear maze,60,CA1sp CA1so CA1sr,uLEDiscotheque InterneuronsLibrary LightInInh
 fcamk3_201117_sess24,fcamk3,fcamk3\fcamk3_201117_sess24,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",home cage home cage,54,CA1sp CA1so CA1sr,uLEDiscotheque InterneuronsLibrary LightInInh
+<<<<<<< HEAD
 fvip2_220831_sess19,fvip2,fvip2\fvip2_220831_sess19,c57b1/6,vip/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,58,CA1sp CA1so PTLp5 PTLp2_3 CA1sr CA1slm DG,InterneuronsLibrary desVIPnhibition
+=======
+fcamk10_220920_sess8,fcamk10,fcamk10\fcamk10_220920_sess8,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",no,36,CA1sp CA1so,uLEDiscotheque InterneuronsLibrary LightInInh
+>>>>>>> f3c3a2e80d616bfb742a8d3eca6cd55b63c53426

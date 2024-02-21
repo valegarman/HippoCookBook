@@ -61,6 +61,7 @@ end
 
 ints = [];
 if restrict_to_manipulation
+  
     list_of_manipulations = list_of_manipulations_names;
     session = loadSession;
     for ii = 1:length(session.epochs)
@@ -73,6 +74,7 @@ if restrict_to_manipulation
     if isempty(ints)
         error('Epoch with manipulation not found!!');
     end
+
 elseif restrict_to_baseline
     list_of_manipulations = list_of_manipulations_names;
     session = loadSession;
@@ -85,9 +87,12 @@ elseif restrict_to_baseline
     if isempty(ints)
         ints = [0 Inf];
     end
+
 else
     ints = [0 Inf];
 end
+
+
 restrict_ints = IntersectIntervals([ints; restrict_to]);
 
 try

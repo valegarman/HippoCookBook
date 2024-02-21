@@ -62,15 +62,15 @@ getSpikesRank('events','ripples');
 % Revise channel definition, theta band in thetaEpochs.png and cells
 % rhytmicity. If bad, you can change useCSD_for_theta_detection to false,
 % or change powerThreshold, even the channel
-useCSD_for_theta_detection = false;
-powerThreshold = 2;
-channel = 28;
+useCSD_for_theta_detection = true;
+powerThreshold = 1;
+channel = [];
 thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'powerThreshold',powerThreshold,'channel', channel);
 
 %% 6. Phase modulation
 % NOTE!! If you have re-detected ripples or theta, you must run this code
 % again with the same channel definition!!!
-thetaChannel = 28;
+thetaChannel = [];
 [phaseMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel,'thetaChannel',thetaChannel);
 computeCofiringModulation;
 

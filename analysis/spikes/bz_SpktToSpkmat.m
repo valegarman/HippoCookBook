@@ -17,7 +17,9 @@ function [spikemat] = bz_SpktToSpkmat(spikes, varargin)
 %                   to get spike matrix (default: [0 Inf])
 %       'bintype'  'boxcar' (default), 'gaussian'
 %       'units'     'counts' (default), 'rate'
-%                   
+%       'restrict_to'
+%       'number_of_bins_after_interp'
+%                  'false'
 %
 %OUTPUT
 %   spikemat
@@ -42,7 +44,8 @@ addParameter(p,'overlap',[]);
 addParameter(p,'dt',0.1);
 addParameter(p,'bintype','boxcar');
 addParameter(p,'units','counts');
-
+addParameter(p,'restrict_to',[0 Inf],@isnumeric);
+addParameter(p,'number_of_bins_after_interp',false);
 
 parse(p,varargin{:})
 
@@ -52,6 +55,8 @@ overlap = p.Results.overlap;
 dt = p.Results.dt;
 bintype = p.Results.bintype;
 units = p.Results.units;
+restrict_to = p.Results.restrict_to;
+number_of_bins_after_interp = p.Results.number_of_bins_after_interp;
 
 %For legacy use of 'binsize','overlap' input
 if ~isempty(binsize) && ~isempty(overlap)
@@ -100,6 +105,14 @@ if numcells == 0
     return
 end
 
+% restrict
+if any(restrict_to ~= [0 Inf])
+    warning('Restricting analysis for intervals...');
+    for ii = 1:length(spikes.times)
+        [status] = InIntervals(spikes.times{ii},restrict_to);
+        spikes.times{ii} = spikes.times{ii}(status);
+    end 
+end
 
 %Time Window
 if isempty(win) || isequal(win,[0 Inf])
@@ -179,6 +192,16 @@ switch units
     case 'rate'
         %normalize by bin duration for counts/s
         spkmat = spkmat./binsize;
+end
+
+if number_of_bins_after_interp>1
+    for ii = 1:size(spkmat,2)
+        spkmat_interp(:,ii) = interpft(spkmat(:,ii),number_of_bins_after_interp);
+    end
+    t = interpft(t,number_of_bins_after_interp);
+    dt = (1:number_of_bins_after_interp);
+    binsize = NaN; 
+    spkmat = spkmat_interp;
 end
 
 spikemat.data = spkmat;
