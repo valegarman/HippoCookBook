@@ -593,7 +593,7 @@ if saveMat
     filename = split(pwd,filesep); filename = filename{end};
     save([filename '.' save_as '.cellinfo.mat'],'optogeneticResponses','-v7.3');
     if getRaster
-        save([basenameFromBasepath(pwd) '.' save_as '.cellinfo.mat'],'optogeneticResponses_raster','-v7.3');
+        save([basenameFromBasepath(pwd) '.' save_as '_raster.cellinfo.mat'],'optogeneticResponses_raster','-v7.3');
     end
 end
 

@@ -1,4 +1,3 @@
-
 function [] = processSession(varargin)
 
 % [] = indexSession_InterneuronsLibrary(varargin)
@@ -309,7 +308,7 @@ if ~any(ismember(excludeAnalysis, {'10',lower('cellMetrics')}))
     end
 
     session = loadSession;
-    cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true); % after CellExplorar
+    cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludePulsesIntervals,'forceReload',true); % after CellExplorar
     
     getACGPeak('force',true);
 
