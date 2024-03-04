@@ -58,6 +58,7 @@ addParameter(p,'restrict_to_baseline',true,@islogical);
 addParameter(p,'restrict_to_manipulation',false,@islogical);
 addParameter(p,'save_as','optogeneticResponse',@ischar);
 addParameter(p,'save_pulses_as','optogeneticPulses',@ischar);
+addParameter(p,'maxNumberOfPulses',5000,@isnumeric);
 
 parse(p, varargin{:});
 analogChannelsList = p.Results.analogChannelsList;
@@ -89,6 +90,7 @@ restrict_to_baseline = p.Results.restrict_to_baseline;
 restrict_to_manipulation = p.Results.restrict_to_manipulation;
 save_as = p.Results.save_as;
 save_pulses_as = p.Results.save_pulses_as;
+maxNumberOfPulses = p.Results.maxNumberOfPulses;
 
 % Deal with inputs
 prevPath = pwd;
@@ -102,9 +104,9 @@ if ~isempty(targetFile) && ~force
 end
 
 ints = [];
-if restrict_to_manipulation
+session = loadSession;
+if isfield(session.epochs{1},'behavioralParadigm') && restrict_to_manipulation
     list_of_manipulations = list_of_manipulations_names;
-    session = loadSession;
     for ii = 1:length(session.epochs)
         if ismember(session.epochs{ii}.behavioralParadigm, list_of_manipulations)
             ints = [session.epochs{ii}.startTime session.epochs{end}.stopTime];
@@ -116,7 +118,7 @@ if restrict_to_manipulation
     if isempty(ints)
         error('Epoch with manipulation not found!!');
     end
-elseif restrict_to_baseline
+elseif isfield(session.epochs{1},'behavioralParadigm') && restrict_to_baseline
     list_of_manipulations = list_of_manipulations_names;
     session = loadSession;
     for ii = 1:length(session.epochs)
@@ -317,6 +319,9 @@ for jj = 1:nConditions
     disp('Generating boostrap template...');
     nPulses = length(find(pulses.channel == conditions(jj,2) & pulses.duration == conditions(jj,1)));
     randomEvents = [];
+    if nPulses > maxNumberOfPulses
+        nPulses = maxNumberOfPulses;
+    end
     for mm = 1:numRep
         randomEvents{mm} = sort(randsample(timestamps_recording, nPulses))';
     end
@@ -343,6 +348,10 @@ for jj = 1:nConditions
     if isempty(pulses)
         pul = [0];
     end
+    if length(pul)>maxNumberOfPulses
+        pul = sort(randsample(pul, maxNumberOfPulses));
+    end
+
     times = spikes.times; times{length(times)+1} = pul;
     [stccg, t] = CCG(times,[],'binSize',binSize,'duration',winSize,'norm','rate'); fprintf('\n'); %
     optogeneticResponses.responsecurve(:,jj,:) = squeeze(stccg(:, end , 1:end-1))';
@@ -436,8 +445,12 @@ for jj = 1:nConditions
                 if any((v + nmbn - 1) > st)
                     error('reduce window size or baseline duration')
                 end
-
-                [optogeneticResponses.salt.p_value(ii,jj,1), optogeneticResponses.salt.I_statistics(ii,jj,1)] = salt(rasterHist3(:,baseidx(1):baseidx(2)),rasterHist3(:,tidx(1):tidx(2)),salt_binSize, salt_win);
+                try 
+                    [optogeneticResponses.salt.p_value(ii,jj,1), optogeneticResponses.salt.I_statistics(ii,jj,1)] = salt(rasterHist3(:,baseidx(1):baseidx(2)),rasterHist3(:,tidx(1):tidx(2)),salt_binSize, salt_win);
+                catch
+                    optogeneticResponses.salt.p_value(ii,jj,1) = NaN; 
+                    optogeneticResponses.salt.I_statistics(ii,jj,1) = NaN;
+                end
             else
                 optogeneticResponses.raster.rasterCount{ii,jj} = NaN;
                 optogeneticResponses.raster.rasterProb{ii,jj} = NaN;

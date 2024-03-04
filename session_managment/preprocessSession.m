@@ -62,10 +62,11 @@ addParameter(p,'tracking_pixel_cm',0.1149,@isnumeric);
 addParameter(p,'sessionSummary',true,@islogical);
 addParameter(p,'digitalChannelsList',[],@isnumeric);
 addParameter(p,'manualThr',true,@islogical);
-addParameter(p,'bazler_ttl_channel',10,@isnumeric);
+addParameter(p,'bazler_ttl_channel',5,@isnumeric);
 addParameter(p,'anymaze_ttl_channel',[],@isnumeric);
 addParameter(p,'getDigitalInputBySubfolders',true,@islogical);
 addParameter(p,'anyMaze',false,@islogical);
+addParameter(p,'skipStimulationPeriods',true,@islogical);
 
 % addParameter(p,'pullData',[],@isdir); To do... 
 parse(p,varargin{:});
@@ -85,6 +86,7 @@ bazler_ttl_channel = p.Results.bazler_ttl_channel;
 anymaze_ttl_channel = p.Results.anymaze_ttl_channel;
 getDigitalInputBySubfolders = p.Results.getDigitalInputBySubfolders;
 anyMaze = p.Results.anyMaze;
+skipStimulationPeriods = p.Results.skipStimulationPeriods;
 
 if ~exist('basepath') || isempty(basepath)
     basepath = uigetdir; % select folder
@@ -162,12 +164,12 @@ if  ~isempty(analogChannelsList)
     end
 end
 if ~isempty(dir('*digitalIn.dat')) 
-    digitalIn = getDigitalIn('all','fs',session.extracellular.sr); 
+    digitalIn = getDigitalIn('fs',session.extracellular.sr); 
 end
 
 if getDigitalInputBySubfolders
     try
-        digitalIn = getDigitalInBySubfolders('all','fs',session.extracellular.sr);
+        digitalIn = getDigitalInBySubfolders('fs',session.extracellular.sr);
     end
 end
 
@@ -248,7 +250,7 @@ end
 %% Get tracking positions 
 if getPos
     try 
-        getSessionTracking('convFact',tracking_pixel_cm,'roiTracking','manual','anyMaze',anyMaze,'forceReload',false); 
+        getSessionTracking('convFact',tracking_pixel_cm,'roiTracking','manual','anyMaze',anyMaze,'forceReload',false,'tracking_ttl_channel',bazler_ttl_channel); 
     catch
         warning('Tracking extraction was not possible. Skipping...')
     end
@@ -258,7 +260,7 @@ if sessionSummary
     cd(basepath);
     session = sessionTemplate(pwd,'showGUI',false);
     save([basepath filesep session.general.name,'.session.mat'],'session','-v7.3');
-    computeSessionSummary('digitalChannelsList',digitalChannelsList,'analogChannelsList',analogChannelsList);
+    computeSessionSummary('digitalChannelsList',digitalChannelsList,'analogChannelsList',analogChannelsList,'skipStimulationPeriods',skipStimulationPeriods);
 end
 
 if ~isempty(analysisPath)
