@@ -61,6 +61,7 @@ addParameter(p,'restrict_to_baseline',true,@islogical);
 addParameter(p,'restrict_to_manipulation',false,@islogical);
 addParameter(p,'save_as','_psth',@ischar);
 addParameter(p,'save_raster_as','_raster',@ischar);
+addParameter(p,'sr',[],@isnumeric);
 
 
 parse(p, timestamps,varargin{:});
@@ -92,6 +93,7 @@ restrict_to_baseline = p.Results.restrict_to_baseline;
 restrict_to_manipulation = p.Results.restrict_to_manipulation;
 save_as = p.Results.save_as;
 save_raster_as = p.Results.save_raster_as;
+sr = p.Results.sr;
 
 %% Session Template
 % Deal with inputs
@@ -103,8 +105,7 @@ if minNumberOfPulses < 2
 end
 
 session = loadSession;
-if (exist([session.general.name '.' eventType '_psth.cellinfo.mat'],'file') || ...
-        exist([session.general.name '.' eventType '_psth.cellinfo.mat'],'file')) ...
+if exist([session.general.name '.' eventType '_psth.cellinfo.mat'],'file') ...
         && ~force
     disp(['Psth already computed for ', session.general.name, ' ', eventType,'. Loading file.']);
     load([session.general.name '.' eventType '_psth.cellinfo.mat']);
@@ -153,10 +154,15 @@ if isempty(spikes)
     end
 end
 
+if ~isfield(spikes, 'numcells')
+    spikes.numcells = length(spikes.times); 
+end
+
 ints = [];
-if restrict_to_manipulation
+session = loadSession;
+if isfield(session,'epochs') && isfield(session.epochs{1},'behavioralParadigm') && restrict_to_manipulation
     list_of_manipulations = list_of_manipulations_names;
-    session = loadSession;
+    
     for ii = 1:length(session.epochs)
         if ismember(session.epochs{ii}.behavioralParadigm, list_of_manipulations)
             ints = [session.epochs{ii}.startTime session.epochs{end}.stopTime];
@@ -167,7 +173,7 @@ if restrict_to_manipulation
     if isempty(ints)
         error('Epoch with manipulation not found!!');
     end
-elseif restrict_to_baseline
+elseif isfield(session,'epochs') && isfield(session.epochs{1},'behavioralParadigm') && restrict_to_baseline
     list_of_manipulations = list_of_manipulations_names;
     session = loadSession;
     for ii = 1:length(session.epochs)
@@ -186,6 +192,16 @@ end
 restrict_ints = IntersectIntervals([ints; restrict_to]);
 timestamps = Restrict(timestamps, restrict_ints);
 
+if isempty(sr)
+    session = loadSession;
+    if isfield(session,'extracellular') && isfield(session.extracellular,'sr')
+        sr = session.extracellular.sr;
+    else
+        warning('Sampling rate not provided! Using 30000 as default parameter...');
+        sr = 30000;
+    end
+end
+
 %% Get cell response
 psth = [];
 if isempty(timestamps)
@@ -201,7 +217,7 @@ t = [];
 disp('Computing responses...');
 jj = 1;
 
-disp('Generating bootstrap template...');
+% disp('Generating bootstrap template...');
 nEvents = int32(size(timestamps,1));
 randomEvents = [];
 
@@ -209,8 +225,8 @@ for i = 1:numRep
     randomEvents{i} = sort(randsample(timestamps_recording,nEvents))';
 end
 pulseDuration = abs(diff(event_ints));
-if ~isnan(timestamps)
-    [stccg, t] = CCG([spikes.times randomEvents],[],'binSize',binSize,'duration',winSize,'norm','rate','Fs',1/session.extracellular.sr);
+if ~isnan(timestamps) & numRep > 0
+    [stccg, t] = CCG([spikes.times randomEvents],[],'binSize',binSize,'duration',winSize,'norm','rate','Fs',1/sr);
     fprintf('\n'); %
     t_duringPulse = t > event_ints(1) & t < event_ints(2);
     randomRatesDuringPulse = squeeze(mean(stccg(t_duringPulse, length(spikes.UID)+1:end,1:length(spikes.UID)),1));
@@ -239,7 +255,7 @@ else
 end
 disp('Computing responses...');
 times = spikes.times; times{length(times)+1} = pul;
-[stccg, t] = CCG(times,[],'binSize',binSize,'duration',winSize,'norm','rate','Fs',1/session.extracellular.sr); fprintf('\n'); %
+[stccg, t] = CCG(times,[],'binSize',binSize,'duration',winSize,'norm','rate','Fs',1/sr); fprintf('\n'); %
 
 psth.responsecurve(:,jj,:) = squeeze(stccg(:, end , 1:end-1))';
 if length(times{end}) < minNumberOfPulses
@@ -530,7 +546,7 @@ if getRaster && any(any(~isnan(psth.responsecurve)))
         end
     end
     if savePlot
-        saveas(gcf,['SummaryFigures\' save_raster_as eventType '.png']); 
+        saveas(gcf,['SummaryFigures\' erase(save_raster_as,'_') eventType '.png']); 
     end
 end
 % 2. Rate plot
@@ -568,7 +584,8 @@ if ratePlot && any(any(~isnan(psth.responsecurve)))
     end
 end          
 if savePlot
-    saveas(gcf,['SummaryFigures\' save_as eventType,'.png']); 
+    mkdir('SummaryFigures');
+    saveas(gcf,['SummaryFigures\' erase(save_as,'_') eventType,'.png']); 
 end
 
 cd(prevPath);

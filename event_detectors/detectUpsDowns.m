@@ -84,6 +84,7 @@ addParameter(p,'spikeThreshold',.25,@isnumeric);
 addParameter(p,'skipCluster',[],@isnumeric);
 addParameter(p,'useparfor',true,@islogical);
 addParameter(p,'excludeIntervals',[],@isnumeric);
+addParameter(p,'skipStimulationPeriods',true,@islogical);
 
 parse(p,varargin{:})
 basepath = p.Results.basepath;
@@ -104,6 +105,7 @@ spikeThreshold = p.Results.spikeThreshold;
 skipCluster = p.Results.skipCluster;
 useparfor = p.Results.useparfor;
 excludeIntervals = p.Results.excludeIntervals;
+skipStimulationPeriods = p.Results.skipStimulationPeriods;
 
 %% Collect pieces
 if exist([basenameFromBasepath(pwd) '.UDStates.events.mat'],'file') && ~forceDetect
@@ -132,7 +134,7 @@ else
     warning('NREM interval format not recognized!!');
 end
 
-if isempty(pulPeriods)
+if isempty(pulPeriods) && skipStimulationPeriods
     if ~isempty(dir('*.optogeneticPulses.events.mat'))
         f = dir('*.optogeneticPulses.events.mat');
         disp('Using stimulation periods from optogeneticPulses.events.mat file');
