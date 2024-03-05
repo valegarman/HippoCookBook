@@ -31,6 +31,7 @@ addParameter(p,'excludeShanks',[],@isnumeric);
 addParameter(p,'analogChannelsList','all',@isnumeric);
 addParameter(p,'digitalChannelsList','all',@isnumeric);
 addParameter(p,'tracking_pixel_cm',0.1149,@isnumeric);
+addParameter(p,'skipStimulationPeriods',true,@islogical);
 
 parse(p,varargin{:});
 basepath = p.Results.basepath;
@@ -40,6 +41,7 @@ excludeShanks = p.Results.excludeShanks;
 analogChannelsList = p.Results.analogChannelsList;
 digitalChannelsList = p.Results.digitalChannelsList;
 tracking_pixel_cm = p.Results.tracking_pixel_cm;
+skipStimulationPeriods = p.Results.skipStimulationPeriods;
 
 prevPath = pwd;
 cd(basepath);
@@ -63,9 +65,6 @@ end
 mkdir('SummaryFigures'); % create folder
 close all
 
-try
-    getuLEDsPulses();
-end
 cd(basepath);
 % SPIKES SUMMARY
 if any(ismember(listOfAnalysis,'spikes'))
@@ -255,7 +254,7 @@ if any(ismember(listOfAnalysis,'downStates'))
     try
         disp('Slow-waves CSD and PSTH...');
 
-        UDStates = detectUD;
+        UDStates = detectUpsDowns;
         % CSD
         shanks = session.extracellular.electrodeGroups.channels;            
         shanks(excludeShanks) = [];
@@ -280,7 +279,7 @@ if any(ismember(listOfAnalysis,'downStates'))
         saveas(gcf,'SummaryFigures\downUpStatesCSD.png');
         
         % PSTH
-        psthUD = spikesPsth([],'eventType','slowOscillations','numRep',100,'min_pulsesNumber',10);
+        psthUD = spikesPsth([],'eventType','slowOscillations','numRep',100,'minNumberOfPulses',10);
     catch
         warning('Error on Psth and CSD from down-states!');
     end
@@ -291,7 +290,7 @@ if any(ismember(listOfAnalysis,'ripples'))
     try
         disp('Ripples CSD and PSTH...');
         
-        ripples = rippleMasterDetector;
+        ripples = rippleMasterDetector('skipStimulationPeriods',skipStimulationPeriods);
         % CSD
         shanks = session.extracellular.electrodeGroups.channels;            
         shanks(excludeShanks) = [];
@@ -316,7 +315,7 @@ if any(ismember(listOfAnalysis,'ripples'))
         saveas(gcf,'SummaryFigures\ripplesCSD.png');
         
         % PSTH
-        psthRipples = spikesPsth([],'eventType','ripples','numRep',100,'min_pulsesNumber',10);
+        psthRipples = spikesPsth([],'eventType','ripples','numRep',100,'minNumberOfPulses',10);
         
     catch
         warning('Error on Psth and CSD from ripples! ');
@@ -327,7 +326,7 @@ end
 if any(ismember(listOfAnalysis,'thetaModulation'))
     try
         thetaEpochs = detectThetaEpochs;
-        computePhaseModulation();
+        computePhaseModulation('skipStimulationPeriods',skipStimulationPeriods);
     catch
         warning('It has not been possible to run theta and gamma mod code...');
     end
