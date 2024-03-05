@@ -127,3 +127,4 @@ fcamk3_201113_sess22,fcamk3,fcamk3\fcamk3_201113_sess22,c57b1/6,camkii/ai32,"ule
 fcamk3_201106_sess17,fcamk3,fcamk3\fcamk3_201106_sess17,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze linear maze,46,CA1sp CA1sr CA1so,uLEDiscotheque InterneuronsLibrary LightInInh
 fcamk3_201116_sess23,fcamk3,fcamk3\fcamk3_201116_sess23,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze linear maze,60,CA1sp CA1so CA1sr,uLEDiscotheque InterneuronsLibrary LightInInh
 fcamk3_201117_sess24,fcamk3,fcamk3\fcamk3_201117_sess24,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",home cage home cage,54,CA1sp CA1so CA1sr,uLEDiscotheque InterneuronsLibrary LightInInh
+fvip2_220901_sess20,fvip2,fvip2\fvip2_220901_sess20,c57b1/6,vip/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,80,CA1sp CA1so CA1sr PTLp5 PTLp2_3 CA1slm CA3sp CA3so Thalamus,InterneuronsLibrary desVIPnhibition
