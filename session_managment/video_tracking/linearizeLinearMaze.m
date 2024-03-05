@@ -154,7 +154,7 @@ try
     session = loadSession();
     cd(basepath)
 end
-digitalIn = getDigitalIn('all','fs',session.extracellular.sr);
+digitalIn = getDigitalIn('fs',session.extracellular.sr);
 if length(digitalIn.timestampsOn{3}) <  length(digitalIn.timestampsOn{4})- 5 || length(digitalIn.timestampsOn{3}) >  length(digitalIn.timestampsOn{4})+ 5
     warning('Malfunctioning sensor!! Trying to fix');
     if length(digitalIn.timestampsOn{3}) <  length(digitalIn.timestampsOn{4})- 5

@@ -62,7 +62,7 @@ addParameter(p,'verbose',false,@islogical);
 addParameter(p,'thresh',.98,@isnumeric) % .98
 addParameter(p,'bazlerTTL',[],@isnumeric)
 addParameter(p,'saveMat',true,@islogical);
-addParameter(p,'basler_ttl_channel',[],@isnumeric);
+addParameter(p,'basler_ttl_channel',[],@isnumeric); % by default, 5
 
 % addParameter(p,'RGBChannel',[],@isstr);
 

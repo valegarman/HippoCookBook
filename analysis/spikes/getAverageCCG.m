@@ -90,9 +90,10 @@ if ~isempty(targetFile) && ~force
 end
 
 ints = [];
-if restrict_to_manipulation
+session = loadSession;
+if isfield(session,'epochs') && isfield(session.epochs{1},'behavioralParadigm') && restrict_to_manipulation
     list_of_manipulations = list_of_manipulations_names;
-    session = loadSession;
+    
     for ii = 1:length(session.epochs)
         if ismember(session.epochs{ii}.behavioralParadigm, list_of_manipulations)
             ints = [session.epochs{ii}.startTime session.epochs{end}.stopTime];
@@ -103,7 +104,7 @@ if restrict_to_manipulation
     if isempty(ints)
         error('Epoch with manipulation not found!!');
     end
-elseif restrict_to_baseline
+elseif isfield(session,'epochs') && isfield(session.epochs{1},'behavioralParadigm') && restrict_to_baseline
     list_of_manipulations = list_of_manipulations_names;
     session = loadSession;
     for ii = 1:length(session.epochs)
