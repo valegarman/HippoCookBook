@@ -46,7 +46,7 @@ addParameter(p,'rightArmTtl_channel',3,@isnumeric)
 addParameter(p,'homeDelayTtl_channel',4,@isnumeric)
 addParameter(p,'tracking_pixel_cm',0.1149,@isnumeric);
 addParameter(p,'excludeAnalysis',[]); % 
-addParameter(p,'useCSD_for_theta_detection',true,@islogical);
+addParameter(p,'useCSD_for_theta_detection',true,@islogical); % If there is the middle shank, otherwhise put false
 addParameter(p,'profileType','hippocampus',@ischar); % options, 'hippocampus' and 'cortex'
 addParameter(p,'rippleMasterDetector_threshold',[1.5 3.5],@isnumeric); % [1.5 3.5]
 addParameter(p,'LED_threshold',0.98,@isnumeric);
@@ -277,7 +277,7 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     getSpikesRank('events','ripples');
 
     % 8.3 Theta intervals
-    thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'powerThreshold',1);
+    thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'powerThreshold',1 );
 end
 
 %% 9. Phase Modulation
