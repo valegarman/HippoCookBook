@@ -53,8 +53,8 @@ rippleChannel = [27];
 SWChannel = [43];
 eventSpikeThreshold_shanks = [4 5]; % which shanks will be accounted for the spike threshold 
 rippleMasterDetector_threshold = [1 2]; % [1.5 3.5]
-eventSpikeThreshold = 1;
-ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'removeOptogeneticStimulation',false,'thresholds',rippleMasterDetector_threshold,'eventSpikeThreshold_shanks', eventSpikeThreshold_shanks,'eventSpikeThreshold',eventSpikeThreshold);
+eventSpikeThreshold = 1.5;
+ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',false,'thresholds',rippleMasterDetector_threshold,'eventSpikeThreshold_shanks', eventSpikeThreshold_shanks,'eventSpikeThreshold',eventSpikeThreshold);
 psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10);
 getSpikesRank('events','ripples');
 
@@ -64,7 +64,7 @@ getSpikesRank('events','ripples');
 % or change powerThreshold, even the channel
 useCSD_for_theta_detection = true;
 powerThreshold = 1;
-channel = [];
+channel = 18;
 thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'powerThreshold',powerThreshold,'channel', channel);
 
 %% 6. Phase modulation
