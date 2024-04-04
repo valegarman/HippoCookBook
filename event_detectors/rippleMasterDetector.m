@@ -103,7 +103,7 @@ addParameter(p,'debug',false,@islogical);
 addParameter(p,'eventSpikeThreshold',.5);
 addParameter(p,'eventSpikeThreshold_shanks','all');
 addParameter(p,'force',false,@islogical);
-addParameter(p,'removeOptogeneticStimulation',true,@islogical);
+addParameter(p,'skipStimulationPeriods',true,@islogical);
 addParameter(p,'useCSD',false,@islogical);
 addParameter(p,'stdThreshold',2,@isnumeric);
 addParameter(p,'detector','filter',@ischar);
@@ -141,7 +141,7 @@ debug = p.Results.debug;
 eventSpikeThreshold = p.Results.eventSpikeThreshold;
 eventSpikeThreshold_shanks = p.Results.eventSpikeThreshold_shanks;
 force = p.Results.force;
-removeOptogeneticStimulation = p.Results.removeOptogeneticStimulation;
+skipStimulationPeriods = p.Results.skipStimulationPeriods;
 useCSD = p.Results.useCSD;
 stdThreshold = p.Results.stdThreshold;
 detector = p.Results.detector;
@@ -189,7 +189,7 @@ if isempty(SWChannel)
     SWChannel = hippocampalLayers.bestShankLayers.radiatum;
 end
 
-if removeOptogeneticStimulation && ~isempty(dir('*optogeneticPulses.events.mat'))
+if skipStimulationPeriods && ~isempty(dir('*optogeneticPulses.events.mat'))
     targetFile = dir('*optogeneticPulses.events.mat'); load(targetFile.name);
     restrict_temp = SubtractIntervals([0 Inf],optoPulses.stimulationEpochs);
     restrict =  ConsolidateIntervals([restrict; restrict_temp; restrict_temp]);
@@ -249,7 +249,7 @@ else
     return
 end
 
-if removeOptogeneticStimulation
+if skipStimulationPeriods
     try
         % Remove ripples durting stimulation artifacts
         if ~isempty(dir('*.optogeneticPulses.events.mat'))

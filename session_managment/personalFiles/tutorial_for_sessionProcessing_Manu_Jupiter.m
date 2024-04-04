@@ -10,7 +10,7 @@ updateExpFolder({'V:\data\fCck1', 'Y:\fCck1'},'E:\data\fCck1');
 % 2% Then, preprocess session (includes artifacts removal, median signal
 %   removal, LFP and Kilosort, and running computeSessionSummary by 'batch_preprocessSession('basepath','sessionBasepath').
 %   Example:
-batch_preprocessSession('basepath','Z:\unindexedSubjects\fCamk10\','analysisPath','C:\Data\fCamk10','cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',1:16);
+batch_preprocessSession('basepath','Y:\unindexedSubjects\fCamk10','analysisPath','C:\Data\fCamk10','cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',6:16,'bazler_ttl_channel',5,'skipStimulationPeriods',false);
 
 % <OPTIONAL> If summary was not processed, it can be run in batch by 'batch_preprocessSession'
 batch_sessionSummary('basepath','G:\data\fPv4','cleanArtifacts',({65,[]}),'analogChannelsList',65,'digitalChannelsList',0);

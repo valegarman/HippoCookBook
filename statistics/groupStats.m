@@ -538,7 +538,7 @@ if doPlot
             plot(pos(ii)-0.1, m,'o','MarkerFaceColor',roundPlotCenterColor(ii,:),'MarkerEdgeColor',color(ii,:),'MarkerSize',roundPlotSize);
         end
         if plotConnectors
-            posData = randn(ySize(1),1)/10; S
+            posData = randn(ySize(1),1)/10;
             posData((posData)>0.3) = posData((posData)>0.3)/2;
             posData((posData)<-0.3) = posData((posData)<-0.3)/2;
             if plotData
