@@ -52,7 +52,7 @@ hippocampalLayers = getHippocampalLayers('force',true,'promt',true);
 rippleChannel = [];
 SWChannel = [];
 eventSpikeThreshold_shanks = [3]; % which shanks will be accounted for the spike threshold 
-rippleMasterDetector_threshold = [1.5 3.5]; % [1.5 3.5]
+rippleMasterDetector_threshold = [1 2]; % [1.5 3.5]
 eventSpikeThreshold = .5; % .5
 ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',false,'thresholds',rippleMasterDetector_threshold,'eventSpikeThreshold_shanks', eventSpikeThreshold_shanks,'eventSpikeThreshold',eventSpikeThreshold);
 psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10);
@@ -70,7 +70,7 @@ thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection
 %% 6. Phase modulation
 % NOTE!! If you have re-detected ripples or theta, you must run this code
 % again with the same channel definition!!!
-thetaChannel = 28;
+thetaChannel = [];
 [phaseMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel,'thetaChannel',thetaChannel);
 computeCofiringModulation;
 
