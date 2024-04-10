@@ -204,6 +204,8 @@ CSD = [nan(size(CSD,1),1) CSD nan(size(CSD,1),1);];
 if any(channelToRetrieve ~= channels) && ~(channelToRetrieve == channels(1) || channelToRetrieve == channels(end))
     CSD = CSD(:,find(channels==channelToRetrieve));
     channels = channelToRetrieve;
+else
+    error('Not possible to retrieve top or bottom channel!');
 end
 
 % generate output structure

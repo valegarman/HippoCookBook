@@ -1,4 +1,4 @@
-
+e
 %% Notebook_for_checking_processSession_results
 % Andrea Gallardo and Manu Valero, 2023
 %% 0. Check metadata
@@ -105,8 +105,7 @@ getSpikesReturnPlot('force',true);
 LED_threshold = 0.98;
 spikes = loadSpikes;
 getSessionTracking('roiTracking','manual','forceReload',false,'LED_threshold',LED_threshold);
-% only if the animal run a figure-eight maze behavior
-%getSessionArmChoice('task','alternation','leftArmTtl_channel',2,'rightArmTtl_channel',3,'homeDelayTtl_channel',4);
+getSessionArmChoice('task','alternation','leftArmTtl_channel',2,'rightArmTtl_channel',3,'homeDelayTtl_channel',4);
 behaviour = getSessionLinearize('forceReload',true);  
 firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',true);
 placeFieldStats = bz_findPlaceFields1D('firingMaps',firingMaps,'maxSize',.75,'sepEdge',0.03); %% ,'maxSize',.75,'sepEdge',0.03
