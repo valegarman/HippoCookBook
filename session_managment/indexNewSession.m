@@ -147,7 +147,7 @@ system(commandToExecute);
 commandToExecute = ['git push'];
 system(commandToExecute);
 
-cd(basepath)     
+cd(basepath);     
 
 %% Removing dat files before copying files to buzsakilab or synology
 if removeDatFiles
