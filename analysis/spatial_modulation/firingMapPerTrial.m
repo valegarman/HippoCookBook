@@ -103,6 +103,13 @@ directionNumber = unique(behaviour.masks.direction);
 directionNumber(isnan(directionNumber)) = [];
 spatialFactor = [max(positions{1}(:,2)) - min(positions{1}(:,2)) min(positions{1}(:,2))];
 time_unit = mean(diff(behaviour.timestamps));
+%
+if size(behaviour.masks.direction,1) ~= 1
+    behaviour.masks.direction = behaviour.masks.direction';
+end
+if size(behaviour.masks.trials,1) ~= 1
+    behaviour.masks.trials = behaviour.masks.trials';
+end
 for ii = 1:spikes.numcells
     for kk = 1:numel(directionNumber)
         spikesPosition_temp = [];
@@ -116,6 +123,7 @@ for ii = 1:spikes.numcells
                 map_x = [map_x; map_temp.x * spatialFactor(1) - spatialFactor(2)];
                 map_count = [map_count; map_temp.count];
                 map_time = [map_time; map_temp.time];
+                 
                 map_z = [map_z; map_temp.z];
                 map_trial = [map_trial; jj*ones(size(map_temp.z))];
                 map_counter = [map_counter; counter*ones(size(map_temp.z))];
