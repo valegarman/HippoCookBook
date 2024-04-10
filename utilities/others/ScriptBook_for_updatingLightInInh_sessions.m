@@ -4,47 +4,46 @@
 
 %% 1. Session with pulses 
 
-% getAnalogPulses generates for each channel the recording in order to
-% dselect the best channel to be used for thanalysis and save different
-% features about the pulses.
-
-pulses = getAnalogPulses('manualThr',true,'force',true); % 1-index   
-getDigitalIn('force', true);
-uLEDPulses = getuLEDPulses('Current',3,'force',true,'ledLayout','ledLayoutScience2022');
-close all;
-
-% ProcessSession is a big funtion that runs different analysis. Go inside
-% the function to check the different section.
-% important, in the Extracellular tab, update Electrode groups and Spike groups witht following info:
-% Group         Channel
-% 1             25 21 24 28 26 22 23 27
-% 2             29 17 20 32 30 18 19 31
-% 3             16 4 1 13 15 3 2 14
-% 4             12 8 5 9 11 7 6 10
-
-processSession('digital_optogenetic_channels',[11 12 13 14 15 16],'analog_optogenetic_channels',[3 4 5 6 7 8],...
-    'promt_hippo_layers',true,'profileType','hippocampus','force_analogPulsesDetection',false,...
-    'bazler_ttl_channel',1,'leftArmTtl_channel',3,'leftArmTtl_channel',4,'useCSD_for_theta_detection',false);
-close all
-
+% %%% getAnalogPulses generates for each channel the recording in order to
+% % dselect the best channel to be used for thanalysis and save different
+% % features about the pulses.
+% 
+% pulses = getAnalogPulses('manualThr',true,'force',true); % 1-index   
+% getDigitalIn('force', true);
+% uLEDPulses = getuLEDPulses('Current',3,'force',true,'ledLayout','ledLayoutScience2022');
+% close all;
+% 
+% % ProcessSession is a big funtion that runs different analysis. Go inside
+% % the function to check the different section.
+% % important, in the Extracellular tab, update Electrode groups and Spike groups witht following info:
+% % Group         Channel
+% % 1             25 21 24 28 26 22 23 27
+% % 2             29 17 20 32 30 18 19 31
+% % 3             16 4 1 13 15 3 2 14
+% % 4             12 8 5 9 11 7 6 10
+% 
+% processSession('digital_optogenetic_channels',[11 12 13 14 15 16],'analog_optogenetic_channels',[3 4 5 6 7 8],...
+%     'promt_hippo_layers',true,'profileType','hippocampus','force_analogPulsesDetection',false,...
+%     'bazler_ttl_channel',1,'leftArmTtl_channel',3,'leftArmTtl_channel',4,'useCSD_for_theta_detection',false);
+% close all%%
 % For ripple detection, follow this steps:
-% 1. Copy ripple file (basename.ripples.events.mat) from NEURAL, and
-% overwrite in the folder of the Session in your local memory
-% 2. Run this code;
+% % 1. Copy ripple file (basename.ripples.events.mat) from NEURAL, and
+% % overwrite in the folder of the Session in your local memory
+% % 2. Run this code;
+% 
+% targetFile = dir("*ripples.events.mat"); load(targetFile.name);
+% ripples.detectorinfo.detectionchannel = ripples.detectorinfo.detectionchannel + 1;
+% ripples = computeRippleStats('ripples',ripples,'rippleChannel',ripples.detectorinfo.detectionchannel);
+% session = loadSession;
+% save([session.general.name , '.ripples.events.mat'],'ripples');
+% psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10);
+% getSpikesRank('events','ripples');
+% [phaseMod] = computePhaseModulation('rippleChannel',ripples.detectorinfo.detectionchannel);
+% computeCofiringModulation;
+% close all;
 
-targetFile = dir("*ripples.events.mat"); load(targetFile.name);
-ripples.detectorinfo.detectionchannel = ripples.detectorinfo.detectionchannel + 1;
-ripples = computeRippleStats('ripples',ripples,'rippleChannel',ripples.detectorinfo.detectionchannel);
-session = loadSession;
-save([session.general.name , '.ripples.events.mat'],'ripples');
-psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10);
-getSpikesRank('events','ripples');
-[phaseMod] = computePhaseModulation('rippleChannel',ripples.detectorinfo.detectionchannel);
-computeCofiringModulation;
-close all;
 
-
-[uLEDResponses] = getuLEDResponse('force',true);
+[uLEDResponses] = getuLEDResponse('force',true); %questa funzione ha senso runnarla solo se si ha usato il LED
 % script_tempWin_LightInInh;
 close all;
 
@@ -87,7 +86,7 @@ close all;
 
 indexNewSession('copyFiles', true);
 
-%% 3. Sessions with manipulations (CNO and DMSO) after havce already runned the section 1 or 2
+%% 3. Sessions with manipulations (CNO and DMSO) after have already runned the section 1 or 2
 
 % New window will open in order to express General, Epochs, Animal Subject,
 % Extracellular, Tags, etc..

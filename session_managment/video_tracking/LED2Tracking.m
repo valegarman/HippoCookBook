@@ -357,8 +357,8 @@ elseif abs(length(x)-length(bazlerTtl)) > 15 * 1 && size(digitalIn.timestampsOn,
     imagesc(xMaze, yMaze,average_frame); colormap gray; caxis([0 4*mean(average_frame(:))]); axis tight
     set(gca,'Ydir','reverse');
    
-    lReward = digitalIn.timestampsOn{3}(1);
-    rReward = digitalIn.timestampsOn{4}(1);
+    lReward = digitalIn.timestampsOn{2}(1);
+    rReward = digitalIn.timestampsOn{3}(1);
 
     if lReward < rReward % If the animal turned left first, find the location based on the IR location
         disp('Mouse turned left first. Mark y-position for left IR sensor...');
