@@ -256,7 +256,6 @@ if ~any(ismember(excludeAnalysis, {'7',lower('getHippocampalLayers')}))
     [hippocampalLayers] = getHippocampalLayers('force',true,'promt',promt_hippo_layers);
 end
 
-
 %% 8. Check Brain Events
 if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     % Trying changes in detecUD_temp
@@ -289,7 +288,7 @@ end
 % Exclude manipulation intervals for computing CellMetrics
 if ~any(ismember(excludeAnalysis, {'10',lower('cellMetrics')}))
     if strcmpi(profileType,'hippocampus')
-        session = assignBrainRegion('showPowerProfile','theta','showEvent','ripples','eventTwin',[-0.05 0.05]); % hfo slowOscilations [-.5 .5]
+        session = assignBrainRegion('showPowerProfile','theta','showEvent','ripples','eventTwin',[-0.05 0.05]);
     elseif strcmpi(profileType,'cortex')
         session = assignBrainRegion('showPowerProfile','hfo','showEvent','slowOscilations','eventTwin',[-.5 .5]); % hfo slowOscilations [-.5 .5]
     end
