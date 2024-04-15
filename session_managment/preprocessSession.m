@@ -126,7 +126,7 @@ if isempty(dir([basename '.xml'])) && isempty(dir('global.xml'))
 end
 
 %% Loading metadata
-try
+% try
     session = sessionTemplate(pwd,'showGUI',false); % 
     session.channels = 1:session.extracellular.nChannels;
     session.analysisTags.digital_optogenetic_channels = digitalChannelsList;
@@ -138,9 +138,9 @@ try
         session.analysisTags.anymaze_ttl_channel = anymaze_ttl_channel;
     end
     save([basepath filesep session.general.name,'.session.mat'],'session','-v7.3');
-catch
-    warning('it seems that CellExplorer is not on your path');
-end
+% catch
+%    warning('it seems that CellExplorer is not on your path');
+% end
 
 if ~isempty(analysisPath)
     cd(analysisPath);

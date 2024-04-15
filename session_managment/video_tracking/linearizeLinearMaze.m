@@ -50,6 +50,9 @@ addParameter(p,'editLOI',false,@islogical);
 addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'forceReload',false,@islogical);
 addParameter(p,'verbose',false,@islogical);
+addParameter(p,'leftTtl',3,@isnumeric);
+addParameter(p,'rightTtl',4,@isnumeric);
+
 parse(p,varargin{:});
 tracking = p.Results.tracking;
 basepath = p.Results.basepath;
@@ -58,6 +61,8 @@ editLOI = p.Results.editLOI;
 saveMat = p.Results.saveMat;
 forceReload = p.Results.forceReload;
 verbose = p.Results.verbose;
+leftTtl = p.Results.leftTtl;
+rightTtl = p.Results.rightTtl;
 
 if ~isempty(dir('*Linearized.Behavior.mat')) && ~forceReload 
     disp('Linearization already computed! Loading file.');
@@ -155,12 +160,12 @@ try
     cd(basepath)
 end
 digitalIn = getDigitalIn('fs',session.extracellular.sr);
-if length(digitalIn.timestampsOn{3}) <  length(digitalIn.timestampsOn{4})- 5 || length(digitalIn.timestampsOn{3}) >  length(digitalIn.timestampsOn{4})+ 5
+if length(digitalIn.timestampsOn{leftTtl}) <  length(digitalIn.timestampsOn{rightTtl})- 5 || length(digitalIn.timestampsOn{leftTtl}) >  length(digitalIn.timestampsOn{rightTtl})+ 5
     warning('Malfunctioning sensor!! Trying to fix');
-    if length(digitalIn.timestampsOn{3}) <  length(digitalIn.timestampsOn{4})- 5
+    if length(digitalIn.timestampsOn{leftTtl}) <  length(digitalIn.timestampsOn{rightTtl})- 5
         warning('Left sensor is not working properly');
         disp('Find most distant place between consecutive right sensor pulses...');
-        rightSensorTimes = digitalIn.timestampsOn{4};
+        rightSensorTimes = digitalIn.timestampsOn{rightTtl};
         timestamps = tracking.timestamps;
         rightSensorPositions = interp1(timestamps, linCont', rightSensorTimes);
         for ii = 1:length(rightSensorTimes) - 1
@@ -172,7 +177,7 @@ if length(digitalIn.timestampsOn{3}) <  length(digitalIn.timestampsOn{4})- 5 || 
     else
         warning('Right sensor is not working properly');
         disp('Find most distant place between consecutive right sensor pulses...');
-        leftSensorTimes = digitalIn.timestampsOn{3};
+        leftSensorTimes = digitalIn.timestampsOn{leftTtl};
         timestamps = tracking.timestamps;
         leftSensorPositions = interp1(timestamps, linCont', leftSensorTimes);
         for ii = 1:length(leftSensorTimes) - 1
@@ -182,8 +187,8 @@ if length(digitalIn.timestampsOn{3}) <  length(digitalIn.timestampsOn{4})- 5 || 
         end
     end
 else
-    rightSensorTimes = digitalIn.timestampsOn{4};
-    leftSensorTimes = digitalIn.timestampsOn{3};
+    rightSensorTimes = digitalIn.timestampsOn{rightTtl};
+    leftSensorTimes = digitalIn.timestampsOn{leftTtl};
 end
 armChoice.timestamps = [rightSensorTimes; leftSensorTimes];
 armChoice.visitedArm = [ones(size(rightSensorTimes)); zeros(size(leftSensorTimes))];

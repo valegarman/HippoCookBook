@@ -708,6 +708,9 @@ for ii = 1:length(UID)
 end
 
 if checkUnits && showTagCells
+    if size(UID,2) > 1
+        UID = UID';
+    end    
     disp(['Unis UIDs ' num2str(UID') ' were defined as responsive']);
     discardUIDs = str2num(input(['Do you want to discard any (introduce UIDs btw o press enter to continue)?: '],'s'));
     
