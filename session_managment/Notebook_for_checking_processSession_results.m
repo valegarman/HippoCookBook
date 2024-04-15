@@ -1,4 +1,4 @@
-e
+
 %% Notebook_for_checking_processSession_results
 % Andrea Gallardo and Manu Valero, 2023
 %% 0. Check metadata
@@ -51,9 +51,9 @@ hippocampalLayers = getHippocampalLayers('force',true,'promt',true);
 % analysis.
 rippleChannel = [];
 SWChannel = [];
-eventSpikeThreshold_shanks = [3]; % which shanks will be accounted for the spike threshold 
+eventSpikeThreshold_shanks = [3 4 5]; % which shanks will be accounted for the spike threshold 
 rippleMasterDetector_threshold = [1.5 3.5]; % [1.5 3.5]
-eventSpikeThreshold = .5; % .5
+eventSpikeThreshold = 1; % .5
 ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',false,'thresholds',rippleMasterDetector_threshold,'eventSpikeThreshold_shanks', eventSpikeThreshold_shanks,'eventSpikeThreshold',eventSpikeThreshold);
 psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10);
 getSpikesRank('events','ripples');
@@ -70,7 +70,7 @@ thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection
 %% 6. Phase modulation
 % NOTE!! If you have re-detected ripples or theta, you must run this code
 % again with the same channel definition!!!
-thetaChannel = 28;
+thetaChannel = [];
 [phaseMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel,'thetaChannel',thetaChannel);
 computeCofiringModulation;
 
@@ -105,7 +105,8 @@ getSpikesReturnPlot('force',true);
 LED_threshold = 0.98;
 spikes = loadSpikes;
 getSessionTracking('roiTracking','manual','forceReload',false,'LED_threshold',LED_threshold);
-getSessionArmChoice('task','alternation','leftArmTtl_channel',2,'rightArmTtl_channel',3,'homeDelayTtl_channel',4);
+% only if the animal run a figure-eight maze behavior
+%getSessionArmChoice('task','alternation','leftArmTtl_channel',2,'rightArmTtl_channel',3,'homeDelayTtl_channel',4);
 behaviour = getSessionLinearize('forceReload',true);  
 firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',true);
 placeFieldStats = bz_findPlaceFields1D('firingMaps',firingMaps,'maxSize',.75,'sepEdge',0.03); %% ,'maxSize',.75,'sepEdge',0.03

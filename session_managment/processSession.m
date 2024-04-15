@@ -37,7 +37,7 @@ addParameter(p,'rippleChannel',[],@isnumeric);% manually selecting ripple Channe
 addParameter(p,'SWChannel',[],@isnumeric); % manually selecting SW Channel in case getHippocampalLayers does not provide a right output
 addParameter(p,'digital_optogenetic_channels',[],@isnumeric);
 addParameter(p,'analog_optogenetic_channels',[],@isnumeric);
-addParameter(p,'promt_hippo_layers',false,@islogical);
+addParameter(p,'promt_hippo_layers',true,@islogical);
 addParameter(p,'manual_analog_pulses_threshold',false,@islogical);
 addParameter(p,'bazler_ttl_channel',[],@isnumeric);
 addParameter(p,'leftArmTtl_channel',2,@isnumeric)
@@ -45,7 +45,7 @@ addParameter(p,'rightArmTtl_channel',3,@isnumeric)
 addParameter(p,'homeDelayTtl_channel',4,@isnumeric)
 addParameter(p,'tracking_pixel_cm',0.1149,@isnumeric);
 addParameter(p,'excludeAnalysis',[]); % 
-addParameter(p,'useCSD_for_theta_detection',true,@islogical);
+addParameter(p,'useCSD_for_theta_detection',true,@islogical); % If there is the middle shank, otherwhise put false
 addParameter(p,'profileType','hippocampus',@ischar); % options, 'hippocampus' and 'cortex'
 addParameter(p,'rippleMasterDetector_threshold',[1.5 3.5],@isnumeric); % [1.5 3.5]
 addParameter(p,'LED_threshold',0.98,@isnumeric);
@@ -253,9 +253,8 @@ end
 
 %% 7. Getting Hippocampal Layers
 if ~any(ismember(excludeAnalysis, {'7',lower('getHippocampalLayers')}))
-    [hippocampalLayers] = getHippocampalLayers('force',true,'promt',promt_hippo_layers);
+    [hippocampalLayers] = getHippocampalLayers('force',true,'promt',promt_hippo_layers,'removeRipplesStimulation', false);
 end
-
 
 %% 8. Check Brain Events
 if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
@@ -270,12 +269,20 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     getSpikesRank('events','upstates');
 
     % 8.2 Ripples
+<<<<<<< HEAD
+    ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',false,'thresholds',rippleMasterDetector_threshold);
+=======
     ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',true,'thresholds',rippleMasterDetector_threshold,'eventSpikeThreshold', false);
+>>>>>>> 0029fef7ca55d5f1dd20999d57a54ebf235a35d9
     psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10,'restrict_to',restrict_ints);
     getSpikesRank('events','ripples');
 
     % 8.3 Theta intervals
+<<<<<<< HEAD
+    thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'powerThreshold',1,'channel',20 );
+=======
     thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection);
+>>>>>>> 0029fef7ca55d5f1dd20999d57a54ebf235a35d9
 end
 
 %% 9. Phase Modulation
@@ -289,7 +296,7 @@ end
 % Exclude manipulation intervals for computing CellMetrics
 if ~any(ismember(excludeAnalysis, {'10',lower('cellMetrics')}))
     if strcmpi(profileType,'hippocampus')
-        session = assignBrainRegion('showPowerProfile','theta','showEvent','ripples','eventTwin',[-0.05 0.05]); % hfo slowOscilations [-.5 .5]
+        session = assignBrainRegion('showPowerProfile','theta','showEvent','ripples','eventTwin',[-0.05 0.05]);
     elseif strcmpi(profileType,'cortex')
         session = assignBrainRegion('showPowerProfile','hfo','showEvent','slowOscilations','eventTwin',[-.5 .5]); % hfo slowOscilations [-.5 .5]
     end

@@ -27,12 +27,18 @@ addParameter(p,'forceReload',false,@islogical)
 addParameter(p,'verbose',false,@islogical)
 addParameter(p,'saveMat',true,@islogical)
 addParameter(p,'maze',[],@ischar)
+addParameter(p,'leftTtl',3,@isnumeric)
+addParameter(p,'rightTtl',4,@isnumeric)
+
 parse(p,varargin{:});
 forceReload = p.Results.forceReload;
 basepath = p.Results.basepath;
 verbose = p.Results.verbose;
 saveMat = p.Results.saveMat;
 maze = p.Results.maze;
+leftTtl = p.Results.leftTtl;
+rightTtl = p.Results.rightTtl;
+
 
 %% Deal with inputs
 filename = split(pwd,filesep); filename = filename{end};
@@ -60,17 +66,20 @@ C = strsplit(basenameFromBasepath(pwd),'_');
 sess = dir(strcat(C{1},'_',C{2},'*')); % get session files
 count = 1;
 for ii = 1:size(sess,1)
-    if sess(ii).isdir && ~isempty(dir([basepath filesep sess(ii).name filesep '*Tracking.Behavior.mat']))
+     if sess(ii).isdir && ~isempty(dir([basepath filesep sess(ii).name filesep '*Tracking.Behavior.mat']))
         cd([basepath filesep sess(ii).name]);
         fprintf('Computing linearization in %s folder \n',sess(ii).name);
         if strcmpi(maze,'tMaze')
             behaviorTemp.(sess(ii).name)= linearizeArmChoice('verbose',true);
         elseif strcmpi(maze,'linearMaze')
-            behaviorTemp.(sess(ii).name)= linearizeLinearMaze('verbose',verbose);
-        end
+             disp('sono qui');
+            behaviorTemp.(sess(ii).name)= linearizeLinearMaze('verbose',verbose, 'leftTtl',leftTtl ,'rightTtl',rightTtl);
+      end
         trackFolder(count) = ii; 
         count = count + 1;
-    end
+     else
+         behaviorTemp=[];
+     end
 end
 cd(basepath);
 
@@ -124,6 +133,12 @@ end
 % generate maps, one for each arm and for each recording
 maps = [];
 directionList = unique(direction);
+if size(direction,1) ~= 1
+    direction = direction';
+end
+if size(recMask,1) ~= 1
+    recMask = recMask';
+end
 count = 1;
 for ii = 1:length(efields)
     for jj = 1:length(directionList)
@@ -134,6 +149,9 @@ for ii = 1:length(efields)
 end
 
 % populate behavior
+if size(timestamps,2) ~= 1
+    timestamps = timestamps';
+end
 behavior.timestamps = timestamps;
 
 behavior.position.lin = lin;
