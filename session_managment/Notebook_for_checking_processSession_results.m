@@ -53,7 +53,7 @@ rippleChannel = [];
 SWChannel = [];
 eventSpikeThreshold_shanks = [3 4 5]; % which shanks will be accounted for the spike threshold 
 rippleMasterDetector_threshold = [1.5 3.5]; % [1.5 3.5]
-eventSpikeThreshold = 1; % .5
+eventSpikeThreshold = .5; % .5
 ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',false,'thresholds',rippleMasterDetector_threshold,'eventSpikeThreshold_shanks', eventSpikeThreshold_shanks,'eventSpikeThreshold',eventSpikeThreshold);
 psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10);
 getSpikesRank('events','ripples');
