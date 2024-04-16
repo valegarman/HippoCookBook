@@ -44,7 +44,7 @@ rightTtl = p.Results.rightTtl;
 filename = split(pwd,filesep); filename = filename{end};
 if ~isempty(dir([basepath filesep filename '.Behavior.mat'])) && ~forceReload
     disp('Behavior linearization already detected! Loading file.');
-    file =dir([basepath filesep filename '.Behavior.mat']);
+    file = dir([basepath filesep filename '.Behavior.mat']);
     load(file.name);
     return
 end
@@ -60,11 +60,12 @@ end
     
 %% Find subfolder recordings
 cd(basepath);
-sess = basenameFromBasepath(pwd);
+% sess = basenameFromBasepath(pwd);
 % [sessionInfo] = bz_getSessionInfo(basepath, 'noPrompts', true);
 C = strsplit(basenameFromBasepath(pwd),'_');
 sess = dir(strcat(C{1},'_',C{2},'*')); % get session files
 count = 1;
+behaviorTemp=[];
 for ii = 1:size(sess,1)
      if sess(ii).isdir && ~isempty(dir([basepath filesep sess(ii).name filesep '*Tracking.Behavior.mat']))
         cd([basepath filesep sess(ii).name]);
@@ -78,7 +79,6 @@ for ii = 1:size(sess,1)
         trackFolder(count) = ii; 
         count = count + 1;
      else
-         behaviorTemp=[];
      end
 end
 cd(basepath);
