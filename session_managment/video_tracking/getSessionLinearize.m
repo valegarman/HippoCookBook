@@ -65,6 +65,7 @@ cd(basepath);
 C = strsplit(basenameFromBasepath(pwd),'_');
 sess = dir(strcat(C{1},'_',C{2},'*')); % get session files
 count = 1;
+behaviorTemp=[];
 for ii = 1:size(sess,1)
      if sess(ii).isdir && ~isempty(dir([basepath filesep sess(ii).name filesep '*Tracking.Behavior.mat']))
         cd([basepath filesep sess(ii).name]);
