@@ -60,7 +60,7 @@ end
     
 %% Find subfolder recordings
 cd(basepath);
-sess = basenameFromBasepath(pwd);
+% sess = basenameFromBasepath(pwd);
 % [sessionInfo] = bz_getSessionInfo(basepath, 'noPrompts', true);
 C = strsplit(basenameFromBasepath(pwd),'_');
 sess = dir(strcat(C{1},'_',C{2},'*')); % get session files
