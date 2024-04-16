@@ -44,7 +44,7 @@ rightTtl = p.Results.rightTtl;
 filename = split(pwd,filesep); filename = filename{end};
 if ~isempty(dir([basepath filesep filename '.Behavior.mat'])) && ~forceReload
     disp('Behavior linearization already detected! Loading file.');
-    file =dir([basepath filesep filename '.Behavior.mat']);
+    file = dir([basepath filesep filename '.Behavior.mat']);
     load(file.name);
     return
 end
