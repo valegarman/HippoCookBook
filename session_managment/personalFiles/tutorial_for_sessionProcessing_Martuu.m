@@ -42,7 +42,7 @@ if ~isempty(bazler_ttl_channel)
 
 % 4.2 Processs individual sessions by by 'processSession'. Example:
 
-processSession('digital_optogenetic_channels',[6:16],'analog_optogenetic_channels',[],'promt_hippo_layers',true);  % digital_optogenetic_channels (0-16) ask manu 
+processSession('digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);  % digital_optogenetic_channels (0-16) ask manu 
                                                                                                                    % analog_optogenetic_channels - check the folder pulses, if no analog pulses is inside, put []
                                                                                                                    % promt_hippo_layers always put 'true', if analisys is done in cortex put 'false'
 % 5% Revise output using ProcessSession_notebook
