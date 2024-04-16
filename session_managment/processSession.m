@@ -256,7 +256,6 @@ if ~any(ismember(excludeAnalysis, {'7',lower('getHippocampalLayers')}))
     [hippocampalLayers] = getHippocampalLayers('force',true,'promt',promt_hippo_layers,'removeRipplesStimulation', false);
 end
 
-
 %% 8. Check Brain Events
 if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     % Trying changes in detecUD_temp
@@ -270,20 +269,12 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     getSpikesRank('events','upstates');
 
     % 8.2 Ripples
-<<<<<<< HEAD
     ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',false,'thresholds',rippleMasterDetector_threshold);
-=======
-    ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',true,'thresholds',rippleMasterDetector_threshold,'eventSpikeThreshold', false);
->>>>>>> 0029fef7ca55d5f1dd20999d57a54ebf235a35d9
     psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10,'restrict_to',restrict_ints);
     getSpikesRank('events','ripples');
 
     % 8.3 Theta intervals
-<<<<<<< HEAD
-    thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'powerThreshold',1,'channel',20 );
-=======
     thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection);
->>>>>>> 0029fef7ca55d5f1dd20999d57a54ebf235a35d9
 end
 
 %% 9. Phase Modulation
@@ -297,7 +288,7 @@ end
 % Exclude manipulation intervals for computing CellMetrics
 if ~any(ismember(excludeAnalysis, {'10',lower('cellMetrics')}))
     if strcmpi(profileType,'hippocampus')
-        session = assignBrainRegion('showPowerProfile','theta','showEvent','ripples','eventTwin',[-0.05 0.05]); % hfo slowOscilations [-.5 .5]
+        session = assignBrainRegion('showPowerProfile','theta','showEvent','ripples','eventTwin',[-0.05 0.05]);
     elseif strcmpi(profileType,'cortex')
         session = assignBrainRegion('showPowerProfile','hfo','showEvent','slowOscilations','eventTwin',[-.5 .5]); % hfo slowOscilations [-.5 .5]
     end
