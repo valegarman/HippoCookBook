@@ -146,6 +146,11 @@ fvip4_221014_sess3,fvip4,fvip4\fvip4_221014_sess3,c57b1/6,vip/dlx/ai80,"105µm (
 fid4_220829_sess17,fid4,fid4\fid4_220829_sess17,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,29,CA1sp CA1so CA1sr pCA1slm CA2slm CA3slm CA1slm CA3sr PTLp5 PTLp6 PTLp2_3 PTLp4 CA3sp CA3so,InterneuronsLibrary
 fsst3_220923_sess10,fsst3,fsst3\fsst3_220923_sess10,c57b1/6,sst/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,28,CA1so CA1sp CA1slm CA1sr CA3sp CA3so CA3sr,InterneuronsLibrary
 fvip4_221021_sess8,fvip4,fvip4\fvip4_221021_sess8,c57b1/6,vip/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,60,CA1so PTLp6 PTLp5 PTLp2_3 CA1sp CA1slm CA1sr CA3sp CA3so CA3sr,InterneuronsLibrary desVIPnhibition
+<<<<<<< HEAD
 fcr1_220307_sess7,fcr1,fcr1\fcr1_220307_sess7,c57b1/6,vip/cr/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,58,CA1sp CA1so PTLp6 PTLp5 PTLp2_3 CA1slm CA1sr CA3sp CA3sr CA3so,InterneuronsLibrary desVIPnhibition
 fcr1_220322_sess17,fcr1,fcr1\fcr1_220322_sess17,c57b1/6,vip/cr/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,22,CA1so PTLp6 PTLp5 PTLp2_3 CA1sp CA1slm CA1sr CA3sp CA3so DG,InterneuronsLibrary desVIPnhibition
 fcr1_220329_sess22,fcr1,fcr1\fcr1_220329_sess22,c57b1/6,vip/cr/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,41,PTLp6 PTLp5 PTLp2_3 CA1so CA1sp CA1slm CA1sr CA3sp CA3so CA3sr DG,InterneuronsLibrary desVIPnhibition
+=======
+fsst3_220927_sess12,fsst3,fsst3\fsst3_220927_sess12,c57b1/6,sst/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,66,CA1sp CA1so DG PTLp5 PTLp2_3 CA1sr CA1slm,InterneuronsLibrary
+fid4_220830_sess18,fid4,fid4\fid4_220830_sess18,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,42,CA1sp CA1so PTLp6 PTLp5 PTLp2_3 CA1slm CA1sr CA3sp CA3sr CA3so,InterneuronsLibrary desVIPnhibition neuroGli2d
+>>>>>>> ab082502bbfb89e56015d23988b61749a4d6dd55
