@@ -250,7 +250,6 @@ if ~any(ismember(excludeAnalysis, {'6',lower('powerProfiles')}))
     powerSpectrumProfile(theta_bandpass,'showfig',true,'forceDetect',true,'restrict_to',restrict_ints);
     powerSpectrumProfile(gamma_bandpass,'showfig',true,'forceDetect',true,'restrict_to',restrict_ints);
     powerSpectrumProfile(hfo_bandpass,'showfig',true,'forceDetect',true,'restrict_to',restrict_ints);
-
 end
 
 %% 7. Getting Hippocampal Layers
