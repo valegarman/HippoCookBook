@@ -108,7 +108,7 @@ if lightVersion
 end
 
 projectSessionResults = [];
-for ii = 1:length(sessions.basepaths)
+for ii = 122:length(sessions.basepaths)
     fprintf(' > %3.i/%3.i sessions \n',ii, length(sessions.basepaths)); %\n
     cd(sessions.basepaths{ii});
     
@@ -135,17 +135,22 @@ for ii = 1:length(sessions.basepaths)
     clear spikes
     
     % optogenetic responses
-    targetFile = dir('*.optogeneticResponse.cellinfo.mat'); load(targetFile.name);
-    if ~isfield(optogeneticResponses,'checkedCells')
-        optogeneticResponses.checkedCells = zeros(length(optogeneticResponses.bootsTrapRate(:,1)),1);
-    end
-    if lightVersion
-        if isfield(optogeneticResponses,'raster')
-            optogeneticResponses = rmfield(optogeneticResponses,'raster');
+    targetFile = dir('*.optogeneticResponse.cellinfo.mat'); 
+    if  isempty(targetFile)
+        projectSessionResults.optogeneticResponses{ii} = NaN;
+    else
+        load(targetFile.name)
+        if ~isfield(optogeneticResponses,'checkedCells')
+            optogeneticResponses.checkedCells = zeros(length(optogeneticResponses.bootsTrapRate(:,1)),1);
         end
+        if lightVersion
+            if isfield(optogeneticResponses,'raster')
+                optogeneticResponses = rmfield(optogeneticResponses,'raster');
+            end
+        end
+        projectSessionResults.optogeneticResponses{ii} = optogeneticResponses;
+        clear optogeneticResponses
     end
-    projectSessionResults.optogeneticResponses{ii} = optogeneticResponses;
-    clear optogeneticResponses
     
     % average CCG
     targetFile = dir('*.averageCCG.cellinfo.mat'); load(targetFile.name);
@@ -182,32 +187,32 @@ for ii = 1:length(sessions.basepaths)
     end
     
     % theta phase_locking
-    targetFile = dir('*.theta_*PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+    targetFile = dir('*.theta_*.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
     projectSessionResults.thetaModulation{ii} = thetaMod;
     clear thetaMod
     
     % theta phase_locking
-    targetFile = dir('*.thetaREM*PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+    targetFile = dir('*.thetaREM*.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
     projectSessionResults.thetaREMModulation{ii} = thetaREMMod;
     clear thetaREMMod
     
     % theta phase_locking
-    targetFile = dir('*.thetaRun*PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+    targetFile = dir('*.thetaRun*.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
     projectSessionResults.thetaRunModulation{ii} = thetaRunMod;
     clear thetaRunMod
     
     % lgamma phase_locking
-    targetFile = dir('*.lgamma*PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+    targetFile = dir('*.lgamma*.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
     projectSessionResults.lGammaModulation{ii} = lgammaMod;
     clear lgammaMod
     
     % hgamma phase_locking
-    targetFile = dir('*.hgamma*PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+    targetFile = dir('*.hgamma*.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
     projectSessionResults.hGammaModulation{ii} = hgammaMod;
     clear hgammaMod
     
     % ripple phase_locking
-    try targetFile = dir('*.ripple*PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+    try targetFile = dir('*.ripple*.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
         projectSessionResults.rippleMod{ii} = rippleMod;
         clear rippleMod
     catch
