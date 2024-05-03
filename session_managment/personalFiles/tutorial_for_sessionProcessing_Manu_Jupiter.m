@@ -27,9 +27,9 @@ indexNewSession('copyFiles', true);
 % 6% Once a database has been created, use loadProjectResults to stack results for all sessions
 % an enjoy data analysis!
 [projectResults, projectSessionResults] = ...
-        loadProjectResults('project', 'InterneuronsLibrary',...
+        loadProjectResults('project', 'Bibliocampus',...
         'analysis_project_path', adapt_filesep([onedrive_path 'NeuralComputationLab\ActiveProjects\interneuronsLibrary\data']),'loadLast',false); 
-% other projects include InterneuronsLibrary, desVIPnhibition, etc
+% other projects include Bibliocampus, desVIPnhibition, etc
 
 % PS. uLED sessions
 pulses = getAnalogPulses('manualThr',true,'overwrite',true); % 1-index
