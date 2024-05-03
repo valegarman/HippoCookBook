@@ -64,7 +64,7 @@ getSpikesRank('events','ripples');
 % or change powerThreshold, even the channel
 useCSD_for_theta_detection = true;
 powerThreshold = 1;% .8
-thetaChannel = 19;
+thetaChannel = [];
 thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'powerThreshold',powerThreshold,'channel', thetaChannel);
 
 %% 6. Phase modulation
