@@ -22,6 +22,8 @@ function [digitalIn] = getDigitalIn(varargin)
 % timestampsOn  Beggining of all ON pulses
 % timestampsOff Beggining of all OFF pulses
 % intsPeriods   Stimulation periods, as defined by perioLag
+% maze_in_virtual_channels   Save digital pulses that happen during Maze
+%               epochs in channels from 17.
 % 
 % MV-BuzsakiLab 2019
 % Based on Process_IntanDigitalChannels by P Petersen
@@ -32,17 +34,23 @@ addParameter(p,'fs',30000,@isnumeric)
 addParameter(p,'filename',[],@isstring)
 addParameter(p,'periodLag',5,@isnumeric)
 addParameter(p,'force',false,@islogical)
+addParameter(p,'maxNumberOfChannels',16,@isscalar)
+addParameter(p,'maze_in_virtual_channels',false,@islogical)
 
 parse(p, varargin{:});
 fs = p.Results.fs;
 filename = p.Results.filename;
 lag = p.Results.periodLag;
 force = p.Results.force;
+maxNumberOfChannels = p.Results.maxNumberOfChannels;
+maze_in_virtual_channels = p.Results.maze_in_virtual_channels;
+
 
 if ~isempty(dir('*DigitalIn.events.mat')) && force == false
     disp('Digital pulses already detected! Loading file.');
     file = dir('*DigitalIn.events.mat');
     load(file.name);
+
     
 %     if ~isempty(digitalIn)
 %         for ii = 1:size(digitalIn.ints,2)
@@ -101,8 +109,8 @@ digital_on = pulses;
 digital_off = pulses2;
 disp('Done!');
 
-for ii = 1:size(digital_on,2)
-    if ~isempty(digital_on{ii})
+for ii = 1: maxNumberOfChannels
+     if ~isempty(digital_on{ii})
         % take timestamp in seconds
         digitalIn.timestampsOn{ii} = digital_on{ii}/fs;
         digitalIn.timestampsOff{ii} = digital_off{ii}/fs;
@@ -128,6 +136,42 @@ for ii = 1:size(digital_on,2)
         end
         intsPeriods(end,2) = d(2,end);  
         digitalIn.intsPeriods{ii} = intsPeriods;
+     else
+        digitalIn.timestampsOn{ii} = [];
+        digitalIn.timestampsOff{ii} = [];
+        digitalIn.ints{ii} = [];
+        digitalIn.dur{ii} =[];
+        digitalIn.intsPeriods{ii} = [];
+    end
+end
+
+
+if  maze_in_virtual_channels && exist([basenameFromBasepath '.session.mat'],'file')
+    digitalIn2 = digitalIn;
+    session = loadSession;
+    if isfield(session.epochs{1},'behavioralParadigm')
+        for ii = 1:length(session.epochs)
+            if strcmpi(session.epochs{ii}.behavioralParadigm, 'Maze')
+                for jj = 1:16
+                    status = InIntervals(digitalIn2.timestampsOn{jj}, [session.epochs{ii}.startTime session.epochs{ii}.stopTime]);
+                    digitalIn2.timestampsOn{16+jj} = digitalIn2.timestampsOn{jj}(status);
+                    digitalIn2.timestampsOff{16+jj} = digitalIn2.timestampsOff{jj}(status);
+                    digitalIn2.ints{16+jj} = digitalIn2.ints{jj}(status,:);
+                    digitalIn2.dur{16+jj} = digitalIn2.dur{jj}(status);
+                    
+                    % remove usless pulses
+                    if ~isempty(digitalIn2.timestampsOn{jj})
+                        digitalIn2.timestampsOn{jj}(status) = [];
+                        digitalIn2.timestampsOff{jj}(status) = [];
+                        digitalIn2.ints{jj}(status,:) = [];
+                        digitalIn2.dur{jj}(status) = [];
+                    end
+                end
+            end
+        end
+        digitalIn = digitalIn2;
+    else
+        warning('No behavior was performed!!');
     end
 end
 
@@ -138,7 +182,8 @@ if exist('digitalIn')==1
 
     h=figure;
     imagesc(xt,1:size(data,2),data);
-    xlabel('s'); ylabel('Channels'); colormap gray 
+    xlabel('s'); ylabel('Channels'); 
+    colormap(flip(gray));
     mkdir('Pulses');
     saveas(h,'pulses\digitalIn.png');    
 else

@@ -146,8 +146,8 @@ end
 if isempty(digitalPulses) && any(ledLayout.isDigital)
     digitalPulses = getDigitalIn;
 
-    if length(digitalPulses.ints)<16
-        digitalPulses.ints = [digitalPulses.ints cell(1,16-length(digitalPulses.ints))];
+    if length(digitalPulses.timestampsOff)<16
+        digitalPulses.tpsOff = [digitalPulses.timestampsOff cell(1,16-length(digitalPulses.timestampsOff))];
     end
 end
 
@@ -207,12 +207,8 @@ probe = probe(idx);
 duration = diff(timestamps')';
 durationRounded = round(duration,duration_round_decimal);
 % zeroDurationPulses = find(durationRounded==0);
-if length(unique(durationRounded))>1
-    [cnt_unique, unique_a] = hist(durationRounded,unique(durationRounded));
-else
-    cnt_unique = length(durationRounded);
-    unique_a = unique(durationRounded);
-end
+
+[cnt_unique, unique_a] = hist(durationRounded,unique(durationRounded));
 uniqueToDiscard = unique_a(cnt_unique < minNumberOfPulses);
 pulsesToDiscard = zeros(size(duration));
 for ii = 1:length(uniqueToDiscard)
