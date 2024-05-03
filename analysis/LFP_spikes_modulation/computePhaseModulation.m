@@ -401,7 +401,7 @@ if plotting
             xlim([0 4*pi]);
             title(num2str(i),'FontWeight','normal','FontSize',10);
             if i == 1
-                ylabel('prob'); title(['Channel (1-index): ' num2str(thetaEpochs.channel)],'FontWeight','normal','FontSize',10);
+                ylabel('prob'); title(['Channel (1-index): ' num2str(thetaChannel)],'FontWeight','normal','FontSize',10);
             elseif i == size(spikes.UID,2)
                 set(gca,'XTick',[0:2*pi:4*pi],'XTickLabel',{'0','2\pi','4\pi'},'YTick',[])
                 xlabel('phase (rad)');
@@ -428,7 +428,7 @@ if plotting
             xlim([0 4*pi]);
             title(num2str(i),'FontWeight','normal','FontSize',10);
             if i == 1
-                ylabel('prob'); title(['Channel (1-index): ' num2str(thetaEpochs.channel)],'FontWeight','normal','FontSize',10);
+                ylabel('prob'); title(['Channel (1-index): ' num2str(lgammaChannel)],'FontWeight','normal','FontSize',10);
             elseif i == size(spikes.UID,2)
                 set(gca,'XTick',[0:2*pi:4*pi],'XTickLabel',{'0','2\pi','4\pi'},'YTick',[])
                 xlabel('phase (rad)');
@@ -455,7 +455,7 @@ if plotting
             xlim([0 4*pi]);
             title(num2str(i),'FontWeight','normal','FontSize',10);
             if i == 1
-                ylabel('prob'); title(['Channel (1-index): ' num2str(thetaEpochs.channel)],'FontWeight','normal','FontSize',10);
+                ylabel('prob'); title(['Channel (1-index): ' num2str(hgammaChannel)],'FontWeight','normal','FontSize',10);
             elseif i == size(spikes.UID,2)
                 set(gca,'XTick',[0:2*pi:4*pi],'XTickLabel',{'0','2\pi','4\pi'},'YTick',[])
                 xlabel('phase (rad)');
@@ -482,7 +482,7 @@ if plotting
             xlim([0 4*pi]);
             title(num2str(i),'FontWeight','normal','FontSize',10);
             if i == 1
-                ylabel('prob'); title(['Channel (1-index): ' num2str(thetaEpochs.channel)],'FontWeight','normal','FontSize',10);
+                ylabel('prob'); title(['Channel (1-index): ' num2str(thetaChannel)],'FontWeight','normal','FontSize',10);
             elseif i == size(spikes.UID,2)
                 set(gca,'XTick',[0:2*pi:4*pi],'XTickLabel',{'0','2\pi','4\pi'},'YTick',[])
                 xlabel('phase (rad)');
@@ -509,7 +509,7 @@ if plotting
             xlim([0 4*pi]);
             title(num2str(i),'FontWeight','normal','FontSize',10);
             if i == 1
-                ylabel('prob'); title(['Channel (1-index): ' num2str(thetaEpochs.channel)],'FontWeight','normal','FontSize',10);
+                ylabel('prob'); title(['Channel (1-index): ' num2str(thetaChannel)],'FontWeight','normal','FontSize',10);
             elseif i == size(spikes.UID,2)
                 set(gca,'XTick',[0:2*pi:4*pi],'XTickLabel',{'0','2\pi','4\pi'},'YTick',[])
                 xlabel('phase (rad)');
