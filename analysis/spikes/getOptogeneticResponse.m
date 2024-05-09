@@ -12,7 +12,7 @@ function [optogeneticResponses] = getOptogeneticResponse(varargin)
 % basepath          By default pwd.
 % numRep            For boostraping, default, 500. If 0, no bexpoostraping.
 % binSize           In seconds, default, 0.001.
-% winSize           In seconds, default, 0.5.
+% winSize           In seconds, default, 0..
 % rasterPlot        Default true.
 % ratePlot          Default true.
 % winSizePlot       Default [-0.1 .5];
