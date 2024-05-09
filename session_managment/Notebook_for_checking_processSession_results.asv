@@ -98,7 +98,7 @@ cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeM
 ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true,'restrictToIntervals',...
     [0 1.2957e+04],'manualAdjustMonoSyn',false); % uLEDResponses.restricted_interval
 cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true,...
-    'restrictToIntervals',[1.2957e+04 2.0668e+04],'manualAdjustMonoSyn',false,'saveAs','cell_metrics_post'); % uLEDResponses.restricted_interval
+    'restrictToIntervals',[1.3164e+04 2.1741e+04],'manualAdjustMonoSyn',false,'saveAs','cell_metrics_post'); % uLEDResponses.restricted_interval
 
 
 getACGPeak('force',true);
