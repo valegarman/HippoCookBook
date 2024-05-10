@@ -110,7 +110,6 @@ fid4_220818_sess10,fid4,fid4\fid4_220818_sess10,c57b1/6,id2/dlx/ai80,"105µm (12
 fid4_220825_sess15,fid4,fid4\fid4_220825_sess15,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,29,CA1sp CA1so PTLp6 PTLp5 PTLp2_3 CA1slm CA1sr CA3sp,Bibliocampus
 fid4_220826_sess16,fid4,fid4\fid4_220826_sess16,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,29,CA1sp CA1so CA1slm CA1sr CA3sp CA3so DG PTLp6 PTLp5 PTLp2_3,Bibliocampus
 fvip2_220812_sess6,fvip2,fvip2\fvip2_220812_sess6,c57b1/6,vip/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,87,CA1sp CA1sr CA1so PTLp6 PTLp5 PTLp2_3,Bibliocampus desVIPnhibition
-<<<<<<< HEAD
 fcamk1_200911_sess19,fcamk1,fcamk1\fcamk1_200911_sess19,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze,38,CA1sp CA1so pCA1sr CA1sr,uLEDiscotheque Bibliocampus LightInInh
 fcamk1_200910_sess18,fcamk1,fcamk1\fcamk1_200910_sess18,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze,54,CA1sp CA1so CA1sr,uLEDiscotheque Bibliocampus LightInInh
 fcamk3_201111_sess20,fcamk3,fcamk3\fcamk3_201111_sess20,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze linear maze,63,disCA1sp CA1sp CA1so CA1sr,uLEDiscotheque Bibliocampus LightInInh
@@ -123,20 +122,6 @@ fcamk3_201113_sess22,fcamk3,fcamk3\fcamk3_201113_sess22,c57b1/6,camkii/ai32,"ule
 fcamk3_201106_sess17,fcamk3,fcamk3\fcamk3_201106_sess17,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze linear maze,46,CA1sp CA1sr CA1so,uLEDiscotheque Bibliocampus LightInInh
 fcamk3_201116_sess23,fcamk3,fcamk3\fcamk3_201116_sess23,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze linear maze,60,CA1sp CA1so CA1sr,uLEDiscotheque Bibliocampus LightInInh
 fcamk3_201117_sess24,fcamk3,fcamk3\fcamk3_201117_sess24,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",home cage home cage,54,CA1sp CA1so CA1sr,uLEDiscotheque Bibliocampus LightInInh
-=======
-fcamk1_200911_sess19,fcamk1,fcamk1\fcamk1_200911_sess19,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze,38,CA1sp CA1so pCA1sr CA1sr,uLEDiscotheque Bibliocampus LightInInh
-fcamk1_200910_sess18,fcamk1,fcamk1\fcamk1_200910_sess18,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze,54,CA1sp CA1so CA1sr,uLEDiscotheque Bibliocampus LightInInh
-fcamk3_201111_sess20,fcamk3,fcamk3\fcamk3_201111_sess20,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze linear maze,63,disCA1sp CA1sp CA1so CA1sr,uLEDiscotheque Bibliocampus LightInInh
-fcamk3_201105_sess16,fcamk3,fcamk3\fcamk3_201105_sess16,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze linear maze,48,CA1sp CA1so,uLEDiscotheque Bibliocampus LightInInh
-fcamk3_201109_sess18,fcamk3,fcamk3\fcamk3_201109_sess18,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze cnopoststim,66,CA1so CA1sp CA1sr,uLEDiscotheque Bibliocampus LightInInh
-fcamk3_201029_sess11_cleanned,fcamk3,fcamk3\fcamk3_201029_sess11_cleanned,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze linear maze,40,CA1sp CA1sr CA1so,uLEDiscotheque Bibliocampus LightInInh
-fcamk3_201102_sess13,fcamk3,fcamk3\fcamk3_201102_sess13,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze linear maze,48,CA1sp CA1so CA1sr,uLEDiscotheque Bibliocampus LightInInh
-fcamk3_201110_sess19,fcamk3,fcamk3\fcamk3_201110_sess19,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze linear maze,61,pCA1sp CA1sp CA1so CA1sr,uLEDiscotheque Bibliocampus LightInInh
-fcamk3_201113_sess22,fcamk3,fcamk3\fcamk3_201113_sess22,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze linear maze,58,CA1sp CA1so CA1sr,uLEDiscotheque Bibliocampus LightInInh
-fcamk3_201106_sess17,fcamk3,fcamk3\fcamk3_201106_sess17,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze linear maze,46,CA1sp CA1sr CA1so,uLEDiscotheque Bibliocampus LightInInh
-fcamk3_201116_sess23,fcamk3,fcamk3\fcamk3_201116_sess23,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze linear maze,60,CA1sp CA1so CA1sr,uLEDiscotheque LightInInh
-fcamk3_201117_sess24,fcamk3,fcamk3\fcamk3_201117_sess24,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,home cage home cage,54,CA1sp CA1so CA1sr,uLEDiscotheque LightInInh
->>>>>>> d309c5e267a3d90efd7d8d9810567761969454ed
 fvip2_220901_sess20,fvip2,fvip2\fvip2_220901_sess20,c57b1/6,vip/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,80,CA1sp CA1so CA1sr PTLp5 PTLp2_3 CA1slm CA3sp CA3so Thalamus,Bibliocampus desVIPnhibition
 fcamk10_220920_sess8,fcamk10,fcamk10\fcamk10_220920_sess8,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",no,36,CA1sp CA1so,uLEDiscotheque Bibliocampus LightInInh
 fvip2_220826_sess16,fvip2,fvip2\fvip2_220826_sess16,c57b1/6,vip/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,66,CA1sr CA1slm CA1sp CA1so PTLp5 PTLp2_3 CA3sp CA3sr CA3so DG,Bibliocampus desVIPnhibition
