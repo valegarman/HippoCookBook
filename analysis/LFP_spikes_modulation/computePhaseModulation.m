@@ -203,21 +203,25 @@ end
 
 if isempty(lgammaChannel)
     lgammaChannel = hippocampalLayers.bestShankLayers.oriens;
-    try
-        thetaEpochs = detectThetaEpochs();
-        lgammaChannel = thetaEpochs.channel;
-    catch
-        disp('Not possible to load good low gamma channel...');
+    if isnan(lgammaChannel)
+        try
+            thetaEpochs = detectThetaEpochs();
+            lgammaChannel = thetaEpochs.channel;
+        catch
+            disp('Not possible to load good low gamma channel...');
+        end
     end
 end
 
 if isempty(hgammaChannel)
     hgammaChannel = hippocampalLayers.bestShankLayers.oriens;
-    try
-        thetaEpochs = detectThetaEpochs();
-        hgammaChannel = thetaEpochs.channel;
-    catch
-        disp('Not possible to load good low gamma channel...');
+    if isnan(hgammaChannel)
+        try
+            thetaEpochs = detectThetaEpochs();
+            hgammaChannel = thetaEpochs.channel;
+        catch
+            disp('Not possible to load good low gamma channel...');
+        end
     end
 end
 
