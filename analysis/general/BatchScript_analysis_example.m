@@ -16,19 +16,20 @@ for ii = 1:length(sessionsTable.SessionName)
         try
         
             %%% your code goes here...
-            targetFile = dir('*thetaRun_6-12.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
-            thetaChannel = thetaRunMod.detectorParams.channels;
-            targetFile = dir('*ripple_120-200.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
-            rippleChannel = rippleMod.detectorParams.channels;
-            targetFile = dir('*SW_2-10.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
-            if ~isempty(SWMod)
-                SWChannel = SWMod.detectorParams.channels;
-            else
-                SWChannel = [];
-            end
-
-            computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel,'thetaChannel',thetaChannel,'hgammaChannel',thetaChannel,'lgammaChannel',thetaChannel);
-            clear rippleChannel SWChannel thetaChannel
+            % targetFile = dir('*thetaRun_6-12.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+            % thetaChannel = thetaRunMod.detectorParams.channels;
+            % targetFile = dir('*ripple_120-200.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+            % rippleChannel = rippleMod.detectorParams.channels;
+            % targetFile = dir('*SW_2-10.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+            % if ~isempty(SWMod)
+            %     SWChannel = SWMod.detectorParams.channels;
+            % else
+            %     SWChannel = [];
+            % end
+            % 
+            % computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel,'thetaChannel',thetaChannel,'hgammaChannel',thetaChannel,'lgammaChannel',thetaChannel);
+            % clear rippleChannel SWChannel thetaChannel
+            getAverageCCG('force',true);
             %%%
             
             close all;
