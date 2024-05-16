@@ -96,8 +96,6 @@ fcck1_220131_sess1,fcck1,fcck1\fcck1_220131_sess1,c57b1/6,vip/cck/ai80,"105µm (
 fvip1_220603_sess18,fvip1,fvip1\fvip1_220603_sess18,c57b1/6,vip/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,59,CA1 PTLp CA3,Bibliocampus desVIPnhibition
 fvip1_220525_sess11,fvip1,fvip1\fvip1_220525_sess11,c57b1/6,vip/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,19,CA1sp PTLp CA3,Bibliocampus desVIPnhibition
 fsst3_220909_sess1,fsst3,fsst3\fsst3_220909_sess1,c57b1/6,sst/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,38,PTLp PTLp5 PTLp6 CA1sp CA1so CA1slm CA1sr CA3sp CA3sr,Bibliocampus
-fcck1_220131_sess1,fcck1,fcck1\fcck1_220131_sess1,c57b1/6,vip/cck/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,41,CA1so CA1sp CA1sr CA1slm CA3sp PTLp6 PTLp5 PTLp2_3,Bibliocampus desVIPnhibition
-fcck1_220204_sess5,fcck1,fcck1\fcck1_220204_sess5,c57b1/6,vip/cck/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,50,CA1sp CA1so CA1sr CA1slm CA3sp CA3sr PTLp6 PTLp5 PTLp2_3,Bibliocampus desVIPnhibition
 fsst3_220921_sess8,fsst3,fsst3\fsst3_220921_sess8,c57b1/6,sst/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,11,CA1sp CA1so CA1slm CA1sr CA3sp DG CA3sr PTLp5 PTLp2_3 PTLp6,Bibliocampus
 fsst3_220922_sess9,fsst3,fsst3\fsst3_220922_sess9,c57b1/6,sst/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,14,CA1sp CA1so PTLp5 PTLp2_3 CA1slm CA1sr CA3sp DG,Bibliocampus
 fcamk1_200902_sess13,fcamk1,fcamk1\fcamk1_200902_sess13,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linearmaze,37,CA1sp CA1so,uLEDiscotheque Bibliocampus
@@ -152,3 +150,4 @@ fid4_220830_sess18,fid4,fid4\fid4_220830_sess18,c57b1/6,id2/dlx/ai80,"105µm (12
 fcr1_220301_sess3,fcr1,fcr1\fcr1_220301_sess3,c57b1/6,vip/cr/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,89,PTLp6 PTLp5 PTLp2_3 CA1sp CA1so CA1slm CA1sr,Bibliocampus desVIPnhibition
 fcr1_220323_sess18,fcr1,fcr1\fcr1_220323_sess18,c57b1/6,vip/cr/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,37,CA1sp CA1so CA1sr CA1slm PTLp6 PTLp5 PTLp2_3 CA3sp CA3so CA3sr,Bibliocampus desVIPnhibition
 fvip4_221020_sess7,fvip4,fvip4\fvip4_221020_sess7,c57b1/6,vip/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,44,PTLp6 PTLp5 PTLp2_3 CA1so CA1sp CA1slm CA1sr CA3sp CA3so CA3sr DG,Bibliocampus desVIPnhibition
+fvip2_220811_sess5,fvip2,fvip2\fvip2_220811_sess5,c57b1/6,vip/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,82,CA1sp CA1so CA1sr CA1slm PTLp6 PTLp5 PTLp2_3,InterneuronsLibrary desVIPnhibition
