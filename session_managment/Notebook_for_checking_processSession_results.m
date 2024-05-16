@@ -49,17 +49,14 @@ hippocampalLayers = getHippocampalLayers('force',true,'promt',true);
 % Revise number of ripples, shape and channel. You can also specifiy a
 % different trhresold or restrict the shanks for the spikeThreshold
 % analysis.
-<<<<<<< HEAD
-excludeIntervals = [];
-=======
 
->>>>>>> d309c5e267a3d90efd7d8d9810567761969454ed
+excludeIntervals = [];
 rippleChannel = [];
 SWChannel = [];
 eventSpikeThreshold_shanks = [3]; % which shanks will be accounted for the spike threshold 
 rippleMasterDetector_threshold = [1 2]; % [1.5 3.5]
 eventSpikeThreshold = 1; % .5
-ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',false,'thresholds',rippleMasterDetector_threshold,'eventSpikeThreshold_shanks', eventSpikeThreshold_shanks,'eventSpikeThreshold',eventSpikeThreshold,'excludeIntervals',excludeIntervals);
+ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',false,'thresholds',rippleMasterDetector_threshold,'eventSpikeThreshold_shanks', eventSpikeThreshold_shanks,'eventSpikeThreshold',eventSpikeThreshold,'excludeIntervals',excludeIntervals); 
 psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10);
 % psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10,'restrict_to_manipulation',true);
 getSpikesRank('events','ripples');
@@ -68,37 +65,27 @@ getSpikesRank('events','ripples');
 % Revise channel definition, theta band in thetaEpochs.png and cells
 % rhytmicity. If bad, you can change useCSD_for_theta_detection to false,
 % or change powerThreshold, even the channel
-<<<<<<< HEAD
-useCSD_for_theta_detection = false;
-=======
 
+powerThreshouseCSD_for_theta_detection = false;
+ld = 2;% .8
+channel = 32;
 useCSD_for_theta_detection = true;
->>>>>>> d309c5e267a3d90efd7d8d9810567761969454ed
 powerThreshold = 1;% .8
-thetaChannel = [];
-thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'powerThreshold',powerThreshold,'channel', thetaChannel);
+thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'powerThreshold',powerThreshold,'channel', channel);
 
 
 %% 6. Phase modulation
 % NOTE!! If you have re-detected ripples or theta, you must run this code
 % again with the same channel definition!!!
-<<<<<<< HEAD
-thetaChannel = [];
-hgammaChannel = [];
-lgammaChannel = [];
-[phaseMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel,'thetaChannel',thetaChannel,'hgammaChannel',thetaChannel,'lgammaChannel',thetaChannel);
-% [phaseMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel,'thetaChannel',thetaChannel,'hgammaChannel',thetaChannel,'lgammaChannel',thetaChannel,'restrict_to_manipulation',true);
-=======
-
 
 
 thetaChannel = 22;
 hgammaChannel = 56;
 lgammaChannel = 48;
 [phaseMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel,'thetaChannel',thetaChannel,'hgammaChannel',thetaChannel,'lgammaChannel',thetaChannel);
-
->>>>>>> d309c5e267a3d90efd7d8d9810567761969454ed
 computeCofiringModulation;
+% [phaseMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel,'thetaChannel',thetaChannel,'hgammaChannel',thetaChannel,'lgammaChannel',thetaChannel,'restrict_to_manipulation',true);
+
 
 %% 7. Brain region
 % Revise assignBrainRegion output. If disagreements or out of date, run again
