@@ -22,14 +22,14 @@ processSession('digital_optogenetic_channels',1,'analog_optogenetic_channels',[]
 close all
 
 % 5% Index session
-indexNewSession('copyFiles', true);
+indexNewSession('copyFiles', false);
 
 % 6% Once a database has been created, use loadProjectResults to stack results for all sessions
 % an enjoy data analysis!
 [projectResults, projectSessionResults] = ...
-        loadProjectResults('project', 'uLEDiscotheque',...
-        'analysis_project_path', adapt_filesep([dropbox_path '\ProjectsOnLine\monoSynBition\data']),'loadLast',false); 
-% other projects include InterneuronsLibrary, desVIPnhibition, etc
+        loadProjectResults('project', 'Bibliocampus',...
+        'analysis_project_path', adapt_filesep([onedrive_path 'NeuralComputationLab\ActiveProjects\interneuronsLibrary\data']),'loadLast',false); 
+% other projects include Bibliocampus, desVIPnhibition, etc
 
 % PS. uLED sessions
 pulses = getAnalogPulses('manualThr',true,'overwrite',true); % 1-index
