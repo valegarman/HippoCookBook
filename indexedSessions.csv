@@ -151,3 +151,6 @@ fcr1_220301_sess3,fcr1,fcr1\fcr1_220301_sess3,c57b1/6,vip/cr/ai80,"105µm (125µ
 fcr1_220323_sess18,fcr1,fcr1\fcr1_220323_sess18,c57b1/6,vip/cr/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,37,CA1sp CA1so CA1sr CA1slm PTLp6 PTLp5 PTLp2_3 CA3sp CA3so CA3sr,Bibliocampus desVIPnhibition
 fvip4_221020_sess7,fvip4,fvip4\fvip4_221020_sess7,c57b1/6,vip/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,44,PTLp6 PTLp5 PTLp2_3 CA1so CA1sp CA1slm CA1sr CA3sp CA3so CA3sr DG,Bibliocampus desVIPnhibition
 fvip2_220811_sess5,fvip2,fvip2\fvip2_220811_sess5,c57b1/6,vip/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,82,CA1sp CA1so CA1sr CA1slm PTLp6 PTLp5 PTLp2_3,InterneuronsLibrary desVIPnhibition
+fcamk10_221004_sess18,fcamk10,fcamk10\fcamk10_221004_sess18,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze,56,CA1so CA1sp,uLEDiscotheque LightInInh
+fcamk10_221006_sess20,fcamk10,fcamk10\fcamk10_221006_sess20,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze,74,CA1so CA1sp CA1sr,uLEDiscotheque LightInInh
+fcamk10_220930_sess16,fcamk10,fcamk10\fcamk10_220930_sess16,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze,52,CA1so CA1sp CA1sr,uLEDiscotheque LightInInh
