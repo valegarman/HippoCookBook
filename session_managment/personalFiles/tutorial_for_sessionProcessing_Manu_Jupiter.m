@@ -22,7 +22,7 @@ processSession('digital_optogenetic_channels',1,'analog_optogenetic_channels',[]
 close all
 
 % 5% Index session
-indexNewSession('copyFiles', true);
+indexNewSession('copyFiles', false);
 
 % 6% Once a database has been created, use loadProjectResults to stack results for all sessions
 % an enjoy data analysis!
