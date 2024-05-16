@@ -49,11 +49,11 @@ hippocampalLayers = getHippocampalLayers('force',true,'promt',true);
 % Revise number of ripples, shape and channel. You can also specifiy a
 % different trhresold or restrict the shanks for the spikeThreshold
 % analysis.
-rippleChannel = 9;
-SWChannel = 47;
-eventSpikeThreshold_shanks = [1 2 3 4 5]; % which shanks will be accounted for the spike threshold 
-rippleMasterDetector_threshold = [1.5 3.5]; % [1.5 3.5]
-eventSpikeThreshold = 1.5; % .5
+rippleChannel = 3;
+SWChannel = 32;
+eventSpikeThreshold_shanks = [1 2 3 4]; % which shanks will be accounted for the spike threshold 
+rippleMasterDetector_threshold = [1 3]; % [1.5 3.5]
+eventSpikeThreshold = 1; % .5
 ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',false,'thresholds',rippleMasterDetector_threshold,'eventSpikeThreshold_shanks', eventSpikeThreshold_shanks,'eventSpikeThreshold',eventSpikeThreshold);
 psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10);
 getSpikesRank('events','ripples');
@@ -62,15 +62,15 @@ getSpikesRank('events','ripples');
 % Revise channel definition, theta band in thetaEpochs.png and cells
 % rhytmicity. If bad, you can change useCSD_for_theta_detection to false,
 % or change powerThreshold, even the channel
-useCSD_for_theta_detection = false;
-powerThreshold = 2;% .8
-channel = 47;
+powerThreshouseCSD_for_theta_detection = false;
+ld = 2;% .8
+channel = 32;
 thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'powerThreshold',powerThreshold,'channel', channel);
 
 %% 6. Phase modulation
 % NOTE!! If you have re-detected ripples or theta, you must run this code
 % again with the same channel definition!!!
-thetaChannel = 47;
+thetaChannel = 32;
 [phaseMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel,'thetaChannel',thetaChannel);
 computeCofiringModulation;
 

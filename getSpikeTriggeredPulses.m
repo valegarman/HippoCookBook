@@ -30,7 +30,7 @@ addParameter(p,'spikes',[],@isstruct);
 addParameter(p,'basepath',pwd,@ischar);
 addParameter(p,'paddingWindow',1,@islogical);  
 addParameter(p,'th_STD',50,@islogical); 
-addParameter(p,'maxDurationPulse',0.005,@islogical); 
+addParameter(p,'maxDurationPulse',0.0045,@islogical); 
 addParameter(p,'winSizePlotRaster',[-0.01 0.01],@islogical);  
 addParameter(p,'winSizePlotSTD',[-.005 .005],@islogical); 
 addParameter(p,'winSizePlotRasterPulse',[-.005 .06],@islogical); 
@@ -62,16 +62,19 @@ cell_metrics = loadCellMetrics;
 pulses = optogeneticResponses.pulses;
 uLEDPulses = getuLEDPulses;
 session = loadSession;
-
 keyboard;
+
+
 %% CHECK 
 
 if any(optogeneticResponses.conditions(:,1))>maxDurationPulse
-  conditions = optogeneticResponses.conditions(find( optogeneticResponses.conditions(:,1)<maxDurationPulse),:);
+  conditions = [optogeneticResponses.conditions(find( optogeneticResponses.conditions(:,1)<maxDurationPulse),:)  find( optogeneticResponses.conditions(:,1)<maxDurationPulse)];
+else
+  ind =[1:length(optogeneticResponses.conditions)];
+  conditions = [optogeneticResponses.conditions ind];
+  
 end
-% qui ho gia compreso il numero delle condizioni, ma ora conoscendo la loro
-% posizione le posso utilizzare per cambiare la cose che mi servono di
-% optogeneticrespons.durationPerPulse e optogeneticResponses.responsecurveZ
+
 
 
 %% 1. plot raster plot of all uLED of each shank  
@@ -85,36 +88,30 @@ spikeTriggeredPulses.shank = unique(uLEDPulses.shank);                          
 spikeTriggeredPulses.condition = conditions;                                    % conditions of the experiments ( duration of pulses, digital channels, ?)
 spikeTriggeredPulses.maxDurationPulse = maxDurationPulse;                       % max duration of the pulse to be included in this analysis 
 
-index = [1,5,9,2,6,10,3,7,11,4,8,12];
+index = [0,0,0,0,1,5,9,2,6,10,3,7,11,4,8,12];
 colorForSTD = colormap(winter(size(spikes.UID,2)));
 t = optogeneticResponses.timestamps;
 nCondition = length(conditions);
 
 
+
+%%
+
 figure;
 set(gcf,'Position',[300 -200 1500 1000]);
+
 for ii = 1:nCondition
     
-    subplot(3 ,4, index(ii));
+    subplot(3 ,4, index(conditions(ii,2)));
 
     for jj = 1:size(spikes.UID,2)
           
-        resp = squeeze(optogeneticResponses.responsecurveZ(jj,conditions(ii,2),:));
+        resp = squeeze(optogeneticResponses.responsecurveZ(jj,conditions(ii,4),:));
         dur = conditions(ii,1);
         hold on
         plot(t(t>winSizePlotRaster(1) & t<winSizePlotRaster(2)), resp(t>winSizePlotRaster(1) & t<winSizePlotRaster(2)),'LineWidth',0.75,'color',colorForSTD (jj,:));
-        xlim([winSizePlotRaster(1) winSizePlotRaster(2)]);
-        xlabel(['time [s]']);
-        ylabel(['amplitude [std]']);
-        hold on
-        plot([0 dur],[250 250],'color',[0 0 0],'LineWidth',2);
-        hold on 
-        yline(th_STD,'color',[0 0 0],'LineWidth',1);
-
-        t_win = t(t>winSizePlotRaster(1) & t<winSizePlotRaster(2));
-        xlim([min(t_win) max(t_win)]);
-       
-       if any(resp(t>winSizePlotRaster(1) & t<winSizePlotRaster(2)) > th_STD)
+        
+       if any(resp(t>winSizePlotRaster(1) & t<dur) > th_STD)
             spikeTriggeredPulses.amplitude(jj,ii) = 1;
             ist = t_win(resp(t>winSizePlotRaster(1) & t<winSizePlotRaster(2)) > th_STD);
             spikeTriggeredPulses.latency(jj,ii) = ist;
@@ -124,14 +121,50 @@ for ii = 1:nCondition
        end
         
     end
+
+    xlim([winSizePlotRaster(1) winSizePlotRaster(2)]);
+    xlabel(['time [s]']);
+    ylabel(['amplitude [std]']);
+    hold on
+    %find the way to have ylim of the pulse flexible and not fixed at 250
+    plot([0 dur],[250 250],'color',[0 0 0],'LineWidth',2);
+    hold on 
+    yline(th_STD,'color',[0 0 0],'LineWidth',1);
+
+    t_win = t(t>winSizePlotRaster(1) & t<winSizePlotRaster(2));
+    xlim([min(t_win) max(t_win)]); 
+    sgt = sgtitle('Shank 1                                       Shank 2                                         Shank3                                        Shank4');
+    sgt.FontSize = 15;    
+
 end
 
 saveas(gcf,['SummaryFigures\' save_as '_LED_Spk_Triggered.png']);
  
-spikeTriggeredPulses.unitsTriggeringPulse = find(any(spikeTriggeredPulses.amplitude'));                                            % units that trigger the pulses
-spikeTriggeredPulses.DigitalChannelTriggered = spikeTriggeredPulses.DigitalChannels(find(any(spikeTriggeredPulses.amplitude)));    % digital channels that recorded the neurons that triggered by the units recorded
-spikeTriggeredPulses.nConditionChannelTriggered = find(any(spikeTriggeredPulses.amplitude));                                       % number of the conditions triggered 
-spikeTriggeredPulses.unitsTriggeringPulses_rateSpkDetected =[];                                                                    % rate of spikes detected from the triggering units    
+spikeTriggeredPulses.unitsTriggeringPulse = find(any(spikeTriggeredPulses.amplitude'));                                                  % units that trigger the pulses
+spikeTriggeredPulses.DigitalChannelTriggered = spikeTriggeredPulses.DigitalChannels(find(any(spikeTriggeredPulses.amplitude)));          % digital channels that recorded the neurons that triggered by the units recorded
+spikeTriggeredPulses.nConditionChannelTriggered = find(any(spikeTriggeredPulses.amplitude));                                             % number of the conditions triggered 
+spikeTriggeredPulses.unitsTriggeringPulses_rateSpkDetected(length(jj),9) =0;                                                             % rate of spikes detected from the triggering units    
+spikeTriggeredPulses.delayedStimShank =[];                                                                                               % Shank stimulated with delay
+spikeTriggeredPulses.directStimShank =[];                                                                                                % Shank directly  stimulated 
+spikeTriggeredPulses.controlShank =[];                                                                                                   % Shank used as control 
+
+
+[firstGoodPulse, firstGoodPulse_indexes] = min(uLEDPulses.timestamps(uLEDPulses.duration< maxDurationPulse ,1));
+lastGoodPulse = max(uLEDPulses.timestamps(uLEDPulses.duration < maxDurationPulse,1));                                                  
+spikeTriggeredPulses.stimulationInterval = [firstGoodPulse lastGoodPulse];                                                               % time interval of pulses in the xperiments
+
+lastBadPulse =max(uLEDPulses.timestamps(find(uLEDPulses.timestamps(:,1)<firstGoodPulse),1));                                             % this is the time stamp before the fisrt pulse time stamp
+if isempty(lastBadPulse)
+    lastBadPulse =0;
+end
+spikeTriggeredPulses.pre_stimulationInterval = [lastBadPulse firstGoodPulse];                                                            % interval before start give pulses
+
+FirstBadPulse = min(uLEDPulses.timestamps(find(uLEDPulses.timestamps(:,1)>lastGoodPulse),1));                                            % this is the time stamp before the fisrt pulse time stamp
+if isempty(FirstBadPulse)
+    FirstBadPulse = eval(session.general.duration);
+end
+spikeTriggeredPulses.post_stimulationInterval = [lastGoodPulse  FirstBadPulse];                                                          % interval after giving pulses
+
 
 for jj = spikeTriggeredPulses.unitsTriggeringPulse
 
@@ -140,6 +173,7 @@ for jj = spikeTriggeredPulses.unitsTriggeringPulse
     
 end
 
+    
 
 %% 2. statics of triggering neurons
 
@@ -166,7 +200,7 @@ for jj = spikeTriggeredPulses.unitsTriggeringPulse
         rast_x = []; rast_y = [];
        
         for kk = 1:length(st)
-            temp_rast = PulseTime(pulses.channel == optogeneticResponses.conditions(ii,2)) - st(kk);
+            temp_rast = PulseTime(pulses.channel == conditions(ii,2)) - st(kk);
             temp_rast = temp_rast(temp_rast>winSizePlotRasterPulse(1) & temp_rast<winSizePlotRasterPulse(2));
             rast_x = [rast_x temp_rast'];
             rast_y = [rast_y kk*ones(size(temp_rast))'];
@@ -189,12 +223,12 @@ for jj = spikeTriggeredPulses.unitsTriggeringPulse
  
     % avarage neuron activity around pulses  
     
-    for ii = 1: optogeneticResponses.nConditions
+    for ii = 1: nCondition
     
      for kk = 1:size(spikes.UID,2)
       
-        resp = (squeeze(optogeneticResponses.responsecurveZ(kk,ii,:)));
-        dur = optogeneticResponses.durationPerPulse(kk,ii,1);
+        resp = (squeeze(optogeneticResponses.responsecurveZ(kk,conditions(ii,4),:)));
+        dur = conditions(ii,1);
     
       if any(ii == spikeTriggeredPulses.nConditionChannelTriggered) && any(kk==spikeTriggeredPulses.unitsTriggeringPulse)
          hold on
@@ -204,11 +238,11 @@ for jj = spikeTriggeredPulses.unitsTriggeringPulse
          plot(t(t>winSizePlotSTD(1) & t<winSizePlotSTD(2)), resp(t>winSizePlotSTD(1) & t<winSizePlotSTD(2)),'LineWidth',0.5,'Color',[0.6 0.6 0.6 .3]);
       end 
        subplot(4,4,[9,10,13,14]);
-        xlabel(['time [s]']);
-        ylabel(['amplitude [std]']);
-        title('Avarage neuron activity around pulses');
-        t_winSTD = t(t>winSizePlotSTD(1) & t<winSizePlotSTD(2));
-        xlim([min(t_winSTD) max(t_winSTD)]);
+       xlabel(['time [s]']);
+       ylabel(['amplitude [std]']);
+       title('Avarage neuron activity around pulses');
+       t_winSTD = t(t>winSizePlotSTD(1) & t<winSizePlotSTD(2));
+       xlim([min(t_winSTD) max(t_winSTD)]);
       end
       
     end
@@ -239,17 +273,16 @@ for jj = spikeTriggeredPulses.unitsTriggeringPulse
 
     for ii = 1 :nCondition
         
-        PulseTimeCondition = PulseTime(pulses.channel == optogeneticResponses.conditions(ii,2));
+        PulseTimeCondition = PulseTime(pulses.channel == conditions(ii,2) & pulses.duration<maxDurationPulse);
         spikeTimeNeuron(spikeTimeNeuron < PulseTimeCondition(1) - paddingWindow | spikeTimeNeuron > PulseTimeCondition(end) + paddingWindow) = [];
         
         [status,interval,index] = InIntervals(spikeTimeNeuron,[PulseTimeCondition - 0.005 PulseTimeCondition]);   
         spikeTriggeredPulses.unitsTriggeringPulses_rateSpkDetected(count,ii) = length(find(status))/length(status);
     end
-    
-    count = count +1 ;
+
 
     subplot(4,4,[11,12]);
-    X = categorical({'uLed #1','uLed #2','uLed #3','uLed #4','uLed #5','uLed #6'});
+    X = categorical({'uLed #1','uLed #2','uLed #3','uLed #4','uLed #5','uLed #6','uLed #7','uLed #8','uLed #9'});
     bar(X,spikeTriggeredPulses.unitsTriggeringPulses_rateSpkDetected *100);
     box off;
     title('% of spikes use to trigger pulse');
@@ -261,27 +294,59 @@ for jj = spikeTriggeredPulses.unitsTriggeringPulse
         hc = histogram(uLEDPulses.timestamps(uLEDPulses.code==ii),[0:60:eval(session.general.duration)]);
         histcountsPerLED(ii,:) = hc.Values;
     end
-    
-  
-    imagesc(histcountsPerLED);
+
+    imagesc(log10(histcountsPerLED));
     colormap(h,flip(gray));
-    xlabel('Minutes'); ylabel('uLEDs');
+    xlabel('Minutes'); ylabel('uLEDs'); 
+    c = colorbar;  c.Label.String = 'Log_10 scale';
+    
+    hold on
+    xline(spikeTriggeredPulses.stimulationInterval/60,'color',[0 0 1],'LineWidth',2);
+    hold on
+    plot(spikeTriggeredPulses.pre_stimulationInterval/60,[0.5 0.5],'color',[0 1 0],'LineWidth',2);
+    hold on
+    plot(spikeTriggeredPulses.post_stimulationInterval/60,[0.5 0.5],'color',[0 1 0],'LineWidth',2);
+    
+    text((spikeTriggeredPulses.stimulationInterval(2)/60 + spikeTriggeredPulses.stimulationInterval(1)/60)/2,-1.5,'Stim','FontSize',9,'HorizontalAlignment','center','VerticalAlignment','top','FontWeight','bold');
+    text((spikeTriggeredPulses.pre_stimulationInterval(2)/60 + spikeTriggeredPulses.pre_stimulationInterval(1)/60)/2,-1.5,'preStim period','FontSize',9,'HorizontalAlignment','center','VerticalAlignment','top','FontWeight','bold');
+    text((spikeTriggeredPulses.post_stimulationInterval(2)/60 + spikeTriggeredPulses.post_stimulationInterval(1)/60)/2,-1.5,'PostStim period','FontSize',9,'HorizontalAlignment','center','VerticalAlignment','top','FontWeight','bold');
+
     box off;
-   
+    
+    count = count +1 ;
+
     saveas(gcf,['SummaryFigures\' save_as '_TriggeringUnits_',num2str(jj),'.png']); 
 end
 
-%% 3. raster polot of spikes around pulses
+%% 3.Input request - Using the statical results and the figures
+
+%select which one is the delayed stimulated shank, the one that is triggered by the pulses
+prompt = "delayed stimulated shank? ";
+x = input(prompt);
+spikeTriggeredPulses.delayedStimShank = x;
+
+%select which one is the direct stimulated shank, the one that is triggering the pulses
+prompt = "direct stimulated shank? ";
+x = input(prompt);
+spikeTriggeredPulses.directStimShank = x;
+
+%select which one is the control shank the one that not triggered or use to triggering
+
+prompt = "control shank? ";
+x = input(prompt);
+spikeTriggeredPulses.controlShank = x;
+
+%% 4. raster polot of spikes around pulses
   
 for jj = spikeTriggeredPulses.unitsTriggeringPulse
 
     figure;
-   set(gcf,'Position',[300 -200 1500 1000]);
+    set(gcf,'Position',[300 -200 1500 1000]);
     offset = 0;
     
     for ii = 1:nCondition
         
-        st = pulses.timestamps(pulses.channel == optogeneticResponses.conditions(ii,2) & pulses.duration == optogeneticResponses.conditions(ii,1),1);
+        st = pulses.timestamps(pulses.channel == conditions(ii,2) & pulses.duration == conditions(ii,1),1);
         if length(st) > 1000 
             st = randsample(st, 1000);
             st = sort(st);
@@ -306,8 +371,7 @@ for jj = spikeTriggeredPulses.unitsTriggeringPulse
     end
     
     hold on
-    plot([0 dur],[kk*6.1 kk*6.1],'color',[0 0 0],'LineWidth',2);
-    ylim([0 kk*6.1]);
+    plot([0 dur],[max(rast_y ) max(rast_y )],'color',[0 0 0],'LineWidth',2);
     colormap(winter(nCondition));
     caxis([1, nCondition]);
     colorbar('Ticks',[1:nCondition]);
