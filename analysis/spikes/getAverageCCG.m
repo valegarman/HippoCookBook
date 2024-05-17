@@ -51,6 +51,8 @@ addParameter(p,'restrict_to',[0 Inf],@isnumeric);
 addParameter(p,'restrict_to_baseline',true,@islogical);
 addParameter(p,'restrict_to_manipulation',false,@islogical);
 addParameter(p,'save_as','averageCCG',@ischar);
+addParameter(p,'win_Z',[-0.3 -0.15],@isnumeric);
+
 
 parse(p, varargin{:});
 basepath = p.Results.basepath;
@@ -74,6 +76,7 @@ restrict_to = p.Results.restrict_to;
 restrict_to_baseline = p.Results.restrict_to_baseline;
 restrict_to_manipulation = p.Results.restrict_to_manipulation;
 save_as = p.Results.save_as;
+win_Z = p.Results.win_Z;
 
 % Deal with inputs
 prevPath = pwd;
@@ -166,13 +169,22 @@ end
 
 % do ccg
 [allCcg, t_ccg] = CCG(spikes.times,[],'binSize',binSize,'duration',winSize,'Fs',1/session.extracellular.sr);
+status_winZ = InIntervals(t_ccg,win_Z);
 indCell = [1:size(allCcg,2)];
 for jj = 1 : length(spikes.times)
-    ccMedian(jj,:) = nanmedian(squeeze(allCcg(:,jj,indCell(indCell~=jj))),2); % zCCG
-    ccZMedian(jj,:) = nanmedian(zscore(squeeze(allCcg(:,jj,indCell(indCell~=jj)))',[],2)); % zCCG
+    ccMedian(jj,:) = nanmedian(squeeze(allCcg(:,jj,indCell(indCell~=jj))),2); % 
+    keyboard;
+    ccZMedian(jj,:) = nanmedian(zscore_win(squeeze(allCcg(:,jj,indCell(indCell~=jj)))',status_winZ)); % zCCG
     
     ccMean(jj,:) = nanmean(squeeze(allCcg(:,jj,indCell(indCell~=jj))),2); % zCCG
     ccZMean(jj,:) = nanmean(zscore(squeeze(allCcg(:,jj,indCell(indCell~=jj)))',[],2)); % zCCG
+
+    % abs
+    ccMedian_abs(jj,:) = nanmedian(abs(squeeze(allCcg(:,jj,indCell(indCell~=jj)))),2); % zCCG_abs
+    ccZMedian_abs(jj,:) = nanmedian(abs(zscore(squeeze(allCcg(:,jj,indCell(indCell~=jj))))',[],2)); % zCCG_abs
+    
+    ccMean_abs(jj,:) = nanmean(abs(squeeze(allCcg(:,jj,indCell(indCell~=jj)))),2); % zCCG_abs
+    ccZMean_abs(jj,:) = nanmean(abs(zscore(squeeze(allCcg(:,jj,indCell(indCell~=jj))))',[],2)); % zCCG_abs
 end
 
 % interpolate value in 0
@@ -185,21 +197,34 @@ if interp0
         ccZMedian(jj,artifactSamples) = interp1(x_axis,ccZMedian(jj,x_axis),artifactSamples);
         ccMean(jj,artifactSamples) = interp1(x_axis,ccMean(jj,x_axis),artifactSamples);
         ccZMean(jj,artifactSamples) = interp1(x_axis,ccZMean(jj,x_axis),artifactSamples);
+        %
+        ccMedian_abs(jj,artifactSamples) = interp1(x_axis,ccMedian_abs(jj,x_axis),artifactSamples);
+        ccZMedian_abs(jj,artifactSamples) = interp1(x_axis,ccZMedian_abs(jj,x_axis),artifactSamples);
+        ccMean_abs(jj,artifactSamples) = interp1(x_axis,ccMean_abs(jj,x_axis),artifactSamples);
+        ccZMean_abs(jj,artifactSamples) = interp1(x_axis,ccZMean_abs(jj,x_axis),artifactSamples);
     end
 end
 
 win = t_ccg >= winIndex(1) & t_ccg <= winIndex(2);
 ccgIndex = median(ccZMedian(:,win),2);
+ccgIndexAbs = median(ccZMedian_abs(:,win),2);
 
 averageCCG.medianCCG = ccMedian;
 averageCCG.ZmedianCCG = ccZMedian;
 averageCCG.meanCCG = ccMean;
 averageCCG.ZmeanCCG = ccZMean;
+averageCCG.ccgIndex = ccgIndex;
+%
+averageCCG.medianCCGAbs = ccMedian_abs;
+averageCCG.ZmedianCCGAbs = ccZMedian_abs;
+averageCCG.meanCCGAbs = ccMean_abs;
+averageCCG.ZmeanCCGAbs = ccZMean_abs;
+averageCCG.ccgIndexAbs = ccgIndexAbs;
+%
 averageCCG.binSize = binSize;
 averageCCG.winSize = winSize;
 averageCCG.timestamps = t_ccg;
 averageCCG.excludeIntervals = excludeIntervals;
-averageCCG.ccgIndex = ccgIndex;
 averageCCG.winIndex = winIndex;
 averageCCG.allCcg = allCcg;
 
@@ -223,19 +248,31 @@ if useBrainRegions && exist([basenameFromBasepath(basepath) '.cell_metrics.celli
 
                     ccMean(jj,:) = squeeze(allCcg(:,jj,cellsID)); % zCCG
                     ccZMean(jj,:) = zscore(squeeze(allCcg(:,jj,cellsID))',[],2); % zCCG
+                    % 
+                    ccMedian_abs(jj,:) = abs(squeeze(allCcg(:,jj,cellsID))); %
+                    ccZMedian_abs(jj,:) = abs(zscore(squeeze(allCcg(:,jj,cellsID)))',[],2); % zCCG
+
+                    ccMean_abs(jj,:) = squeeze(abs(allCcg(:,jj,cellsID))); % zCCG
+                    ccZMean_abs(jj,:) = zscore(abs(squeeze(allCcg(:,jj,cellsID)))',[],2); % zCCG
                 else
                     ccMedian(jj,:) = nanmedian(squeeze(allCcg(:,jj,cellsID)),2); %
                     ccZMedian(jj,:) = nanmedian(zscore(squeeze(allCcg(:,jj,cellsID))',[],2)); % zCCG
 
                     ccMean(jj,:) = nanmean(squeeze(allCcg(:,jj,cellsID)),2); % zCCG
                     ccZMean(jj,:) = nanmean(zscore(squeeze(allCcg(:,jj,cellsID))',[],2)); % zCCG
+                    %
+                    ccMedian_abs(jj,:) = nanmedian(abs(squeeze(allCcg(:,jj,indCell(indCell~=jj)))),2); % zCCG_abs
+                    ccZMedian_abs(jj,:) = nanmedian(abs(zscore(squeeze(allCcg(:,jj,indCell(indCell~=jj))))',[],2)); % zCCG_abs
+    
+                    ccMean_abs(jj,:) = nanmean(abs(squeeze(allCcg(:,jj,indCell(indCell~=jj)))),2); % zCCG_abs
+                    ccZMean_abs(jj,:) = nanmean(abs(zscore(squeeze(allCcg(:,jj,indCell(indCell~=jj))))',[],2)); % zCCG_abs
                 end
                 
-                ccMedian(jj,:) = nanmedian(squeeze(allCcg(:,jj,cellsID)),2); %
-                ccZMedian(jj,:) = nanmedian(zscore(squeeze(allCcg(:,jj,cellsID))',[],2),1); % zCCG
+                %ccMedian(jj,:) = nanmedian(squeeze(allCcg(:,jj,cellsID)),2); %
+                %ccZMedian(jj,:) = nanmedian(zscore(squeeze(allCcg(:,jj,cellsID))',[],2),1); % zCCG
 
-                ccMean(jj,:) = nanmean(squeeze(allCcg(:,jj,cellsID)),2); % zCCG
-                ccZMean(jj,:) = nanmean(zscore(squeeze(allCcg(:,jj,cellsID))',[],2),1); % zCCG
+                %ccMean(jj,:) = nanmean(squeeze(allCcg(:,jj,cellsID)),2); % zCCG
+                %ccZMean(jj,:) = nanmean(zscore(squeeze(allCcg(:,jj,cellsID))',[],2),1); % zCCG
             end
             
             if interp0
