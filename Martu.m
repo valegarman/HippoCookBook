@@ -9,7 +9,7 @@ optogeneticResponses = getOptogeneticResponse('force',true);
 uLEDResponse = getuLEDResponse('force',true);
 uLEDPulses = getuLEDPulses('force',true);
 
-TargetNeuroninfo = getSpikeTriggeredPulses;
+
 
 %
 spikeFeatures('skipStimulationPeriods',false);
@@ -17,3 +17,7 @@ spikeFeatures('skipStimulationPeriods',false);
 session = loadSession;
 cell_metrics = ProcessCellMetrics('session', session,'forceReload',true,'getWaveformsFromDat',true); % after CellExplorar
 getAverageCCG('force',true,'skipStimulationPeriods',false);
+
+
+TargetNeuroninfo = getSpikeTriggeredPulses;
+
