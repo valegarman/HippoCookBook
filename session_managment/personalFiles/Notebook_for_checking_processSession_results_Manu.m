@@ -51,12 +51,14 @@ hippocampalLayers = getHippocampalLayers('force',true,'promt',true);
 % analysis.
 
 excludeIntervals = [];
-rippleChannel = [];
+rippleChannel = 2;
 SWChannel = [];
-eventSpikeThreshold_shanks = [3]; % which shanks will be accounted for the spike threshold 
-rippleMasterDetector_threshold = [1 2]; % [1.5 3.5]
+noiseChannel = [];
+eventSpikeThreshold_shanks = [1 2 3 4]; % which shanks will be accounted for the spike threshold 
 eventSpikeThreshold = 1; % .5
-ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',false,'thresholds',rippleMasterDetector_threshold,'eventSpikeThreshold_shanks', eventSpikeThreshold_shanks,'eventSpikeThreshold',eventSpikeThreshold,'excludeIntervals',excludeIntervals); 
+rippleMasterDetector_threshold = [1 2]; % [1.5 3.5]
+ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',false,'thresholds',...
+    rippleMasterDetector_threshold,'eventSpikeThreshold_shanks', eventSpikeThreshold_shanks,'eventSpikeThreshold',eventSpikeThreshold,'excludeIntervals',excludeIntervals,'noise',noiseChannel); 
 psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10);
 % psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10,'restrict_to_manipulation',true);
 getSpikesRank('events','ripples');
@@ -66,11 +68,9 @@ getSpikesRank('events','ripples');
 % rhytmicity. If bad, you can change useCSD_for_theta_detection to false,
 % or change powerThreshold, even the channel
 
-powerThreshouseCSD_for_theta_detection = false;
-ld = 2;% .8
-channel = 32;
-useCSD_for_theta_detection = true;
-powerThreshold = 1;% .8
+channel = 1;
+useCSD_for_theta_detection = false;
+powerThreshold = 2;% .8
 thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'powerThreshold',powerThreshold,'channel', channel);
 
 
@@ -78,10 +78,9 @@ thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection
 % NOTE!! If you have re-detected ripples or theta, you must run this code
 % again with the same channel definition!!!
 
-
-thetaChannel = 22;
-hgammaChannel = 56;
-lgammaChannel = 48;
+thetaChannel = [];
+hgammaChannel = [];
+lgammaChannel = [];
 [phaseMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel,'thetaChannel',thetaChannel,'hgammaChannel',thetaChannel,'lgammaChannel',thetaChannel);
 computeCofiringModulation;
 % [phaseMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel,'thetaChannel',thetaChannel,'hgammaChannel',thetaChannel,'lgammaChannel',thetaChannel,'restrict_to_manipulation',true);
@@ -103,10 +102,10 @@ end
 excludeManipulationIntervals = optoPulses.stimulationEpochs;
 
 cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true,'getWaveformsFromDat', false);
-ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true,'restrictToIntervals',...
-    [0 1.2957e+04],'manualAdjustMonoSyn',false); % uLEDResponses.restricted_interval
-cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true,...
-    'restrictToIntervals',[1.2957e+04 2.0668e+04],'manualAdjustMonoSyn',false,'saveAs','cell_metrics_post'); % uLEDResponses.restricted_interval
+% ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true,'restrictToIntervals',...
+%     [0 1.2957e+04],'manualAdjustMonoSyn',false); % uLEDResponses.restricted_interval
+% cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true,...
+%     'restrictToIntervals',[1.2957e+04 2.0668e+04],'manualAdjustMonoSyn',false,'saveAs','cell_metrics_post'); % uLEDResponses.restricted_interval
 
 
 getACGPeak('force',true);

@@ -206,7 +206,7 @@ end
 
 if strcmp(detector, 'filter')
     ripples = findRipples(rippleChannel,'thresholds',thresholds,'passband',passband,...
-        'EMGThresh',EMGThresh,'durations',durations, 'saveMat',false,'restrict',restrict,'frequency',frequency,'excludeIntervals',excludeIntervals);
+        'EMGThresh',EMGThresh,'durations',durations, 'saveMat',false,'restrict',restrict,'frequency',frequency,'excludeIntervals',excludeIntervals,'noise',noise);
 elseif strcmp(detector, 'cnn')
     % Load channel configuration
     load([session.general.name,'.session.mat']);
