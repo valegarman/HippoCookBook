@@ -50,13 +50,13 @@ hippocampalLayers = getHippocampalLayers('force',true,'promt',true);
 % different trhresold or restrict the shanks for the spikeThreshold
 % analysis.
 
-excludeIntervals = [];
-rippleChannel = [];
-SWChannel = [];
+ExcludeIntervals = [];
+rippleChannel =3 ;
+SWChannel = 6;
 eventSpikeThreshold_shanks = [3]; % which shanks will be accounted for the spike threshold 
 rippleMasterDetector_threshold = [1 2]; % [1.5 3.5]
 eventSpikeThreshold = 1; % .5
-ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',false,'thresholds',rippleMasterDetector_threshold,'eventSpikeThreshold_shanks', eventSpikeThreshold_shanks,'eventSpikeThreshold',eventSpikeThreshold,'excludeIntervals',excludeIntervals); 
+ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',false,'thresholds',rippleMasterDetector_threshold,'eventSpikeThreshold_shanks', eventSpikeThreshold_shanks,'eventSpikeThreshold',eventSpikeThreshold,'excludeIntervals',ExcludeIntervals); 
 psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10);
 % psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10,'restrict_to_manipulation',true);
 getSpikesRank('events','ripples');
@@ -66,10 +66,8 @@ getSpikesRank('events','ripples');
 % rhytmicity. If bad, you can change useCSD_for_theta_detection to false,
 % or change powerThreshold, even the channel
 
-powerThreshouseCSD_for_theta_detection = false;
-ld = 2;% .8
-channel = 32;
-useCSD_for_theta_detection = true;
+channel = 6;
+useCSD_for_theta_detection = false;
 powerThreshold = 1;% .8
 thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'powerThreshold',powerThreshold,'channel', channel);
 
@@ -79,7 +77,7 @@ thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection
 % again with the same channel definition!!!
 
 
-thetaChannel = 22;
+thetaChannel = 6;
 hgammaChannel = 56;
 lgammaChannel = 48;
 [phaseMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel,'thetaChannel',thetaChannel,'hgammaChannel',thetaChannel,'lgammaChannel',thetaChannel);
@@ -105,8 +103,6 @@ excludeManipulationIntervals = optoPulses.stimulationEpochs;
 cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true,'getWaveformsFromDat', false);
 ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true,'restrictToIntervals',...
     [0 1.2957e+04],'manualAdjustMonoSyn',false); % uLEDResponses.restricted_interval
-cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true,...
-    'restrictToIntervals',[1.2957e+04 2.0668e+04],'manualAdjustMonoSyn',false,'saveAs','cell_metrics_post'); % uLEDResponses.restricted_interval
 
 
 getACGPeak('force',true);
