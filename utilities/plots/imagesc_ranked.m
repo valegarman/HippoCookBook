@@ -26,7 +26,7 @@ end
 
 if smoothOpt
     for ii = 1:size(C,1)
-        C(ii,:) = smooth(C(ii,:),interpOpt);
+        C(ii,:) = smooth(C(ii,:),smoothOpt);
     end
 end
 

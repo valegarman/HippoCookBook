@@ -49,7 +49,7 @@ for mm = 1:length(toStack)
     if ~isstruct(toStack{mm}) && isnan(toStack{mm})
         % find in example session, fields with size as in numCells
         for ii = 1:length(names)
-            if isnumeric(toStack{exampleSession}.(names{ii})) %any(size(toStack{exampleSession}.(names{ii}))==numCells(exampleSession))
+            if isnumeric(toStack{exampleSession}.(names{ii})) || islogical(toStack{exampleSession}.(names{ii})) %any(size(toStack{exampleSession}.(names{ii}))==numCells(exampleSession))
                 if ischar(toStack{exampleSession}.(names{ii}))
                     keyboard;
                     toStack_clon{mm}.(names{ii}) = toStack{exampleSession}.(names{ii});
@@ -74,7 +74,7 @@ for ii = 1:length(names)
     if isstruct(toStack{exampleSession}.(names{ii}))
         l2_names = fieldnames(toStack{exampleSession}.(names{ii}));
         for jj = 1:length(l2_names)
-            if isnumeric(toStack{exampleSession}.(names{ii}).(l2_names{jj})) &&  any(size(toStack{exampleSession}.(names{ii}).(l2_names{jj})) == numCells(exampleSession))
+            if (isnumeric(toStack{exampleSession}.(names{ii}).(l2_names{jj})) || islogical(toStack{exampleSession}.(names{ii}).(l2_names{jj}))) &&  any(size(toStack{exampleSession}.(names{ii}).(l2_names{jj})) == numCells(exampleSession))
                 fprintf('Flattening %s... \n', l2_names{jj}); %\n
                 for mm = 1:length(toStack)
                     if isstruct(toStack{mm}) && isfield(toStack{mm}.(names{ii}),(l2_names{jj}))
@@ -103,7 +103,7 @@ for ii = 1:length(names)
                 l3_names = fieldnames(toStack{exampleSession}.(names{ii}).(l2_names{jj}));
                 
                 for kk = 1:length(l3_names)
-                    if isnumeric(toStack{exampleSession}.(names{ii}).(l2_names{jj}).(l3_names{kk})) & any(size(toStack{exampleSession}.(names{ii}).(l2_names{jj}).(l3_names{kk})) == numCells(exampleSession))
+                    if (isnumeric(toStack{exampleSession}.(names{ii}).(l2_names{jj})) || islogical(toStack{exampleSession}.(names{ii}).(l2_names{jj}))) && any(size(toStack{exampleSession}.(names{ii}).(l2_names{jj}).(l3_names{kk})) == numCells(exampleSession))
                         fprintf('Flattening %s... \n', l3_names{kk});
                         for mm = 1:length(toStack)
                            if isstruct(toStack{mm}) && isfield(toStack{mm}.(names{ii}).(l2_names{jj}),(l3_names{kk}))
@@ -177,7 +177,7 @@ for ii = 1:length(names)
     dim_sorted = [dim_sorted(dim_cells_data) dim_sorted(~dim_cells_data)];
     dims = dims(dim_sorted);
     
-    if ~isempty(find(dim_cells_data)) && strcmpi(type_field,'double')
+    if ~isempty(find(dim_cells_data)) && (strcmpi(type_field,'double') || strcmpi(type_field,'logical'))
         stacked.(names{ii}) = [];
         for jj = 1:length(toStack)
             % stack by the cells in first dimension
