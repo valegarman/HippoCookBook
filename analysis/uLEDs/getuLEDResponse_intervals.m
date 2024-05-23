@@ -388,7 +388,7 @@ disp('Parsing cells responses...');
 % parse cell responses
 for kk = 1:length(uLEDPulses.list_of_conditions)
     for ii = 1:length(spikes.UID)
-        %% in
+        %% in and out leds
         in_interval.noRespLEDs.LEDs{ii,kk} = find(in_interval.bootsTrapTest(ii,kk,:) == 0);
         in_interval.respLEDs.LEDs{ii,kk} = find(in_interval.bootsTrapTest(ii,kk,:) == 1);
         in_interval.negRespLEDs.LEDs{ii,kk} = find(in_interval.bootsTrapTest(ii,kk,:)== -1);
@@ -413,6 +413,31 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
             in_interval.minRespLED.LEDs(ii,kk) = NaN;
         end
 
+        out_interval.noRespLEDs.LEDs{ii,kk} = find(out_interval.bootsTrapTest(ii,kk,:) == 0);
+        out_interval.respLEDs.LEDs{ii,kk} = find(out_interval.bootsTrapTest(ii,kk,:) == 1);
+        out_interval.negRespLEDs.LEDs{ii,kk} = find(out_interval.bootsTrapTest(ii,kk,:)== -1);
+        
+        ratio = squeeze(out_interval.rateDuringPulse(ii,kk,:)./out_interval.rateBeforePulse(ii,kk,:));
+        ratio(isinf(ratio)) = NaN;
+        maxRespLED = find(max(ratio)==ratio,1);
+        if length(ratio)==1 % if only 1 light, get everything in maxRespLED
+            maxRespLED = 1;
+        end
+        minRespLED = find(min(ratio)==ratio,1);
+        
+        if out_interval.bootsTrapTest(ii,kk,maxRespLED) == 1
+            out_interval.maxRespLED.LEDs(ii,kk) = maxRespLED;
+        else
+            out_interval.maxRespLED.LEDs(ii,kk) = NaN;
+        end
+        
+        if out_interval.bootsTrapTest(ii,kk,minRespLED) == -1
+            out_interval.minRespLED.LEDs(ii,kk) = minRespLED;
+        else
+            out_interval.minRespLED.LEDs(ii,kk) = NaN;
+        end
+        
+        % in
         % noRespLEDs
         in_interval.noRespLEDs.rate{ii,kk} = in_interval.rateDuringPulse(ii,kk,in_interval.noRespLEDs.LEDs{ii,kk});
         in_interval.noRespLEDs.rateBeforePulse{ii,kk} = in_interval.rateBeforePulse(ii,kk,in_interval.noRespLEDs.LEDs{ii,kk});
@@ -468,21 +493,28 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
             in_interval.respLEDs.rateZBeforePulse{ii,kk} = [];
             in_interval.respLEDs.ratioBeforeAfter{ii,kk} = [];
         end
-
-        % maxRespLED
-        if ~isnan(in_interval.maxRespLED.LEDs(ii,kk))
-            in_interval.maxRespLED.rate(ii,kk) = in_interval.rateDuringPulse(ii,kk,in_interval.maxRespLED.LEDs(ii,kk));
-            in_interval.maxRespLED.rateBeforePulse(ii,kk) = in_interval.rateBeforePulse(ii,kk,in_interval.maxRespLED.LEDs(ii,kk));   
-            in_interval.maxRespLED.rateZ(ii,kk) = in_interval.rateZDuringPulse(ii,kk,in_interval.maxRespLED.LEDs(ii,kk));
-            in_interval.maxRespLED.rateZBeforePulse(ii,kk) = in_interval.rateZBeforePulse(ii,kk,in_interval.maxRespLED.LEDs(ii,kk));   
+        
+        % maxRespLED % the reference is the out_intervals max leds!!!
+        if ~isnan(out_interval.maxRespLED.LEDs(ii,kk))
+            in_interval.maxRespLED.rate(ii,kk) = in_interval.rateDuringPulse(ii,kk,out_interval.maxRespLED.LEDs(ii,kk));
+            in_interval.maxRespLED.rateBeforePulse(ii,kk) = in_interval.rateBeforePulse(ii,kk,out_interval.maxRespLED.LEDs(ii,kk));   
+            in_interval.maxRespLED.rateZ(ii,kk) = in_interval.rateZDuringPulse(ii,kk,out_interval.maxRespLED.LEDs(ii,kk));
+            in_interval.maxRespLED.rateZBeforePulse(ii,kk) = in_interval.rateZBeforePulse(ii,kk,out_interval.maxRespLED.LEDs(ii,kk));   
             in_interval.maxRespLED.ratioBeforeAfter(ii,kk) = in_interval.maxRespLED.rate(ii,kk)./in_interval.maxRespLED.rateBeforePulse(ii,kk); 
             in_interval.maxRespLED.ratioNoResp(ii,kk) = in_interval.is_out_rateBeforePulse_similar_h(ii,kk);
             
-            in_interval.maxRespLED.is_out_rateBeforePulse_similar_h(ii,kk) = in_interval.is_out_rateBeforePulse_similar_h(ii,kk,in_interval.maxRespLED.LEDs(ii,kk));
-            in_interval.maxRespLED.is_out_rateBeforePulse_similar_p(ii,kk) = in_interval.is_out_rateBeforePulse_similar_p(ii,kk,in_interval.maxRespLED.LEDs(ii,kk));
+            in_interval.maxRespLED.is_out_rateBeforePulse_similar_h(ii,kk) = in_interval.is_out_rateBeforePulse_similar_h(ii,kk,out_interval.maxRespLED.LEDs(ii,kk));
+            in_interval.maxRespLED.is_out_rateBeforePulse_similar_p(ii,kk) = in_interval.is_out_rateBeforePulse_similar_p(ii,kk,out_interval.maxRespLED.LEDs(ii,kk));
 
             if isnan(in_interval.maxRespLED.rate(ii,kk))
                 in_interval.maxRespLED.LEDs(ii,kk) = NaN;
+            end
+            in_interval.maxRespLED.responseCurve(ii,kk,:) = squeeze(in_interval.responsecurve(ii,kk,out_interval.maxRespLED.LEDs(ii,kk),:));
+            in_interval.maxRespLED.responseCurveZ(ii,kk,:) = squeeze(in_interval.responsecurveZ(ii,kk,out_interval.maxRespLED.LEDs(ii,kk),:));
+            in_interval.maxRespLED.responseCurveZSmooth(ii,kk,:) = squeeze(in_interval.responsecurveZSmooth(ii,kk,out_interval.maxRespLED.LEDs(ii,kk),:));
+            if mean(in_interval.maxRespLED.responseCurve(ii,kk,t_duringPulse)) ~= in_interval.rateDuringPulse(ii,kk,out_interval.maxRespLED.LEDs(ii,kk)) && ~isnan(in_interval.rateDuringPulse(ii,kk,out_interval.maxRespLED.LEDs(ii,kk)))
+                warning('Something terrible happened with indexing!!')
+                keyboard;
             end
         else
             in_interval.maxRespLED.rate(ii,kk) = NaN;
@@ -493,23 +525,29 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
             in_interval.maxRespLED.ratioNoResp(ii,kk) = NaN;
             in_interval.maxRespLED.is_out_rateBeforePulse_similar_h(ii,kk) = NaN;
             in_interval.maxRespLED.is_out_rateBeforePulse_similar_p(ii,kk) = NaN;
+            in_interval.maxRespLED.responseCurve(ii,kk,:) = nan(size(t));
+            in_interval.maxRespLED.responseCurveZ(ii,kk,:) = nan(size(t));
+            in_interval.maxRespLED.responseCurveZSmooth(ii,kk,:) = nan(size(t));
         end
         
         % minRespLED
-        if ~isnan(in_interval.minRespLED.LEDs(ii,kk))
-            in_interval.minRespLED.rate(ii,kk) = in_interval.rateDuringPulse(ii,kk,in_interval.minRespLED.LEDs(ii,kk));
-            in_interval.minRespLED.rateBeforePulse(ii,kk) = in_interval.rateBeforePulse(ii,kk,in_interval.minRespLED.LEDs(ii,kk));   
-            in_interval.minRespLED.rateZ(ii,kk) = in_interval.rateZDuringPulse(ii,kk,in_interval.minRespLED.LEDs(ii,kk));
-            in_interval.minRespLED.rateZBeforePulse(ii,kk) = in_interval.rateZBeforePulse(ii,kk,in_interval.minRespLED.LEDs(ii,kk));   
+        if ~isnan(out_interval.minRespLED.LEDs(ii,kk))
+            in_interval.minRespLED.rate(ii,kk) = in_interval.rateDuringPulse(ii,kk,out_interval.minRespLED.LEDs(ii,kk));
+            in_interval.minRespLED.rateBeforePulse(ii,kk) = in_interval.rateBeforePulse(ii,kk,out_interval.minRespLED.LEDs(ii,kk));   
+            in_interval.minRespLED.rateZ(ii,kk) = in_interval.rateZDuringPulse(ii,kk,out_interval.minRespLED.LEDs(ii,kk));
+            in_interval.minRespLED.rateZBeforePulse(ii,kk) = in_interval.rateZBeforePulse(ii,kk,out_interval.minRespLED.LEDs(ii,kk));   
             in_interval.minRespLED.ratioBeforeAfter(ii,kk) = in_interval.minRespLED.rate(ii,kk)./in_interval.minRespLED.rateBeforePulse(ii,kk);  
             in_interval.minRespLED.ratioNoResp(ii,kk) = in_interval.minRespLED.rate(ii,kk)./nanmean(in_interval.noRespLEDs.rate{ii,kk});
 
-            in_interval.minRespLED.is_out_rateBeforePulse_similar_h(ii,kk) = in_interval.is_out_rateBeforePulse_similar_h(ii,kk,in_interval.minRespLED.LEDs(ii,kk));
-            in_interval.minRespLED.is_out_rateBeforePulse_similar_p(ii,kk) = in_interval.is_out_rateBeforePulse_similar_p(ii,kk,in_interval.minRespLED.LEDs(ii,kk));
+            in_interval.minRespLED.is_out_rateBeforePulse_similar_h(ii,kk) = in_interval.is_out_rateBeforePulse_similar_h(ii,kk,out_interval.minRespLED.LEDs(ii,kk));
+            in_interval.minRespLED.is_out_rateBeforePulse_similar_p(ii,kk) = in_interval.is_out_rateBeforePulse_similar_p(ii,kk,out_interval.minRespLED.LEDs(ii,kk));
 
             if isnan(in_interval.minRespLED.rate(ii,kk))
                 in_interval.minRespLED.LEDs(ii,kk) = NaN;
             end
+            in_interval.minRespLED.responseCurve(ii,kk,:) = squeeze(in_interval.responsecurve(ii,kk,out_interval.minRespLED.LEDs(ii,kk),:));
+            in_interval.minRespLED.responseCurveZ(ii,kk,:) = squeeze(in_interval.responsecurveZ(ii,kk,out_interval.minRespLED.LEDs(ii,kk),:));
+            in_interval.minRespLED.responseCurveZSmooth(ii,kk,:) = squeeze(in_interval.responsecurveZSmooth(ii,kk,out_interval.minRespLED.LEDs(ii,kk),:));
         else
             in_interval.minRespLED.rate(ii,kk) = NaN;
             in_interval.minRespLED.rateBeforePulse(ii,kk) = NaN;   
@@ -519,33 +557,12 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
             in_interval.minRespLED.ratioNoResp(ii,kk) = NaN;
             in_interval.minRespLED.is_out_rateBeforePulse_similar_h(ii,kk) = NaN;
             in_interval.minRespLED.is_out_rateBeforePulse_similar_p(ii,kk) = NaN;
+            in_interval.minRespLED.responseCurve(ii,kk,:) = nan(size(t));
+            in_interval.minRespLED.responseCurveZ(ii,kk,:) = nan(size(t));
+            in_interval.minRespLED.responseCurveZSmooth(ii,kk,:) = nan(size(t));
         end
         
         %% out
-        out_interval.noRespLEDs.LEDs{ii,kk} = find(out_interval.bootsTrapTest(ii,kk,:) == 0);
-        out_interval.respLEDs.LEDs{ii,kk} = find(out_interval.bootsTrapTest(ii,kk,:) == 1);
-        out_interval.negRespLEDs.LEDs{ii,kk} = find(out_interval.bootsTrapTest(ii,kk,:)== -1);
-        
-        ratio = squeeze(out_interval.rateDuringPulse(ii,kk,:)./out_interval.rateBeforePulse(ii,kk,:));
-        ratio(isinf(ratio)) = NaN;
-        maxRespLED = find(max(ratio)==ratio,1);
-        if length(ratio)==1 % if only 1 light, get everything in maxRespLED
-            maxRespLED = 1;
-        end
-        minRespLED = find(min(ratio)==ratio,1);
-        
-        if out_interval.bootsTrapTest(ii,kk,maxRespLED) == 1
-            out_interval.maxRespLED.LEDs(ii,kk) = maxRespLED;
-        else
-            out_interval.maxRespLED.LEDs(ii,kk) = NaN;
-        end
-        
-        if out_interval.bootsTrapTest(ii,kk,minRespLED) == -1
-            out_interval.minRespLED.LEDs(ii,kk) = minRespLED;
-        else
-            out_interval.minRespLED.LEDs(ii,kk) = NaN;
-        end
-        
         % noRespLEDs
         out_interval.noRespLEDs.rate{ii,kk} = out_interval.rateDuringPulse(ii,kk,out_interval.noRespLEDs.LEDs{ii,kk});
         out_interval.noRespLEDs.rateBeforePulse{ii,kk} = out_interval.rateBeforePulse(ii,kk,out_interval.noRespLEDs.LEDs{ii,kk});
@@ -617,6 +634,13 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
             if isnan(out_interval.maxRespLED.rate(ii,kk))
                 out_interval.maxRespLED.LEDs(ii,kk) = NaN;
             end
+            out_interval.maxRespLED.responseCurve(ii,kk,:) = squeeze(out_interval.responsecurve(ii,kk,out_interval.maxRespLED.LEDs(ii,kk),:));
+            out_interval.maxRespLED.responseCurveZ(ii,kk,:) = squeeze(out_interval.responsecurveZ(ii,kk,out_interval.maxRespLED.LEDs(ii,kk),:));
+            out_interval.maxRespLED.responseCurveZSmooth(ii,kk,:) = squeeze(out_interval.responsecurveZSmooth(ii,kk,out_interval.maxRespLED.LEDs(ii,kk),:));
+            if mean(out_interval.maxRespLED.responseCurve(ii,kk,t_duringPulse)) ~= out_interval.rateDuringPulse(ii,kk,out_interval.maxRespLED.LEDs(ii,kk))
+                warning('Something terrible happened with indexing!!')
+                keyboard;
+            end
         else
             out_interval.maxRespLED.rate(ii,kk) = NaN;
             out_interval.maxRespLED.rateBeforePulse(ii,kk) = NaN;
@@ -626,6 +650,9 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
             out_interval.maxRespLED.ratioNoResp(ii,kk) = NaN;
             out_interval.maxRespLED.is_out_rateBeforePulse_similar_h(ii,kk) = NaN;
             out_interval.maxRespLED.is_out_rateBeforePulse_similar_p(ii,kk) = NaN;
+            out_interval.maxRespLED.responseCurve(ii,kk,:) = nan(size(t));
+            out_interval.maxRespLED.responseCurveZ(ii,kk,:) = nan(size(t));
+            out_interval.maxRespLED.responseCurveZSmooth(ii,kk,:) = nan(size(t));
         end
         
         % minRespLED
@@ -643,6 +670,9 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
             if isnan(out_interval.minRespLED.rate(ii,kk))
                 out_interval.minRespLED.LEDs(ii,kk) = NaN;
             end
+            out_interval.minRespLED.responseCurve(ii,kk,:) = squeeze(out_interval.responsecurve(ii,kk,out_interval.minRespLED.LEDs(ii,kk),:));
+            out_interval.minRespLED.responseCurveZ(ii,kk,:) = squeeze(out_interval.responsecurveZ(ii,kk,out_interval.minRespLED.LEDs(ii,kk),:));
+            out_interval.minRespLED.responseCurveZSmooth(ii,kk,:) = squeeze(out_interval.responsecurveZSmooth(ii,kk,out_interval.minRespLED.LEDs(ii,kk),:));
         else
             out_interval.minRespLED.rate(ii,kk) = NaN;
             out_interval.minRespLED.rateBeforePulse(ii,kk) = NaN;   
@@ -652,6 +682,9 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
             out_interval.minRespLED.ratioNoResp(ii,kk) = NaN;
             out_interval.minRespLED.is_out_rateBeforePulse_similar_h(ii,kk) = NaN;
             out_interval.minRespLED.is_out_rateBeforePulse_similar_p(ii,kk) = NaN;
+            out_interval.minRespLED.responseCurve(ii,kk,:) = nan(size(t));
+            out_interval.minRespLED.responseCurveZ(ii,kk,:) = nan(size(t));
+            out_interval.minRespLED.responseCurveZSmooth(ii,kk,:) = nan(size(t));
         end
     end
 end
