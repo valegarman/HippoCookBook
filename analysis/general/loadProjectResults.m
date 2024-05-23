@@ -108,7 +108,7 @@ if lightVersion
 end
 
 projectSessionResults = [];
-for ii = 122:length(sessions.basepaths)
+for ii = 1:length(sessions.basepaths)
     fprintf(' > %3.i/%3.i sessions \n',ii, length(sessions.basepaths)); %\n
     cd(sessions.basepaths{ii});
     
