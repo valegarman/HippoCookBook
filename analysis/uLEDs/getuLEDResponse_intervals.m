@@ -53,6 +53,10 @@ addParameter(p,'salt_time',[-0.250 0.250],@isscalar);
 addParameter(p,'salt_win',0.005,@isscalar);
 addParameter(p,'salt_binSize',0.001,@isscalar);
 addParameter(p,'verbose',true,@islogical);
+addParameter(p,'restrict_to',[0 Inf],@isnumeric);
+addParameter(p,'restrict_to_baseline',true,@islogical);
+addParameter(p,'restrict_to_manipulation',false,@islogical);
+addParameter(p,'save_as','uLEDResponse_interval',@ischar);
 
 parse(p, intervals, varargin{:});
 uLEDPulses = p.Results.uLEDPulses;
@@ -76,6 +80,10 @@ salt_binSize = p.Results.salt_binSize;
 bootsTrapCI = p.Results.bootsTrapCI;
 getRaster = p.Results.getRaster;
 verbose = p.Results.verbose;
+restrict_to = p.Results.restrict_to;
+restrict_to_baseline = p.Results.restrict_to_baseline;
+restrict_to_manipulation = p.Results.restrict_to_manipulation;
+save_as = p.Results.save_as;
 
 % Deal with inputs
 prevPath = pwd;
@@ -103,8 +111,53 @@ uLEDPulses.timestamps = uLEDPulses_temp.timestamps;
 uLEDPulses.nonStimulatedShank = uLEDPulses_temp.nonStimulatedShank;
 clear uLEDPulses_temp
 
+ints = [];
+session = loadSession;
+if isfield(session,'epochs') && isfield(session.epochs{1},'behavioralParadigm') && restrict_to_manipulation
+    list_of_manipulations = list_of_manipulations_names;
+    
+    for ii = 1:length(session.epochs)
+        if ismember(session.epochs{ii}.behavioralParadigm, list_of_manipulations)
+            ints = [session.epochs{ii}.startTime session.epochs{end}.stopTime];
+            warning('Epoch with manipulations found! Restricting analysis to manipulation interval!');
+            save_as = 'averageCCG_post';
+        end
+    end
+    if isempty(ints)
+        error('Epoch with manipulation not found!!');
+    end
+elseif isfield(session,'epochs') && isfield(session.epochs{1},'behavioralParadigm') && restrict_to_baseline
+    list_of_manipulations = list_of_manipulations_names;
+    session = loadSession;
+    for ii = 1:length(session.epochs)
+        if ismember(session.epochs{ii}.behavioralParadigm, list_of_manipulations)
+            ints = [0 session.epochs{ii}.startTime];
+            warning('Epoch with manipulations found! Restricting analysis to baseline interval!');
+        end
+    end
+    if isempty(ints)
+        ints = [0 Inf];
+    end
+else
+    ints = [0 Inf];
+end
+restrict_ints = IntersectIntervals([ints; restrict_to]);
+
 if isempty(spikes)
     spikes = loadSpikes('getWaveformsFromDat',false);
+end
+
+if any(restrict_ints ~= [0 Inf])
+    warning('Restricting analysis for intervals...');
+    for ii = 1:length(spikes.times)
+        [status] = InIntervals(spikes.times{ii},restrict_ints);
+        spikes.times{ii} = spikes.times{ii}(status);
+    end 
+
+    status = InIntervals(uLEDPulses.timestamps(:,1),restrict_ints);
+    uLEDPulses.timestamps(~status,:) = [];
+    uLEDPulses.conditionID(~status) = [];
+    uLEDPulses.code(~status) = [];
 end
 
 if length(uLEDPulses.list_of_durations)>length(onset) && length(onset)==1
@@ -485,6 +538,14 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
         in_interval.respLEDs.ratioNoResp(ii,kk) = nanmean(in_interval.respLEDs.rate{ii,kk})./nanmean(in_interval.noRespLEDs.rate{ii,kk});
         in_interval.respLEDs.meanRateBeforePulse(ii,kk) = mean(in_interval.respLEDs.rateBeforePulse{ii,kk});
         in_interval.respLEDs.meanRateDuringPulse(ii,kk) = mean(in_interval.respLEDs.rate{ii,kk});
+        if length(out_interval.respLEDs.LEDs{ii,kk}) == 1
+            dim_mean = 2;
+        else
+            dim_mean = 1;
+        end
+        in_interval.respLEDs.responseCurve(ii,kk,:) = mean(squeeze(in_interval.responsecurve(ii,kk,out_interval.respLEDs.LEDs{ii,kk},:)),dim_mean);
+        in_interval.respLEDs.responseCurveZ(ii,kk,:) = mean(squeeze(in_interval.responsecurveZ(ii,kk,out_interval.respLEDs.LEDs{ii,kk},:)),dim_mean);
+        in_interval.respLEDs.responseCurveZSmooth(ii,kk,:) = mean(squeeze(in_interval.responsecurveZSmooth(ii,kk,out_interval.respLEDs.LEDs{ii,kk},:)),dim_mean);
         if isnan(in_interval.respLEDs.meanRatio(ii,kk)) % if only NaN, remove LEDs
             in_interval.respLEDs.LEDs{ii,kk} = [];
             in_interval.respLEDs.rate{ii,kk} = [];
@@ -492,6 +553,9 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
             in_interval.respLEDs.rateZ{ii,kk} = [];
             in_interval.respLEDs.rateZBeforePulse{ii,kk} = [];
             in_interval.respLEDs.ratioBeforeAfter{ii,kk} = [];
+            in_interval.respLEDs.responseCurve(ii,kk,:) = nan(size(t));
+            in_interval.respLEDs.responseCurveZ(ii,kk,:) = nan(size(t));
+            in_interval.respLEDs.responseCurveZSmooth(ii,kk,:) = nan(size(t));
         end
         
         % maxRespLED % the reference is the out_intervals max leds!!!
@@ -514,7 +578,7 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
             in_interval.maxRespLED.responseCurveZSmooth(ii,kk,:) = squeeze(in_interval.responsecurveZSmooth(ii,kk,out_interval.maxRespLED.LEDs(ii,kk),:));
             if mean(in_interval.maxRespLED.responseCurve(ii,kk,t_duringPulse)) ~= in_interval.rateDuringPulse(ii,kk,out_interval.maxRespLED.LEDs(ii,kk)) && ~isnan(in_interval.rateDuringPulse(ii,kk,out_interval.maxRespLED.LEDs(ii,kk)))
                 warning('Something terrible happened with indexing!!')
-                keyboard;
+                % keyboard;
             end
         else
             in_interval.maxRespLED.rate(ii,kk) = NaN;
@@ -610,6 +674,14 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
         out_interval.respLEDs.ratioNoResp(ii,kk) = nanmean(out_interval.respLEDs.rate{ii,kk})./nanmean(out_interval.noRespLEDs.rate{ii,kk});
         out_interval.respLEDs.meanRateBeforePulse(ii,kk) = mean(out_interval.respLEDs.rateBeforePulse{ii,kk});
         out_interval.respLEDs.meanRateDuringPulse(ii,kk) = mean(out_interval.respLEDs.rate{ii,kk});
+        if length(out_interval.respLEDs.LEDs{ii,kk}) == 1
+            dim_mean = 2;
+        else
+            dim_mean = 1;
+        end
+        out_interval.respLEDs.responseCurve(ii,kk,:) = mean(squeeze(out_interval.responsecurve(ii,kk,out_interval.respLEDs.LEDs{ii,kk},:)),dim_mean);
+        out_interval.respLEDs.responseCurveZ(ii,kk,:) = mean(squeeze(out_interval.responsecurveZ(ii,kk,out_interval.respLEDs.LEDs{ii,kk},:)),dim_mean);
+        out_interval.respLEDs.responseCurveZSmooth(ii,kk,:) = mean(squeeze(out_interval.responsecurveZSmooth(ii,kk,out_interval.respLEDs.LEDs{ii,kk},:)),dim_mean);
         if isnan(out_interval.respLEDs.meanRatio(ii,kk)) % if only NaN, remove LEDs
             out_interval.respLEDs.LEDs{ii,kk} = [];
             out_interval.respLEDs.rate{ii,kk} = [];
@@ -617,7 +689,10 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
             out_interval.respLEDs.rateZ{ii,kk} = [];
             out_interval.respLEDs.rateZBeforePulse{ii,kk} = [];
             out_interval.respLEDs.ratioBeforeAfter{ii,kk} = [];
-        end
+            out_interval.respLEDs.responseCurve(ii,kk,:) = nan(size(t));
+            out_interval.respLEDs.responseCurveZ(ii,kk,:) = nan(size(t));
+            out_interval.respLEDs.responseCurveZSmooth(ii,kk,:) = nan(size(t));
+        end            
         
         % maxRespLED
         if ~isnan(out_interval.maxRespLED.LEDs(ii,kk))
@@ -639,7 +714,7 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
             out_interval.maxRespLED.responseCurveZSmooth(ii,kk,:) = squeeze(out_interval.responsecurveZSmooth(ii,kk,out_interval.maxRespLED.LEDs(ii,kk),:));
             if mean(out_interval.maxRespLED.responseCurve(ii,kk,t_duringPulse)) ~= out_interval.rateDuringPulse(ii,kk,out_interval.maxRespLED.LEDs(ii,kk))
                 warning('Something terrible happened with indexing!!')
-                keyboard;
+                % keyboard;
             end
         else
             out_interval.maxRespLED.rate(ii,kk) = NaN;
@@ -704,6 +779,7 @@ end
 
 % parse non-responsive and responsive cells
 uLEDResponses_interval.drivenCells = [];
+uLEDResponses_interval.stronglyDrivenCells = []; % >2SD
 for kk = 1:length(uLEDPulses.list_of_conditions)
     for ii = 1:length(spikes.UID)
         % in
@@ -745,6 +821,7 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
         end
     end
 end
+uLEDResponses_interval.stronglyDrivenCells = out_interval.maxRespLED.rateZ > 2 | in_interval.maxRespLED.rateZ > 2;
 
 in_interval_raster = in_interval;
 out_interval_raster = out_interval;
@@ -760,11 +837,15 @@ uLEDResponses_interval.out_interval = out_interval;
 uLEDResponses_interval.is_rateBeforePulse_similar_h = in_interval.maxRespLED.is_out_rateBeforePulse_similar_h;
 uLEDResponses_interval.is_rateBeforePulse_similar_p = in_interval.maxRespLED.is_out_rateBeforePulse_similar_p;
 
+% flattening in_interval and out_interval maxLED responses
+uLEDResponses_interval.in_interval_maxRespLED = uLEDResponses_interval.in_interval.maxRespLED;
+uLEDResponses_interval.out_interval_maxRespLED = uLEDResponses_interval.out_interval.maxRespLED;
+
 if saveMat
     disp('Saving...');
-    save([basenameFromBasepath(pwd) '.uLEDResponse_interval.cellinfo.mat'],'uLEDResponses_interval');
+    save([basenameFromBasepath(pwd) '.' save_as '.cellinfo.mat'],'uLEDResponses_interval');
     if getRaster
-        save([basenameFromBasepath(pwd) '.uLEDResponse_interval_raster.cellinfo.mat'],'uLEDResponses_interval_raster','-v7.3');
+        save([basenameFromBasepath(pwd) '.' save_as '_raster.cellinfo.mat'],'uLEDResponses_interval_raster','-v7.3');
     end
 end
 
@@ -915,7 +996,7 @@ if doPlot
         (uLEDResponses_interval.out_interval.maxRespLED.rate(uLEDResponses_interval.drivenCells==1) + uLEDResponses_interval.in_interval.maxRespLED.rate(uLEDResponses_interval.drivenCells==1)));
     xlabel('(Out - In)/ (Out + In) (Hz)');  ylabel('#');
 
-    exportgraphics(gcf,['SummaryFigures\uLEDResponse_intervals_comparison',num2str(kk),'_dur',num2str(uLEDResponses_interval.in_interval.pulseDuration(1,kk,1)),'s.png']);
+    exportgraphics(gcf,['SummaryFigures\' save_as '_comparison',num2str(kk),'_dur',num2str(uLEDResponses_interval.in_interval.pulseDuration(1,kk,1)),'s.png']);
 
 end
 cd(prevPath);
