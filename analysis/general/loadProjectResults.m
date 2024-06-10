@@ -20,6 +20,8 @@ addParameter(p,'loadLast',false,@islogical);
 addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'saveSummaries',true,@islogical);
 addParameter(p,'lightVersion',true,@islogical);
+addParameter(p,'list_of_sessions',[],@iscell);
+addParameter(p,'save_as',[],@ischar);
 
 parse(p,varargin{:});
 
@@ -33,6 +35,8 @@ loadLast = p.Results.loadLast;
 saveMat = p.Results.saveMat;
 saveSummaries = p.Results.saveSummaries;
 lightVersion = p.Results.lightVersion;
+list_of_sessions = p.Results.list_of_sessions;
+save_as = p.Results.save_as;
 
 if loadLast
     projectFiles = dir([analysis_project_path filesep '*' project '.mat']);
@@ -79,16 +83,21 @@ project_list = unique(split([project_list_temp{:}],' '));
 for ii = 1:length(project_list)
     fprintf(' %3.i/ %s \n',ii,project_list{ii}); %\n
 end
-fprintf('Taking all sessions from project "%s" \n',project)
+% fprintf('Taking all sessions from project "%s" \n',project)
 
-if ~strcmpi(project,'Undefined') 
-    if ~isempty(ismember(project_list, project))
-        sessions.basepaths = sessions.basepaths(contains(sessions.project, project));
-        sessions.project = sessions.project(contains(sessions.project, project));
-    else
-        error('Project name not recognized!');
-    end
+% selecting sessions
+if isempty(list_of_sessions)
+    list_of_sessions = {sessionsTable.SessionName};
 end
+if strcmpi(project,'Undefined') || strcmpi(project,'All')
+    targetProject = project_list;
+elseif ~any(ismember(project_list, project))
+    error('Project name not recognized!');
+end
+
+sessions.basepaths = sessions.basepaths(contains(lower(sessions.project), lower(targetProject)) & contains(lower(sessionsTable.SessionName), lower(list_of_sessions)));
+sessions.project = sessions.project(contains(lower(sessions.project), lower(targetProject)) & contains(lower(sessionsTable.SessionName), lower(list_of_sessions)));
+
 fprintf('Loading %3.i sessions... \n',length(sessions.basepaths)); %\n
 
 %% load cellexplorer results
@@ -280,6 +289,78 @@ for ii = 1:length(sessions.basepaths)
         projectSessionResults.lightSpikeCollision{ii} = NaN;
     end
     
+    % uLEDResponse_ripples
+    targetFile = dir('*uLEDResponse_ripples.cellinfo.mat');
+    try load(targetFile.name);
+        projectSessionResults.uLEDResponse_ripples{ii} =  uLEDResponses_interval;
+        clear uLEDResponses_interval
+    catch
+        projectSessionResults.uLEDResponse_ripples{ii} = NaN;
+    end
+
+    % uLEDResponse_ripples_pre
+    targetFile = dir('*uLEDResponse_ripples_pre.cellinfo.mat');
+    try load(targetFile.name);
+        projectSessionResults.uLEDResponse_ripples_pre{ii} =  uLEDResponses_interval;
+        clear uLEDResponses_interval
+    catch
+        projectSessionResults.uLEDResponse_ripples_pre{ii} = NaN;
+    end 
+
+    % uLEDResponse_ripples_post
+    targetFile = dir('*uLEDResponse_ripples_post.cellinfo.mat');
+    try load(targetFile.name);
+        projectSessionResults.uLEDResponse_ripples_post{ii} =  uLEDResponses_interval;
+        clear uLEDResponses_interval
+    catch
+        projectSessionResults.uLEDResponse_ripples_post{ii} = NaN;
+    end 
+
+    % spike triggered pulse
+    targetFile = dir('*spikeTriggeredPulses.cellinfo.mat');
+    try load(targetFile.name);
+        projectSessionResults.spikeTriggeredPulses{ii} =  spikeTriggeredPulses;
+        clear spikeTriggeredPulses
+    catch
+        projectSessionResults.spikeTriggeredPulses{ii} = NaN;
+    end 
+
+    % ev stim
+    targetFile = dir('*explained_variance_stim.sessioninfo.mat');
+    try load(targetFile.name);
+        projectSessionResults.explained_variance_stim{ii} =  evStats;
+        clear evStats
+    catch
+        projectSessionResults.explained_variance_stim{ii} = NaN;
+    end
+
+    % ev delayed
+    targetFile = dir('*explained_variance_delayed.sessioninfo.mat');
+    try load(targetFile.name);
+        projectSessionResults.explained_variance_delayed{ii} =  evStats;
+        clear evStats
+    catch
+        projectSessionResults.explained_variance_delayed{ii} = NaN;
+    end
+
+    % spike triggered pulse
+    targetFile = dir('*spikeCCGchange.cellinfo.mat');
+    try load(targetFile.name);
+        projectSessionResults.spikeCCGchange{ii} =  spikeCCGchange;
+        clear spikeCCGchange
+    catch
+        projectSessionResults.spikeCCGchange{ii} = NaN;
+    end
+
+    % uledResponse_strikeTrigered
+    targetFile = dir('*uLEDResponse_spikeTriggered.cellinfo.mat');
+    try load(targetFile.name);
+        projectSessionResults.uledResponse_strikeTrigered{ii} =  uLEDResponses_interval;
+        clear uLEDResponses_interval
+    catch
+        projectSessionResults.uledResponse_strikeTrigered{ii} = NaN;
+    end
+
     if includeLFP
         lfp = getLFP;
         projectSessionResults.lfp{ii} = spikes;
@@ -365,7 +446,38 @@ try projectResults.lightSpikeCollision = stackSessionResult(projectSessionResult
 catch
     warning('lightSpikeCollisions were not staked!');
 end
-
+try projectResults.uLEDResponse_ripples = stackSessionResult(projectSessionResults.uLEDResponse_ripples, projectSessionResults.numcells);
+catch
+    warning('uLEDResponse_ripples were not staked!');
+end
+try projectResults.uLEDResponse_ripples_pre = stackSessionResult(projectSessionResults.uLEDResponse_ripples_pre, projectSessionResults.numcells);
+catch
+    warning('uLEDResponse_ripples_pre were not staked!');
+end
+try projectResults.uLEDResponse_ripples_post = stackSessionResult(projectSessionResults.uLEDResponse_ripples_post, projectSessionResults.numcells);
+catch
+    warning('uLEDResponse_ripples_post were not staked!');
+end
+try projectResults.spikeTriggeredPulses = stackSessionResult(projectSessionResults.spikeTriggeredPulses, projectSessionResults.numcells);
+catch
+    warning('spikeTriggeredPulses were not staked!');
+end
+try projectResults.explained_variance_stim = stackSessionResult(projectSessionResults.explained_variance_stim, projectSessionResults.numcells);
+catch
+    warning('explained_variance_stim were not staked!');
+end
+try projectResults.explained_variance_delayed = stackSessionResult(projectSessionResults.explained_variance_delayed, projectSessionResults.numcells);
+catch
+    warning('explained_variance_delayed was not staked!');
+end
+try projectResults.spikeCCGchange = stackSessionResult(projectSessionResults.spikeCCGchange, projectSessionResults.numcells);
+catch
+    warning('spikeCCGchange was not staked!');
+end
+try projectResults.uledResponse_strikeTrigered = stackSessionResult(projectSessionResults.uledResponse_strikeTrigered, projectSessionResults.numcells);
+catch
+    warning('uledResponse_strikeTrigered was not staked!');
+end
 projectResults.cell_metrics = cell_metrics;
 
 % session, genetic line, experimentalSubject
