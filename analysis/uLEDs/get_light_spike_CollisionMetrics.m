@@ -15,7 +15,7 @@ addParameter(p,'before_pulse_factor',1.5,@isscalar); % which cells show similar 
 addParameter(p,'doPlot',true,@islogical);
 addParameter(p,'label',[]); % string to add to the title for figures and mat file
 addParameter(p,'saveMat',true,@islogical); % 
-addParameter(p,'rate_change_threshold',5,@isnumeric); % 
+addParameter(p,'rate_change_threshold',4,@isnumeric); % 
 addParameter(p,'spikes',[],@isstruct); % 
 addParameter(p,'interpolate_pulse_sides',true,@islogical); % 
 addParameter(p,'update_cell_metrics',true,@islogical); % 
@@ -64,6 +64,9 @@ uLEDResponses_InInterval.maxZBeforePulse = [];
 uLEDResponses_InInterval.maxZPulse = [];
 uLEDResponses_InInterval.putativeCellType = [];
 uLEDResponses_InInterval.is_out_rateBeforePuse_similar = [];
+uLEDResponses_InInterval.responsecurve = [];
+uLEDResponses_InInterval.responsecurveZ = [];
+uLEDResponses_InInterval.responsecurveZSmooth = [];
 
 uLEDResponses_OutInterval.presynapticID = [];
 uLEDResponses_OutInterval.presynapticCellType = [];
@@ -74,6 +77,9 @@ uLEDResponses_OutInterval.maxZBeforePulse = [];
 uLEDResponses_OutInterval.maxZPulse = [];
 uLEDResponses_OutInterval.putativeCellType = [];
 uLEDResponses_OutInterval.is_in_rateBeforePuse_similar = [];
+uLEDResponses_OutInterval.responsecurve = [];
+uLEDResponses_OutInterval.responsecurveZ = [];
+uLEDResponses_OutInterval.responsecurveZSmooth = [];
 
 for ii = 1:length(uLEDResponses_interval)
     if strcmpi(cell_metrics.putativeCellType{ii},'Pyramidal Cell')
@@ -104,6 +110,8 @@ for ii = 1:length(uLEDResponses_interval)
         uLEDResponses_interval{ii}.is_rateBeforePulse_similar_h];
     uLEDResponses_InInterval.postsynapticID = [uLEDResponses_InInterval.postsynapticID; ...
         (1:size(uLEDResponses_interval{ii}.bootsTrapRate,1))'];
+    uLEDResponses_InInterval.responsecurve = [uLEDResponses_InInterval.responsecurve; ...
+        squeeze(uLEDResponses_interval{ii}.in_interval.maxRespLED.responseCurve)];
 
     % out
     uLEDResponses_OutInterval.presynapticID = [uLEDResponses_OutInterval.presynapticID; ...
@@ -124,40 +132,13 @@ for ii = 1:length(uLEDResponses_interval)
         uLEDResponses_interval{ii}.is_rateBeforePulse_similar_h];
     uLEDResponses_OutInterval.postsynapticID = [uLEDResponses_OutInterval.postsynapticID; ...
         (1:size(uLEDResponses_interval{ii}.bootsTrapRate,1))'];
+    uLEDResponses_OutInterval.responsecurve = [uLEDResponses_OutInterval.responsecurve; ...
+        squeeze(uLEDResponses_interval{ii}.out_interval.maxRespLED.responseCurve)];
 end
-
-% including responseCurves
-in_responsecurve = [];
-out_responsecurve = [];
-in_responsecurveZ = [];
-out_responsecurveZ = [];
 timestamps = uLEDResponses_interval{1}.in_interval.timestamps;
-for ii = 1:length(uLEDResponses_interval)
-    for jj = 1:length(uLEDResponses_interval{ii}.in_interval.maxRespLED.LEDs)
-        maxLEDs = uLEDResponses_interval{ii}.in_interval.maxRespLED.LEDs(jj);
-        if isnan(maxLEDs) || ii == jj
-            in_responsecurve = [in_responsecurve; timestamps'*NaN];
-            out_responsecurve = [out_responsecurve; timestamps'*NaN];
-            in_responsecurveZ = [in_responsecurveZ; timestamps'*NaN];
-            out_responsecurveZ = [out_responsecurveZ; timestamps'*NaN];
-        else
-            in_responsecurve = ...
-                [in_responsecurve; squeeze(uLEDResponses_interval{ii}.in_interval.responsecurve(jj,1,maxLEDs,:))'];
-            out_responsecurve = ...
-                [out_responsecurve; squeeze(uLEDResponses_interval{ii}.out_interval.responsecurve(jj,1,maxLEDs,:))'];
-            in_responsecurveZ = ...
-                [in_responsecurveZ; squeeze(uLEDResponses_interval{ii}.in_interval.responsecurveZ(jj,1,maxLEDs,:))'];
-            out_responsecurveZ = ...
-                [out_responsecurveZ; squeeze(uLEDResponses_interval{ii}.out_interval.responsecurveZ(jj,1,maxLEDs,:))'];
-        end
-    end
-end
-uLEDResponses_OutInterval.responsecurve = out_responsecurve;
-uLEDResponses_OutInterval.responsecurveZ = out_responsecurveZ;
 uLEDResponses_OutInterval.timestamps = timestamps';
-uLEDResponses_InInterval.responsecurve = in_responsecurve;
-uLEDResponses_InInterval.responsecurveZ = in_responsecurveZ;
 uLEDResponses_InInterval.timestamps = timestamps';
+
 
 if interpolate_pulse_sides
     timestamps = uLEDResponses_interval{1}.in_interval.timestamps;
@@ -170,15 +151,25 @@ if interpolate_pulse_sides
         for jj = 1:size(uLEDResponses_OutInterval.responsecurve,1)
             uLEDResponses_OutInterval.responsecurve(jj,samples_to_interpolate(ii,:)) = ...
                 interp1(x_axis,uLEDResponses_OutInterval.responsecurve(jj,x_axis),samples_to_interpolate(ii,:));
-            uLEDResponses_OutInterval.responsecurveZ(jj,samples_to_interpolate(ii,:)) = ...
-                interp1(x_axis,uLEDResponses_OutInterval.responsecurveZ(jj,x_axis),samples_to_interpolate(ii,:));
             uLEDResponses_InInterval.responsecurve(jj,samples_to_interpolate(ii,:)) = ...
                 interp1(x_axis,uLEDResponses_InInterval.responsecurve(jj,x_axis),samples_to_interpolate(ii,:));
-            uLEDResponses_InInterval.responsecurveZ(jj,samples_to_interpolate(ii,:)) = ...
-                interp1(x_axis,uLEDResponses_InInterval.responsecurveZ(jj,x_axis),samples_to_interpolate(ii,:));
         end
     end
+    % the interpolation may change a bit the max responses... recomputing
+    timestamps = uLEDResponses_interval{1}.in_interval.timestamps;
+    t_duringPulse = timestamps > 0 & timestamps <0.02;
+    uLEDResponses_OutInterval.maxRatePulse = mean(uLEDResponses_OutInterval.responsecurve(:,t_duringPulse),2);
+    uLEDResponses_InInterval.maxRatePulse = mean(uLEDResponses_InInterval.responsecurve(:,t_duringPulse),2);
 end
+
+% z_scoring properly
+timestamps = uLEDResponses_interval{1}.in_interval.timestamps;
+pulse_duration = uLEDResponses_interval{1}.in_interval.pulseDuration(1);
+z_win = InIntervals(timestamps, [min(timestamps) min(timestamps)+ pulse_duration]);
+uLEDResponses_InInterval.responsecurveZ = zscore_win(uLEDResponses_InInterval.responsecurve,z_win)';
+uLEDResponses_OutInterval.responsecurveZ = zscore_win(uLEDResponses_OutInterval.responsecurve,z_win)';
+uLEDResponses_OutInterval.maxZPulse = mean(uLEDResponses_OutInterval.responsecurveZ(:,t_duringPulse),2);
+uLEDResponses_InInterval.maxZPulse = mean(uLEDResponses_InInterval.responsecurveZ(:,t_duringPulse),2);
 
 % light responsive cells
 uLEDResponses_OutInterval.lightResponsive = ...
@@ -211,11 +202,11 @@ collision_metrics.is_post_pyramidalCell = strcmpi(collision_metrics.putativeCell
 
 not_same_cell = uLEDResponses_OutInterval.postsynapticID~=uLEDResponses_OutInterval.presynapticCellType;
 collision_metrics.candidate_int_pyr_pairs = collision_metrics.is_pre_interneuron==1 & ...
-        collision_metrics.is_lightResponsive & collision_metrics.is_rate_before_similar_factor & ...
-        collision_metrics.is_post_pyramidalCell & not_same_cell;
+    collision_metrics.is_post_pyramidalCell & not_same_cell;
+        % collision_metrics.is_lightResponsive & collision_metrics.is_rate_before_similar_factor & ...
 collision_metrics.candidate_pyr_pyr_pairs = collision_metrics.is_pre_interneuron==0 & ...
-        collision_metrics.is_lightResponsive & collision_metrics.is_rate_before_similar_factor & ...
         collision_metrics.is_post_pyramidalCell & not_same_cell;
+        % collision_metrics.is_lightResponsive & collision_metrics.is_rate_before_similar_factor & ...
 
 pre_post_CCG = [];
 pre_waveforms = [];
@@ -267,6 +258,8 @@ collision_metrics.inhibitory_connection_probability = size(collision_metrics.put
 collision_metrics.excitatory_connection_probability = size(cell_metrics.putativeConnections.excitatory,1)/(length(find(pyr)) * (length(find(nw)) + length(find(ww))));
 collision_metrics.inhibitory_connectionsOut = histcounts(collision_metrics.putative_int_pyr_pairs_list(:,1),[0:length(cell_metrics.UID)]+.5);
 collision_metrics.inhibitory_connectionsIn = histcounts(collision_metrics.putative_int_pyr_pairs_list(:,2),[0:length(cell_metrics.UID)]+.5);
+collision_metrics.presynapticID = collision_metrics.uLEDResponses_InInterval.presynapticID;
+collision_metrics.presynapticID = collision_metrics.uLEDResponses_InInterval.postsynapticID;
 
 % select pairs
 prePyr_select = collision_metrics.candidate_pyr_pyr_pairs;
@@ -347,7 +340,7 @@ if doPlot
         'XTickLabelRotation',45);
     ylabel('Rate responses (Hz)');
     
-    mkdir('SummaryFigures/')
+    mkdir('SummaryFigures/');
     saveas(gcf,strcat('SummaryFigures\Light_spike_Collision_',label,'.png'));
 
     % visualize pairs
@@ -410,12 +403,36 @@ if doPlot
         plot(cell_metrics.troughToPeak(pre_post),...
             cell_metrics.burstIndex_Royer2012(pre_post),'-','color',[.1 .1 .4]);
     end
-
     text(0.1, .9,[num2str(size(cell_metrics.putativeConnections.excitatory,1)) 'exc pairs (' num2str(round(collision_metrics.excitatory_connection_probability,2)) ' prob)'],"Units","normalized");
     text(0.1, .8,[num2str(size(collision_metrics.putative_int_pyr_pairs_list,1)) 'inh pairs (' num2str(round(collision_metrics.inhibitory_connection_probability,2)) ' prob)'],"Units","normalized");
     ylabel('Bursting Index (Royer2012)'); xlabel('Through to peak (ms)');
-    mkdir('SummaryFigures/')
+    
+    mkdir('SummaryFigures/');
     saveas(gcf,strcat('SummaryFigures\Light_spike_Collision_pairs_',label,'.png'));
+
+    % plotting pairs
+    figure,
+    subplot(2,3,1)
+    imagesc_ranked(uLEDResponses_OutInterval.timestamps, [], uLEDResponses_OutInterval.responsecurveZ(putative_inh_pairs,:),[-30 30],collision_metrics.rateZ_difference(putative_inh_pairs),'smoothOpt',5);
+    ylabel('Z-scored pairs (S.D.)');
+    subplot(2,3,2)
+    imagesc_ranked(uLEDResponses_OutInterval.timestamps, [], uLEDResponses_InInterval.responsecurveZ(putative_inh_pairs,:),[-30 30],collision_metrics.rateZ_difference(putative_inh_pairs),'smoothOpt',5);
+    subplot(2,3,3)
+    imagesc_ranked(uLEDResponses_InInterval.timestamps, [], uLEDResponses_OutInterval.responsecurveZ(putative_inh_pairs,:) - uLEDResponses_InInterval.responsecurveZ(putative_inh_pairs,:),...
+        [-30 30],collision_metrics.rateZ_difference(putative_inh_pairs),'smoothOpt',5);
+
+    subplot(2,3,4)
+    imagesc_ranked(uLEDResponses_OutInterval.timestamps, [], uLEDResponses_OutInterval.responsecurve(putative_inh_pairs,:),[0 30],collision_metrics.rate_difference(putative_inh_pairs),'smoothOpt',5);
+    ylabel('Rate pairs (Hz)');
+    subplot(2,3,5)
+    imagesc_ranked(uLEDResponses_OutInterval.timestamps, [], uLEDResponses_InInterval.responsecurve(putative_inh_pairs,:),[0 30],collision_metrics.rate_difference(putative_inh_pairs),'smoothOpt',5);
+    xlabel('Time since light stimulation (ms)')
+    subplot(2,3,6)
+    imagesc_ranked(uLEDResponses_InInterval.timestamps, [], uLEDResponses_OutInterval.responsecurve(putative_inh_pairs,:) - uLEDResponses_InInterval.responsecurve(putative_inh_pairs,:),...
+        [0 30],collision_metrics.rate_difference(putative_inh_pairs),'smoothOpt',5);
+    colormap jet
+    mkdir('SummaryFigures/');
+    saveas(gcf,strcat('SummaryFigures\Light_spike_Collision_ranked_pairs_',label,'.png'));
     
 end
 

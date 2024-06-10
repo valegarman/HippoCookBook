@@ -51,11 +51,11 @@ hippocampalLayers = getHippocampalLayers('force',true,'promt',true);
 % analysis.
 
 excludeIntervals = [];
-rippleChannel = 2;
+rippleChannel = [];
 SWChannel = [];
 noiseChannel = [];
 eventSpikeThreshold_shanks = [1 2 3 4]; % which shanks will be accounted for the spike threshold 
-eventSpikeThreshold = 1; % .5
+eventSpikeThreshold = .5; % .5
 rippleMasterDetector_threshold = [1 2]; % [1.5 3.5]
 ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',false,'thresholds',...
     rippleMasterDetector_threshold,'eventSpikeThreshold_shanks', eventSpikeThreshold_shanks,'eventSpikeThreshold',eventSpikeThreshold,'excludeIntervals',excludeIntervals,'noise',noiseChannel); 

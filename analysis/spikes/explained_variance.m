@@ -42,8 +42,12 @@ function [evStats] = explained_variance(spikes,pre_ints,r_ints,post_ints,varargi
 % Parse inputs 
 p = inputParser;
 addParameter(p,'BinSize',.1,@isnumeric);
+addParameter(p,'save_as','explained_variance',@ischar);
+addParameter(p,'saveMat',true,@islogical);
 parse(p,varargin{:});
 BinSize = p.Results.BinSize;
+save_as = p.Results.save_as;
+saveMat = p.Results.saveMat;
 
 % Correlation matrices
 spkMat = bz_SpktToSpkmat(spikes,'dt',BinSize);
@@ -89,5 +93,10 @@ evStats.ev_perCell = mean(delta_ev)';
 evStats.P1 = c_pre;
 evStats.R = c_maze;
 evStats.P2 = c_post;
+
+if saveMat
+    disp('Saving...');
+    save([basenameFromBasepath(pwd) '.' save_as '.sessioninfo.mat'],'evStats');
+end
 
 end
