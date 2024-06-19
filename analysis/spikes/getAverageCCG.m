@@ -27,6 +27,7 @@ function [averageCCG] = getAverageCCG(varargin)
 % averageCCG
 %
 % Manu-BuzsakiLab 2021
+% Manu-NCL 2024, improving Z-score, regions, cell-types, etc
 
 % Parse options
 p = inputParser;
