@@ -15,7 +15,7 @@ computerName = (strtrim(computerName));
             dp = 'W:\buzsakilab\Buzsakilabspace\Datasets\ValeroM';
         case 'Manuels-MacBook-Pro.local'
             dp = '/Volumes/NEURAL';
-        case 'DESKTOP-1SBCILE'
+        case 'DESKTOP-BEPJ8P0'
             dp = 'Z:\';
         case 'IMW02691'
             dp = 'Z:\';
