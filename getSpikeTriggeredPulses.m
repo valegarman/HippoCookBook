@@ -1,4 +1,5 @@
 
+
 function [spikeTriggeredPulses] = getSpikeTriggeredPulses(varargin)
 % [spikeTriggeredPulses] = getSpikeTriggeredPulses(varargin)
 %
