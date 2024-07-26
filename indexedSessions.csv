@@ -156,3 +156,4 @@ fcamk10_220930_sess16,fcamk10,fcamk10\fcamk10_220930_sess16,c57b1/6,camkii/ai32,
 ymv04_170907,ymv04,ymv04\ymv04_170907,c57b1/6,camkii/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,63,VISp5 VISp6 VISp4 VISp2_3 VISp1 CA1so,Layer-specific physiological features and interlaminar interactions in the primary visual cortex of the mouse
 fcamk5_210406_sess10,fcamk5,fcamk5\fcamk5_210406_sess10,c57,camkii/ai32,"uled-12led-32ch-4shanks",linear maze linear maze,49,CA1sp CA1so,LightInInh
 fcamk5_210407_sess11,fcamk5,fcamk5\fcamk5_210407_sess11,c57,camkii/ai32,"uled-12led-32ch-4shanks",linear maze linear maze,59,CA1sp CA1so,LightInInh
+ymv17_180207,ymv17,ymv17\ymv17_180207,c57b1/6,pv/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,81,VISp5 VISp2_3 VISp4 VISp6 CA1so VISp1,Layer-specific physiological features and interlaminar interactions in the primary visual cortex of the mouse
