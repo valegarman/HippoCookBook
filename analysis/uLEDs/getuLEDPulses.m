@@ -18,6 +18,7 @@ function uLEDPulses = getuLEDPulses(varargin)
 %   condition_epochs     Catalog pulses by recording epochs. Input should
 %                           be an array of the same size than the total of epochs 
 %                           (recording folders) 
+%   current              Scalar, in nA. Exmaple '6'
 %
 % uLED map:
 %  S1               S2               S3               S4
