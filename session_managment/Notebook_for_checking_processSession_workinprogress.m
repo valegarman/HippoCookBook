@@ -218,13 +218,11 @@ end
 % ProcessCellMetrics generates plot about CellMetrics session summary 
 
 % if no pulses, put this variable related to the pulses or to the uLED response equal to []
-
-excludeManipulationIntervals = optoPulses.stimulationEpochs; 
-
-ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true,'restrictToIntervals',...
-    uLEDResponses.restricted_interval,'manualAdjustMonoSyn',false);
-cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true,...
-    'restrictToIntervals',uLEDResponses.restricted_interval,'manualAdjustMonoSyn',false,'saveAs','cell_metrics_post');
+uLEDResponses = getuLEDResponse;
+ProcessCellMetrics('session', session,'forceReload',true,'restrictToIntervals',...
+    uLEDResponses.restricted_interval,'manualAdjustMonoSyn',false,'getWaveformsFromDat',false);
+cell_metrics = ProcessCellMetrics('session', session, 'forceReload',true,'getWaveformsFromDat',false,...
+    'restrictToIntervals',uLEDResponses_post.restricted_interval,'manualAdjustMonoSyn',false,'saveAs','cell_metrics_post');
 
 disp('CellMetrics computed!');
 

@@ -3,7 +3,7 @@
 % project
 
 clear; close all
-targetProject= 'LightInInh';
+targetProject= 'all';
 
 HCB_directory = what('HippoCookBook'); 
 
@@ -16,23 +16,7 @@ for ii = 1:length(sessionsTable.SessionName)
         try
         
             %%% your code goes here...
-            clear uLEDResponses_interval
-            delete(gcp('nocreate'))
-            spikes = loadSpikes;
-            spikes_times = spikes.times;
-            monosyn_inh_win = [0.01 0.021]; % 01to21
-            parfor mm = 1:spikes.numcells
-                disp(mm);
-                uLEDResponses_interval{mm} = getuLEDResponse_intervals([spikes_times{mm} + monosyn_inh_win(1) spikes_times{mm} + monosyn_inh_win(2)],...
-                    'saveMat', false,'numRep',500,'doPlot', false,'getRaster', false, 'verbose', false);
-            end
-            collision_metrics_01_21 = get_light_spike_CollisionMetrics(uLEDResponses_interval,'label','01msTo21ms','saveMat',false,'update_cell_metrics',false);
-            save('uLEDResponses_interval_01ms_21ms.mat','uLEDResponses_interval','collision_metrics_01_21');
-            clear uLEDResponses_interval
-
-            load('uLEDResponses_interval_01ms_21ms.mat');
-            collision_metrics_01_21 = get_light_spike_CollisionMetrics(uLEDResponses_interval,'label','01msTo21ms','rate_change_threshold',3);
-
+            getAverageCCG('force',true);
             %%%
             
             close all;

@@ -427,7 +427,7 @@ try
     end
 end
 
-if promt
+if promt && length(maxTheta) > 1
     fp = figure;
     hold on
     plot(maxTheta_zscore,'color',[.8 .2 .2],'LineWidth',1.5);
@@ -465,6 +465,8 @@ if promt
     pause(2);
     saveas(gcf,['SummaryFigures\hippocampalLayers_bestShank.png']);
     close(fp);
+else
+    bestShank = 1;
 end
 
 hippocampalLayers.layers = channels;
