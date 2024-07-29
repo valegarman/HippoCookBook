@@ -158,3 +158,4 @@ fcamk5_210406_sess10,fcamk5,fcamk5\fcamk5_210406_sess10,c57,camkii/ai32,"uled-12
 fcamk5_210407_sess11,fcamk5,fcamk5\fcamk5_210407_sess11,c57,camkii/ai32,"uled-12led-32ch-4shanks",linear maze linear maze,59,CA1sp CA1so,LightInInh
 ymv17_180207,ymv17,ymv17\ymv17_180207,c57b1/6,pv/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,81,VISp5 VISp2_3 VISp4 VISp6 CA1so VISp1,Layer-specific physiological features and interlaminar interactions in the primary visual cortex of the mouse
 fcr3_220321_sess3,fcr3,fcr3\fcr3_220321_sess3,c57b1/6,vip/cr/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,90,CA1sp CA1so PTLp5 PTLp2_3 CA1sr CA1slm CA3sp DG,Bibliocampus
+fcr3_220328_sess8,fcr3,fcr3\fcr3_220328_sess8,c57b1/6,vip/cr/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,26,CA1sp CA1so PTLp5 PTLp2_3 CA1slm CA1sr CA3sp DG,Bibliocampus
