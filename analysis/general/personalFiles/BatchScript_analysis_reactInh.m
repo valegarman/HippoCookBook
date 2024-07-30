@@ -3,6 +3,7 @@
 % project
 
 %% analysis for figure 2
+
 clear; close all
 targetProject= 'All';
 list_of_sessions = {'fCamk1_200827_sess9', 'fCamk1_200901_sess12', 'fCamk1_200902_sess13',...
