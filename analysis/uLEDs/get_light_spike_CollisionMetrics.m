@@ -228,6 +228,7 @@ if ~isempty(spikes)
     end
 end
 collision_metrics.pre_post_CCG    = pre_post_CCG;
+collision_metrics.pre_post_CCG_timestamps    = t;
 collision_metrics.pre_waveforms   = pre_waveforms;
 collision_metrics.post_waveforms  = post_waveforms;
 collision_metrics.pre_firingRate  = pre_firingRate;
