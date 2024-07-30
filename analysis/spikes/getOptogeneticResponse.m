@@ -41,7 +41,7 @@ addParameter(p,'ratePlot',true,@islogical);
 addParameter(p,'winSizePlot',[-.1 .5],@islogical);
 addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'force',false,@islogical);
-addParameter(p,'minNumberOfPulses',200,@isnumeric);
+addParameter(p,'minNumberOfPulses',99,@isnumeric);
 addParameter(p,'minDuration',0.004,@isnumeric); % 4 ms
 addParameter(p,'saveEventsFile',true,@islogical);
 addParameter(p,'duration_round_decimal',3,@isscalar);
@@ -346,7 +346,7 @@ for jj = 1:nConditions
     pul = pulses.timestamps(pulses.channel == conditions(jj,2) & pulses.duration == conditions(jj,1),1);
     isAnalog = nanmedian(pulses.isAnalog(pulses.channel == conditions(jj,2) & pulses.duration == conditions(jj,1)));
     channelPulse = median(pulses.channel(pulses.channel == conditions(jj,2) & pulses.duration == conditions(jj,1)));
-    if isempty(pulses)
+    if isempty(pul)
         pul = [0];
     end
     if length(pul)>maxNumberOfPulses

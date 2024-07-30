@@ -63,6 +63,7 @@ listOfRegions = {'Select region','CA1','CA2','CA3','pSUB','disSUB','PTLp',...
     'SUBm','SUBsp','SUBsr',...
     'DG',...
     'PTLp1','PTLp2_3','PTLp4','PTLp5','PTLp6','PTLp6a','PTLp6b',...
+    'VISp1','VISp2_3','VISp4','VISp5','VISp6','VISp6a','VISp6b',...
     'Thalamus','Cortex','VISp','mPFC','Not assigned'};
 
 listOfColors = hsv(length(listOfRegions)+10);
@@ -84,7 +85,7 @@ if ~isnumeric(showEvent) && strcmpi(showEvent,'ripples')
     ripples = rippleMasterDetector;
     events = round(ripples.peaks * session.extracellular.srLfp);
 elseif ~isnumeric(showEvent) && strcmpi(showEvent,'slowOscilations')
-    UDStates = detectUD;
+    UDStates = detectUpsDowns;
     events = round(UDStates.timestamps.DOWN * session.extracellular.srLfp);
 elseif isnumeric(showEvent)
     events = round(showEvent * session.extracellular.srLfp);

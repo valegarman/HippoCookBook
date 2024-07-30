@@ -44,6 +44,8 @@ addParameter(p,'basepath',pwd,@ischar);
 addParameter(p,'useGPU',true,@islogical);
 addParameter(p,'force',false,@islogical);
 addParameter(p,'autodetect',true,@islogical);
+addParameter(p,'samplingRate',[],@isscalar);
+addParameter(p,'nChannels',[],@isscalar);
 
 parse(p, varargin{:});
 offset = p.Results.offset;
@@ -56,6 +58,8 @@ basepath = p.Results.basepath;
 useGPU = p.Results.useGPU;
 force = p.Results.force;
 autodetect = p.Results.autodetect;
+samplingRate = p.Results.samplingRate;
+nChannels = p.Results.nChannels;
 
 prevPath = pwd;
 cd(basepath);
@@ -87,32 +91,35 @@ end
 analogFile = []; IntanBuzEd = [];
 f=dir('analogin.dat');                                                     % check file
 if ~isempty(analogChannelsList) && ~(isempty(f) || f.bytes == 0)
-    disp('Using the provided list of analog channel on analogin.dat file!');
-    analogFile = 'analogin.dat';  
-    try [amplifier_channels, notes, aux_input_channels, spike_triggers,...         
-        board_dig_in_channels, supply_voltage_channels, frequency_parameters, board_adc_channels ] =...
-        read_Intan_RHD2000_file_HCB;
-    catch
-        disp('File ''info.rhd'' not found. (Type ''help <a href="matlab:help loadAnalog">loadAnalog</a>'' for details) ');
+    if isempty(samplingRate) || isempty(nChannels)
+        disp('Using the provided list of analog channel on analogin.dat file!');
+        analogFile = 'analogin.dat';  
+        try [amplifier_channels, notes, aux_input_channels, spike_triggers,...         
+            board_dig_in_channels, supply_voltage_channels, frequency_parameters, board_adc_channels ] =...
+            read_Intan_RHD2000_file_HCB;
+        catch
+            disp('File ''info.rhd'' not found. (Type ''help <a href="matlab:help loadAnalog">loadAnalog</a>'' for details) ');
+        end
+        if ~exist('board_adc_channels')
+            disp('Trying intan metadata from recording folder...');
+            filetarget = split(filetarget,'_'); filetarget = filetarget{1};
+            localPaths = dir([filetarget, '*']);
+            cd(localPaths(1).name);
+            [amplifier_channels, notes, aux_input_channels, spike_triggers,...         
+            board_dig_in_channels, supply_voltage_channels, frequency_parameters, board_adc_channels ] =...
+            read_Intan_RHD2000_file_HCB;
+            cd ..
+        end
+        samplingRate = frequency_parameters.board_adc_sample_rate;
+        nChannels = length(board_adc_channels); % ADC input info from header file
     end
-    if ~exist('board_adc_channels')
-        disp('Trying intan metadata from recording folder...');
-        filetarget = split(filetarget,'_'); filetarget = filetarget{1};
-        localPaths = dir([filetarget, '*']);
-        cd(localPaths(1).name);
-        [amplifier_channels, notes, aux_input_channels, spike_triggers,...         
-        board_dig_in_channels, supply_voltage_channels, frequency_parameters, board_adc_channels ] =...
-        read_Intan_RHD2000_file_HCB;
-        cd ..
-    end
-    samplingRate = frequency_parameters.board_adc_sample_rate;
-    nChannels = length(board_adc_channels); % ADC input info from header file
     if isempty(analogChannelsList)
         analogChannelsList = 1:nChannels;
     end
     fileTargetAnalogIn =  dir('analogin*.dat');
     mAnalogIn = memmapfile(fullfile(basepath,fileTargetAnalogIn.name),'Format','uint16','Writable', true);
-    dataAnalogIn = reshape(mAnalogIn.Data,size(board_adc_channels,2),[]);
+    % dataAnalogIn = reshape(mAnalogIn.Data,size(board_adc_channels,2),[]);
+    dataAnalogIn = reshape(mAnalogIn.Data,nChannels,[]);
     IntanBuzEd = 0;
 
 elseif isempty(f) || f.bytes == 0                                              % if analogin is empty or doesn't exist
@@ -240,7 +247,7 @@ for jj = 1 : length(analogChannelsList)
 
     temp2 = temp;
     temp(2,:) = 0;
-    parfor ii = 1 : length(temp2) % pair begining and end of the pulse
+    for ii = 1 : length(temp2) % pair begining and end of the pulse
         try temp(2,ii) =  locsB(find(locsB - temp2(ii) ==...
             min(locsB(locsB > temp2(ii)) - temp2(ii))));
         catch
