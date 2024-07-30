@@ -53,7 +53,7 @@ addParameter(p,'restrict_to_baseline',true,@islogical);
 addParameter(p,'restrict_to_manipulation',false,@islogical);
 addParameter(p,'save_as','averageCCG',@ischar);
 addParameter(p,'win_Z',[-0.3 -0.15],@isnumeric);
-
+addParameter(p,'orderOfccZMedianMap',[]);
 
 parse(p, varargin{:});
 basepath = p.Results.basepath;
@@ -78,6 +78,7 @@ restrict_to_baseline = p.Results.restrict_to_baseline;
 restrict_to_manipulation = p.Results.restrict_to_manipulation;
 save_as = p.Results.save_as;
 win_Z = p.Results.win_Z;
+orderOfccZMedianMap = p.Results.orderOfccZMedianMap;
 
 % Deal with inputs
 prevPath = pwd;
@@ -170,7 +171,7 @@ end
 
 % do ccg
 [allCcg, t_ccg] = CCG(spikes.times,[],'binSize',binSize,'duration',winSize,'Fs',1/session.extracellular.sr);
-averageCCG = averageCCGheart(allCcg, t_ccg, win_Z, winIndex, interp0);
+averageCCG = averageCCGheart(allCcg, t_ccg, win_Z, winIndex, interp0, ones(1,size(allCcg,2)), orderOfccZMedianMap);
 averageCCG.excludeIntervals = excludeIntervals;
 
 brainRegionCCG = [];
@@ -183,7 +184,7 @@ if useBrainRegions && exist([basenameFromBasepath(basepath) '.cell_metrics.celli
         efields = fieldnames(session.brainRegions);
         for ii =  1: length(efields)
             cellsInRegion = ismember(cell_metrics.brainRegion,efields{ii});
-            avgCCG = averageCCGheart(allCcg, t_ccg, win_Z, winIndex,cellsInRegion);
+            avgCCG = averageCCGheart(allCcg, t_ccg, win_Z, winIndex, interp0,cellsInRegion);
             
             brainRegionCCG.([efields{ii} '_medianCCG']) = avgCCG.medianCCG;
             brainRegionCCG.([efields{ii} '_ZmedianCCG']) = avgCCG.ZmedianCCG;
@@ -194,6 +195,7 @@ if useBrainRegions && exist([basenameFromBasepath(basepath) '.cell_metrics.celli
             brainRegionCCG.([efields{ii} '_ccgAbsMeanIndex']) = avgCCG.ccgAbsMeanIndex;
             brainRegionCCG.([efields{ii} '_ccgMedianIndex']) = avgCCG.ccgMedianIndex;
             brainRegionCCG.([efields{ii} '_ccgAbsMedianIndex']) = avgCCG.ccgAbsMedianIndex;
+            brainRegionCCG.([efields{ii} '_ccZMedianMap']) = avgCCG.ccZMedianMap;
 
             brainRegionCCG.binSize = avgCCG.binSize;
             brainRegionCCG.winSize = avgCCG.winSize;
@@ -221,6 +223,7 @@ if useBrainRegions && exist([basenameFromBasepath(basepath) '.cell_metrics.celli
         brainRegionCCG.('CA1_ccgAbsMeanIndex') = avgCCG.ccgAbsMeanIndex;
         brainRegionCCG.('CA1_ccgMedianIndex') = avgCCG.ccgMedianIndex;
         brainRegionCCG.('CA1_ccgAbsMedianIndex') = avgCCG.ccgAbsMedianIndex;
+        brainRegionCCG.('CA1_ccZMedianMap') = avgCCG.ccZMedianMap;
         
         % for HPC
         cellsInRegion = ismember(cell_metrics.brainRegion,'CA1') | ismember(cell_metrics.brainRegion,'CA1sp')...
@@ -243,6 +246,7 @@ if useBrainRegions && exist([basenameFromBasepath(basepath) '.cell_metrics.celli
         brainRegionCCG.('HIP_ccgAbsMeanIndex') = avgCCG.ccgAbsMeanIndex;
         brainRegionCCG.('HIP_ccgMedianIndex') = avgCCG.ccgMedianIndex;
         brainRegionCCG.('HIP_ccgAbsMedianIndex') = avgCCG.ccgAbsMedianIndex;
+        brainRegionCCG.('HIP_ccZMedianMap') = avgCCG.ccZMedianMap;
 
         % for CA1 pyramidal cells
         cellsInRegion = ismember(cell_metrics.brainRegion,'CA1') | ismember(cell_metrics.brainRegion,'CA1sp')...
@@ -260,6 +264,7 @@ if useBrainRegions && exist([basenameFromBasepath(basepath) '.cell_metrics.celli
         brainRegionCCG.('CA1pyr_ccgAbsMeanIndex') = avgCCG.ccgAbsMeanIndex;
         brainRegionCCG.('CA1pyr_ccgMedianIndex') = avgCCG.ccgMedianIndex;
         brainRegionCCG.('CA1pyr_ccgAbsMedianIndex') = avgCCG.ccgAbsMedianIndex;
+        brainRegionCCG.('CA1pyr_ccZMedianMap') = avgCCG.ccZMedianMap;
         
         % CCGIndex per region
         efields = fieldnames(brainRegionsCcgIndex);
@@ -298,6 +303,7 @@ if useDistinctShanks && length(session.extracellular.electrodeGroups.channels)>1
         shanksCCG.(['shank_' num2str(ii)  '_ccgAbsMeanIndex']) = avgCCG.ccgAbsMeanIndex;
         shanksCCG.(['shank_' num2str(ii)  '_ccgMedianIndex']) = avgCCG.ccgMedianIndex;
         shanksCCG.(['shank_' num2str(ii)  '_ccgAbsMedianIndex']) = avgCCG.ccgAbsMedianIndex;
+        shanksCCG.(['shank_' num2str(ii)  '_ccZMedianMap']) = avgCCG.ccZMedianMap;
         shanksCCG.binSize = binSize;
         shanksCCG.winSize = winSize;
         shanksCCG.timestamps = t_ccg;
@@ -432,10 +438,14 @@ close all;
 cd(prevPath);
 end
 
-function avgCCG = averageCCGheart(allCcg, t_ccg, win_Z, winIndex, interp0, include_cells)
+function avgCCG = averageCCGheart(allCcg, t_ccg, win_Z, winIndex, interp0, include_cells, orderOfccZMedianMap)
     
     if nargin < 6
         include_cells = ones(1,size(allCcg,2));
+    end
+
+    if nargin < 7
+        orderOfccZMedianMap = [];
     end
 
     if interp0
@@ -447,35 +457,52 @@ function avgCCG = averageCCGheart(allCcg, t_ccg, win_Z, winIndex, interp0, inclu
     status_winZ = InIntervals(t_ccg,win_Z);
     status_winIndex = InIntervals(t_ccg,winIndex);
     indCell = 1:size(allCcg,2);
-        for jj = 1 : length(indCell)
-            cellsID = indCell(indCell~=jj & include_cells);
-            cc = squeeze(allCcg(:,jj,cellsID));
-            % detecting of spike shadows, as negative peaks with 0 lag lower than
-            % 1 std (the two is after accounting for the falling and rising step of
-            % the shadow)
-            center = ceil(size(cc,1)/2);
-            spikes_shadow = diff(cc(center-1:center+1,:));
-            spikes_shadow(2,:) = spikes_shadow(2,:) * -1;
-            is_spikeshadow = sum(spikes_shadow) < -std(cc) * 2;
-            cc(center,is_spikeshadow) = round(mean(cc([center-1 center+1], is_spikeshadow)));
-            
-            % stats
-            ccMedian(jj,:) = median(cc,2); % 
-            ccZMedian(jj,:) = median(zscore_win(cc,status_winZ),2);
-            ccMean(jj,:) = mean(cc,2); % 
-            ccZMean(jj,:) = mean(zscore_win(cc,status_winZ),2);
-            if interp0
-                ccMedian(jj,artifactSamples) = interp1(x_axis,ccMedian(jj,x_axis),artifactSamples);
-                ccZMedian(jj,artifactSamples) = interp1(x_axis,ccZMedian(jj,x_axis),artifactSamples);
-                ccMean(jj,artifactSamples) = interp1(x_axis,ccMean(jj,x_axis),artifactSamples);
-                ccZMean(jj,artifactSamples) = interp1(x_axis,ccZMean(jj,x_axis),artifactSamples);
-            end
-            
-            % index
-            ccZ = zscore_win(cc,status_winZ);
-            ccgIndexes(jj,:) = [mean(ccZMedian(jj,status_winIndex)) mean(ccZMean(jj,status_winIndex)) ...
-                mean(median(abs(ccZ(status_winIndex,:)),2)) mean(mean(abs(ccZ(status_winIndex,:)),2))];
+    for jj = 1 : length(indCell)
+        cellsID = indCell(indCell~=jj & include_cells);
+        cc = squeeze(allCcg(:,jj,cellsID));
+        % detecting of spike shadows, as negative peaks with 0 lag lower than
+        % 1 std (the two is after accounting for the falling and rising step of
+        % the shadow)
+        center = ceil(size(cc,1)/2);
+        spikes_shadow = diff(cc(center-1:center+1,:));
+        spikes_shadow(2,:) = spikes_shadow(2,:) * -1;
+        is_spikeshadow = sum(spikes_shadow) < -std(cc) * 2;
+        cc(center,is_spikeshadow) = round(mean(cc([center-1 center+1], is_spikeshadow)));
+        
+        % stats
+        ccMedian(jj,:) = median(cc,2); % 
+        ccZMedian(jj,:) = median(zscore_win(cc,status_winZ),2);
+        ccMean(jj,:) = mean(cc,2); % 
+        ccZMean(jj,:) = mean(zscore_win(cc,status_winZ),2);
+        if interp0
+            ccMedian(jj,artifactSamples) = interp1(x_axis,ccMedian(jj,x_axis),artifactSamples);
+            ccZMedian(jj,artifactSamples) = interp1(x_axis,ccZMedian(jj,x_axis),artifactSamples);
+            ccMean(jj,artifactSamples) = interp1(x_axis,ccMean(jj,x_axis),artifactSamples);
+            ccZMean(jj,artifactSamples) = interp1(x_axis,ccZMean(jj,x_axis),artifactSamples);
         end
+        
+        % index
+        ccZ = zscore_win(cc,status_winZ,2);
+        ccgIndexes(jj,:) = [mean(ccZMedian(jj,status_winIndex)) mean(ccZMean(jj,status_winIndex)) ...
+            mean(median(abs(ccZ(status_winIndex,:)),2)) mean(mean(abs(ccZ(status_winIndex,:)),2))];
+
+        % ccMap
+        if ~isempty(orderOfccZMedianMap)
+            orderOfMap2 = orderOfccZMedianMap(jj,:);
+        else
+            [~,orderOfMap2] =  sort(mean(ccZ(find(InIntervals(t_ccg,[-0.015 0.015])),:)));
+        end
+        if length(find(include_cells)) > 1
+            ccZ = interpft(ccZ(:,orderOfMap2),100,2)';
+            ccZMedianMap(jj,:,:) = ccZ;
+            orderOfMap(jj,:) = nan(1, length(find(include_cells)));
+            orderOfMap(jj,1:length(orderOfMap2)) = orderOfMap2;
+        else
+            ccZMedianMap(jj,:,:) = nan(size(t_ccg));
+            orderOfMap(jj,:) = nan(1, length(find(include_cells)));
+        end
+        
+    end
     
     avgCCG.medianCCG            = ccMedian;
     avgCCG.ZmedianCCG           = ccZMedian;
@@ -493,5 +520,6 @@ function avgCCG = averageCCGheart(allCcg, t_ccg, win_Z, winIndex, interp0, inclu
     avgCCG.winIndex             = winIndex;
     avgCCG.win_Z                = win_Z;
     avgCCG.allCcg               = allCcg;
-
+    avgCCG.ccZMedianMap         = ccZMedianMap;
+    avgCCG.orderOfccZMedianMap  = orderOfMap;
 end

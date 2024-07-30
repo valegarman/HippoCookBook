@@ -31,7 +31,7 @@ addParameter(p,'gamma_bandpass',[20 100], @isnumeric);
 addParameter(p,'hfo_bandpass',[100 500], @isnumeric);
 addParameter(p,'rejectChannels',[],@isnumeric); % 0-index
 addParameter(p,'force_analogPulsesDetection',true,@islogical);
-addParameter(p,'force_loadingSpikes',true,@islogical);
+addParameter(p,'force_loadingSpikes',false,@islogical);
 addParameter(p,'excludePulsesIntervals',[],@isnumeric);
 addParameter(p,'rippleChannel',[],@isnumeric);% manually selecting ripple Channel in case getHippocampalLayers does not provide a right output
 addParameter(p,'SWChannel',[],@isnumeric); % manually selecting SW Channel in case getHippocampalLayers does not provide a right output
@@ -157,8 +157,6 @@ if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))
     session = gui_session(session);
 
     selectProbe('force',true); % choose probe
-    keyboard;
-
 end
 
 ints = [];
@@ -201,7 +199,7 @@ if ~any(ismember(excludeAnalysis, {'2',lower('loadSpikes')}))
             file = dir([session.general.name ,'.spikes.cellinfo.mat']);
             delete(file.name);
         end
-    end   
+    end
     spikes = loadSpikes('forceReload',force_loadingSpikes);
     
     session = loadSession(basepath);
@@ -266,17 +264,17 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
 %     UDStates = detectUD('plotOpt', true,'forceDetect',true','NREMInts','all');
 %     psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true);
 
-    UDStates = detectUpsDowns('plotOpt', true,'forceDetect',true','NREMInts','all');
+    UDStates = detectUpsDowns('plotOpt', true,'forceDetect',false','NREMInts','all','excludeIntervals', [9000 10000]);
     psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true,'minNumberOfPulses',10,'restrict_to',restrict_ints);
     getSpikesRank('events','upstates');
 
     % 8.2 Ripples
-    ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',false,'thresholds',rippleMasterDetector_threshold);
+    ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',true,'thresholds',rippleMasterDetector_threshold,'eventSpikeThreshold', false);
     psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10,'restrict_to',restrict_ints);
     getSpikesRank('events','ripples');
 
     % 8.3 Theta intervals
-    thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'useCSD',false);
+    thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection);
 end
 
 %% 9. Phase Modulation
@@ -308,7 +306,9 @@ if ~any(ismember(excludeAnalysis, {'10',lower('cellMetrics')}))
     end
 
     session = loadSession;
-    cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludePulsesIntervals,'forceReload',true); % after CellExplorar
+
+    cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludePulsesIntervals,'forceReload',true,'excludeMetrics',{'deepSuperficial'}); % after CellExplorar
+
     
     getACGPeak('force',true);
 

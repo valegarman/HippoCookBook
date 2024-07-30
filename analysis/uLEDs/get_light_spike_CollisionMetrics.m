@@ -19,6 +19,7 @@ addParameter(p,'rate_change_threshold',4,@isnumeric); %
 addParameter(p,'spikes',[],@isstruct); % 
 addParameter(p,'interpolate_pulse_sides',true,@islogical); % 
 addParameter(p,'update_cell_metrics',true,@islogical); % 
+addParameter(p,'save_as','lightSpikeCollisions',@ischar);
 
 parse(p, uLEDResponses_interval, varargin{:});
 basepath = p.Results.basepath;
@@ -33,6 +34,7 @@ rate_change_threshold = p.Results.rate_change_threshold;
 spikes = p.Results.spikes;
 interpolate_pulse_sides = p.Results.interpolate_pulse_sides;
 update_cell_metrics = p.Results.update_cell_metrics;
+save_as = p.Results.save_as;
 
 % Deal with inputs
 prevPath = pwd;
@@ -226,6 +228,7 @@ if ~isempty(spikes)
     end
 end
 collision_metrics.pre_post_CCG    = pre_post_CCG;
+collision_metrics.pre_post_CCG_timestamps    = t;
 collision_metrics.pre_waveforms   = pre_waveforms;
 collision_metrics.post_waveforms  = post_waveforms;
 collision_metrics.pre_firingRate  = pre_firingRate;
@@ -268,7 +271,7 @@ preInt_select = collision_metrics.candidate_int_pyr_pairs;
 if saveMat
     disp(' Saving results...');
     filename = split(pwd,filesep); filename = filename{end};
-    save([filename '.lightSpikeCollisions.cellinfo.mat'],'collision_metrics','-v7.3');
+    save([filename, '.', save_as, '.cellinfo.mat'],'collision_metrics','-v7.3');
 end
 
 if update_cell_metrics
