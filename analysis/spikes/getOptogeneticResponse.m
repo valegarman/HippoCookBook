@@ -161,6 +161,7 @@ if isempty(spikes)
 end
 
 pulsesAnalog.timestamps = []; pulsesAnalog.analogChannelsList = [];
+
 if strcmpi(analogChannelsList,'all')
     pulsesAnalog = getAnalogPulses;
 else
@@ -345,7 +346,7 @@ for jj = 1:nConditions
     end
 
     pul = pulses.timestamps(pulses.channel == conditions(jj,2) & pulses.duration == conditions(jj,1),1);
-    isAnalog = median(pulses.isAnalog(pulses.channel == conditions(jj,2) & pulses.duration == conditions(jj,1)));
+    isAnalog = nanmedian(pulses.isAnalog(pulses.channel == conditions(jj,2) & pulses.duration == conditions(jj,1)));
     channelPulse = median(pulses.channel(pulses.channel == conditions(jj,2) & pulses.duration == conditions(jj,1)));
     if isempty(pul)
         pul = [0];

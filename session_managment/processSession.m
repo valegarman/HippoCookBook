@@ -31,7 +31,7 @@ addParameter(p,'gamma_bandpass',[20 100], @isnumeric);
 addParameter(p,'hfo_bandpass',[100 500], @isnumeric);
 addParameter(p,'rejectChannels',[],@isnumeric); % 0-index
 addParameter(p,'force_analogPulsesDetection',true,@islogical);
-addParameter(p,'force_loadingSpikes',true,@islogical);
+addParameter(p,'force_loadingSpikes',false,@islogical);
 addParameter(p,'excludePulsesIntervals',[],@isnumeric);
 addParameter(p,'rippleChannel',[],@isnumeric);% manually selecting ripple Channel in case getHippocampalLayers does not provide a right output
 addParameter(p,'SWChannel',[],@isnumeric); % manually selecting SW Channel in case getHippocampalLayers does not provide a right output
@@ -199,7 +199,7 @@ if ~any(ismember(excludeAnalysis, {'2',lower('loadSpikes')}))
             file = dir([session.general.name ,'.spikes.cellinfo.mat']);
             delete(file.name);
         end
-    end   
+    end
     spikes = loadSpikes('forceReload',force_loadingSpikes);
     
     session = loadSession(basepath);
@@ -306,7 +306,9 @@ if ~any(ismember(excludeAnalysis, {'10',lower('cellMetrics')}))
     end
 
     session = loadSession;
+
     cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludePulsesIntervals,'forceReload',true,'excludeMetrics',{'deepSuperficial'}); % after CellExplorar
+
     
     getACGPeak('force',true);
 
