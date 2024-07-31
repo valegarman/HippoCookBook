@@ -159,3 +159,8 @@ ymv17_180207,ymv17,ymv17\ymv17_180207,c57b1/6,pv/ai32,"105µm (125µm), na 0.22 
 fcr3_220321_sess3,fcr3,fcr3\fcr3_220321_sess3,c57b1/6,vip/cr/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,90,CA1sp CA1so PTLp5 PTLp2_3 CA1sr CA1slm CA3sp DG,Bibliocampus
 fcr3_220328_sess8,fcr3,fcr3\fcr3_220328_sess8,c57b1/6,vip/cr/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,26,CA1sp CA1so PTLp5 PTLp2_3 CA1slm CA1sr CA3sp DG,Bibliocampus
 fcamk5_210408_sess12,fcamk5,fcamk5\fcamk5_210408_sess12,c57,camkii/ai32,"uled-12led-32ch-4shanks",linear maze linear maze,62,CA1sp CA1so CA1sr,LightInInh
+fcamk5_210412_sess14,fcamk5,fcamk5\fcamk5_210412_sess14,c57,camkii/ai32,"uled-12led-32ch-4shanks",linear maze linear maze,50,CA1sp CA1so CA1sr,LightInInh
+ymv15_180205,ymv15,ymv15\ymv15_180205,c57b1/6,pv/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,79,VISp6 VISp5 VISp2_3 VISp4 VISp1 CA1so,Layer-specific physiological features and interlaminar interactions in the primary visual cortex of the mouse
+fcr3_220331_sess11,fcr3,fcr3\fcr3_220331_sess11,c57b1/6,vip/cr/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,37,CA1sp CA1so PTLp5 PTLp2_3 CA1slm CA1sr CA3sp CA3sr DG,Bibliocampus desVIPnhibition
+ymv09_171204,ymv09,ymv09\ymv09_171204,c57b1/6,pv/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,78,VISp5 VISp2_3 VISp4 VISp1 VISp6 CA1so CA1sp,Layer-specific physiological features and interlaminar interactions in the primary visual cortex of the mouse
+fcamk5_210414_sess16,fcamk5,fcamk5\fcamk5_210414_sess16,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze linear maze,54,CA1sp CA1so CA1sr,LightInInh
