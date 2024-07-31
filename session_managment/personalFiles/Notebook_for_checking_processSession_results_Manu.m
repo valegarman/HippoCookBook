@@ -51,12 +51,12 @@ hippocampalLayers = getHippocampalLayers('force',true,'promt',true);
 % analysis.
 
 excludeIntervals = [];
-rippleChannel = [];
+rippleChannel = 6;
 SWChannel = [];
-noiseChannel = [];
-eventSpikeThreshold_shanks = [1 2 3]; % which shanks will be accounted for the spike threshold 
-eventSpikeThreshold = 1.2; % .5
-rippleMasterDetector_threshold = [1.5 3.5]; % [1.5 3.5]
+noiseChannel = 28;
+eventSpikeThreshold_shanks = [3 4 5]; % which shanks will be accounted for the spike threshold 
+eventSpikeThreshold = .5; % .5
+rippleMasterDetector_threshold = [1 2]; % [1.5 3.5]
 ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',false,'thresholds',...
     rippleMasterDetector_threshold,'eventSpikeThreshold_shanks', eventSpikeThreshold_shanks,'eventSpikeThreshold',eventSpikeThreshold,'excludeIntervals',excludeIntervals,'noise',noiseChannel); 
 psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10);
@@ -68,9 +68,9 @@ getSpikesRank('events','ripples');
 % rhytmicity. If bad, you can change useCSD_for_theta_detection to false,
 % or change powerThreshold, even the channel
 
-channel = 47;
+channel = [];
 useCSD_for_theta_detection = true;
-powerThreshold = 1.5;% .8
+powerThreshold = 1.2;% .8
 thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'powerThreshold',powerThreshold,'channel', channel);
 
 
@@ -101,12 +101,11 @@ if ~isempty(dir([session.general.name,'.optogeneticPulses.events.mat']))
 end
 excludeManipulationIntervals = optoPulses.stimulationEpochs;
 
-cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true,'getWaveformsFromDat', false);
+cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true,'getWaveformsFromDat', true);
 % ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true,'restrictToIntervals',...
 %     [0 1.2957e+04],'manualAdjustMonoSyn',false); % uLEDResponses.restricted_interval
 % cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true,...
 %     'restrictToIntervals',[1.2957e+04 2.0668e+04],'manualAdjustMonoSyn',false,'saveAs','cell_metrics_post'); % uLEDResponses.restricted_interval
-
 
 getACGPeak('force',true);
 
