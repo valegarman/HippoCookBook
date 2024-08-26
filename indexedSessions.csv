@@ -98,13 +98,13 @@ fvip1_220525_sess11,fvip1,fvip1\fvip1_220525_sess11,c57b1/6,vip/dlx/ai80,"105µm
 fsst3_220909_sess1,fsst3,fsst3\fsst3_220909_sess1,c57b1/6,sst/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,38,PTLp PTLp5 PTLp6 CA1sp CA1so CA1slm CA1sr CA3sp CA3sr,Bibliocampus
 fsst3_220921_sess8,fsst3,fsst3\fsst3_220921_sess8,c57b1/6,sst/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,11,CA1sp CA1so CA1slm CA1sr CA3sp DG CA3sr PTLp5 PTLp2_3 PTLp6,Bibliocampus
 fsst3_220922_sess9,fsst3,fsst3\fsst3_220922_sess9,c57b1/6,sst/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,14,CA1sp CA1so PTLp5 PTLp2_3 CA1slm CA1sr CA3sp DG,Bibliocampus
-fcamk1_200902_sess13,fcamk1,fcamk1\fcamk1_200902_sess13,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze,37,CA1sp CA1so,uLEDiscotheque Bibliocampus LightInInh
-fcamk3_201030_sess12,fcamk3,fcamk3\fcamk3_201030_sess12,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze linear maze,47,CA1sp CA1so,uLEDiscotheque Bibliocampus LightInInh
-fcamk1_200904_sess15,fcamk1,fcamk1\fcamk1_200904_sess15,c57,camkii/ai32,uled-12led-32ch-4shanks,linear maze,59,CA1sp CA1so CA1sr,uLEDiscotheque Bibliocampus LightInInh
-fcamk3_201103_sess14,fcamk3,fcamk3\fcamk3_201103_sess14,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze linear maze,44,CA1sp CA1so CA1sr,uLEDiscotheque Bibliocampus LightInInh
-fcamk1_200908_sess16,fcamk1,fcamk1\fcamk1_200908_sess16,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze,59,CA1sp CA1so,uLEDiscotheque Bibliocampus LightInInh
+fcamk1_200902_sess13,fcamk1,fcamk1\fcamk1_200902_sess13,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze,37,CA1sp CA1so,uLEDiscotheque Bibliocampus LightInInh
+fcamk3_201030_sess12,fcamk3,fcamk3\fcamk3_201030_sess12,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze linear maze,47,CA1sp CA1so,uLEDiscotheque Bibliocampus LightInInh
+fcamk1_200904_sess15,fcamk1,fcamk1\fcamk1_200904_sess15,c57,camkii/ai32,"uled-12led-32ch-4shanks",linear maze,59,CA1sp CA1so CA1sr,uLEDiscotheque Bibliocampus LightInInh
+fcamk3_201103_sess14,fcamk3,fcamk3\fcamk3_201103_sess14,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze linear maze,44,CA1sp CA1so CA1sr,uLEDiscotheque Bibliocampus LightInInh
+fcamk1_200908_sess16,fcamk1,fcamk1\fcamk1_200908_sess16,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze,59,CA1sp CA1so,uLEDiscotheque Bibliocampus LightInInh
 fpv5_220701_sess5,fpv5,fpv5\fpv5_220701_sess5,c57b1/6,vip/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,19,CA1sp CA1so PTLp6 PTLp5 CA1slm CA1sr CA3sp CA3sr DG,Bibliocampus
-fcamk1_200909_sess17,fcamk1,fcamk1\fcamk1_200909_sess17,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze,58,CA1sp,uLEDiscotheque Bibliocampus LightInInh
+fcamk1_200909_sess17,fcamk1,fcamk1\fcamk1_200909_sess17,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze,58,CA1sp,uLEDiscotheque Bibliocampus LightInInh
 fvip2_220825_sess15,fvip2,fvip2\fvip2_220825_sess15,c57b1/6,vip/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,62,CA1slm CA1sp CA1so CA1sr PTLp5 PTLp2_3 CA3sp CA3so DG,Bibliocampus desVIPnhibition
 fid4_220818_sess10,fid4,fid4\fid4_220818_sess10,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,37,PTLp5 PTLp6 PTLp2_3 CA1sp CA1so CA1slm CA1sr CA3sp,Bibliocampus
 fid4_220825_sess15,fid4,fid4\fid4_220825_sess15,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,29,CA1sp CA1so PTLp6 PTLp5 PTLp2_3 CA1slm CA1sr CA3sp,Bibliocampus
@@ -164,3 +164,4 @@ ymv15_180205,ymv15,ymv15\ymv15_180205,c57b1/6,pv/ai32,"105µm (125µm), na 0.22 
 fcr3_220331_sess11,fcr3,fcr3\fcr3_220331_sess11,c57b1/6,vip/cr/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,37,CA1sp CA1so PTLp5 PTLp2_3 CA1slm CA1sr CA3sp CA3sr DG,Bibliocampus desVIPnhibition
 ymv09_171204,ymv09,ymv09\ymv09_171204,c57b1/6,pv/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,78,VISp5 VISp2_3 VISp4 VISp1 VISp6 CA1so CA1sp,Layer-specific physiological features and interlaminar interactions in the primary visual cortex of the mouse
 fcamk5_210414_sess16,fcamk5,fcamk5\fcamk5_210414_sess16,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze linear maze,54,CA1sp CA1so CA1sr,LightInInh
+ymv19_180209,ymv19,ymv19\ymv19_180209,c57b1/6,pv/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,64,VISp5 VISp2_3 VISp1 VISp4 VISp6 CA1so CA1sp,Layer-specific physiological features and interlaminar interactions in the primary visual cortex of the mouse
