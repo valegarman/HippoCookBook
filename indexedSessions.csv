@@ -169,3 +169,4 @@ fcr4_220331_sess2,fcr4,fcr4\fcr4_220331_sess2,neural3,c57b1/6,vip/cr/ai80,"105µ
 ymv18_180208,ymv18,ymv18\ymv18_180208,neural3,c57b1/6,pv/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,119,VISp5 VISp6 VISp2_3 VISp4 VISp1,Bibliocampus
 fcr3_220322_sess4,fcr3,fcr3\fcr3_220322_sess4,neural3,c57b1/6,vip/cr/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,80,CA1sp CA1so PTLp5 PTLp2_3 CA1sr CA1slm CA3sp DG,Bibliocampus
 fcr3_220401_sess12,fcr3,fcr3\fcr3_220401_sess12,neural3,c57b1/6,vip/cr/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,28,CA1sp CA1so CA1sr PTLp5 PTLp2_3 CA1slm CA3sp DG,Bibliocampus
+fsst3_220929_sess14,fsst3,fsst3\fsst3_220929_sess14,neural3,c57b1/6,sst/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,68,PTLp5 PTLp2_3 CA1sp CA1so CA1sr CA1slm DG,Bibliocampus
