@@ -171,3 +171,4 @@ fcr3_220322_sess4,fcr3,fcr3\fcr3_220322_sess4,neural3,c57b1/6,vip/cr/ai80,"105µ
 fcr3_220401_sess12,fcr3,fcr3\fcr3_220401_sess12,neural3,c57b1/6,vip/cr/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,28,CA1sp CA1so CA1sr PTLp5 PTLp2_3 CA1slm CA3sp DG,Bibliocampus
 fsst3_220929_sess14,fsst3,fsst3\fsst3_220929_sess14,neural3,c57b1/6,sst/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,68,PTLp5 PTLp2_3 CA1sp CA1so CA1sr CA1slm DG,Bibliocampus
 fcr4_220330_sess1,fcr4,fcr4\fcr4_220330_sess1,neural3,c57b1/6,vip/cr/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,77,PTLp5 PTLp6 PTLp2_3 CA1so CA1sp CA1slm CA1sr DG,Bibliocampus desVIPnhibition
+fvip1_220512_sess2,fvip1,fvip1\fvip1_220512_sess2,neural3,c57b1/6,vip/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,41,PTLp5 PTLp6 PTLp2_3 CA1sp CA1so CA1slm CA1sr,Bibliocampus desVIPnhibition
