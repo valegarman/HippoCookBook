@@ -41,7 +41,7 @@ SleepScoreMaster(pwd,'noPrompts',true,'ignoretime',ignoretime, 'overwrite', true
 % IS NOT WORKING!!!!!
 TheStateEditor(session.general.name);
 
- % Revise hippocapmal layer definition. Upon disagrements, run again
+%% 3. Revise hippocapmal layer definition. Upon disagrements, run again
 hippocampalLayers = getHippocampalLayers('force',true,'promt',true);
 
 %% 4. Ripples
@@ -65,7 +65,7 @@ getSpikesRank('events','ripples');
 % rhytmicity. If bad, you can change useCSD_for_theta_detection to false,
 % or change powerThreshold, even the channel
 
-channel = 19;
+channel = 47;
 useCSD_for_theta_detection = false;
 powerThreshold = 1.5;% .8
 thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'powerThreshold',powerThreshold,'channel', channel);
