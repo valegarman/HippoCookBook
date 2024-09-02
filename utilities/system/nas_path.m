@@ -1,4 +1,4 @@
-function dp = onedrive_path
+function location = nas_path(input)
 % return dropbox folder path
     switch computer
        case 'MACI64'
@@ -8,18 +8,27 @@ function dp = onedrive_path
             computerName = getenv('computername');
     end
     
-    dp = [];
+    location = [];
     switch computerName
         case 'manu'
-            dp = '/Users/manu/Dropbox';
+            keyboard;
         case 'IMW02691'
-            dp = 'C:\Users\mvalero\OneDrive - imim.es\';
+            location = whereIsThisNas1(input);
         case 'IMW02703' % pc de andrea
-            dp = 'C:\Users\agallardo\OneDrive - imim.es\';
+            location = whereIsThisNas1(input);
         case 'DESKTOP-BEPJ8P0'
-            dp = 'C:\Users\mpicco\OneDrive - imim.es\';
+            location = whereIsThisNas1(input);
         otherwise
-            error('Not recornized computer!');
+            location = whereIsThisNas1(input);
     end
 
+end
+
+function here = whereIsThisNas1(input)
+    switch lower(input)
+        case 'neural'
+            here = 'Z:';
+        case 'neural3'
+            here = 'Y:';
+    end
 end

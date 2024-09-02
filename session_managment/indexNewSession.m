@@ -17,8 +17,9 @@ addParameter(p,'removeDatFiles',true,@islogical);
 addParameter(p,'removeDat',false,@islogical);
 addParameter(p,'copyFiles',true,@islogical);
 % addParameter(p,'driveStorage_path','W:\Buzsakilabspace\Datasets\ValeroM',@isdir);
-addParameter(p,'driveStorage_path','Z:\',@isdir);
-addParameter(p,'driveStorage_name','Research',@isstring);
+addParameter(p,'driveStorage_path',[],@isdir);
+% addParameter(p,'driveStorage_name','Research',@isstring);
+addParameter(p,'driveStorage_location','neural3',@isstring);
 
 parse(p,varargin{:})
 
@@ -31,7 +32,8 @@ removeDatFiles = p.Results.removeDatFiles;
 removeDat = p.Results.removeDat;
 copyFiles = p.Results.copyFiles;
 driveStorage_path = p.Results.driveStorage_path;
-driveStorage_name = p.Results.driveStorage_name;
+% driveStorage_name = p.Results.driveStorage_name;
+driveStorage_location = p.Results.driveStorage_location;
 
 %% Creates a pointer to the folder where the index variable is located
 if isempty(indexedSessionCSV_name)
@@ -60,17 +62,26 @@ end
 cd(basepath)
 
 %% By default looks for Synology and copy files to it, it specified copy files to the specified folder
-if isempty(driveStorage_path)
-    % Let's find the packrat synology 
-    F = getdrives();
-    for i = 1:length(F)
-        if strcmpi(driveName(cell2mat(strsplit(F{i},[':',filesep]))),driveStorage_name)
-            driveStorage_path = [F{i},'data'];
-            cd(driveStorage_path);
-        end
+if ~isempty(driveStorage_location) && ~isempty(driveStorage_path)
+    if ~strcmpi(nas_path(driveStorage_location), driveStorage_path) 
+        error('Defined path as driveStorage_location and driveStorage_path do not match!');
     end
+elseif ~isempty(driveStorage_location) && isempty(driveStorage_path)
+    driveStorage_path = nas_path(driveStorage_location);
+elseif isempty(driveStorage_location) && ~isempty(driveStorage_path)
+    warning('driveStorage_location name missing...');
 end
-cd(basepath)
+% if isempty(driveStorage_path)
+%     % Let's find the packrat synology 
+%     F = getdrives();
+%     for i = 1:length(F)
+%         if strcmpi(driveName(cell2mat(strsplit(F{i},[':',filesep]))),driveStorage_name)
+%             driveStorage_path = [F{i},'data'];
+%             cd(driveStorage_path);
+%         end
+%     end
+% end
+% cd(basepath)
 
 % Indexing
 session = loadSession(basepath);
@@ -81,8 +92,8 @@ if isempty(project)
 end
 % updated indexedSession table
 sessionsTable = readtable([indexedSessionCSV_path filesep indexedSessionCSV_name,'.csv'],'PreserveVariableNames',true); % the variable is called allSessions
-% new table entry
 
+% new table entry
 optogenetics = cell(0);
 if ~strcmpi(session.extracellular.chanCoords.layout,'uLED-12LED-32Ch-4Shanks')
     for ii = 1:length(session.animal.opticFiberImplants)
@@ -121,12 +132,11 @@ for jj = 1:length(fn)
 end    
 brainRegions(end) = [];
 
-sessionEntry = {lower(sessionName), lower(session.animal.name), lower(generalPath), lower(session.animal.strain),...
+sessionEntry = {lower(sessionName), lower(session.animal.name), lower(generalPath), lower(driveStorage_location), lower(session.animal.strain),...
     lower(session.animal.geneticLine), lower([optogenetics{:}]), [behav{:}], spikes.numcells,  [brainRegions{:}], project};
-sessionEntry = cell2table(sessionEntry,"VariableNames",["SessionName", "Subject", "Path", "Strain", "GeneticLine", "Optogenetics", "Behavior", "numCells", "brainRegions", "Project"]);
+sessionEntry = cell2table(sessionEntry,"VariableNames",["SessionName", "Subject", "Path", "Location", "Strain", "GeneticLine", "Optogenetics", "Behavior", "numCells", "brainRegions", "Project"]);
 sessionsTable = [sessionsTable; sessionEntry];
 writetable(sessionsTable,[indexedSessionCSV_path filesep indexedSessionCSV_name,'.csv']); % the variable is called allSessions
-
 
 % Lets do a push for git repository
 cd(indexedSessionCSV_path);
