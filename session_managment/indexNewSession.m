@@ -58,7 +58,7 @@ if isempty(indexedSessionCSV_path)
 end
 
 cd(basepath)
-keyboard;
+
 %% By default looks for Synology and copy files to it, it specified copy files to the specified folder
 if isempty(driveStorage_path)
     % Let's find the packrat synology 

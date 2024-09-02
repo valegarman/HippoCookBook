@@ -85,7 +85,7 @@ end
 sessionsTable = readtable([indexedSessionCSV_path filesep indexedSessionCSV_name,'.csv']); % the variable is called allSessions
 
 for ii = 1:length(sessionsTable.SessionName)
-    sessions.basepaths{ii} = [database_path filesep sessionsTable.Path{ii}];
+    sessions.basepaths{ii} = [database_path sessionsTable.Path{ii}];
 end
 sessions.project = sessionsTable.Project;
 
