@@ -113,9 +113,11 @@ cv = cell_metrics.firingRateCV; cv = cv/std(cv);
 [averageCCG] = getAverageCCG;
 
 % ripples responses
-targetFile = dir('*.ripples_psth.cellinfo.mat'); ripplesResponses = importdata(targetFile.name);
-targetFile = dir('*.ripple_120-200.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
-ripples = rippleMasterDetector;
+if exist('*ripples_psth*','file')
+    targetFile = dir('*.ripples_psth.cellinfo.mat'); ripplesResponses = importdata(targetFile.name);
+    targetFile = dir('*.ripple_120-200.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+    ripples = rippleMasterDetector;
+end
 
 % theta and gamma/s
 targetFile = dir('*.theta_6-12.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
@@ -423,62 +425,63 @@ for ii = 1:length(UID)
     end
     
     % ripples 
-    subplot(5,5,13)
-    hold on
-    t_win = ripplesResponses.timestamps > -0.25 & ripplesResponses.timestamps < 0.25;
-    plotFill(ripplesResponses.timestamps(t_win),ripplesResponses.responsecurveZSmooth(all_ww,t_win),'color',ww_color,'style','filled');
-    plotFill(ripplesResponses.timestamps(t_win),ripplesResponses.responsecurveZSmooth(all_pyr,t_win),'color',pyr_color,'style','filled','faceAlpha',.9);
-    plotFill(ripplesResponses.timestamps(t_win),ripplesResponses.responsecurveZSmooth(all_nw,t_win),'color',nw_color,'style','filled');
-    
-    scatter(rand(length(find(all_pyr)),1)/20 + .25, ripplesResponses.rateZDuringPulse(all_pyr),20,pyr_color,'filled');
-    scatter(rand(length(find(all_nw)),1)/20 + .28, ripplesResponses.rateZDuringPulse(all_nw),20,nw_color,'filled');
-    scatter(rand(length(find(all_ww)),1)/20 + .31, ripplesResponses.rateZDuringPulse(all_ww),20,ww_color,'filled');
-    
-    if showTagCells
-        plot(ripplesResponses.timestamps(t_win),ripplesResponses.responsecurveZSmooth(UID(ii),t_win),'color',cell_color,'LineWidth',1.5);
-        scatter(.3, ripplesResponses.rateZDuringPulse(UID(ii)),20,cell_color,'filled');
+    if exist("ripplesResponses",'var')
+        subplot(5,5,13)
+        hold on
+        t_win = ripplesResponses.timestamps > -0.25 & ripplesResponses.timestamps < 0.25;
+        plotFill(ripplesResponses.timestamps(t_win),ripplesResponses.responsecurveZSmooth(all_ww,t_win),'color',ww_color,'style','filled');
+        plotFill(ripplesResponses.timestamps(t_win),ripplesResponses.responsecurveZSmooth(all_pyr,t_win),'color',pyr_color,'style','filled','faceAlpha',.9);
+        plotFill(ripplesResponses.timestamps(t_win),ripplesResponses.responsecurveZSmooth(all_nw,t_win),'color',nw_color,'style','filled');
         
-        title(['Pyr: '  num2str(round(mean(ripplesResponses.rateZDuringPulse(all_pyr)),1)) ...
-        ', NW: '  num2str(round(mean(ripplesResponses.rateZDuringPulse(all_nw)),1))...
-        ', WW: '  num2str(round(mean(ripplesResponses.rateZDuringPulse(all_ww)),1))...
-        ', cell: '  num2str(round(mean(ripplesResponses.rateZDuringPulse(UID(ii))),1)),' SD'],'FontWeight','normal');
-    else
-        title(['Pyr: '  num2str(round(mean(ripplesResponses.rateZDuringPulse(all_pyr)),1)) ...
-        ', NW: '  num2str(round(mean(ripplesResponses.rateZDuringPulse(all_nw)),1))...
-        ', WW: '  num2str(round(mean(ripplesResponses.rateZDuringPulse(all_ww)),1)),' SD'],'FontWeight','normal');
+        scatter(rand(length(find(all_pyr)),1)/20 + .25, ripplesResponses.rateZDuringPulse(all_pyr),20,pyr_color,'filled');
+        scatter(rand(length(find(all_nw)),1)/20 + .28, ripplesResponses.rateZDuringPulse(all_nw),20,nw_color,'filled');
+        scatter(rand(length(find(all_ww)),1)/20 + .31, ripplesResponses.rateZDuringPulse(all_ww),20,ww_color,'filled');
+        
+        if showTagCells
+            plot(ripplesResponses.timestamps(t_win),ripplesResponses.responsecurveZSmooth(UID(ii),t_win),'color',cell_color,'LineWidth',1.5);
+            scatter(.3, ripplesResponses.rateZDuringPulse(UID(ii)),20,cell_color,'filled');
+            
+            title(['Pyr: '  num2str(round(mean(ripplesResponses.rateZDuringPulse(all_pyr)),1)) ...
+            ', NW: '  num2str(round(mean(ripplesResponses.rateZDuringPulse(all_nw)),1))...
+            ', WW: '  num2str(round(mean(ripplesResponses.rateZDuringPulse(all_ww)),1))...
+            ', cell: '  num2str(round(mean(ripplesResponses.rateZDuringPulse(UID(ii))),1)),' SD'],'FontWeight','normal');
+        else
+            title(['Pyr: '  num2str(round(mean(ripplesResponses.rateZDuringPulse(all_pyr)),1)) ...
+            ', NW: '  num2str(round(mean(ripplesResponses.rateZDuringPulse(all_nw)),1))...
+            ', WW: '  num2str(round(mean(ripplesResponses.rateZDuringPulse(all_ww)),1)),' SD'],'FontWeight','normal');
+        end
+        plot(ripples.rippleStats.maps.timestamps, zscore(mean(ripples.rippleStats.maps.ripples_raw))+20,'-k')
+        axis tight
+        xlabel('Ripple center (s)'); ylabel('Rate (SD)');
+        
+        % ripple phase
+        subplot(5,5,14)
+        hold on
+        x_wave = 0:0.01:4*pi;
+        y_wave = cos(x_wave)*2;
+        plot(x_wave,y_wave,'--k');
+        plotFill(rippleMod.phasebins_wide_doubled,rippleMod.phasedistro_wide_smoothZ_doubled(all_nw,:),'color',nw_color,'style','filled');
+        plotFill(rippleMod.phasebins_wide_doubled,rippleMod.phasedistro_wide_smoothZ_doubled(all_ww,:),'color',ww_color,'style','filled');
+        plotFill(rippleMod.phasebins_wide_doubled,rippleMod.phasedistro_wide_smoothZ_doubled(all_pyr,:),'color',pyr_color,'style','filled');
+        
+        scatter(rand(length(find(all_pyr)),1)/2 + 12.6, rippleMod.phasestats.r(all_pyr)*5,20,pyr_color,'filled');
+        scatter(rand(length(find(all_nw)),1)/2 + 13.1, rippleMod.phasestats.r(all_nw)*5,20,nw_color,'filled');
+        scatter(rand(length(find(all_ww)),1)/2 + 13.6, rippleMod.phasestats.r(all_ww)*5,20,ww_color,'filled');
+        
+        scatter(rippleMod.phasestats.m(all_pyr), rand(length(find(all_pyr)),1)/2 + 2.2,20,pyr_color,'filled');
+        scatter(rippleMod.phasestats.m(all_nw), rand(length(find(all_nw)),1)/2 + 2.8,20,nw_color,'filled');
+        scatter(rippleMod.phasestats.m(all_ww), rand(length(find(all_ww)),1)/2 + 3.4,20,ww_color,'filled');
+        
+        if showTagCells
+            plot(rippleMod.phasebins_wide_doubled,rippleMod.phasedistro_wide_smoothZ_doubled(UID(ii),:),'color',cell_color,'LineWidth',1.5);
+    	    scatter(13.2, rippleMod.phasestats.r(UID(ii))*5,20,cell_color,'filled');
+            scatter(rippleMod.phasestats.m(UID(ii)), 3.2,20,cell_color,'filled');
+        end
+    
+        axis tight
+        xlabel('Ripple phase (rad)'); ylabel('Rate (SD)');
+        set(gca,'XTick',[0:2*pi:4*pi],'XTickLabel',{'0', '2\pi', '4\pi'});
     end
-    plot(ripples.rippleStats.maps.timestamps, zscore(mean(ripples.rippleStats.maps.ripples_raw))+20,'-k')
-    axis tight
-    xlabel('Ripple center (s)'); ylabel('Rate (SD)');
-    
-    % ripple phase
-    subplot(5,5,14)
-    hold on
-    x_wave = 0:0.01:4*pi;
-    y_wave = cos(x_wave)*2;
-    plot(x_wave,y_wave,'--k');
-    plotFill(rippleMod.phasebins_wide_doubled,rippleMod.phasedistro_wide_smoothZ_doubled(all_nw,:),'color',nw_color,'style','filled');
-    plotFill(rippleMod.phasebins_wide_doubled,rippleMod.phasedistro_wide_smoothZ_doubled(all_ww,:),'color',ww_color,'style','filled');
-    plotFill(rippleMod.phasebins_wide_doubled,rippleMod.phasedistro_wide_smoothZ_doubled(all_pyr,:),'color',pyr_color,'style','filled');
-    
-    scatter(rand(length(find(all_pyr)),1)/2 + 12.6, rippleMod.phasestats.r(all_pyr)*5,20,pyr_color,'filled');
-    scatter(rand(length(find(all_nw)),1)/2 + 13.1, rippleMod.phasestats.r(all_nw)*5,20,nw_color,'filled');
-    scatter(rand(length(find(all_ww)),1)/2 + 13.6, rippleMod.phasestats.r(all_ww)*5,20,ww_color,'filled');
-    
-    scatter(rippleMod.phasestats.m(all_pyr), rand(length(find(all_pyr)),1)/2 + 2.2,20,pyr_color,'filled');
-    scatter(rippleMod.phasestats.m(all_nw), rand(length(find(all_nw)),1)/2 + 2.8,20,nw_color,'filled');
-    scatter(rippleMod.phasestats.m(all_ww), rand(length(find(all_ww)),1)/2 + 3.4,20,ww_color,'filled');
-    
-    if showTagCells
-        plot(rippleMod.phasebins_wide_doubled,rippleMod.phasedistro_wide_smoothZ_doubled(UID(ii),:),'color',cell_color,'LineWidth',1.5);
-    	scatter(13.2, rippleMod.phasestats.r(UID(ii))*5,20,cell_color,'filled');
-        scatter(rippleMod.phasestats.m(UID(ii)), 3.2,20,cell_color,'filled');
-    end
-
-    axis tight
-    xlabel('Ripple phase (rad)'); ylabel('Rate (SD)');
-    set(gca,'XTick',[0:2*pi:4*pi],'XTickLabel',{'0', '2\pi', '4\pi'});
-
     % theta
     subplot(5,5,15)
     hold on
