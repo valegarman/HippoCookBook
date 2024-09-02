@@ -204,6 +204,7 @@ if ~isempty(powerThreshold_nonTheta)
 
     catch
         disp('Discarting ripples was not possible');
+        intervals_nonTheta_nonRipples = intervals_nonTheta;
     end
 
 end
