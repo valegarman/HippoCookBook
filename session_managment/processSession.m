@@ -284,7 +284,7 @@ if ~any(ismember(excludeAnalysis, {'9',lower('phaseModulation')}))
     % LFP-spikes modulation
     [phaseMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel,'restrict_to',restrict_ints);
     computeCofiringModulation;
-end
+    endg
 
 %% 10. Cell metrics
 % Exclude manipulation intervals for computing CellMetrics
