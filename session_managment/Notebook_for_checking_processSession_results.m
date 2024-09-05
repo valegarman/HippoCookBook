@@ -51,10 +51,10 @@ hippocampalLayers = getHippocampalLayers('force',true,'promt',true);
 % analysis.
 
 ExcludeIntervals = [];
-rippleChannel =3 ;
-SWChannel = 6;
-eventSpikeThreshold_shanks = [3]; % which shanks will be accounted for the spike threshold 
-rippleMasterDetector_threshold = [1 2]; % [1.5 3.5]
+rippleChannel =[] ;
+SWChannel = [];
+eventSpikeThreshold_shanks = [1 2 3 4 5]; % which shanks will be accounted for the spike threshold 
+rippleMasterDetector_threshold = [1.5 3.5]; % [1.5 3.5]
 eventSpikeThreshold = 1; % .5
 ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',false,'thresholds',rippleMasterDetector_threshold,'eventSpikeThreshold_shanks', eventSpikeThreshold_shanks,'eventSpikeThreshold',eventSpikeThreshold,'excludeIntervals',ExcludeIntervals); 
 psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10);
@@ -75,11 +75,9 @@ thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection
 %% 6. Phase modulation
 % NOTE!! If you have re-detected ripples or theta, you must run this code
 % again with the same channel definition!!!
-
-
-thetaChannel = 6;
-hgammaChannel = 56;
-lgammaChannel = 48;
+thetaChannel = [];
+hgammaChannel = [];
+lgammaChannel = [];
 [phaseMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel,'thetaChannel',thetaChannel,'hgammaChannel',thetaChannel,'lgammaChannel',thetaChannel);
 computeCofiringModulation;
 % [phaseMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel,'thetaChannel',thetaChannel,'hgammaChannel',thetaChannel,'lgammaChannel',thetaChannel,'restrict_to_manipulation',true);
@@ -100,10 +98,7 @@ if ~isempty(dir([session.general.name,'.optogeneticPulses.events.mat']))
 end
 excludeManipulationIntervals = optoPulses.stimulationEpochs;
 
-cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true,'getWaveformsFromDat', false);
-ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true,'restrictToIntervals',...
-    [0 1.2957e+04],'manualAdjustMonoSyn',false); % uLEDResponses.restricted_interval
-
+cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true,'getWaveformsFromDat', true);
 
 getACGPeak('force',true);
 
