@@ -98,7 +98,7 @@ if ~isempty(dir([session.general.name,'.optogeneticPulses.events.mat']))
 end
 excludeManipulationIntervals = optoPulses.stimulationEpochs;
 
-cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true,'getWaveformsFromDat', true);
+cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true,'getWaveformsFromDat', false);
 % ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true,'restrictToIntervals',...
 %     [0 1.2957e+04],'manualAdjustMonoSyn',false); % uLEDResponses.restricted_interval
 % cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true,...
