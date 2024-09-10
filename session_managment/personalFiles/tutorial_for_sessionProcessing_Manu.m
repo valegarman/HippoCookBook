@@ -18,10 +18,10 @@ batch_sessionSummary('basepath','G:\data\fPv4','cleanArtifacts',({65,[]}),'analo
 % 3% CLEAN SESSIONS MANUALLY BY PHY
 
 % 4% Processs individual sessions by by 'processSession'. Example:
-processSession('digital_optogenetic_channels',1,'analog_optogenetic_channels',[],'promt_hippo_layers',true,'profileType','hippocampus');
+processSession('digital_optogenetic_channels',[1],'analog_optogenetic_channels',[],'promt_hippo_layers',true,'profileType','hippocampus');
 
 % 5% Index session
-indexNewSession;
+indexNewSession('copyFiles',true);
 
 % 6% Once a database has been created, use loadProjectResults to stack results for all sessions
 % an enjoy data analysis!
@@ -29,9 +29,10 @@ indexNewSession;
         loadProjectResults('project', 'InterneuronsLibrary',...
         'analysis_project_path', 'C:\Users\valeg\Dropbox\ProjectsOnLine\interneuronsLibrary\data','loadLast',false);
 
-
 % run getOptogeneticResponses with uLEDs
-pulses = getAnalogPulses('manualThr',true,'overwrite',true); % 1-index
+pulses = getAnalogPulses('manualThr',true,'force',true); % 1-index
 getDigitalIn;
+uledPulses = getuLEDPulses('current',6,'force', true);
 optogeneticResponses = getOptogeneticResponse('numRep',50,'force',true,...
     'analogChannelsList',[3 4 5 6 7 8],'digitalChannelsList',[11 12 13 14 15 16]);
+getuLEDResponse('force',true);

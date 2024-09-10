@@ -90,6 +90,8 @@ if isempty(task)
             task = 'cueSide';
         case 10
             task = 'alternation';
+        case 16
+            task = 'alternation';
     end
 end
 if strcmpi(task,'cueSide')
