@@ -37,6 +37,7 @@ save_as = p.Results.save_as;
 % Deal with inputs
 prevPath = pwd;
 cd(basepath);
+%ciao come va 
 
 targetFile = dir('*.speedCorrs.cellinfo.mat');
 if ~isempty(targetFile) && ~force
