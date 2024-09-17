@@ -9,8 +9,8 @@ targetBehavior = 'linear maze';
 HCB_directory = what('HippoCookBook'); 
 
 sessionsTable = readtable([HCB_directory.path filesep 'indexedSessions.csv']); % the variable is called allSessions
-
-for ii = 1 : length(sessionsTable.SessionName)
+%length(sessionsTable.SessionName)
+for ii = 169
      %% Analysis general all over Camkii/32 animal
     if contains(sessionsTable.Project{ii}, targetProject) || strcmpi('all', targetProject)
 
@@ -32,8 +32,8 @@ for ii = 1 : length(sessionsTable.SessionName)
                     'saveMat', false,'numRep',500,'doPlot', false,'getRaster', false, 'verbose', false);
                 uLEDResponses_control{mm} = getuLEDResponse_intervals([spikes_times{mm} + monosyn_control_win(1) spikes_times{mm} + monosyn_control_win(2)],...
                     'saveMat', false,'numRep',500,'doPlot', false,'getRaster', false, 'verbose', false);
-            
             end
+
             collision_metrics_1_21 = get_light_spike_CollisionMetrics(uLEDResponses_interval,'label','1msTo21ms','saveMat',true,'update_cell_metrics',true,'save_as','lightSpikeCollisions','rate_change_threshold',3);
             collision_metrics_control = get_light_spike_CollisionMetrics(uLEDResponses_control,'label','control','saveMat',true,'update_cell_metrics',true,'save_as','lightSpikeCollisions_control','rate_change_threshold',3);
 

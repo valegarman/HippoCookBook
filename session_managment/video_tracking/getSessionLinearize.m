@@ -73,7 +73,6 @@ for ii = 1:size(sess,1)
         if strcmpi(maze,'tMaze')
             behaviorTemp.(sess(ii).name)= linearizeArmChoice('verbose',true);
         elseif strcmpi(maze,'linearMaze')
-             disp('sono qui');
             behaviorTemp.(sess(ii).name)= linearizeLinearMaze('verbose',verbose, 'leftTtl',leftTtl ,'rightTtl',rightTtl);
       end
         trackFolder(count) = ii; 
