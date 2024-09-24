@@ -55,7 +55,7 @@ addParameter(p,'ledLayout',[]);
 addParameter(p,'current',[],@isnumeric);
 addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'force',false,@islogical);
-addParameter(p,'duration_round_decimal',3,@isscalar);
+addParameter(p,'duration_round_decimal',2,@isscalar);
 addParameter(p,'minNumberOfPulses',200,@isnumeric);
 addParameter(p,'condition_epochs',[]);
 
