@@ -41,7 +41,7 @@ SleepScoreMaster(pwd,'noPrompts',true,'ignoretime',ignoretime, 'overwrite', true
 % IS NOT WORKING!!!!!
 TheStateEditor(session.general.name);
 
- % Revise hippocapmal layer definition. Upon disagrements, run again
+%% 3. Revise hippocapmal layer definition. Upon disagrements, run again
 hippocampalLayers = getHippocampalLayers('force',true,'promt',true);
 
 %% 4. Ripples
@@ -50,11 +50,11 @@ hippocampalLayers = getHippocampalLayers('force',true,'promt',true);
 % analysis.
 
 ExcludeIntervals = [];
-rippleChannel = 44 ;
+rippleChannel = 6;
 SWChannel = [];
-eventSpikeThreshold_shanks = [1 2 3 4 5]; % which shanks will be accounted for the spike threshold 
-rippleMasterDetector_threshold = [1.5 3.5]; % [1.5 3.5]
-eventSpikeThreshold = 1.2; % .5
+eventSpikeThreshold_shanks = [1 2 3 4]; % which shanks will be accounted for the spike threshold 
+rippleMasterDetector_threshold = [2 4]; % [1.5 3.5]
+eventSpikeThreshold = 1; % .5
 ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',false,'thresholds',rippleMasterDetector_threshold,'eventSpikeThreshold_shanks', eventSpikeThreshold_shanks,'eventSpikeThreshold',eventSpikeThreshold,'excludeIntervals',ExcludeIntervals); 
 psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10);
 % psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10,'restrict_to_manipulation',true);
@@ -65,9 +65,9 @@ getSpikesRank('events','ripples');
 % rhytmicity. If bad, you can change useCSD_for_theta_detection to false,
 % or change powerThreshold, even the channel
 
-channel = 19;
+channel = 45;
 useCSD_for_theta_detection = false;
-powerThreshold = 1.5;% .8
+powerThreshold = 2;% .8
 thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'powerThreshold',powerThreshold,'channel', channel);
 
 
@@ -79,7 +79,7 @@ rippleChannel = [];
 SWChannel = [];    %from radiatum
 hgammaChannel = [];
 lgammaChannel = [];
-thetaChannel =  47;
+thetaChannel =  [];
 [phaseMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel,'thetaChannel',thetaChannel,'hgammaChannel',thetaChannel,'lgammaChannel',thetaChannel);
 computeCofiringModulation;
 
