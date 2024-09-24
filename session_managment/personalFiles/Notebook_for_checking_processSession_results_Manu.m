@@ -22,11 +22,11 @@ TheStateEditor(session.general.name);
 % 
 % 2.2 If no clear bimodalities are visible, run scoring with different
 % channels and include noisy ignoretime epochs
-ThetaChannels = []; % choose theta channels (ideally SLM)
-SWChannels = []; % choose slow wave channels (ideally superficial cortex)
-ignoretime = [];
+ThetaChannels = 60; % choose theta channels (ideally SLM)
+SWChannels = 36; % choose slow wave channels (ideally superficial cortex)
+ignoretime = [9000 15000];
 % if EMG is not been quantified correctly, try discarting channels with
-bz_EMGFromLFP(pwd,'rejectChannels',[],'overwrite', true,'ignoretime',ignoretime);
+% bz_EMGFromLFP(pwd,'rejectChannels',[],'overwrite', true,'ignoretime',ignoretime);
 
 targetFile = (dir('*optogeneticPulses.events.mat'));
 if ~isempty(targetFile)
@@ -36,7 +36,10 @@ else
 end
 ignoretime = [pulses.stimulationEpochs; ignoretime]; % [pulses.stimulationEpochs; ignoretime]
 SleepScoreMaster(pwd,'noPrompts',true,'ignoretime',ignoretime, 'overwrite', true, 'ThetaChannels', ThetaChannels, 'SWChannels', SWChannels,'rejectChannels',[]);
-  
+
+% SleepScoreMaster(pwd,'noPrompts',true,'overwrite', true, 'ThetaChannels', ThetaChannels, 'SWChannels', SWChannels,'rejectChannels',[],'scoretime',[1 440*60]);
+ 
+
 % 2.3 As the last resource, you can edit the epochs in TheStateEditor. IT
 % IS NOT WORKING!!!!!
 TheStateEditor(session.general.name);
@@ -56,6 +59,7 @@ SWChannel = [];
 noiseChannel = [];
 eventSpikeThreshold_shanks = [1 2 3]; % which shanks will be accounted for the spike threshold 
 eventSpikeThreshold = 1.2; % .5
+
 rippleMasterDetector_threshold = [1.5 3.5]; % [1.5 3.5]
 ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',false,'thresholds',...
     rippleMasterDetector_threshold,'eventSpikeThreshold_shanks', eventSpikeThreshold_shanks,'eventSpikeThreshold',eventSpikeThreshold,'excludeIntervals',excludeIntervals,'noise',noiseChannel); 
@@ -68,23 +72,22 @@ getSpikesRank('events','ripples');
 % rhytmicity. If bad, you can change useCSD_for_theta_detection to false,
 % or change powerThreshold, even the channel
 
+
 channel = 47;
 useCSD_for_theta_detection = true;
 powerThreshold = 1.5;% .8
-thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'powerThreshold',powerThreshold,'channel', channel);
 
+thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'powerThreshold',powerThreshold,'channel', channel);
 
 %% 6. Phase modulation
 % NOTE!! If you have re-detected ripples or theta, you must run this code
 % again with the same channel definition!!!
-
 thetaChannel = [];
 hgammaChannel = [];
 lgammaChannel = [];
 [phaseMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel,'thetaChannel',thetaChannel,'hgammaChannel',thetaChannel,'lgammaChannel',thetaChannel);
 computeCofiringModulation;
 % [phaseMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel,'thetaChannel',thetaChannel,'hgammaChannel',thetaChannel,'lgammaChannel',thetaChannel,'restrict_to_manipulation',true);
-
 
 %% 7. Brain region
 % Revise assignBrainRegion output. If disagreements or out of date, run again
@@ -107,7 +110,6 @@ cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeM
 % cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true,...
 %     'restrictToIntervals',[1.2957e+04 2.0668e+04],'manualAdjustMonoSyn',false,'saveAs','cell_metrics_post'); % uLEDResponses.restricted_interval
 
-
 getACGPeak('force',true);
 
 getAverageCCG('force',true);
@@ -124,7 +126,7 @@ spikes = loadSpikes;
 getSessionTracking('roiTracking','manual','forceReload',false,'LED_threshold',LED_threshold);
 % only if the animal run a figure-eight maze behavior
 %getSessionArmChoice('task','alternation','leftArmTtl_channel',2,'rightArmTtl_channel',3,'homeDelayTtl_channel',4);
-behaviour = getSessionLinearize('forceReload',true);  
+behaviour = getSessionLinearize('forceReload',true,'maze','tMaze');  
 firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',true);
 placeFieldStats = bz_findPlaceFields1D('firingMaps',firingMaps,'maxSize',.75,'sepEdge',0.03); %% ,'maxSize',.75,'sepEdge',0.03
 firingTrialsMap = firingMapPerTrial('force',true);

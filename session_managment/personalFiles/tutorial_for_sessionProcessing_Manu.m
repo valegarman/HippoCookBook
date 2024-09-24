@@ -29,7 +29,6 @@ indexNewSession('copyFiles',true);
         loadProjectResults('project', 'InterneuronsLibrary',...
         'analysis_project_path', 'C:\Users\valeg\Dropbox\ProjectsOnLine\interneuronsLibrary\data','loadLast',false);
 
-
 % run getOptogeneticResponses with uLEDs
 pulses = getAnalogPulses('manualThr',true,'force',true); % 1-index
 getDigitalIn;
