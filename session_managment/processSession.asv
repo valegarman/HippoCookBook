@@ -31,7 +31,7 @@ addParameter(p,'gamma_bandpass',[20 100], @isnumeric);
 addParameter(p,'hfo_bandpass',[100 500], @isnumeric);
 addParameter(p,'rejectChannels',[],@isnumeric); % 0-index
 addParameter(p,'force_analogPulsesDetection',true,@islogical);
-addParameter(p,'force_loadingSpikes',false,@islogical);
+addParameter(p,'force_loadingSpikes',true,@islogical);
 addParameter(p,'excludePulsesIntervals',[],@isnumeric);
 addParameter(p,'rippleChannel',[],@isnumeric);% manually selecting ripple Channel in case getHippocampalLayers does not provide a right output
 addParameter(p,'SWChannel',[],@isnumeric); % manually selecting SW Channel in case getHippocampalLayers does not provide a right output
@@ -157,8 +157,6 @@ if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))
     session = gui_session(session);
 
     selectProbe('force',true); % choose probe
-    keyboard;
-    
 end
 
 ints = [];
@@ -211,7 +209,7 @@ end
 if ~any(ismember(excludeAnalysis, {'3',lower('cureAnalogPulses')}))
     if force_analogPulsesDetection || isempty(dir([session.general.name,'_original.dat']))
         disp('Getting analog Pulses...')
-        pulses = getAnalogPulses('analogChannelsList',analog_optogenetic_channels,'manualThr',true,'force',force_analogPulsesDetection); % 1-index
+        pulses = getAnalogPulses('analogChannelsList',analog_optogenetic_channels,'manualThr',manual_analog_pulses_threshold,'force',force_analogPulsesDetection); % 1-index
     else
         try
             if ~isempty(dir([session.general.name,'.pulses.events.mat']))
@@ -227,7 +225,6 @@ end
 %% 4. Spike Features, and optogenetic responses
 % 4.1 Light responses, if available
 if ~any(ismember(excludeAnalysis, {'4',lower('spikesFeatures')}))
-    digitalIn = getDigitalIn; %in this case
     getOptogeneticResponse('numRep',500,'force',true,'restrict_to', restrict_ints);
     % 4.2 ACG and waveform
     spikeFeatures;
@@ -267,7 +264,7 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
 %     UDStates = detectUD('plotOpt', true,'forceDetect',true','NREMInts','all');
 %     psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true);
 
-    UDStates = detectUpsDowns('plotOpt', true,'forceDetect',false','NREMInts','all','excludeIntervals', [9000 10000]);
+    UDStates = detectUpsDowns('plotOpt', true,'forceDetect',false','NREMInts','all');
     psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true,'minNumberOfPulses',10,'restrict_to',restrict_ints);
     getSpikesRank('events','upstates');
 
@@ -277,10 +274,8 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     getSpikesRank('events','ripples');
 
     % 8.3 Theta intervals
-    % thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection);
-    thetaEpochs = detectThetaEpochs('force',true,'useCSD',false);
-    close all;
-
+    useCSD_for_theta_detection = false
+    thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection);
 end
 
 %% 9. Phase Modulation
