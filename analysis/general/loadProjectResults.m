@@ -85,11 +85,16 @@ end
 sessionsTable = readtable([indexedSessionCSV_path filesep indexedSessionCSV_name,'.csv']); % the variable is called allSessions
 
 for ii = 1:length(sessionsTable.SessionName)
-    sessions.basepaths{ii} = [database_path sessionsTable.Path{ii}];
+
+    sessions.basepaths{ii} = [nas_path(sessionsTable.Location{ii}) filesep sessionsTable.Path{ii}];
+
 end
 sessions.project = sessionsTable.Project;
 
 disp('Projects found: '); 
+for ii = 1:length(sessions.project) % remove to spaces together, if any
+    sessions.project{ii} = strrep(sessions.project{ii}, '  ', ' ');
+end
 project_list = unique(sessions.project);
 project_list_temp = cell(0);
 for jj = 1:length(project_list)
@@ -146,6 +151,7 @@ for ii = 1:length(sessions.basepaths)
     
     % session name!!
     session = loadSession;
+    projectSessionResults.cell_metrics = loadCellMetrics;
     projectSessionResults.session{ii} = session;
     projectSessionResults.sessionName{ii} = session.general.name;
     projectSessionResults.geneticLine{ii} = session.animal.geneticLine;

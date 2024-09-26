@@ -36,8 +36,10 @@ else
 end
 ignoretime = [pulses.stimulationEpochs; ignoretime]; % [pulses.stimulationEpochs; ignoretime]
 SleepScoreMaster(pwd,'noPrompts',true,'ignoretime',ignoretime, 'overwrite', true, 'ThetaChannels', ThetaChannels, 'SWChannels', SWChannels,'rejectChannels',[]);
+
 % SleepScoreMaster(pwd,'noPrompts',true,'overwrite', true, 'ThetaChannels', ThetaChannels, 'SWChannels', SWChannels,'rejectChannels',[],'scoretime',[1 440*60]);
  
+
 % 2.3 As the last resource, you can edit the epochs in TheStateEditor. IT
 % IS NOT WORKING!!!!!
 TheStateEditor(session.general.name);
@@ -55,8 +57,9 @@ excludeIntervals = [];
 rippleChannel = [];
 SWChannel = [];
 noiseChannel = [];
-eventSpikeThreshold_shanks = [3]; % which shanks will be accounted for the spike threshold 
-eventSpikeThreshold = .8; % .5
+eventSpikeThreshold_shanks = [1 2 3]; % which shanks will be accounted for the spike threshold 
+eventSpikeThreshold = 1.2; % .5
+
 rippleMasterDetector_threshold = [1.5 3.5]; % [1.5 3.5]
 ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',false,'thresholds',...
     rippleMasterDetector_threshold,'eventSpikeThreshold_shanks', eventSpikeThreshold_shanks,'eventSpikeThreshold',eventSpikeThreshold,'excludeIntervals',excludeIntervals,'noise',noiseChannel); 
@@ -68,9 +71,12 @@ getSpikesRank('events','ripples');
 % Revise channel definition, theta band in thetaEpochs.png and cells
 % rhytmicity. If bad, you can change useCSD_for_theta_detection to false,
 % or change powerThreshold, even the channel
-channel = 45;
+
+
+channel = 47;
 useCSD_for_theta_detection = true;
-powerThreshold = 1.2;% .8
+powerThreshold = 1.5;% .8
+
 thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'powerThreshold',powerThreshold,'channel', channel);
 
 %% 6. Phase modulation
@@ -98,7 +104,7 @@ if ~isempty(dir([session.general.name,'.optogeneticPulses.events.mat']))
 end
 excludeManipulationIntervals = optoPulses.stimulationEpochs;
 
-cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true,'getWaveformsFromDat', true);
+cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true,'getWaveformsFromDat', false);
 % ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true,'restrictToIntervals',...
 %     [0 1.2957e+04],'manualAdjustMonoSyn',false); % uLEDResponses.restricted_interval
 % cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true,...

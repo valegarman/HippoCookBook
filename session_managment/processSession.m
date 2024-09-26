@@ -157,6 +157,9 @@ if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))
     session = gui_session(session);
 
     selectProbe('force',true); % choose probe
+
+    keyboard;
+
 end
 
 ints = [];
@@ -209,7 +212,7 @@ end
 if ~any(ismember(excludeAnalysis, {'3',lower('cureAnalogPulses')}))
     if force_analogPulsesDetection || isempty(dir([session.general.name,'_original.dat']))
         disp('Getting analog Pulses...')
-        pulses = getAnalogPulses('analogChannelsList',analog_optogenetic_channels,'manualThr',manual_analog_pulses_threshold,'force',force_analogPulsesDetection); % 1-index
+        pulses = getAnalogPulses('analogChannelsList',analog_optogenetic_channels,'manualThr',true,'force',force_analogPulsesDetection); % 1-index
     else
         try
             if ~isempty(dir([session.general.name,'.pulses.events.mat']))
@@ -265,6 +268,7 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
 %     psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true);
 
     UDStates = detectUpsDowns('plotOpt', true,'forceDetect',false','NREMInts','all');
+
     psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true,'minNumberOfPulses',10,'restrict_to',restrict_ints);
     getSpikesRank('events','upstates');
 
@@ -274,7 +278,9 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     getSpikesRank('events','ripples');
 
     % 8.3 Theta intervals
+
     thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection);
+
 end
 
 %% 9. Phase Modulation
@@ -327,7 +333,8 @@ if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
         catch
             warning('Performance in task was not computed! maybe linear maze?');
         end
-        behaviour = getSessionLinearize('forceReload',true);  
+     
+        behaviour = getSessionLinearize('forceReload',true,'maze','linearMaze');  
         firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',true,'speedThresh',0.1);
         placeFieldStats = bz_findPlaceFields1D('firingMaps',firingMaps,'maxSize',.75,'sepEdge',0.03); %% ,'maxSize',.75,'sepEdge',0.03
         firingTrialsMap = firingMapPerTrial('force',true,'saveMat',true);

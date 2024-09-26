@@ -604,6 +604,32 @@ cd(basepath);
 arrangeSessionFolder;
 
 
+%% fSst4
+preprocessSession('basepath','Y:\unindexedSubjects\fSst4\fSst4_220920_sess6','analogChannelsList',[],'spikeSort',true,'getPos',false, 'cleanArtifacts',true,...
+                    'medianSubstr',true,'tracking_pixel_cm',0.1128,'sessionSummary',false,'digitalChannelsList',[],'bazler_ttl_channel',[]);
+
+
+preprocessSession('basepath','Y:\unindexedSubjects\fSst4\fSst4_220921_sess7','analogChannelsList',[],'spikeSort',true,'getPos',false, 'cleanArtifacts',true,...
+                    'medianSubstr',true,'tracking_pixel_cm',0.1128,'sessionSummary',false,'digitalChannelsList',[],'bazler_ttl_channel',[]);
+preprocessSession('basepath','Y:\unindexedSubjects\fSst4\fSst4_220922_sess8','analogChannelsList',[],'spikeSort',true,'getPos',false, 'cleanArtifacts',true,...
+                    'medianSubstr',true,'tracking_pixel_cm',0.1128,'sessionSummary',false,'digitalChannelsList',[],'bazler_ttl_channel',[]);
+preprocessSession('basepath','Y:\unindexedSubjects\fSst4\fSst4_220923_sess9','analogChannelsList',[],'spikeSort',true,'getPos',false, 'cleanArtifacts',true,...
+                    'medianSubstr',true,'tracking_pixel_cm',0.1128,'sessionSummary',false,'digitalChannelsList',[],'bazler_ttl_channel',[]);
+preprocessSession('basepath','Y:\unindexedSubjects\fSst4\fSst4_220926_sess10','analogChannelsList',[],'spikeSort',true,'getPos',false, 'cleanArtifacts',true,...
+                    'medianSubstr',true,'tracking_pixel_cm',0.1128,'sessionSummary',false,'digitalChannelsList',[],'bazler_ttl_channel',[]);
+preprocessSession('basepath','Y:\unindexedSubjects\fSst4\fSst4_220927_sess11','analogChannelsList',[],'spikeSort',true,'getPos',false, 'cleanArtifacts',true,...
+                    'medianSubstr',true,'tracking_pixel_cm',0.1128,'sessionSummary',false,'digitalChannelsList',[],'bazler_ttl_channel',[]);
+preprocessSession('basepath','Y:\unindexedSubjects\fSst4\fSst4_220928_sess12','analogChannelsList',[],'spikeSort',true,'getPos',false, 'cleanArtifacts',true,...
+                    'medianSubstr',true,'tracking_pixel_cm',0.1128,'sessionSummary',false,'digitalChannelsList',[],'bazler_ttl_channel',[]);
+preprocessSession('basepath','Y:\unindexedSubjects\fSst4\fSst4_220929_sess13','analogChannelsList',[],'spikeSort',true,'getPos',false, 'cleanArtifacts',true,...
+                    'medianSubstr',true,'tracking_pixel_cm',0.1128,'sessionSummary',false,'digitalChannelsList',[],'bazler_ttl_channel',[]);
+preprocessSession('basepath','Y:\unindexedSubjects\fSst4\fSst4_220930_sess14','analogChannelsList',[],'spikeSort',true,'getPos',false, 'cleanArtifacts',true,...
+                    'medianSubstr',true,'tracking_pixel_cm',0.1128,'sessionSummary',false,'digitalChannelsList',[],'bazler_ttl_channel',[]);
+
+
+
+
+
 
 
 

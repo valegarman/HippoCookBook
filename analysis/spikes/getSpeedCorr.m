@@ -7,7 +7,7 @@ addParameter(p,'threshold',0,@isscalar);
 addParameter(p,'numQuantiles',10,@isscalar);
 addParameter(p,'fs_tracking',30,@isnumeric);
 addParameter(p,'order',2,@isnumeric);
-addParameter(p,'trials',true,@islogical);
+addParameter(p,'trials',false,@islogical);
 addParameter(p,'plt',true,@islogical);
 addParameter(p,'basepath',pwd,@isfolder);
 addParameter(p,'force',false,@islogical);
@@ -37,6 +37,7 @@ save_as = p.Results.save_as;
 % Deal with inputs
 prevPath = pwd;
 cd(basepath);
+%ciao come va  asdfasdfasdf 
 
 targetFile = dir('*.speedCorrs.cellinfo.mat');
 if ~isempty(targetFile) && ~force
