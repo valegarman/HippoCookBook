@@ -262,7 +262,7 @@ collision_metrics.excitatory_connection_probability = size(cell_metrics.putative
 collision_metrics.inhibitory_connectionsOut = histcounts(collision_metrics.putative_int_pyr_pairs_list(:,1),[0:length(cell_metrics.UID)]+.5);
 collision_metrics.inhibitory_connectionsIn = histcounts(collision_metrics.putative_int_pyr_pairs_list(:,2),[0:length(cell_metrics.UID)]+.5);
 collision_metrics.presynapticID = collision_metrics.uLEDResponses_InInterval.presynapticID;
-collision_metrics.presynapticID = collision_metrics.uLEDResponses_InInterval.postsynapticID;
+collision_metrics.postsynapticID = collision_metrics.uLEDResponses_InInterval.postsynapticID;
 
 % select pairs
 prePyr_select = collision_metrics.candidate_pyr_pyr_pairs;
