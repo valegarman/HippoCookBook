@@ -28,20 +28,21 @@ ignoretime = [];
 % if EMG is not been quantified correctly, try discarting channels with
 bz_EMGFromLFP(pwd,'rejectChannels',[],'overwrite', true,'ignoretime',ignoretime);
 
-% targetFile = (dir('*optogeneticPulses.events.mat'));
-% if ~isempty(targetFile)
-%     pulses = importdata(targetFile.name);
-% else
-%     pulses.stimulationEpochs = [];
-% end
-% ignoretime = [pulses.stimulationEpochs; ignoretime]; % [pulses.stimulationEpochs; ignoretime]
-SleepScoreMaster(pwd,'noPrompts',true,'ignoretime',ignoretime, 'overwrite', true, 'ThetaChannels', ThetaChannels, 'SWChannels', SWChannels,'rejectChannels',[30]);
-
+targetFile = (dir('*optogeneticPulses.events.mat'));
+if ~isempty(targetFile)
+    pulses = importdata(targetFile.name);
+else
+    pulses.stimulationEpochs = [];
+end
+ignoretime = [pulses.stimulationEpochs; ignoretime]; % [pulses.stimulationEpochs; ignoretime]
+SleepScoreMaster(pwd,'noPrompts',true,'ignoretime',ignoretime, 'overwrite', true, 'ThetaChannels', ThetaChannels, 'SWChannels', SWChannels,'rejectChannels',[]);
+  
 % 2.3 As the last resource, you can edit the epochs in TheStateEditor. IT
 % IS NOT WORKING!!!!!
 TheStateEditor(session.general.name);
 
- % Revise hippocapmal layer definition. Upon disagrements, run again
+%% 3. Hippocampal layers
+% Revise hippocapmal layer definition. Upon disagrements, run again
 hippocampalLayers = getHippocampalLayers('force',true,'promt',true);
 
 %% 4. Ripples
@@ -49,13 +50,15 @@ hippocampalLayers = getHippocampalLayers('force',true,'promt',true);
 % different trhresold or restrict the shanks for the spikeThreshold
 % analysis.
 
-ExcludeIntervals = [];
-rippleChannel =28 ;
+excludeIntervals = [];
+rippleChannel = [];
 SWChannel = [];
-eventSpikeThreshold_shanks = [1 2 3 4]; % which shanks will be accounted for the spike threshold 
-rippleMasterDetector_threshold = [1 2]; % [1.5 3.5]
-eventSpikeThreshold = 1; % .5
-ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',false,'thresholds',rippleMasterDetector_threshold,'eventSpikeThreshold_shanks', eventSpikeThreshold_shanks,'eventSpikeThreshold',eventSpikeThreshold,'excludeIntervals',ExcludeIntervals); 
+noiseChannel = [];
+eventSpikeThreshold_shanks = [1 2 3]; % which shanks will be accounted for the spike threshold 
+eventSpikeThreshold = 1.2; % .5
+rippleMasterDetector_threshold = [1.5 3.5]; % [1.5 3.5]
+ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',false,'thresholds',...
+    rippleMasterDetector_threshold,'eventSpikeThreshold_shanks', eventSpikeThreshold_shanks,'eventSpikeThreshold',eventSpikeThreshold,'excludeIntervals',excludeIntervals,'noise',noiseChannel); 
 psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10);
 % psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10,'restrict_to_manipulation',true);
 getSpikesRank('events','ripples');
@@ -65,9 +68,9 @@ getSpikesRank('events','ripples');
 % rhytmicity. If bad, you can change useCSD_for_theta_detection to false,
 % or change powerThreshold, even the channel
 
-channel = 20;
-useCSD_for_theta_detection = false;
-powerThreshold = 1.3;% .8
+channel = 47;
+useCSD_for_theta_detection = true;
+powerThreshold = 1.5;% .8
 thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'powerThreshold',powerThreshold,'channel', channel);
 
 
@@ -75,13 +78,12 @@ thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection
 % NOTE!! If you have re-detected ripples or theta, you must run this code
 % again with the same channel definition!!!
 
-rippleChannel = [];
-SWChannel = [];    %from radiatum
+thetaChannel = [];
 hgammaChannel = [];
 lgammaChannel = [];
-thetaChannel = 6;
 [phaseMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel,'thetaChannel',thetaChannel,'hgammaChannel',thetaChannel,'lgammaChannel',thetaChannel);
 computeCofiringModulation;
+% [phaseMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel,'thetaChannel',thetaChannel,'hgammaChannel',thetaChannel,'lgammaChannel',thetaChannel,'restrict_to_manipulation',true);
 
 
 %% 7. Brain region
@@ -101,7 +103,9 @@ excludeManipulationIntervals = optoPulses.stimulationEpochs;
 
 cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true,'getWaveformsFromDat', false);
 % ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true,'restrictToIntervals',...
-    % [0 1.2957e+04],'manualAdjustMonoSyn',false); % uLEDResponses.restricted_interval
+%     [0 1.2957e+04],'manualAdjustMonoSyn',false); % uLEDResponses.restricted_interval
+% cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true,...
+%     'restrictToIntervals',[1.2957e+04 2.0668e+04],'manualAdjustMonoSyn',false,'saveAs','cell_metrics_post'); % uLEDResponses.restricted_interval
 
 
 getACGPeak('force',true);
@@ -134,7 +138,7 @@ spatialModulation = getSpatialModulation('force',true);
 % Also, if substancial changes were done before, run again!!
 % (Summary_cell_1, 2 etc). If bad cells, run again. 
 plotSummary('showTagCells',true);
-close all; exit
+close all;
 
 % -------------------------------------------------------------------------
 
