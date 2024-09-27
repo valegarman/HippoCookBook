@@ -593,7 +593,7 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
         
         % maxRespLED % the reference is the out_intervals max leds!!!
         if ~isnan(out_interval.maxRespLED.LEDs(ii,kk))
-            in_interval.maxRespLED.rate(ii,kk) = in_interval.rateDuringPulse(ii,kk,out_interval.maxRespLED.LEDs(ii,kk));
+            in_interval.maxRespLED.rate(ii,kk) = in_interval.rateDuringPulse(ii,kk,out_interval.maxRespLED.LEDs(ii,kk));vb
             in_interval.maxRespLED.rateBeforePulse(ii,kk) = in_interval.rateBeforePulse(ii,kk,out_interval.maxRespLED.LEDs(ii,kk));   
             in_interval.maxRespLED.rateZ(ii,kk) = in_interval.rateZDuringPulse(ii,kk,out_interval.maxRespLED.LEDs(ii,kk));
             in_interval.maxRespLED.rateZBeforePulse(ii,kk) = in_interval.rateZBeforePulse(ii,kk,out_interval.maxRespLED.LEDs(ii,kk));   
