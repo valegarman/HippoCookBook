@@ -11,7 +11,7 @@ function dp = onedrive_path
     dp = [];
     switch computerName
         case 'manu'
-            dp = '/Users/manu/Dropbox';
+            dp = '/Users/manu/Library/CloudStorage/OneDrive-imim.es/';
         case 'IMW02691'
             dp = 'C:\Users\mvalero\OneDrive - imim.es\';
         case 'IMW02703' % pc de andrea
