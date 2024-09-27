@@ -11,13 +11,15 @@ function dp = onedrive_path
     dp = [];
     switch computerName
         case 'manu'
-            dp = '/Users/manu/Dropbox';
+            dp = '/Users/manu/Library/CloudStorage/OneDrive-imim.es/';
         case 'IMW02691'
             dp = 'C:\Users\mvalero\OneDrive - imim.es\';
         case 'IMW02703' % pc de andrea
             dp = 'C:\Users\agallardo\OneDrive - imim.es\';
         case 'DESKTOP-BEPJ8P0'
             dp = 'C:\Users\mpicco\OneDrive - imim.es\';
+        case 'IMW02838' % pc de Ane, la mejor
+            dp = 'C:\Users\amartinez11\OneDrive - imim.es\';
         otherwise
             error('Not recornized computer!');
     end
