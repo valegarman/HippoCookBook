@@ -1,7 +1,22 @@
 
 function h = plotCorrMat(varargin)
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% h = plotCorrMat(corrMat, corrMatArea)
+%
+% Draws a correlation matrix as a scatter plot where color and size code for
+% different quantities of the same variable (normaly, effect size and p-value)
+%
+%--------------------------------------------------------------------------
+% PARAMETERS
+% area_factor               (scalar)  default, 10
+% minPvalue                 (scalar)  default, 0.0000000001
+% area_is_p                 (logical) default, true
+% variablesNames            (cell) default, []
+% showGrid                  (logical) default, true
+% onlyBelowDiagonal         (logical) default, false
+% inAxis                    (logical) default, false
+%--------------------------------------------------------------------------
+%% MV-NCL 2024
 
 %% Defaults and Parms
 p = inputParser;
