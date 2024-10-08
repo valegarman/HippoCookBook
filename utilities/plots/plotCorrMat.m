@@ -30,8 +30,8 @@ area_factor = p.Results.area_factor;
 %%%
 if onlyBelowDiagonal
     upperTriMask = triu(true(size(corrMat)), 1); % '1' excludes the diagonal
-    corrMat(find(~upperTriMask)) = NaN;
-    corrMatP(find(~upperTriMask)) = NaN;
+    % corrMat(find(~upperTriMask)) = NaN;
+    % corrMatP(find(~upperTriMask)) = NaN;
 end
 
 corrMat = corrMat';
@@ -87,7 +87,7 @@ if showGrid
          end
     end
 end
-scatter(x(:),y(:),area_values*area_factor, r_values,'filled')
+scatter(x(:),y(:),area_values*area_factor, r_values,'filled');
 colormap(flip(brewermap([],'RdYlBu')));
 caxis([-max(abs(corrMat(:))) max(abs(corrMat(:)))]);
 xlim([0 length(corrMat) + 1]);
