@@ -51,7 +51,7 @@ if isempty(list_of_results) && strcmpi(list_of_results,'all')
         'thetaRun*.PhaseLockingData','lgamma*.PhaseLockingData','hgamma*.PhaseLockingData','ripple*.PhaseLockingData','spatialModulation','placeFields','behavior.cellinfo','ACGPeak',...
         'speedCorr.cellinfo','uLEDResponse.cellinfo','lightSpikeCollisions','uLEDResponse_ripples','uLEDResponse_ripples_pre','uLEDResponse_ripples_post','spikeTriggeredPulses',...
         'explained_variance_stim','explained_variance_delayed','spikeCCGchange','uLEDResponse_spikeTriggered'};
-elseif isempty(list_of_results) && trcmpi(list_of_results,'standard')
+elseif isempty(list_of_results) && strcmpi(list_of_results,'standard')
     list_of_results = {'optogeneticResponse','averageCCG','ripples_psth','slowOscillations_psth','theta_*.PhaseLockingData','thetaREM*.PhaseLockingData',...
         'thetaRun*.PhaseLockingData','lgamma*.PhaseLockingData','hgamma*.PhaseLockingData','ripple*.PhaseLockingData','spatialModulation','placeFields','behavior.cellinfo','ACGPeak',...
         'speedCorr.cellinfo','uLEDResponse.cellinfo'};
@@ -85,7 +85,9 @@ end
 sessionsTable = readtable([indexedSessionCSV_path filesep indexedSessionCSV_name,'.csv']); % the variable is called allSessions
 
 for ii = 1:length(sessionsTable.SessionName)
+
     sessions.basepaths{ii} = [nas_path(sessionsTable.Location{ii}) filesep sessionsTable.Path{ii}];
+
 end
 sessions.project = sessionsTable.Project;
 

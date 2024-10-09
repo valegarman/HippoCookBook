@@ -61,6 +61,9 @@ end
 
 cd(basepath)
 
+keyboard;
+
+
 %% By default looks for Synology and copy files to it, it specified copy files to the specified folder
 if ~isempty(driveStorage_location) && ~isempty(driveStorage_path)
     if ~strcmpi(nas_path(driveStorage_location), driveStorage_path) 
@@ -158,6 +161,8 @@ commandToExecute = ['git push'];
 system(commandToExecute);
 
 cd(basepath);     
+
+keyboard;
 
 %% Removing dat files before copying files to buzsakilab or synology
 if removeDatFiles

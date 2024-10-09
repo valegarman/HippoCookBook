@@ -62,6 +62,7 @@ end
 cd(basepath);
 % sess = basenameFromBasepath(pwd);
 % [sessionInfo] = bz_getSessionInfo(basepath, 'noPrompts', true);
+
 C = strsplit(basenameFromBasepath(pwd),'_');
 sess = dir(strcat(C{1},'_',C{2},'*')); % get session files
 count = 1;
@@ -73,9 +74,8 @@ for ii = 1:size(sess,1)
         if strcmpi(maze,'tMaze')
             behaviorTemp.(sess(ii).name)= linearizeArmChoice('verbose',true);
         elseif strcmpi(maze,'linearMaze')
-             disp('sono qui');
             behaviorTemp.(sess(ii).name)= linearizeLinearMaze('verbose',verbose, 'leftTtl',leftTtl ,'rightTtl',rightTtl);
-      end
+        end
         trackFolder(count) = ii; 
         count = count + 1;
      else

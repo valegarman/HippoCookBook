@@ -18,6 +18,7 @@ function h = plotDistribution(datax,varargin)
 %    'normalize'    True (default) or false
 %    'orientation'  'horizontal' (default) or 'vertical'
 %    'offset'       Default 0
+%    'plotNegative' Falsae
 % 
 % OUTPUS
 %    'h'            Figure handle.
@@ -35,6 +36,8 @@ addParameter(p,'yscale','linear',@ischar);
 addParameter(p,'normalize',true,@islogical);
 addParameter(p,'orientation','horizontal',@ischar);
 addParameter(p,'offset',0,@isnumeric);
+addParameter(p,'plotNegative',false,@islogical);
+
 
 parse(p,varargin{:});
 color = p.Results.color;
@@ -47,6 +50,7 @@ yscale = p.Results.yscale;
 normalize = p.Results.normalize;
 orientation = p.Results.orientation;
 offset = p.Results.offset;
+plotNegative = p.Results.plotNegative;
 
 % Deal with inputs
 if isempty(edges)
@@ -66,15 +70,21 @@ end
 
 x_centers = edges(2:end) - diff(edges)/2;
 
+if plotNegative
+    signPlot = -1;
+else
+    signPlot = 1;
+end
+
 if strcmpi(style, 'line')
-    plot(x_centers, xHist+offset,'color',color,'LineStyle',lineStyle);
+    plot(x_centers, signPlot*xHist+offset,'color',color,'LineStyle',lineStyle);
 elseif strcmpi(style, 'fill')
     hold on
     % plot(x_centers, xHist,'color',color,'LineStyle',lineStyle);
-    try fill([x_centers(1); x_centers; x_centers(end); x_centers(1)], [min(xHist([1 end])) xHist min(xHist([1 end])) min(xHist([1 end]))]+offset,...
+    try fill([x_centers(1); x_centers; x_centers(end); x_centers(1)], signPlot * [min(xHist([1 end])) xHist min(xHist([1 end])) min(xHist([1 end]))]+offset,...
             color,'FaceAlpha',.3,'EdgeColor','none');
     catch
-        fill([x_centers(1) x_centers x_centers(end) x_centers(1)], [min(xHist([1 end])) xHist' min(xHist([1 end])) min(xHist([1 end]))]+offset,...
+        fill([x_centers(1) x_centers x_centers(end) x_centers(1)], signPlot * [min(xHist([1 end])) xHist' min(xHist([1 end])) min(xHist([1 end]))]+offset,...
             color,'FaceAlpha',.3,'EdgeColor','none');
     end    
 end
