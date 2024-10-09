@@ -21,7 +21,8 @@ addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'saveSummaries',true,@islogical);
 addParameter(p,'lightVersion',true,@islogical);
 addParameter(p,'list_of_sessions',[],@iscell);
-addParameter(p,'list_of_results',[],@iscell);
+addParameter(p,'reject_sessions',[],@iscell);
+addParameter(p,'list_of_results',[]);
 addParameter(p,'save_as',[],@ischar);
 
 parse(p,varargin{:});
@@ -39,6 +40,7 @@ lightVersion = p.Results.lightVersion;
 list_of_sessions = p.Results.list_of_sessions;
 save_as = p.Results.save_as;
 list_of_results = p.Results.list_of_results;
+reject_sessions = p.Results.reject_sessions;
 
 if isempty(save_as)
     save_as = [datestr(datetime('now'),29) '_' project];
@@ -46,12 +48,12 @@ end
 
 list_of_results = loadListOfResults(project);
 
-if isempty(list_of_results) && strcmpi(list_of_results,'all')
+if strcmpi(list_of_results,'all')
     list_of_results = {'optogeneticResponse','averageCCG','ripples_psth','slowOscillations_psth','theta_*.PhaseLockingData','thetaREM*.PhaseLockingData',...
         'thetaRun*.PhaseLockingData','lgamma*.PhaseLockingData','hgamma*.PhaseLockingData','ripple*.PhaseLockingData','spatialModulation','placeFields','behavior.cellinfo','ACGPeak',...
         'speedCorr.cellinfo','uLEDResponse.cellinfo','lightSpikeCollisions','uLEDResponse_ripples','uLEDResponse_ripples_pre','uLEDResponse_ripples_post','spikeTriggeredPulses',...
         'explained_variance_stim','explained_variance_delayed','spikeCCGchange','uLEDResponse_spikeTriggered'};
-elseif isempty(list_of_results) && trcmpi(list_of_results,'standard')
+elseif strcmpi(list_of_results,'standard')
     list_of_results = {'optogeneticResponse','averageCCG','ripples_psth','slowOscillations_psth','theta_*.PhaseLockingData','thetaREM*.PhaseLockingData',...
         'thetaRun*.PhaseLockingData','lgamma*.PhaseLockingData','hgamma*.PhaseLockingData','ripple*.PhaseLockingData','spatialModulation','placeFields','behavior.cellinfo','ACGPeak',...
         'speedCorr.cellinfo','uLEDResponse.cellinfo'};
@@ -111,6 +113,12 @@ end
 if isempty(list_of_sessions)
     list_of_sessions = sessionsTable.SessionName;
 end
+
+if ~isempty(reject_sessions)
+    list_of_sessions{find(contains(list_of_sessions,lower(reject_sessions)))} = ' ';
+end
+    
+
 if strcmpi(project,'Undefined') || strcmpi(project,'All')
     project = project_list;
 elseif ~any(ismember(project_list, project))
@@ -166,6 +174,7 @@ for ii = 1:length(sessions.basepaths)
         projectSessionResults.spikes{ii} = spikes;
     end
     clear spikes
+    
     
     % loop results
     for jj = 1:length(list_of_results)
@@ -253,4 +262,5 @@ if saveMat
     disp('Saving data');
     save([analysis_project_path filesep save_as '.mat'],'projectSessionResults','projectResults','-v7.3');
 end
+
 end
