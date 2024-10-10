@@ -156,8 +156,13 @@ if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))
    
     session = gui_session(session);
 
+<<<<<<< HEAD
     % selectProbe('force',true); % choose probe
 end
+=======
+    selectProbe('force',true); % choose probe
+close allend
+>>>>>>> fcb001423d5d496eeaa6cceecb22650df3091dff
 
 ints = [];
 if restrict_to_manipulation
@@ -274,7 +279,7 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     getSpikesRank('events','ripples');
 
     % 8.3 Theta intervals
-    thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection);
+    thetaEpochs = detectThetaEpochs('force',true,'useCSD',false);
 end
 
 %% 9. Phase Modulation
@@ -327,7 +332,7 @@ if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
         catch
             warning('Performance in task was not computed! maybe linear maze?');
         end
-        behaviour = getSessionLinearize('forceReload',true);  
+        behaviour = getSessionLinearize('forceReload',false);  
         firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',true,'speedThresh',0.1);
         placeFieldStats = bz_findPlaceFields1D('firingMaps',firingMaps,'maxSize',.75,'sepEdge',0.03); %% ,'maxSize',.75,'sepEdge',0.03
         firingTrialsMap = firingMapPerTrial('force',true,'saveMat',true);

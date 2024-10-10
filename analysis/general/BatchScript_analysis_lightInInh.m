@@ -22,6 +22,7 @@ for ii = 1:length(sessionsTable.SessionName)
             spikes = loadSpikes;
             spikes_times = spikes.times;
             monosyn_inh_win = [0.001 0.021]; % 01to21
+            
             parfor mm = 1:spikes.numcells
                 disp(mm);
                 uLEDResponses_interval{mm} = getuLEDResponse_intervals([spikes_times{mm} + monosyn_inh_win(1) spikes_times{mm} + monosyn_inh_win(2)],...
