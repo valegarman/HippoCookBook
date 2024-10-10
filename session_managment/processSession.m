@@ -156,7 +156,7 @@ if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))
    
     session = gui_session(session);
 
-    selectProbe('force',true); % choose probe
+    % selectProbe('force',true); % choose probe
 end
 
 ints = [];
