@@ -151,7 +151,7 @@ for ii = 1:length(sessions.basepaths)
     
     % session name!!
     session = loadSession;
-    projectSessionResults.cell_metrics = loadCellMetrics;
+    projectSessionResults.cell_metrics{ii} = loadCellMetrics;
     projectSessionResults.session{ii} = session;
     projectSessionResults.sessionName{ii} = session.general.name;
     projectSessionResults.geneticLine{ii} = session.animal.geneticLine;
