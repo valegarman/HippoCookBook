@@ -72,6 +72,7 @@ addParameter(p,'roundPlotSize',10,@isnumeric);
 addParameter(p,'roundPlotCenterColor',[]);
 addParameter(p,'x_position',[]);
 addParameter(p,'plotConnectors',false,@islogical);
+addParameter(p,'isCircular',false,@islogical);
 
 parse(p,varargin{:});
 color = p.Results.color;
@@ -97,6 +98,7 @@ roundPlotSize = p.Results.roundPlotSize;
 x_position = p.Results.x_position;
 roundPlotCenterColor = p.Results.roundPlotCenterColor;
 plotConnectors = p.Results.plotConnectors;
+isCircular = p.Results.isCircular;
 
 % Dealing with inputs
 if size(y,1) < size(y,2)
@@ -232,20 +234,36 @@ end
 
 
 % DESCRIPTIVE 
-for ii = 1 : size(yC,2)
-    fprintf('%i %8.2f +/- %1.2f \n', ind(ii),nanmean(yC{ii}), nanstd(yC{ii}));
-    stats.descriptive.groupsIndex(ii) = ind(ii);
-    stats.descriptive.mean(ii) =  nanmean(yC{ii});
-    stats.descriptive.median(ii) = nanmedian(yC{ii});
-    stats.descriptive.std(ii) = nanstd(yC{ii});
-    stats.descriptive.SEM(ii) = nanstd(yC{ii})/sqrt(length(yC{ii}));
-    stats.descriptive.q25(ii) = prctile(yC{ii},25);
-    stats.descriptive.q75(ii) = prctile(yC{ii},75);
-    stats.descriptive.q37(ii) = prctile(yC{ii},37.5);
-    stats.descriptive.q62(ii) = prctile(yC{ii},62.5);
-    stats.descriptive.N(ii) = length(yC{ii});
+if isCircular == false
+    for ii = 1 : size(yC,2)
+        fprintf('%i %8.2f +/- %1.2f \n', ind(ii),nanmean(yC{ii}), nanstd(yC{ii}));
+        stats.descriptive.groupsIndex(ii) = ind(ii);
+        stats.descriptive.mean(ii) =  nanmean(yC{ii});
+        stats.descriptive.median(ii) = nanmedian(yC{ii});
+        stats.descriptive.std(ii) = nanstd(yC{ii});
+        stats.descriptive.SEM(ii) = nanstd(yC{ii})/sqrt(length(yC{ii}));
+        stats.descriptive.q25(ii) = prctile(yC{ii},25);
+        stats.descriptive.q75(ii) = prctile(yC{ii},75);
+        stats.descriptive.q37(ii) = prctile(yC{ii},37.5);
+        stats.descriptive.q62(ii) = prctile(yC{ii},62.5);
+        stats.descriptive.N(ii) = length(yC{ii});
+    end
+else
+    for ii = 1 : size(yC,2)
+        fprintf('%i %8.2f +/- %1.2f \n', ind(ii),circ_mean(yC{ii}), circ_std(yC{ii}));
+        stats.descriptive.groupsIndex(ii) = ind(ii);
+        stats.descriptive.mean(ii) =  wrapTo2Pi(circ_mean(yC{ii}));
+        stats.descriptive.median(ii) = wrapTo2Pi(circ_median(yC{ii}));
+        stats.descriptive.std(ii) = circ_std(yC{ii});
+        stats.descriptive.SEM(ii) = circ_std(yC{ii})/sqrt(length(yC{ii}));
+        stats.descriptive.q25(ii) = wrapTo2Pi(circ_median(yC{ii}) - circ_iqr(yC{ii})/2);
+        stats.descriptive.q75(ii) = wrapTo2Pi(circ_median(yC{ii}) + circ_iqr(yC{ii})/2);
+        stats.descriptive.q37(ii) = NaN;
+        stats.descriptive.q62(ii) = NaN;
+        stats.descriptive.N(ii) = length(yC{ii});
+    end
 end
-
+    
 % normality
 for ii=1:length(ind)
     if ~all(isnan(yC{ii}))
@@ -293,7 +311,7 @@ for ii=1:length(ind)
     stats.oneSample.ttest.df(ii) = statsT.df;
     stats.oneSample.ttest.sd(ii) = statsT.sd;
 end
-
+    
 % mean/median differences
 if repeatedMeasures
     if size(groupAll,2) < 2
@@ -340,8 +358,8 @@ else
         stats.kruskalWallis.stats = statsK;
     end
 end
-
-
+    
+    
 % if two groups
 if length(yC) == 2
     %  Mann-Whitney U-test.
