@@ -280,6 +280,7 @@ if update_cell_metrics
     save([filename '.cell_metrics.cellinfo.mat'],'cell_metrics');
 end
 
+
 %% plots
 if doPlot
     color_pyr = [.9 .3 .3];
