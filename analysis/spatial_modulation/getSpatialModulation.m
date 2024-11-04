@@ -184,6 +184,57 @@ for jj = 1:length(firingTrialsMap.raster_rate{1})
     end
 end
 
+% 4 General metrics
+% 4.1 Stability (it does not separate between recordings... )
+if size(behaviour.masks.recording,1) < size(behaviour.masks.recording,2)
+    behaviour.masks.recording = behaviour.masks.recording';
+end
+list_of_recordings = unique(behaviour.masks.recording);
+count2 = 1;
+for jj = 1:length(list_of_recordings)
+    masks_trials = behaviour.masks.trials(behaviour.masks.recording == list_of_recordings(jj));
+    half_trial = round(max(masks_trials)/2);
+    
+    if ~isfield(behaviour.masks,'direction')
+        behaviour.masks.direction = behaviour.masks.arm; 
+    end
+    if size(behaviour.masks.direction,1) < size(behaviour.masks.direction,2)
+        behaviour.masks.direction = behaviour.masks.direction';
+    end
+    masks_directions = behaviour.masks.direction(behaviour.masks.recording == list_of_recordings(jj));
+    list_of_directions = unique(masks_directions);
+    count = 1;
+    clear idx_second_half idx_first_half
+    for ii = 1:length(list_of_directions)
+        idx_first_half{count} = behaviour.masks.trials<half_trial & behaviour.masks.direction == list_of_directions(ii) & behaviour.masks.recording == list_of_recordings(jj);
+        idx_second_half{count} = behaviour.masks.trials>half_trial & behaviour.masks.direction == list_of_directions(ii) & behaviour.masks.recording == list_of_recordings(jj);
+        count = count + 1;
+    end
+    % get maps
+    clear maps
+    count = 1;
+    for ii = 1:length(idx_first_half)
+        maps{count} = [behaviour.timestamps(idx_first_half{ii}) behaviour.position.lin(idx_first_half{ii})];
+        count = count + 1;
+        maps{count} = [behaviour.timestamps(idx_second_half{ii}) behaviour.position.lin(idx_second_half{ii})];
+        count = count + 1;
+    end    
+    % get fields
+    firingMaps_stability = bz_firingMapAvg(maps, spikes,'saveMat',false,'speedThresh',0.1);
+    
+    % computing stability
+    count = 0;
+    for ii = 1:length(list_of_directions)
+        stability_temp = ones(size(firingMaps_stability.UID));
+        for jj = 1:length(stability_temp)
+            stability_temp(jj) = corr(firingMaps_stability.rateMaps{jj}{1+count}', firingMaps_stability.rateMaps{jj}{2+count}','Type','Spearman');
+        end
+        count = count + 2;
+        spatialModulation.(['stability_map' num2str(count2)]) = stability_temp';
+        count2 = count2 + 1;
+    end
+end
+
 if saveMat
     save([basenameFromBasepath(pwd) '.spatialModulation.cellinfo.mat'],'spatialModulation'); 
 end
