@@ -36,3 +36,11 @@ uledPulses = getuLEDPulses('current',6,'force', true);
 optogeneticResponses = getOptogeneticResponse('numRep',50,'force',true,...
     'analogChannelsList',[3 4 5 6 7 8],'digitalChannelsList',[11 12 13 14 15 16]);
 getuLEDResponse('force',true);
+
+%% code for humans
+preprocessSession('basepath',pwd,'spikeSort',true,'getPos',false, ...
+                    'medianSubstr',true);
+% CLEAN SESSIONS MANUALLY BY PHY
+processSession('promt_hippo_layers',true,'profileType','hippocampus','selectProbe_automatic', false);
+cellTypes = cellTypeClassifier('modelType','fobrebrain5','score_cut_off',0,'imposeCellExplorerPyr',false);
+indexNewSession('copyFiles',true);

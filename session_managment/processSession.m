@@ -45,7 +45,6 @@ addParameter(p,'rightArmTtl_channel',3,@isnumeric)
 addParameter(p,'homeDelayTtl_channel',4,@isnumeric)
 addParameter(p,'tracking_pixel_cm',0.1149,@isnumeric);
 addParameter(p,'excludeAnalysis',[]); % 
-addParameter(p,'useCSD_for_theta_detection',true,@islogical); % If there is the middle shank, otherwhise put false
 addParameter(p,'profileType','hippocampus',@ischar); % options, 'hippocampus' and 'cortex'
 addParameter(p,'rippleMasterDetector_threshold',[1.5 3.5],@isnumeric); % [1.5 3.5]
 addParameter(p,'LED_threshold',0.98,@isnumeric);
@@ -53,6 +52,7 @@ addParameter(p,'createLegacySummaryFolder',true,@islogical);
 addParameter(p,'restrict_to',[0 Inf],@isnumeric);
 addParameter(p,'restrict_to_baseline',true,@islogical);
 addParameter(p,'restrict_to_manipulation',false,@islogical);
+addParameter(p,'selectProbe_automatic',false,@islogical);
 
 parse(p,varargin{:})
 
@@ -76,7 +76,6 @@ rightArmTtl_channel = p.Results.rightArmTtl_channel;
 homeDelayTtl_channel = p.Results.homeDelayTtl_channel;
 tracking_pixel_cm = p.Results.tracking_pixel_cm;
 excludeAnalysis = p.Results.excludeAnalysis;
-useCSD_for_theta_detection = p.Results.useCSD_for_theta_detection;
 profileType = p.Results.profileType;
 rippleMasterDetector_threshold = p.Results.rippleMasterDetector_threshold;
 LED_threshold = p.Results.LED_threshold;
@@ -84,6 +83,7 @@ createLegacySummaryFolder = p.Results.createLegacySummaryFolder;
 restrict_to = p.Results.restrict_to;
 restrict_to_baseline = p.Results.restrict_to_baseline;
 restrict_to_manipulation = p.Results.restrict_to_manipulation;
+selectProbe_automatic = p.Results.selectProbe_automatic;
 
 % Deal with inputs
 prevPath = pwd;
@@ -155,11 +155,10 @@ if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))
     %% 
    
     session = gui_session(session);
-keyboard; 
-    selectProbe('force',true); % choose probe
-    close all
-end
 
+    selectProbe('force',true,'automatic', selectProbe_automatic); % choose probe
+close all
+end
 
 ints = [];
 if restrict_to_manipulation
@@ -378,7 +377,7 @@ end
 
 %% 12. Summary per cell
 if ~any(ismember(excludeAnalysis, {'12',lower('summary')}))
-    plotSummary('showTagCells',true);
+    plotSummary('showTagCells',false);
 end
 
 cd(prevPath);
