@@ -53,11 +53,10 @@ if strcmpi(list_of_results,'all')
         'thetaRun*.PhaseLockingData','lgamma*.PhaseLockingData','hgamma*.PhaseLockingData','ripple*.PhaseLockingData','spatialModulation','placeFields','behavior.cellinfo','ACGPeak',...
         'speedCorr.cellinfo','uLEDResponse.cellinfo','lightSpikeCollisions','uLEDResponse_ripples','uLEDResponse_ripples_pre','uLEDResponse_ripples_post','spikeTriggeredPulses',...
         'explained_variance_stim','explained_variance_delayed','spikeCCGchange','uLEDResponse_spikeTriggered'};
-<<<<<<< HEAD
+
 elseif strcmpi(list_of_results,'standard')
-=======
+
 elseif isempty(list_of_results) && strcmpi(list_of_results,'standard')
->>>>>>> fcb001423d5d496eeaa6cceecb22650df3091dff
     list_of_results = {'optogeneticResponse','averageCCG','ripples_psth','slowOscillations_psth','theta_*.PhaseLockingData','thetaREM*.PhaseLockingData',...
         'thetaRun*.PhaseLockingData','lgamma*.PhaseLockingData','hgamma*.PhaseLockingData','ripple*.PhaseLockingData','spatialModulation','placeFields','behavior.cellinfo','ACGPeak',...
         'speedCorr.cellinfo','uLEDResponse.cellinfo'};
