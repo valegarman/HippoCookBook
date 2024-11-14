@@ -197,7 +197,9 @@ fcr4_220405_sess6,fcr4,fcr4\fcr4_220405_sess6,neural3,c57b1/6,vip/cr/ai80,"105µ
 fsst4_220922_sess8,fsst4,fsst4\fsst4_220922_sess8,neural3,c57b1/6,sst/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,13,CA1sp CA1so PTLp5 PTLp2_3 CA1sr,Bibliocampus
 fsst4_220923_sess9,fsst4,fsst4\fsst4_220923_sess9,neural3,c57b1/6,sst/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,17,pCA1sp CA1so CA1sr CA1slm PTLp5 PTLp2_3,Bibliocampus
 fcr4_220405_sess6,fcr4,fcr4\fcr4_220405_sess6,neural3,c57b1/6,vip/cr/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,121,CA1so CA1sp CA1sr CA1slm DG CA3sp CA3so PTLp5 PTLp2_3,Bibliocampus desVIPnhibition
-ny15session22,ny15,ny15\ny15session22,neural3,epilepsy,wild type,"none",no,20,CA1sp,evoNeurons
+fcamk7_220422_sess18,fcamk7,fcamk7\fcamk7_220422_sess18,neural3,c57b1/6,camkii/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,156,CA1so CA1sp pSUBsp mPFC,'nterneuronsLibrary 
 fsst4_220921_sess7,fsst4,fsst4\fsst4_220921_sess7,neural3,c57b1/6,"sst/ai32","105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,19,pCA1sp CA1sp CA1so CA1sr CA1slm PTLp5 PTLp2_3,Bibliocampus
 fsst4_220928_sess12,fsst4,fsst4\fsst4_220928_sess12,neural3,c57b1/6,"sst/ai32","105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,9,CA1sp CA1so CA1sr CA1slm PTLp5 PTLp6,Bibliocampus
 fcamk7_220420_sess16,fcamk7,fcamk7\fcamk7_220420_sess16,neural3,c57b1/6,camkii/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,245,CA1so CA1sp CA1slm CA1sr mPFC,InterneuronsLibrary 
+ny15session22,ny15,ny15\ny15session22,neural3,epilepsy,wild type,"none",no,20,CA1sp,evoNeurons
+
