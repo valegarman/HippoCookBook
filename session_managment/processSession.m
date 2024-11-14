@@ -155,11 +155,11 @@ if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))
     %% 
    
     session = gui_session(session);
-keyboard; 
+
     selectProbe('force',true); % choose probe
     close all
 end
-
+keyboard; 
 
 ints = [];
 if restrict_to_manipulation
