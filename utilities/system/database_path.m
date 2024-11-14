@@ -21,6 +21,8 @@ computerName = (strtrim(computerName));
             dp = 'Z:\';
         case 'IMW02703'
             dp = 'Z:\';
+        case 'DESKTOP-4MOGMGG'
+            dp = 'Z:\';
         case 'MountainJorge'
             dp = [];
         otherwise

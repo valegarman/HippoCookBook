@@ -205,8 +205,16 @@ end
 %% Make LFP
 if isempty(dir('*.lfp'))
     disp('Creating .lfp file. This could take a while...');
-    ResampleBinary(strcat(basename,'.dat'),strcat(basename,'.lfp'),...
+    try ResampleBinary(strcat(basename,'.dat'),strcat(basename,'.lfp'),...
         session.extracellular.nChannels,1, session.extracellular.sr/session.extracellular.srLfp);
+    catch
+        warning('Unnable to downsample LFP at 1250 Hz...');
+        fprintf('Resampling by an integer factor %2.1i to %3.1i Hz \n', int32(session.extracellular.sr/session.extracellular.srLfp), session.extracellular.sr/(int32(session.extracellular.sr/session.extracellular.srLfp))); %\n
+        ResampleBinary(strcat(basename,'.dat'),strcat(basename,'.lfp'),...
+        session.extracellular.nChannels,1, int32(session.extracellular.sr/session.extracellular.srLfp));
+        session.extracellular.srLfp = session.extracellular.sr/(int32(session.extracellular.sr/session.extracellular.srLfp));
+        save([basepath filesep session.general.name,'.session.mat'],'session','-v7.3');
+    end
 end
 
 %% MEDIAN SUBS

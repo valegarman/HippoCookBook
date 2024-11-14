@@ -72,6 +72,8 @@ addParameter(p,'roundPlotSize',10,@isnumeric);
 addParameter(p,'roundPlotCenterColor',[]);
 addParameter(p,'x_position',[]);
 addParameter(p,'plotConnectors',false,@islogical);
+addParameter(p,'isCircular',false,@islogical);
+addParameter(p,'posthoc_test','tukey-kramer',@ischar);
 
 parse(p,varargin{:});
 color = p.Results.color;
@@ -97,6 +99,8 @@ roundPlotSize = p.Results.roundPlotSize;
 x_position = p.Results.x_position;
 roundPlotCenterColor = p.Results.roundPlotCenterColor;
 plotConnectors = p.Results.plotConnectors;
+isCircular = p.Results.isCircular;
+posthoc_test = p.Results.posthoc_test;
 
 % Dealing with inputs
 if size(y,1) < size(y,2)
@@ -232,20 +236,36 @@ end
 
 
 % DESCRIPTIVE 
-for ii = 1 : size(yC,2)
-    fprintf('%i %8.2f +/- %1.2f \n', ind(ii),nanmean(yC{ii}), nanstd(yC{ii}));
-    stats.descriptive.groupsIndex(ii) = ind(ii);
-    stats.descriptive.mean(ii) =  nanmean(yC{ii});
-    stats.descriptive.median(ii) = nanmedian(yC{ii});
-    stats.descriptive.std(ii) = nanstd(yC{ii});
-    stats.descriptive.SEM(ii) = nanstd(yC{ii})/sqrt(length(yC{ii}));
-    stats.descriptive.q25(ii) = prctile(yC{ii},25);
-    stats.descriptive.q75(ii) = prctile(yC{ii},75);
-    stats.descriptive.q37(ii) = prctile(yC{ii},37.5);
-    stats.descriptive.q62(ii) = prctile(yC{ii},62.5);
-    stats.descriptive.N(ii) = length(yC{ii});
+if isCircular == false
+    for ii = 1 : size(yC,2)
+        fprintf('%i %8.2f +/- %1.2f \n', ind(ii),nanmean(yC{ii}), nanstd(yC{ii}));
+        stats.descriptive.groupsIndex(ii) = ind(ii);
+        stats.descriptive.mean(ii) =  nanmean(yC{ii});
+        stats.descriptive.median(ii) = nanmedian(yC{ii});
+        stats.descriptive.std(ii) = nanstd(yC{ii});
+        stats.descriptive.SEM(ii) = nanstd(yC{ii})/sqrt(length(yC{ii}));
+        stats.descriptive.q25(ii) = prctile(yC{ii},25);
+        stats.descriptive.q75(ii) = prctile(yC{ii},75);
+        stats.descriptive.q37(ii) = prctile(yC{ii},37.5);
+        stats.descriptive.q62(ii) = prctile(yC{ii},62.5);
+        stats.descriptive.N(ii) = length(yC{ii});
+    end
+else
+    for ii = 1 : size(yC,2)
+        fprintf('%i %8.2f +/- %1.2f \n', ind(ii),circ_mean(yC{ii}), circ_std(yC{ii}));
+        stats.descriptive.groupsIndex(ii) = ind(ii);
+        stats.descriptive.mean(ii) =  wrapTo2Pi(circ_mean(yC{ii}));
+        stats.descriptive.median(ii) = wrapTo2Pi(circ_median(yC{ii}));
+        stats.descriptive.std(ii) = circ_std(yC{ii});
+        stats.descriptive.SEM(ii) = circ_std(yC{ii})/sqrt(length(yC{ii}));
+        stats.descriptive.q25(ii) = wrapTo2Pi(circ_median(yC{ii}) - circ_iqr(yC{ii})/2);
+        stats.descriptive.q75(ii) = wrapTo2Pi(circ_median(yC{ii}) + circ_iqr(yC{ii})/2);
+        stats.descriptive.q37(ii) = NaN;
+        stats.descriptive.q62(ii) = NaN;
+        stats.descriptive.N(ii) = length(yC{ii});
+    end
 end
-
+    
 % normality
 for ii=1:length(ind)
     if ~all(isnan(yC{ii}))
@@ -293,7 +313,7 @@ for ii=1:length(ind)
     stats.oneSample.ttest.df(ii) = statsT.df;
     stats.oneSample.ttest.sd(ii) = statsT.sd;
 end
-
+    
 % mean/median differences
 if repeatedMeasures
     if size(groupAll,2) < 2
@@ -340,8 +360,8 @@ else
         stats.kruskalWallis.stats = statsK;
     end
 end
-
-
+    
+    
 % if two groups
 if length(yC) == 2
     %  Mann-Whitney U-test.
@@ -402,22 +422,22 @@ end
 
 % post-hocs
 if size(groupAll,2) < 2    
-    anph=multcompare(statsA,'CType','tukey-kramer','Display','off');
-    kkph=multcompare(statsK,'Display','off');
+    anph=multcompare(statsA,'CType',posthoc_test,'Display','off');
+    kkph=multcompare(statsK,'Display','off','CriticalValueType',posthoc_test);
 
     if repeatedMeasures
         stats.r_anova.posthoc.tbl = anph;
-        stats.r_anova.posthoc.test = 'tukey-kramer';
+        stats.r_anova.posthoc.test = posthoc_test;
         stats.friedman.posthoc.tbl = kkph;
-        stats.friedman.posthoc.test = 'tukey-kramer';
+        stats.friedman.posthoc.test = posthoc_test;
     else
         stats.anova.posthoc.tbl = anph;
-        stats.anova.posthoc.test = 'tukey-kramer';
+        stats.anova.posthoc.test = posthoc_test;
         stats.kruskalWallis.posthoc.tbl = kkph;
-        stats.kruskalWallis.posthoc.test = 'tukey-kramer';
+        stats.kruskalWallis.posthoc.test = posthoc_test;
     end
 else
-    anph=multcompare(statsA,'CType','tukey-kramer','Display','off','Dimension',[1:size(groupAll,2)]);
+    anph=multcompare(statsA,'CType',posthoc_test,'Display','off','Dimension',[1:size(groupAll,2)]);
     % change numbers
     posLin = [1:length(ind)];                                              
     c=unique(indAll(:,end));
@@ -443,7 +463,7 @@ else
     anphInd = sortrows(anphInd,[1 2]);
     
     stats.anova.posthoc.tbl = anphInd;
-    stats.anova.posthoc.test = 'tukey-kramer';
+    stats.anova.posthoc.test = posthoc_test;
  end
 
 if pvar>=0.05
@@ -834,9 +854,9 @@ if doPlot
     end
 end
 
-disp('Tukey ANOVA pairwise comparison ');
+disp('ANOVA pairwise comparison ');
 disp(anph);
-disp('Tukey KK pairwise comparison ');
+disp('KK pairwise comparison ');
 try disp(kkph); end
 
 end

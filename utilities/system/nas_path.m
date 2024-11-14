@@ -11,17 +11,16 @@ function location = nas_path(input)
     location = [];
     switch computerName
         case 'manu'
-            keyboard;
+            location = whereIsThisNas2(input);
         case 'IMW02691'
             location = whereIsThisNas1(input);
         case 'IMW02703' % pc de andrea
             location = whereIsThisNas1(input);
-        case 'DESKTOP-BEPJ8P0'
+        case 'DESKTOP-BEPJ8P0' % pc of Martu
             location = whereIsThisNas1(input);
         otherwise
             location = whereIsThisNas1(input);
     end
-
 end
 
 function here = whereIsThisNas1(input)
@@ -30,5 +29,14 @@ function here = whereIsThisNas1(input)
             here = 'Z:';
         case 'neural3'
             here = 'Y:';
+    end
+end
+
+function here = whereIsThisNas2(input)
+    switch lower(input)
+        case 'neural'
+            here = '/Volumes/NEURAL';
+        case 'neural3'
+            here = '/Volumes/NEURAL3';
     end
 end
