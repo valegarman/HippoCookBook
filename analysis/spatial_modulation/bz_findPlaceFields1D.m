@@ -89,6 +89,8 @@ addParameter(p,'minPeak2nd',0.6,@isnumeric);
 addParameter(p,'sepEdge',0.05,@isnumeric);
 addParameter(p,'verbose','off',@isstr);
 addParameter(p,'saveMat', true, @islogical);
+addParameter(p,'plotOpt', true, @islogical);
+
 
 parse(p,varargin{:});
 basepath = p.Results.basepath;
@@ -112,6 +114,7 @@ minPeak = p.Results.minPeak;
 minPeak2nd = p.Results.minPeak2nd;
 verbose = p.Results.verbose;
 saveMat = p.Results.saveMat;
+plotOpt = p.Results.plotOpt;
 % Find place fields
 for unit = 1:length(firingMaps.rateMaps)     
     for c = 1:length(firingMaps.rateMaps{1})
@@ -253,39 +256,41 @@ end
 % ==========
 %   PLOT    
 % ==========
-if isfield(firingMaps, 'cmBin')
-    xtrack = linspace(0, sizeMaze * firingMaps.cmBin, sizeMaze);
-else
-    xtrack = linspace(0, sizeMaze, sizeMaze);
-end
-mkdir(basepath,'SummaryFigures');
-for c = 1:length(firingMaps.rateMaps{1})
-    figure;
-    set(gcf,'Position',[100 -100 2500 1200])
-    for unit = 1:size(firingMaps.UID,2)
-        subplot(7,ceil(size(firingMaps.UID,2)/7),unit); % autocorrelogram
-        plot(xtrack, firingMaps.rateMaps{unit}{c},'k')
-        if sum(firingMaps.rateMaps{unit}{c})>0
-            hold on
-            for ii = 1:size(mapStats{unit}{c}.field,2)
-                try 
-                plot(xtrack(find(mapStats{unit}{c}.field(:,ii))),firingMaps.rateMaps{unit}{c}(mapStats{unit}{c}.field(:,ii)==1),'linewidth',2)
-                plot([1 1]*xtrack(mapStats{unit}{c}.x(ii)),[0 firingMaps.rateMaps{unit}{c}(mapStats{unit}{c}.x(ii))],'--k')
+if plotOpt
+    if isfield(firingMaps, 'cmBin')
+        xtrack = linspace(0, sizeMaze * firingMaps.cmBin, sizeMaze);
+    else
+        xtrack = linspace(0, sizeMaze, sizeMaze);
+    end
+    mkdir(basepath,'SummaryFigures');
+    for c = 1:length(firingMaps.rateMaps{1})
+        figure;
+        set(gcf,'Position',[100 -100 2500 1200])
+        for unit = 1:size(firingMaps.UID,2)
+            subplot(7,ceil(size(firingMaps.UID,2)/7),unit); % autocorrelogram
+            plot(xtrack, firingMaps.rateMaps{unit}{c},'k')
+            if sum(firingMaps.rateMaps{unit}{c})>0
+                hold on
+                for ii = 1:size(mapStats{unit}{c}.field,2)
+                    try 
+                    plot(xtrack(find(mapStats{unit}{c}.field(:,ii))),firingMaps.rateMaps{unit}{c}(mapStats{unit}{c}.field(:,ii)==1),'linewidth',2)
+                    plot([1 1]*xtrack(mapStats{unit}{c}.x(ii)),[0 firingMaps.rateMaps{unit}{c}(mapStats{unit}{c}.x(ii))],'--k')
+                    end
                 end
             end
+            if max(firingMaps.rateMaps{unit}{c}) < 10
+                ylim([0 10]);
+            end
+            if unit == 1
+                ylabel('FR [Hz]');
+                xlabel('Track [cm]');
+            end
+            title(num2str(unit),'FontWeight','normal','FontSize',10);
         end
-        if max(firingMaps.rateMaps{unit}{c}) < 10
-            ylim([0 10]);
-        end
-        if unit == 1
-            ylabel('FR [Hz]');
-            xlabel('Track [cm]');
-        end
-        title(num2str(unit),'FontWeight','normal','FontSize',10);
+        saveas(gcf,[basepath,filesep,'SummaryFigures',filesep ,'firingMap_' num2str(c) '.png'],'png');
     end
-    saveas(gcf,[basepath,filesep,'SummaryFigures',filesep ,'firingMap_' num2str(c) '.png'],'png');
+    close all;
 end
-close all;
 
 % for unit = 1:length(firingMaps.rateMaps)
 %     figure;
