@@ -156,8 +156,9 @@ if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))
    
     session = gui_session(session);
 
-    selectProbe('force',true); % choose probe
-close allend
+    selectProbe('automatic',false,'force',true); % choose probe
+    close all
+end
 
 ints = [];
 if restrict_to_manipulation
