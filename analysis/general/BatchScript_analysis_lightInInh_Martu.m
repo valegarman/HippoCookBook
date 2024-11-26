@@ -9,8 +9,8 @@ targetBehavior = 'linear maze';
 HCB_directory = what('HippoCookBook'); 
 
 sessionsTable = readtable([HCB_directory.path filesep 'indexedSessions.csv']); % the variable is called allSessions
-%length(sessionsTable.SessionName)
-for ii = 132 : length(sessionsTable.SessionName)
+
+for ii = 190 : length(sessionsTable.SessionName)
      %% Analysis general all over Camkii/32 animal
     if contains(sessionsTable.Project{ii}, targetProject) || strcmpi('all', targetProject)
 
@@ -48,7 +48,7 @@ end
 
 %% Analysis for pre and post synaptic changes
 
-for ii = 1:length(sessionsTable.SessionName)
+for ii = 85:length(sessionsTable.SessionName)
     
     if contains(sessionsTable.Project{ii}, targetProject) && contains(sessionsTable.Behavior{ii},targetBehavior) || strcmpi('all', targetProject) 
         
@@ -72,8 +72,8 @@ for ii = 1:length(sessionsTable.SessionName)
             parfor mm = 1:spikes.numcells
                 disp(mm);
 
-                uLEDResponses_interval_pre{mm} = getuLEDResponse_intervals([spikes_times{mm} + monosyn_inh_win(1) spikes_times{mm} + monosyn_inh_win(2)],...
-                    'saveMat', false,'numRep',500,'doPlot', false,'getRaster', false, 'verbose', false,'restrict_to',pre_maze);
+                % uLEDResponses_interval_pre{mm} = getuLEDResponse_intervals([spikes_times{mm} + monosyn_inh_win(1) spikes_times{mm} + monosyn_inh_win(2)],...
+                %     'saveMat', false,'numRep',500,'doPlot', false,'getRaster', false, 'verbose', false,'restrict_to',pre_maze);
 
                 uLEDResponses_interval_post{mm} = getuLEDResponse_intervals([spikes_times{mm} + monosyn_inh_win(1) spikes_times{mm} + monosyn_inh_win(2)],...
                     'saveMat', false,'numRep',500,'doPlot', false,'getRaster', false, 'verbose', false,'restrict_to',post_maze);
