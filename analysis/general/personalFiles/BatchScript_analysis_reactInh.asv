@@ -220,13 +220,13 @@ for ii = 1:length(targetSessions)
             coactivation.pairs_pyramidalCells.post_id = pairs.post_id(pyramidal_neuron_pair,:);
 
             % light responsive neurons and pyramidal neurons
-            uledResponses = getuLEDResponse('force', true, 'winSize', .2, 'before_pulse_win', [-.1 -0.05], 'during_pulse_win', [0.01 .020], 'winSizePlot', [-.1 .1], 'saveMat', false);
-            coactivation.uledResponses = uledResponses;
+            uledResponses = getuLEDResponse('force', true, 'winSize', .2, 'before_pulse_win', [-.1 -0.05], 'during_pulse_win', [0.01 .020], 'winSizePlot', [-.1 .1]);
+            uledResponses = getuLEDResponse;
             boostrap_mat = nansum(squeeze(abs(uledResponses.bootsTrapTest(:,1,:))),2)>0;
             targetCells = pyramidal_neurons & boostrap_mat;
-            coactivation.units_pyramidalCells_lightResponsive.preZ = units.preZ(targetCells,targetCells);
-            coactivation.units_pyramidalCells_lightResponsive.coactZ = units.coactZ(targetCells,targetCells);
-            coactivation.units_pyramidalCells_lightResponsive.postZ = units.postZ(targetCells,targetCells);
+            coactivation.pyramidalCells_lightResponsive.preZ = units.preZ(targetCells,targetCells);
+            coactivation.pyramidalCells_lightResponsive.coactZ = units.coactZ(targetCells,targetCells);
+            coactivation.pyramidalCells_lightResponsive.postZ = units.postZ(targetCells,targetCells);
 
             figure
             subplot(1,3,1)
