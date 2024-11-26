@@ -41,6 +41,14 @@ fileTargetAux =  dir('auxiliary*.dat');
 m = memmapfile(fullfile(basepath,fileTargetAmplifier.name),'Format','int16','Writable', true);
 data=reshape(m.Data,xml.nChannels,[]);
 timestamps = linspace(0,size(data,2)/xml.rates.wideband,size(data,2));
+
+% Creating time.dat
+time = 0:1:length(data(1,:))-1;
+fileID_time = fopen('time.dat','w'); % Open a file.
+disp('Writing time.dat file...')
+fwrite(fileID_time,time,'int32');
+fclose(fileID_time);
+
 if strcmpi(option,'zeroes')
     for ii = 1:size(ints,1) %
         idx = find(timestamps >= ints(ii,1) & timestamps <= ints(ii,2));
@@ -59,13 +67,20 @@ elseif strcmpi(option,'remove')
     fileID = fopen('temp.dat','w');
     disp('Writing dat file...'); fwrite(fileID,data,'int16');
     fclose(fileID);
-    clear m data
+    % clear m data
     delete(fileTargetAmplifier.name);
     movefile('temp.dat', fileTargetAmplifier.name);
     
 else
     error('Not recognized option!');
 end
+% Creating time.dat
+time = 0:1:length(data(1,:))-1;
+fileID_time = fopen('time.dat','w'); % Open a file.
+disp('Writing time.dat file...')
+fwrite(fileID_time,time,'int32');
+fclose(fileID_time);
+
 
 cd(prevPath);
 

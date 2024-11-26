@@ -156,9 +156,17 @@ if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))
    
     session = gui_session(session);
 
+<<<<<<< HEAD
+    selectProbe('automatic',false,'force',true); % choose probe
+    close all
+end
+=======
+
     selectProbe('force',true,'automatic', selectProbe_automatic); % choose probe
 close all
 end
+
+>>>>>>> 0b5e8e6dee9c79dca9af27ee0849b975c08947fd
 
 ints = [];
 if restrict_to_manipulation
@@ -275,7 +283,8 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     getSpikesRank('events','ripples');
 
     % 8.3 Theta intervals
-    thetaEpochs = detectThetaEpochs('force',true,'useCSD',false);
+    thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection);
+    
 end
 
 %% 9. Phase Modulation
