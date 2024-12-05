@@ -24,7 +24,7 @@ for ii = 190 : length(sessionsTable.SessionName)
             spikes = loadSpikes;
             spikes_times = spikes.times;
             monosyn_inh_win = [0.001 0.021]; % 01to21
-            monosyn_control_win = [-0.041 -0.021]; % 01to21
+            monosyn_control_win = [-0.041 -0.021];
 
             parfor mm = 1:spikes.numcells
                 disp(mm);
@@ -48,7 +48,7 @@ end
 
 %% Analysis for pre and post synaptic changes
 
-for ii = 85:length(sessionsTable.SessionName)
+for ii = 1:length(sessionsTable.SessionName)
     
     if contains(sessionsTable.Project{ii}, targetProject) && contains(sessionsTable.Behavior{ii},targetBehavior) || strcmpi('all', targetProject) 
         

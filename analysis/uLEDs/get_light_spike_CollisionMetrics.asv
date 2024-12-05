@@ -40,6 +40,8 @@ update_cell_metrics = p.Results.update_cell_metrics;
 save_as = p.Results.save_as;
 
 
+keyboard;
+
 % Deal with inputs
 prevPath = pwd;
 cd(basepath);
@@ -251,13 +253,18 @@ if ~isempty(spikes)
     for ii = 1:length(spikes.times)
         spikes_times_baseline{ii} = spikes.times{ii}(spikes.times{ii} < t_limit);
     end
-    [ccg,t] = CCG(spikes_times_baseline,[],'binSize',0.0004,'duration',0.12,'norm','rate');
+    [ccg,t] = CCG(spikes.times,[],'binSize',0.0004,'duration',0.12,'norm','rate');
     fprintf('\n');
     for ii = 1:spikes.numcells
-        pre_post_baseline_CCG    = [pre_post_baseline_CCG; squeeze(ccg(:,ii,:))'];
+        pre_post_CCG    = [pre_post_CCG; squeeze(ccg(:,ii,:))'];
+        pre_firingRate  = [pre_firingRate;...
+            ones(size(spikes.times'))*length(spikes.times{ii})/(max(spikes.times{ii})-min(spikes.times{ii}))];
+        post_firingRate = [post_firingRate; cellfun(@length,spikes.times)./(cellfun(@max,spikes.times)-cellfun(@min,spikes.times))];
+        pre_waveforms   = [pre_waveforms; (spikes.filtWaveform{ii}'* ones(size(spikes.times)))'];
+        post_waveforms  = [post_waveforms; cat(1,spikes.filtWaveform{:})];
     end
 end
-collision_metrics.pre_post_baseline_CCG  = pre_post_baseline_CCG;
+
 % actual metrics
 collision_metrics.rate_difference            = uLEDResponses_OutInterval.maxRatePulse - uLEDResponses_InInterval.maxRatePulse;
 collision_metrics.rateZ_difference           = uLEDResponses_OutInterval.maxZPulse - uLEDResponses_InInterval.maxZPulse;
