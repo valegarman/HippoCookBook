@@ -40,9 +40,9 @@ addParameter(p,'analog_optogenetic_channels',[],@isnumeric);
 addParameter(p,'promt_hippo_layers',true,@islogical);
 addParameter(p,'manual_analog_pulses_threshold',false,@islogical);
 addParameter(p,'bazler_ttl_channel',[],@isnumeric);
-addParameter(p,'leftArmTtl_channel',2,@isnumeric)
-addParameter(p,'rightArmTtl_channel',3,@isnumeric)
-addParameter(p,'homeDelayTtl_channel',4,@isnumeric)
+addParameter(p,'leftArmTtl_channel',[],@isnumeric)
+addParameter(p,'rightArmTtl_channel',[],@isnumeric)
+addParameter(p,'homeDelayTtl_channel',[],@isnumeric)
 addParameter(p,'tracking_pixel_cm',0.1149,@isnumeric);
 addParameter(p,'excludeAnalysis',[]); % 
 addParameter(p,'useCSD_for_theta_detection',true,@islogical); % If there is the middle shank, otherwhise put false
@@ -88,6 +88,7 @@ restrict_to_manipulation = p.Results.restrict_to_manipulation;
 % Deal with inputs
 prevPath = pwd;
 cd(basepath);
+keyboard;
 
 if createLegacySummaryFolder
     if exist('SummaryFigures') == 7
@@ -110,6 +111,7 @@ if length(excludeAnalysis) == 0
     excludeAnalysis = num2str(excludeAnalysis);
 end
 excludeAnalysis = lower(excludeAnalysis);
+
 %% 1. Runs sessionTemplate
 if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))
     try
@@ -160,6 +162,10 @@ if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))
     close all
 end
 keyboard; 
+
+leftArmTtl_channel = session.analysisTags.leftArmTtl_channel;
+rightArmTtl_channel = session.analysisTags.rightArmTtl_channel;
+homeDelayTtl_channel = session.analysisTags.homeDelayTtl_channel;
 
 ints = [];
 if restrict_to_manipulation
@@ -323,7 +329,7 @@ end
 if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
     try
         spikes = loadSpikes;
-        getSessionTracking('roiTracking','manual','forceReload',false,'LED_threshold',LED_threshold,'convFact',tracking_pixel_cm);
+        getSessionTracking('roiTracking','manual','forceReload',false,'LED_threshold',LED_threshold,'convFact',tracking_pixel_cm,'leftTTL_reward',leftArmTtl_channel,'rightTTL_reward',rightArmTtl_channel);
         try
             getSessionArmChoice('task','alternation','leftArmTtl_channel',leftArmTtl_channel,'rightArmTtl_channel',rightArmTtl_channel,'homeDelayTtl_channel',homeDelayTtl_channel);
         catch
