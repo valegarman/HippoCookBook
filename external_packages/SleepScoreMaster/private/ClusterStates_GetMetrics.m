@@ -86,6 +86,8 @@ end
             downsamplefactor = 1;
         case 1000
             downsamplefactor = 4;
+        case 252
+            downsamplefactor = 1;
         otherwise
             display('sf not recognized... if only you made this able to set its own downsample...')
     end

@@ -7,10 +7,13 @@ switch lower(project)
             'thetaRun*.PhaseLockingData','lgamma*.PhaseLockingData','hgamma*.PhaseLockingData','ripple*.PhaseLockingData','spatialModulation','placeFields','behavior.cellinfo','ACGPeak',...
             'speedCorr','uLEDResponse.cellinfo'};
 
+
         case 'lightininh'
         list = {'optogeneticResponse','averageCCG','ripples_psth','slowOscillations_psth','theta_*.PhaseLockingData','thetaREM*.PhaseLockingData',...
         'thetaRun*.PhaseLockingData','lgamma*.PhaseLockingData','hgamma*.PhaseLockingData','ripple*.PhaseLockingData','spatialModulation','placeFields','behavior.cellinfo','ACGPeak',...
         'speedCorr.cellinfo','uLEDResponse.cellinfo','lightSpikeCollisions','spikeCCGchange','lightSpikeCollisions_control'};
 
+    otherwise
+        list = 'standard';
 end
 end

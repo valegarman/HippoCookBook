@@ -110,7 +110,7 @@ if any(restrict_to ~= [0 Inf])
     warning('Restricting analysis for intervals...');
     for ii = 1:length(spikes.times)
         [status] = InIntervals(spikes.times{ii},restrict_to);
-        spikes.times{ii} = spikes.times{ii}(status);
+        spikes.times{ii} = spikes.times{ii}(status);        
     end 
 end
 

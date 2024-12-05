@@ -56,7 +56,7 @@ leftArmTtl_channel = p.Results.leftArmTtl_channel;
 rightArmTtl_channel = p.Results.rightArmTtl_channel;
 homeDelayTtl_channel = p.Results.homeDelayTtl_channel;
 
-% keyboard;
+
 %% Deal with inputs
 if ~isempty(dir([basepath filesep '*.SessionArmChoice.Events.mat'])) || forceReload
     disp('Session arm choice already detected! Loading file.');
@@ -67,8 +67,17 @@ end
 
 %% Find subfolder recordings
 cd(basepath);
-try [sessionInfo] = bz_getSessionInfo(basepath, 'noPrompts', true);
-    C = strsplit(sessionInfo.session.name,'_');
+% try [sessionInfo] = bz_getSessionInfo(basepath, 'noPrompts', true);
+%     C = strsplit(sessionInfo.session.name,'_');
+%     sess = dir(strcat(C{1},'_',C{2},'*')); % get session files
+% catch
+%     warning('No sessionInfo found!');
+%     sess = dir(pwd);
+%     sess(1:2) = [];
+% end
+
+try [session] = loadSession();
+    C = strsplit(session.general.name,'_');
     sess = dir(strcat(C{1},'_',C{2},'*')); % get session files
 catch
     warning('No sessionInfo found!');
