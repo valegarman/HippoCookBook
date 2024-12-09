@@ -151,6 +151,9 @@ if ~isempty(analysisPath)
     disp('Copied files. Peforming preprocessSession...')
 end
     
+%% Create .time dat
+disp('Creating time.dat files...');
+createTimeDat();
 %% Concatenate sessions
 disp('Concatenate session folders...'); 
 concatenateDats(pwd,0,1);
@@ -165,15 +168,9 @@ if  ~isempty(analogChannelsList)
 end
 if ~isempty(dir('*digitalIn.dat')) 
     digitalIn = getDigitalIn('fs',session.extracellular.sr); 
+else
+    digitalIn = getDigitalIn_OE('all','fs',session.extracellular.sr);
 end
-
-if getDigitalInputBySubfolders
-    try
-        digitalIn = getDigitalInBySubfolders('fs',session.extracellular.sr);
-    end
-end
-
-% digitalIn = pap_getDigitalIn('all','fs',session.extracellular.sr);
 
 %% Remove stimulation artifacts
 try
@@ -227,6 +224,14 @@ if isempty(dir([session.general.name '_original.dat']))
 else
     warning('Session was already median-subtracted. Spiking...');
 end
+
+%% Fiber photometry analysis
+try
+    fiber = getSessionFiberPhotometry();
+catch
+    warning('No possible to load fiber photometry data...')
+end
+cd(basepath)
 
 %% Kilosort concatenated sessions
 if spikeSort
