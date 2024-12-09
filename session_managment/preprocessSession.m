@@ -1,4 +1,3 @@
-
 function  preprocessSession(varargin)
 
 %         bz_PreprocessSession(varargin)
