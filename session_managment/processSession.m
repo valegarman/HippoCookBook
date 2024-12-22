@@ -156,20 +156,12 @@ if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))
         session = sessionTemplate(basepath,'showGUI',true);
     end
     %% 
-   
+   keyboard;
     session = gui_session(session);
 
-<<<<<<< HEAD
-    selectProbe('automatic',false,'force',true); % choose probe
+    selectProbe('force',true,'automatic', selectProbe_automatic); % choose probe
     close all
 end
-=======
-
-    selectProbe('force',true,'automatic', selectProbe_automatic); % choose probe
-close all
-end
-
->>>>>>> 0b5e8e6dee9c79dca9af27ee0849b975c08947fd
 
 leftArmTtl_channel = session.analysisTags.leftArmTtl_channel;
 rightArmTtl_channel = session.analysisTags.rightArmTtl_channel;
