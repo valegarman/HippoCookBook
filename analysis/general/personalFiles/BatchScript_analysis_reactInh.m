@@ -124,7 +124,10 @@ end
 %% Analysis for co-activation
 clear; close all
 targetProject= 'All';
-list_of_sessions = {'fCamk10_220930_sess16', 'fCamk10_221007_sess21'};
+list_of_sessions = {'fCamk10_220915_sess5', 'fCamk10_220916_sess6', 'fCamk10_220930_sess16'};
+
+
+
 
 HCB_directory = what('HippoCookBook'); 
 sessionsTable = readtable([HCB_directory.path filesep 'indexedSessions.csv']); % the variable is called allSessions
@@ -227,6 +230,82 @@ for ii = 1:length(targetSessions)
             coactivation.units_pyramidalCells_lightResponsive.preZ = units.preZ(targetCells,targetCells);
             coactivation.units_pyramidalCells_lightResponsive.coactZ = units.coactZ(targetCells,targetCells);
             coactivation.units_pyramidalCells_lightResponsive.postZ = units.postZ(targetCells,targetCells);
+
+            % explained variance
+            spikes = loadSpikes;
+            evStats_units = explained_variance(spikes, epochsInts(find(ismember(epochsNames,'precoactivation')),:), epochsInts(find(ismember(epochsNames,'coactivation')),:), epochsInts(find(ismember(epochsNames,'postcoactivation')),:),'saveMat',false);
+            temp_spikes = spikes;
+            temp_spikes.times(~pyramidal_neurons) = [];
+            evStats_pyramidalCells = explained_variance(temp_spikes, epochsInts(find(ismember(epochsNames,'precoactivation')),:), epochsInts(find(ismember(epochsNames,'coactivation')),:), epochsInts(find(ismember(epochsNames,'postcoactivation')),:),'saveMat',false);
+            temp_spikes = spikes;
+            temp_spikes.times(~targetCells) = [];
+            evStats_pyramidalCells_lightResponsive = explained_variance(temp_spikes, epochsInts(find(ismember(epochsNames,'precoactivation')),:), epochsInts(find(ismember(epochsNames,'coactivation')),:), epochsInts(find(ismember(epochsNames,'postcoactivation')),:),'saveMat',false);
+            coactivation.evStats_units = evStats_units;
+            coactivation.evStats_pyramidalCells = evStats_pyramidalCells;
+            coactivation.evStats_pyramidalCells_lightResponsive = evStats_pyramidalCells_lightResponsive;
+            
+            % get pairs of coactivated uleds
+            [status] = InIntervals(uledpulses.timestamps(:,1),epochsInts(find(ismember(epochsNames,'coactivation')),:));
+            times_coactivation = uledpulses.timestamps(status==1,1);
+            codes_coactivation = uledpulses.code(status==1,1);
+            list_codes = unique(codes_coactivation);
+            coactivation.times = [];
+            for kk = 1:12
+                coactivation.times{kk} = times_coactivation(find(codes_coactivation==kk));
+            end
+            binSize = [0.001];
+            winSize = [1];
+            [allCcg, t_ccg] = CCG(coactivation.times,[],'binSize',binSize,'duration',winSize,'Fs',1/session.extracellular.sr);
+            win_coactivation = 0.01;
+            win_coactivation = InIntervals(t_ccg, [-win_coactivation win_coactivation]);
+            for kk = 1:size(allCcg,2)
+                for jj = 1:size(allCcg,2)
+                    temp = zscore(allCcg(:,kk,jj));
+                    coactivation_matrix(kk,jj) = max(temp(win_coactivation)) > 10;
+                end
+            end
+            coactivation.uled_coactivation_matrix = coactivation_matrix;
+            
+            % classifying neurons according to response
+            win_coact = [0.01];
+            zero_ind = round(size(averageCCG_precoact.allCcg,1)/2);
+            win_coact = InIntervals(averageCCG_precoact.timestamps, [-win_coact win_coact]);
+            win_Z = [averageCCG_precoact.timestamps(1) -0.10];
+            win_Z = InIntervals(averageCCG_precoact.timestamps, [win_Z(1) win_Z(2)]);
+            boostrap_mat = squeeze(uledResponses.bootsTrapTest(:,1,:));
+
+            uleds.preZ = [];
+            uleds.coactZ = [];
+            uleds.postZ = [];
+            uleds.post_pre = [];
+            uleds.rateZmat = [];
+
+            % coactivation zscore
+            cell_metrics = loadCellMetrics;
+            pyramidal_neurons = ismember(cell_metrics.putativeCellType, 'Pyramidal Cell')';
+            goodCells = pyramidal_neurons;  %& max(uledResponses.maxRespLED.values,[],2) > 1;
+            for kk = 1:size(boostrap_mat,2)
+                for jj = 1:size(boostrap_mat,2)
+                    % find neurons
+                    neurons_kk = find(boostrap_mat(:,kk)==1 & goodCells);
+                    neurons_jj  = find(boostrap_mat(:,jj )==1 & goodCells);
+                    uleds.rateZmat(kk,jj) = nanmean(uledResponses.rateZDuringPulse(neurons_kk,1,jj));
+
+                    % coactivations
+                    temp = units.preZ(neurons_kk,neurons_jj);
+                    uleds.preZ(kk,jj) = nanmean(temp(:));
+                    temp = units.coactZ(neurons_kk,neurons_jj);
+                    uleds.coactZ(kk,jj) = nanmean(temp(:));
+                    temp = units.postZ(neurons_kk,neurons_jj);
+                    uleds.postZ(kk,jj) = nanmean(temp(:));
+                    uleds.post_pre(kk,jj) = uleds.postZ(kk,jj) - uleds.preZ(kk,jj);
+                end
+            end
+
+            % Plots
+
+
+  
 
             figure
             subplot(1,3,1)

@@ -1,4 +1,3 @@
-
 function [uLEDResponses] = getuLEDResponse(varargin)
 % [uLEDResponses] = getuLEDResponse(varargin)
 %
