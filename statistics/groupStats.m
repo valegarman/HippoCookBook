@@ -1,4 +1,3 @@
-
 function [stats,h] = groupStats(y,group,varargin)
 % Descriptive and mean/median difference analysis, with serveral plot
 % options.
@@ -30,6 +29,7 @@ function [stats,h] = groupStats(y,group,varargin)
 %    'plotConnectors' Default, false
 %    'repeatedMeasures' Default, false
 %    'dataColor'    For data points and lines, Default [.7 .7 .7];
+%    'dataSize'     For data points, Default 3
 %    'cloudColor'   For data plots, Default [1 1 1];   
 %    'dataAlpha'    For data points and lines, Default .5;
 %    'posOffset'    When 'inAxis', it adds an offset to the group numbers.
@@ -73,6 +73,7 @@ addParameter(p,'roundPlotCenterColor',[]);
 addParameter(p,'x_position',[]);
 addParameter(p,'plotConnectors',false,@islogical);
 addParameter(p,'isCircular',false,@islogical);
+addParameter(p,'posthoc_test','tukey-kramer',@ischar);
 
 parse(p,varargin{:});
 color = p.Results.color;
@@ -99,6 +100,7 @@ x_position = p.Results.x_position;
 roundPlotCenterColor = p.Results.roundPlotCenterColor;
 plotConnectors = p.Results.plotConnectors;
 isCircular = p.Results.isCircular;
+posthoc_test = p.Results.posthoc_test;
 
 % Dealing with inputs
 if size(y,1) < size(y,2)
@@ -420,22 +422,22 @@ end
 
 % post-hocs
 if size(groupAll,2) < 2    
-    anph=multcompare(statsA,'CType','tukey-kramer','Display','off');
-    kkph=multcompare(statsK,'Display','off');
+    anph=multcompare(statsA,'CType',posthoc_test,'Display','off');
+    kkph=multcompare(statsK,'Display','off','CriticalValueType',posthoc_test);
 
     if repeatedMeasures
         stats.r_anova.posthoc.tbl = anph;
-        stats.r_anova.posthoc.test = 'tukey-kramer';
+        stats.r_anova.posthoc.test = posthoc_test;
         stats.friedman.posthoc.tbl = kkph;
-        stats.friedman.posthoc.test = 'tukey-kramer';
+        stats.friedman.posthoc.test = posthoc_test;
     else
         stats.anova.posthoc.tbl = anph;
-        stats.anova.posthoc.test = 'tukey-kramer';
+        stats.anova.posthoc.test = posthoc_test;
         stats.kruskalWallis.posthoc.tbl = kkph;
-        stats.kruskalWallis.posthoc.test = 'tukey-kramer';
+        stats.kruskalWallis.posthoc.test = posthoc_test;
     end
 else
-    anph=multcompare(statsA,'CType','tukey-kramer','Display','off','Dimension',[1:size(groupAll,2)]);
+    anph=multcompare(statsA,'CType',posthoc_test,'Display','off','Dimension',[1:size(groupAll,2)]);
     % change numbers
     posLin = [1:length(ind)];                                              
     c=unique(indAll(:,end));
@@ -461,7 +463,7 @@ else
     anphInd = sortrows(anphInd,[1 2]);
     
     stats.anova.posthoc.tbl = anphInd;
-    stats.anova.posthoc.test = 'tukey-kramer';
+    stats.anova.posthoc.test = posthoc_test;
  end
 
 if pvar>=0.05
@@ -518,7 +520,7 @@ if doPlot
                 posData((posData)>0.3) = posData((posData)>0.3)/2;
                 posData((posData)<-0.3) = posData((posData)<-0.3)/2;
                 plot(pos(ii)+ posData, y(group==ind(ii)),'o','color',[1 1 1],...
-                       'MarkerFaceColor','k','MarkerEdgeColor','none','MarkerSize',dataSize);
+                       'MarkerFaceColor',cloudColor,'MarkerEdgeColor',cloudColor,'MarkerSize',dataSize);
             end
             plot(pos(ii)-0.1, m,'o','MarkerFaceColor',roundPlotCenterColor(ii,:),'MarkerEdgeColor',color(ii,:),'MarkerSize',roundPlotSize);
             plot([pos(ii)-0.1 pos(ii)-0.1], [m-s1 m+s2],'-','MarkerFaceColor',color(ii,:),'MarkerEdgeColor',color(ii,:),...
@@ -852,9 +854,9 @@ if doPlot
     end
 end
 
-disp('Tukey ANOVA pairwise comparison ');
+disp('ANOVA pairwise comparison ');
 disp(anph);
-disp('Tukey KK pairwise comparison ');
+disp('KK pairwise comparison ');
 try disp(kkph); end
 
 end

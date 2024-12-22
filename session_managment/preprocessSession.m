@@ -1,4 +1,3 @@
-
 function  preprocessSession(varargin)
 
 %         bz_PreprocessSession(varargin)
@@ -151,6 +150,9 @@ if ~isempty(analysisPath)
     disp('Copied files. Peforming preprocessSession...')
 end
     
+%% Create .time dat
+disp('Creating time.dat files...');
+createTimeDat();
 %% Concatenate sessions
 disp('Concatenate session folders...'); 
 concatenateDats(pwd,0,1);
@@ -165,15 +167,9 @@ if  ~isempty(analogChannelsList)
 end
 if ~isempty(dir('*digitalIn.dat')) 
     digitalIn = getDigitalIn('fs',session.extracellular.sr); 
+else
+    digitalIn = getDigitalIn_OE('all','fs',session.extracellular.sr);
 end
-
-if getDigitalInputBySubfolders
-    try
-        digitalIn = getDigitalInBySubfolders('fs',session.extracellular.sr);
-    end
-end
-
-% digitalIn = pap_getDigitalIn('all','fs',session.extracellular.sr);
 
 %% Remove stimulation artifacts
 try
@@ -205,8 +201,16 @@ end
 %% Make LFP
 if isempty(dir('*.lfp'))
     disp('Creating .lfp file. This could take a while...');
-    ResampleBinary(strcat(basename,'.dat'),strcat(basename,'.lfp'),...
+    try ResampleBinary(strcat(basename,'.dat'),strcat(basename,'.lfp'),...
         session.extracellular.nChannels,1, session.extracellular.sr/session.extracellular.srLfp);
+    catch
+        warning('Unnable to downsample LFP at 1250 Hz...');
+        fprintf('Resampling by an integer factor %2.1i to %3.1i Hz \n', int32(session.extracellular.sr/session.extracellular.srLfp), session.extracellular.sr/(int32(session.extracellular.sr/session.extracellular.srLfp))); %\n
+        ResampleBinary(strcat(basename,'.dat'),strcat(basename,'.lfp'),...
+        session.extracellular.nChannels,1, int32(session.extracellular.sr/session.extracellular.srLfp));
+        session.extracellular.srLfp = session.extracellular.sr/(int32(session.extracellular.sr/session.extracellular.srLfp));
+        save([basepath filesep session.general.name,'.session.mat'],'session','-v7.3');
+    end
 end
 
 %% MEDIAN SUBS
@@ -219,6 +223,14 @@ if isempty(dir([session.general.name '_original.dat']))
 else
     warning('Session was already median-subtracted. Spiking...');
 end
+
+%% Fiber photometry analysis
+try
+    fiber = getSessionFiberPhotometry();
+catch
+    warning('No possible to load fiber photometry data...')
+end
+cd(basepath)
 
 %% Kilosort concatenated sessions
 if spikeSort

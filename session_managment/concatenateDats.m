@@ -129,7 +129,7 @@ for a = 1:length(d)
     end
 end
 otherdattypes(find(bad_otherdattypes)) = [];%if there weren't analogin or digitalin in some recording
-if isempty(datpaths.amplifier)
+if isempty(datpaths) || isempty(datpaths.amplifier)
     disp('No .dats found in subfolders.  Exiting bz_ConcatenateDats.')
     return
 end

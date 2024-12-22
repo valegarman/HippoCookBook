@@ -46,6 +46,7 @@ maxNumberOfChannels = p.Results.maxNumberOfChannels;
 maze_in_virtual_channels = p.Results.maze_in_virtual_channels;
 
 
+
 if ~isempty(dir('*DigitalIn.events.mat')) && force == false
     disp('Digital pulses already detected! Loading file.');
     file = dir('*DigitalIn.events.mat');

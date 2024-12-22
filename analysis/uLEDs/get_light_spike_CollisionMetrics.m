@@ -17,13 +17,16 @@ addParameter(p,'label',[]); % string to add to the title for figures and mat fil
 addParameter(p,'saveMat',true,@islogical); % 
 addParameter(p,'rate_change_threshold',4,@isnumeric); % 
 addParameter(p,'spikes',[],@isstruct); % 
+addParameter(p,'uLEDPulses',[],@isstruct); % 
 addParameter(p,'interpolate_pulse_sides',true,@islogical); % 
 addParameter(p,'update_cell_metrics',true,@islogical); % 
 addParameter(p,'save_as','lightSpikeCollisions',@ischar);
 
+
 parse(p, uLEDResponses_interval, varargin{:});
 basepath = p.Results.basepath;
 cell_metrics = p.Results.cell_metrics;
+uLEDPulses = p.Results.uLEDPulses;
 light_response_threshold_factor = p.Results.light_response_threshold_factor;
 light_response_only_pyr = p.Results.light_response_only_pyr;
 before_pulse_factor = p.Results.before_pulse_factor;
@@ -35,6 +38,7 @@ spikes = p.Results.spikes;
 interpolate_pulse_sides = p.Results.interpolate_pulse_sides;
 update_cell_metrics = p.Results.update_cell_metrics;
 save_as = p.Results.save_as;
+
 
 % Deal with inputs
 prevPath = pwd;
@@ -54,6 +58,10 @@ if isempty(spikes)
     catch
         warning('Spikes structure not found! Spiking waveform and CCG...');
     end
+end
+
+if ~isstruct(uLEDPulses) && isnan(uLEDPulses)
+    uLEDPulses = getuLEDPulses;
 end
 
 % stacking data
@@ -234,6 +242,22 @@ collision_metrics.post_waveforms  = post_waveforms;
 collision_metrics.pre_firingRate  = pre_firingRate;
 collision_metrics.post_firingRate = post_firingRate;
 
+% CCG in baseline
+
+pre_post_baseline_CCG = [];
+t_limit = uLEDPulses.timestamps(1);
+spikes_times_baseline = {};
+if ~isempty(spikes)
+    for ii = 1:length(spikes.times)
+        spikes_times_baseline{ii} = spikes.times{ii}(spikes.times{ii} < t_limit);
+    end
+    [ccg,t] = CCG(spikes_times_baseline,[],'binSize',0.0004,'duration',0.12,'norm','rate');
+    fprintf('\n');
+    for ii = 1:spikes.numcells
+        pre_post_baseline_CCG    = [pre_post_baseline_CCG; squeeze(ccg(:,ii,:))'];
+    end
+end
+collision_metrics.pre_post_baseline_CCG  = pre_post_baseline_CCG;
 % actual metrics
 collision_metrics.rate_difference            = uLEDResponses_OutInterval.maxRatePulse - uLEDResponses_InInterval.maxRatePulse;
 collision_metrics.rateZ_difference           = uLEDResponses_OutInterval.maxZPulse - uLEDResponses_InInterval.maxZPulse;
@@ -279,6 +303,7 @@ if update_cell_metrics
     filename = split(pwd,filesep); filename = filename{end};
     save([filename '.cell_metrics.cellinfo.mat'],'cell_metrics');
 end
+
 
 %% plots
 if doPlot

@@ -1,4 +1,3 @@
-
 function [uLEDResponses] = getuLEDResponse(varargin)
 % [uLEDResponses] = getuLEDResponse(varargin)
 %
@@ -43,7 +42,9 @@ addParameter(p,'winSize',.1,@isnumeric);
 addParameter(p,'doPlot',true,@islogical);
 addParameter(p,'offset',0,@isnumeric);
 addParameter(p,'onset',0,@isnumeric);
-addParameter(p,'winSizePlot',[-.02 .05],@islogical);
+addParameter(p,'winSizePlot',[-.02 .05],@isnumeric);
+addParameter(p,'before_pulse_win',[],@isnumeric);
+addParameter(p,'during_pulse_win',[],@isnumeric); % by default, pulse duration
 addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'force',false,@islogical);
 addParameter(p,'minNumberOfPulses',2000,@isnumeric);
@@ -82,6 +83,8 @@ restrict_to = p.Results.restrict_to;
 restrict_to_baseline = p.Results.restrict_to_baseline;
 restrict_to_manipulation = p.Results.restrict_to_manipulation;
 save_as = p.Results.save_as;
+before_pulse_win = p.Results.before_pulse_win;
+during_pulse_win = p.Results.during_pulse_win;
 
 % Deal with inputs
 prevPath = pwd;
@@ -133,8 +136,6 @@ else
 end
 
 restrict_ints = IntersectIntervals([ints; restrict_to]);
-
-
 
 % Get cell responses!! :)
 uLEDResponses = [];
@@ -207,16 +208,25 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
         if length(times{end}) < minNumberOfPulses
             uLEDResponses.responsecurve(:,kk,jj,:) = uLEDResponses.responsecurve(:,kk,jj,:) * NaN;
         end
-        t_duringPulse = t > 0 + onset(kk) & t < pulseDuration + offset(kk); 
-        t_beforePulse = t > -pulseDuration & t < 0; 
+        if isempty(during_pulse_win)
+            t_duringPulse = t > 0 + onset(kk) & t < pulseDuration + onset(kk); 
+        else
+            t_duringPulse = t > during_pulse_win(1) & t < during_pulse_win(2);
+        end
+
+        if isempty(before_pulse_win)
+            t_beforePulse = t > -pulseDuration + onset(kk) & t < 0 + onset(kk); 
+        else
+            t_beforePulse = t > before_pulse_win(1) & t < before_pulse_win(2);
+        end
         
         numberOfPulses = size(pulses,1);
         for ii = 1:size(uLEDResponses.responsecurve,1)
             if numberOfPulses > minNumberOfPulses
                 uLEDResponses.responsecurveSmooth(ii,kk,jj,:) = smooth(uLEDResponses.responsecurve(ii,kk,jj,:));
                 uLEDResponses.responsecurveZ(ii,kk,jj,:) = (uLEDResponses.responsecurve(ii,kk,jj,:)...
-                    - mean(uLEDResponses.responsecurve(ii,kk,jj,t < 0)))...
-                    /std(uLEDResponses.responsecurve(ii,kk,jj,t < 0));
+                    - mean(uLEDResponses.responsecurve(ii,kk,jj,t_beforePulse)))...
+                    /std(uLEDResponses.responsecurve(ii,kk,jj,t_beforePulse));
                 uLEDResponses.responsecurveZSmooth(ii,kk,jj,:) = smooth(uLEDResponses.responsecurveZ(ii,kk,jj,:));
                 uLEDResponses.rateDuringPulse(ii,kk,jj,1) = mean(uLEDResponses.responsecurve(ii,kk,jj,t_duringPulse));
                 uLEDResponses.rateBeforePulse(ii,kk,jj,1) = mean(uLEDResponses.responsecurve(ii,kk,jj,t_beforePulse));

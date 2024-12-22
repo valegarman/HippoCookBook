@@ -13,7 +13,8 @@ function [cell_types, cell_classification_stats cell_metrics] = cellTypeClassifi
     addParameter(p,'thetaMod',[],@isstruct);
     addParameter(p,'modelType','hippocampus5',@ischar);
     addParameter(p,'overwrite_cell_metrics',true,@islogical);
-    addParameter(p,'score_cut_off',.70,@islogical);
+    addParameter(p,'score_cut_off',.70,@isnumeric);
+    addParameter(p,'imposeCellExplorerPyr',true);
     
     parse(p,varargin{:});
     
@@ -23,6 +24,7 @@ function [cell_types, cell_classification_stats cell_metrics] = cellTypeClassifi
     modelType = p.Results.modelType;
     overwrite_cell_metrics = p.Results.overwrite_cell_metrics;
     score_cut_off = p.Results.score_cut_off;
+    imposeCellExplorerPyr = p.Results.imposeCellExplorerPyr;
 
     %% Collect data
     previousPath = pwd;
@@ -83,8 +85,9 @@ function [cell_types, cell_classification_stats cell_metrics] = cellTypeClassifi
     end
     [cell_types, score] = predict(Mdl,T_feat);
     % imposing pyramidal cell from cellExplorer
-    cell_types(ismember(cell_metrics.putativeCellType,'Pyramidal Cell')) = {'CAMK2'}; % 
-    
+    if imposeCellExplorerPyr % quite conservative option for hippocampus
+        cell_types(ismember(cell_metrics.putativeCellType,'Pyramidal Cell')) = {'CAMK2'}; % 
+    end
     cell_classification_stats.raw_cell_types = cell_types;
     cell_classification_stats.score = score;
     cell_types(max(score,[],2)<score_cut_off) = {'Undetermined'};

@@ -59,7 +59,7 @@ optogeneticResponses = getOptogeneticResponse;
 spikes = loadSpikes;
 cell_metrics = loadCellMetrics;
 pulses = optogeneticResponses.pulses;
-uLEDPulses = getuLEDPulses;
+uLEDPulses = getuLEDPulses('force',true);
 session = loadSession;
 keyboard;
 
