@@ -11,7 +11,7 @@ function [cell_types, cell_classification_stats cell_metrics] = cellTypeClassifi
     addParameter(p,'basepath',pwd,@isdir);
     addParameter(p,'cell_metrics',[],@isstruct);
     addParameter(p,'thetaMod',[],@isstruct);
-    addParameter(p,'modelType','hippocampus5',@isstring);
+    addParameter(p,'modelType','hippocampus5',@ischar);
     addParameter(p,'overwrite_cell_metrics',true,@islogical);
     addParameter(p,'score_cut_off',.70,@islogical);
     
