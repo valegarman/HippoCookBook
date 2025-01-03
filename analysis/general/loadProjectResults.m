@@ -184,7 +184,7 @@ for ii = 1:length(sessions.basepaths)
     
     
     % loop results
-    for jj = 1:length(list_of_results)
+    for jj= 1:length(list_of_results)
         targetFile = dir(['*.' list_of_results{jj} '*.mat']); 
         name_of_result = replace(list_of_results{jj},{'.','*'},'');
         list_of_results2{jj} = name_of_result;
