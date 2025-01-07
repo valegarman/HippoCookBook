@@ -15,7 +15,7 @@ function uLEDPulses = getuLEDPulses(varargin)
 %   ledLayout            By default, see below
 %   saveMat              Default, true.
 %   force                Default, false;
-%   condition_epochs     Catalog pulses by recording epochs. Input should
+%   conditionEpochs     Catalog pulses by recording epochs. Input should
 %                           be an array of the same size than the total of epochs 
 %                           (recording folders) 
 %   current              Scalar, in nA. Exmaple '6'
@@ -57,7 +57,8 @@ addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'force',false,@islogical);
 addParameter(p,'duration_round_decimal',3,@isscalar);
 addParameter(p,'minNumberOfPulses',200,@isnumeric);
-addParameter(p,'condition_epochs',[]);
+addParameter(p,'conditionEpochs',[]);
+addParameter(p,'doPlot',true,@islogical);
 
 parse(p,varargin{:});
 basepath = p.Results.basepath;
@@ -69,7 +70,8 @@ force = p.Results.force;
 current = p.Results.current;
 duration_round_decimal = p.Results.duration_round_decimal;
 minNumberOfPulses = p.Results.minNumberOfPulses;
-condition_epochs = p.Results.condition_epochs;
+conditionEpochs = p.Results.conditionEpochs;
+doPlot = p.Results.doPlot;
 
 prevPath = pwd;
 cd(basepath);
@@ -271,24 +273,25 @@ if isempty(uLEDPulses.nonStimulatedShank)
 end
 
 % parse conditions
-if isempty(condition_epochs)
-    condition_epochs = ones(size(session.epochs));
+if isempty(conditionEpochs)
+    conditionEpochs = 1:size(session.epochs,2);
 end
 
 uLEDPulses.conditionDuration = unique(uLEDPulses.durationRounded);
-uLEDPulses.condition_epochs_sequence = condition_epochs;
-uLEDPulses.condition_epochs = unique(condition_epochs);
+uLEDPulses.conditionEpochs_sequence = conditionEpochs;
+uLEDPulses.conditionEpochs = unique(conditionEpochs);
 uLEDPulses.conditionEpochsID = ones(size(uLEDPulses.durationRounded));
 
-if ~isempty(condition_epochs) && length(condition_epochs) ~= length(session.epochs)
+if ~isempty(conditionEpochs) && length(conditionEpochs) ~= length(session.epochs)
     error('Number of defined epochs does not match with number of real epochs!');
-elseif ~isempty(condition_epochs)
-    for ii = 1:length(condition_epochs)
+elseif ~isempty(conditionEpochs)
+    for ii = 1:length(conditionEpochs)
         [status] = InIntervals(uLEDPulses.timestamps(:,1),[session.epochs{ii}.startTime session.epochs{ii}.stopTime]);
-        uLEDPulses.conditionEpochsID(status) = uLEDPulses.condition_epochs_sequence(ii);
+        uLEDPulses.conditionEpochsID(status) = uLEDPulses.conditionEpochs_sequence(ii);
     end
 else
 end
+uLEDPulses.conditionEpochs = unique(uLEDPulses.conditionEpochsID);
 
 uLEDPulses.conditionDurationID = ones(size(code));
 for ii = 1:length(uLEDPulses.conditionDuration)
@@ -300,23 +303,51 @@ conditionID = 1;
 uLEDPulses.conditionID = ones(size(code));
 uLEDPulses.conditions_table = [];
 for ii = 1:length(uLEDPulses.conditionDuration)
-    for jj = 1:length(uLEDPulses.condition_epochs)
+    for jj = 1:length(uLEDPulses.conditionEpochs)
         uLEDPulses.conditionID(uLEDPulses.durationRounded == uLEDPulses.conditionDuration(ii) ...
-            & uLEDPulses.conditionEpochsID == uLEDPulses.condition_epochs(jj)) = conditionID;
+            & uLEDPulses.conditionEpochsID == uLEDPulses.conditionEpochs(jj)) = conditionID;
         uLEDPulses.conditions_table = [uLEDPulses.conditions_table; ...
-            uLEDPulses.conditionDuration(ii) uLEDPulses.condition_epochs(jj)];
+            uLEDPulses.conditionDuration(ii) uLEDPulses.conditionEpochs(jj)];
         uLEDPulses.list_of_conditions(conditionID) = conditionID;
         conditionID = conditionID + 1;
     end
 end
 
-if isempty(uLEDPulses.condition_epochs)
-    uLEDPulses.condition_epochs = NaN;
-    uLEDPulses.condition_epochs_sequence = NaN;
+if isempty(uLEDPulses.conditionEpochs)
+    uLEDPulses.conditionEpochs = NaN;
+    uLEDPulses.conditionEpochs_sequence = NaN;
 end
 
 uLEDPulses.list_of_durations = uLEDPulses.conditions_table(:,1)';
 uLEDPulses.list_of_epochs = uLEDPulses.conditions_table(:,2)';
+
+if doPlot
+    tiledlayout('vertical')
+    session = loadSession;
+    cmap = cool(size(session.epochs,2));
+    nexttile;
+    hold on
+    for ii = 1:size(session.epochs,2)
+        temp = session.epochs{ii};
+        fill([temp.startTime temp.stopTime temp.stopTime temp.startTime temp.startTime],[0 0 1 1 0], cmap(ii,:));
+        text(temp.startTime + 100, .5, num2str(ii));
+        text(temp.startTime + 100, .7, temp.behavioralParadigm);
+    end
+    xlim([0 temp.stopTime]); ylabel('Epochs');
+
+    for ii = 1:size(uLEDPulses.conditions_table,1)
+        nexttile;
+        % collect pulses
+        idx = find(uLEDPulses.conditionID==ii);
+        scatter(uLEDPulses.timestamps(idx,1), uLEDPulses.code(idx,1),5,[.5 .5 .5],"filled","o");
+        xlim([0 str2double(session.general.duration)]);
+        xlabel('Time (s)'); ylabel('uLEDs');
+        text(1000, 1, ['dur, epoch: ' num2str(uLEDPulses.conditions_table(ii,1)) ', ' num2str(uLEDPulses.conditions_table(ii,2))]);
+        ylim([0.5 12.5]);
+    end
+    mkdir('SummaryFigures'); % create folder
+    saveas(gcf,'SummaryFigures\uledpulses_sequence.png');
+end
 
 if saveMat
     disp('Saving results...');

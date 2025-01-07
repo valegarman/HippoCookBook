@@ -10,7 +10,7 @@ updateExpFolder({'V:\data\fCck1', 'Y:\fCck1'},'E:\data\fCck1');
 % 2% Then, preprocess session (includes artifacts removal, median signal
 %   removal, LFP and Kilosort, and running computeSessionSummary by 'batch_preprocessSession('basepath','sessionBasepath').
 %   Example:
-batch_preprocessSession('basepath','X:\data\fCr1','analysisPath','F:\fCr1','cleanArtifacts',({[],1}),'analogChannelsList',[],'digitalChannelsList',1);
+batch_preprocessSession('basepath','E:\wt3');
 
 % <OPTIONAL> If summary was not processed, it can be run in batch by 'batch_preprocessSession'
 batch_sessionSummary('basepath','G:\data\fPv4','cleanArtifacts',({65,[]}),'analogChannelsList',65,'digitalChannelsList',0);
@@ -36,3 +36,12 @@ uledPulses = getuLEDPulses('current',6,'force', true);
 optogeneticResponses = getOptogeneticResponse('numRep',50,'force',true,...
     'analogChannelsList',[3 4 5 6 7 8],'digitalChannelsList',[11 12 13 14 15 16]);
 getuLEDResponse('force',true);
+
+%% code for humans
+preprocessSession('basepath',pwd,'spikeSort',true,'getPos',false, ...
+                    'medianSubstr',true);
+% CLEAN SESSIONS MANUALLY BY PHY
+processSession('promt_hippo_layers',true,'profileType','hippocampus','selectProbe_automatic', false);
+cellTypes = cellTypeClassifier('modelType','fobrebrain5','score_cut_off',0,'imposeCellExplorerPyr',false);
+indexNewSession('copyFiles',true);
+

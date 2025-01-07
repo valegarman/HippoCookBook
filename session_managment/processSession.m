@@ -40,12 +40,11 @@ addParameter(p,'analog_optogenetic_channels',[],@isnumeric);
 addParameter(p,'promt_hippo_layers',true,@islogical);
 addParameter(p,'manual_analog_pulses_threshold',false,@islogical);
 addParameter(p,'bazler_ttl_channel',[],@isnumeric);
-addParameter(p,'leftArmTtl_channel',2,@isnumeric)
-addParameter(p,'rightArmTtl_channel',3,@isnumeric)
-addParameter(p,'homeDelayTtl_channel',4,@isnumeric)
+addParameter(p,'leftArmTtl_channel',[],@isnumeric)
+addParameter(p,'rightArmTtl_channel',[],@isnumeric)
+addParameter(p,'homeDelayTtl_channel',[],@isnumeric)
 addParameter(p,'tracking_pixel_cm',0.1149,@isnumeric);
 addParameter(p,'excludeAnalysis',[]); % 
-addParameter(p,'useCSD_for_theta_detection',true,@islogical); % If there is the middle shank, otherwhise put false
 addParameter(p,'profileType','hippocampus',@ischar); % options, 'hippocampus' and 'cortex'
 addParameter(p,'rippleMasterDetector_threshold',[1.5 3.5],@isnumeric); % [1.5 3.5]
 addParameter(p,'LED_threshold',0.98,@isnumeric);
@@ -53,6 +52,7 @@ addParameter(p,'createLegacySummaryFolder',true,@islogical);
 addParameter(p,'restrict_to',[0 Inf],@isnumeric);
 addParameter(p,'restrict_to_baseline',true,@islogical);
 addParameter(p,'restrict_to_manipulation',false,@islogical);
+addParameter(p,'selectProbe_automatic',false,@islogical);
 
 parse(p,varargin{:})
 
@@ -76,7 +76,6 @@ rightArmTtl_channel = p.Results.rightArmTtl_channel;
 homeDelayTtl_channel = p.Results.homeDelayTtl_channel;
 tracking_pixel_cm = p.Results.tracking_pixel_cm;
 excludeAnalysis = p.Results.excludeAnalysis;
-useCSD_for_theta_detection = p.Results.useCSD_for_theta_detection;
 profileType = p.Results.profileType;
 rippleMasterDetector_threshold = p.Results.rippleMasterDetector_threshold;
 LED_threshold = p.Results.LED_threshold;
@@ -84,11 +83,14 @@ createLegacySummaryFolder = p.Results.createLegacySummaryFolder;
 restrict_to = p.Results.restrict_to;
 restrict_to_baseline = p.Results.restrict_to_baseline;
 restrict_to_manipulation = p.Results.restrict_to_manipulation;
+selectProbe_automatic = p.Results.selectProbe_automatic;
 
 % Deal with inputs
 prevPath = pwd;
 cd(basepath);
+keyboard;
 
+mkdir('SummaryFigures')
 if createLegacySummaryFolder
     if exist('SummaryFigures') == 7
         d = strrep(strrep(string(datetime),' ','_'),':','_');
@@ -110,6 +112,7 @@ if length(excludeAnalysis) == 0
     excludeAnalysis = num2str(excludeAnalysis);
 end
 excludeAnalysis = lower(excludeAnalysis);
+
 %% 1. Runs sessionTemplate
 if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))
     try
@@ -153,11 +156,16 @@ if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))
         session = sessionTemplate(basepath,'showGUI',true);
     end
     %% 
-   
+   keyboard;
     session = gui_session(session);
 
-    selectProbe('force',true); % choose probe
+    selectProbe('force',true,'automatic', selectProbe_automatic); % choose probe
+    close all
 end
+
+leftArmTtl_channel = session.analysisTags.leftArmTtl_channel;
+rightArmTtl_channel = session.analysisTags.rightArmTtl_channel;
+homeDelayTtl_channel = session.analysisTags.homeDelayTtl_channel;
 
 ints = [];
 if restrict_to_manipulation
@@ -273,8 +281,13 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10,'restrict_to',restrict_ints);
     getSpikesRank('events','ripples');
 
+    % 8.4 Fiber ripple analysis
+    ripples_fiber = fiberPhotometryModulation([],'eventType','ripples');
+
+
     % 8.3 Theta intervals
     thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection);
+    
 end
 
 %% 9. Phase Modulation
@@ -321,13 +334,13 @@ end
 if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
     try
         spikes = loadSpikes;
-        getSessionTracking('roiTracking','manual','forceReload',false,'LED_threshold',LED_threshold,'convFact',tracking_pixel_cm);
+        getSessionTracking('roiTracking','manual','forceReload',false,'LED_threshold',LED_threshold,'convFact',tracking_pixel_cm,'leftTTL_reward',leftArmTtl_channel,'rightTTL_reward',rightArmTtl_channel);
         try
             getSessionArmChoice('task','alternation','leftArmTtl_channel',leftArmTtl_channel,'rightArmTtl_channel',rightArmTtl_channel,'homeDelayTtl_channel',homeDelayTtl_channel);
         catch
             warning('Performance in task was not computed! maybe linear maze?');
         end
-        behaviour = getSessionLinearize('forceReload',true);  
+        behaviour = getSessionLinearize('forceReload',false);  
         firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',true,'speedThresh',0.1);
         placeFieldStats = bz_findPlaceFields1D('firingMaps',firingMaps,'maxSize',.75,'sepEdge',0.03); %% ,'maxSize',.75,'sepEdge',0.03
         firingTrialsMap = firingMapPerTrial('force',true,'saveMat',true);
@@ -376,7 +389,7 @@ end
 
 %% 12. Summary per cell
 if ~any(ismember(excludeAnalysis, {'12',lower('summary')}))
-    plotSummary('showTagCells',true);
+    plotSummary('showTagCells',false);
 end
 
 cd(prevPath);

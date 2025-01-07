@@ -56,6 +56,7 @@ addParameter(p,'verbose',true,@islogical);
 addParameter(p,'restrict_to',[0 Inf],@isnumeric);
 addParameter(p,'restrict_to_baseline',true,@islogical);
 addParameter(p,'restrict_to_manipulation',false,@islogical);
+addParameter(p,'duration_pulse',0.020,@isnumeric);
 addParameter(p,'save_as','uLEDResponse_interval',@ischar);
 
 parse(p, intervals, varargin{:});
@@ -83,6 +84,7 @@ verbose = p.Results.verbose;
 restrict_to = p.Results.restrict_to;
 restrict_to_baseline = p.Results.restrict_to_baseline;
 restrict_to_manipulation = p.Results.restrict_to_manipulation;
+duration_pulse = p.Results.duration_pulse;
 save_as = p.Results.save_as;
 
 % Deal with inputs
@@ -110,6 +112,31 @@ uLEDPulses.code = uLEDPulses_temp.code;
 uLEDPulses.timestamps = uLEDPulses_temp.timestamps;
 uLEDPulses.nonStimulatedShank = uLEDPulses_temp.nonStimulatedShank;
 clear uLEDPulses_temp
+
+%check that the pulse duration is 0.02 
+
+if length(uLEDPulses.list_of_conditions) > 1
+       
+       CONDITION = uLEDPulses.list_of_conditions(find(uLEDPulses.list_of_durations == duration_pulse));
+
+       uLEDPulses.conditionID =uLEDPulses.conditionID(find(uLEDPulses.conditionID == CONDITION));
+       uLEDPulses.timestamps = uLEDPulses.timestamps(find(uLEDPulses.conditionID == CONDITION),:);
+       uLEDPulses.code = uLEDPulses.code(find(uLEDPulses.conditionID == CONDITION));
+       
+       uLEDPulses.list_of_epochs = 1;
+       uLEDPulses.list_of_conditions = 1;
+       uLEDPulses.list_of_durations(find(uLEDPulses.list_of_durations ~= duration_pulse)) =[];
+       uLEDPulses.conditionID = ones(length(uLEDPulses.conditionID(find(uLEDPulses.conditionID == CONDITION))),1); 
+
+   
+       % % INDEX = find(round(diff(uLEDPulses.timestamps'),3)==0.02)';
+       % uLEDPulses.timestamps = uLEDPulses.timestamps(find(round(diff(uLEDPulses.timestamps'),3)==0.02)',:);
+       % uLEDPulses.conditionID =uLEDPulses.conditionID(find(round(diff(uLEDPulses.timestamps'),3)==0.02));
+       % uLEDPulses.code = uLEDPulses.code(find(round(diff(uLEDPulses.timestamps'),3)==0.02));
+end
+
+%% CHECK HERE WHATS APP pulses = uLEDPulses.timestamps(uLEDPulses.code == codes(jj) & uLEDPulses.conditionID==kk,1);
+%%WHY DO I HAVE 2 CONDITIONS INSTEAD OF ONE, AND CHANGE IT IN 1 
 
 ints = [];
 session = loadSession;
@@ -179,12 +206,15 @@ codes = 1:max(uLEDPulses.code);
 
 timestamps_recording = min(uLEDPulses.timestamps(:,2)):1/1250:max(uLEDPulses.timestamps(:,2));
 if verbose
-    disp('Computing cell responses...');
+    disp('Computing cell responses...');          
 end
+
 for kk = 1:length(uLEDPulses.list_of_conditions)
+
     pulseDuration = uLEDPulses.list_of_durations(kk);
     epoch = uLEDPulses.list_of_epochs(kk);
     condition = uLEDPulses.list_of_conditions(kk);
+
     % generate random events for boostraping
     nPulses = int32(length(find(uLEDPulses.conditionID == uLEDPulses.list_of_conditions(kk)))/...
             length(unique(uLEDPulses.code(uLEDPulses.conditionID == uLEDPulses.list_of_conditions(kk)))));
@@ -204,6 +234,8 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
     if verbose
         disp('Done!');
     end
+   
+    
     t_duringPulse = t > 0 + onset(kk) & t < pulseDuration + offset(kk); 
     randomRatesDuringPulse = squeeze(mean(stccg(t_duringPulse, length(spikes.UID)+1:end,1:length(spikes.UID)),1));
     uLEDResponses_interval.bootsTrapRate(:,kk) = mean(randomRatesDuringPulse,1);
@@ -224,7 +256,7 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
         pulses = uLEDPulses.timestamps(uLEDPulses.code == codes(jj) & uLEDPulses.conditionID==kk,1);
         status = InIntervals(pulses, intervals);
         times = spikes.times; 
-        if ~isempty(pulses)
+        if ~isempty(pulses) 
             times{length(times)+1} = pulses(status==1,1); times{length(times)+1} = pulses(status==0,1); 
         else
             times{length(times)+1} = [0]; times{length(times)+1} = [0]; 
@@ -438,6 +470,7 @@ in_interval.timestamps = t;
 uLEDResponses_interval.timestamps = t;
 
 disp('Parsing cells responses...');
+
 % parse cell responses
 for kk = 1:length(uLEDPulses.list_of_conditions)
     for ii = 1:length(spikes.UID)
@@ -560,7 +593,7 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
         
         % maxRespLED % the reference is the out_intervals max leds!!!
         if ~isnan(out_interval.maxRespLED.LEDs(ii,kk))
-            in_interval.maxRespLED.rate(ii,kk) = in_interval.rateDuringPulse(ii,kk,out_interval.maxRespLED.LEDs(ii,kk));vb
+            in_interval.maxRespLED.rate(ii,kk) = in_interval.rateDuringPulse(ii,kk,out_interval.maxRespLED.LEDs(ii,kk));
             in_interval.maxRespLED.rateBeforePulse(ii,kk) = in_interval.rateBeforePulse(ii,kk,out_interval.maxRespLED.LEDs(ii,kk));   
             in_interval.maxRespLED.rateZ(ii,kk) = in_interval.rateZDuringPulse(ii,kk,out_interval.maxRespLED.LEDs(ii,kk));
             in_interval.maxRespLED.rateZBeforePulse(ii,kk) = in_interval.rateZBeforePulse(ii,kk,out_interval.maxRespLED.LEDs(ii,kk));   

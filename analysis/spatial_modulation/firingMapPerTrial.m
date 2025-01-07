@@ -98,15 +98,19 @@ rasterGrid = min(positions{1}(:,2)):rasterUnit:max(positions{1}(:,2));
 firingTrialsMap = []; spikesPosition = []; rasterMaps = [];
 trialsNumber = unique(behaviour.masks.trials); 
 trialsNumber(isnan(trialsNumber)) = [];
+if size(behaviour.masks.direction,1) ~= 1
+    behaviour.masks.direction = behaviour.masks.direction';
+end
+if size(behaviour.masks.recording,1) ~= 1
+    behaviour.masks.recording = behaviour.masks.recording';
+end
 behaviour.masks.direction = behaviour.masks.direction + (behaviour.masks.recording-1)*2;
 directionNumber = unique(behaviour.masks.direction);
 directionNumber(isnan(directionNumber)) = [];
 spatialFactor = [max(positions{1}(:,2)) - min(positions{1}(:,2)) min(positions{1}(:,2))];
 time_unit = mean(diff(behaviour.timestamps));
 %
-if size(behaviour.masks.direction,1) ~= 1
-    behaviour.masks.direction = behaviour.masks.direction';
-end
+
 if size(behaviour.masks.trials,1) ~= 1
     behaviour.masks.trials = behaviour.masks.trials';
 end
