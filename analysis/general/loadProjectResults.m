@@ -48,20 +48,6 @@ end
 
 if isempty(list_of_results)
     list_of_results = loadListOfResults(project);
-    
-    if strcmpi(list_of_results,'all')
-        list_of_results = {'optogeneticResponse','averageCCG','ripples_psth','slowOscillations_psth','theta_*.PhaseLockingData','thetaREM*.PhaseLockingData',...
-            'thetaRun*.PhaseLockingData','lgamma*.PhaseLockingData','hgamma*.PhaseLockingData','ripple*.PhaseLockingData','spatialModulation','placeFields','behavior.cellinfo','ACGPeak',...
-            'speedCorr.cellinfo','uLEDResponse.cellinfo','lightSpikeCollisions','uLEDResponse_ripples','uLEDResponse_ripples_pre','uLEDResponse_ripples_post','spikeTriggeredPulses',...
-            'explained_variance_stim','explained_variance_delayed','spikeCCGchange','uLEDResponse_spikeTriggered'};
-    % 
-    % elseif strcmpi(list_of_results,'standard')
-    % 
-    % elseif isempty(list_of_results) && strcmpi(list_of_results,'standard')
-    %     list_of_results = {'optogeneticResponse','averageCCG','ripples_psth','slowOscillations_psth','theta_*.PhaseLockingData','thetaREM*.PhaseLockingData',...
-    %         'thetaRun*.PhaseLockingData','lgamma*.PhaseLockingData','hgamma*.PhaseLockingData','ripple*.PhaseLockingData','spatialModulation','placeFields','behavior.cellinfo','ACGPeak',...
-    %         'speedCorr.cellinfo','uLEDResponse.cellinfo'};
-    end
 end
 
 if loadLast

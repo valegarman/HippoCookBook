@@ -29,7 +29,7 @@ indexedSessionCSV_path = p.Results.indexedSessionCSV_path;
 indexedSessionCSV_name = p.Results.indexedSessionCSV_name;
 hippoCookBook_path = p.Results.hippoCookBook_path;
 removeDatFiles = p.Results.removeDatFiles;
-% removeDat = p.Results.removeDat;
+removeDat = p.Results.removeDat;
 copyFiles = p.Results.copyFiles;
 driveStorage_path = p.Results.driveStorage_path;
 % driveStorage_name = p.Results.driveStorage_name;
@@ -195,12 +195,8 @@ if removeDatFiles
     if ~isempty(dir('Kilosort*'))
         file = dir('Kilosort*');
         cd(file(end).name);
-        try
-            if exist('.phy','dir')
-                rmdir('.phy','s');
-            end
-        catch
-            warning('.phy folder does not exist... Maybe was removed before?');
+        if exist('.phy','dir')
+            rmdir('.phy','s');
         end
         cd(basepath);
     end

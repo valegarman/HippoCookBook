@@ -156,7 +156,7 @@ if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))
         session = sessionTemplate(basepath,'showGUI',true);
     end
     %% 
-   keyboard;
+    keyboard;
     session = gui_session(session);
 
     selectProbe('force',true,'automatic', selectProbe_automatic); % choose probe
