@@ -20,6 +20,7 @@ addParameter(p,'before_pulse_win',[-.1 -0.05],@isnumeric);
 addParameter(p,'during_pulse_win',[0.01 .020],@isnumeric);
 addParameter(p,'winSizePlot',[-.1 .1],@isnumeric);
 addParameter(p,'winCoactivation',.01,@isnumeric);
+addParameter(p,'offset_precoactivation',-600,@isnumeric);
 
 parse(p,varargin{:});
 basepath = p.Results.basepath;
@@ -36,6 +37,7 @@ before_pulse_win = p.Results.before_pulse_win;
 during_pulse_win = p.Results.during_pulse_win;
 winSizePlot = p.Results.winSizePlot;
 winCoactivation = p.Results.winCoactivation;
+offset_precoactivation = p.Results.offset_precoactivation;
 
 prevPath = pwd;
 cd(basepath);
@@ -65,7 +67,7 @@ end
 
 disp('Computing CCG...');
 disp('... CCG during pre-coactivation');
-averageCCG_precoact = getAverageCCG('restrict_to',epochsInts(find(ismember(epochsNames,'precoactivation')),:), 'saveMat', false, 'skipStimulationPeriods', false ,'force', true, 'plotOpt', false);
+averageCCG_precoact = getAverageCCG('restrict_to',epochsInts(find(ismember(epochsNames,'precoactivation')),:) + [0 offset_precoactivation], 'saveMat', false, 'skipStimulationPeriods', false ,'force', true, 'plotOpt', false);
 disp('... CCG during coactivation');
 averageCCG_coact = getAverageCCG('restrict_to',epochsInts(find(ismember(epochsNames,'coactivation')),:), 'saveMat', false, 'skipStimulationPeriods', false ,'force', true, 'plotOpt', false);
 disp('... CCG during post-coactivation');
