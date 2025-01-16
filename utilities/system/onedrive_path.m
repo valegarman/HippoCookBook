@@ -1,7 +1,7 @@
 function dp = onedrive_path
 % return dropbox folder path
     switch computer
-       case 'MACI64'
+       case 'MACA64'
             %computerName = char(java.net.InetAddress.getLocalHost.getHostName);
             computerName = char(java.lang.System.getProperty('user.name'));
         case 'PCWIN64'
