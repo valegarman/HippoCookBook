@@ -31,7 +31,7 @@ function h = plotFill(datax,datay,varargin)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 p = inputParser;
 addParameter(p,'color',[],@isnumeric);
-addParameter(p,'error','ci95',@ischar);
+addParameter(p,'error','ci95',@ischar); % SE
 addParameter(p,'style','alpha',@ischar);
 addParameter(p,'smoothOpt',1,@isnumeric);
 addParameter(p,'xscale','linear',@ischar);
