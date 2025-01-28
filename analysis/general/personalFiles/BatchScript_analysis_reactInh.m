@@ -144,6 +144,9 @@ for ii = 1:length(targetSessions)
         end
 end
 
+% to take a baseline session before and after uled stim, I am going to take
+% baselinePre, PostStim, BaselinePost
+% 
 list_of_sessions_control = {'fcamk1_200827_sess9', 'fcamk1_200901_sess12', 'fcamk1_200902_sess13', 'fcamk1_200904_sess15', 'fcamk1_200908_sess16', 'fcamk1_200909_sess17', 'fcamk1_200911_sess19', 'fcamk1_200910_sess18', ...
     'fcamk10_220920_sess8', 'fcamk3_201117_sess24', 'fcamk3_201030_sess12', 'fcamk3_201103_sess14', 'fcamk3_201111_sess20', 'fcamk3_201105_sess16','fcamk3_201109_sess18', 'fcamk3_201029_sess11_cleanned', 'fcamk3_201102_sess13', ...
     'fcamk3_201110_sess19', 'fcamk3_201113_sess22', 'fcamk3_201106_sess17', 'fcamk3_201116_sess23'};
