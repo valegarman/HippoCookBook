@@ -22,6 +22,7 @@ addParameter(p,'winSizePlot',[-.1 .1],@isnumeric);
 addParameter(p,'winCoactivation',.01,@isnumeric);
 addParameter(p,'offset_precoactivation', 0,@isnumeric);
 addParameter(p,'test_uled_responses', 'zscore',@ischar);
+addParameter(p,'epochs_names', {'precoactivation', 'coactivation', 'postcoactivation'} ,@iscell);
 
 parse(p,varargin{:});
 basepath = p.Results.basepath;
@@ -40,6 +41,7 @@ winSizePlot = p.Results.winSizePlot;
 winCoactivation = p.Results.winCoactivation;
 offset_precoactivation = p.Results.offset_precoactivation;
 test_uled_responses = p.Results.test_uled_responses;
+epochs_names = p.Results.epochs_names;
 
 prevPath = pwd;
 cd(basepath);
