@@ -144,6 +144,10 @@ for ii = 1:length(targetSessions)
         end
 end
 
+[projectResults, projectSessionResults] = ...
+        loadProjectResults('list_of_sessions',list_of_sessions,...
+        'analysis_project_path', [onedrive_path 'NeuralComputationLab\ActiveProjects\ReactInh\dataCoactivation'] ,'loadLast',false, 'save_as', 'reactInh_figureCoactivation');
+
 % to take a baseline session before and after uled stim, I am going to take
 % baselinePre, PostStim, BaselinePost
 % 
