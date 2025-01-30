@@ -20,9 +20,10 @@ addParameter(p,'before_pulse_win',[-0.1 -0.06],@isnumeric);
 addParameter(p,'during_pulse_win',[0.005 0.045],@isnumeric);
 addParameter(p,'winSizePlot',[-.1 .1],@isnumeric);
 addParameter(p,'winCoactivation',.01,@isnumeric);
+addParameter(p,'winSTD',[-.3 -.15],@isnumeric);
 addParameter(p,'offset_precoactivation', 0,@isnumeric);
 addParameter(p,'test_uled_responses', 'zscore',@ischar);
-addParameter(p,'epochs_names', {'precoactivation', 'coactivation', 'postcoactivation'} ,@iscell);
+% addParameter(p,'epochs_names', {'precoactivation', 'coactivation', 'postcoactivation'} ,@iscell);
 
 parse(p,varargin{:});
 basepath = p.Results.basepath;
@@ -41,7 +42,8 @@ winSizePlot = p.Results.winSizePlot;
 winCoactivation = p.Results.winCoactivation;
 offset_precoactivation = p.Results.offset_precoactivation;
 test_uled_responses = p.Results.test_uled_responses;
-epochs_names = p.Results.epochs_names;
+winSTD = p.Results.winSTD;
+% epochs_names = p.Results.epochs_names;
 
 prevPath = pwd;
 cd(basepath);
@@ -138,7 +140,7 @@ pairs.post_id = [];
 
 zero_ind = round(size(averageCCG_precoact.allCcg,1)/2);
 winCoactivation = InIntervals(averageCCG_precoact.timestamps, [-winCoactivation winCoactivation]);
-win_Z = InIntervals(averageCCG_precoact.timestamps, [before_pulse_win(1) before_pulse_win(2)]);
+win_Z = InIntervals(averageCCG_precoact.timestamps, [winSTD(1) winSTD(2)]);
 for kk = 1:size(averageCCG_precoact.allCcg,2)
     for jj = 1:size(averageCCG_precoact.allCcg,2)
         pairs.pre_id = [pairs.pre_id; kk];
