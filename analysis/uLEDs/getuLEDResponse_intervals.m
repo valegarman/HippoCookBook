@@ -406,7 +406,7 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
             out_interval.pulseDuration(ii,kk,jj,1) = pulseDuration;
             out_interval.epoch(ii,kk,jj,1) = epoch;
             out_interval.condition(ii,kk,jj,1) = condition;
-            in_interval.numberOfPulses(ii,kk,jj,1) = length(times{end});
+            out_interval.numberOfPulses(ii,kk,jj,1) = length(times{end});
 
             rasterX = [];
             rasterY = [];
