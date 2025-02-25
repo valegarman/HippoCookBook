@@ -23,10 +23,10 @@ for ii = 1:length(sessionsTable.SessionName)
             spikes_times = spikes.times;
             monosyn_inh_win = [0.001 0.021]; % 01to21
             
-            parfor mm = 1:spikes.numcells
+            for mm = 1:spikes.numcells
                 disp(mm);
-                uLEDResponses_interval{mm} = getuLEDResponse_intervals([spikes_times{mm} + monosyn_inh_win(1) spikes_times{mm} + monosyn_inh_win(2)],...
-                    'saveMat', false,'numRep',500,'doPlot', false,'getRaster', false, 'verbose', false);
+                uLEDResponses_interval{mm} = getuLEDResponse_intervals2([spikes_times{mm} + monosyn_inh_win(1) spikes_times{mm} + monosyn_inh_win(2)],...
+                    'saveMat', false,'numRep',500,'doPlot', false,'getRaster', false, 'verbose', false, 'boostraping_type', 'interval');
             end
             collision_metrics_01_21 = get_light_spike_CollisionMetrics(uLEDResponses_interval,'label','01msTo21ms','saveMat',false,'update_cell_metrics',false);
             save('uLEDResponses_interval_01ms_21ms.mat','uLEDResponses_interval','collision_metrics_01_21');
