@@ -63,6 +63,9 @@ end
 
 % plotting
 xHist = smooth(histcounts(datax(~isnan(datax)), edges),smoothOpt);
+if strcmpi(yscale, 'log') && any(xHist==0)
+    xHist = xHist +0.1;
+end
 
 if normalize
     xHist = xHist/max(xHist);
@@ -86,7 +89,11 @@ elseif strcmpi(style, 'fill')
     catch
         fill([x_centers(1) x_centers x_centers(end) x_centers(1)], signPlot * [min(xHist([1 end])) xHist' min(xHist([1 end])) min(xHist([1 end]))]+offset,...
             color,'FaceAlpha',.3,'EdgeColor','none');
-    end    
+    end
+elseif strcmpi(style, 'stairs')
+    stairs(x_centers, signPlot*xHist+offset,'color',color,'LineStyle',lineStyle);
+elseif strcmpi(style, 'bar')
+    bar(x_centers, signPlot*xHist+offset,1,'EdgeColor','none','FaceColor',color,'FaceAlpha',.8);
 end
 
 set(gca,'XScale',xscale,'YScale',yscale,'TickDir','out');

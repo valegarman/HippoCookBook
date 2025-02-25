@@ -4,6 +4,9 @@ function location = nas_path(input)
        case 'MACI64'
             %computerName = char(java.net.InetAddress.getLocalHost.getHostName);
             computerName = char(java.lang.System.getProperty('user.name'));
+       case 'MACA64'
+            %computerName = char(java.net.InetAddress.getLocalHost.getHostName);
+            computerName = char(java.lang.System.getProperty('user.name'));
         case 'PCWIN64'
             computerName = getenv('computername');
     end
