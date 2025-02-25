@@ -14,7 +14,7 @@ addParameter(p,'indexedSessionCSV_path',[],@isstring);
 addParameter(p,'indexedSessionCSV_name','indexedSessions',@isstring);
 addParameter(p,'hippoCookBook_path','HippoCookBook',@isstring);
 addParameter(p,'removeDatFiles',true,@islogical);
-addParameter(p,'removeDat',false,@islogical);
+% addParameter(p,'removeDat',false,@islogical);
 addParameter(p,'copyFiles',true,@islogical);
 % addParameter(p,'driveStorage_path','W:\Buzsakilabspace\Datasets\ValeroM',@isdir);
 addParameter(p,'driveStorage_path',[],@isdir);
@@ -29,7 +29,7 @@ indexedSessionCSV_path = p.Results.indexedSessionCSV_path;
 indexedSessionCSV_name = p.Results.indexedSessionCSV_name;
 hippoCookBook_path = p.Results.hippoCookBook_path;
 removeDatFiles = p.Results.removeDatFiles;
-removeDat = p.Results.removeDat;
+% removeDat = p.Results.removeDat;
 copyFiles = p.Results.copyFiles;
 driveStorage_path = p.Results.driveStorage_path;
 % driveStorage_name = p.Results.driveStorage_name;
@@ -199,19 +199,23 @@ if removeDatFiles
     if ~isempty(dir('Kilosort*'))
         file = dir('Kilosort*');
         cd(file(end).name);
-        if exist('.phy','dir')
-            rmdir('.phy','s');
+        try
+            if exist('.phy','dir')
+                rmdir('.phy','s');
+            end
+        catch
+            warning('.phy folder does not exist... Maybe was removed before?');
         end
         cd(basepath);
     end
 end
 
-if removeDat
-    if ~isempty(dir([session.general.name,'.dat']))
-        file = dir([session.general.name,'.dat']);
-        delete(file.name);
-    end
-end
+% if removeDat
+%     if ~isempty(dir([session.general.name,'.dat']))
+%         file = dir([session.general.name,'.dat']);
+%         delete(file.name);
+%     end
+% end
 
 % copying files to storage
 if copyFiles

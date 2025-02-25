@@ -349,7 +349,7 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
                     interp1(x_axis,squeeze(in_interval.responsecurve(mm,1,jj,x_axis)),samples_to_interpolate(ii,:));
             end
         end
-     end
+      end
         t_duringPulse = t > 0 + onset(kk) & t < pulseDuration + offset(kk); 
         t_beforePulse = t > -pulseDuration & t < 0; 
         
@@ -396,12 +396,11 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
                     for mm = 1:size(out_interval.responsecurve,1)
                          rand_interval{ss}.responsecurve(mm,kk,jj,samples_to_interpolate(ii,:)) = ...
                             interp1(x_axis,squeeze(rand_interval{ss}.responsecurve(mm,kk,jj,x_axis)),samples_to_interpolate(ii,:));
-
                     end
                 end
-            end
-        end
-        for ii = 1:numRep
+             end
+         end
+         for ii = 1:numRep
             rand_interval{ii} = aux_computeResponse(rand_interval{ii}, kk, jj, t, t_duringPulse, t_beforePulse, codes, uLEDResponses_interval, pulseDuration, epoch, condition, times{numberOfcells+2+ii}, spikes, getRaster);
            
             for mm = 1:size(in_interval.responsecurve,1)
@@ -417,39 +416,6 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
                 rand_interval{ii}.is_rateBeforePulse_similar_p(mm,kk,jj,1) = p;
            end
         end
-    end
-
-    % for jj =1:length(codes)
-    % 
-    %     temp = permute(squeeze(stccg(:, numberOfcells+3:end, 1:numberOfcells)), [3,1,2]);
-    % 
-    %     for ii = 1:numRep
-    %         rand_interval{ii}.responsecurve(:,kk,jj,:) = temp(:,:,ii);
-    %     end
-    % 
-    %     if length(times{numberOfcells + 1}) < minNumberOfPulses
-    %         for ii = 1:numRep
-    %             rand_interval{ii}.responsecurve(:,kk,jj,:) = temp(:,:,ii)*NaN;
-    %         end
-    %     end 
-    % 
-    %     for ii = 1:numRep
-    %         rand_interval{ii} = aux_computeResponse(rand_interval{ii}, kk, jj, t, t_duringPulse, t_beforePulse, codes, uLEDResponses_interval, pulseDuration, epoch, condition, times{numberOfcells+2+ii}, spikes, getRaster);
-    % 
-    %         for mm = 1:size(in_interval.responsecurve,1)
-    %             try
-    %             [h,p]= kstest2(squeeze(in_interval.responsecurve(mm,kk,jj,t_beforePulse)),...
-    %                 squeeze( rand_interval{ii}.responsecurve(mm,kk,jj,t_beforePulse)));
-    %             h = ~h;
-    %             catch
-    %             h = NaN;
-    %             p = NaN;
-    %             end
-    %             rand_interval{ii}.is_rateBeforePulse_similar_h(mm,kk,jj,1) = double(h);
-    %             rand_interval{ii}.is_rateBeforePulse_similar_p(mm,kk,jj,1) = p;
-    %        end
-    %     end
-    % end
 end
 
  %%%%%%%%% SEAL OF MARTA APPORVAL -written by Mario
@@ -519,11 +485,7 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
          rand_interval{mm} = aux_computeResponse_2(rand_interval{mm}, kk,spikes,t,out_interval,ii,t_duringPulse);
         end
     end
-    % for ii = 1:length(spikes.UID)
-    %     for mm = 1:numRep
-    %      rand_interval{mm} = aux_computeResponse_2(rand_interval{mm}, kk,spikes,t,out_interval,ii,t_duringPulse);
-    %     end
-    % end
+    
 end
 
 % check here if the code still works
@@ -1028,3 +990,4 @@ out_interval=interval_out;
     end
   
 end
+

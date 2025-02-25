@@ -90,6 +90,7 @@ prevPath = pwd;
 cd(basepath);
 keyboard;
 
+mkdir('SummaryFigures')
 if createLegacySummaryFolder
     if exist('SummaryFigures') == 7
         d = strrep(strrep(string(datetime),' ','_'),':','_');
@@ -155,13 +156,12 @@ if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))
             session = sessionTemplate(basepath,'showGUI',true);
         end
 
+
     session = gui_session(session);
 
     selectProbe('force',true,'automatic', selectProbe_automatic); % choose probe
     close all
 end
-
-
 
 leftArmTtl_channel = session.analysisTags.leftArmTtl_channel;
 rightArmTtl_channel = session.analysisTags.rightArmTtl_channel;
@@ -280,6 +280,10 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',true,'thresholds',rippleMasterDetector_threshold,'eventSpikeThreshold', false);
     psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10,'restrict_to',restrict_ints);
     getSpikesRank('events','ripples');
+
+    % 8.4 Fiber ripple analysis
+    ripples_fiber = fiberPhotometryModulation([],'eventType','ripples');
+
 
     % 8.3 Theta intervals
     thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection);
