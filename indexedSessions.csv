@@ -54,7 +54,7 @@ fcr1_220303_sess5,fcr1,fcr1\fcr1_220303_sess5,neural,c57b1/6,vip/cr/ai80,"105µm
 fpv4_210323_sess13,fpv4,fpv4\fpv4_210323_sess13,neural,c57b1/6,pv/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,11,PTLp CA1sp CA1so CA1sr CA1slm CA3,Bibliocampus
 fpv4_210317_sess10,fpv4,fpv4\fpv4_210317_sess10,neural,c57b1/6,pv/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,22,PTLp CA1sr CA1sp CA1so CA3,Bibliocampus
 fpv4_210324_sess14,fpv4,fpv4\fpv4_210324_sess14,neural,c57b1/6,pv/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,20,PTLp CA1sp CA1so CA1sr CA3,Bibliocampus
-fcamk1_200827_sess9,fcamk1,fcamk1\fcamk1_200827_sess9,neural,c57,camkii/ai32,"uled-12led-32ch-4shanks",linear maze,57,CA1sp CA1so,uLEDiscotheque Bibliocampus LightInInh
+fcamk1_200827_sess9,fcamk1,fcamk1\fcamk1_200827_sess9,neural,c57,camkii/ai32,uled-12led-32ch-4shanks,linear maze,57,CA1sp CA1so,uLEDiscotheque Bibliocampus LightInInh
 fpv4_210315_sess8,fpv4,fpv4\fpv4_210315_sess8,neural,c57b1/6,pv/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,13,PTLp CA1sp CA1so CA1sr CA3,Bibliocampus
 fid2dlx1_191119_sess2,fid2dlx1,fid2dlx1\fid2dlx1_191119_sess2,neural,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,48,PTLp5 PTLp6 PTLp2_3 PTLp1 PTLp4,Bibliocampus neuroGli2d
 fpv3_210317_sess13,fpv3,fpv3\fpv3_210317_sess13,neural,c57b1/6,pv/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,30,PTLp CA1so CA1sp CA1slm CA1sr CA3,Bibliocampus
@@ -83,8 +83,8 @@ fnkx8_200821_sess5,fnkx8,fnkx8\fnkx8_200821_sess5,neural,c57b1/6,id2/dlx/ai80,"1
 fnkx8_200824_sess6,fnkx8,fnkx8\fnkx8_200824_sess6,neural,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,50,CA1sp CA1so CA1sr PTLp6 PTLp5 CA1slm CA3 DG,Bibliocampus neuroGli2d
 fnkx9_200817_sess1,fnkx9,fnkx9\fnkx9_200817_sess1,neural,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,70,PTLp5 PTLp6 PTLp2_3 CA1so CA1sp CA1sr CA1slm CA3,Bibliocampus neuroGli2d
 fcr2_220304_sess4,fcr2,fCr2\fCr2_220304_sess4,neural,c57b1/6,vip/cr/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,75,PTLp5 PTLp6 PTLp2_3 CA1so CA1sp CA1sr CA1slm CA3,Bibliocampus desVIPnhibition
-fcamk1_200901_sess12,fcamk1,fcamk1\fcamk1_200901_sess12,neural,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze,47,CA1sp,uLEDiscotheque Bibliocampus LightInInh
-fcamk3_201028_sess10_cleanned,fcamk3,fcamk3\fcamk3_201028_sess10_cleanned,neural,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze linear maze,43,CA1sp,uLEDiscotheque Bibliocampus LightInInh
+fcamk1_200901_sess12,fcamk1,fcamk1\fcamk1_200901_sess12,neural,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze,47,CA1sp,uLEDiscotheque Bibliocampus LightInInh
+fcamk3_201028_sess10_cleanned,fcamk3,fcamk3\fcamk3_201028_sess10_cleanned,neural,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze linear maze,43,CA1sp,uLEDiscotheque Bibliocampus LightInInh
 fvip5_221021_sess6,fvip5,fvip5\fvip5_221021_sess6,neural,c57b1/6,vip/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,100,PTLp5 PTLp2_3 CA1so CA1sp CA1slm CA1sr CA3sp CA3so CA3sr,Bibliocampus desVIPnhibition
 fvip5_221019_sess4,fvip5,fvip5\fvip5_221019_sess4,neural,c57b1/6,vip/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,97,PTLp5 PTLp2_3 CA1so CA1sp CA1slm CA1sr CA3sp CA3so CA3sr,Bibliocampus desVIPnhibition
 fsst1_190522_sess23,fsst1,fsst1\fsst1_190522_sess23,neural,c57b1/6,sst/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,31,CA1sp CA1so PTLp5 PTLp6,Bibliocampus neuroGli2d
@@ -98,43 +98,43 @@ fvip1_220525_sess11,fvip1,fvip1\fvip1_220525_sess11,neural3,c57b1/6,vip/dlx/ai80
 fsst3_220909_sess1,fsst3,fsst3\fsst3_220909_sess1,neural,c57b1/6,sst/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,38,PTLp PTLp5 PTLp6 CA1sp CA1so CA1slm CA1sr CA3sp CA3sr,Bibliocampus
 fsst3_220921_sess8,fsst3,fsst3\fsst3_220921_sess8,neural,c57b1/6,sst/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,11,CA1sp CA1so CA1slm CA1sr CA3sp DG CA3sr PTLp5 PTLp2_3 PTLp6,Bibliocampus
 fsst3_220922_sess9,fsst3,fsst3\fsst3_220922_sess9,neural,c57b1/6,sst/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,14,CA1sp CA1so PTLp5 PTLp2_3 CA1slm CA1sr CA3sp DG,Bibliocampus
-fcamk1_200902_sess13,fcamk1,fcamk1\fcamk1_200902_sess13,neural,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze,37,CA1sp CA1so,uLEDiscotheque Bibliocampus LightInInh
-fcamk3_201030_sess12,fcamk3,fcamk3\fcamk3_201030_sess12,neural,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze linear maze,47,CA1sp CA1so,uLEDiscotheque Bibliocampus LightInInh
-fcamk1_200904_sess15,fcamk1,fcamk1\fcamk1_200904_sess15,neural,c57,camkii/ai32,"uled-12led-32ch-4shanks",linear maze,59,CA1sp CA1so CA1sr,uLEDiscotheque Bibliocampus LightInInh
-fcamk3_201103_sess14,fcamk3,fcamk3\fcamk3_201103_sess14,neural,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze linear maze,44,CA1sp CA1so CA1sr,uLEDiscotheque Bibliocampus LightInInh
-fcamk1_200908_sess16,fcamk1,fcamk1\fcamk1_200908_sess16,neural,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze,59,CA1sp CA1so,uLEDiscotheque Bibliocampus LightInInh
+fcamk1_200902_sess13,fcamk1,fcamk1\fcamk1_200902_sess13,neural,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze,37,CA1sp CA1so,uLEDiscotheque Bibliocampus LightInInh
+fcamk3_201030_sess12,fcamk3,fcamk3\fcamk3_201030_sess12,neural,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze linear maze,47,CA1sp CA1so,uLEDiscotheque Bibliocampus LightInInh
+fcamk1_200904_sess15,fcamk1,fcamk1\fcamk1_200904_sess15,neural,c57,camkii/ai32,uled-12led-32ch-4shanks,linear maze,59,CA1sp CA1so CA1sr,uLEDiscotheque Bibliocampus LightInInh
+fcamk3_201103_sess14,fcamk3,fcamk3\fcamk3_201103_sess14,neural,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze linear maze,44,CA1sp CA1so CA1sr,uLEDiscotheque Bibliocampus LightInInh
+fcamk1_200908_sess16,fcamk1,fcamk1\fcamk1_200908_sess16,neural,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze,59,CA1sp CA1so,uLEDiscotheque Bibliocampus LightInInh
 fpv5_220701_sess5,fpv5,fpv5\fpv5_220701_sess5,neural,c57b1/6,vip/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,19,CA1sp CA1so PTLp6 PTLp5 CA1slm CA1sr CA3sp CA3sr DG,Bibliocampus
-fcamk1_200909_sess17,fcamk1,fcamk1\fcamk1_200909_sess17,neural,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze,58,CA1sp,uLEDiscotheque Bibliocampus LightInInh
+fcamk1_200909_sess17,fcamk1,fcamk1\fcamk1_200909_sess17,neural,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze,58,CA1sp,uLEDiscotheque Bibliocampus LightInInh
 fvip2_220825_sess15,fvip2,fvip2\fvip2_220825_sess15,neural,c57b1/6,vip/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,62,CA1slm CA1sp CA1so CA1sr PTLp5 PTLp2_3 CA3sp CA3so DG,Bibliocampus desVIPnhibition
 fid4_220818_sess10,fid4,fid4\fid4_220818_sess10,neural,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,37,PTLp5 PTLp6 PTLp2_3 CA1sp CA1so CA1slm CA1sr CA3sp,Bibliocampus
 fid4_220825_sess15,fid4,fid4\fid4_220825_sess15,neural,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,29,CA1sp CA1so PTLp6 PTLp5 PTLp2_3 CA1slm CA1sr CA3sp,Bibliocampus
 fid4_220826_sess16,fid4,fid4\fid4_220826_sess16,neural,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,29,CA1sp CA1so CA1slm CA1sr CA3sp CA3so DG PTLp6 PTLp5 PTLp2_3,Bibliocampus
 fvip2_220812_sess6,fvip2,fvip2\fvip2_220812_sess6,neural,c57b1/6,vip/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,87,CA1sp CA1sr CA1so PTLp6 PTLp5 PTLp2_3,Bibliocampus desVIPnhibition
-fcamk1_200911_sess19,fcamk1,fcamk1\fcamk1_200911_sess19,neural,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze,38,CA1sp CA1so pCA1sr CA1sr,uLEDiscotheque Bibliocampus LightInInh
-fcamk1_200910_sess18,fcamk1,fcamk1\fcamk1_200910_sess18,neural,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze,54,CA1sp CA1so CA1sr,uLEDiscotheque Bibliocampus LightInInh
-fcamk3_201111_sess20,fcamk3,fcamk3\fcamk3_201111_sess20,neural,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze linear maze,63,disCA1sp CA1sp CA1so CA1sr,uLEDiscotheque Bibliocampus LightInInh
-fcamk3_201105_sess16,fcamk3,fcamk3\fcamk3_201105_sess16,neural,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze linear maze,48,CA1sp CA1so,uLEDiscotheque Bibliocampus LightInInh
-fcamk3_201109_sess18,fcamk3,fcamk3\fcamk3_201109_sess18,neural,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze cnopoststim,66,CA1so CA1sp CA1sr,uLEDiscotheque Bibliocampus LightInInh
-fcamk3_201029_sess11_cleanned,fcamk3,fcamk3\fcamk3_201029_sess11_cleanned,neural,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze linear maze,40,CA1sp CA1sr CA1so,uLEDiscotheque Bibliocampus  LightInInh
-fcamk3_201102_sess13,fcamk3,fcamk3\fcamk3_201102_sess13,neural,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze linear maze,48,CA1sp CA1so CA1sr,uLEDiscotheque Bibliocampus LightInInh
-fcamk3_201110_sess19,fcamk3,fcamk3\fcamk3_201110_sess19,neural,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze linear maze,61,pCA1sp CA1sp CA1so CA1sr,uLEDiscotheque Bibliocampus LightInInh
-fcamk3_201113_sess22,fcamk3,fcamk3\fcamk3_201113_sess22,neural,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze linear maze,58,CA1sp CA1so CA1sr,uLEDiscotheque LightInInh
-fcamk3_201106_sess17,fcamk3,fcamk3\fcamk3_201106_sess17,neural,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze linear maze,46,CA1sp CA1sr CA1so,uLEDiscotheque Bibliocampus LightInInh
-fcamk3_201116_sess23,fcamk3,fcamk3\fcamk3_201116_sess23,neural,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze linear maze,60,CA1sp CA1so CA1sr,uLEDiscotheque
+fcamk1_200911_sess19,fcamk1,fcamk1\fcamk1_200911_sess19,neural,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze,38,CA1sp CA1so pCA1sr CA1sr,uLEDiscotheque Bibliocampus LightInInh
+fcamk1_200910_sess18,fcamk1,fcamk1\fcamk1_200910_sess18,neural,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze,54,CA1sp CA1so CA1sr,uLEDiscotheque Bibliocampus LightInInh
+fcamk3_201111_sess20,fcamk3,fcamk3\fcamk3_201111_sess20,neural,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze linear maze,63,disCA1sp CA1sp CA1so CA1sr,uLEDiscotheque Bibliocampus LightInInh
+fcamk3_201105_sess16,fcamk3,fcamk3\fcamk3_201105_sess16,neural,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze linear maze,48,CA1sp CA1so,uLEDiscotheque Bibliocampus LightInInh
+fcamk3_201109_sess18,fcamk3,fcamk3\fcamk3_201109_sess18,neural,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze cnopoststim,66,CA1so CA1sp CA1sr,uLEDiscotheque Bibliocampus LightInInh
+fcamk3_201029_sess11_cleanned,fcamk3,fcamk3\fcamk3_201029_sess11_cleanned,neural,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze linear maze,40,CA1sp CA1sr CA1so,uLEDiscotheque Bibliocampus  LightInInh
+fcamk3_201102_sess13,fcamk3,fcamk3\fcamk3_201102_sess13,neural,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze linear maze,48,CA1sp CA1so CA1sr,uLEDiscotheque Bibliocampus LightInInh
+fcamk3_201110_sess19,fcamk3,fcamk3\fcamk3_201110_sess19,neural,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze linear maze,61,pCA1sp CA1sp CA1so CA1sr,uLEDiscotheque Bibliocampus LightInInh
+fcamk3_201113_sess22,fcamk3,fcamk3\fcamk3_201113_sess22,neural,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze linear maze,58,CA1sp CA1so CA1sr,uLEDiscotheque LightInInh
+fcamk3_201106_sess17,fcamk3,fcamk3\fcamk3_201106_sess17,neural,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze linear maze,46,CA1sp CA1sr CA1so,uLEDiscotheque Bibliocampus LightInInh
+fcamk3_201116_sess23,fcamk3,fcamk3\fcamk3_201116_sess23,neural,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze linear maze,60,CA1sp CA1so CA1sr,uLEDiscotheque
 fvip2_220901_sess20,fvip2,fvip2\fvip2_220901_sess20,neural,c57b1/6,vip/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,80,CA1sp CA1so CA1sr PTLp5 PTLp2_3 CA1slm CA3sp CA3so Thalamus,Bibliocampus desVIPnhibition
-fcamk10_220920_sess8,fcamk10,fcamk10\fcamk10_220920_sess8,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",no,36,CA1sp CA1so,uLEDiscotheque
+fcamk10_220920_sess8,fcamk10,fcamk10\fcamk10_220920_sess8,neural3,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,no,36,CA1sp CA1so,uLEDiscotheque
 fvip2_220826_sess16,fvip2,fvip2\fvip2_220826_sess16,neural,c57b1/6,vip/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,66,CA1sr CA1slm CA1sp CA1so PTLp5 PTLp2_3 CA3sp CA3sr CA3so DG,Bibliocampus desVIPnhibition
 fcr1_220302_sess4,fcr1,fcr1\fcr1_220302_sess4,neural,c57b1/6,vip/cr/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,92,PTLp5 PTLp6 PTLp2_3 CA1sp CA1so CA1sr CA1slm CA3sp CA3sr,Bibliocampus desVIPnhibition
 fcr1_220308_sess8,fcr1,fcr1\fcr1_220308_sess8,neural,c57b1/6,vip/cr/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,51,CA1sp CA1so PTLp5 PTLp6 PTLp2_3 CA3sp CA3so CA1slm CA1sr,Bibliocampus desVIPnhibition
 fvip4_221013_sess2,fvip4,fvip4\fvip4_221013_sess2,neural,c57b1/6,vip/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,39,CA1sp CA1so PTLp5 PTLp2_3 CA1slm CA1sr CA3sp CA3sr,Bibliocampus desVIPnhibition
 fvip2_220831_sess19,fvip2,fvip2\fvip2_220831_sess19,neural,c57b1/6,vip/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,58,CA1sp CA1so PTLp5 PTLp2_3 CA1sr CA1slm DG,Bibliocampus desVIPnhibition
-fcamk10_220922_sess10,fcamk10,fcamk10\fcamk10_220922_sess10,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",no,60,CA1sp CA1so,uLEDiscotheque
-fcamk10_220921_sess9,fcamk10,fcamk10\fcamk10_220921_sess9,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",no,50,CA1sp CA1so,uLEDiscotheque
-fcamk10_220923_sess11,fcamk10,fcamk10\fcamk10_220923_sess11,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze,57,CA1so CA1sp,uLEDiscotheque LightInInh
-fcamk10_220926_sess12,fcamk10,fcamk10\fcamk10_220926_sess12,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze,60,CA1so CA1sp,uLEDiscotheque
-fcamk10_220927_sess13,fcamk10,fcamk10\fcamk10_220927_sess13,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze,58,CA1sp CA1sr CA1so,uLEDiscotheque LightInInh
-fcamk10_220928_sess14,fcamk10,fcamk10\fcamk10_220928_sess14,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze,67,CA1sr CA1sp CA1so,uLEDiscotheque LightInInh
-fcamk10_220929_sess15,fcamk10,fcamk10\fcamk10_220929_sess15,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze,60,CA1sr CA1sp CA1so,uLEDiscotheque LightInInh
+fcamk10_220922_sess10,fcamk10,fcamk10\fcamk10_220922_sess10,neural3,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,no,60,CA1sp CA1so,uLEDiscotheque
+fcamk10_220921_sess9,fcamk10,fcamk10\fcamk10_220921_sess9,neural3,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,no,50,CA1sp CA1so,uLEDiscotheque
+fcamk10_220923_sess11,fcamk10,fcamk10\fcamk10_220923_sess11,neural3,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze,57,CA1so CA1sp,uLEDiscotheque LightInInh
+fcamk10_220926_sess12,fcamk10,fcamk10\fcamk10_220926_sess12,neural3,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze,60,CA1so CA1sp,uLEDiscotheque
+fcamk10_220927_sess13,fcamk10,fcamk10\fcamk10_220927_sess13,neural3,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze,58,CA1sp CA1sr CA1so,uLEDiscotheque LightInInh
+fcamk10_220928_sess14,fcamk10,fcamk10\fcamk10_220928_sess14,neural3,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze,67,CA1sr CA1sp CA1so,uLEDiscotheque LightInInh
+fcamk10_220929_sess15,fcamk10,fcamk10\fcamk10_220929_sess15,neural3,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze,60,CA1sr CA1sp CA1so,uLEDiscotheque LightInInh
 fvip4_221014_sess3,fvip4,fvip4\fvip4_221014_sess3,neural,c57b1/6,vip/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,37,CA1sp CA1so PTLp6 PTLp5 PTLp2_3 CA1slm CA1sr CA3sp CA3so CA2sr CA3sr,Bibliocampus desVIPnhibition
 fid4_220829_sess17,fid4,fid4\fid4_220829_sess17,neural,c57b1/6,id2/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,29,CA1sp CA1so CA1sr pCA1slm CA2slm CA3slm CA1slm CA3sr PTLp5 PTLp6 PTLp2_3 PTLp4 CA3sp CA3so,Bibliocampus
 fsst3_220923_sess10,fsst3,fsst3\fsst3_220923_sess10,neural,c57b1/6,sst/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,28,CA1so CA1sp CA1slm CA1sr CA3sp CA3so CA3sr,Bibliocampus
@@ -149,21 +149,21 @@ fcr1_220301_sess3,fcr1,fcr1\fcr1_220301_sess3,neural,c57b1/6,vip/cr/ai80,"105µm
 fcr1_220323_sess18,fcr1,fcr1\fcr1_220323_sess18,neural,c57b1/6,vip/cr/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,37,CA1sp CA1so CA1sr CA1slm PTLp6 PTLp5 PTLp2_3 CA3sp CA3so CA3sr,Bibliocampus desVIPnhibition
 fvip4_221020_sess7,fvip4,fvip4\fvip4_221020_sess7,neural,c57b1/6,vip/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,44,PTLp6 PTLp5 PTLp2_3 CA1so CA1sp CA1slm CA1sr CA3sp CA3so CA3sr DG,Bibliocampus desVIPnhibition
 fvip2_220811_sess5,fvip2,fvip2\fvip2_220811_sess5,neural,c57b1/6,vip/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,82,CA1sp CA1so CA1sr CA1slm PTLp6 PTLp5 PTLp2_3,Bibliocampus desVIPnhibition
-fcamk10_221004_sess18,fcamk10,fcamk10\fcamk10_221004_sess18,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze,56,CA1so CA1sp,uLEDiscotheque LightInInh
-fcamk10_221006_sess20,fcamk10,fcamk10\fcamk10_221006_sess20,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze,74,CA1so CA1sp CA1sr,uLEDiscotheque LightInInh
-fcamk10_220930_sess16,fcamk10,fcamk10\fcamk10_220930_sess16,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze,52,CA1so CA1sp CA1sr,uLEDiscotheque
+fcamk10_221004_sess18,fcamk10,fcamk10\fcamk10_221004_sess18,neural3,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze,56,CA1so CA1sp,uLEDiscotheque LightInInh
+fcamk10_221006_sess20,fcamk10,fcamk10\fcamk10_221006_sess20,neural3,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze,74,CA1so CA1sp CA1sr,uLEDiscotheque LightInInh
+fcamk10_220930_sess16,fcamk10,fcamk10\fcamk10_220930_sess16,neural3,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze,52,CA1so CA1sp CA1sr,uLEDiscotheque
 ymv04_170907,ymv04,ymv04\ymv04_170907,neural,c57b1/6,camkii/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,63,VISp5 VISp6 VISp4 VISp2_3 VISp1 CA1so,Bibliocampus
-fcamk5_210406_sess10,fcamk5,fcamk5\fcamk5_210406_sess10,neural,c57,camkii/ai32,"uled-12led-32ch-4shanks",linear maze linear maze,49,CA1sp CA1so,
-fcamk5_210407_sess11,fcamk5,fcamk5\fcamk5_210407_sess11,neural,c57,camkii/ai32,"uled-12led-32ch-4shanks",linear maze linear maze,59,CA1sp CA1so,
+fcamk5_210406_sess10,fcamk5,fcamk5\fcamk5_210406_sess10,neural,c57,camkii/ai32,uled-12led-32ch-4shanks,linear maze linear maze,49,CA1sp CA1so,
+fcamk5_210407_sess11,fcamk5,fcamk5\fcamk5_210407_sess11,neural,c57,camkii/ai32,uled-12led-32ch-4shanks,linear maze linear maze,59,CA1sp CA1so,
 ymv17_180207,ymv17,ymv17\ymv17_180207,neural,c57b1/6,pv/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,81,VISp5 VISp2_3 VISp4 VISp6 CA1so VISp1,Bibliocampus
 fcr3_220321_sess3,fcr3,fcr3\fcr3_220321_sess3,neural3,c57b1/6,vip/cr/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,90,CA1sp CA1so PTLp5 PTLp2_3 CA1sr CA1slm CA3sp DG,Bibliocampus
 fcr3_220328_sess8,fcr3,fcr3\fcr3_220328_sess8,neural3,c57b1/6,vip/cr/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,26,CA1sp CA1so PTLp5 PTLp2_3 CA1slm CA1sr CA3sp DG,Bibliocampus
-fcamk5_210408_sess12,fcamk5,fcamk5\fcamk5_210408_sess12,neural,c57,camkii/ai32,"uled-12led-32ch-4shanks",linear maze linear maze,62,CA1sp CA1so CA1sr,LightInInh
-fcamk5_210412_sess14,fcamk5,fcamk5\fcamk5_210412_sess14,neural,c57,camkii/ai32,"uled-12led-32ch-4shanks",linear maze linear maze,50,CA1sp CA1so CA1sr,
+fcamk5_210408_sess12,fcamk5,fcamk5\fcamk5_210408_sess12,neural,c57,camkii/ai32,uled-12led-32ch-4shanks,linear maze linear maze,62,CA1sp CA1so CA1sr,LightInInh
+fcamk5_210412_sess14,fcamk5,fcamk5\fcamk5_210412_sess14,neural,c57,camkii/ai32,uled-12led-32ch-4shanks,linear maze linear maze,50,CA1sp CA1so CA1sr,
 ymv15_180205,ymv15,ymv15\ymv15_180205,neural,c57b1/6,pv/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,79,VISp6 VISp5 VISp2_3 VISp4 VISp1 CA1so,Bibliocampus
 fcr3_220331_sess11,fcr3,fcr3\fcr3_220331_sess11,neural3,c57b1/6,vip/cr/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,37,CA1sp CA1so PTLp5 PTLp2_3 CA1slm CA1sr CA3sp CA3sr DG,Bibliocampus desVIPnhibition
 ymv09_171204,ymv09,ymv09\ymv09_171204,neural,c57b1/6,pv/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,78,VISp5 VISp2_3 VISp4 VISp1 VISp6 CA1so CA1sp,Bibliocampus
-fcamk5_210414_sess16,fcamk5,fcamk5\fcamk5_210414_sess16,neural,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze linear maze,54,CA1sp CA1so CA1sr,
+fcamk5_210414_sess16,fcamk5,fcamk5\fcamk5_210414_sess16,neural,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze linear maze,54,CA1sp CA1so CA1sr,
 ymv19_180209,ymv19,ymv19\ymv19_180209,neural,c57b1/6,pv/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,64,VISp5 VISp2_3 VISp1 VISp4 VISp6 CA1so CA1sp,Bibliocampus
 fcr4_220331_sess2,fcr4,fcr4\fcr4_220331_sess2,neural3,c57b1/6,vip/cr/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,29,PTLp5 PTLp6 PTLp2_3 CA1sp CA1so CA1sr CA1slm CA3sp CA3so DG,Bibliocampus desVIPnhibition
 ymv18_180208,ymv18,ymv18\ymv18_180208,neural3,c57b1/6,pv/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,119,VISp5 VISp6 VISp2_3 VISp4 VISp1,Bibliocampus
@@ -181,17 +181,17 @@ fcr3_220329_sess9,fcr3,fcr3\fcr3_220329_sess9,neural3,c57b1/6,vip/cr/ai80,"105µ
 fvip1_220523_sess9,fvip1,fvip1\fvip1_220523_sess9,neural3,c57b1/6,vip/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,18,CA1sp CA1so PTLp2_3 PTLp5 PTLp6 CA1sr DG,Bibliocampus desVIPnhibition
 fvip1_220513_sess3,fvip1,fvip1\fvip1_220513_sess3,neural3,c57b1/6,vip/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,20,PTLp5 PTLp2_3 CA1slm CA1sr CA1sp CA1so PTLp6,Bibliocampus desVIPnhibition
 fvip1_220524_sess10,fvip1,fvip1\fvip1_220524_sess10,neural3,c57b1/6,vip/dlx/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,12,PTLp2_3 PTLp5 PTLp6 DG CA1sp CA1so CA1sr CA1slm,Bibliocampus desVIPnhibition
-fcamk10_221007_sess21,fcamk10,fcamk10\fcamk10_221007_sess21,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze,70,CA1so CA1sp CA1sr,uLEDiscotheque LightInInh
-fcamk6_210630_sess1,fcamk6,fcamk6\fcamk6_210630_sess1,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze,28,CA1sp CA1so CA1sr CA1slm,uLEDiscotheque
-fcamk6_210701_sess2,fcamk6,fcamk6\fcamk6_210701_sess2,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze,22,CA1sp CA1so,uLEDiscotheque
-fcamk6_210706_sess4,fcamk6,fcamk6\fcamk6_210706_sess4,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze,21,CA1so CA1sp,uLEDiscotheque
-fcamk6_210707_sess5,fcamk6,fcamk6\fcamk6_210707_sess5,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze,18,CA1so CA1sp CA1sr,uLEDiscotheque
-fcamk6_210708_sess6,fcamk6,fcamk6\fcamk6_210708_sess6,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linera maze,15,CA1sp CA1so CA1sr,uLEDiscotheque
-fcamk6_210709_sess7,fcamk6,fcamk6\fcamk6_210709_sess7,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze,20,CA1sp CA1so CA1sr,uLEDiscotheque
-fcamk5_210415_sess17,fcamk5,fcamk5\fcamk5_210415_sess17,neural,c57,camkii/ai32,"uled-12led-32ch-4shanks",linear maze linear maze,48,CA1sp CA1so,
-fcamk10_221003_sess17,fcamk10,fcamk10\fcamk10_221003_sess17,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze,40,CA1so CA1sp CA1sr,uLEDiscotheque
+fcamk10_221007_sess21,fcamk10,fcamk10\fcamk10_221007_sess21,neural3,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze,70,CA1so CA1sp CA1sr,uLEDiscotheque LightInInh
+fcamk6_210630_sess1,fcamk6,fcamk6\fcamk6_210630_sess1,neural3,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze,28,CA1sp CA1so CA1sr CA1slm,uLEDiscotheque
+fcamk6_210701_sess2,fcamk6,fcamk6\fcamk6_210701_sess2,neural3,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze,22,CA1sp CA1so,uLEDiscotheque
+fcamk6_210706_sess4,fcamk6,fcamk6\fcamk6_210706_sess4,neural3,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze,21,CA1so CA1sp,uLEDiscotheque
+fcamk6_210707_sess5,fcamk6,fcamk6\fcamk6_210707_sess5,neural3,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze,18,CA1so CA1sp CA1sr,uLEDiscotheque
+fcamk6_210708_sess6,fcamk6,fcamk6\fcamk6_210708_sess6,neural3,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linera maze,15,CA1sp CA1so CA1sr,uLEDiscotheque
+fcamk6_210709_sess7,fcamk6,fcamk6\fcamk6_210709_sess7,neural3,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze,20,CA1sp CA1so CA1sr,uLEDiscotheque
+fcamk5_210415_sess17,fcamk5,fcamk5\fcamk5_210415_sess17,neural,c57,camkii/ai32,uled-12led-32ch-4shanks,linear maze linear maze,48,CA1sp CA1so,
+fcamk10_221003_sess17,fcamk10,fcamk10\fcamk10_221003_sess17,neural3,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze,40,CA1so CA1sp CA1sr,uLEDiscotheque
 fcr3_220318_sess2,fcr3,fcr3\fcr3_220318_sess2,neural3,c57b1/6,vip/cr/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,59,CA1sp CA1so PTLp5 PTLp2_3 CA1slm CA1sr CA3sp CA3so DG,Bibliocampus desVIPnhibition
-fcamk3_201117_sess24,fcamk3,fcamk3\fcamk3_201117_sess24,neural,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze linear maze,54,CA1sp CA1so CA1sr,uLEDiscotheque InterneuronsLibrary
+fcamk3_201117_sess24,fcamk3,fcamk3\fcamk3_201117_sess24,neural,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze linear maze,54,CA1sp CA1so CA1sr,uLEDiscotheque InterneuronsLibrary
 fcr4_220401_sess3,fcr4,fcr4\fcr4_220401_sess3,neural3,c57b1/6,vip/cr/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,100,CA1sp CA1sr CA1so CA1slm PTLp5 PTLp2_3 PTLp4 DG CA3slm,Bibliocampus desVIPnhibition
 fcr4_220405_sess6,fcr4,fcr4\fcr4_220405_sess6,neural3,c57b1/6,vip/cr/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,121,CA1so CA1sp CA1sr CA1slm DG CA3sp CA3so PTLp5 PTLp2_3,Bibliocampus desVIPnhibition
 fsst4_220922_sess8,fsst4,fsst4\fsst4_220922_sess8,neural3,c57b1/6,sst/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,13,CA1sp CA1so PTLp5 PTLp2_3 CA1sr,Bibliocampus
@@ -201,8 +201,8 @@ fcamk7_220422_sess18,fcamk7,fcamk7\fcamk7_220422_sess18,neural3,c57b1/6,camkii/a
 fsst4_220921_sess7,fsst4,fsst4\fsst4_220921_sess7,neural3,c57b1/6,sst/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,19,pCA1sp CA1sp CA1so CA1sr CA1slm PTLp5 PTLp2_3,Bibliocampus
 fsst4_220928_sess12,fsst4,fsst4\fsst4_220928_sess12,neural3,c57b1/6,sst/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,9,CA1sp CA1so CA1sr CA1slm PTLp5 PTLp6,Bibliocampus
 fcamk7_220420_sess16,fcamk7,fcamk7\fcamk7_220420_sess16,neural3,c57b1/6,camkii/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,245,CA1so CA1sp CA1slm CA1sr mPFC,InterneuronsLibrary
-ny15session22,ny15,ny15\ny15session22,neural3,epilepsy,wild type,"none",no,20,CA1sp,evoNeurons
+ny15session22,ny15,ny15\ny15session22,neural3,epilepsy,wild type,none,no,20,CA1sp,evoNeurons
 fcamk7_220418_sess14,fcamk7,fcamk7\fcamk7_220418_sess14,neural3,c57b1/6,camkii/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",maze,218,mPFC pSUBsp CA1sr CA1sp CA1so,InterneuronsLibrary
-fcamk10_220913_sess3,data,data\fcamk10_220913_sess3,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",no,17,CA1so CA1sp,ReactInh
+fcamk10_220913_sess3,data,data\fcamk10_220913_sess3,neural3,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,no,17,CA1so CA1sp,ReactInh
 fcamk7_220419_sess15,fcamk7,fcamk7\fcamk7_220419_sess15,neural3,c57b1/6,camkii/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",maze,268,mPFC pSUBsp CA1sr CA1so CA1sp,InterneuronsLibrary
-fcamk8_220609_sess8,fcamk8,fcamk8\fcamk8_220609_sess8,neural3,unknown,,"diagnosticbiochip-128-6-128ch&uled_12led-32ch-4shanks",tmaze,154,mPFC CA1so CA1sp CA1sr pSUBsp,
+fcamk8_220609_sess8,fcamk8,fcamk8\fcamk8_220609_sess8,neural3,c57b1/6,camkii/ai32,diagnosticbiochip-128-6-128ch&uled_12led-32ch-4shanks,tmaze,154,mPFC CA1so CA1sp CA1sr pSUBsp,Bibliocampus

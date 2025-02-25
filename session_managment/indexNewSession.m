@@ -60,6 +60,8 @@ if isempty(indexedSessionCSV_path)
 end
 
 cd(basepath)
+keyboard;
+
 
 %% By default looks for Synology and copy files to it, it specified copy files to the specified folder
 if ~isempty(driveStorage_location) && ~isempty(driveStorage_path)
@@ -98,13 +100,15 @@ optogenetics = cell(0);
 switch session.extracellular.chanCoords.layout
     case 'uLED-12LED-32Ch-4Shanks'
         optogenetics = {session.extracellular.chanCoords.layout};
+    case 'DiagnosticBiochip-128-6-128ch&uLED_12LED-32Ch-4Shanks'
+        optogenetics = {session.extracellular.chanCoords.layout};
     case 'BehnkeFried-8ch.csv'
         optogenetics = {'None'};
     otherwise
         for ii = 1:length(session.animal.opticFiberImplants)
             optogenetics{1, length(optogenetics)+1} = session.animal.opticFiberImplants{ii}.opticFiber;
             optogenetics{1, length(optogenetics)+1} = ' ';
-        end
+        end 
         optogenetics(end) = [];
 end
 
