@@ -95,7 +95,7 @@ uLEDResponses_RandInterval.maxRatePulse = [];
 uLEDResponses_RandInterval.maxZPulse = [];
 
 
-for ii = 3:length(uLEDResponses_interval)
+for ii = 1:length(uLEDResponses_interval)
     if strcmpi(cell_metrics.putativeCellType{ii},'Pyramidal Cell')
         cellType = 1;
     elseif strcmpi(cell_metrics.putativeCellType{ii},'Wide Interneuron')
