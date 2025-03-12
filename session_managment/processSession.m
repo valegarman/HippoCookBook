@@ -115,48 +115,48 @@ excludeAnalysis = lower(excludeAnalysis);
 
 %% 1. Runs sessionTemplate
 if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))
-    try
-        session = loadSession(basepath);
-        session.channels = 1:session.extracellular.nChannels;
+        try
+            session = loadSession(basepath);
+            session.channels = 1:session.extracellular.nChannels;
+    
+            if ~isfield(session, 'analysisTags')
+                session.analysisTags = [];
+            end
+            if ~isfield(session.analysisTags,'digital_optogenetic_channels')
+                session.analysisTags.digital_optogenetic_channels = digital_optogenetic_channels;
+            end
+            if ~isfield(session.analysisTags,'analog_optogenetic_channels')
+                session.analysisTags.analog_optogenetic_channels = analog_optogenetic_channels;
+            end
+    
+            if isempty(rejectChannels)
+                rejectChannels = session.channelTags.Bad.channels; % 1-index
+            end
+            if ~isfield(session.analysisTags,'bazler_ttl_channel')
+                session.analysisTags.bazler_ttl_channel = bazler_ttl_channel;
+            end
+            
+            if ~isfield(session.analysisTags,'leftArmTtl_channel')
+                session.analysisTags.leftArmTtl_channel = leftArmTtl_channel;
+            end
+            if ~isfield(session.analysisTags,'rightArmTtl_channel')
+                session.analysisTags.rightArmTtl_channel = rightArmTtl_channel;
+            end
+            if ~isfield(session.analysisTags,'homeDelayTtl_channel')
+                session.analysisTags.homeDelayTtl_channel = homeDelayTtl_channel;
+            end
+            
+            if ~isfield(session.analysisTags,'homeDelayTtl_channel')
+            end
+            
+            save([basepath filesep session.general.name,'.session.mat'],'session','-v7.3');
+        catch
+            warning('it seems that CellExplorer is not on your path');
+            
+            session = sessionTemplate(basepath,'showGUI',true);
+        end
 
-        if ~isfield(session, 'analysisTags')
-            session.analysisTags = [];
-        end
-        if ~isfield(session.analysisTags,'digital_optogenetic_channels')
-            session.analysisTags.digital_optogenetic_channels = digital_optogenetic_channels;
-        end
-        if ~isfield(session.analysisTags,'analog_optogenetic_channels')
-            session.analysisTags.analog_optogenetic_channels = analog_optogenetic_channels;
-        end
 
-        if isempty(rejectChannels)
-            rejectChannels = session.channelTags.Bad.channels; % 1-index
-        end
-        if ~isfield(session.analysisTags,'bazler_ttl_channel')
-            session.analysisTags.bazler_ttl_channel = bazler_ttl_channel;
-        end
-        
-        if ~isfield(session.analysisTags,'leftArmTtl_channel')
-            session.analysisTags.leftArmTtl_channel = leftArmTtl_channel;
-        end
-        if ~isfield(session.analysisTags,'rightArmTtl_channel')
-            session.analysisTags.rightArmTtl_channel = rightArmTtl_channel;
-        end
-        if ~isfield(session.analysisTags,'homeDelayTtl_channel')
-            session.analysisTags.homeDelayTtl_channel = homeDelayTtl_channel;
-        end
-        
-        if ~isfield(session.analysisTags,'homeDelayTtl_channel')
-        end
-        
-        save([basepath filesep session.general.name,'.session.mat'],'session','-v7.3');
-    catch
-        warning('it seems that CellExplorer is not on your path');
-        
-        session = sessionTemplate(basepath,'showGUI',true);
-    end
-    %% 
-    keyboard;
     session = gui_session(session);
 
     selectProbe('force',true,'automatic', selectProbe_automatic); % choose probe
@@ -389,7 +389,7 @@ end
 
 %% 12. Summary per cell
 if ~any(ismember(excludeAnalysis, {'12',lower('summary')}))
-    plotSummary('showTagCells',false);
+    
 end
 
 cd(prevPath);
