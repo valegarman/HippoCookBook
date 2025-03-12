@@ -14,7 +14,7 @@ addParameter(p,'indexedSessionCSV_path',[],@isstring);
 addParameter(p,'indexedSessionCSV_name','indexedSessions',@isstring);
 addParameter(p,'hippoCookBook_path','HippoCookBook',@isstring);
 addParameter(p,'removeDatFiles',true,@islogical);
-addParameter(p,'removeDat',false,@islogical);
+% addParameter(p,'removeDat',false,@islogical);
 addParameter(p,'copyFiles',true,@islogical);
 % addParameter(p,'driveStorage_path','W:\Buzsakilabspace\Datasets\ValeroM',@isdir);
 addParameter(p,'driveStorage_path',[],@isdir);
@@ -29,7 +29,7 @@ indexedSessionCSV_path = p.Results.indexedSessionCSV_path;
 indexedSessionCSV_name = p.Results.indexedSessionCSV_name;
 hippoCookBook_path = p.Results.hippoCookBook_path;
 removeDatFiles = p.Results.removeDatFiles;
-removeDat = p.Results.removeDat;
+% removeDat = p.Results.removeDat;
 copyFiles = p.Results.copyFiles;
 driveStorage_path = p.Results.driveStorage_path;
 % driveStorage_name = p.Results.driveStorage_name;
@@ -60,6 +60,8 @@ if isempty(indexedSessionCSV_path)
 end
 
 cd(basepath)
+keyboard;
+
 
 %% By default looks for Synology and copy files to it, it specified copy files to the specified folder
 if ~isempty(driveStorage_location) && ~isempty(driveStorage_path)
@@ -98,13 +100,15 @@ optogenetics = cell(0);
 switch session.extracellular.chanCoords.layout
     case 'uLED-12LED-32Ch-4Shanks'
         optogenetics = {session.extracellular.chanCoords.layout};
+    case 'DiagnosticBiochip-128-6-128ch&uLED_12LED-32Ch-4Shanks'
+        optogenetics = {session.extracellular.chanCoords.layout};
     case 'BehnkeFried-8ch.csv'
         optogenetics = {'None'};
     otherwise
         for ii = 1:length(session.animal.opticFiberImplants)
             optogenetics{1, length(optogenetics)+1} = session.animal.opticFiberImplants{ii}.opticFiber;
             optogenetics{1, length(optogenetics)+1} = ' ';
-        end
+        end 
         optogenetics(end) = [];
 end
 
@@ -195,19 +199,23 @@ if removeDatFiles
     if ~isempty(dir('Kilosort*'))
         file = dir('Kilosort*');
         cd(file(end).name);
-        if exist('.phy','dir')
-            rmdir('.phy','s');
+        try
+            if exist('.phy','dir')
+                rmdir('.phy','s');
+            end
+        catch
+            warning('.phy folder does not exist... Maybe was removed before?');
         end
         cd(basepath);
     end
 end
 
-if removeDat
-    if ~isempty(dir([session.general.name,'.dat']))
-        file = dir([session.general.name,'.dat']);
-        delete(file.name);
-    end
-end
+% if removeDat
+%     if ~isempty(dir([session.general.name,'.dat']))
+%         file = dir([session.general.name,'.dat']);
+%         delete(file.name);
+%     end
+% end
 
 % copying files to storage
 if copyFiles
