@@ -11,7 +11,7 @@ HCB_directory = what('HippoCookBook');
 
 sessionsTable = readtable([HCB_directory.path filesep 'indexedSessions.csv']); % the variable is called allSessions
 
-for ii = 86 : length(sessionsTable.SessionName)
+for ii = 183: length(sessionsTable.SessionName)
      %% Analysis general all over Camkii/32 animal
     if contains(sessionsTable.Project{ii}, targetProject) || strcmpi('all', targetProject)
 
