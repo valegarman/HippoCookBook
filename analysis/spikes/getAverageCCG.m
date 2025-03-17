@@ -492,6 +492,7 @@ function avgCCG = averageCCGheart(allCcg, t_ccg, win_Z, winIndex, interp0, inclu
         else
             [~,orderOfMap2] =  sort(mean(ccZ(find(InIntervals(t_ccg,[-0.015 0.015])),:)));
         end
+        
         if length(find(include_cells)) > 1
             ccZ = interpft(ccZ(:,orderOfMap2),100,2)';
             ccZMedianMap(jj,:,:) = ccZ;
