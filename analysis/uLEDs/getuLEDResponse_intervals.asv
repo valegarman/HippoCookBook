@@ -119,7 +119,7 @@ uLEDPulses.code = uLEDPulses_temp.code;
 uLEDPulses.timestamps = uLEDPulses_temp.timestamps;
 uLEDPulses.nonStimulatedShank = uLEDPulses_temp.nonStimulatedShank;
 clear uLEDPulses_temp
-
+keyboard;
 %check that the pulse duration is 0.02 
 CONDITION =[];
 
@@ -128,15 +128,15 @@ if length(uLEDPulses.list_of_conditions) > 1
     CONDITION_LIST = uLEDPulses.list_of_conditions(find(uLEDPulses.list_of_durations == duration_pulse))';
     CONDITION = CONDITION_LIST(unique(uLEDPulses.conditionID) == CONDITION_LIST);
       
-    uLEDPulses.conditionID =uLEDPulses.conditionID(find(uLEDPulses.conditionID == CONDITION));
-    uLEDPulses.timestamps = uLEDPulses.timestamps(find(uLEDPulses.conditionID == CONDITION),:);
-    uLEDPulses.code = uLEDPulses.code(find(uLEDPulses.conditionID == CONDITION));
+    uLEDPulses.conditionID =uLEDPulses.conditionID(find(uLEDPulses.conditionID == CONDITION_LIST));
+    uLEDPulses.timestamps = uLEDPulses.timestamps(find(uLEDPulses.conditionID == CONDITION_LIST),:);
+    uLEDPulses.code = uLEDPulses.code(find(uLEDPulses.conditionID == CONDITION_LIST));
     
     uLEDPulses.list_of_epochs = 1;
     uLEDPulses.list_of_conditions = 1;
     uLEDPulses.list_of_durations(find(uLEDPulses.list_of_durations ~= duration_pulse)) =[];
     % uLEDPulses.conditionID = ones(length(uLEDPulses.conditionID),1); 
-    uLEDPulses.conditionID = ones(length(uLEDPulses.conditionID(find(uLEDPulses.conditionID == CONDITION))),1); 
+    uLEDPulses.conditionID = ones(length(uLEDPulses.conditionID(find(uLEDPulses.conditionID == CONDITION_LIST))),1); 
 
    % % INDEX = find(round(diff(uLEDPulses.timestamps'),3)==0.02)';
    % uLEDPulses.timestamps = uLEDPulses.timestamps(find(round(diff(uLEDPulses.timestamps'),3)==0.02)',:);
