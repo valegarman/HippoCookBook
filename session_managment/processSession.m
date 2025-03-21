@@ -281,7 +281,8 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     getSpikesRank('events','ripples');
 
     % 8.4 Fiber ripple analysis
-    ripples_fiber = fiberPhotometryModulation([],'eventType','ripples');
+    % ripples_fiber = fiberPhotometryModulation([],'eventType','ripples');
+    ripples_fiber = fiberPhotometryModulation_temp([],'eventType','ripples');
 
 
     % 8.3 Theta intervals
