@@ -14,6 +14,6 @@ switch lower(project)
         'speedCorr.cellinfo','uLEDResponse.cellinfo','lightSpikeCollisions','spikeCCGchange','lightSpikeCollisions_control'};
 
     otherwise
-        list = 'standard';
+        list = {'ripples_psth','slowOscillations_psth','theta_*.PhaseLockingData','lgamma*.PhaseLockingData','hgamma*.PhaseLockingData','ripple*.PhaseLockingData','spatialModulation','placeFields','behavior.cellinfo','ACGPeak'};
 end
 end

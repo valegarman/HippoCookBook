@@ -122,6 +122,18 @@ xlim([0 size(corrMat,1) + 1]);
 ylim([0 size(corrMat,2) + 1]);
 if area_is_p
     scatter([length(corrMat)-3 : length(corrMat)], zeros(4,1),-log10([minPvalue 0.001 0.01 0.05])*area_factor, [.5 .5 .5],'filled')
+    x_ax = [length(corrMat)-3 : length(corrMat)];
+    p_ax = [minPvalue 0.001 0.01 0.05];
+    for ii = 1:length(x_ax)
+        t = text(x_ax(ii), 0.1, num2str(p_ax(ii)));
+        t.Rotation = 320;
+    end
+    
+    x = x(:);
+    y = y(:);
+    is_sig = p_values > -log10(0.05);
+
+    scatter(x(is_sig),y(is_sig),area_values(is_sig)*area_factor, [.5 .5 .5],'LineWidth',1);
 end
 
 axis square
