@@ -201,12 +201,16 @@ uLEDcoactivation.units_pyramidalCells = label_unit_as_nan(uLEDcoactivation.units
 pyramidal_neuron_pair = ismember(uLEDcoactivation.pairs.pre_id, find(pyramidal_neurons)) & ismember(uLEDcoactivation.pairs.post_id, find(pyramidal_neurons));
 uLEDcoactivation.pairs_pyramidalCells = label_pairs_as_nan(uLEDcoactivation.pairs, ~pyramidal_neuron_pair);
 
+uLEDcoactivation.is_pyramidalCells = ismember(cell_metrics.putativeCellType, 'Pyramidal Cell')';
+
 % light responsive neurons and pyramidal neurons
 targetCells = pyramidal_neurons & lightRespNeurons;
 uLEDcoactivation.units_pyramidalCells_lightResponsive = label_unit_as_nan(uLEDcoactivation.units, ~targetCells);
 
 lightResponsive_pyr_pair = ismember(uLEDcoactivation.pairs.pre_id, find(targetCells)) & ismember(uLEDcoactivation.pairs.post_id, find(targetCells));
 uLEDcoactivation.pairs_pyramidalCells_lightResponsive = label_pairs_as_nan(uLEDcoactivation.pairs, ~lightResponsive_pyr_pair);
+
+uLEDcoactivation.is_pyramidalCells_lightResponsive = pyramidal_neurons & lightRespNeurons;
 
 % light responsive neurons
 targetCells = lightRespNeurons;
@@ -215,41 +219,52 @@ uLEDcoactivation.units_lightResponsive = label_unit_as_nan(uLEDcoactivation.unit
 lightResponsive_pair = ismember(uLEDcoactivation.pairs.pre_id, find(targetCells)) & ismember(uLEDcoactivation.pairs.post_id, find(targetCells));
 uLEDcoactivation.pairs_lightResponsive = label_pairs_as_nan(uLEDcoactivation.pairs, ~lightResponsive_pair);
 
+uLEDcoactivation.is_lightResponsive = lightRespNeurons;
+
 % Neurons in different electrode
 uLEDcoactivation.units_distinct_electrode = mask_unit_as_nan(uLEDcoactivation.units, distance.are_same_electrode_units);
 uLEDcoactivation.pair_distinct_electrode = label_pairs_as_nan(uLEDcoactivation.pairs, distance.are_same_electrode_pairs);
+uLEDcoactivation.is_distinct_electrode = ~distance.are_same_electrode_units;
 
 % Pyramidal neurons in different electrode
 uLEDcoactivation.units_pyramidalCells_distinct_electrode = mask_unit_as_nan(uLEDcoactivation.units_pyramidalCells, distance.are_same_electrode_units);
 uLEDcoactivation.pair_pyramidalCells_distinct_electrode = label_pairs_as_nan(uLEDcoactivation.pairs_pyramidalCells, distance.are_same_electrode_pairs);
+uLEDcoactivation.is_pyramidalCells_distinct_electrode = pyramidal_neurons & ~distance.are_same_electrode_units;
 
 % Light responsive, pyramidal neurons, in different electrode
 uLEDcoactivation.units_pyramidalCells_lightResponsive_distinct_electrode = mask_unit_as_nan(uLEDcoactivation.units_pyramidalCells_lightResponsive, distance.are_same_electrode_units);
 uLEDcoactivation.pairs_pyramidalCells_lightResponsive_distinct_electrode = label_pairs_as_nan(uLEDcoactivation.pairs_pyramidalCells_lightResponsive, distance.are_same_electrode_pairs);
+uLEDcoactivation.is_pyramidalCells_lightResponsive_distinct_electrode = pyramidal_neurons & lightRespNeurons & ~distance.are_same_electrode_units;
 
 % Units in different shank
 uLEDcoactivation.units_distinct_shank = mask_unit_as_nan(uLEDcoactivation.units, distance.are_same_shank_units); % label as Nan those units pairs in same shank
 uLEDcoactivation.pair_distinct_shank = label_pairs_as_nan(uLEDcoactivation.pairs, distance.are_same_shank_pairs);
+uLEDcoactivation.is_distinct_shank = ~distance.are_same_shank_units;
 
 % Pyramidal neurons in different shank
 uLEDcoactivation.units_pyramidalCells_distinct_shank = mask_unit_as_nan(uLEDcoactivation.units_pyramidalCells, distance.are_same_shank_units);
 uLEDcoactivation.pair_pyramidalCells_distinct_shank = label_pairs_as_nan(uLEDcoactivation.pairs_pyramidalCells, distance.are_same_shank_pairs);
+uLEDcoactivation.is_pyramidalCells_distinct_shank = pyramidal_neurons & ~distance.are_same_shank_units;
 
 % Light responsive, pyramidal neurons, in different shank
 uLEDcoactivation.units_pyramidalCells_lightResponsive_distinct_shank = mask_unit_as_nan(uLEDcoactivation.units_pyramidalCells_lightResponsive, distance.are_same_shank_units);
 uLEDcoactivation.pairs_pyramidalCells_lightResponsive_distinct_shank = label_pairs_as_nan(uLEDcoactivation.pairs_pyramidalCells_lightResponsive, distance.are_same_shank_pairs);
+uLEDcoactivation.is_pyramidalCells_lightResponsive_distinct_shank = pyramidal_neurons & lightRespNeurons & ~distance.are_same_shank_units;
 
 % Units in same shank
 uLEDcoactivation.units_same_shank = mask_unit_as_nan(uLEDcoactivation.units, distance.are_distint_shank_units); % label as Nan those units pairs in distint shank
 uLEDcoactivation.pair_same_shank = label_pairs_as_nan(uLEDcoactivation.pairs, distance.are_distint_shank_pairs);
+uLEDcoactivation.is_same_shank = ~distance.are_distint_shank_units;
 
 % Pyramidal neurons in same shank
 uLEDcoactivation.units_pyramidalCells_same_shank = mask_unit_as_nan(uLEDcoactivation.units_pyramidalCells, distance.are_distint_shank_units);
 uLEDcoactivation.pair_pyramidalCells_same_shank = label_pairs_as_nan(uLEDcoactivation.pairs_pyramidalCells, distance.are_distint_shank_pairs);
+uLEDcoactivation.is_pyramidalCells_same_shank = pyramidal_neurons & ~distance.are_distint_shank_units;
 
 % Light responsive, pyramidal neurons, in same shank
 uLEDcoactivation.units_pyramidalCells_lightResponsive_same_shank = mask_unit_as_nan(uLEDcoactivation.units_pyramidalCells_lightResponsive, distance.are_distint_shank_units);
 uLEDcoactivation.pairs_pyramidalCells_lightResponsive_same_shank = label_pairs_as_nan(uLEDcoactivation.pairs_pyramidalCells_lightResponsive, distance.are_distint_shank_pairs);
+uLEDcoactivation.is_pyramidalCells_lightResponsive_same_shank = pyramidal_neurons & lightRespNeurons & ~distance.are_distint_shank_units;
 
 % 1.2 % Coactivated LEDs
 % get pairs of coactivated uleds
@@ -393,6 +408,7 @@ evStats_pyramidalCells_lightResponsive = explained_variance(temp_spikes, epochsI
 uLEDcoactivation.evStats_units = evStats_units;
 uLEDcoactivation.evStats_pyramidalCells = evStats_pyramidalCells;
 uLEDcoactivation.evStats_pyramidalCells_lightResponsive = evStats_pyramidalCells_lightResponsive;
+
 
 % Saving 
 if saveMat
