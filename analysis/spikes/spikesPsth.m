@@ -546,6 +546,9 @@ if getRaster && any(any(~isnan(psth.responsecurve)))
         end
     end
     if savePlot
+        if exist('SummaryFigures','dir') == 7
+            mkdir('SummaryFigures');
+        end
         saveas(gcf,['SummaryFigures\' erase(save_raster_as,'_') eventType '.png']); 
     end
 end
