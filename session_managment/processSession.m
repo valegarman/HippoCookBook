@@ -48,7 +48,8 @@ addParameter(p,'excludeAnalysis',[]); %
 addParameter(p,'profileType','hippocampus',@ischar); % options, 'hippocampus' and 'cortex'
 addParameter(p,'rippleMasterDetector_threshold',[1.5 3.5],@isnumeric); % [1.5 3.5]
 addParameter(p,'LED_threshold',0.98,@isnumeric);
-addParameter(p,'createLegacySummaryFolder',true,@islogical);
+addParameter(p,'createLegacySummaryFolder',false,@islogical);
+addParameter(p,'useCSD_for_theta_detection',true,@islogical);
 addParameter(p,'restrict_to',[0 Inf],@isnumeric);
 addParameter(p,'restrict_to_baseline',true,@islogical);
 addParameter(p,'restrict_to_manipulation',false,@islogical);
@@ -79,6 +80,7 @@ excludeAnalysis = p.Results.excludeAnalysis;
 profileType = p.Results.profileType;
 rippleMasterDetector_threshold = p.Results.rippleMasterDetector_threshold;
 LED_threshold = p.Results.LED_threshold;
+useCSD_for_theta_detection = p.Results.useCSD_for_theta_detection;
 createLegacySummaryFolder = p.Results.createLegacySummaryFolder;
 restrict_to = p.Results.restrict_to;
 restrict_to_baseline = p.Results.restrict_to_baseline;
@@ -395,6 +397,7 @@ end
 
 %% 12. Summary per cell
 if ~any(ismember(excludeAnalysis, {'12',lower('summary')}))
+    plotSummary('showTagCells',true);
     
 end
 

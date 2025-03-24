@@ -36,3 +36,5 @@ preprocessSession('basepath','Y:\others_databases\fAxo2_180414_sess2','analysisP
 preprocessSession('basepath','Y:\others_databases\fAxo3_180415_sess1','analysisPath',[],'cleanArtifacts',({[],[1]}),'analogChannelsList',[],'digitalChannelsList',[1],'getPos',false,'sessionSummary',false)
 
 processSession('basepath','C:\fAxo2\fAxo2_180414_sess2','digital_optogenetic_channels',[1],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
+
+indexNewSession('basepath','C:\fAxo2\fAxo2_180414_sess2');
