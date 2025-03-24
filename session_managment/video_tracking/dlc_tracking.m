@@ -1,4 +1,4 @@
-function [tracking] = dlc_tracking(aviFile,varargin)
+function [tracking] = dlc_tracking(varargin)
 % Get tracking from DeepLabCut
 %
 % USAGE
@@ -85,7 +85,7 @@ rightTTL_reward = p.Results.rightTTL_reward;
 homeTtl = p.Results.homeTtl;
 
 %% Deal with inputs
-if ~isempty(dir([basepath filesep '*Tracking.Behavior.mat'])) || forceReload
+if ~isempty(dir([basepath filesep '*Tracking.Behavior.mat'])) && forceReload
     disp('Trajectory already detected! Loading file.');
     file = dir([basepath filesep '*Tracking.Behavior.mat']);
     load(file.name);
@@ -99,7 +99,7 @@ if isempty(dlc_ttl_channel)
     if isfield(session.analysisTags,'dlc_ttl_channel')
         dlc_ttl_channel = session.analysisTags.dlc_ttl_channel;
     else
-        warning('Basler TTL was not defined!!');
+        warning('DLC TTL was not defined!!');
         tracking = [];
         return
     end
@@ -107,8 +107,8 @@ end
 cd(basepath)
 
 if ~exist('aviFile') || isempty(aviFile)
-    if ~isempty(dir([basepath filesep '*Basler*avi']))
-        aviFile = dir([basepath filesep '*Basler*avi']); 
+    if ~isempty(dir([basepath filesep '*tracking_crop.avi']))
+        aviFile = dir([basepath filesep '*tracking_crop.avi']); 
         aviFile = erase(aviFile.name,'.avi');
     else
         warning('No video file!!');
@@ -117,7 +117,7 @@ if ~exist('aviFile') || isempty(aviFile)
     end
 end
 % attention, for now it only loads the red channel from the video!!
-if ~exist([basepath filesep aviFile '.mat'],'file') && ~forceReload
+if ~exist([basepath filesep aviFile '.mat'],'file')
     disp('Get average frame...');
     videoObj = VideoReader([aviFile '.avi']);   % get video
     numFrames = get(videoObj, 'NumFrames');
@@ -147,47 +147,27 @@ end
 % get average frame
 average_frame = mean(frames.r,3);                                          % get average frames
 
-% deal with the ROI for the tracking 
-cd(basepath); cd ..; upBasepath = pwd; pwd; cd ..; up_upBasepath = pwd;cd(basepath);
-if exist([basepath filesep 'roiTracking.mat'],'file')
-    load([basepath filesep 'roiTracking.mat'],'roiTracking');
-elseif exist([upBasepath filesep 'roiTracking.mat'],'file')
-    load([upBasepath filesep 'roiTracking.mat'],'roiTracking');
-    disp('ROI tracking from sessions folder... copying locally...');
-    save([basepath filesep 'roiTracking.mat'],'roiTracking');
-elseif exist([up_upBasepath filesep 'roiTracking.mat'],'file')
-    load([up_upBasepath filesep 'roiTracking.mat'],'roiTracking');
-    disp('ROI tracking from master folder... copying locally...');
-    save([basepath filesep 'roiTracking.mat'],'roiTracking');
-elseif isempty(roiTracking)
-    roiTracking = [1 1 size(frames.r,2) size(frames.r,2) 1 ;1 size(frames.r,1) size(frames.r,1) 1 1 ]';
-elseif ischar(roiTracking) && strcmpi(roiTracking,'manual')
-    disp('Draw ROI for tracking...');
-    h1 = figure;
-    imagesc(average_frame); colormap gray; caxis([0 4*mean(average_frame(:))]);
-    title('Draw ROI for tracking... (include all posible locations)','FontWeight','normal');
-    roi = drawpolygon;
-    roiTracking = [roi.Position; roi.Position(1,:)];
-    save([basepath filesep 'roiTracking.mat'],'roiTracking');
-    close(h1);
-end
-
 % deal with the ROI for the LED
+cd(basepath); cd ..; upBasepath = pwd; pwd; cd ..; up_upBasepath = pwd;cd(basepath);
 if exist([basepath filesep 'roiLED.mat'],'file')
     load([basepath filesep 'roiLED.mat'],'roiLED');
 elseif exist([upBasepath filesep 'roiLED.mat'],'file')
     load([upBasepath filesep 'roiLED.mat'],'roiLED');
     disp('ROI LED from master folder... copying locally...');
     save([basepath filesep 'roiLED.mat'],'roiLED');
-elseif ischar(roiLED) && strcmpi(roiLED,'manual')
+elseif isempty(roiLED)
     disp('Draw ROI for LED...');
     h1 = figure;
     imshow(average_frame);
+    colormap gray;
     roi = drawpolygon;
     roiLED = [roi.Position; roi.Position(1,:)];
     save([basepath filesep 'roiLED.mat'],'roiLED');
     close(h1);
 end
+
+% xMaze = [0 size(frames.r,2) * convFact];
+% yMaze = [0 size(frames.r,1) * convFact];
 
 if isempty(convFact)                             % if convFact not provided, normalize to 1 along the longest axis
     convFact = 1/max([size(frames.r,1) size(frames.r,2)]);
@@ -196,14 +176,19 @@ end
 xMaze = [0 size(frames.r,2) * convFact];
 yMaze = [0 size(frames.r,1) * convFact];
 
+
+% xMaze = [0 size(frames.r,2)];
+% yMaze = [0 size(frames.r,1)];
+
 % save ROI figure
 h1 = figure;
 hold on
-imagesc(xMaze, yMaze,average_frame); colormap gray; caxis([0 4*mean(average_frame(:))]);
+imagesc(xMaze, yMaze,average_frame); colormap gray;
 set(gca,'YDir','normal', 'TickDir','out');
-p = plot(roiTracking(:,1)*convFact, roiTracking(:,2)*convFact,'r','LineWidth',2);
-axis tight
-legend(p,'Tracking ROI');
+p = plot(roiLED(:,1)*convFact, roiLED(:,2)*convFact,'r','LineWidth',2);
+axis tight;
+axis ij;
+legend(p,'LED ROI');
 xlabel('Normalize/ cm');
 mkdir('Behavior');
 saveas(h1,'Behavior\MazeROI.png');
@@ -211,63 +196,34 @@ if ~verbose
     close(h1);
 end
 
-%% DETECT LED POSITION
-bw = uint8(poly2mask(roiTracking(:,1),roiTracking(:,2),size(frames.r,1),size(frames.r,2)));
-disp('Detect LED position...');
-thr_fr = thresh * 255;
-if ~verbose
-    tic
-    f = waitbar(0,'Detecting LED position...');
-    for ii = 1:size(frames.r,3)
-        waitbar(ii/size(frames.r,3),f)
-        fr = frames.r(:,:,ii).*bw;
-        bin_fr = imbinarize(double(fr),thr_fr); %
-        bin_fr = bwareafilt(bin_fr,[10 300]);
-        stats_fr = regionprops(bin_fr);
-        maxBlob = find([stats_fr.Area]== max([stats_fr.Area]),1);
-        if ~isempty(maxBlob)
-            sz_fr(ii) = stats_fr(maxBlob).Area;
-            Rr_x(ii) = stats_fr(maxBlob).Centroid(1);
-            Rr_y(ii) = stats_fr(maxBlob).Centroid(2);
-        else
-            sz_fr(ii) = NaN;
-            Rr_x(ii) = NaN;
-            Rr_y(ii) = NaN;
-        end
+%% GET POSITION FROM DEEPLABCUT
+try
+    if ~isempty(dir(['*TM_tracking*_filtered.csv']))
+        csv_file = dir(['*TM_tracking*_filtered.csv']); 
+        tracking_data = readmatrix(csv_file.name);
+
+        timestamps = linspace(0,size(frames.r,3)/fs,size(frames.r,3));
+        x = tracking_data(:,2); % headstage, main coordinates
+        y = tracking_data(:,3); % headstage
+        likelihood = tracking_data(:,4); % headstage
+        x_back = tracking_data(:,5); % back
+        y_back = tracking_data(:,6); % back
+        likelihood_back = tracking_data(:,7); % back
+        x_tail1 = tracking_data(:,8); % tail1
+        y_tail1 = tracking_data(:,9); % tail1
+        likelihood_tail1 = tracking_data(:,10); % tail1
+        x_tail2 = tracking_data(:,11); % tail2
+        y_tail2 = tracking_data(:,12); % tail2
+        likelihood_tail2 = tracking_data(:,13); % tail2
+    else
+        error('DeepLabCut needs to be computed first in this session...');
     end
-    close(f)
-    toc
-else
-    h1 = figure;
-    hold on
-    tic
-    for ii = 1:size(frames.r,3)
-        fr = frames.r(:,:,ii).*bw;
-        bin_fr = imbinarize(double(fr),thr_fr); %
-        bin_fr = bwareafilt(bin_fr,[10 300]);
-        stats_fr = regionprops(bin_fr);
-        maxBlob = find([stats_fr.Area]== max([stats_fr.Area]),1);
-        if ~isempty(maxBlob)
-            sz_fr(ii) = stats_fr(maxBlob).Area;
-            Rr_x(ii) = stats_fr(maxBlob).Centroid(1);
-            Rr_y(ii) = stats_fr(maxBlob).Centroid(2);
-            cla
-            imagesc(fr)
-            plot(Rr_x(ii),Rr_y(ii),'or')
-            drawnow;
-        else
-            sz_fr(ii) = NaN;
-            Rr_x(ii) = NaN;
-            Rr_y(ii) = NaN;
-        end
-    end
-    toc
-    close(h1);
+
+catch
 end
 
-pos = [Rr_x; Rr_y]';
-
-%% postprocessing of LED position 
+%% Postprocessing of position
+pos = [x,y];
 pos = pos * convFact;                                   % cm or normalized
 art = find(sum(abs(diff(pos))>artifactThreshold,2))+1;  % remove artefacs as movement > 10cm/frame
 pos(art,:) = NaN;
@@ -287,10 +243,11 @@ acceleration = sqrt(ax.^2 + ay.^2);
 
 h2 = figure;
 hold on
-imagesc(xMaze, yMaze,average_frame); colormap gray; caxis([0 .7]);
+imagesc(xMaze, yMaze,average_frame); colormap gray;
 freezeColors;
 scatter(x,y,3,t,'filled','MarkerEdgeColor','none','MarkerFaceAlpha',.5); colormap jet
 caxis([t(1) t(end)])
+axis ij;
 xlabel('norm/cm'); ylabel('norm/cm'); colorbar;
 xlim(xMaze); ylim(yMaze);
 mkdir('Behavior');
@@ -299,12 +256,14 @@ if ~verbose
     close(h2);
 end
 
-%% detect LED pulses for sync
+%% DETECT LED BLINKING
+% bw = uint8(poly2mask(roiTracking(:,1),roiTracking(:,2),size(frames.r,1),size(frames.r,2)));
+
 if ~isempty(roiLED)
     disp('Detect LED for sync...');
-    bwLED = uint8(poly2mask(roiLED(:,1),roiLED(:,2),size(frames,1),size(frames,2)));
-    parfor ii = 1:size(frames,4)
-        fr = double(frames(:,:,1,ii).*bwLED);
+    bwLED = uint8(poly2mask(roiLED(:,1),roiLED(:,2),size(frames.r,1),size(frames.r,2)));
+    for ii = 1:size(frames.r,3)
+        fr = double(frames.r(:,:,ii).*bwLED);
         fr(fr==0) = NaN;
         sync(ii) = nansum(fr(:)); 
     end
@@ -327,74 +286,51 @@ else
 end
 
 %% Get basler TTL
-% digital_in legend: 10. Basler, 2. maze LEd, 3. Left Alternation, 4.Righ
-% Alternation, 5. Home Delay, 6. Is alternation forzed?
-if isempty(bazlerTtl)
-    digitalIn = getDigitalIn;
-    bazlerTtl = digitalIn.timestampsOn{basler_ttl_channel};
-end
-% match basler frames con ttl pulses
-if length(bazlerTtl) == length(x)
-    disp('Number of frames match!!');
-elseif length(bazlerTtl) > length(x) && length(bazlerTtl) <= length(x) + 15 * 1 
-    fprintf('%3.i frames were dropped, probably at the end of the recording. Skipping... \n',...
-        length(bazlerTtl) - length(x));
-    bazlerTtl = bazlerTtl(1:length(x));
-elseif length(bazlerTtl) < length(x) && (length(x)-length(bazlerTtl)) < 60 * 10
-    fprintf('%3.i video frames without TTL... Was the recording switched off before the camera?. Skipping... \n',...
-        length(x) - length(bazlerTtl));
-    x = x(1:length(bazlerTtl));
-    y = y(1:length(bazlerTtl));
-    vx = vx(1:length(bazlerTtl));
-    vy = vy(1:length(bazlerTtl));
-    ax = ax(1:length(bazlerTtl));
-    ay = ay(1:length(bazlerTtl)); 
-elseif isempty(bazlerTtl)
-    bazlerTtl = xt;
-elseif abs(length(x)-length(bazlerTtl)) > 15 * 1 && size(digitalIn.timestampsOn,2)> 4
-    fprintf('%3.i frames were dropped, possibly at the beginning of the recording. Aligning timestamps to the first IR TTL... \n',...
-        length(bazlerTtl) - length(x));
-    f1 = figure;
-    hold on
-    imagesc(xMaze, yMaze,average_frame); colormap gray; caxis([0 4*mean(average_frame(:))]); axis tight
-    set(gca,'Ydir','reverse');
-   
-    lReward = digitalIn.timestampsOn{leftTTL_reward}(1);
-    rReward = digitalIn.timestampsOn{rightTTL_reward}(1);
+% digital_in legend: 1. Fiber, 2. Left alternation, 3. Right alternation,ç
+% 4. Home delay, 5. dlc_ttl
 
-    if lReward < rReward % If the animal turned left first, find the location based on the IR location
-        disp('Mouse turned left first. Mark y-position for left IR sensor...');
-        roiIR = drawpoint;
-        idx = find((y <= (roiIR.Position(2)+0.75)) & (y >= (roiIR.Position(2)- 0.75)) & x<20); %% tentative left IR location
-        timediff = lReward-bazlerTtl(idx(1));
-        % correct TTLs
-        bazlerTtl = bazlerTtl + timediff;
-    else % If the animal turned right first, find the location based on the IR location
-        disp('Mouse turned right first. Mark y-position for right IR sensor...');
-        roiIR = drawpoint;
-        idx = find((y <= (roiIR.Position(2)+0.75)) & (y >= (roiIR.Position(2)- 0.75)) & x<20); %% tentative right IR location
-        timediff = rReward-bazlerTtl(idx(1));
-        % correct TTLs
-        bazlerTtl = bazlerTtl + timediff;
-    end
-    close(f1);
-    bazlerTtl = bazlerTtl(1:length(x));
-else
-    keyboard;
-    error('Frames do not match for more than 5 seconds!! Trying to sync LED pulses');
-    if length(digitalIn.timestampsOn{2}) == length(sync_signal)
-         disp('Using sync LED pulses...');
-         keyboard; % to do!!!
-    end
+if isempty(dlcTtl)
+    digitalIn = getDigitalIn;
+    dlcTtl = digitalIn.timestampsOn{dlc_ttl_channel};
 end
+
+
+% match dlc frames with ttl pulses
+if length(dlcTtl) == size(pul,2)
+    disp('Number of frames match!!');
+elseif length(dlcTtl) < size(pul,2)
+    disp('More blinks were detected than TTLs');
+elseif length(dlcTtl) > size(pul,2)
+    disp('More Ttls were detected than blinks');
+end
+
+if pul(1,1) < 1 % if blinked light less than 1 minute
+    error('Error');
+end
+
+
+
+%% WRITING OUTPUT
 
 [~,fbasename,~]=fileparts(pwd);
 
 tracking.position.x =x;
 tracking.position.y = y;
 tracking.position.z = [];
-tracking.description = '';
-tracking.timestamps = bazlerTtl;
+tracking.position.likelihood = likelihood;
+% Extra positions
+tracking.position_back.x = x_back;
+tracking.position_back.y = y_back;
+tracking.position_back.likelihood = likelihood_back;
+tracking.position_tail1.x = x_tail1;
+tracking.position_tail1.y = y_tail1;
+tracking.position_tail1.likelihood = likelihood_tail1;
+tracking.position_tail2.x = x_tail2;
+tracking.position_tail2.y = y_tail2;
+tracking.position_tail2.likelihood = likelihood_tail2;
+
+tracking.description = 'DeepLabCut';
+tracking.timestamps = timestamps + digitalIn.timestampsOn{dlc_ttl_channel}(1) - pul(1,1);
 tracking.originalTimestamps = [];
 tracking.folder = fbasename;
 tracking.sync.sync = sync;
@@ -408,6 +344,8 @@ tracking.roi.roiLED = roiLED;
 
 tracking.velocity = velocity;
 tracking.acceleration = acceleration;
+
+saveMat = false;
 if saveMat
     save([basepath filesep fbasename '.Tracking.Behavior.mat'],'tracking');
 end
