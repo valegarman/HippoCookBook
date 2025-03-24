@@ -282,8 +282,13 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     getSpikesRank('events','ripples');
 
     % 8.4 Fiber ripple analysis
-    % ripples_fiber = fiberPhotometryModulation([],'eventType','ripples');
-    ripples_fiber = fiberPhotometryModulation_temp([],'eventType','ripples');
+    % ripples_fiber =
+    % fiberPhotometryModulation([],'eventType','ripples');ç+
+    try
+        ripples_fiber = fiberPhotometryModulation_temp([],'eventType','ripples');
+    catch
+        warning('No fiber recording in this session...');
+    end
 
 
     % 8.3 Theta intervals
@@ -335,7 +340,8 @@ end
 if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
     try
         spikes = loadSpikes;
-        getSessionTracking('roiTracking','manual','forceReload',false,'LED_threshold',LED_threshold,'convFact',tracking_pixel_cm,'leftTTL_reward',leftArmTtl_channel,'rightTTL_reward',rightArmTtl_channel);
+        % getSessionTracking('roiTracking','manual','forceReload',false,'LED_threshold',LED_threshold,'convFact',tracking_pixel_cm,'leftTTL_reward',leftArmTtl_channel,'rightTTL_reward',rightArmTtl_channel);
+        getSessionTracking('forceReload',false,'leftTTL_reward',leftArmTtl_channel,'rightTTL_reward',rightArmTtl_channel,'homeTtl',homeTtl,'tracking_ttl_channel',tracking_ttl_channel);
         try
             getSessionArmChoice('task','alternation','leftArmTtl_channel',leftArmTtl_channel,'rightArmTtl_channel',rightArmTtl_channel,'homeDelayTtl_channel',homeDelayTtl_channel);
         catch
