@@ -69,6 +69,11 @@ if exist([filetarget '.pulses.events.mat'],'file')
     if ~force % || exist([filetarget '.pulses.events.mat'],'file') 
         disp('Pulses already detected! Loading file.');
         load([filetarget '.pulses.events.mat']);
+        
+        if isfield(pulses, 'analogChannel') && ~isfield(pulses, 'analogChannelsList')
+            pulses.analogChannelsList = pulses.analogChannel;
+        end
+
         if ~isempty(analogChannelsList) && isnumeric(analogChannelsList)
             maskPulses = ismember(pulses.analogChannelsList, analogChannelsList);
             pulses.timestamps = pulses.timestamps(maskPulses,:);

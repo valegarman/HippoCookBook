@@ -241,7 +241,7 @@ end
 try
     fiber = getSessionFiberPhotometry();
 catch
-    warning('No possible to load fiber photometry data...')
+    warning('No possible loading fiber photometry data. Was fiber photometry signal recorded in this experiment? ...')
 end
 cd(basepath)
 

@@ -88,7 +88,6 @@ selectProbe_automatic = p.Results.selectProbe_automatic;
 % Deal with inputs
 prevPath = pwd;
 cd(basepath);
-keyboard;
 
 mkdir('SummaryFigures')
 if createLegacySummaryFolder

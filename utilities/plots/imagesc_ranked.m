@@ -7,10 +7,12 @@ function [im, idx] = imagesc_ranked(x,y,C,cax,sortingVariable,varargin)
 p = inputParser;
 addParameter(p,'interpOpt',false);
 addParameter(p,'smoothOpt',false);
+addParameter(p,'smoothOpt_yaxis',false);
 
 parse(p,varargin{:});
 interpOpt = p.Results.interpOpt;
 smoothOpt = p.Results.smoothOpt;
+smoothOpt_yaxis = p.Results.smoothOpt_yaxis;
 
 if size(C,1) ~= length(sortingVariable)
     C = C';
@@ -38,6 +40,15 @@ end
 if isempty(y)
     y = 1:size(C,1);
 end
+
+if smoothOpt_yaxis
+    temp = C(idx,:);
+    for ii = 1:size(temp,2)
+        temp(:,ii) = smooth(temp(:,ii),smoothOpt_yaxis);
+    end
+    C(idx,:) =  temp;
+end
+
 im = imagesc(x,y,C(idx,:),cax);
 if max(y)-length(find(isnan(val)))>1
     set(gca,'YDir','normal','TickDir','out','YTick',[1 max(y)-length(find(isnan(val)))]);
