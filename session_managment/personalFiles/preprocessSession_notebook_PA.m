@@ -2,6 +2,8 @@
 updateExpFolder_temp({'D:\wt5'},'C:\wt5');
 
 preprocessSession('basepath','C:\wt5\wt5_250317_sess11','analysisPath',[],'exclude_shanks',[3],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
+preprocessSession('basepath','C:\wt5\wt5_250324_sess16','analysisPath',[],'exclude_shanks',[3],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
+
 
 processSession('basepath','C:\wt5\wt5_250314_sess10','digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 %% WT1
@@ -38,3 +40,8 @@ preprocessSession('basepath','Y:\others_databases\fAxo3_180415_sess1','analysisP
 processSession('basepath','C:\fAxo2\fAxo2_180414_sess2','digital_optogenetic_channels',[1],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 
 indexNewSession('basepath','C:\fAxo2\fAxo2_180414_sess2');
+
+%% fAxo3
+processSession('basepath','C:\fAxo3\fAxo3_180415_sess1','digital_optogenetic_channels',[1],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
+indexNewSession('basepath','C:\fAxo3\fAxo3_180415_sess1');
+
