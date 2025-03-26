@@ -22,7 +22,7 @@ batch_sessionSummary('basepath','G:\data\fPv4','cleanArtifacts',({65,[]}),'analo
 processSession('digital_optogenetic_channels',[1],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 
 % 5% Revise output using ProcessSession_notebook
-edit ProcessSession_notebook.m
+edit Notebook_for_checking_processSession_results
 
 % 5% Index session
 indexNewSession;
