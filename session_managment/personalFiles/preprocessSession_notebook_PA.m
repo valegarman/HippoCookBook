@@ -6,6 +6,15 @@ preprocessSession('basepath','C:\wt5\wt5_250324_sess16','analysisPath',[],'exclu
 
 
 processSession('basepath','C:\wt5\wt5_250314_sess10','digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
+
+%% WT6
+processSession('basepath','Y:\wt6\wt6_250306_sess2','digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
+
+indexNewSession('basepath','Y:\wt6\wt6_250306_sess2');
+indexNewSession('basepath','Y:\wt6\wt6_250307_sess3');
+
+
+
 %% WT1
 updateExpFolder_temp({'D:\wt1'},'C:\wt1');
 preprocessSession('basepath','C:\wt1\wt1_241205_sess15','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);

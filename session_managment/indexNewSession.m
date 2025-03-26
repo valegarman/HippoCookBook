@@ -60,8 +60,6 @@ if isempty(indexedSessionCSV_path)
 end
 
 cd(basepath)
-keyboard;
-
 
 %% By default looks for Synology and copy files to it, it specified copy files to the specified folder
 if ~isempty(driveStorage_location) && ~isempty(driveStorage_path)
@@ -93,6 +91,7 @@ if isempty(project)
     project = session.general.projects;
 end
 % updated indexedSession table
+
 sessionsTable = readtable([indexedSessionCSV_path filesep indexedSessionCSV_name,'.csv'],'PreserveVariableNames',true); % the variable is called allSessions
 
 % new table entry
@@ -145,6 +144,7 @@ sessionEntry = cell2table(sessionEntry,"VariableNames",["SessionName", "Subject"
 sessionsTable = [sessionsTable; sessionEntry];
 writetable(sessionsTable,[indexedSessionCSV_path filesep indexedSessionCSV_name,'.csv']); % the variable is called allSessions
 
+keyboard;
 % Lets do a push for git repository
 cd(indexedSessionCSV_path);
 % Git pull 

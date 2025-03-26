@@ -283,8 +283,6 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     getSpikesRank('events','ripples');
 
     % 8.4 Fiber ripple analysis
-    % ripples_fiber =
-    % fiberPhotometryModulation([],'eventType','ripples');ç+
     try
         ripples_fiber = fiberPhotometryModulation_temp([],'eventType','ripples');
     catch
@@ -300,6 +298,7 @@ end
 %% 9. Phase Modulation
 if ~any(ismember(excludeAnalysis, {'9',lower('phaseModulation')}))
     % LFP-spikes modulation
+    % [phaseMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel,'thetaChannel',thetaChannel,'lgammaChannel',thetaChannel,'hgammaChannel',thetaChannel,'restrict_to',restrict_ints);
     [phaseMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel,'restrict_to',restrict_ints);
     computeCofiringModulation;
 end
@@ -388,6 +387,13 @@ if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
         warning('Psth on behaviour events was not possible...');
     end
 
+    % Fiber behaviour analysis
+    try
+        lReward_fiber = fiberPhotometryModulation_temp([behaviour.events.lReward],'eventType','reward');
+    catch
+        warning('No fiber recording in this session...');
+    end
+
     try
         speedCorr = getSpeedCorr('numQuantiles',20,'force',true);
     catch
@@ -397,7 +403,7 @@ end
 
 %% 12. Summary per cell
 if ~any(ismember(excludeAnalysis, {'12',lower('summary')}))
-    plotSummary('showTagCells',true);
+    plotSummary('showTagCells',false);
     
 end
 

@@ -163,8 +163,16 @@ elseif strcmpi(eventType,'UslowOscillations')
     idx = all(to_remove==1,1);
     timestamps(idx) = NaN;
 
-end
+elseif strcmpi(eventType,'reward')
 
+    warning('Using default parameters for reward');
+    win = [-6 6];
+    win_size = round(fiber.sr * win);
+    event_ints = [0 6];
+    baseline_ints = [-6 -6+diff(event_ints)]; 
+    time_vector = baseline_ints(1):1/fiber.sr:event_ints(2);
+
+end
 
 timestamps(:,2) = nan(1,length(timestamps));
 if restrict_fiber_epochs

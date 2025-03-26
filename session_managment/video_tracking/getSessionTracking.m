@@ -155,7 +155,7 @@ elseif strcmpi(tracking_software,'dlc')
         load(strcat(basename,'.MergePoints.events.mat'));
         count = 1;
         for ii = 1:size(MergePoints.foldernames,2)
-            if ~isempty(dir([basepath filesep MergePoints.foldernames{ii} filesep '*tracking_crop.avi']))
+            if ~isempty(dir([basepath filesep MergePoints.foldernames{ii} filesep '*tracking*_crop.avi']))
                 cd([basepath filesep MergePoints.foldernames{ii}]);
                 fprintf('Computing tracking in %s folder \n',MergePoints.foldernames{ii});
                  tempTracking{count} = dlc_tracking('leftTtl_reward',leftTTL_reward,'rightTtl_reward',rightTTL_reward,'homeTtl',homeTtl,'forceReload',forceReload);
