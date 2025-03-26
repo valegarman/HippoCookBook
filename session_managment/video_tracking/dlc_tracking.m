@@ -107,8 +107,8 @@ end
 cd(basepath)
 
 if ~exist('aviFile') || isempty(aviFile)
-    if ~isempty(dir([basepath filesep '*tracking_crop.avi']))
-        aviFile = dir([basepath filesep '*tracking_crop.avi']); 
+    if ~isempty(dir([basepath filesep '*tracking*_crop.avi']))
+        aviFile = dir([basepath filesep '*tracking*_crop.avi']); 
         aviFile = erase(aviFile.name,'.avi');
     else
         warning('No video file!!');
@@ -198,8 +198,8 @@ end
 
 %% GET POSITION FROM DEEPLABCUT
 try
-    if ~isempty(dir(['*TM_tracking*_filtered.csv']))
-        csv_file = dir(['*TM_tracking*_filtered.csv']); 
+    if ~isempty(dir(['*tracking*_filtered.csv']))
+        csv_file = dir(['*tracking*_filtered.csv']); 
         tracking_data = readmatrix(csv_file.name);
 
         timestamps = linspace(0,size(frames.r,3)/fs,size(frames.r,3));
