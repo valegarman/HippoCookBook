@@ -9,9 +9,12 @@ processSession('basepath','C:\wt5\wt5_250314_sess10','digital_optogenetic_channe
 
 %% WT6
 processSession('basepath','Y:\wt6\wt6_250306_sess2','digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
+processSession('basepath','Y:\wt6\wt6_250307_sess3','digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
+processSession('basepath','Y:\wt6\wt6_250310_sess4','digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 
 indexNewSession('basepath','Y:\wt6\wt6_250306_sess2');
 indexNewSession('basepath','Y:\wt6\wt6_250307_sess3');
+indexNewSession('basepath','Y:\wt6\wt6_250310_sess4');
 
 
 
