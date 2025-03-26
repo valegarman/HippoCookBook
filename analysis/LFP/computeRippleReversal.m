@@ -104,7 +104,6 @@ end
 clear SHANKS
 SHANKS=SHANKS_PerProb;
 
-
 % Discard shanks based on session metadata and if all the channels of the
 % same shanks are marked as Bad
 if isempty(discardShanks) && ~isempty(session.channelTags.Bad.channels)
@@ -123,7 +122,8 @@ end
 %% Get Ripple
 lfp = getLFP('all');
 if isempty(ripples)
-    [ripples] = findRipples(rippleChannel);
+    ripples = rippleMasterDetector;
+    % [ripples] = findRipples(rippleChannel);
 end
 
 Win=70;
@@ -163,7 +163,6 @@ for shk=1:length(SHANKS)
 end
 
 %% find Deep and superficial channels ######################################
-keyboard;
 Deep_Sup=[];
 con_sum_all=[];
 con_direction_all=[];
@@ -213,9 +212,18 @@ for shk=1:length(SHANKS)
     for CH=1:length(SHANKS{shk})
         K=K+1;
         clear var Ripple_channel Cr
+        
         Ripple_Y=Rippl_Matrix{shk}(CH,:)-(CH-1)*chan_spacing;
-        Ripple_X=[1:length(Ripple_Y)]+(shk-1)*Sh_spacing; 
-        Cr = [.0 .0 .0];
+        Ripple_X=[1:length(Ripple_Y)]+(shk-1)*Sh_spacing;
+        
+        SD=Deep_Sup{shk}(CH);
+     
+        % Deep sup layer Colors ###########################################
+        if SD <0
+            Cr=[0 146 146]./256;
+        else
+            Cr=[0 109 219]./256;
+        end
         plot(Ripple_X,Ripple_Y,'color',Cr,'linewidth',1);
         hold on
         % Channel Colors ##################################################
@@ -224,8 +232,15 @@ for shk=1:length(SHANKS)
             plot(Ripple_X,Ripple_Y,'color','r','linewidth',1,'LineStyle','-.');
             text(Ripple_X(end)-20,Ripple_Y(1)+2*Sh_spacing,channelname,'color','r','fontsize',10)
         end
+        %Type channel number and deep sup
+        %##################################################################
+        if SD <0
+        text(Ripple_X(1)-30,Ripple_Y(1)+2*Sh_spacing,['Sup' num2str([SHANKS{1,shk}(CH)])])
+        else
+        text(Ripple_X(1)-30,Ripple_Y(1)+2*Sh_spacing,['Deep' num2str([SHANKS{1,shk}(CH)])])
+        end
+        %Type test number #################################################
         hold on
-        text(Ripple_X(1)-30,Ripple_Y(1)+2*Sh_spacing,[num2str([SHANKS{1,shk}(CH)])])
     end
 end
 
@@ -238,6 +253,33 @@ if saveFig
     saveas(gcf,['SummaryFigures',filesep,'plotRippleChannels.png']);
 end
 cd(prevPath);
+
+% updating cell_metrics
+ds_ch = [];
+ds_id = [];
+for ii = 1:length(Deep_Sup)
+    ds_ch = [ds_ch; Anatomical_groups{ii}'];
+    ds_id = [ds_id; Deep_Sup{ii}];
+end
+
+[ds_ch, id] = sort(ds_ch);
+ds_id = ds_id(id);
+
+deepSuperficial_Sharif = cell(size(ds_id));
+deepSuperficial_Sharif(ds_id<0) = {'Superficial'};
+deepSuperficial_Sharif(ds_id>=0) = {'Deep'};
+
+cell_metrics = loadCellMetrics;
+spikes = loadSpikes;
+for j = 1:cell_metrics.general.cellCount
+    try
+        cell_metrics.deepSuperficial_Sharif(j) = deepSuperficial_Sharif(spikes.maxWaveformCh1(j)); % cell_deep_superficial OK
+    catch
+        cell_metrics.deepSuperficial_Sharif(j) = {'Undetermined'}; % cell_deep_superficial OK
+    end
+end
+save([basenameFromBasepath(pwd) '.cell_metrics.cellinfo.mat'], "cell_metrics");
+
 end
 
 
