@@ -27,8 +27,11 @@ indexNewSession('basepath','Y:\wt6\wt6_250310_sess4');
 %% WT1
 updateExpFolder_temp({'D:\wt1'},'C:\wt1');
 preprocessSession('basepath','C:\wt1\wt1_241205_sess15','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
+<<<<<<< HEAD
+=======
 
 
+>>>>>>> 2262c805a068d48770f291c0eb9783831492ee25
 %% WT3
 
 updateExpFolder_temp({'D:\wt3'},'C:\wt3');
