@@ -218,3 +218,46 @@ corrBinned.distribution.y_edges = y_edges;
 corrBinned.distribution.y_centers = y_centers;
     
 end
+
+function [xout] = ic95(x)
+% [xout] = ic95(x)
+% Compute ic95
+
+xout = 1.96 * nanstd(x)/ sqrt(length(x));
+
+end
+
+function [xfill,yfill]=fillformat(xvector, yMean, ySd)
+% Return shadow to draw error.
+% [xfill,yfill]=fillformat(xvector, yMean, ySd)
+% INPUT
+%   xvector: dependent variable values (vector)
+%   yMean: independent variable values (vector)
+%   ySd: error of the independent variable in all points of xvector (vector) 
+%   
+% OUTPUT
+%   xfill: x input for fill to draw the poligon (vector)
+%   yfill: y input for fill to draw the polygon (vector)
+% LCN-MV 2016
+%
+if size(xvector,1)>size(xvector,2)
+    xvector=xvector';
+end
+if size(yMean,1)>size(yMean,2)
+    yMean=yMean';
+end
+if size(ySd,1)>size(ySd,2)
+    ySd=ySd';
+end
+
+%keyboard;
+% discard ymean
+yMean=yMean(~isnan(yMean));
+ySd=ySd(~isnan(yMean));
+xvector=xvector(~isnan(yMean));
+
+ySd(isnan(ySd))=0; % NaN to 0;
+
+    xfill=[xvector xvector(end) fliplr(xvector) xvector(1)];
+    yfill=[(yMean+ySd) (yMean(end)+ySd(end)) fliplr(yMean-ySd) (yMean(1)+ySd(1))];
+end

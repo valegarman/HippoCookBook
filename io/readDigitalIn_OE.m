@@ -85,39 +85,44 @@ else
     digital_off = [];
 end
 
-for ii=1:size(digital_on,2)
-    if ~isempty(digital_on{ii})
-        % take timestamps in seconds
-        digitalIn.timestampsOn{ii} = digital_on{ii};
-        digitalIn.timestampsOff{ii} = digital_off{ii};
-        
-        % intervals
-        d = zeros(max([size(digitalIn.timestampsOn{ii},1) size(digitalIn.timestampsOff{ii},1)]),2);
-        d(1:size(digitalIn.timestampsOn{ii},1),1) = digitalIn.timestampsOn{ii};
-        d(1:size(digitalIn.timestampsOff{ii},1),2) = digitalIn.timestampsOff{ii};
-
-        if size(d,1) > 1 
-            if d(1,1) > d(2,1)
-                d = flip(d,1);
+try
+    for ii=1:size(digital_on,2)
+        if ~isempty(digital_on{ii})
+            % take timestamps in seconds
+            digitalIn.timestampsOn{ii} = digital_on{ii};
+            digitalIn.timestampsOff{ii} = digital_off{ii};
+            
+            % intervals
+            d = zeros(max([size(digitalIn.timestampsOn{ii},1) size(digitalIn.timestampsOff{ii},1)]),2);
+            d(1:size(digitalIn.timestampsOn{ii},1),1) = digitalIn.timestampsOn{ii};
+            d(1:size(digitalIn.timestampsOff{ii},1),2) = digitalIn.timestampsOff{ii};
+    
+            if size(d,1) > 1 
+                if d(1,1) > d(2,1)
+                    d = flip(d,1);
+                end
             end
+            if size(d,1) > 1
+                if length(d) > 1 & d(2,end) == 0; d(2,end) = nan; end
+            end
+            digitalIn.ints{ii} = d;
+            digitalIn.dur{ii} = digitalIn.ints{ii}(:,2) - digitalIn.ints{ii}(:,1); % durantion
+            
+            clear intsPeriods
+            intsPeriods(1,1) = d(1,1); % find stimulation intervals
+            intPeaks =find(diff(d(1,:))>lag);
+            for jj = 1:length(intPeaks)
+                intsPeriods(jj,2) = d(2,intPeaks(jj));
+                intsPeriods(jj+1,1) = d(1,intPeaks(jj)+1);
+            end
+            intsPeriods(end,2) = d(end,2);  
+            digitalIn.intsPeriods{ii} = intsPeriods;
         end
-        if size(d,1) > 1
-            if length(d) > 1 & d(2,end) == 0; d(2,end) = nan; end
-        end
-        digitalIn.ints{ii} = d;
-        digitalIn.dur{ii} = digitalIn.ints{ii}(:,2) - digitalIn.ints{ii}(:,1); % durantion
-        
-        clear intsPeriods
-        intsPeriods(1,1) = d(1,1); % find stimulation intervals
-        intPeaks =find(diff(d(1,:))>lag);
-        for jj = 1:length(intPeaks)
-            intsPeriods(jj,2) = d(2,intPeaks(jj));
-            intsPeriods(jj+1,1) = d(1,intPeaks(jj)+1);
-        end
-        intsPeriods(end,2) = d(end,2);  
-        digitalIn.intsPeriods{ii} = intsPeriods;
     end
+catch
+    digitalIn = [];
 end
+
 
 if exist('digitalIn')==1
 

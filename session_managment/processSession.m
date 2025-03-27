@@ -48,7 +48,8 @@ addParameter(p,'excludeAnalysis',[]); %
 addParameter(p,'profileType','hippocampus',@ischar); % options, 'hippocampus' and 'cortex'
 addParameter(p,'rippleMasterDetector_threshold',[1.5 3.5],@isnumeric); % [1.5 3.5]
 addParameter(p,'LED_threshold',0.98,@isnumeric);
-addParameter(p,'createLegacySummaryFolder',true,@islogical);
+addParameter(p,'createLegacySummaryFolder',false,@islogical);
+addParameter(p,'useCSD_for_theta_detection',true,@islogical);
 addParameter(p,'restrict_to',[0 Inf],@isnumeric);
 addParameter(p,'restrict_to_baseline',true,@islogical);
 addParameter(p,'restrict_to_manipulation',false,@islogical);
@@ -79,6 +80,7 @@ excludeAnalysis = p.Results.excludeAnalysis;
 profileType = p.Results.profileType;
 rippleMasterDetector_threshold = p.Results.rippleMasterDetector_threshold;
 LED_threshold = p.Results.LED_threshold;
+useCSD_for_theta_detection = p.Results.useCSD_for_theta_detection;
 createLegacySummaryFolder = p.Results.createLegacySummaryFolder;
 restrict_to = p.Results.restrict_to;
 restrict_to_baseline = p.Results.restrict_to_baseline;
@@ -88,7 +90,6 @@ selectProbe_automatic = p.Results.selectProbe_automatic;
 % Deal with inputs
 prevPath = pwd;
 cd(basepath);
-keyboard;
 
 mkdir('SummaryFigures')
 if createLegacySummaryFolder
@@ -272,7 +273,7 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
 %     UDStates = detectUD('plotOpt', true,'forceDetect',true','NREMInts','all');
 %     psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true);
 
-    UDStates = detectUpsDowns('plotOpt', true,'forceDetect',false','NREMInts','all');
+    UDStates = detectUpsDowns('plotOpt', true,'forceDetect',true,'NREMInts','all');
     psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true,'minNumberOfPulses',10,'restrict_to',restrict_ints);
     getSpikesRank('events','upstates');
 
@@ -282,7 +283,11 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     getSpikesRank('events','ripples');
 
     % 8.4 Fiber ripple analysis
-    ripples_fiber = fiberPhotometryModulation([],'eventType','ripples');
+    try
+        ripples_fiber = fiberPhotometryModulation_temp([],'eventType','ripples');
+    catch
+        warning('No fiber recording in this session...');
+    end
 
 
     % 8.3 Theta intervals
@@ -293,6 +298,7 @@ end
 %% 9. Phase Modulation
 if ~any(ismember(excludeAnalysis, {'9',lower('phaseModulation')}))
     % LFP-spikes modulation
+    % [phaseMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel,'thetaChannel',thetaChannel,'lgammaChannel',thetaChannel,'hgammaChannel',thetaChannel,'restrict_to',restrict_ints);
     [phaseMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel,'restrict_to',restrict_ints);
     computeCofiringModulation;
 end
@@ -320,7 +326,7 @@ if ~any(ismember(excludeAnalysis, {'10',lower('cellMetrics')}))
 
     session = loadSession;
 
-    cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludePulsesIntervals,'forceReload',true,'excludeMetrics',{'deepSuperficial'}); % after CellExplorar
+    cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludePulsesIntervals,'forceReload',true); % after CellExplorar
 
     
     getACGPeak('force',true);
@@ -334,7 +340,8 @@ end
 if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
     try
         spikes = loadSpikes;
-        getSessionTracking('roiTracking','manual','forceReload',false,'LED_threshold',LED_threshold,'convFact',tracking_pixel_cm,'leftTTL_reward',leftArmTtl_channel,'rightTTL_reward',rightArmTtl_channel);
+        % getSessionTracking('roiTracking','manual','forceReload',false,'LED_threshold',LED_threshold,'convFact',tracking_pixel_cm,'leftTTL_reward',leftArmTtl_channel,'rightTTL_reward',rightArmTtl_channel);
+        getSessionTracking('forceReload',false,'leftTTL_reward',leftArmTtl_channel,'rightTTL_reward',rightArmTtl_channel,'homeTtl',homeTtl,'tracking_ttl_channel',tracking_ttl_channel);
         try
             getSessionArmChoice('task','alternation','leftArmTtl_channel',leftArmTtl_channel,'rightArmTtl_channel',rightArmTtl_channel,'homeDelayTtl_channel',homeDelayTtl_channel);
         catch
@@ -380,6 +387,13 @@ if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
         warning('Psth on behaviour events was not possible...');
     end
 
+    % Fiber behaviour analysis
+    try
+        lReward_fiber = fiberPhotometryModulation_temp([behaviour.events.lReward],'eventType','reward');
+    catch
+        warning('No fiber recording in this session...');
+    end
+
     try
         speedCorr = getSpeedCorr('numQuantiles',20,'force',true);
     catch
@@ -389,6 +403,7 @@ end
 
 %% 12. Summary per cell
 if ~any(ismember(excludeAnalysis, {'12',lower('summary')}))
+    plotSummary('showTagCells',false);
     
 end
 
