@@ -2,9 +2,6 @@
 %% WT1
 updateExpFolder_temp({'D:\wt1'},'C:\wt1');
 preprocessSession('basepath','C:\wt1\wt1_241205_sess15','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
-
-
-
 %% WT3
 
 updateExpFolder_temp({'D:\wt3'},'C:\wt3');
