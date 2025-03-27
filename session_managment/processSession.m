@@ -48,7 +48,11 @@ addParameter(p,'excludeAnalysis',[]); %
 addParameter(p,'profileType','hippocampus',@ischar); % options, 'hippocampus' and 'cortex'
 addParameter(p,'rippleMasterDetector_threshold',[1.5 3.5],@isnumeric); % [1.5 3.5]
 addParameter(p,'LED_threshold',0.98,@isnumeric);
+<<<<<<< HEAD
+addParameter(p,'createLegacySummaryFolder',true,@islogical);
+=======
 addParameter(p,'createLegacySummaryFolder',false,@islogical);
+>>>>>>> 2262c805a068d48770f291c0eb9783831492ee25
 addParameter(p,'useCSD_for_theta_detection',true,@islogical);
 addParameter(p,'restrict_to',[0 Inf],@isnumeric);
 addParameter(p,'restrict_to_baseline',true,@islogical);
@@ -86,6 +90,7 @@ restrict_to = p.Results.restrict_to;
 restrict_to_baseline = p.Results.restrict_to_baseline;
 restrict_to_manipulation = p.Results.restrict_to_manipulation;
 selectProbe_automatic = p.Results.selectProbe_automatic;
+useCSD_for_theta_detection = p.Results.useCSD_for_theta_detection;
 
 % Deal with inputs
 prevPath = pwd;
