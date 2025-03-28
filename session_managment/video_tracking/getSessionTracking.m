@@ -53,7 +53,7 @@ addParameter(p,'roiTracking',[],@ismatrix);
 addParameter(p,'roiLED',[],@ismatrix);
 addParameter(p,'roisPath',[],@isfolder);
 addParameter(p,'saveMat',true,@islogical)
-addParameter(p,'forceReload',false,@islogical);
+addParameter(p,'forceReload',true,@islogical);
 addParameter(p,'LED_threshold',0.98,@isnumeric);
 addParameter(p,'tracking_ttl_channel',[],@isnumeric);
 addParameter(p,'leftTTL_reward',[],@isnumeric);
@@ -228,7 +228,7 @@ if count > 1 % if traking
         folder{ii} = tempTracking{ii}.folder; 
         samplingRate = [samplingRate; tempTracking{ii}.samplingRate];  
         description{ii} = tempTracking{ii}.description;
-        if anyMaze
+        if strcmpi(tracking_software,'anymaze')
             avFrame{ii} = tempTracking{ii}.avFrame;
             apparatus{ii} = tempTracking{ii}.apparatus;
             if isfield(tempTracking{ii},zone)

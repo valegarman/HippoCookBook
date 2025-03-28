@@ -49,16 +49,13 @@ addParameter(p,'excludeAnalysis',[]); %
 addParameter(p,'profileType','hippocampus',@ischar); % options, 'hippocampus' and 'cortex'
 addParameter(p,'rippleMasterDetector_threshold',[1.5 3.5],@isnumeric); % [1.5 3.5]
 addParameter(p,'LED_threshold',0.98,@isnumeric);
-<<<<<<< HEAD
-addParameter(p,'createLegacySummaryFolder',true,@islogical);
-=======
 addParameter(p,'createLegacySummaryFolder',false,@islogical);
->>>>>>> 2262c805a068d48770f291c0eb9783831492ee25
-addParameter(p,'useCSD_for_theta_detection',true,@islogical);
+addParameter(p,'useCSD_for_theta_detection',false,@islogical);
 addParameter(p,'restrict_to',[0 Inf],@isnumeric);
 addParameter(p,'restrict_to_baseline',true,@islogical);
 addParameter(p,'restrict_to_manipulation',false,@islogical);
 addParameter(p,'selectProbe_automatic',false,@islogical);
+addParameter(p,'use_manual_ttls',false,@islogical),
 
 parse(p,varargin{:})
 
@@ -93,6 +90,7 @@ restrict_to_baseline = p.Results.restrict_to_baseline;
 restrict_to_manipulation = p.Results.restrict_to_manipulation;
 selectProbe_automatic = p.Results.selectProbe_automatic;
 useCSD_for_theta_detection = p.Results.useCSD_for_theta_detection;
+use_manual_ttls = p.Results.use_manual_ttls;
 
 % Deal with inputs
 prevPath = pwd;
@@ -348,9 +346,9 @@ if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
     try
         spikes = loadSpikes;
         % getSessionTracking('roiTracking','manual','forceReload',false,'LED_threshold',LED_threshold,'convFact',tracking_pixel_cm,'leftTTL_reward',leftArmTtl_channel,'rightTTL_reward',rightArmTtl_channel);
-        getSessionTracking('forceReload',false,'leftTTL_reward',leftArmTtl_channel,'rightTTL_reward',rightArmTtl_channel,'homeTtl',homeTtl,'tracking_ttl_channel',tracking_ttl_channel);
+        getSessionTracking('forceReload',false,'leftTTL_reward',leftArmTtl_channel,'rightTTL_reward',rightArmTtl_channel,'homeTtl',homeDelayTtl_channel,'tracking_ttl_channel',tracking_ttl_channel);
         try
-            getSessionArmChoice('task','alternation','leftArmTtl_channel',leftArmTtl_channel,'rightArmTtl_channel',rightArmTtl_channel,'homeDelayTtl_channel',homeDelayTtl_channel);
+            getSessionArmChoice('task','alternation','leftArmTtl_channel',leftArmTtl_channel,'rightArmTtl_channel',rightArmTtl_channel,'homeDelayTtl_channel',homeDelayTtl_channel,'use_manual_ttls',use_manual_ttls);
         catch
             warning('Performance in task was not computed! maybe linear maze?');
         end
@@ -365,11 +363,11 @@ if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
 
     try 
         behaviour = getSessionLinearize;
-        psth_lReward = spikesPsth([behaviour.events.lReward],'numRep',100,'saveMat',false,...
+        psth_lReward = spikesPsth([behaviour.events.lReward],'numRep',100,'eventType','lReward','saveMat',false,...
             'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01,'raster_time',[-2 2]);
-        psth_rReward = spikesPsth([behaviour.events.rReward],'numRep',100,'saveMat',false,...
+        psth_rReward = spikesPsth([behaviour.events.rReward],'numRep',100,'eventType','rReward','saveMat',false,...
             'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'raster_time',[-2 2]);
-        psth_reward = spikesPsth([behaviour.events.lReward; behaviour.events.rReward],'numRep',100,'saveMat',false,...
+        psth_reward = spikesPsth([behaviour.events.lReward; behaviour.events.rReward],'numRep',100,'eventType','reward','saveMat',false,...
             'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'raster_time',[-2 2]);
         
         if all(isnan(behaviour.events.startPoint))
@@ -378,9 +376,9 @@ if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
         if all(isnan(behaviour.events.intersection))
             behaviour.events.intersection = NaN;
         end
-        psth_intersection = spikesPsth([behaviour.events.intersection],'numRep',100,'saveMat',false,...
+        psth_intersection = spikesPsth([behaviour.events.intersection],'numRep',100,'eventType','intersection','saveMat',false,...
             'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'raster_time',[-2 2]);
-        psth_startPoint = spikesPsth([behaviour.events.startPoint],'numRep',100,'saveMat',false,...
+        psth_startPoint = spikesPsth([behaviour.events.startPoint],'numRep',100,'eventType','startPoint','saveMat',false,...
             'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'raster_time',[-2 2]);
 
         behaviour.psth_lReward = psth_lReward;
@@ -396,7 +394,21 @@ if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
 
     % Fiber behaviour analysis
     try
-        lReward_fiber = fiberPhotometryModulation_temp([behaviour.events.lReward],'eventType','reward');
+        lReward_fiber = fiberPhotometryModulation_temp([behaviour.events.lReward],'eventType','lReward','saveMat',false);
+        rReward_fiber = fiberPhotometryModulation_temp([behaviour.events.rReward],'eventType','rReward','saveMat',false);
+        reward_fiber = fiberPhotometryModulation_temp([behaviour.events.lReward; behaviour.events.rReward],'eventType','reward','saveMat',false);
+
+        intersection_fiber = fiberPhotometryModulation_temp([behaviour.events.intersection],'eventType','intersection','saveMat',false,'savePlotAs','intersection');
+        startPoint_fiber = fiberPhotometryModulation_temp([behaviour.events.startPoint],'eventType','startPoint','saveMat',false,'savePlotAs','startPoint');
+
+        fiber_behavior.lReward = lReward_fiber;
+        fiber_behavior.rReward = rReward_fiber;
+        fiber_behavior.reward = reward_fiber;
+
+        fiber_behavior.intersection = intersection_fiber;
+        fiber_behavior.startPoint = startPoint_fiber;
+
+        save([basenameFromBasepath(pwd),'.behavior_fiber.events.mat'],'fiber_behavior');
     catch
         warning('No fiber recording in this session...');
     end

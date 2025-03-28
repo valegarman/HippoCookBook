@@ -158,7 +158,7 @@ elseif exist([upBasepath filesep 'roiLED.mat'],'file')
 elseif isempty(roiLED)
     disp('Draw ROI for LED...');
     h1 = figure;
-    imshow(average_frame);
+    imagesc(average_frame);
     colormap gray;
     roi = drawpolygon;
     roiLED = [roi.Position; roi.Position(1,:)];
@@ -269,7 +269,8 @@ if ~isempty(roiLED)
     end
 
     sync = sync.^2;
-    syncBin = (sync>mean(sync)); % binarize signal
+    % syncBin = (sync>mean(sync)); % binarize signal
+    syncBin = (sync> mean(sync) + std(sync)); % binarize signal
     locsA = find(diff(syncBin)==1)/fs; % start of pulses
     locsB = find(diff(syncBin)==-1)/fs; % end of pulses
     pul = locsA(1:min([length(locsA) length(locsB)]));
@@ -345,7 +346,8 @@ tracking.roi.roiLED = roiLED;
 tracking.velocity = velocity;
 tracking.acceleration = acceleration;
 
-saveMat = false;
+tracking.convFact = convFact;
+
 if saveMat
     save([basepath filesep fbasename '.Tracking.Behavior.mat'],'tracking');
 end
