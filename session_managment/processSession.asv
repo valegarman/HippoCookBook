@@ -395,20 +395,12 @@ if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
     % Fiber behaviour analysis
     try
         lReward_fiber = fiberPhotometryModulation_temp([behaviour.events.lReward],'eventType','lReward','saveMat',false);
-        rReward_fiber = fiberPhotometryModulation_temp([behaviour.events.rReward],'eventType','rReward','saveMat',false);
+        rReward_fiber = fiberPhotometryModulation_temp([behaviour.events.rReward],'eventType','rReward','saveMat',false));
         reward_fiber = fiberPhotometryModulation_temp([behaviour.events.lReward; behaviour.events.rReward],'eventType','reward','saveMat',false);
 
         intersection_fiber = fiberPhotometryModulation_temp([behaviour.events.intersection],'eventType','intersection','saveMat',false,'savePlotAs','intersection');
         startPoint_fiber = fiberPhotometryModulation_temp([behaviour.events.startPoint],'eventType','startPoint','saveMat',false,'savePlotAs','startPoint');
 
-        fiber_behavior.lReward = lReward_fiber;
-        fiber_behavior.rReward = rReward_fiber;
-        fiber_behavior.reward = reward_fiber;
-
-        fiber_behavior.intersection = intersection_fiber;
-        fiber_behavior.startPoint = startPoint_fiber;
-
-        save([basenameFromBasepath(pwd),'.behavior_fiber.events.mat'],'fiber_behavior');
     catch
         warning('No fiber recording in this session...');
     end

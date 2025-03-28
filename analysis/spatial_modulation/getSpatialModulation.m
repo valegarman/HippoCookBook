@@ -205,6 +205,9 @@ for jj = 1:length(list_of_recordings)
     list_of_directions = unique(masks_directions);
     count = 1;
     clear idx_second_half idx_first_half
+    if size(behaviour.masks.trials,1) < size(behaviour.masks.trials,2)
+        behaviour.masks.trials = behaviour.masks.trials';
+    end
     for ii = 1:length(list_of_directions)
         idx_first_half{count} = behaviour.masks.trials<half_trial & behaviour.masks.direction == list_of_directions(ii) & behaviour.masks.recording == list_of_recordings(jj);
         idx_second_half{count} = behaviour.masks.trials>half_trial & behaviour.masks.direction == list_of_directions(ii) & behaviour.masks.recording == list_of_recordings(jj);
