@@ -172,6 +172,7 @@ end
 if isempty(convFact)                             % if convFact not provided, normalize to 1 along the longest axis
     convFact = 1/max([size(frames.r,1) size(frames.r,2)]);
     artifactThreshold = Inf;
+    artifactThreshold = 0.05;
 end
 xMaze = [0 size(frames.r,2) * convFact];
 yMaze = [0 size(frames.r,1) * convFact];
@@ -268,11 +269,18 @@ if ~isempty(roiLED)
         sync(ii) = nansum(fr(:)); 
     end
 
-    sync = sync.^2;
-    % syncBin = (sync>mean(sync)); % binarize signal
-    syncBin = (sync> mean(sync) + std(sync)); % binarize signal
-    locsA = find(diff(syncBin)==1)/fs; % start of pulses
-    locsB = find(diff(syncBin)==-1)/fs; % end of pulses
+    figure;
+    histogram(sync);
+    hold on;
+    xline(mean(sync),'r');
+    hold on;
+    xline(prctile(sync,90),'g');
+
+    syncBin = zeros(1,length(sync));
+    syncBin(sync > prctile(sync,90)) = 1;
+    locsA = find(diff(syncBin) == 1)/fs;
+    locsB = find(diff(syncBin) == -1)/fs;
+    
     pul = locsA(1:min([length(locsA) length(locsB)]));
     for ii = 1 : size(pul,2) % pair begining and end of the pulse
         if sum(locsB > pul(1,ii)) > 0
@@ -282,6 +290,22 @@ if ~isempty(roiLED)
             pul(2,ii) = nan;
         end
     end
+
+
+    % sync = sync.^2;
+    % % syncBin = (sync>mean(sync)); % binarize signal
+    % syncBin = (sync> mean(sync) + std(sync)); % binarize signal
+    % locsA = find(diff(syncBin)==1)/fs; % start of pulses
+    % locsB = find(diff(syncBin)==-1)/fs; % end of pulses
+    % pul = locsA(1:min([length(locsA) length(locsB)]));
+    % for ii = 1 : size(pul,2) % pair begining and end of the pulse
+    %     if sum(locsB > pul(1,ii)) > 0
+    %         pul(2,ii) =  locsB(find(locsB - pul(1,ii) ==...
+    %             min(locsB(locsB > pul(1,ii)) - pul(1,ii))));
+    %     else
+    %         pul(2,ii) = nan;
+    %     end
+    % end
 else
     sync = []; pul = [];
 end
