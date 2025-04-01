@@ -44,6 +44,7 @@ addParameter(p,'forceRun',false,@islogical);
 addParameter(p,'leftArmTtl_channel',2,@isnumeric)
 addParameter(p,'rightArmTtl_channel',3,@isnumeric)
 addParameter(p,'homeDelayTtl_channel',4,@isnumeric)
+addParameter(p,'use_manual_ttls',false,@islogical);
 
 parse(p,varargin{:});
 task = p.Results.task;
@@ -55,7 +56,7 @@ forceRun = p.Results.forceRun;
 leftArmTtl_channel = p.Results.leftArmTtl_channel;
 rightArmTtl_channel = p.Results.rightArmTtl_channel;
 homeDelayTtl_channel = p.Results.homeDelayTtl_channel;
-
+use_manual_ttls = p.Results.use_manual_ttls;
 
 %% Deal with inputs
 if ~isempty(dir([basepath filesep '*.SessionArmChoice.Events.mat'])) || forceReload
@@ -88,11 +89,11 @@ end
 count = 1;
 for ii = 1:size(sess,1)
     if sess(ii).isdir
-        if ~isempty(dir([basepath filesep sess(ii).name filesep '*Basler*avi'])) || forceRun 
+        if ~isempty(dir([basepath filesep sess(ii).name filesep '*Basler*avi'])) || ~isempty(dir([basepath filesep sess(ii).name filesep '*tracking*_crop.avi'])) || forceRun 
             cd([basepath filesep sess(ii).name]);
             fprintf('Computing arm Choice in %s folder \n',sess(ii).name);
             sessionArmChoice.(sess(ii).name)= getArmChoice('verbose',verbose,'task',task,'leftArmTtl_channel',leftArmTtl_channel,...
-                'rightArmTtl_channel',rightArmTtl_channel,'homeDelayTtl_channel',homeDelayTtl_channel);
+                'rightArmTtl_channel',rightArmTtl_channel,'homeDelayTtl_channel',homeDelayTtl_channel,'use_manual_ttls',use_manual_ttls);
             trackFolder(count) = ii; 
             count = count + 1;
         end
