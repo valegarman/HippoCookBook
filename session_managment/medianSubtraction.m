@@ -21,6 +21,7 @@ addParameter(p,'basepath',pwd,@isdir);
 addParameter(p,'ch','all');
 addParameter(p,'method','substractMean',@ischar);
 addParameter(p,'keepDat',false,@islogical);
+addParameter(p,'exclude_shanks',[]);
 
 warning('Performing median/mean substraction!! Dat file will be compromised!! ');
 parse(p,varargin{:});
@@ -28,6 +29,7 @@ ch = p.Results.ch;
 method = p.Results.method;
 basepath = p.Results.basepath;
 keepDat = p.Results.keepDat;
+exclude_shanks = p.Results.exclude_shanks;
 
 % Get elements
 prevPath = pwd;
@@ -46,7 +48,6 @@ catch
     total_duration = [];
 end
 
-
 fileTargetAmplifier = dir('amplifier*.dat');
 if isempty(fileTargetAmplifier)
     filename = split(pwd,filesep); filename = filename{end};
@@ -60,6 +61,16 @@ end
 if ischar(ch) && strcmpi(ch, 'all')
     ch = channels;
 end
+
+if ~isempty(exclude_shanks)
+    ch_to_remove = session.extracellular.spikeGroups.channels{exclude_shanks};
+    ch(ch_to_remove) = [];
+end
+
+
+
+
+
 duration = 60;
 
 fid = fopen(fileTargetAmplifier.name,'r'); filename = fileTargetAmplifier.name;
