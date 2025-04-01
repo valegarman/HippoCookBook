@@ -91,6 +91,7 @@ if isempty(project)
     project = session.general.projects;
 end
 % updated indexedSession table
+
 sessionsTable = readtable([indexedSessionCSV_path filesep indexedSessionCSV_name,'.csv'],'PreserveVariableNames',true); % the variable is called allSessions
 
 % new table entry
@@ -98,13 +99,15 @@ optogenetics = cell(0);
 switch session.extracellular.chanCoords.layout
     case 'uLED-12LED-32Ch-4Shanks'
         optogenetics = {session.extracellular.chanCoords.layout};
+    case 'DiagnosticBiochip-128-6-128ch&uLED_12LED-32Ch-4Shanks'
+        optogenetics = {session.extracellular.chanCoords.layout};
     case 'BehnkeFried-8ch.csv'
         optogenetics = {'None'};
     otherwise
         for ii = 1:length(session.animal.opticFiberImplants)
             optogenetics{1, length(optogenetics)+1} = session.animal.opticFiberImplants{ii}.opticFiber;
             optogenetics{1, length(optogenetics)+1} = ' ';
-        end
+        end 
         optogenetics(end) = [];
 end
 
@@ -141,6 +144,7 @@ sessionEntry = cell2table(sessionEntry,"VariableNames",["SessionName", "Subject"
 sessionsTable = [sessionsTable; sessionEntry];
 writetable(sessionsTable,[indexedSessionCSV_path filesep indexedSessionCSV_name,'.csv']); % the variable is called allSessions
 
+keyboard;
 % Lets do a push for git repository
 cd(indexedSessionCSV_path);
 % Git pull 

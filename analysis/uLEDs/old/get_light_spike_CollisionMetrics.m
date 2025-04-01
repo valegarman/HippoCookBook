@@ -15,9 +15,9 @@ addParameter(p,'before_pulse_factor',1.5,@isscalar); % which cells show similar 
 addParameter(p,'doPlot',true,@islogical);
 addParameter(p,'label',[]); % string to add to the title for figures and mat file
 addParameter(p,'saveMat',true,@islogical); % 
-addParameter(p,'rate_change_threshold',4,@isnumeric); % 
+addParameter(p,'rate_change_threshold',7,@isnumeric); % 
 addParameter(p,'spikes',[],@isstruct); % 
-addParameter(p,'uLEDPulses',[],@isstruct); % 
+addParameter(p,'uLEDPulses',getuLEDPulses,@isstruct); % 
 addParameter(p,'interpolate_pulse_sides',true,@islogical); % 
 addParameter(p,'update_cell_metrics',true,@islogical); % 
 addParameter(p,'save_as','lightSpikeCollisions',@ischar);
@@ -40,8 +40,6 @@ update_cell_metrics = p.Results.update_cell_metrics;
 save_as = p.Results.save_as;
 
 
-keyboard;
-
 % Deal with inputs
 prevPath = pwd;
 cd(basepath);
@@ -62,9 +60,9 @@ if isempty(spikes)
     end
 end
 
-if ~isstruct(uLEDPulses) && isnan(uLEDPulses)
-    uLEDPulses = getuLEDPulses;
-end
+% if ~isstruct(uLEDPulses) && isnan(uLEDPulses)
+%     uLEDPulses = getuLEDPulses;
+% end
 
 % stacking data
 uLEDResponses_InInterval.presynapticID = [];
@@ -146,7 +144,22 @@ for ii = 1:length(uLEDResponses_interval)
         (1:size(uLEDResponses_interval{ii}.bootsTrapRate,1))'];
     uLEDResponses_OutInterval.responsecurve = [uLEDResponses_OutInterval.responsecurve; ...
         squeeze(uLEDResponses_interval{ii}.out_interval.maxRespLED.responseCurve)];
+
+for jj= 1 : length(uLEDResponses_interval{ii}.rand_interval)
+      cella{jj} = {cella; uLEDResponses_interval{ii}.rand_interval{jj}.maxRespLED.rate};
+      uLEDResponses_RandInterval.maxRatePulse = [uLEDResponses_RandInterval.maxRatePulse; ...
+        cella{jj}];
+    end
+array = cell(length(uLEDResponses_interval{ii}.rand_interval), 1); % Crea un vettore colonna di 43 celle
+
+for i = 1:43
+    array{i} = zeros(1, 500); % Ogni cella contiene una matrice 1x500
 end
+
+
+
+end
+ 
 timestamps = uLEDResponses_interval{1}.in_interval.timestamps;
 uLEDResponses_OutInterval.timestamps = timestamps';
 uLEDResponses_InInterval.timestamps = timestamps';
@@ -253,23 +266,20 @@ if ~isempty(spikes)
     for ii = 1:length(spikes.times)
         spikes_times_baseline{ii} = spikes.times{ii}(spikes.times{ii} < t_limit);
     end
-    [ccg,t] = CCG(spikes.times,[],'binSize',0.0004,'duration',0.12,'norm','rate');
+    [ccg,t] = CCG(spikes_times_baseline,[],'binSize',0.0004,'duration',0.12,'norm','rate');
     fprintf('\n');
     for ii = 1:spikes.numcells
-        pre_post_CCG    = [pre_post_CCG; squeeze(ccg(:,ii,:))'];
-        pre_firingRate  = [pre_firingRate;...
-            ones(size(spikes.times'))*length(spikes.times{ii})/(max(spikes.times{ii})-min(spikes.times{ii}))];
-        post_firingRate = [post_firingRate; cellfun(@length,spikes.times)./(cellfun(@max,spikes.times)-cellfun(@min,spikes.times))];
-        pre_waveforms   = [pre_waveforms; (spikes.filtWaveform{ii}'* ones(size(spikes.times)))'];
-        post_waveforms  = [post_waveforms; cat(1,spikes.filtWaveform{:})];
+        pre_post_baseline_CCG    = [pre_post_baseline_CCG; squeeze(ccg(:,ii,:))'];
     end
 end
-
+collision_metrics.pre_post_baseline_CCG  = pre_post_baseline_CCG;
 % actual metrics
 collision_metrics.rate_difference            = uLEDResponses_OutInterval.maxRatePulse - uLEDResponses_InInterval.maxRatePulse;
 collision_metrics.rateZ_difference           = uLEDResponses_OutInterval.maxZPulse - uLEDResponses_InInterval.maxZPulse;
 collision_metrics.rate_only_light            = uLEDResponses_OutInterval.maxRatePulse;
 collision_metrics.rateZ_only_light           = uLEDResponses_OutInterval.maxZPulse;
+collision_metrics.rate_before_light          = uLEDResponses_OutInterval.maxRateBeforePulse;
+collision_metrics.rateZ_before_light         = uLEDResponses_OutInterval.maxZBeforePulse;
 collision_metrics.rate_ligh_spike_collision  = uLEDResponses_InInterval.maxRatePulse;
 collision_metrics.rateZ_ligh_spike_collision = uLEDResponses_InInterval.maxZPulse;
 % 
