@@ -68,7 +68,7 @@ end
 %% find indexed sessions
 if isempty(list_of_paths)
 
-<<<<<<< HEAD
+% <<<<<<< HEAD
 sessionsTable = readtable([indexedSessionCSV_path filesep indexedSessionCSV_name,'.csv']); % the variable is called allSessions
 
 for ii = 1:length(sessionsTable.SessionName)
@@ -104,18 +104,18 @@ end
 if ~isempty(reject_sessions)
     list_of_sessions{find(contains(list_of_sessions,lower(reject_sessions)))} = ' ';
 end
-=======
-    if isempty(indexedSessionCSV_name)
-        error('Need to provide the name of the index Project variable');
-    end
-    if isempty(indexedSessionCSV_path)
-        warning('Not included the path where the indexed Projects .mat variable is located. Trying to find it...');
-        indexedSessionCSV_path = fileparts(which([indexedSessionCSV_name,'.csv']));
-    end
-    if isempty(analysis_project_path)
-        analysis_project_path = indexedSessionCSV_path;
-    end
->>>>>>> a44f5ed7ef76cf090c2430220e48de8d504a3bde
+% =======
+%     if isempty(indexedSessionCSV_name)
+%         error('Need to provide the name of the index Project variable');
+%     end
+%     if isempty(indexedSessionCSV_path)
+%         warning('Not included the path where the indexed Projects .mat variable is located. Trying to find it...');
+%         indexedSessionCSV_path = fileparts(which([indexedSessionCSV_name,'.csv']));
+%     end
+%     if isempty(analysis_project_path)
+%         analysis_project_path = indexedSessionCSV_path;
+%     end
+% >>>>>>> a44f5ed7ef76cf090c2430220e48de8d504a3bde
     
     sessionsTable = readtable([indexedSessionCSV_path filesep indexedSessionCSV_name,'.csv']); % the variable is called allSessions
     
