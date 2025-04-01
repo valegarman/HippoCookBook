@@ -153,24 +153,13 @@ if ~isempty(analysisPath)
 end
     
 %% Create .time dat
-cd(basepath);
-try
-    disp('Creating time.dat files...');
-    createTimeDat();
-catch
-    warning('Not possible to create time.dat file...');
-end
+disp('Creating time.dat files...');
+createTimeDat();
 %% Concatenate sessions
-cd(basepath);
-try
-    disp('Concatenate session folders...'); 
-    concatenateDats(pwd,0,1);
-catch
-    warning('Not possible to concatenate dats');
-end
+disp('Concatenate session folders...'); 
+concatenateDats(pwd,0,1);
 
 %% Get analog and digital pulses
-cd(basepath);
 if  ~isempty(analogChannelsList)
     try
         [pulses] = getAnalogPulses('analogChannelsList',analogChannelsList,'manualThr', manualThr);
@@ -241,7 +230,7 @@ end
 try
     fiber = getSessionFiberPhotometry();
 catch
-    warning('No possible loading fiber photometry data. Was fiber photometry signal recorded in this experiment? ...')
+    warning('No possible to load fiber photometry data...')
 end
 cd(basepath)
 
