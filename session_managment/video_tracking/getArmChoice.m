@@ -57,6 +57,8 @@ addParameter(p,'homeDelayTtl_channel',4,@isnumeric);
 addParameter(p,'delayPlot',true,@islogical);
 addParameter(p,'use_manual_ttls',false,@islogical);
 addParameter(p,'save_original_ttls',true,@islogical);
+addParameter(p,'dlcTtl_channel',5,@isnumeric);
+addParameter(p,'fiberTtl_channel',1,@isnmueric);
 
 
 parse(p,varargin{:});
@@ -70,6 +72,8 @@ homeDelayTtl_channel = p.Results.homeDelayTtl_channel;
 delayPlot = p.Results.delayPlot;
 use_manual_ttls = p.Results.use_manual_ttls;
 save_original_ttls = p.Results.save_original_ttls;
+dlcTtl_channel = p.Results.dlcTtl_channel;
+fiberTtl_channel = p.Results.fiberTtl_channel;
 
 if ~isempty(dir('*.ArmChoice.Events.mat')) && ~force 
     disp('Arm choice already computed! Loading file.');
@@ -320,6 +324,22 @@ elseif strcmpi(task,'alternation')
             digitalIn = getDigitalIn;
             digitalIn_original = digitalIn;
             save([basepath,'.digitalIn_original.events.mat'],'digitalIn_original');
+            digitalIn = [];
+            % Copy tracking ttls
+            digitalIn.timestampsOn{dlcTtl_channel} = digitalIn_original.timestampsOn{dlcTtl_channel};
+            digitalIn.timestampsOff{dlcTtl_channel} = digitalIn_original.timestampsOff{dlcTtl_channel};
+            digitalIn.ints{dlcTtl_channel} = digitalIn_original.ints{dlcTtl_channel};
+            digitalIn.dur{dlcTtl_channel} = digitalIn_original.dur{dlcTtl_channel};
+            digitalIn.intsPeriods{dlcTtl_channel} = digitalIn_original.dur{dlcTtl_channel};
+            % Copy fiber ttls
+            try
+                digitalIn.timestampsOn{fiberTtl_channel} = digitalIn_original.timestampsOn{fiberTtl_channel};
+                digitalIn.timestampsOff{fiberTtl_channel} = digitalIn_original.timestampsOff{fiberTtl_channel};
+                digitalIn.ints{fiberTtl_channel} = digitalIn_original.ints{fiberTtl_channel};
+                digitalIn.dur{fiberTtl_channel} = digitalIn_original.dur{fiberTtl_channel};
+                digitalIn.intsperiods{fiberTtl_channel} = digitalIn_original.intsPeriods{fiberTtl_channel};
+            catch
+            end
         end
 
         % ROI for left sensor
@@ -401,6 +421,136 @@ elseif strcmpi(task,'alternation')
         ts_area_good = find(ts_area ~= 0);
 
         alternations = all_ts_sorted(:,ts_area_good);
+
+        % Left arm TTls
+        digitalIn.timestampsOn{leftArmTtl_channel} = alternations(1,alternations(2,:) == 1)';
+        digitalIn.timestampsOff{leftArmTtl_channel} = digitalIn.timestampsOn{leftArmTtl_channel} + 0.3;
+        digitalIn.ints{leftArmTtl_channel} = [digitalIn.timestampsOn{leftArmTtl_channel} digitalIn.timestampsOff{leftArmTtl_channel}];
+        
+
+        % Right arm TTLs
+        digitalIn.timestampsOn{rightArmTtl_channel} = alternations(1,alternations(2,:) == 2)';
+        digitalIn.timestampsOff{rightArmTtl_channel} = digitalIn.timestampsOn{rightArmTtl_channel} + 0.3;
+        digitalIn.ints{rightArmTtl_channel} = [digitalIn.timestampsOn{rightArmTtl_channel} digitalIn.timestampsOff{rightArmTtl_channel}];
+
+        % Home delay Ttls
+        digitalIn.timestampsOn{homeDelayTtl_channel} = alternations(1,alternations(2,:) == 3)';
+        digitalIn.timestampsOff{homeDelayTtl_channel} = digitalIn.timestampsOn{homeDelayTtl_channel} + 0.1 ; 
+        digitalIn.ints{homeDelayTtl_channel} = [digitalIn.timestampsOn{homeDelayTtl_channel} digitalIn.timestampsOff{homeDelayTtl_channel}];
+
+        
+
+        % score for alternation task
+        if isfield(digitalIn,'timestampsOn') && size(digitalIn.timestampsOn,2)>= 5
+            armChoice.timestamps = [digitalIn.timestampsOn{leftArmTtl_channel}; digitalIn.timestampsOn{rightArmTtl_channel}]; 
+            % 0 is left, 1 is right
+            armChoice.visitedArm = [zeros(size(digitalIn.timestampsOn{leftArmTtl_channel})); ones(size(digitalIn.timestampsOn{rightArmTtl_channel}))];
+            armChoice.delay.timestamps = digitalIn.ints{homeDelayTtl_channel};
+            if size(armChoice.visitedArm,1) < size(digitalIn.timestampsOn{homeDelayTtl_channel},1) - 10
+                warning('There was problem with one of the sensors! Triying to fix it!')
+                leftArmSensor = digitalIn.timestampsOn{leftArmTtl_channel};
+                rightArmSensor = digitalIn.timestampsOn{rightArmTtl_channel};
+                delaySensor = digitalIn.timestampsOn{homeDelayTtl_channel};
+                if size(leftArmSensor,1) < size(rightArmSensor,1) -10
+                    warning('Estimating left-arm sensor times...');
+                    for ii = 2:length(delaySensor)-1
+                        if any(leftArmSensor > delaySensor(ii) & leftArmSensor < delaySensor(ii+1)) | ...
+                                any(rightArmSensor > delaySensor(ii) & rightArmSensor < delaySensor(ii+1))
+                        else
+                            leftArmSensor = [leftArmSensor; mean(delaySensor(ii:ii+1))];
+                        end
+                    end
+                elseif size(rightArmSensor,1) < size(leftArmSensor,1) -10
+                    warning('Estimating left-arm sensor times...');
+                    for ii = 2:length(delaySensor)-1
+                        if any(leftArmSensor > delaySensor(ii) & leftArmSensor < delaySensor(ii+1)) | ...
+                                any(rightArmSensor > delaySensor(ii) & rightArmSensor < delaySensor(ii+1))
+                        else
+                            rightArmSensor = [rightArmSensor; mean(delaySensor(ii:ii+1))];
+                        end
+                    end
+                else error('Not able to guess what is the missing sensor!!');
+                end
+                armChoice.timestamps = [leftArmSensor; rightArmSensor];
+                armChoice.visitedArm = [zeros(size(leftArmSensor)); ones(size(rightArmSensor))];
+            end
+            
+            [armChoice.timestamps, idx] = sort(armChoice.timestamps);
+            armChoice.visitedArm = armChoice.visitedArm(idx);
+            
+            armChoice.delay.dur = nanmean(armChoice.delay.timestamps(:,2) - armChoice.delay.timestamps(:,1));
+            armChoice.delay.durations = round(armChoice.delay.timestamps(:,2) - armChoice.delay.timestamps(:,1),0);
+            armChoice.choice = [NaN; abs(diff(armChoice.visitedArm))]; % 1 is right, 0 is wrong
+            armChoice.performance = nansum(armChoice.choice)/(length(armChoice.choice) - 1);
+            performance = [];
+            
+            if ~isnan(armChoice.delay.durations(end))
+                armChoice.delay.durations(end) = NaN;
+            end
+            durations = unique(armChoice.delay.durations);
+            for ii = 1:length(durations)- 1
+                performance = [performance; sum(armChoice.choice(find(armChoice.delay.durations == durations(ii)) + 1)) / length(find(armChoice.delay.durations == durations(ii)))];
+            end
+            armChoice.delay.performance = performance;
+            armChoice.delay.uniqueDurations = durations;
+            armChoice.task = task;
+            armChoice.expectedArm = [NaN; ~xor(armChoice.visitedArm(2:end), armChoice.choice(2:end))];
+    
+            if size(digitalIn.timestampsOn,2) >=6
+                if digitalIn.timestampsOn{6}>digitalIn.timestampsOff{6}
+                    armChoice.forzed = 1;
+                    desc = 'forzed alternation';
+                else
+                    armChoice.forzed = 0;
+                    desc = 'spontaneous alternation';
+                end
+            else
+                if armChoice.performance == 1 
+                    armChoice.forzed = 1;
+                    desc = 'forzed alternation';
+                else
+                    armChoice.forzed = 0;
+                    desc = 'spontaneous alternation';
+                end
+            end
+    
+            h = figure;
+            hold on
+            plot(armChoice.timestamps, armChoice.visitedArm,'color',[.7 .7 .7]);
+            scatter(armChoice.timestamps(isnan(armChoice.choice)),...
+                armChoice.visitedArm(isnan(armChoice.choice)),100,[.8 .8 .8],'filled');
+            scatter(armChoice.timestamps(find(armChoice.choice == 1)),...
+                armChoice.visitedArm(find(armChoice.choice == 1)),100,[.6 .9 .7],'filled');
+            scatter(armChoice.timestamps(find(armChoice.choice == 0)),...
+                armChoice.visitedArm(find(armChoice.choice == 0)),100,[.9 .6 .7],'filled');
+            if size(armChoice.delay.timestamps,1)== 2
+                armChoice.delay.timestamps = armChoice.delay.timestamps';
+            end
+            for ii = 1:size(armChoice.delay.timestamps,1)
+                fill([armChoice.delay.timestamps(ii,:)'; flip(armChoice.delay.timestamps(ii,:))'],[1 1 1.2 1.2]',...
+                [.7 .6 .9],'EdgeColor',[.7 .6 .9],'FaceAlpha',.5)
+            end
+            xlabel('seconds'); ylim([-.2 1.2]);
+            text(10,-.1,strcat('Performance: ',{' '},num2str(round(armChoice.performance,2)),',',{' '},...
+                desc, ', delay: ',{' '},num2str(round(armChoice.delay.dur,2)), ', # trials: ',{' '},...
+                num2str(length(armChoice.visitedArm)),{' '},' in: ',{' '},num2str(round(armChoice.timestamps(end))),{' '},...
+                's'));
+            set(gca,'YTick', [0 1],'YTickLabel',{'Left','Right'});
+    
+            mkdir('Behavior');
+            saveas(h,'Behavior\armChoice.png');
+    
+            C = strsplit(pwd,'\');
+            save([C{end} '.ArmChoice.Events.mat'], 'armChoice');
+        else
+            warning('DigitalIn format does not match. Was T maze performed? ');
+        end  
+
+
+        
+
+
+
 
         
 
