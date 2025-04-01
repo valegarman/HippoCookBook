@@ -79,7 +79,7 @@ sessionsTable = readtable([indexedSessionCSV_path filesep indexedSessionCSV_name
 
 for ii = 1:length(sessionsTable.SessionName)
 
-    sessions.basepaths{ii} = [nas_path(sessionsTable.Location{ii}) filesep sessionsTable.Path{ii}];
+    sessions.basepaths{ii} = adapt_filesep([nas_path(sessionsTable.Location{ii}) filesep sessionsTable.Path{ii}]);
 
 end
 sessions.project = sessionsTable.Project;
