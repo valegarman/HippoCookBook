@@ -8,8 +8,8 @@ if ~contains(filename,'.doric')
     filename = [filename '.doric'];
 end
 
-%DataAcquisition = h5info(filename,'/DataAcquisition');
-DataAcquisition = h5info(filename);
+DataAcquisition = h5info(filename,'/DataAcquisition');
+% DataAcquisition = h5info(filename);
 
 
 %Recursive function to go find and extract all the data

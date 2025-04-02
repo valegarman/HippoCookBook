@@ -5,12 +5,12 @@ HCB_directory = what('HippoCookBook');
 sessionsTable = readtable([HCB_directory.path filesep 'indexedSessions.csv']); % the variable is called allSessions
 targetProject = 'Bibliocampus';
 
-for ii = 1:length(sessionsTable.SessionName)
-    if strcmpi(sessionsTable.Project{ii}, targetProject) || strcmpi('all', targetProject)
+for ii = 50:length(sessionsTable.SessionName)
+    if contains(sessionsTable.Project(ii), targetProject) || strcmpi('all', targetProject)
         fprintf(' > %3.i/%3.i session \n',ii, length(sessionsTable.SessionName)); %\n
         cd([database_path filesep sessionsTable.Path{ii}]);
 
-        % ACGPeak SubSessions
+        % 
         clear basepath session basename cell_metrics spikes
         basepath = pwd;
         session = loadSession;
@@ -18,10 +18,15 @@ for ii = 1:length(sessionsTable.SessionName)
         cell_metrics = loadCellMetrics;
         parameters.forceReload = true;
         spikes = loadSpikes;
+        deepSuperficial_file = fullfile(basepath, [basename,'.deepSuperficialfromRipple.channelinfo.mat']);
         
         if strcmpi(session.extracellular.chanCoords.layout, 'A5x12-16-Buz-lin-5mm-100-200-160-177')
             session.extracellular.chanCoords.layout = 'staggered';
             session.extracellular.chanCoords.verticalSpacing = 20;
+        elseif strcmpi(session.extracellular.chanCoords.layout, 'CambridgeNeurotech-E1-64ch(4shank-ege)')
+            session.extracellular.chanCoords.layout = 'staggered';
+            session.extracellular.chanCoords.verticalSpacing = 20;
+        elseif strcmpi(session.extracellular.chanCoords.layout, 'CambridgeNeurotech-E1-64ch(4shank-ege)')
         else 
             keyboard;   
         end

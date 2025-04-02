@@ -107,8 +107,8 @@ end
 cd(basepath)
 
 if ~exist('aviFile') || isempty(aviFile)
-    if ~isempty(dir([basepath filesep '*tracking_crop.avi']))
-        aviFile = dir([basepath filesep '*tracking_crop.avi']); 
+    if ~isempty(dir([basepath filesep '*tracking*_crop.avi']))
+        aviFile = dir([basepath filesep '*tracking*_crop.avi']); 
         aviFile = erase(aviFile.name,'.avi');
     else
         warning('No video file!!');
@@ -158,7 +158,7 @@ elseif exist([upBasepath filesep 'roiLED.mat'],'file')
 elseif isempty(roiLED)
     disp('Draw ROI for LED...');
     h1 = figure;
-    imshow(average_frame);
+    imagesc(average_frame);
     colormap gray;
     roi = drawpolygon;
     roiLED = [roi.Position; roi.Position(1,:)];
@@ -172,6 +172,7 @@ end
 if isempty(convFact)                             % if convFact not provided, normalize to 1 along the longest axis
     convFact = 1/max([size(frames.r,1) size(frames.r,2)]);
     artifactThreshold = Inf;
+    artifactThreshold = 0.05;
 end
 xMaze = [0 size(frames.r,2) * convFact];
 yMaze = [0 size(frames.r,1) * convFact];
@@ -198,8 +199,8 @@ end
 
 %% GET POSITION FROM DEEPLABCUT
 try
-    if ~isempty(dir(['*TM_tracking*_filtered.csv']))
-        csv_file = dir(['*TM_tracking*_filtered.csv']); 
+    if ~isempty(dir(['*tracking*_filtered.csv']))
+        csv_file = dir(['*tracking*_filtered.csv']); 
         tracking_data = readmatrix(csv_file.name);
 
         timestamps = linspace(0,size(frames.r,3)/fs,size(frames.r,3));
@@ -268,10 +269,18 @@ if ~isempty(roiLED)
         sync(ii) = nansum(fr(:)); 
     end
 
-    sync = sync.^2;
-    syncBin = (sync>mean(sync)); % binarize signal
-    locsA = find(diff(syncBin)==1)/fs; % start of pulses
-    locsB = find(diff(syncBin)==-1)/fs; % end of pulses
+    figure;
+    histogram(sync);
+    hold on;
+    xline(mean(sync),'r');
+    hold on;
+    xline(prctile(sync,75),'g');
+
+    syncBin = zeros(1,length(sync));
+    syncBin(sync > prctile(sync,75)) = 1;
+    locsA = find(diff(syncBin) == 1)/fs;
+    locsB = find(diff(syncBin) == -1)/fs;
+    
     pul = locsA(1:min([length(locsA) length(locsB)]));
     for ii = 1 : size(pul,2) % pair begining and end of the pulse
         if sum(locsB > pul(1,ii)) > 0
@@ -281,6 +290,22 @@ if ~isempty(roiLED)
             pul(2,ii) = nan;
         end
     end
+
+
+    % sync = sync.^2;
+    % % syncBin = (sync>mean(sync)); % binarize signal
+    % syncBin = (sync> mean(sync) + std(sync)); % binarize signal
+    % locsA = find(diff(syncBin)==1)/fs; % start of pulses
+    % locsB = find(diff(syncBin)==-1)/fs; % end of pulses
+    % pul = locsA(1:min([length(locsA) length(locsB)]));
+    % for ii = 1 : size(pul,2) % pair begining and end of the pulse
+    %     if sum(locsB > pul(1,ii)) > 0
+    %         pul(2,ii) =  locsB(find(locsB - pul(1,ii) ==...
+    %             min(locsB(locsB > pul(1,ii)) - pul(1,ii))));
+    %     else
+    %         pul(2,ii) = nan;
+    %     end
+    % end
 else
     sync = []; pul = [];
 end
@@ -345,7 +370,8 @@ tracking.roi.roiLED = roiLED;
 tracking.velocity = velocity;
 tracking.acceleration = acceleration;
 
-saveMat = false;
+tracking.convFact = convFact;
+
 if saveMat
     save([basepath filesep fbasename '.Tracking.Behavior.mat'],'tracking');
 end
