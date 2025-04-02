@@ -274,10 +274,10 @@ if ~isempty(roiLED)
     hold on;
     xline(mean(sync),'r');
     hold on;
-    xline(prctile(sync,90),'g');
+    xline(prctile(sync,75),'g');
 
     syncBin = zeros(1,length(sync));
-    syncBin(sync > prctile(sync,90)) = 1;
+    syncBin(sync > prctile(sync,75)) = 1;
     locsA = find(diff(syncBin) == 1)/fs;
     locsB = find(diff(syncBin) == -1)/fs;
     
