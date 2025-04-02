@@ -1,0 +1,129 @@
+# Project definitions (do not edit)
+Task: TMaze
+scorer: Pablo
+date: Dec11
+multianimalproject: false
+identity:
+
+
+# Project path (change when moving around)
+project_path: C:\Users\pabad\Desktop\TMaze-Pablo-2024-12-11
+
+
+# Default DeepLabCut engine to use for shuffle creation (either pytorch or tensorflow)
+engine: pytorch
+
+
+# Annotation data set configuration (and individual video cropping parameters)
+video_sets:
+  C:\Users\pabad\Desktop\TMaze-Pablo-2024-12-11\videos\wt1_02122024_TM_tracking_crop.avi:
+    crop: 0, 458, 0, 354
+  C:\Users\pabad\Desktop\TMaze-Pablo-2024-12-11\videos\wt1_03122024_TM_tracking_crop.avi:
+    crop: 0, 458, 0, 354
+  C:\Users\pabad\Desktop\TMaze-Pablo-2024-12-11\videos\wt1_04122024_TM_tracking_crop.avi:
+    crop: 0, 458, 0, 354
+  C:\Users\pabad\Desktop\TMaze-Pablo-2024-12-11\videos\wt1_05122024_TM_tracking_crop.avi:
+    crop: 0, 458, 0, 354
+  C:\Users\pabad\Desktop\TMaze-Pablo-2024-12-11\videos\wt1_29112024_TM_tracking_crop.avi:
+    crop: 0, 458, 0, 354
+  C:\Users\pabad\Desktop\TMaze-Pablo-2024-12-11\videos\wt2_02122024_TM_tracking_crop.avi:
+    crop: 0, 458, 0, 354
+  C:\Users\pabad\Desktop\TMaze-Pablo-2024-12-11\videos\wt2_03122024_TM_tracking_crop.avi:
+    crop: 0, 458, 0, 354
+  C:\Users\pabad\Desktop\TMaze-Pablo-2024-12-11\videos\wt2_04122024_TM_tracking_crop.avi:
+    crop: 0, 458, 0, 354
+  C:\Users\pabad\Desktop\TMaze-Pablo-2024-12-11\videos\wt2_05122024_TM_tracking_crop.avi:
+    crop: 0, 458, 0, 354
+  C:\Users\pabad\Desktop\TMaze-Pablo-2024-12-11\videos\wt2_28112024_TM_tracking_crop.avi:
+    crop: 0, 458, 0, 354
+  C:\Users\pabad\Desktop\TMaze-Pablo-2024-12-11\videos\wt2_29112024_TM_tracking_crop.avi:
+    crop: 0, 458, 0, 354
+  C:\Users\pabad\Desktop\TMaze-Pablo-2024-12-11\videos\wt3_02122024_TM_tracking_crop.avi:
+    crop: 0, 458, 0, 354
+  C:\Users\pabad\Desktop\TMaze-Pablo-2024-12-11\videos\wt3_03122024_TM_tracking_crop.avi:
+    crop: 0, 458, 0, 354
+  C:\Users\pabad\Desktop\TMaze-Pablo-2024-12-11\videos\wt3_04122024_TM_tracking_crop.avi:
+    crop: 0, 458, 0, 354
+  C:\Users\pabad\Desktop\TMaze-Pablo-2024-12-11\videos\wt3_05122024_TM_tracking_crop.avi:
+    crop: 0, 458, 0, 354
+  C:\Users\pabad\Desktop\TMaze-Pablo-2024-12-11\videos\wt3_28112024_TM_tracking_crop.avi:
+    crop: 0, 458, 0, 354
+  C:\Users\pabad\Desktop\TMaze-Pablo-2024-12-11\videos\wt3_29112024_TM_tracking_crop.avi:
+    crop: 0, 458, 0, 354
+bodyparts:
+- headstage
+- back
+- tail1
+- tail2
+
+
+# Fraction of video to start/stop when extracting frames for labeling/refinement
+
+
+# Fraction of video to start/stop when extracting frames for labeling/refinement
+
+
+# Fraction of video to start/stop when extracting frames for labeling/refinement
+
+
+# Fraction of video to start/stop when extracting frames for labeling/refinement
+
+
+# Fraction of video to start/stop when extracting frames for labeling/refinement
+
+
+# Fraction of video to start/stop when extracting frames for labeling/refinement
+
+
+# Fraction of video to start/stop when extracting frames for labeling/refinement
+
+
+# Fraction of video to start/stop when extracting frames for labeling/refinement
+start: 0
+stop: 1
+numframes2pick: 20
+
+
+# Plotting configuration
+skeleton:
+- - headstage
+  - back
+- - tail1
+  - tail2
+skeleton_color: black
+pcutoff: 0.6
+dotsize: 6
+alphavalue: 0.7
+colormap: rainbow
+
+
+# Training,Evaluation and Analysis configuration
+TrainingFraction:
+- 0.95
+iteration: 0
+default_net_type: resnet_50
+default_augmenter: default
+snapshotindex: all
+detector_snapshotindex: -1
+batch_size: 8
+detector_batch_size: 1
+
+
+# Cropping Parameters (for analysis and outlier frame detection)
+cropping: false
+#if cropping is true for analysis, then set the values here:
+x1: 0
+x2: 640
+y1: 277
+y2: 624
+
+
+# Refinement configuration (parameters from annotation dataset configuration also relevant in this stage)
+corner2move2:
+- 50
+- 50
+move2corner: true
+
+
+# Conversion tables to fine-tune SuperAnimal weights
+SuperAnimalConversionTables:
