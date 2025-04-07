@@ -1,6 +1,12 @@
 %% APP2
 updateExpFolder_temp({'D:\app2'},'C:\app2');
 preprocessSession('basepath','C:\app2\app2_250331_sess1','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
+preprocessSession('basepath','C:\app2\app2_250401_sess2','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
+preprocessSession('basepath','C:\app2\app2_250402_sess3','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
+preprocessSession('basepath','C:\app2\app2_250403_sess4','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
+preprocessSession('basepath','C:\app2\app2_250404_sess5','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
+
+
 
 processSession('basepath','C:\app2\app2_250331_sess1','digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 
@@ -12,6 +18,7 @@ preprocessSession('basepath','C:\wt5\wt5_250324_sess16','analysisPath',[],'exclu
 
 preprocessSession('basepath','C:\wt5\wt5_250325_sess17','analysisPath',[],'exclude_shanks',[3],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
 preprocessSession('basepath','C:\wt5\wt5_250326_sess18','analysisPath',[],'exclude_shanks',[3],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
+preprocessSession('basepath','C:\wt5\wt5_250327_sess19','analysisPath',[],'exclude_shanks',[3],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
 
 processSession('basepath','Y:\wt5\wt5_250311_sess7','digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 processSession('basepath','C:\wt5\wt5_250317_sess11','digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
@@ -20,6 +27,8 @@ processSession('basepath','C:\wt5\wt5_250317_sess11','digital_optogenetic_channe
 processSession('basepath','C:\wt5\wt5_250319_sess13','digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 processSession('basepath','C:\wt5\wt5_250321_sess15','digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 processSession('basepath','C:\wt5\wt5_250325_sess17','digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
+processSession('basepath','C:\wt5\wt5_250324_sess16','digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
+processSession('basepath','C:\wt5\wt5_250326_sess18','digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 
 
 indexNewSession('basepath','Y:\wt5\wt5_250311_sess7');
@@ -28,6 +37,10 @@ indexNewSession('basepath','C:\wt5\wt5_250318_sess12');
 indexNewSession('basepath','C:\wt5\wt5_250317_sess11');
 indexNewSession('basepath','C:\wt5\wt5_250319_sess13');
 indexNewSession('basepath','C:\wt5\wt5_250321_sess15');
+indexNewSession('basepath','C:\wt5\wt5_250324_sess16');
+indexNewSession('basepath','C:\wt5\wt5_250325_sess17');
+indexNewSession('basepath','C:\wt5\wt5_250326_sess18');
+
 
 
 %% WT6

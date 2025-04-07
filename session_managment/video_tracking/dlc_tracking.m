@@ -269,6 +269,14 @@ if ~isempty(roiLED)
         sync(ii) = nansum(fr(:)); 
     end
 
+    % Remove brightness that happens when the video start
+
+    for ii = 1:20
+        if sync(ii) > prctile(sync,80)
+            sync(ii) = prctile(sync,10);
+        end
+    end
+
     figure;
     histogram(sync);
     hold on;
@@ -329,8 +337,35 @@ elseif length(dlcTtl) > size(pul,2)
     disp('More Ttls were detected than blinks');
 end
 
-if pul(1,1) < 1 % if blinked light less than 1 minute
-    error('Error');
+if pul(1,1) < 1 || pul(1,1) > 1200 % if blinked light few than 1 second or more than 2 minutes, synchronize using the first TTl
+
+    keyboard;
+    warning('Problem with blinking led. Alingning timestamps to the first IR TTL...');
+    
+    f1 = figure;
+    hold on;
+    imagesc(xMaze,yMaze,average_frame); colormap gray; axis tight;
+    set(gca,'Ydir','reverse');
+
+    lReward = digitalIn.timestampsOn{leftTTL_reward}(1);
+    rReward = digitalIn.timestampsOn{rightTTL_reward}(1);
+
+    if lReward < rReward % If the animal turned left first, find the location based on the IR location
+        disp('Mouse turned left first. Mark y-position for left IR sensor...');
+        roiIR = drawpoint;
+        idx = find((y <= (roiIR.Position(2)+0.75)) & (y >= (roiIR.Position(2)- 0.75)) & x<20); %% tentative left IR location
+        timediff = lReward-dlcTtl(idx(1));
+        % correct TTLs
+        dlcTtl = dlcTtl + timediff;
+    else % If the animal turned right first, find the location based on the IR location
+        disp('Mouse turned right first. Mark y-position for right IR sensor...');
+        roiIR = drawpoint;
+        idx = find((y <= (roiIR.Position(2)+0.01)) & (y >= (roiIR.Position(2)- 0.01)) & x>0.8); %% tentative right IR location
+        timediff = rReward-dlcTtl(idx(1));
+        % correct TTLs
+        dlcTtl = dlcTtl + timediff;
+    end
+    close(f1);
 end
 
 
