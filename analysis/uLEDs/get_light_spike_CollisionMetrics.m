@@ -155,14 +155,14 @@ for ii = 1:length(uLEDResponses_interval)
     % end
 
     % rand
-    temp_rand_rate = [];
-    temp_rand_rateZ = [];
-    for jj = 1:length(uLEDResponses_interval{ii}.rand_interval)
-        temp_rand_rate(:,jj) = uLEDResponses_interval{ii}.rand_interval{jj}.rate;
-        temp_rand_rateZ(:,jj) = uLEDResponses_interval{ii}.rand_interval{jj}.rateZ;
-    end
-    uLEDResponses_RandInterval.maxRatePulse = [uLEDResponses_RandInterval.maxRatePulse; temp_rand_rate];
-    uLEDResponses_RandInterval.maxZPulse = [uLEDResponses_RandInterval.maxZPulse; temp_rand_rateZ];
+    % temp_rand_rate = [];
+    % temp_rand_rateZ = [];
+    % for jj = 1:length(uLEDResponses_interval{ii}.rand_interval)
+    %     temp_rand_rate(:,jj) = uLEDResponses_interval{ii}.rand_interval{jj}.rate;
+    %     temp_rand_rateZ(:,jj) = uLEDResponses_interval{ii}.rand_interval{jj}.rateZ;
+    % end
+    % uLEDResponses_RandInterval.maxRatePulse = [uLEDResponses_RandInterval.maxRatePulse; temp_rand_rate];
+    % uLEDResponses_RandInterval.maxZPulse = [uLEDResponses_RandInterval.maxZPulse; temp_rand_rateZ];
 end
  
 timestamps = uLEDResponses_interval{1}.in_interval.timestamps;
@@ -314,23 +314,23 @@ collision_metrics.inhibitory_connectionsIn = histcounts(collision_metrics.putati
 collision_metrics.presynapticID = collision_metrics.uLEDResponses_InInterval.presynapticID;
 collision_metrics.postsynapticID = collision_metrics.uLEDResponses_InInterval.postsynapticID;
 
-% boostraping
-for ii = 1:length(collision_metrics.rate_difference)
-    rate_difference_rand(ii,:) = uLEDResponses_OutInterval.maxRatePulse(ii) - uLEDResponses_RandInterval.maxRatePulse(ii,:);
-    collision_metrics.boostrap_CI_05(ii,:) = prctile(rate_difference_rand(ii,:),[5 97.5]);
-    collision_metrics.boostrap_CI_01(ii,:) = prctile(rate_difference_rand(ii,:),[0.5 99.5]);
-    collision_metrics.boostrap_CI_001(ii,:) = prctile(rate_difference_rand(ii,:),[0.05 99.95]);
-    collision_metrics.boostrap_CI_0001(ii,:) = prctile(rate_difference_rand(ii,:),[0.005 99.995]);
-    collision_metrics.boostrap_CI_00001(ii,:) = prctile(rate_difference_rand(ii,:),[0.0005 99.9995]);
-
-    % make boostrap
- 
-
-    collision_metrics.boostrap_CI_05_test(ii) = ~InIntervals(collision_metrics.rate_difference(ii),[collision_metrics.boostrap_CI_05(ii,1)  collision_metrics.boostrap_CI_05(ii,2)]);
-    collision_metrics.boostrap_CI_01_test(ii) = ~InIntervals(collision_metrics.rate_difference(ii),[collision_metrics.boostrap_CI_01(ii,1)  collision_metrics.boostrap_CI_01(ii,2)]);
-    collision_metrics.boostrap_CI_001_test(ii) = ~InIntervals(collision_metrics.rate_difference(ii),[collision_metrics.boostrap_CI_001(ii,1)  collision_metrics.boostrap_CI_001(ii,2)]);
-    collision_metrics.boostrap_CI_0001_test(ii) = ~InIntervals(collision_metrics.rate_difference(ii),[collision_metrics.boostrap_CI_0001(ii,1)  collision_metrics.boostrap_CI_0001(ii,2)]);
-end
+% % boostraping
+% for ii = 1:length(collision_metrics.rate_difference)
+%     rate_difference_rand(ii,:) = uLEDResponses_OutInterval.maxRatePulse(ii) - uLEDResponses_RandInterval.maxRatePulse(ii,:);
+%     collision_metrics.boostrap_CI_05(ii,:) = prctile(rate_difference_rand(ii,:),[5 97.5]);
+%     collision_metrics.boostrap_CI_01(ii,:) = prctile(rate_difference_rand(ii,:),[0.5 99.5]);
+%     collision_metrics.boostrap_CI_001(ii,:) = prctile(rate_difference_rand(ii,:),[0.05 99.95]);
+%     collision_metrics.boostrap_CI_0001(ii,:) = prctile(rate_difference_rand(ii,:),[0.005 99.995]);
+%     collision_metrics.boostrap_CI_00001(ii,:) = prctile(rate_difference_rand(ii,:),[0.0005 99.9995]);
+% 
+%     % make boostrap
+% 
+% 
+%     collision_metrics.boostrap_CI_05_test(ii) = ~InIntervals(collision_metrics.rate_difference(ii),[collision_metrics.boostrap_CI_05(ii,1)  collision_metrics.boostrap_CI_05(ii,2)]);
+%     collision_metrics.boostrap_CI_01_test(ii) = ~InIntervals(collision_metrics.rate_difference(ii),[collision_metrics.boostrap_CI_01(ii,1)  collision_metrics.boostrap_CI_01(ii,2)]);
+%     collision_metrics.boostrap_CI_001_test(ii) = ~InIntervals(collision_metrics.rate_difference(ii),[collision_metrics.boostrap_CI_001(ii,1)  collision_metrics.boostrap_CI_001(ii,2)]);
+%     collision_metrics.boostrap_CI_0001_test(ii) = ~InIntervals(collision_metrics.rate_difference(ii),[collision_metrics.boostrap_CI_0001(ii,1)  collision_metrics.boostrap_CI_0001(ii,2)]);
+% end
 
 % select pairs
 prePyr_select = collision_metrics.candidate_pyr_pyr_pairs;
