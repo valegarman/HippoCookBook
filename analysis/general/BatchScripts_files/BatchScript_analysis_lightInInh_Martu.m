@@ -11,7 +11,7 @@ HCB_directory = what('HippoCookBook');
 
 sessionsTable = readtable([HCB_directory.path filesep 'indexedSessions.csv']); % the variable is called allSessions
 
-for ii = 56
+for ii = 151
      %% Analysis general all over Camkii/32 animal
     if contains(sessionsTable.Project{ii}, targetProject) || strcmpi('all', targetProject)
 
@@ -27,7 +27,7 @@ for ii = 56
             monosyn_inh_win = [0.001 0.021]; % 01to21
             monosyn_control_win = [-0.041 -0.021];
 
-            for mm = 51:spikes.numcells 
+            for mm = 1:spikes.numcells 
                 disp(mm);
                 uLEDResponses_interval{mm} = getuLEDResponse_intervals([spikes_times{mm} + monosyn_inh_win(1) spikes_times{mm} + monosyn_inh_win(2)],...
                     'saveMat', false,'numRep',500,'doPlot', false,'getRaster', false, 'verbose', false, 'boostraping_type','pulses');
@@ -55,7 +55,7 @@ end
 
 %% Analysis for pre and post synaptic changes
 
-for ii = 1:length(sessionsTable.SessionName)
+for ii = 100 :length(sessionsTable.SessionName)
     
     if contains(sessionsTable.Project{ii}, targetProject) && contains(sessionsTable.Behavior{ii},targetBehavior) || strcmpi('all', targetProject) 
         
@@ -78,29 +78,43 @@ for ii = 1:length(sessionsTable.SessionName)
         end
 
  
-        parfor mm = 1:spikes.numcells
+        for mm = 1:spikes.numcells
             disp(mm);
 
             uLEDResponses_interval_pre{mm} = getuLEDResponse_intervals([spikes_times{mm} + monosyn_inh_win(1) spikes_times{mm} + monosyn_inh_win(2)],...
-                'saveMat', false,'numRep',500,'doPlot', false,'getRaster', false, 'verbose', false,'restrict_to',pre_maze);
+                'saveMat', false,'numRep',500,'doPlot', false,'getRaster', false, 'verbose', false,'restrict_to',pre_maze,'minNumberOfPulses',20);
 
             uLEDResponses_interval_post{mm} = getuLEDResponse_intervals([spikes_times{mm} + monosyn_inh_win(1) spikes_times{mm} + monosyn_inh_win(2)],...
-                'saveMat', false,'numRep',500,'doPlot', false,'getRaster', false, 'verbose', false,'restrict_to',post_maze);
+                'saveMat', false,'numRep',500,'doPlot', false,'getRaster', false, 'verbose', false,'restrict_to',post_maze, 'minNumberOfPulses',20);
         end
 
         collision_metrics_1_21_pre = get_light_spike_CollisionMetrics(uLEDResponses_interval_pre,'label','1msTo21ms_pre','saveMat',true,'update_cell_metrics',false,'save_as','lightSpikeCollisions_pre','rate_change_threshold',3);
-        clear uLEDResponses_interval_pre
 
         collision_metrics_1_21_post = get_light_spike_CollisionMetrics(uLEDResponses_interval_post,'label','1msTo21ms_post','saveMat',true,'update_cell_metrics',false,'save_as','lightSpikeCollisions_post','rate_change_threshold',3);
-        clear uLEDResponses_interval_post
         %%%
 
         close all;
         clear uLEDResponses_interval_pre
-        clear uLEDResponses_interval_pOST
+        clear uLEDResponses_interval_post
+
 
     end 
 end
 
 %%% your code goes here...
 % writetable(sessionsTable,[HCB_directory.path filesep 'indexedSessions.csv']); % the variable is called allSessions
+
+
+session = loadSession;
+ for ii= 1:length(session.epochs) 
+    if strcmp(session.epochs{ii}.behavioralParadigm,'Maze')
+        pre_end = session.epochs{ii}.startTime;
+        post_start = session.epochs{ii}.stopTime;
+        pre_maze = [0 pre_end];
+        post_maze = [post_start Inf];
+    end
+ end
+        [status] = InIntervals(timestamps,post_maze);
+        sum(status)
+
+

@@ -319,7 +319,7 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
             times{length(times)+1} = [0]; 
         end
         times = cat(2,times, fake_status);
-        % times = cat(2,times);
+        times = cat(2,times);
 
         fprintf('\n');
         [stccg, t] = CCG(times,[],'binSize',binSize,'duration',winSize,'norm','rate');
