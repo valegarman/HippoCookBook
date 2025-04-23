@@ -10,15 +10,19 @@ updateExpFolder({'V:\data\fCck1', 'Y:\fCck1'},'E:\data\fCck1');
 % 2% Then, preprocess session (includes artifacts removal, median signal
 %   removal, LFP and Kilosort, and running computeSessionSummary by 'batch_preprocessSession('basepath','sessionBasepath').
 %   Example:
-batch_preprocessSession('basepath','X:\data\fCr1','analysisPath','F:\fCr1','cleanArtifacts',({[],1}),'analogChannelsList',[],'digitalChannelsList',1);
+batch_preprocessSession('basepath','E:\wt3');
 
 % <OPTIONAL> If summary was not processed, it can be run in batch by 'batch_preprocessSession'
 batch_sessionSummary('basepath','G:\data\fPv4','cleanArtifacts',({65,[]}),'analogChannelsList',65,'digitalChannelsList',0);
 
+% <OPTIONAL> If only a single session should be processed
+preprocessSession('basepath',pwd,'analogChannelsList',[1:3],'spikeSort',true,'getPos',false, 'cleanArtifacts', true,...
+                    'medianSubstr',true,'tracking_pixel_cm',NaN,'sessionSummary',true,'digitalChannelsList',[],'bazler_ttl_channel',[],'skipStimulationPeriods',false);
+
 % 3% CLEAN SESSIONS MANUALLY BY PHY
 
 % 4% Processs individual sessions by by 'processSession'. Example:
-processSession('digital_optogenetic_channels',[1],'analog_optogenetic_channels',[],'promt_hippo_layers',true,'profileType','hippocampus');
+processSession('digital_optogenetic_channels',[0],'analog_optogenetic_channels',[1],'promt_hippo_layers',true,'profileType','hippocampus');
 
 % 5% Index session
 indexNewSession('copyFiles',true);
@@ -44,3 +48,11 @@ preprocessSession('basepath',pwd,'spikeSort',true,'getPos',false, ...
 processSession('promt_hippo_layers',true,'profileType','hippocampus','selectProbe_automatic', false);
 cellTypes = cellTypeClassifier('modelType','fobrebrain5','score_cut_off',0,'imposeCellExplorerPyr',false);
 indexNewSession('copyFiles',true);
+
+offset = 37.5;
+for ii = 1:10
+    disp(offset) 
+    offset = offset + 25;
+end
+
+linspace()

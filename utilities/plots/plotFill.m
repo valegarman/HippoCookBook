@@ -20,6 +20,9 @@ function h = plotFill(datax,datay,varargin)
 %    'error'        'ic95' (default), 'SE', 'std'
 %    'faceAlpha'    Default, 0.5
 %    'excluding'
+%    'stats'     Default false.
+%    'stats_offset'  1
+%
 %                   Default, all false
 %    'type'         'Median', 'Mean'
 %
@@ -31,7 +34,7 @@ function h = plotFill(datax,datay,varargin)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 p = inputParser;
 addParameter(p,'color',[],@isnumeric);
-addParameter(p,'error','ci95',@ischar);
+addParameter(p,'error','ci95',@ischar); % SE
 addParameter(p,'style','alpha',@ischar);
 addParameter(p,'smoothOpt',1,@isnumeric);
 addParameter(p,'xscale','linear',@ischar);
@@ -42,6 +45,10 @@ addParameter(p,'faceAlpha',0.5,@isnumeric);
 addParameter(p,'lineStyle','-');
 addParameter(p,'excluding',[]);
 addParameter(p,'type','mean',@ischar);
+addParameter(p,'normalization_int',[], @isnumeric);
+addParameter(p,'normalization_intercept_ratio',[], @isnumeric);
+addParameter(p,'stats', false, @islogical);
+addParameter(p,'stats_offset',1, @isnumeric);
 
 parse(p,varargin{:});
 color = p.Results.color;
@@ -56,6 +63,10 @@ lineStyle = p.Results.lineStyle;
 faceAlpha = p.Results.faceAlpha;
 excluding = p.Results.excluding;
 type = p.Results.type;
+normalization_int = p.Results.normalization_int;
+normalization_intercept_ratio = p.Results.normalization_intercept_ratio;
+stats = p.Results.stats;
+stats_offset = p.Results.stats_offset;
 
 % Deal with inputs
 if length(datax) ~= size(datay,1) | length(datax) == size(datay,1)
@@ -107,19 +118,34 @@ end
 
 %%
 if strcmpi(yscale,'circular')
-    [x1, y1] = fillformat(datax(noNan), smooth(rad2deg(circ_mean(datay(noNan,:),[],2)),smoothOpt),...
-        smooth(rad2deg(circ_std(datay(noNan,:),[],[],2)) * f1,smoothOpt));
+    if strcmpi(type, 'mean')
+            datay_mean = rad2deg(circ_mean(datay(noNan,:),[],2));
+    elseif strcmpi(type, 'median')
+        datay_mean = rad2deg(circ_median(datay(noNan,:),[],2));
+    end
+    datay_error = rad2deg(circ_std(datay(noNan,:),[],[],2) * f1);
+
+    if ~isempty(normalization_int)
+            datay_mean = normalize(datay_mean,'range',normalization_int);
+    end
+
+    if ~isempty(normalization_intercept_ratio)
+        datay_mean = (datay_mean - normalization_intercept_ratio(1))/normalization_intercept_ratio(2);
+    end
+
+    [x1, y1] = fillformat(datax(noNan), smooth(datay_mean,smoothOpt),...
+        smooth(datay_error,smoothOpt));
     
     hold on
     if strcmpi(style,'alpha')
         fill(x1, y1, color,'EdgeColor','none','faceAlpha',faceAlpha);
-        h = plot(datax, smooth(rad2deg(circ_mean(datay,[],2)),smoothOpt),lineStyle,'lineWidth',1,'color',color);
+        h = plot(datax, smooth(datay_mean,smoothOpt),lineStyle,'lineWidth',1,'color',color);
     elseif strcmpi(style,'white')
         fill(x1, y1, [1 1 1],'EdgeColor',color);
-        h = plot(datax, smooth(rad2deg(circ_mean(datay,[],2)),smoothOpt),lineStyle,'lineWidth',1,'color',color);
+        h = plot(datax, smooth(datay_mean,smoothOpt),lineStyle,'lineWidth',1,'color',color);
     elseif strcmpi(style,'inverted')
         fill(x1, y1, color,'EdgeColor','none','faceAlpha',1);
-        h = plot(datax, smooth(rad2deg(circ_mean(datay,[],2)),smoothOpt),lineStyle,'lineWidth',1,'color',[1 1 1]);
+        h = plot(datax, smooth(datay_mean,smoothOpt),lineStyle,'lineWidth',1,'color',[1 1 1]);
     elseif strcmpi(style,'filled') 
         h = patch(x1, y1, color,'EdgeColor','none','faceAlpha',faceAlpha);
     end
@@ -138,16 +164,24 @@ if strcmpi(yscale,'circular')
 else
     if ~isempty(datay(noNan,:))
         if strcmpi(type, 'mean')
-            [x1, y1] = fillformat(datax(noNan), smooth(nanmean(datay(noNan,:),2),smoothOpt),...
-                smooth(nanstd(datay(noNan,:),[],2) * f1,smoothOpt));
-            trace = smooth(nanmean(datay,2),smoothOpt);
+            datay_mean = nanmean(datay(noNan,:),2);
         elseif strcmpi(type, 'median')
-            [x1, y1] = fillformat(datax(noNan), smooth(nanmedian(datay(noNan,:),2),smoothOpt),...
-                smooth(nanstd(datay(noNan,:),[],2) * f1,smoothOpt));
-            trace = smooth(nanmedian(datay,2),smoothOpt);
-        else
-            error('Type not recognized!');
+            datay_mean = nanmedian(datay(noNan,:),2);
         end
+        datay_error = nanstd(datay(noNan,:),[],2) * f1;
+
+        if ~isempty(normalization_int)
+            datay_mean = normalize(datay_mean,'range',normalization_int);
+        end
+
+        if ~isempty(normalization_intercept_ratio)
+            datay_mean = (datay_mean - normalization_intercept_ratio(1))/normalization_intercept_ratio(2);
+        end
+        
+        [x1, y1] = fillformat(datax(noNan), smooth(datay_mean,smoothOpt),...
+                smooth(datay_error,smoothOpt));
+        trace = smooth(datay_mean,smoothOpt);
+        
         if ~isempty(find(isinf(y1)))
             x1(find(isinf(y1))) = [];
             y1(find(isinf(y1))) = [];
@@ -160,6 +194,8 @@ else
             x1(ind) = [];
         end
 
+        
+
         hold on
         if strcmpi(style,'alpha')
             fill(x1, y1, color,'EdgeColor','none','faceAlpha',faceAlpha);
@@ -169,11 +205,27 @@ else
             h = plot(datax, trace,lineStyle,'lineWidth',1,'color',color);
         elseif strcmpi(style,'inverted')
             fill(x1, y1, color,'EdgeColor','none','faceAlpha',faceAlpha);
-            h = plot(datax, trace,lineStyle,'lineWidth',1,'color',[1 1 1]);
+            h = plot(x1, trace,lineStyle,'lineWidth',1,'color',[1 1 1]);
         elseif strcmpi(style,'filled') 
             h = fill(x1, y1, color,'EdgeColor','none','faceAlpha',faceAlpha);
         elseif strcmpi(style,'edge') 
             h = fill(x1, y1, [1 1 1],'EdgeColor',color,'faceAlpha',faceAlpha);
+        end
+        
+        if stats
+            for ii = 1:size(datay,1)
+                p_stat(ii) = -log10(signrank(datay(ii,:)));
+            end
+            x = datax';
+            y = stats_offset .* ones(size(datax))';
+            z = zeros(size(datax))';
+            col = p_stat;  % This is the color, vary with x in this case.
+            surface([x;x],[y;y],[z;z],[col;col],...
+                'facecol','no',...
+                'edgecol','interp',...
+                'linew',2);
+            caxis([-log10(0.05) -log10(0.001)]);
+
         end
     end
         set(gca,'XScale',xscale,'YScale',yscale,'TickDir','out');

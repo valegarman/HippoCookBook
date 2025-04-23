@@ -1,4 +1,3 @@
-
 function [uLEDResponses] = getuLEDResponse(varargin)
 % [uLEDResponses] = getuLEDResponse(varargin)
 %
@@ -43,7 +42,9 @@ addParameter(p,'winSize',.1,@isnumeric);
 addParameter(p,'doPlot',true,@islogical);
 addParameter(p,'offset',0,@isnumeric);
 addParameter(p,'onset',0,@isnumeric);
-addParameter(p,'winSizePlot',[-.02 .05],@islogical);
+addParameter(p,'winSizePlot',[-.02 .05],@isnumeric);
+addParameter(p,'before_pulse_win',[],@isnumeric);
+addParameter(p,'during_pulse_win',[],@isnumeric); % by default, pulse duration
 addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'force',false,@islogical);
 addParameter(p,'minNumberOfPulses',2000,@isnumeric);
@@ -57,6 +58,8 @@ addParameter(p,'restrict_to',[0 Inf],@isscalar);
 addParameter(p,'restrict_to_baseline',true,@islogical);
 addParameter(p,'restrict_to_manipulation',false,@islogical);
 addParameter(p,'save_as','uLEDResponse',@ischar);
+addParameter(p,'test_in_plots','boostrap',@ischar); % other options are boostrap, zscore, salt, and Kolmogorov
+addParameter(p,'zscore_threshold',1.96,@isnumeric); % other options are boostrap, zscore, salt, and Kolmogorov
 
 parse(p, varargin{:});
 uLEDPulses = p.Results.uLEDPulses;
@@ -82,6 +85,10 @@ restrict_to = p.Results.restrict_to;
 restrict_to_baseline = p.Results.restrict_to_baseline;
 restrict_to_manipulation = p.Results.restrict_to_manipulation;
 save_as = p.Results.save_as;
+before_pulse_win = p.Results.before_pulse_win;
+during_pulse_win = p.Results.during_pulse_win;
+test_in_plots = p.Results.test_in_plots;
+zscore_threshold = p.Results.zscore_threshold;
 
 % Deal with inputs
 prevPath = pwd;
@@ -133,8 +140,6 @@ else
 end
 
 restrict_ints = IntersectIntervals([ints; restrict_to]);
-
-
 
 % Get cell responses!! :)
 uLEDResponses = [];
@@ -207,16 +212,25 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
         if length(times{end}) < minNumberOfPulses
             uLEDResponses.responsecurve(:,kk,jj,:) = uLEDResponses.responsecurve(:,kk,jj,:) * NaN;
         end
-        t_duringPulse = t > 0 + onset(kk) & t < pulseDuration + offset(kk); 
-        t_beforePulse = t > -pulseDuration & t < 0; 
+        if isempty(during_pulse_win)
+            t_duringPulse = t > 0 + onset(kk) & t < pulseDuration + onset(kk); 
+        else
+            t_duringPulse = t > during_pulse_win(1) & t < during_pulse_win(2);
+        end
+
+        if isempty(before_pulse_win)
+            t_beforePulse = t > -pulseDuration + onset(kk) & t < 0 + onset(kk); 
+        else
+            t_beforePulse = t > before_pulse_win(1) & t < before_pulse_win(2);
+        end
         
         numberOfPulses = size(pulses,1);
         for ii = 1:size(uLEDResponses.responsecurve,1)
             if numberOfPulses > minNumberOfPulses
                 uLEDResponses.responsecurveSmooth(ii,kk,jj,:) = smooth(uLEDResponses.responsecurve(ii,kk,jj,:));
                 uLEDResponses.responsecurveZ(ii,kk,jj,:) = (uLEDResponses.responsecurve(ii,kk,jj,:)...
-                    - mean(uLEDResponses.responsecurve(ii,kk,jj,t < 0)))...
-                    /std(uLEDResponses.responsecurve(ii,kk,jj,t < 0));
+                    - mean(uLEDResponses.responsecurve(ii,kk,jj,t_beforePulse)))...
+                    /std(uLEDResponses.responsecurve(ii,kk,jj,t_beforePulse));
                 uLEDResponses.responsecurveZSmooth(ii,kk,jj,:) = smooth(uLEDResponses.responsecurveZ(ii,kk,jj,:));
                 uLEDResponses.rateDuringPulse(ii,kk,jj,1) = mean(uLEDResponses.responsecurve(ii,kk,jj,t_duringPulse));
                 uLEDResponses.rateBeforePulse(ii,kk,jj,1) = mean(uLEDResponses.responsecurve(ii,kk,jj,t_beforePulse));
@@ -249,9 +263,9 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
                 uLEDResponses.bootsTrapTest(ii,kk,jj,1) = test;
                 
                 % z-score change test
-                if uLEDResponses.rateZDuringPulse(ii,kk,jj,1)  > 1.96
+                if uLEDResponses.rateZDuringPulse(ii,kk,jj,1)  > zscore_threshold
                         test = 1;
-                elseif uLEDResponses.rateZDuringPulse(ii,kk,jj,1)  < -1.96
+                elseif uLEDResponses.rateZDuringPulse(ii,kk,jj,1)  < -zscore_threshold
                     test = -1;
                 elseif isnan(uLEDResponses.rateZDuringPulse(ii,kk,jj,1))
                     test = NaN;
@@ -301,7 +315,7 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
                     uLEDResponses.salt.p_value(ii,kk,jj,1) = NaN;
                     uLEDResponses.salt.I_statistics(ii,kk,jj,1) = NaN;
                 end
-                            % multiple test test. If not boostrap, it would be 2 ways.
+                % multiple test test. If not boostrap, it would be 2 ways.
                 if (uLEDResponses.rateDuringPulse(ii,kk,jj,1) > ci(2) || isnan(ci(2))) && uLEDResponses.modulationSignificanceLevel(ii,kk,jj,1)<0.01...
                         && mean(uLEDResponses.responsecurveZ(ii,kk,jj,t_duringPulse)) > 1.96
                     test = 1;
@@ -519,6 +533,18 @@ if saveMat
 end
 
 if doPlot
+    modulationSignificanceLevel = squeeze(uLEDResponses.modulationSignificanceLevel(ii,kk,:));
+    switch lower(test_in_plots)
+        case 'boostrap'
+            test = squeeze(uLEDResponses.bootsTrapTest(ii,kk,:));
+        case 'zscore'
+            test = squeeze(uLEDResponses.zscoreTest(ii,kk,:));
+        case 'salt'
+            test = squeeze(uLEDResponses.salt.p_value(ii,kk,:))<0.05;
+        case 'kolmogorov'
+            test = squeeze(uLEDResponses.modulationSignificanceLevel(ii,kk,:))<0.05;
+    end
+
     statisticDots = linspace(-0.015, -0.005, 4);
     nLEDS = size(uLEDResponses.responsecurve,3);
     for kk = 1:length(uLEDPulses.list_of_conditions)
@@ -529,21 +555,22 @@ if doPlot
             % subplot(10,ceil(size(spikes.UID,2)/10),ii); %
             nexttile
             imagesc(uLEDResponses.timestamps, 1:nLEDS, squeeze(uLEDResponses.responsecurve(ii,kk,:,:))); caxis([0 30]); 
-            xlim(winSizePlot); ylim([-0.5 nLEDS+0.5])
+            xlim(winSizePlot); ylim([-0.5 nLEDS+0.5]);
             hold on
-            plot([0 0], [0 nLEDS+2],'w','LineWidth',1.5);
+            plot([0 0], [0 nLEDS+2.5],'w','LineWidth',1.5);
             plot([uLEDResponses.pulseDuration(ii,kk,1) uLEDResponses.pulseDuration(ii,kk,1)], [0 nLEDS+2],'color',[.5 .5 .5],'LineWidth',1.5);
+            plot([before_pulse_win], [0 0], 'k', 'LineWidth',1.5);
+            plot([during_pulse_win], [-.1 -.1], 'k', 'LineWidth',1.5);
+
             title(num2str(ii),'FontWeight','normal','FontSize',10);
             set(gca,'TickDir','out');
             
             if ii == 1
                 ylabel('LED [#][s][0-30Hz]');
             end
-            
-            modulationSignificanceLevel = squeeze(uLEDResponses.modulationSignificanceLevel(ii,kk,:));
-            bootsTrapTest = squeeze(uLEDResponses.bootsTrapTest(ii,kk,:));
+
             for mm = 1:length(modulationSignificanceLevel)
-                if bootsTrapTest(mm,1) == 1
+                if test(mm,1) == 1
                     if modulationSignificanceLevel(mm) < 0.05 && modulationSignificanceLevel(mm) > 0.01
                         plot(statisticDots(1), [mm],'ow', 'MarkerFaceColor','w','MarkerSize',3);
                     elseif modulationSignificanceLevel(mm) < 0.01 && modulationSignificanceLevel(mm) > 0.001
@@ -568,8 +595,11 @@ if doPlot
             imagesc(uLEDResponses.timestamps, 1:nLEDS, squeeze(uLEDResponses.responsecurveZ(ii,kk,:,:))); caxis([-5 5]); 
             xlim(winSizePlot); ylim([-0.5 nLEDS+0.5])
             hold on
-            plot([0 0], [0 nLEDS+2],'w','LineWidth',1.5);
+            plot([0 0], [0 nLEDS+2.5],'w','LineWidth',1.5);
             plot([uLEDResponses.pulseDuration(ii,kk,1) uLEDResponses.pulseDuration(ii,kk,1)], [0 nLEDS+2],'color',[.5 .5 .5],'LineWidth',1.5);
+            plot([before_pulse_win], [0 0], 'k', 'LineWidth',1.5);
+            plot([during_pulse_win], [-.1 -.1], 'k', 'LineWidth',1.5);
+
             title(num2str(ii),'FontWeight','normal','FontSize',10);
             set(gca,'TickDir','out')
             
@@ -578,9 +608,8 @@ if doPlot
             end
             
             modulationSignificanceLevel = squeeze(uLEDResponses.modulationSignificanceLevel(ii,kk,:));
-            bootsTrapTest = squeeze(uLEDResponses.bootsTrapTest(ii,kk,:));
             for mm = 1:length(modulationSignificanceLevel)
-                if bootsTrapTest(mm,1) == 1
+                if test(mm,1) == 1
                     if modulationSignificanceLevel(mm) < 0.05 && modulationSignificanceLevel(mm) > 0.01
                         plot(statisticDots(1), [mm],'ow', 'MarkerFaceColor','w','MarkerSize',3);
                     elseif modulationSignificanceLevel(mm) < 0.01 && modulationSignificanceLevel(mm) > 0.001

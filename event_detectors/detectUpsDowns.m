@@ -139,7 +139,11 @@ if isempty(pulPeriods) && skipStimulationPeriods
         f = dir('*.optogeneticPulses.events.mat');
         disp('Using stimulation periods from optogeneticPulses.events.mat file');
         load(f.name);
-        pulPeriods = optoPulses.stimulationEpochs;
+        try
+            pulPeriods = optoPulses.stimulationEpochs;
+        catch
+            pulPeriods = pulses.stimulationEpochs;
+        end
         
     elseif ~isempty(dir('.pulses.events.mat'))
         f = dir('*Pulses.events.mat');

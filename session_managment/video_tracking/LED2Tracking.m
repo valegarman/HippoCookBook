@@ -61,6 +61,8 @@ addParameter(p,'saveFrames',true,@islogical)
 addParameter(p,'verbose',false,@islogical);
 addParameter(p,'thresh',.98,@isnumeric) % .98
 addParameter(p,'bazlerTTL',[],@isnumeric)
+addParameter(p,'leftTTL_reward',[],@isnumeric)
+addParameter(p,'rightTTL_reward',[],@isnumeric)
 addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'basler_ttl_channel',[],@isnumeric); % by default, 5
 
@@ -80,6 +82,11 @@ thresh = p.Results.thresh;
 bazlerTtl = p.Results.bazlerTTL;
 saveMat = p.Results.saveMat;
 basler_ttl_channel = p.Results.basler_ttl_channel;
+leftTTL_reward = p.Results.leftTTL_reward;
+rightTTL_reward = p.Results.rightTTL_reward;
+
+
+
 % RGBChannel = p.Results.RGBChannel;
 
 %% Deal with inputs
@@ -357,8 +364,8 @@ elseif abs(length(x)-length(bazlerTtl)) > 15 * 1 && size(digitalIn.timestampsOn,
     imagesc(xMaze, yMaze,average_frame); colormap gray; caxis([0 4*mean(average_frame(:))]); axis tight
     set(gca,'Ydir','reverse');
    
-    lReward = digitalIn.timestampsOn{2}(1);
-    rReward = digitalIn.timestampsOn{3}(1);
+    lReward = digitalIn.timestampsOn{leftTTL_reward}(1);
+    rReward = digitalIn.timestampsOn{rightTTL_reward}(1);
 
     if lReward < rReward % If the animal turned left first, find the location based on the IR location
         disp('Mouse turned left first. Mark y-position for left IR sensor...');

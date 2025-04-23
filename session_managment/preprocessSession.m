@@ -1,4 +1,3 @@
-
 function  preprocessSession(varargin)
 
 %         bz_PreprocessSession(varargin)
@@ -67,6 +66,7 @@ addParameter(p,'anymaze_ttl_channel',[],@isnumeric);
 addParameter(p,'getDigitalInputBySubfolders',true,@islogical);
 addParameter(p,'anyMaze',false,@islogical);
 addParameter(p,'skipStimulationPeriods',true,@islogical);
+addParameter(p,'exclude_shanks',[]);
 
 % addParameter(p,'pullData',[],@isdir); To do... 
 parse(p,varargin{:});
@@ -87,6 +87,7 @@ anymaze_ttl_channel = p.Results.anymaze_ttl_channel;
 getDigitalInputBySubfolders = p.Results.getDigitalInputBySubfolders;
 anyMaze = p.Results.anyMaze;
 skipStimulationPeriods = p.Results.skipStimulationPeriods;
+exclude_shanks = p.Results.exclude_shanks;
 
 if ~exist('basepath') || isempty(basepath)
     basepath = uigetdir; % select folder
@@ -151,11 +152,25 @@ if ~isempty(analysisPath)
     disp('Copied files. Peforming preprocessSession...')
 end
     
+%% Create .time dat
+cd(basepath);
+try
+    disp('Creating time.dat files...');
+    createTimeDat();
+catch
+    warning('Not possible to create time.dat file...');
+end
 %% Concatenate sessions
-disp('Concatenate session folders...'); 
-concatenateDats(pwd,0,1);
+cd(basepath);
+try
+    disp('Concatenate session folders...'); 
+    concatenateDats(pwd,0,1);
+catch
+    warning('Not possible to concatenate dats');
+end
 
 %% Get analog and digital pulses
+cd(basepath);
 if  ~isempty(analogChannelsList)
     try
         [pulses] = getAnalogPulses('analogChannelsList',analogChannelsList,'manualThr', manualThr);
@@ -165,15 +180,9 @@ if  ~isempty(analogChannelsList)
 end
 if ~isempty(dir('*digitalIn.dat')) 
     digitalIn = getDigitalIn('fs',session.extracellular.sr); 
+else
+    digitalIn = getDigitalIn_OE('all','fs',session.extracellular.sr);
 end
-
-if getDigitalInputBySubfolders
-    try
-        digitalIn = getDigitalInBySubfolders('fs',session.extracellular.sr);
-    end
-end
-
-% digitalIn = pap_getDigitalIn('all','fs',session.extracellular.sr);
 
 %% Remove stimulation artifacts
 try
@@ -220,13 +229,21 @@ end
 %% MEDIAN SUBS
 if isempty(dir([session.general.name '_original.dat']))
     if islogical(medianSubstr) && medianSubstr
-        medianSubtraction(pwd);
+        medianSubtraction(pwd,'exclude_shanks',exclude_shanks);
     elseif medianSubstr
-        medianSubtraction(pwd,'ch',medianSubstr);
+        medianSubtraction(pwd,'ch',medianSubstr,'exclude_shanks',exclude_shanks);
     end
 else
     warning('Session was already median-subtracted. Spiking...');
 end
+
+%% Fiber photometry analysis
+try
+    fiber = getSessionFiberPhotometry();
+catch
+    warning('No possible loading fiber photometry data. Was fiber photometry signal recorded in this experiment? ...')
+end
+cd(basepath)
 
 %% Kilosort concatenated sessions
 if spikeSort

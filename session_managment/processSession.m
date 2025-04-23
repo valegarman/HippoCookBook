@@ -33,6 +33,7 @@ addParameter(p,'rejectChannels',[],@isnumeric); % 0-index
 addParameter(p,'force_analogPulsesDetection',true,@islogical);
 addParameter(p,'force_loadingSpikes',true,@islogical);
 addParameter(p,'excludePulsesIntervals',[],@isnumeric);
+addParameter(p,'thetaChannel',[],@isnumeric);
 addParameter(p,'rippleChannel',[],@isnumeric);% manually selecting ripple Channel in case getHippocampalLayers does not provide a right output
 addParameter(p,'SWChannel',[],@isnumeric); % manually selecting SW Channel in case getHippocampalLayers does not provide a right output
 addParameter(p,'digital_optogenetic_channels',[],@isnumeric);
@@ -40,19 +41,21 @@ addParameter(p,'analog_optogenetic_channels',[],@isnumeric);
 addParameter(p,'promt_hippo_layers',true,@islogical);
 addParameter(p,'manual_analog_pulses_threshold',false,@islogical);
 addParameter(p,'bazler_ttl_channel',[],@isnumeric);
-addParameter(p,'leftArmTtl_channel',2,@isnumeric)
-addParameter(p,'rightArmTtl_channel',3,@isnumeric)
-addParameter(p,'homeDelayTtl_channel',4,@isnumeric)
+addParameter(p,'leftArmTtl_channel',[],@isnumeric)
+addParameter(p,'rightArmTtl_channel',[],@isnumeric)
+addParameter(p,'homeDelayTtl_channel',[],@isnumeric)
 addParameter(p,'tracking_pixel_cm',0.1149,@isnumeric);
 addParameter(p,'excludeAnalysis',[]); % 
 addParameter(p,'profileType','hippocampus',@ischar); % options, 'hippocampus' and 'cortex'
 addParameter(p,'rippleMasterDetector_threshold',[1.5 3.5],@isnumeric); % [1.5 3.5]
 addParameter(p,'LED_threshold',0.98,@isnumeric);
-addParameter(p,'createLegacySummaryFolder',true,@islogical);
+addParameter(p,'createLegacySummaryFolder',false,@islogical);
+addParameter(p,'useCSD_for_theta_detection',false,@islogical);
 addParameter(p,'restrict_to',[0 Inf],@isnumeric);
 addParameter(p,'restrict_to_baseline',true,@islogical);
 addParameter(p,'restrict_to_manipulation',false,@islogical);
 addParameter(p,'selectProbe_automatic',false,@islogical);
+addParameter(p,'use_manual_ttls',false,@islogical),
 
 parse(p,varargin{:})
 
@@ -64,6 +67,7 @@ rejectChannels = p.Results.rejectChannels;
 force_analogPulsesDetection = p.Results.force_analogPulsesDetection;
 force_loadingSpikes = p.Results.force_loadingSpikes;
 excludePulsesIntervals = p.Results.excludePulsesIntervals;
+thetaChannel = p.Results.thetaChannel;
 rippleChannel = p.Results.rippleChannel;
 SWChannel = p.Results.SWChannel;
 digital_optogenetic_channels = p.Results.digital_optogenetic_channels;
@@ -79,16 +83,20 @@ excludeAnalysis = p.Results.excludeAnalysis;
 profileType = p.Results.profileType;
 rippleMasterDetector_threshold = p.Results.rippleMasterDetector_threshold;
 LED_threshold = p.Results.LED_threshold;
+useCSD_for_theta_detection = p.Results.useCSD_for_theta_detection;
 createLegacySummaryFolder = p.Results.createLegacySummaryFolder;
 restrict_to = p.Results.restrict_to;
 restrict_to_baseline = p.Results.restrict_to_baseline;
 restrict_to_manipulation = p.Results.restrict_to_manipulation;
 selectProbe_automatic = p.Results.selectProbe_automatic;
+useCSD_for_theta_detection = p.Results.useCSD_for_theta_detection;
+use_manual_ttls = p.Results.use_manual_ttls;
 
 % Deal with inputs
 prevPath = pwd;
 cd(basepath);
 
+mkdir('SummaryFigures')
 if createLegacySummaryFolder
     if exist('SummaryFigures') == 7
         d = strrep(strrep(string(datetime),' ','_'),':','_');
@@ -110,57 +118,60 @@ if length(excludeAnalysis) == 0
     excludeAnalysis = num2str(excludeAnalysis);
 end
 excludeAnalysis = lower(excludeAnalysis);
+
 %% 1. Runs sessionTemplate
 if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))
-    try
-        session = loadSession(basepath);
-        session.channels = 1:session.extracellular.nChannels;
+        try
+            session = loadSession(basepath);
+            session.channels = 1:session.extracellular.nChannels;
+    
+            if ~isfield(session, 'analysisTags')
+                session.analysisTags = [];
+            end
+            if ~isfield(session.analysisTags,'digital_optogenetic_channels')
+                session.analysisTags.digital_optogenetic_channels = digital_optogenetic_channels;
+            end
+            if ~isfield(session.analysisTags,'analog_optogenetic_channels')
+                session.analysisTags.analog_optogenetic_channels = analog_optogenetic_channels;
+            end
+    
+            if isempty(rejectChannels)
+                rejectChannels = session.channelTags.Bad.channels; % 1-index
+            end
+            if ~isfield(session.analysisTags,'bazler_ttl_channel')
+                session.analysisTags.bazler_ttl_channel = bazler_ttl_channel;
+            end
+            
+            if ~isfield(session.analysisTags,'leftArmTtl_channel')
+                session.analysisTags.leftArmTtl_channel = leftArmTtl_channel;
+            end
+            if ~isfield(session.analysisTags,'rightArmTtl_channel')
+                session.analysisTags.rightArmTtl_channel = rightArmTtl_channel;
+            end
+            if ~isfield(session.analysisTags,'homeDelayTtl_channel')
+                session.analysisTags.homeDelayTtl_channel = homeDelayTtl_channel;
+            end
+            
+            if ~isfield(session.analysisTags,'homeDelayTtl_channel')
+            end
+            
+            save([basepath filesep session.general.name,'.session.mat'],'session','-v7.3');
+        catch
+            warning('it seems that CellExplorer is not on your path');
+            
+            session = sessionTemplate(basepath,'showGUI',true);
+        end
 
-        if ~isfield(session, 'analysisTags')
-            session.analysisTags = [];
-        end
-        if ~isfield(session.analysisTags,'digital_optogenetic_channels')
-            session.analysisTags.digital_optogenetic_channels = digital_optogenetic_channels;
-        end
-        if ~isfield(session.analysisTags,'analog_optogenetic_channels')
-            session.analysisTags.analog_optogenetic_channels = analog_optogenetic_channels;
-        end
 
-        if isempty(rejectChannels)
-            rejectChannels = session.channelTags.Bad.channels; % 1-index
-        end
-        if ~isfield(session.analysisTags,'bazler_ttl_channel')
-            session.analysisTags.bazler_ttl_channel = bazler_ttl_channel;
-        end
-        
-        if ~isfield(session.analysisTags,'leftArmTtl_channel')
-            session.analysisTags.leftArmTtl_channel = leftArmTtl_channel;
-        end
-        if ~isfield(session.analysisTags,'rightArmTtl_channel')
-            session.analysisTags.rightArmTtl_channel = rightArmTtl_channel;
-        end
-        if ~isfield(session.analysisTags,'homeDelayTtl_channel')
-            session.analysisTags.homeDelayTtl_channel = homeDelayTtl_channel;
-        end
-        
-        if ~isfield(session.analysisTags,'homeDelayTtl_channel')
-        end
-        
-        save([basepath filesep session.general.name,'.session.mat'],'session','-v7.3');
-    catch
-        warning('it seems that CellExplorer is not on your path');
-        
-        session = sessionTemplate(basepath,'showGUI',true);
-    end
-    %% 
-   
     session = gui_session(session);
 
-
     selectProbe('force',true,'automatic', selectProbe_automatic); % choose probe
-close all
+    close all
 end
 
+leftArmTtl_channel = session.analysisTags.leftArmTtl_channel;
+rightArmTtl_channel = session.analysisTags.rightArmTtl_channel;
+homeDelayTtl_channel = session.analysisTags.homeDelayTtl_channel;
 
 ints = [];
 if restrict_to_manipulation
@@ -267,7 +278,7 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
 %     UDStates = detectUD('plotOpt', true,'forceDetect',true','NREMInts','all');
 %     psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true);
 
-    UDStates = detectUpsDowns('plotOpt', true,'forceDetect',false','NREMInts','all');
+    UDStates = detectUpsDowns('plotOpt', true,'forceDetect',true,'NREMInts','all');
     psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true,'minNumberOfPulses',10,'restrict_to',restrict_ints);
     getSpikesRank('events','upstates');
 
@@ -276,14 +287,24 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10,'restrict_to',restrict_ints);
     getSpikesRank('events','ripples');
 
+    % 8.4 Fiber ripple analysis
+    try
+        ripples_fiber = fiberPhotometryModulation_temp([],'eventType','ripples');
+    catch
+        warning('No fiber recording in this session...');
+    end
+
+
     % 8.3 Theta intervals
-    thetaEpochs = detectThetaEpochs('force',true,'useCSD',false);
+    thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'channel',11);
+    
 end
 
 %% 9. Phase Modulation
 if ~any(ismember(excludeAnalysis, {'9',lower('phaseModulation')}))
     % LFP-spikes modulation
-    [phaseMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel,'restrict_to',restrict_ints);
+    [phaseMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel,'thetaChannel',thetaChannel,'lgammaChannel',thetaChannel,'hgammaChannel',thetaChannel,'restrict_to',restrict_ints);
+    % [phaseMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel,'restrict_to',restrict_ints);
     computeCofiringModulation;
 end
 
@@ -310,7 +331,7 @@ if ~any(ismember(excludeAnalysis, {'10',lower('cellMetrics')}))
 
     session = loadSession;
 
-    cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludePulsesIntervals,'forceReload',true,'excludeMetrics',{'deepSuperficial'}); % after CellExplorar
+    cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludePulsesIntervals,'forceReload',true); % after CellExplorar
 
     
     getACGPeak('force',true);
@@ -324,9 +345,10 @@ end
 if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
     try
         spikes = loadSpikes;
-        getSessionTracking('roiTracking','manual','forceReload',false,'LED_threshold',LED_threshold,'convFact',tracking_pixel_cm);
+        % getSessionTracking('roiTracking','manual','forceReload',false,'LED_threshold',LED_threshold,'convFact',tracking_pixel_cm,'leftTTL_reward',leftArmTtl_channel,'rightTTL_reward',rightArmTtl_channel);
+        getSessionTracking('forceReload',false,'leftTTL_reward',leftArmTtl_channel,'rightTTL_reward',rightArmTtl_channel,'homeTtl',homeDelayTtl_channel,'tracking_ttl_channel',tracking_ttl_channel);
         try
-            getSessionArmChoice('task','alternation','leftArmTtl_channel',leftArmTtl_channel,'rightArmTtl_channel',rightArmTtl_channel,'homeDelayTtl_channel',homeDelayTtl_channel);
+            getSessionArmChoice('task','alternation','leftArmTtl_channel',leftArmTtl_channel,'rightArmTtl_channel',rightArmTtl_channel,'homeDelayTtl_channel',homeDelayTtl_channel,'use_manual_ttls',use_manual_ttls);
         catch
             warning('Performance in task was not computed! maybe linear maze?');
         end
@@ -341,11 +363,11 @@ if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
 
     try 
         behaviour = getSessionLinearize;
-        psth_lReward = spikesPsth([behaviour.events.lReward],'numRep',100,'saveMat',false,...
+        psth_lReward = spikesPsth([behaviour.events.lReward],'numRep',100,'eventType','lReward','saveMat',false,...
             'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01,'raster_time',[-2 2]);
-        psth_rReward = spikesPsth([behaviour.events.rReward],'numRep',100,'saveMat',false,...
+        psth_rReward = spikesPsth([behaviour.events.rReward],'numRep',100,'eventType','rReward','saveMat',false,...
             'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'raster_time',[-2 2]);
-        psth_reward = spikesPsth([behaviour.events.lReward; behaviour.events.rReward],'numRep',100,'saveMat',false,...
+        psth_reward = spikesPsth([behaviour.events.lReward; behaviour.events.rReward],'numRep',100,'eventType','reward','saveMat',false,...
             'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'raster_time',[-2 2]);
         
         if all(isnan(behaviour.events.startPoint))
@@ -354,9 +376,9 @@ if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
         if all(isnan(behaviour.events.intersection))
             behaviour.events.intersection = NaN;
         end
-        psth_intersection = spikesPsth([behaviour.events.intersection],'numRep',100,'saveMat',false,...
+        psth_intersection = spikesPsth([behaviour.events.intersection],'numRep',100,'eventType','intersection','saveMat',false,...
             'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'raster_time',[-2 2]);
-        psth_startPoint = spikesPsth([behaviour.events.startPoint],'numRep',100,'saveMat',false,...
+        psth_startPoint = spikesPsth([behaviour.events.startPoint],'numRep',100,'eventType','startPoint','saveMat',false,...
             'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'raster_time',[-2 2]);
 
         behaviour.psth_lReward = psth_lReward;
@@ -370,6 +392,27 @@ if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
         warning('Psth on behaviour events was not possible...');
     end
 
+    % Fiber behaviour analysis
+    try
+        lReward_fiber = fiberPhotometryModulation_temp([behaviour.events.lReward],'eventType','lReward','saveMat',false);
+        rReward_fiber = fiberPhotometryModulation_temp([behaviour.events.rReward],'eventType','rReward','saveMat',false);
+        reward_fiber = fiberPhotometryModulation_temp([behaviour.events.lReward; behaviour.events.rReward],'eventType','reward','saveMat',false);
+
+        intersection_fiber = fiberPhotometryModulation_temp([behaviour.events.intersection],'eventType','intersection','saveMat',false,'savePlotAs','intersection');
+        startPoint_fiber = fiberPhotometryModulation_temp([behaviour.events.startPoint],'eventType','startPoint','saveMat',false,'savePlotAs','startPoint');
+
+        fiber_behavior.lReward = lReward_fiber;
+        fiber_behavior.rReward = rReward_fiber;
+        fiber_behavior.reward = reward_fiber;
+
+        fiber_behavior.intersection = intersection_fiber;
+        fiber_behavior.startPoint = startPoint_fiber;
+
+        save([basenameFromBasepath(pwd),'.behavior_fiber.events.mat'],'fiber_behavior');
+    catch
+        warning('No fiber recording in this session...');
+    end
+
     try
         speedCorr = getSpeedCorr('numQuantiles',20,'force',true);
     catch
@@ -380,6 +423,7 @@ end
 %% 12. Summary per cell
 if ~any(ismember(excludeAnalysis, {'12',lower('summary')}))
     plotSummary('showTagCells',false);
+    
 end
 
 cd(prevPath);

@@ -1,4 +1,3 @@
-
 function [stats,h] = groupStats(y,group,varargin)
 % Descriptive and mean/median difference analysis, with serveral plot
 % options.
@@ -30,6 +29,7 @@ function [stats,h] = groupStats(y,group,varargin)
 %    'plotConnectors' Default, false
 %    'repeatedMeasures' Default, false
 %    'dataColor'    For data points and lines, Default [.7 .7 .7];
+%    'dataSize'     For data points, Default 3
 %    'cloudColor'   For data plots, Default [1 1 1];   
 %    'dataAlpha'    For data points and lines, Default .5;
 %    'posOffset'    When 'inAxis', it adds an offset to the group numbers.
@@ -520,7 +520,7 @@ if doPlot
                 posData((posData)>0.3) = posData((posData)>0.3)/2;
                 posData((posData)<-0.3) = posData((posData)<-0.3)/2;
                 plot(pos(ii)+ posData, y(group==ind(ii)),'o','color',[1 1 1],...
-                       'MarkerFaceColor','k','MarkerEdgeColor','none','MarkerSize',dataSize);
+                       'MarkerFaceColor',cloudColor,'MarkerEdgeColor',cloudColor,'MarkerSize',dataSize);
             end
             plot(pos(ii)-0.1, m,'o','MarkerFaceColor',roundPlotCenterColor(ii,:),'MarkerEdgeColor',color(ii,:),'MarkerSize',roundPlotSize);
             plot([pos(ii)-0.1 pos(ii)-0.1], [m-s1 m+s2],'-','MarkerFaceColor',color(ii,:),'MarkerEdgeColor',color(ii,:),...
@@ -627,6 +627,7 @@ if doPlot
         plot(pos, stats.descriptive.mean,'o','color', color(1,:),'MarkerFaceColor',roundPlotCenterColor(1,:),'MarkerEdgeColor',color(1,:),'MarkerSize',roundPlotSize);
         xlim([.5 max(pos)+.5]);
         set(gca,'xtick',[]);
+        
         if strcmpi(orientation, 'horizontal')
             view([90 90]); 
         end

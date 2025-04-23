@@ -191,8 +191,13 @@ end
 
 if skipStimulationPeriods && ~isempty(dir('*optogeneticPulses.events.mat'))
     targetFile = dir('*optogeneticPulses.events.mat'); load(targetFile.name);
-    restrict_temp = SubtractIntervals([0 Inf],optoPulses.stimulationEpochs);
-    restrict =  ConsolidateIntervals([restrict; restrict_temp; restrict_temp]);
+    try
+        restrict_temp = SubtractIntervals([0 Inf],optoPulses.stimulationEpochs);
+        restrict =  ConsolidateIntervals([restrict; restrict_temp; restrict_temp]);
+    catch
+        restrict_temp = SubtractIntervals([0 Inf],pulses.stimulationEpochs);
+        restrict =  ConsolidateIntervals([restrict; restrict_temp; restrict_temp]);
+    end
 end
 
 if useCSD
