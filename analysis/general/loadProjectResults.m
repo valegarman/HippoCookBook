@@ -23,6 +23,7 @@ addParameter(p,'lightVersion',true,@islogical);
 addParameter(p,'list_of_sessions',[],@iscell);
 addParameter(p,'reject_sessions',[],@iscell);
 addParameter(p,'list_of_results',[]);
+addParameter(p,'list_of_paths',[]); % if list of paths is provide, then it overides the sessions path from the CSV
 addParameter(p,'save_as',[],@ischar);
 
 parse(p,varargin{:});
@@ -41,6 +42,7 @@ list_of_sessions = p.Results.list_of_sessions;
 save_as = p.Results.save_as;
 list_of_results = p.Results.list_of_results;
 reject_sessions = p.Results.reject_sessions;
+list_of_paths = p.Results.list_of_paths;
 
 if isempty(save_as)
     save_as = [datestr(datetime('now'),29) '_' project];
@@ -64,22 +66,14 @@ if loadLast
 end
 
 %% find indexed sessions
-if isempty(indexedSessionCSV_name)
-    error('Need to provide the name of the index Project variable');
-end
-if isempty(indexedSessionCSV_path)
-    warning('Not included the path where the indexed Projects .mat variable is located. Trying to find it...');
-    indexedSessionCSV_path = fileparts(which([indexedSessionCSV_name,'.csv']));
-end
-if isempty(analysis_project_path)
-    analysis_project_path = indexedSessionCSV_path;
-end
+if isempty(list_of_paths)
 
+% <<<<<<< HEAD
 sessionsTable = readtable([indexedSessionCSV_path filesep indexedSessionCSV_name,'.csv']); % the variable is called allSessions
 
 for ii = 1:length(sessionsTable.SessionName)
 
-    sessions.basepaths{ii} = [nas_path(sessionsTable.Location{ii}) filesep sessionsTable.Path{ii}];
+    sessions.basepaths{ii} = adapt_filesep([nas_path(sessionsTable.Location{ii}) filesep sessionsTable.Path{ii}]);
 
 end
 sessions.project = sessionsTable.Project;
@@ -110,16 +104,67 @@ end
 if ~isempty(reject_sessions)
     list_of_sessions{find(contains(list_of_sessions,lower(reject_sessions)))} = ' ';
 end
+% =======
+%     if isempty(indexedSessionCSV_name)
+%         error('Need to provide the name of the index Project variable');
+%     end
+%     if isempty(indexedSessionCSV_path)
+%         warning('Not included the path where the indexed Projects .mat variable is located. Trying to find it...');
+%         indexedSessionCSV_path = fileparts(which([indexedSessionCSV_name,'.csv']));
+%     end
+%     if isempty(analysis_project_path)
+%         analysis_project_path = indexedSessionCSV_path;
+%     end
+% >>>>>>> a44f5ed7ef76cf090c2430220e48de8d504a3bde
     
-
-if strcmpi(project,'Undefined') || strcmpi(project,'All')
-    project = project_list;
-elseif ~any(ismember(project_list, project))
-    error('Project name not recognized!');
+    sessionsTable = readtable([indexedSessionCSV_path filesep indexedSessionCSV_name,'.csv']); % the variable is called allSessions
+    
+    for ii = 1:length(sessionsTable.SessionName)
+    
+        sessions.basepaths{ii} = [nas_path(sessionsTable.Location{ii}) filesep sessionsTable.Path{ii}];
+    
+    end
+    sessions.project = sessionsTable.Project;
+    
+    disp('Projects found: '); 
+    for ii = 1:length(sessions.project) % remove to spaces together, if any
+        sessions.project{ii} = strrep(sessions.project{ii}, '  ', ' ');
+    end
+    project_list = unique(sessions.project);
+    project_list_temp = cell(0);
+    for jj = 1:length(project_list)
+        project_list_temp{1,length(project_list_temp)+1} = project_list{jj};
+        project_list_temp{1,length(project_list_temp)+1} = ' ';
+    end    
+    project_list_temp(end) = [];
+    project_list = unique(split([project_list_temp{:}],' '));
+    
+    for ii = 1:length(project_list)
+        fprintf(' %3.i/ %s \n',ii,project_list{ii}); %\n
+    end
+    % fprintf('Taking all sessions from project "%s" \n',project)
+    
+    % selecting sessions
+    if isempty(list_of_sessions)
+        list_of_sessions = sessionsTable.SessionName;
+    end
+    
+    if ~isempty(reject_sessions)
+        list_of_sessions{find(contains(list_of_sessions,lower(reject_sessions)))} = ' ';
+    end
+        
+    
+    if strcmpi(project,'Undefined') || strcmpi(project,'All')
+        project = project_list;
+    elseif ~any(ismember(project_list, project))
+        error('Project name not recognized!');
+    end
+    
+    sessions.basepaths = sessions.basepaths(contains(lower(sessions.project), lower(project)) & contains(lower(sessionsTable.SessionName), lower(list_of_sessions)));
+    sessions.project = sessions.project(contains(lower(sessions.project), lower(project)) & contains(lower(sessionsTable.SessionName), lower(list_of_sessions)));
+else
+    sessions.basepaths = list_of_paths;
 end
-
-sessions.basepaths = sessions.basepaths(contains(lower(sessions.project), lower(project)) & contains(lower(sessionsTable.SessionName), lower(list_of_sessions)));
-sessions.project = sessions.project(contains(lower(sessions.project), lower(project)) & contains(lower(sessionsTable.SessionName), lower(list_of_sessions)));
 
 fprintf('Loading %3.i sessions... \n',length(sessions.basepaths)); %\n
 
@@ -167,7 +212,6 @@ for ii = 1:length(sessions.basepaths)
         projectSessionResults.spikes{ii} = spikes;
     end
     clear spikes
-    
     
     % loop results
     for jj= 1:length(list_of_results)

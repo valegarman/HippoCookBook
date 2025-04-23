@@ -132,29 +132,29 @@ for jj = 1:length(inputFolder)
                 end
 
                 fileInfo = System.IO.FileInfo(datInput{count});
-                fechaCreacion = fileInfo.CreationTime;
+                fechaCreacion = fileInfo.LastWriteTimeUtc;
                 % Day of creation of the file (for creating the subfolder)
-                yyyy = num2str(fileInfo.CreationTime.Year);
-                MM = num2str(fileInfo.CreationTime.Month); 
+                yyyy = num2str(fileInfo.LastWriteTimeUtc.Year);
+                MM = num2str(fileInfo.LastWriteTimeUtc.Month); 
                 if length(MM) < 2  
                     MM = strcat('0',MM);
                 end
-                dd = num2str(fileInfo.CreationTime.Day);
+                dd = num2str(fileInfo.LastWriteTimeUtc.Day);
                 if length(dd) < 2  
                     dd = strcat('0',dd);
                 end
 
                 % Time of creation of the file (for creating the subfolder)
 
-                hh = num2str(fileInfo.CreationTime.Hour);
+                hh = num2str(fileInfo.LastWriteTimeUtc.Hour);
                 if length(hh) < 2  
                     hh = strcat('0',hh);
                 end
-                mm = num2str(fileInfo.CreationTime.Minute);
+                mm = num2str(fileInfo.LastWriteTimeUtc.Minute);
                 if length(mm) < 2  
                     mm = strcat('0',mm);
                 end
-                ss = num2str(fileInfo.CreationTime.Second);
+                ss = num2str(fileInfo.LastWriteTimeUtc.Second);
                 if length(ss) < 2  
                     ss = strcat('0',ss);
                 end

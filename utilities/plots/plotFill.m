@@ -20,6 +20,9 @@ function h = plotFill(datax,datay,varargin)
 %    'error'        'ic95' (default), 'SE', 'std'
 %    'faceAlpha'    Default, 0.5
 %    'excluding'
+%    'stats'     Default false.
+%    'stats_offset'  1
+%
 %                   Default, all false
 %    'type'         'Median', 'Mean'
 %
@@ -44,7 +47,8 @@ addParameter(p,'excluding',[]);
 addParameter(p,'type','mean',@ischar);
 addParameter(p,'normalization_int',[], @isnumeric);
 addParameter(p,'normalization_intercept_ratio',[], @isnumeric);
-
+addParameter(p,'stats', false, @islogical);
+addParameter(p,'stats_offset',1, @isnumeric);
 
 parse(p,varargin{:});
 color = p.Results.color;
@@ -61,6 +65,8 @@ excluding = p.Results.excluding;
 type = p.Results.type;
 normalization_int = p.Results.normalization_int;
 normalization_intercept_ratio = p.Results.normalization_intercept_ratio;
+stats = p.Results.stats;
+stats_offset = p.Results.stats_offset;
 
 % Deal with inputs
 if length(datax) ~= size(datay,1) | length(datax) == size(datay,1)
@@ -188,6 +194,8 @@ else
             x1(ind) = [];
         end
 
+        
+
         hold on
         if strcmpi(style,'alpha')
             fill(x1, y1, color,'EdgeColor','none','faceAlpha',faceAlpha);
@@ -197,11 +205,27 @@ else
             h = plot(datax, trace,lineStyle,'lineWidth',1,'color',color);
         elseif strcmpi(style,'inverted')
             fill(x1, y1, color,'EdgeColor','none','faceAlpha',faceAlpha);
-            h = plot(datax, trace,lineStyle,'lineWidth',1,'color',[1 1 1]);
+            h = plot(x1, trace,lineStyle,'lineWidth',1,'color',[1 1 1]);
         elseif strcmpi(style,'filled') 
             h = fill(x1, y1, color,'EdgeColor','none','faceAlpha',faceAlpha);
         elseif strcmpi(style,'edge') 
             h = fill(x1, y1, [1 1 1],'EdgeColor',color,'faceAlpha',faceAlpha);
+        end
+        
+        if stats
+            for ii = 1:size(datay,1)
+                p_stat(ii) = -log10(signrank(datay(ii,:)));
+            end
+            x = datax';
+            y = stats_offset .* ones(size(datax))';
+            z = zeros(size(datax))';
+            col = p_stat;  % This is the color, vary with x in this case.
+            surface([x;x],[y;y],[z;z],[col;col],...
+                'facecol','no',...
+                'edgecol','interp',...
+                'linew',2);
+            caxis([-log10(0.05) -log10(0.001)]);
+
         end
     end
         set(gca,'XScale',xscale,'YScale',yscale,'TickDir','out');

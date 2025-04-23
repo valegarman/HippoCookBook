@@ -10,7 +10,11 @@ HCB_directory = what('HippoCookBook');
 
 sessionsTable = readtable([HCB_directory.path filesep 'indexedSessions.csv']); % the variable is called allSessions
 
+<<<<<<< HEAD:analysis/general/BatchScripts_files/BatchScript_analysis_lightInInh_Martu_past.m
 for ii = 85 : length(sessionsTable.SessionName)
+=======
+for ii = 183: length(sessionsTable.SessionName)
+>>>>>>> eafe5c0146e18ca4d3d35fea5059737a802d3f6d:analysis/general/BatchScript_analysis_lightInInh_Martu.asv
      %% Analysis general all over Camkii/32 animal
     if contains(sessionsTable.Project{ii}, targetProject) || strcmpi('all', targetProject)
 
@@ -50,7 +54,7 @@ end
 
 %% Analysis for pre and post synaptic changes
 
-for ii = 1:length(sessionsTable.SessionName)
+for ii = 86:length(sessionsTable.SessionName)
     
     if contains(sessionsTable.Project{ii}, targetProject) && contains(sessionsTable.Behavior{ii},targetBehavior) || strcmpi('all', targetProject) 
         
@@ -61,24 +65,24 @@ for ii = 1:length(sessionsTable.SessionName)
         spikes_times = spikes.times;
         monosyn_inh_win = [0.001 0.021]; % 01to21
 
-        for ii= 1:length(session.epochs) 
-            if strcmp(session.epochs{ii}.behavioralParadigm,'Maze')
-                pre_end = session.epochs{ii}.startTime;
-                post_start = session.epochs{ii}.stopTime;
+        for kk= 1:length(session.epochs) 
+            if strcmp(session.epochs{kk}.behavioralParadigm,'Maze')
+                pre_end = session.epochs{kk}.startTime;
+                post_start = session.epochs{kk}.stopTime;
                 pre_maze = [0 pre_end];
                 post_maze = [post_start Inf];
             end
         end
 
-        try
-            parfor mm = 1:spikes.numcells
+        
+            for mm = 1:spikes.numcells
                 disp(mm);
 
-                % uLEDResponses_interval_pre{mm} = getuLEDResponse_intervals([spikes_times{mm} + monosyn_inh_win(1) spikes_times{mm} + monosyn_inh_win(2)],...
-                %     'saveMat', false,'numRep',500,'doPlot', false,'getRaster', false, 'verbose', false,'restrict_to',pre_maze);
+                uLEDResponses_interval_pre{mm} = getuLEDResponse_intervals([spikes_times{mm} + monosyn_inh_win(1) spikes_times{mm} + monosyn_inh_win(2)],...
+                    'saveMat', false,'numRep',500,'doPlot', false,'getRaster', false, 'verbose', false,'restrict_to',pre_maze,'minNumberOfPulses',100);
 
                 uLEDResponses_interval_post{mm} = getuLEDResponse_intervals([spikes_times{mm} + monosyn_inh_win(1) spikes_times{mm} + monosyn_inh_win(2)],...
-                    'saveMat', false,'numRep',500,'doPlot', false,'getRaster', false, 'verbose', false,'restrict_to',post_maze);
+                    'saveMat', false,'numRep',500,'doPlot', false,'getRaster', false, 'verbose', false,'restrict_to',post_maze, 'minNumberOfPulses',100);
             end
 
             collision_metrics_1_21_pre = get_light_spike_CollisionMetrics(uLEDResponses_interval_pre,'label','1msTo21ms_pre','saveMat',true,'update_cell_metrics',false,'save_as','lightSpikeCollisions_pre','rate_change_threshold',3);
@@ -89,9 +93,7 @@ for ii = 1:length(sessionsTable.SessionName)
             %%%
 
             close all;
-        catch
-            warning('Analysis was not possible!');
-        end
+        
     end 
 end
 
