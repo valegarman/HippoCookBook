@@ -229,3 +229,4 @@ wt5_250324_sess16,wt5,wt5\wt5_250324_sess16,neural3,c57b1/6,wild type,"105µm (1
 wt5_250325_sess17,wt5,wt5\wt5_250325_sess17,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,18,CA1so CA1sp,POTometry
 wt5_250326_sess18,wt5,wt5\wt5_250326_sess18,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,21,CA1so CA1sp,POTometry
 fcamk7_220328_sess5,fcamk7,fcamk7\fcamk7_220328_sess5,neural3,c57b1/6,camkii/ai32,"diagnosticbiochip-128-6-128ch&uled_12led-32ch-4shanks",no,248,CA1sp CA1so PTLp5 PTLp6 PTLp2_3 mPFC,Bibliocampus
+fcamk7_220324_sess3,fcamk7,fcamk7\fcamk7_220324_sess3,neural3,c57b1/6,camkii/ai32,"diagnosticbiochip-128-6-128ch&uled_12led-32ch-4shanks",no,162,PTLp5 PTLp6 PTLp2_3 mPFC,Bibliocampus
