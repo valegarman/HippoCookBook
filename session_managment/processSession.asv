@@ -91,6 +91,8 @@ selectProbe_automatic = p.Results.selectProbe_automatic;
 prevPath = pwd;
 cd(basepath);
 
+keyboard;
+
 mkdir('SummaryFigures')
 if createLegacySummaryFolder
     if exist('SummaryFigures') == 7

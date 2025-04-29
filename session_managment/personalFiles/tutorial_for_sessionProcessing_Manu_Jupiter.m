@@ -15,10 +15,15 @@ batch_preprocessSession('basepath','Y:\unindexedSubjects\fCamk10','analysisPath'
 % <OPTIONAL> If summary was not processed, it can be run in batch by 'batch_preprocessSession'
 batch_sessionSummary('basepath','G:\data\fPv4','cleanArtifacts',({65,[]}),'analogChannelsList',65,'digitalChannelsList',0);
 
+% <OPTIONAL> 
+preprocessSession('basepath',pwd,'analogChannelsList',[],'spikeSort',true,'getPos',false, 'cleanArtifacts',false,...
+                    'medianSubstr',true,'sessionSummary',true,'digitalChannelsList',[1:16]);
+
+
 % 3% CLEAN SESSIONS MANUALLY BY PHY
 
 % 4% Processs individual sessions by by 'processSession'. Example:
-processSession('digital_optogenetic_channels',1,'analog_optogenetic_channels',[],'promt_hippo_layers',true,'profileType','hippocampus');
+processSession('digital_optogenetic_channels',[1 9],'analog_optogenetic_channels',[],'promt_hippo_layers',true,'profileType','hippocampus');
 close all
 
 % 5% Index session
@@ -32,10 +37,14 @@ indexNewSession('copyFiles', false);
 % other projects include Bibliocampus, desVIPnhibition, etc
 
 % PS. uLED sessions
-pulses = getAnalogPulses('manualThr',true,'overwrite',true); % 1-index
+pulses = getAnalogPulses('manualThr',true); % 1-index
 getDigitalIn;
 uLEDPulses = getuLEDPulses('Current',2.7);
-processSession('digital_optogenetic_channels',[11 12 13 14 15 16],'analog_optogenetic_channels',[3 4 5 6 7 8],'promt_hippo_layers',true,'profileType','hippocampus','force_analogPulsesDetection',false);
+processSession('digital_optogenetic_channels',[1:16],'promt_hippo_layers',true,'profileType','hippocampus','force_analogPulsesDetection',false);
 % something werid with the pulses... to check!!!
 [uLEDResponses] = getuLEDResponse;
 NotebookMonoSynBition;
+
+
+% 
+getOptogeneticResponse('digitalChannelsList', 9, 'force', true)

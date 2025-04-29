@@ -211,7 +211,7 @@ for ii = 1:length(sessions.basepaths)
         summaryPngs = dir([sessions.basepaths{ii} filesep 'SummaryFigures' filesep 'Summary*.png']);
         for jj = 1:length(summaryPngs)
             copyfile([summaryPngs(jj).folder filesep summaryPngs(jj).name],...
-                [saveSummariespath  sessionsTable.SessionName{ii} '_' summaryPngs(jj).name]);
+                [saveSummariespath  projectSessionResults.sessionName{ii} '_' summaryPngs(jj).name]);
         end
     end
     
