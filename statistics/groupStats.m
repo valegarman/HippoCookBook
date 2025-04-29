@@ -627,6 +627,7 @@ if doPlot
         plot(pos, stats.descriptive.mean,'o','color', color(1,:),'MarkerFaceColor',roundPlotCenterColor(1,:),'MarkerEdgeColor',color(1,:),'MarkerSize',roundPlotSize);
         xlim([.5 max(pos)+.5]);
         set(gca,'xtick',[]);
+        
         if strcmpi(orientation, 'horizontal')
             view([90 90]); 
         end

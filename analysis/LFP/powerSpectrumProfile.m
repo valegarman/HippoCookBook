@@ -238,6 +238,7 @@ if showfig
     if ~exist('SummaryFigures','dir')
         mkdir('SummaryFigures')
     end
+    mkdir('SummaryFigures')
     saveas(gcf,['SummaryFigures\', save_as,'_',num2str(frange(1)),'_',num2str(frange(2)),'.png']);
 
 end
