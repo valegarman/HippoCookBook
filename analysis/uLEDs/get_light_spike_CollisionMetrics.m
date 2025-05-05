@@ -91,8 +91,8 @@ uLEDResponses_OutInterval.responsecurve = [];
 uLEDResponses_OutInterval.responsecurveZ = [];
 uLEDResponses_OutInterval.responsecurveZSmooth = [];
 
-uLEDResponses_RandInterval.maxRatePulse = [];
-uLEDResponses_RandInterval.maxZPulse = [];
+% uLEDResponses_RandInterval.maxRatePulse = [];
+% uLEDResponses_RandInterval.maxZPulse = [];
 
 
 for ii = 1:length(uLEDResponses_interval)
