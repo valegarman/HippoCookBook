@@ -157,7 +157,7 @@ inHippocampus = {'pSUBsp' 'CA1sp' 'CA1so' 'CA1sr' 'CA1slm' 'CA1' 'CA3' 'DG' 'CA3
 
 % deep
 is_deep = ismember(cell_metrics.deepSuperficial_Sharif,'Deep');
-is_sup = ismember(cell_metrics.deepSuperficial,'Superficial');
+is_sup = ismember(cell_metrics.deepSuperficial_Sharif,'Superficial');
 units_deep = units(:,is_deep); 
 units_sup = units(:,is_sup); 
 
