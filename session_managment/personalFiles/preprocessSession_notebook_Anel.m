@@ -3,7 +3,7 @@ updateExpFolder_temp({'E:\app2'},'C:\app2');
 
 %preprocessSession('basepath','C:\app2\app2_250331_sess1','analysisPath',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
 
-processSession('basepath','C:\wt7\wt7_250408_sess3','digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
+processSession('basepath','C:\app2\app2_250401_sess2','digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 
 indexNewSession('basepath','C:\wt5\wt5_250320_sess14');
 
