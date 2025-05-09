@@ -155,6 +155,22 @@ units_int = units(:,~is_pyr);
 
 inHippocampus = {'pSUBsp' 'CA1sp' 'CA1so' 'CA1sr' 'CA1slm' 'CA1' 'CA3' 'DG' 'CA3sp' 'CA3sr'}; % only using hippocampus data... :);
 
+% deep
+is_deep = ismember(cell_metrics.deepSuperficial_Sharif,'Deep');
+is_sup = ismember(cell_metrics.deepSuperficial,'Superficial');
+units_deep = units(:,is_deep); 
+units_sup = units(:,is_sup); 
+
+is_deep_hippo = ismember(cell_metrics.deepSuperficial_Sharif,'Deep') & ismember(cell_metrics.brainRegion,inHippocampus);
+is_sup_hippo = ismember(cell_metrics.deepSuperficial_Sharif,'Superficial') & ismember(cell_metrics.brainRegion,inHippocampus);
+units_deep_hippo = units(:,is_deep_hippo);
+units_sup_hippo = units(:,is_sup_hippo);
+
+is_deep_cortex = ismember(cell_metrics.deepSuperficial_Sharif,'Deep') & ismember(cell_metrics.brainRegion,'mPFC');
+is_sup_cortex = ismember(cell_metrics.deepSuperficial_Sharif,'Superficial') & ismember(cell_metrics.brainRegion,'mPFC');
+units_deep_cortex = units(:,is_deep_cortex);
+units_sup_cortex = units(:,is_sup_cortex);
+
 is_pyr_hippo = ismember(cell_metrics.putativeCellType,'Pyramidal Cell') & ismember(cell_metrics.brainRegion,inHippocampus);
 is_int_hippo = (ismember(cell_metrics.putativeCellType,'Narrow Interneuron') | ismember(cell_metrics.putativeCellType,'Wide Interneuron')) & ismember(cell_metrics.brainRegion,inHippocampus);
 is_hippo = ismember(cell_metrics.brainRegion,inHippocampus);
@@ -246,6 +262,13 @@ save('units_id2.mat','units_id2');
 save('units_camk2_hippo.mat','units_camk2_hippo');
 save('units_camk2_cortex.mat','units_camk2_cortex');
 save('units_camk2.mat','units_camk2');
+
+save('units_deep.mat','units_deep');
+save('units_sup.mat','units_sup');
+save('units_deep_hippo.mat','units_deep_hippo');
+save('units_sup_hippo.mat','units_sup_hippo');
+save('units_deep_cortex.mat','units_deep_cortex');
+save('units_sup_cortex.mat','units_sup_cortex');
 
 
 
