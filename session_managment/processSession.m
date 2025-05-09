@@ -26,7 +26,7 @@ function [] = processSession(varargin)
 p = inputParser;
 
 addParameter(p,'basepath',pwd,@isdir);
-addParameter(p,'theta_bandpass',[6 12], @isnumeric);
+addParameter(p,'theta_bandpass',[5 12], @isnumeric);
 addParameter(p,'gamma_bandpass',[20 100], @isnumeric);
 addParameter(p,'hfo_bandpass',[100 500], @isnumeric);
 addParameter(p,'rejectChannels',[],@isnumeric); % 0-index
