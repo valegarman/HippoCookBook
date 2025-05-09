@@ -131,6 +131,26 @@ for jj = 1:length(inputFolder)
                     doricName{count} = NaN;
                 end
 
+                % uLED ttl .csv file
+                if ~isempty(dir([inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'continuous\', strrep(session.recordNodes{1}.recordings{jj}.info.continuous.folder_name, '/','\'), '*uLED_ttll.csv']))
+                    uLED_ttl_csvFile = dir([inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'continuous\', strrep(session.recordNodes{1}.recordings{jj}.info.continuous.folder_name, '/','\'), '*uLED_ttll.csv']);
+                    uLED_ttl_csvInput{count} = [uLED_ttl_csvFile.folder filesep uLED_ttl_csvFile.name];
+                    uLED_ttl_csvName{count} = uLED_ttl_csvFile.name;
+                else
+                    uLED_ttl_csvInput{count} = NaN;
+                    uLED_ttl_csvName{count} = NaN;
+                end
+
+                % uLED ttl .txt file
+                if ~isempty(dir([inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'continuous\', strrep(session.recordNodes{1}.recordings{jj}.info.continuous.folder_name, '/','\'), '*uLED_ttl.txt']))
+                    uLED_ttl_txtFile = dir([inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'continuous\', strrep(session.recordNodes{1}.recordings{jj}.info.continuous.folder_name, '/','\'), '*uLED_ttl.txt']);
+                    uLED_ttl_txtInput{count} = [uLED_ttl_txtFile.folder filesep uLED_ttl_txtFile.name];
+                    uLED_ttl_txtName{count} = uLED_ttl_txtFile.name;
+                else
+                    uLED_ttl_txtInput{count} = NaN;
+                    uLED_ttl_txtName{count} = NaN;
+                end
+
                 fileInfo = System.IO.FileInfo(datInput{count});
                 fechaCreacion = fileInfo.LastWriteTimeUtc;
                 % Day of creation of the file (for creating the subfolder)
@@ -245,6 +265,19 @@ for jj = 1:length(inputFolder)
             copyfile(doricInput{newExp(ii)},...
             strcat(datOutput{newExp(ii)},filesep,'fiber.doric'));
         end
+
+        % Copy uLED ttl .csv file
+        if ~isnan(uLED_ttl_csvInput{newExp(ii)})
+            copyfile(uLED_ttl_csvInput{newExp(ii)},...
+            strcat(datOutput{newExp(ii)},filesep,uLED_ttl_csvName{newExp(ii)}));
+        end
+
+        % Copy uLED ttl .txt file
+        if ~isnan(uLED_ttl_txtInput{newExp(ii)})
+            copyfile(uLED_ttl_txtInput{newExp(ii)},...
+            strcat(datOutput{newExp(ii)},filesep,uLED_ttl_txtName{newExp(ii)}));
+        end
+
 
     end
     % clear expNameInput recInput allRecInp
