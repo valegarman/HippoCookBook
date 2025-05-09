@@ -22,6 +22,7 @@ processSession('basepath','C:\data\wt7\wt7_250404_sess1','digital_optogenetic_ch
 processSession('basepath','C:\data\wt7\wt7_250407_sess2','digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 
 indexNewSession('basepath','C:\data\wt7\wt7_250404_sess1');
+indexNewSession('basepath','C:\data\wt7\wt7_250407_sess2');
 %% WT5
 updateExpFolder_temp({'D:\wt5'},'C:\wt5');
 
