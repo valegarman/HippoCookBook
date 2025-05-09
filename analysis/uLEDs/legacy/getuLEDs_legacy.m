@@ -101,7 +101,7 @@ end
 session = loadSession(fullfile(pwd, '..'));
 
 file_folder = strsplit(file.folder,'\');
-file_folder = file_folder{4};
+file_folder = file_folder{end};
 
 for ii =1:size(session.epochs,2)
     if strcmpi(file_folder,session.epochs{ii}.name) 

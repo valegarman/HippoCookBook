@@ -246,18 +246,18 @@ for jj = 1:length(inputFolder)
         % Copy tracking (timestamps) CSV file
         if ~isnan(tracking_timestampsInput{newExp(ii)})
             copyfile(tracking_timestampsInput{newExp(ii)},...
-            strcat(datOutput{newExp(ii)},filesep,tracking_timestampsName{ii}));
+            strcat(datOutput{newExp(ii)},filesep,tracking_timestampsName{newExp(ii)}));
         end
 
         % Copy tracking (avi video)
         if ~isnan(trackingInput{newExp(ii)})
             copyfile(trackingInput{newExp(ii)},...
-            strcat(datOutput{newExp(ii)},filesep,trackingName{ii}));
+            strcat(datOutput{newExp(ii)},filesep,trackingName{newExp(ii)}));
         end
         % Copy crop tracking (avi video)
         if ~isnan(trackingCropInput{newExp(ii)})
             copyfile(trackingCropInput{newExp(ii)},...
-            strcat(datOutput{newExp(ii)},filesep,trackingCropName{ii}));
+            strcat(datOutput{newExp(ii)},filesep,trackingCropName{newExp(ii)}));
         end
         
         % Copy doric file (in case it exists)
@@ -269,13 +269,13 @@ for jj = 1:length(inputFolder)
         % Copy uLED ttl .csv file
         if ~isnan(uLED_ttl_csvInput{newExp(ii)})
             copyfile(uLED_ttl_csvInput{newExp(ii)},...
-            strcat(datOutput{newExp(ii)},filesep,uLED_ttl_csvName{ii}));
+            strcat(datOutput{newExp(ii)},filesep,uLED_ttl_csvName{newExp(ii)}));
         end
 
         % Copy uLED ttl .txt file
         if ~isnan(uLED_ttl_txtInput{newExp(ii)})
             copyfile(uLED_ttl_txtInput{newExp(ii)},...
-            strcat(datOutput{newExp(ii)},filesep,uLED_ttl_txtName{ii}));
+            strcat(datOutput{newExp(ii)},filesep,uLED_ttl_txtName{newExp(ii)}));
         end
 
 

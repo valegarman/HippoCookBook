@@ -10,13 +10,14 @@ updateExpFolder_temp({'F:\camk12'},'D:\camk12');
 % 2% Then, preprocess session (includes artifacts removal, median signal
 %   removal, LFP and Kilosort, and running computeSessionSummary by 'batch_preprocessSession('basepath','sessionBasepath').
 %   Example:
-preprocessSession('basepath','D:\camk12\camk12_250429_sess2','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[]}),'digitalChannelsList',[1],'sessionSummary',false,'getPos',false);
+preprocessSession('basepath','D:\camk12\camk12_250508_sess6','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[]}),'digitalChannelsList',[1],'sessionSummary',false,'getPos',false);
 
-    computeSessionSummary('digitalChannelsList',1);
-    
-    uLEDPulses = getuLEDsPulses_legacy();
-    getuLEDResponse('restrict_to_baseline',false,'uLEDPulses',uLEDPulses);
-    optogeneticResponses = getOptogeneticResponse('force',true,'digitalChannelsList',[2,3,4,5,6,7,8,9,10,11,12,13]);
+computeSessionSummary('digitalChannelsList',[1,2]);
+
+uLEDPulses = getuLEDsPulses_legacy();
+getuLEDResponse('restrict_to_baseline',false,'uLEDPulses',uLEDPulses);
+
+optogeneticResponses = getOptogeneticResponse('force',true,'digitalChannelsList',[1,2,3,4,5,6,7,8,9,10,11,12,13]);
 
 
 
