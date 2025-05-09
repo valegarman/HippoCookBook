@@ -7,6 +7,7 @@ batch_preprocessSession('basepath','E:\app2','sessionSummary',false,'getPos',fal
 
 processSession('basepath','C:\app2\app2_250331_sess1','digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 
+indexNewSession('basepath','C:\data\app2\app2_250331_sess1');
 %% WT7
 updateExpFolder_temp({'D:\wt7'},'E:\wt7');
 
