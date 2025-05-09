@@ -40,7 +40,7 @@ addParameter(p,'BoundsColor',[],@isnumeric);
 addParameter(p,'doPlot',true,@islogical);
 addParameter(p,'inAxis',false,@islogical);
 addParameter(p,'labelSummary',true,@islogical);
-addParameter(p,'type','Pearson',@ischar);
+addParameter(p,'type','Spearman',@ischar);
 addParameter(p,'alphaBounds',.95,@isscalar);
 addParameter(p,'plotBounds',false,@islogical);
 addParameter(p,'MarkerAlpha',[.5],@isnumeric);

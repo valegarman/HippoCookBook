@@ -172,7 +172,7 @@ end
 leftArmTtl_channel = session.analysisTags.leftArmTtl_channel;
 rightArmTtl_channel = session.analysisTags.rightArmTtl_channel;
 homeDelayTtl_channel = session.analysisTags.homeDelayTtl_channel;
-tracking_ttl_channel = session.analysisTags.bazler_ttl_channel;
+tracking_ttl_channel = session.
 
 ints = [];
 if restrict_to_manipulation

@@ -7,7 +7,8 @@ identity:
 
 
 # Project path (change when moving around)
-project_path: C:\Users\pabad\Desktop\TMaze-Pablo-2024-12-11
+project_path: C:\Users\amartinez11\OneDrive - 
+  imim.es\Documents\Code\HippoCookBook\external_packages\DeepLabCut\TMaze-Pablo-2024-12-11
 
 
 # Default DeepLabCut engine to use for shuffle creation (either pytorch or tensorflow)
@@ -55,6 +56,9 @@ bodyparts:
 - back
 - tail1
 - tail2
+
+
+# Fraction of video to start/stop when extracting frames for labeling/refinement
 
 
 # Fraction of video to start/stop when extracting frames for labeling/refinement
