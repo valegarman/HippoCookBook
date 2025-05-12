@@ -5,32 +5,11 @@
 %   'updateExpFolder({recordingPC_1, recordingPC_2, etc}, 'analysis unit')',
 %   Example:
 
-updateExpFolder_temp({'F:\camk12'},'D:\camk12');
+updateExpFolder_temp({'E:\app2'},'C:\app2');
 
 % 2% Then, preprocess session (includes artifacts removal, median signal
 %   removal, LFP and Kilosort, and running computeSessionSummary by 'batch_preprocessSession('basepath','sessionBasepath').
 %   Example:
-preprocessSession('basepath','D:\camk12\camk12_250508_sess6','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[]}),'digitalChannelsList',[1],'sessionSummary',false,'getPos',false);
-
-computeSessionSummary('digitalChannelsList',[1,2]);
-
-uLEDPulses = getuLEDsPulses_legacy();
-getuLEDResponse('restrict_to_baseline',false,'uLEDPulses',uLEDPulses);
-
-optogeneticResponses = getOptogeneticResponse('force',true,'digitalChannelsList',[1,2,3,4,5,6,7,8,9,10,11,12,13]);
-
-
-
-
-
-
-
-
-
-
-
-
-
 batch_preprocessSession('basepath','X:\data\fCr1','analysisPath','F:\fCr1','cleanArtifacts',({[],1}),'analogChannelsList',[],'digitalChannelsList',1);
 
 % <OPTIONAL> If summary was not processed, it can be run in batch by 'batch_preprocessSession'
@@ -39,11 +18,12 @@ batch_sessionSummary('basepath','G:\data\fPv4','cleanArtifacts',({65,[]}),'analo
 % 3% CLEAN SESSIONS MANUALLY BY PHY
 
 % 4% Processs individual sessions by by 'processSession'. Example:
-% ANDREA!!!!!!! add ('LED_threshold',.8) in the function for fSst3!!!!!!!!!!!!
-processSession('digital_optogenetic_channels',[1],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
+% ANEL!!!!!!! add ('LED_threshold',.8) in the function for fSst3!!!!!!!!!!!!
+processSession('basepath','C:\app2\app2_250401_sess2','digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 
-% 5% Revise output using ProcessSession_notebook
-edit ProcessSession_notebook.m
+
+% 5% Check out output using ProcessSession_notebook
+edit Notebook_for_checking_processSession_results.m
 
 % 5% Index session
 indexNewSession;
@@ -54,3 +34,12 @@ indexNewSession;
         loadProjectResults('project', 'InterneuronsLibrary',...
         'analysis_project_path', 'C:\Users\Andrea Gallardo\Dropbox\ProjectsOnLine\interneuronsLibrary\data','loadLast',true);
     
+
+
+% % Ripple dectection
+    ExcludeIntervals = [];
+    rippleChannel =42; %which is the best ripple channel
+    SWChannel = 6;
+    eventSpikeThreshold_shanks = [1 2 3 4 5]; % which shanks will be accounted for the spike threshold 
+    rippleMasterDetector_threshold = [.50 1]; % [1.5 3.5]
+    eventSpikeThreshold = 0; % .5
