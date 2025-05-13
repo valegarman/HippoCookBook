@@ -27,8 +27,7 @@ for ii = 1:length(sessionsTable.SessionName)
 
             ts_PreSleep2 = [];
             ts_PostSleep2 = [];
-            ripples_fiber_pre = [];
-            ripples_fiber_post = [];
+            ripples_fiber_pre ripples_fiber_post
     
             for jj = 1:length(session.epochs)
                 if strcmpi(session.epochs{jj}.behavioralParadigm,'PreSleep2') && strcmpi(session.epochs{jj}.manipulation,'Fiber')
@@ -47,9 +46,9 @@ for ii = 1:length(sessionsTable.SessionName)
             end
     
             % Compute fiber for pre-post maze epochs
-            if ~isempty(ts_PreSleep2)
-                ripples_fiber_pre = fiberPhotometryModulation_temp([],'restrictIntervals',ts_PreSleep2,'eventType','ripples','saveAs','PreSleep2','savePlotAs','PreSleep2');
-            end
+    
+            ripples_fiber_pre = fiberPhotometryModulation_temp([],'restrictIntervals',ts_PreSleep2,'eventType','ripples','saveAs','PreSleep2','savePlotAs','PreSleep2');
+            
             if ~isempty(ts_PostSleep2)
                 ripples_fiber_post = fiberPhotometryModulation_temp([],'restrictIntervals',ts_PostSleep2,'eventType','ripples','saveAs','PostSleep2','savePlotAs','PostSleep2');
             end

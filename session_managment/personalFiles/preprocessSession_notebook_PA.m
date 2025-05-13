@@ -22,11 +22,15 @@ processSession('basepath','C:\data\wt7\wt7_250404_sess1','digital_optogenetic_ch
 processSession('basepath','C:\data\wt7\wt7_250407_sess2','digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 processSession('basepath','E:\wt7\wt7_250408_sess3','digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 processSession('basepath','E:\wt7\wt7_250409_sess4','digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
+processSession('basepath','D:\wt7 sorted\wt7_250414_sess7','digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
+
 
 indexNewSession('basepath','C:\data\wt7\wt7_250404_sess1');
 indexNewSession('basepath','C:\data\wt7\wt7_250407_sess2');
 indexNewSession('basepath','E:\wt7\wt7_250408_sess3');
 indexNewSession('basepath','E:\wt7\wt7_250409_sess4');
+indexNewSession('basepath','D:\wt7 sorted\wt7_250414_sess7');
+
 %% WT5
 updateExpFolder_temp({'D:\wt5'},'C:\wt5');
 
