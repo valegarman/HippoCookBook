@@ -66,7 +66,7 @@ figure
 [gs_predicted] = groupStats({deep_counter_error,sup_error},...
     [],'color',[color_deep;color_sup],'plotType','roundPlot','plotData',true,'labelSummary',false,'x_position',[1 2],'sigStar',true,'roundPlotSize',5,'inAxis',true,'dataSize',2);
 ylim([0 40]);
-set(gca,'XTick',[1:2],'XTickLabel',{'DEEP','SUP'},'XTickLabelRotation',45);
+% set(gca,'XTick',[1:2],'XTickLabel',{'DEEP','SUP'},'XTickLabelRotation',45);
 
 
 figure
