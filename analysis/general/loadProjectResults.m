@@ -68,16 +68,54 @@ end
 %% find indexed sessions
 if isempty(list_of_paths)
 
-    if isempty(indexedSessionCSV_name)
-        error('Need to provide the name of the index Project variable');
-    end
-    if isempty(indexedSessionCSV_path)
-        warning('Not included the path where the indexed Projects .mat variable is located. Trying to find it...');
-        indexedSessionCSV_path = fileparts(which([indexedSessionCSV_name,'.csv']));
-    end
-    if isempty(analysis_project_path)
-        analysis_project_path = indexedSessionCSV_path;
-    end
+% <<<<<<< HEAD
+sessionsTable = readtable([indexedSessionCSV_path filesep indexedSessionCSV_name,'.csv']); % the variable is called allSessions
+
+for ii = 1:length(sessionsTable.SessionName)
+
+    sessions.basepaths{ii} = adapt_filesep([nas_path(sessionsTable.Location{ii}) filesep sessionsTable.Path{ii}]);
+
+end
+sessions.project = sessionsTable.Project;
+
+disp('Projects found: '); 
+for ii = 1:length(sessions.project) % remove to spaces together, if any
+    sessions.project{ii} = strrep(sessions.project{ii}, '  ', ' ');
+end
+project_list = unique(sessions.project);
+project_list_temp = cell(0);
+for jj = 1:length(project_list)
+    project_list_temp{1,length(project_list_temp)+1} = project_list{jj};
+    project_list_temp{1,length(project_list_temp)+1} = ' ';
+end    
+project_list_temp(end) = [];
+project_list = unique(split([project_list_temp{:}],' '));
+
+for ii = 1:length(project_list)
+    fprintf(' %3.i/ %s \n',ii,project_list{ii}); %\n
+end
+% fprintf('Taking all sessions from project "%s" \n',project)
+
+% selecting sessions
+if isempty(list_of_sessions)
+    list_of_sessions = sessionsTable.SessionName;
+end
+
+if ~isempty(reject_sessions)
+    list_of_sessions{find(contains(list_of_sessions,lower(reject_sessions)))} = ' ';
+end
+% =======
+%     if isempty(indexedSessionCSV_name)
+%         error('Need to provide the name of the index Project variable');
+%     end
+%     if isempty(indexedSessionCSV_path)
+%         warning('Not included the path where the indexed Projects .mat variable is located. Trying to find it...');
+%         indexedSessionCSV_path = fileparts(which([indexedSessionCSV_name,'.csv']));
+%     end
+%     if isempty(analysis_project_path)
+%         analysis_project_path = indexedSessionCSV_path;
+%     end
+% >>>>>>> a44f5ed7ef76cf090c2430220e48de8d504a3bde
     
     sessionsTable = readtable([indexedSessionCSV_path filesep indexedSessionCSV_name,'.csv']); % the variable is called allSessions
     
@@ -211,7 +249,7 @@ for ii = 1:length(sessions.basepaths)
         summaryPngs = dir([sessions.basepaths{ii} filesep 'SummaryFigures' filesep 'Summary*.png']);
         for jj = 1:length(summaryPngs)
             copyfile([summaryPngs(jj).folder filesep summaryPngs(jj).name],...
-                [saveSummariespath  sessionsTable.SessionName{ii} '_' summaryPngs(jj).name]);
+                [saveSummariespath  projectSessionResults.sessionName{ii} '_' summaryPngs(jj).name]);
         end
     end
     

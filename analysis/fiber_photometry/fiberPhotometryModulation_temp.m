@@ -1,4 +1,4 @@
-function [ripples_fiber] = fiberPhotometryModulation_temp(timestamps,varargin)
+function [psth] = fiberPhotometryModulation_temp(timestamps,varargin)
 %   fiberPhtometryModulation - Computes fiber photometry response in
 %   specific timestamps. 
 %
@@ -207,6 +207,17 @@ else
     save_plt_as = {};
 end
 
+if ~isempty(restrictIntervals)
+    [status] = InIntervals(timestamps,[restrictIntervals]);
+    timestamps = timestamps(status,:);
+    if ~isempty(saveAs)
+        save_mat_as{1} = saveAs;
+    end
+    if ~isempty(savePlotAs)
+        save_plt_as{1} = savePlotAs;
+    end
+end
+
 for jj = 1:max(timestamps(:,2))
     
     ts = timestamps(timestamps(:,2) == jj,1);
@@ -385,13 +396,25 @@ if saveMat
         psth.times = times{ii};
 
         try
-            if restrict_fiber_epochs
-            save([session.general.name,'.fiber_psth_',eventType,'_',save_mat_as{ii},'.mat'],'psth');
+            if restrict_fiber_epochs | ~isempty(saveAs)
+                save([session.general.name,'.fiber_psth_',eventType,'_',save_mat_as{ii},'.mat'],'psth');
             else
                 save([session.general.name,'.fiber_psth_',eventType,'.mat'],'psth');
             end
         catch
         end
+    end
+else
+    for ii = 1:max(timestamps(:,2))
+        psth = [];
+    
+        psth.red = red{ii};
+        psth.red_smooth = red_smooth{ii};
+        psth.red_normalized = red_normalized{ii};
+        psth.green = green{ii};
+        psth.green_smooth = green_smooth{ii};
+        psth.green_normalized = green_normalized{ii};
+        psth.times = times{ii};
     end
 end
 
@@ -432,10 +455,12 @@ if plt
         plot(time_vector,smooth(zmean,10),'k','LineWidth',2);
         xline(0, '--', 'Color',[.5 .5 .5], 'LineWidth', 2); % Line in t=0 
     
-        if restrict_fiber_epochs
-            saveas(gca,['SummaryFigures\fiber_red_',eventType,'_',save_plt_as{ii},'.png']);
-        else
-            saveas(gca,['SummaryFigures\fiber_red_',eventType,'.png']);
+        if savePlot
+            if restrict_fiber_epochs | ~isempty(savePlotAs)
+                saveas(gca,['SummaryFigures\fiber_red_',eventType,'_',save_plt_as{ii},'.png']);
+            else
+                saveas(gca,['SummaryFigures\fiber_red_',eventType,'.png']);
+            end
         end
 
         % greenZSmooth
@@ -465,7 +490,7 @@ if plt
         xline(0, '--', 'Color',[.5 .5 .5], 'LineWidth', 2); % Line in t=0 
 
         if savePlot
-            if restrict_fiber_epochs
+            if restrict_fiber_epochs | ~isempty(savePlotAs)
                 saveas(gca,['SummaryFigures\fiber_green_',eventType,'_',save_plt_as{ii},'.png']);
             else
                 saveas(gca,['SummaryFigures\fiber_green_',eventType,'.png']);

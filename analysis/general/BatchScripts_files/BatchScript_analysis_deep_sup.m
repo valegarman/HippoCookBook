@@ -5,7 +5,7 @@ HCB_directory = what('HippoCookBook');
 sessionsTable = readtable([HCB_directory.path filesep 'indexedSessions.csv']); % the variable is called allSessions
 targetProject = 'Bibliocampus';
 
-for ii = 95:length(sessionsTable.SessionName)
+for ii = 204:length(sessionsTable.SessionName)
     if contains(sessionsTable.Project(ii), targetProject) || strcmpi('all', targetProject)
         fprintf(' > %3.i/%3.i session \n',ii, length(sessionsTable.SessionName)); %\n
         cd([nas_path(sessionsTable.Location{ii}) filesep sessionsTable.Path{ii}]);
@@ -41,12 +41,27 @@ for ii = 95:length(sessionsTable.SessionName)
             session.extracellular.chanCoords.verticalSpacing = 20;
             session.extracellular.chanCoords.probe = 'CambridgeNeurotech-H2-64ch(2shank-ege)';
         elseif strcmpi(session.extracellular.chanCoords.layout, 'poly2')
-            keyboard;
             session.extracellular.chanCoords.layout = 'staggered';
             session.extracellular.chanCoords.verticalSpacing = 20;
             session.extracellular.chanCoords.probe = 'A5x12-16-Buz-lin-5mm-100-200-160-177';
         elseif strcmpi(session.extracellular.chanCoords.layout, 'staggered')
             session.extracellular.chanCoords.probe = session.animal.probeImplants{1}.probe;
+        elseif strcmpi(session.extracellular.chanCoords.layout, 'CambridgeNeurotech-H3-64ch')
+            session.extracellular.chanCoords.layout = 'linear';
+            session.extracellular.chanCoords.verticalSpacing = 20;
+            session.extracellular.chanCoords.probe = 'CambridgeNeurotech-H3-64ch';
+        elseif strcmpi(session.extracellular.chanCoords.layout, 'A3x8-16-Buz-lin-5mm-50-150-160-703')
+            session.extracellular.chanCoords.layout = 'staggered';
+            session.extracellular.chanCoords.verticalSpacing = 20;
+            session.extracellular.chanCoords.probe = 'A3x8-16-Buz-lin-5mm-50-150-160-703';
+        elseif strcmpi(session.extracellular.chanCoords.layout, 'DiagnosticBiochip-128-6-128ch&uLED_12LED-32Ch-4Shanks')
+            session.extracellular.chanCoords.layout = 'staggered';
+            session.extracellular.chanCoords.verticalSpacing = 20;
+            session.extracellular.chanCoords.probe = 'DiagnosticBiochip-128-6-128ch&uLED_12LED-32Ch-4Shanks';
+        elseif strcmpi(session.extracellular.chanCoords.layout, 'A1x32-Poly3-5mm-25s-177')
+            session.extracellular.chanCoords.layout = 'staggered';
+            session.extracellular.chanCoords.verticalSpacing = 20;
+            session.extracellular.chanCoords.probe = 'A1x32-Poly3-5mm-25s-177';
         else 
             keyboard;   
         end

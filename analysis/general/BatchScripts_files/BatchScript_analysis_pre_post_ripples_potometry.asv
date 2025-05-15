@@ -1,0 +1,77 @@
+%% BatchScript_analysis_ripplesPerSubsession
+
+clear; close all
+HCB_directory = what('HippoCookBook'); 
+sessionsTable = readtable([HCB_directory.path filesep 'indexedSessions.csv']); % the variable is called allSessions
+targetProject = 'POTometry';
+
+for ii = 1:length(sessionsTable.SessionName)
+    if contains(sessionsTable.Project(ii), targetProject) || strcmpi('all', targetProject)
+        fprintf(' > %3.i/%3.i session \n',ii, length(sessionsTable.SessionName)); %\n
+        cd([nas_path(sessionsTable.Location{ii}) filesep sessionsTable.Path{ii}]);
+
+        % 
+        clear basepath session basename cell_metrics spikes 
+        basepath = pwd;
+        session = loadSession;
+        basename = basenameFromBasepath(basepath);
+         try
+            ripples_fiber = fiberPhotometryModulation_temp([],'eventType','ripples');
+        catch
+            warning('No fiber recording in this session...');
+        end
+
+        if isempty(dir('*fiber_psth_ripples_PreSleep2.mat'))
+
+            % 
+
+            ts_PreSleep2 = [];
+            ts_PostSleep2 = [];
+            ripples_fiber_pre ripples_fiber_post
+    
+            for jj = 1:length(session.epochs)
+                if strcmpi(session.epochs{jj}.behavioralParadigm,'PreSleep2') && strcmpi(session.epochs{jj}.manipulation,'Fiber')
+                    ts_PreSleep2 = [session.epochs{jj}.startTime session.epochs{jj}.stopTime];
+                elseif strcmpi(session.epochs{jj}.behavioralParadigm,'PreSleep2') && ~strcmpi(session.epochs{jj}.manipulation,'Fiber')
+                    error('Problems defining fiber epochs...');
+                end
+            end
+    
+            for jj = 1:length(session.epochs)
+                if strcmpi(session.epochs{jj}.behavioralParadigm,'PostSleep2') && strcmpi(session.epochs{jj}.manipulation,'Fiber')
+                    ts_PostSleep2 = [session.epochs{jj}.startTime session.epochs{jj}.stopTime];
+                elseif strcmpi(session.epochs{jj}.behavioralParadigm,'PostSleep2') && ~strcmpi(session.epochs{jj}.manipulation,'Fiber')
+                    error('Problems defining fiber epochs...');
+                end
+            end
+    
+            % Compute fiber for pre-post maze epochs
+    
+            ripples_fiber_pre = fiberPhotometryModulation_temp([],'restrictIntervals',ts_PreSleep2,'eventType','ripples','saveAs','PreSleep2','savePlotAs','PreSleep2');
+            
+            if ~isempty(ts_PostSleep2)
+                ripples_fiber_post = fiberPhotometryModulation_temp([],'restrictIntervals',ts_PostSleep2,'eventType','ripples','saveAs','PostSleep2','savePlotAs','PostSleep2');
+            end
+
+            try
+                figure;
+                plotFill([1:size(ripples_fiber_pre.red_normalized.responsecurveZSmooth,2)],ripples_fiber_pre.red_normalized.responsecurveZSmooth,'color',[0 0 0]);
+                hold on;
+                plotFill([1:size(ripples_fiber_post.red_normalized.responsecurveZSmooth,2)],ripples_fiber_post.red_normalized.responsecurveZSmooth,'color',[1 0 0]);
+                saveas(gca,['SummaryFigures\fiber_red_pre_post.png']);
+    
+                figure;
+                plotFill([1:size(ripples_fiber_pre.green_normalized.responsecurveZSmooth,2)],ripples_fiber_pre.green_normalized.responsecurveZSmooth,'color',[0 0 0]);
+                hold on;
+                plotFill([1:size(ripples_fiber_post.green_normalized.responsecurveZSmooth,2)],ripples_fiber_post.green_normalized.responsecurveZSmooth,'color',[0 1 0]);
+                saveas(gca,['SummaryFigures\fiber_green_pre_post.png']);
+            catch
+            end
+        end
+
+        close all;
+
+        
+    end
+    close all;
+end

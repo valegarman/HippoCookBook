@@ -32,6 +32,7 @@ addParameter(p,'showGrid',true,@islogical);
 addParameter(p,'inAxis',false,@islogical);
 addParameter(p,'area_is_p',true,@islogical);
 addParameter(p,'area_factor',10,@isnumeric);
+addParameter(p,'p_value_threshold',0.05,@isnumeric);
 
 parse(p,varargin{:});
 
@@ -46,6 +47,7 @@ inAxis = p.Results.inAxis;
 area_is_p = p.Results.area_is_p;
 area_factor = p.Results.area_factor;
 maxPvalue = p.Results.maxPvalue;
+p_value_threshold = p.Results.p_value_threshold;
 
 %%%
 if onlyBelowDiagonal
@@ -131,12 +133,12 @@ if area_is_p
     
     x = x(:);
     y = y(:);
-    is_sig = p_values > -log10(0.05);
+    is_sig = p_values > -log10(p_value_threshold);
 
     scatter(x(is_sig),y(is_sig),area_values(is_sig)*area_factor, [.5 .5 .5],'LineWidth',1);
 end
 
-axis square
+% axis square
 set(gca, 'TickDir','out','Xtick',[1:size(corrMat,1)],'XTickLabel',X_variablesNames,'XTickLabelRotation',45, 'YDir', 'reverse', ...
     'Ytick', [1:size(corrMat,2)], 'YTickLabel', Y_variablesNames, 'XTickLabelRotation', 45);
 
