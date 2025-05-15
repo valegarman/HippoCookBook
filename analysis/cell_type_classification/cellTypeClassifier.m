@@ -1,5 +1,5 @@
 
-function [cell_types, cell_classification_stats cell_metrics] = cellTypeClassifier(varargin) 
+function [cell_types, cell_classification_stats, cell_metrics, cell_subtypes] = cellTypeClassifier(varargin) 
     % [cell_types, cell_metrics] = cellTypeClassifier(varargin) 
     %   Cell type classification based on ...
     %
@@ -15,6 +15,7 @@ function [cell_types, cell_classification_stats cell_metrics] = cellTypeClassifi
     addParameter(p,'overwrite_cell_metrics',true,@islogical);
     addParameter(p,'score_cut_off',.70,@isnumeric);
     addParameter(p,'imposeCellExplorerPyr',true);
+    addParameter(p,'ripples_psth',[],@isstruct);
     
     parse(p,varargin{:});
     
@@ -25,6 +26,7 @@ function [cell_types, cell_classification_stats cell_metrics] = cellTypeClassifi
     overwrite_cell_metrics = p.Results.overwrite_cell_metrics;
     score_cut_off = p.Results.score_cut_off;
     imposeCellExplorerPyr = p.Results.imposeCellExplorerPyr;
+    ripples_psth = p.Results.ripples_psth;
 
     %% Collect data
     previousPath = pwd;
@@ -93,8 +95,45 @@ function [cell_types, cell_classification_stats cell_metrics] = cellTypeClassifi
     cell_types(max(score,[],2)<score_cut_off) = {'Undetermined'};
     is_noisy = cell_metrics.refractoryPeriodViolation > 15 | cell_metrics.firingRate < 0.1;
     cell_types(is_noisy) = {'Noisy_unit'};
-    cell_types(ismember(cell_metrics.putativeCellType,'CAMK2')) = {'CAMK2+'}; % fix name :)
+    cell_types(ismember(cell_types,'CAMK2')) = {'CAMK2+'}; % fix name :)
     cell_classification_stats.model = modelType;
+
+    % subtypes
+    cell_subtypes = cell_types;
+    % sup_deep
+    deep_sup = [];
+    try deep_sup = cell_metrics.deepSuperficial_Sharif;
+    catch
+        disp('Trying alternative deep-superficial metric...');
+        try deep_sup = cell_metrics.deepSuperficial;
+        catch
+            warning('Deep-superficial subtype definition was not possible...');
+        end
+    end
+    if ~isempty(deep_sup)
+        cell_subtypes(ismember(deep_sup',{'Superficial'}) & ismember(cell_subtypes, 'CAMK2+')) = {'CAMK2_SUP'};
+        cell_subtypes(ismember(deep_sup','Deep') & ismember(cell_subtypes, 'CAMK2+')) = {'CAMK2_DEEP'};
+    end
+    
+    % id2_sncg and id2_noSncg
+    if isempty(ripples_psth)
+        targetFile = dir('*ripples_psth.cellinfo.mat');
+        if isempty(targetFile.name)
+            warning('Sncg subtype definition was not possible...');
+        end
+        ripples_psth = importdata(targetFile.name);
+    end
+    if ~isempty(ripples_psth)
+        if ~isempty(find(ismember(cell_metrics.brainRegion, 'CA1sp')))
+            Mdl_sncg = importdata([directory.path filesep 'Mdl_sncg.mat']);
+            features = [log10(cell_metrics.acg_tau_rise)' cell_metrics.cv2' log10(cell_metrics.firingRate)' ripples_psth.rateZDuringPulse];
+            [predicted_sncg,score] = predict(Mdl_sncg,features);
+            cell_subtypes(ismember(cell_subtypes, 'ID2+') & predicted_sncg & ismember(cell_metrics.brainRegion, 'CA1sp')' & ripples_psth.rateZDuringPulse<3.5) = {'ID2_SNCG+'};
+            cell_subtypes(ismember(cell_subtypes, 'ID2+')) = {'ID2_NOSNCG+'};
+        else
+            warning('Sncg subtype definition was not possible...');
+        end
+    end
     
     % OUTPUT 
     cell_classification_stats.noisy_units = is_noisy;
@@ -103,6 +142,7 @@ function [cell_types, cell_classification_stats cell_metrics] = cellTypeClassifi
     cell_classification_stats.processed_cell_types = cell_types;
     
     cell_metrics.ground_truth_classification.cell_types = cell_types;
+    cell_metrics.ground_truth_classification.cell_subtypes = cell_subtypes;
     cell_metrics.ground_truth_classification.cell_classification_stats = cell_classification_stats;
 
     if overwrite_cell_metrics
