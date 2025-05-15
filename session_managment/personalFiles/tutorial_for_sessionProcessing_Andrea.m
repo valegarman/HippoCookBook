@@ -19,7 +19,7 @@ batch_sessionSummary('basepath','G:\data\fPv4','cleanArtifacts',({65,[]}),'analo
 
 % 4% Processs individual sessions by by 'processSession'. Example:
 % ANDREA!!!!!!! add ('LED_threshold',.8) in the function for fSst3!!!!!!!!!!!!
-processSession('digital_optogenetic_channels',[1],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
+processSession('digital_optogenetic_channels',[1,2],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 
 % 5% Revise output using ProcessSession_notebook
 edit Notebook_for_checking_processSession_results

@@ -114,6 +114,8 @@ if length(excludeAnalysis) == 0
 end
 excludeAnalysis = lower(excludeAnalysis);
 
+keyboard;
+
 %% 1. Runs sessionTemplate
 if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))
         try
@@ -326,9 +328,8 @@ if ~any(ismember(excludeAnalysis, {'10',lower('cellMetrics')}))
     end
 
     session = loadSession;
-
+    
     cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludePulsesIntervals,'forceReload',true,'excludeMetrics',{'deepSuperficial'}); % after CellExplorar
-
     
     getACGPeak('force',true);
 
@@ -403,3 +404,7 @@ end
 
 cd(prevPath);
 end
+
+
+
+
