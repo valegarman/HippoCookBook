@@ -43,6 +43,7 @@ preprocessSession('basepath','C:\wt5\wt5_250317_sess11','analysisPath',[],'exclu
 processSession('basepath','C:\wt5\wt5_250326_sess18','digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 
 indexNewSession('basepath','C:\wt5\wt5_250326_sess18');
+indexNewSession('basepath','Y:\wt5\wt5_250320_sess14');
 %% WT6
 processSession('basepath','Y:\wt6\wt6_250306_sess2','digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 
