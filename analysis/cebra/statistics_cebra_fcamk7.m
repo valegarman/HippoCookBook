@@ -1,6 +1,8 @@
 %% Load data from CEBRA
 
-sessions = {'Y:\fCamk7\fCamk7_220418_sess14','Y:\fCamk7\fCamk7_220419_sess15','Y:\fCamk7\fCamk7_220420_sess16','Y:\fCamk7\fCamk7_220421_sess17','Y:\fCamk7\fCamk7_220422_sess18'};
+% sessions = {'Y:\fCamk7\fCamk7_220418_sess14','Y:\fCamk7\fCamk7_220419_sess15','Y:\fCamk7\fCamk7_220420_sess16','Y:\fCamk7\fCamk7_220421_sess17','Y:\fCamk7\fCamk7_220422_sess18'};
+% sessions = {'Y:\fCamk7\fCamk7_220418_sess14','Y:\fCamk7\fCamk7_220419_sess15','Y:\fCamk7\fCamk7_220420_sess16'};
+sessions = {'Y:\fCamk7\fCamk7_220418_sess14','Y:\fCamk7\fCamk7_220420_sess16','Y:\fCamk7\fCamk7_220421_sess17','Y:\fCamk7\fCamk7_220422_sess18'};
 
 for ii = 1:length(sessions)
 

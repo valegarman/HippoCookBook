@@ -15,11 +15,16 @@ for ii = 1:length(sessionsTable.SessionName)
         basepath = pwd;
         session = loadSession;
         basename = basenameFromBasepath(basepath);
-         try
-            ripples_fiber = fiberPhotometryModulation_temp([],'eventType','ripples');
-        catch
-            warning('No fiber recording in this session...');
-        end
+
+        % Cell classifier
+        computeRippleReversal;
+        cellTypeClassifier;
+
+        %  try
+        %     ripples_fiber = fiberPhotometryModulation_temp([],'eventType','ripples');
+        % catch
+        %     warning('No fiber recording in this session...');
+        % end
 
         if isempty(dir('*fiber_psth_ripples_PreSleep2.mat'))
 

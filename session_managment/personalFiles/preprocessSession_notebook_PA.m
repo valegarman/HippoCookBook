@@ -2,6 +2,10 @@
 updateExpFolder_temp({'D:\app2'},'E:\app2');
 
 preprocessSession('basepath','C:\app2\app2_250331_sess1','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
+preprocessSession('basepath','E:\app2\app2_250415_sess12','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
+preprocessSession('basepath','E:\app2\app2_250416_sess13','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
+preprocessSession('basepath','E:\app2\app2_250417_sess14','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
+
 batch_preprocessSession('basepath','E:\app2','sessionSummary',false,'getPos',false);
 
 
