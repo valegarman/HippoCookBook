@@ -1,27 +1,27 @@
 %% Load data from CEBRA
 
-sessions = {'Y:\fCamk7\fCamk7_220418_sess14','Y:\fCamk7\fCamk7_220419_sess15','Y:\fCamk7\fCamk7_220420_sess16','Y:\fCamk7\fCamk7_220421_sess17','Y:\fCamk7\fCamk7_220422_sess18'};
+sessions = {'Y:\fCamk7\fCamk7_220418_sess14\CEBRA analysis','Y:\fCamk7\fCamk7_220419_sess15\CEBRA analysis','Y:\fCamk7\fCamk7_220420_sess16\CEBRA analysis','Y:\fCamk7\fCamk7_220421_sess17\CEBRA analysis','Y:\fCamk7\fCamk7_220422_sess18\CEBRA analysis'};
 for ii = 1:length(sessions)
 
     cd(sessions{ii})
 
-    file = dir('*cell_metrics.cellinfo.mat');
-    load(file.name);
-
-    neurons.session{ii} = sessions{ii};
-    neurons.number(ii) = length(cell_metrics.UID);
-    neurons.camk2(ii) = length(find(ismember(cell_metrics.ground_truth_classification.cell_types,'CAMK2')));
-    neurons.pv(ii) = length(find(ismember(cell_metrics.ground_truth_classification.cell_types,'PV+')));
-    neurons.sst(ii) = length(find(ismember(cell_metrics.ground_truth_classification.cell_types,'SST+')));
-    
-    neurons.vip(ii) = length(find(ismember(cell_metrics.ground_truth_classification.cell_types,'VIP+')));
-    % New classes
-    neurons.deep(ii) = length(find(ismember(cell_metrics.ground_truth_classification.cell_subtypes,'CAMK2_DEEP')));
-    neurons.sup(ii) = length(find(ismember(cell_metrics.ground_truth_classification.cell_subtypes,'CAMK2_SUP')));
-    neurons.id2(ii) = length(find(ismember(cell_metrics.ground_truth_classification.cell_subtypes,'ID2_NOSNCG+')));
-    neurons.sncg(ii) = length(find(ismember(cell_metrics.ground_truth_classification.cell_subtypes,'ID2_SNCG+')));
-
-    neurons.int(ii) = neurons.pv(ii)+neurons.sst(ii)+neurons.id2(ii)+neurons.vip(ii)+neurons.sncg(ii);
+    % file = dir('*cell_metrics.cellinfo.mat');
+    % load(file.name);
+    % 
+    % neurons.session{ii} = sessions{ii};
+    % neurons.number(ii) = length(cell_metrics.UID);
+    % neurons.camk2(ii) = length(find(ismember(cell_metrics.ground_truth_classification.cell_types,'CAMK2')));
+    % neurons.pv(ii) = length(find(ismember(cell_metrics.ground_truth_classification.cell_types,'PV+')));
+    % neurons.sst(ii) = length(find(ismember(cell_metrics.ground_truth_classification.cell_types,'SST+')));
+    % 
+    % neurons.vip(ii) = length(find(ismember(cell_metrics.ground_truth_classification.cell_types,'VIP+')));
+    % % New classes
+    % neurons.deep(ii) = length(find(ismember(cell_metrics.ground_truth_classification.cell_subtypes,'CAMK2_DEEP')));
+    % neurons.sup(ii) = length(find(ismember(cell_metrics.ground_truth_classification.cell_subtypes,'CAMK2_SUP')));
+    % neurons.id2(ii) = length(find(ismember(cell_metrics.ground_truth_classification.cell_subtypes,'ID2_NOSNCG+')));
+    % neurons.sncg(ii) = length(find(ismember(cell_metrics.ground_truth_classification.cell_subtypes,'ID2_SNCG+')));
+    % 
+    % neurons.int(ii) = neurons.pv(ii)+neurons.sst(ii)+neurons.id2(ii)+neurons.vip(ii)+neurons.sncg(ii);
 
 
     try
@@ -53,6 +53,16 @@ figure
     [],'color',[color_camk2;color_camk2;color_int;color_camk2_dark;color_camk2_dark;color_int],'plotType','roundPlot','plotData',true,'labelSummary',false,'x_position',[1 2 3 4 5 6],'sigStar',true,'roundPlotSize',5,'inAxis',true,'dataSize',2, 'repeatedMeasures',true,'posthoc_test','lsd');
 ylim([0 40]);
 set(gca,'XTick',[1:6],'XTickLabel',{'CAMK2','CAMK2_c','INT','CAMK2_s','CAMK2_c_s','INT_s'},'XTickLabelRotation',45);
+
+
+
+
+figure
+[gs_predicted] = groupStats({camk2_error,camk2_counter_error,int_error},...
+    [],'color',[color_camk2;color_camk2;color_int],'plotType','roundPlot','plotData',true,'labelSummary',false,'x_position',[1 2 3 4 5 6],'sigStar',true,'roundPlotSize',5,'inAxis',true,'dataSize',2, 'repeatedMeasures',false,'posthoc_test','lsd');
+ylim([0 40]);
+set(gca,'XTick',[1:3],'XTickLabel',{'CAMK2','CAMK2_c','INT'},'XTickLabelRotation',45);
+
 
 analysis_project_path = adapt_filesep([onedrive_path filesep 'NeuralComputationLab\ActiveProjects\Bibliocampus\data']);
 save([analysis_project_path filesep 'chapter_cebra_data' date '.mat'],'-v7.3');
