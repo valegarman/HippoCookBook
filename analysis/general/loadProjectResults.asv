@@ -312,58 +312,6 @@ for ii = 1:length(projectSessionResults.numcells)
     end
 end
 
-% session, genetic line, experimentalSubjet (for ripples variables)
-counCell = 1;
-for ii = 1:length(projectSessionResults.num_ripples)
-    for jj = 1:projectSessionResults.num_ripples(ii)
-        % session
-        projectResults.session_ripples{counCell} = lower(projectSessionResults.sessionName{ii});
-        projectResults.sessionNumber_ripples(counCell) = ii;
-        
-        % geneticLine
-        projectResults.geneticLine_ripples{counCell} = lower(projectSessionResults.geneticLine{ii});
-        
-        % expSubject
-         projectResults.expSubject_ripples{counCell} = lower(projectSessionResults.expSubject{ii});
-         counCell = counCell + 1;
-    end
-end
-
-% session, genetic line, experimentalSubjet (for ripples variables)
-counCell = 1;
-for ii = 1:length(projectSessionResults.num_ripples_pre)
-    for jj = 1:projectSessionResults.num_ripples_pre(ii)
-        % session
-        projectResults.session_ripples_pre{counCell} = lower(projectSessionResults.sessionName{ii});
-        projectResults.sessionNumber_ripples_pre(counCell) = ii;
-        
-        % geneticLine
-        projectResults.geneticLine_ripples_pre{counCell} = lower(projectSessionResults.geneticLine{ii});
-        
-        % expSubject
-         projectResults.expSubject_ripples_pre{counCell} = lower(projectSessionResults.expSubject{ii});
-         counCell = counCell + 1;
-    end
-end
-
-% session, genetic line, experimentalSubjet (for ripples variables)
-counCell = 1;
-for ii = 1:length(projectSessionResults.num_ripples_post)
-    for jj = 1:projectSessionResults.num_ripples_post(ii)
-        % session
-        projectResults.session_ripples_post{counCell} = lower(projectSessionResults.sessionName{ii});
-        projectResults.sessionNumber_ripples_post(counCell) = ii;
-        
-        % geneticLine
-        projectResults.geneticLine_ripples_post{counCell} = lower(projectSessionResults.geneticLine{ii});
-        
-        % expSubject
-         projectResults.expSubject_ripples_post{counCell} = lower(projectSessionResults.expSubject{ii});
-         counCell = counCell + 1;
-    end
-end
-
-
 projectResults.sessionList = unique(projectResults.session);
 projectResults.geneticLineList = unique(projectResults.geneticLine);
 projectResults.expSubjectList = unique(projectResults.expSubject);

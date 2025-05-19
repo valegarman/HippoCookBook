@@ -2,6 +2,10 @@
 updateExpFolder_temp({'D:\app2'},'E:\app2');
 
 preprocessSession('basepath','C:\app2\app2_250331_sess1','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
+preprocessSession('basepath','E:\app2\app2_250415_sess12','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
+preprocessSession('basepath','E:\app2\app2_250416_sess13','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
+preprocessSession('basepath','E:\app2\app2_250417_sess14','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
+
 batch_preprocessSession('basepath','E:\app2','sessionSummary',false,'getPos',false);
 
 
@@ -39,6 +43,7 @@ preprocessSession('basepath','C:\wt5\wt5_250317_sess11','analysisPath',[],'exclu
 processSession('basepath','C:\wt5\wt5_250326_sess18','digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 
 indexNewSession('basepath','C:\wt5\wt5_250326_sess18');
+indexNewSession('basepath','Y:\wt5\wt5_250320_sess14');
 %% WT6
 processSession('basepath','Y:\wt6\wt6_250306_sess2','digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 
