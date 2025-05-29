@@ -42,17 +42,19 @@ p = inputParser;
 addParameter(p,'basepath',pwd,@isdir);
 addParameter(p,'spikes',[]);
 addParameter(p,'bandsToCompute',{'rippleModulation','thetaModulation','lgammaModulation',...
-    'hgammaModulation','thetaRunModulation','thetaREMModulation'});
+    'hgammaModulation', 'fgammaModulation','thetaRunModulation','thetaREMModulation'});
 addParameter(p,'rippleChannel',[],@isnumeric);
 addParameter(p,'SWChannel',[],@isnumeric);
 addParameter(p,'thetaChannel',[],@isnumeric);
 addParameter(p,'hgammaChannel',[],@isnumeric);
 addParameter(p,'lgammaChannel',[],@isnumeric);
+addParameter(p,'fgammaChannel',[],@isnumeric);
 addParameter(p,'ripple_passband',[120 200], @isnumeric);
 addParameter(p,'SW_passband',[2 10],@isnumeric);
 addParameter(p,'theta_passband',[6 12], @isnumeric);
-addParameter(p,'lgamma_passband',[20 60], @isnumeric);
-addParameter(p,'hgamma_passband',[60 100],@isnumeric);
+addParameter(p,'lgamma_passband',[20 50], @isnumeric);
+addParameter(p,'hgamma_passband',[50 100],@isnumeric);
+addParameter(p,'fgamma_passband',[100 140],@isnumeric);
 addParameter(p,'method','hilbert',@ischar);
 addParameter(p,'plotting',true,@islogical);
 addParameter(p,'saveMat',true,@islogical);
@@ -75,18 +77,20 @@ SWChannel = p.Results.SWChannel;
 thetaChannel = p.Results.thetaChannel;
 hgammaChannel = p.Results.hgammaChannel;
 lgammaChannel = p.Results.lgammaChannel;
+fgammaChannel = p.Results.fgammaChannel;
 ripple_passband = p.Results.ripple_passband;
 SW_passband = p.Results.SW_passband;
 theta_passband = p.Results.theta_passband;
 lgamma_passband = p.Results.lgamma_passband;
 hgamma_passband = p.Results.hgamma_passband;
+fgamma_passband = p.Results.fgamma_passband;
 method = p.Results.method;
 plotting = p.Results.plotting;
 saveMat = p.Results.saveMat;
 skipStimulationPeriods = p.Results.skipStimulationPeriods;
 excludeIntervals = p.Results.excludeIntervals;
 powerThresh = p.Results.powerThresh;
-restrict_to = p.Results.restrictIntervals;
+% restrict_to = p.Results.restrictIntervals;
 restrict_to = p.Results.restrict_to;
 restrict_to_baseline = p.Results.restrict_to_baseline;
 restrict_to_manipulation = p.Results.restrict_to_manipulation;
@@ -94,7 +98,7 @@ save_as = p.Results.save_as;
 
 %% Session template
 % session = sessionTemplate(basepath,'showGUI',false);
-session = loadSession(basepath);
+% session = loadSession(basepath);
 %% Spikes
 if isempty(spikes)
     spikes = loadSpikes;
@@ -182,7 +186,12 @@ if any([isempty(rippleChannel) isempty(SWChannel) isempty(thetaChannel) isempty(
 end
 
 if isempty(rippleChannel)
-    rippleChannel = hippocampalLayers.bestShankLayers.pyramidal;
+    try 
+        load([basenameFromBasepath(pwd) '.ripples.events.mat']);
+        rippleChannel = ripples.detectorinfo.detectionchannel;
+    catch
+        rippleChannel = hippocampalLayers.bestShankLayers.pyramidal;
+    end
 end
 
 if isempty(SWChannel)
@@ -202,26 +211,24 @@ if isempty(thetaChannel)
 end
 
 if isempty(lgammaChannel)
-    lgammaChannel = hippocampalLayers.bestShankLayers.oriens;
+    lgammaChannel = hippocampalLayers.bestShankLayers.radiatum;
     if isnan(lgammaChannel)
-        try
-            thetaEpochs = detectThetaEpochs();
-            lgammaChannel = thetaEpochs.channel;
-        catch
-            disp('Not possible to load good low gamma channel...');
-        end
+        lgammaChannel = rippleChannel;
     end
 end
 
 if isempty(hgammaChannel)
     hgammaChannel = hippocampalLayers.bestShankLayers.oriens;
     if isnan(hgammaChannel)
-        try
-            thetaEpochs = detectThetaEpochs();
-            hgammaChannel = thetaEpochs.channel;
-        catch
-            disp('Not possible to load good low gamma channel...');
-        end
+        thetaEpochs = detectThetaEpochs();
+        hgammaChannel = thetaEpochs.channel;
+    end
+end
+
+if isempty(fgammaChannel)
+    fgammaChannel = rippleChannel;
+    if isnan(fgammaChannel)
+        fgammaChannel = hippocampalLayers.bestShankLayers.pyramidal;
     end
 end
 
@@ -231,6 +238,7 @@ SWMod = [];
 thetaMod = [];
 lgammaMod = [];
 hgammaMod = [];
+fgammaMod = [];
 thetaRunMod = [];
 thetaREMMod = [];
 
@@ -309,6 +317,18 @@ if ismember('hgammaModulation',bandsToCompute)
         warning('High gamma modulation estimation was not possible...');
     end
 end
+
+%% 6. Fast Gamma Modulation
+if ismember('fgammaModulation',bandsToCompute)
+    try
+        lfpT = getLFP(fgammaChannel);
+        fgammaMod = phaseModulation(spikes,lfpT,fgamma_passband,'intervals',thetaEpochs.intervals,...
+            'useThresh',useThresh,'useMinWidth',false,'powerThresh',powerThresh,'method',method);
+    catch
+        warning('High gamma modulation estimation was not possible...');
+    end
+end
+
 
 %% 6. Theta run mod
 if ismember('thetaRunModulation',bandsToCompute)
@@ -470,6 +490,33 @@ if plotting
         saveas(gcf,['SummaryFigures\hGamma_',num2str(hgamma_passband(1)),'-',num2str(hgamma_passband(end)),save_as ,'.png']);
     end
 
+    % Fast Modulation
+    if ismember('fgammaModulation',bandsToCompute)
+        figure,
+        set(gcf,'Position',get(0,'ScreenSize'))
+        for i = 1:length(spikes.UID)
+            subplot(7,ceil(size(spikes.UID,2)/7),i)
+            area([fgammaMod.phasebins ; fgammaMod.phasebins + 2*pi],[fgammaMod.phasedistros(:,i) ;  fgammaMod.phasedistros(:,i)], 'EdgeColor','none');
+            hold on;
+            ax = axis;
+            x = 0:.001:4*pi;
+            y = cos(x);
+            y = y - min(y); y = ((y/max(y))*(ax(4)-ax(3)))+ax(3);
+            h = plot(x,y,'-','color',[1 .8 .8]); uistack(h,'bottom') % [1 .8 .8]
+            xlim([0 4*pi]);
+            title(num2str(i),'FontWeight','normal','FontSize',10);
+            if i == 1
+                ylabel('prob'); title(['Channel (1-index): ' num2str(fgammaChannel)],'FontWeight','normal','FontSize',10);
+            elseif i == size(spikes.UID,2)
+                set(gca,'XTick',[0:2*pi:4*pi],'XTickLabel',{'0','2\pi','4\pi'},'YTick',[])
+                xlabel('phase (rad)');
+            else
+                set(gca,'YTick',[],'XTick',[]);
+            end
+        end
+        saveas(gcf,['SummaryFigures\fGamma_',num2str(fgamma_passband(1)),'-',num2str(fgamma_passband(end)),save_as ,'.png']);
+    end
+
     % ThetaRUN Modulation
     if ismember('thetaRunModulation',bandsToCompute)
         figure,
@@ -534,6 +581,7 @@ phaseMod.SharpWave = SWMod;
 phaseMod.theta = thetaMod;
 phaseMod.lgamma = lgammaMod;
 phaseMod.hgamma = hgammaMod;
+phaseMod.fgamma = fgammaMod;
 phaseMod.thetaRunMod = thetaRunMod;
 phaseMod.thetaREMMod = thetaREMMod;
 
@@ -562,6 +610,11 @@ if saveMat
     if ismember('hgammaModulation',bandsToCompute)
         save([session.general.name,'.hgamma_',num2str(hgamma_passband(1)),'-',num2str(hgamma_passband(end)),...
             '.', save_as,'.cellinfo.mat'],'hgammaMod');
+    end
+    % Fast Gamma
+    if ismember('fgammaModulation',bandsToCompute)
+        save([session.general.name,'.fgamma_',num2str(fgamma_passband(1)),'-',num2str(fgamma_passband(end)),...
+            '.', save_as,'.cellinfo.mat'],'fgammaMod');
     end
     % ThetaRun
     if ismember('thetaRunModulation',bandsToCompute)

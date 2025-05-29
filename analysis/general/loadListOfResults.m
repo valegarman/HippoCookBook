@@ -7,13 +7,17 @@ switch lower(project)
             'thetaRun*.PhaseLockingData','lgamma*.PhaseLockingData','hgamma*.PhaseLockingData','ripple*.PhaseLockingData','spatialModulation','placeFields','behavior.cellinfo','ACGPeak',...
             'speedCorr','uLEDResponse.cellinfo'};
 
-
     case 'lightininh'
         list = {'optogeneticResponse','averageCCG','ripples_psth','slowOscillations_psth','theta_*.PhaseLockingData','thetaREM*.PhaseLockingData',...
         'thetaRun*.PhaseLockingData','lgamma*.PhaseLockingData','hgamma*.PhaseLockingData','ripple*.PhaseLockingData','spatialModulation','placeFields','behavior.cellinfo','ACGPeak',...
         'speedCorr.cellinfo','uLEDResponse.cellinfo','lightSpikeCollisions','spikeCCGchange','lightSpikeCollisions_control'};
 
+    case 'potometry'
+        list = {'fiber_psth_ripples','fiber_psth_ripples_PreSleep2','fiber_psth_ripples_PostSleep2','FiberPhotometry','ripples_psth.cellinfo', 'SessionArmChoice.Events','behavior.cellinfo','behavior_fiber',...
+            'peri_spike_trace_PreSleep2','peri_spike_trace_PostSleep2'};
+
     otherwise
-        list = {'ripples_psth','slowOscillations_psth','theta_*.PhaseLockingData','lgamma*.PhaseLockingData','hgamma*.PhaseLockingData','ripple*.PhaseLockingData','spatialModulation','placeFields','behavior.cellinfo','ACGPeak'};
+        list = {'optogeneticResponse','ripples_psth','slowOscillations_psth','theta_*.PhaseLockingData','lgamma*.PhaseLockingData','hgamma*.PhaseLockingData','ripple*.PhaseLockingData',...
+            'spatialModulation','placeFields','behavior.cellinfo','ACGPeak'};
 end
 end

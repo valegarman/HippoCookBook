@@ -208,6 +208,7 @@ isDigital = isDigital(idx);
 probe = probe(idx);
 
 duration = diff(timestamps')';
+duration(isnan(duration)) = nanmedian(duration);
 durationRounded = round(duration,duration_round_decimal);
 % zeroDurationPulses = find(durationRounded==0);
 if length(unique(durationRounded))>1
