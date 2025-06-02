@@ -12,7 +12,7 @@ p = inputParser;
 addParameter(p,'project','Undefined',@ischar);
 addParameter(p,'indexedSessionCSV_path',[]);
 addParameter(p,'indexedSessionCSV_name','indexedSessions');
-addParameter(p,'data_path',database_path,@isstring);
+%%addParameter(p,'data_path',database_path,@isstring);
 addParameter(p,'includeSpikes',true,@isstring);
 addParameter(p,'includeLFP',false,@isstring);
 addParameter(p,'analysis_project_path',[],@isfolder);

@@ -333,7 +333,7 @@ if ~any(ismember(excludeAnalysis, {'10',lower('cellMetrics')}))
 
     session = loadSession;
 
-    cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludePulsesIntervals,'forceReload',true); % after CellExplorar
+    cell_metrics = ProcessCellMetrics('session', session,'forceReload',true); % after CellExplorar
 
     
     getACGPeak('force',true);
@@ -424,7 +424,7 @@ end
 
 %% 12. Summary per cell
 if ~any(ismember(excludeAnalysis, {'12',lower('summary')}))
-    plotSummary('showTagCells',false);
+    plotSummary('showTagCells',false,'use_deltaThetaEpochs',false);
     
 end
 
