@@ -245,3 +245,4 @@ wt7_250408_sess3,wt7,wt7\wt7_250408_sess3,neural3,c57b1/6,wild type,"105µm (125
 wt7_250409_sess4,wt7,wt7\wt7_250409_sess4,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,13,CA1so PTLp CA1sp CA1sr,POTometry
 wt7_250414_sess7,wt7,wt7\wt7_250414_sess7,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,23,PTLp CA1sp CA1sr,POTometry
 app2_250409_sess8,app2,app2\app2_250409_sess8,neural3,c57b1/6,,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,19,PTLp CA1 CA3,POTometry
+app2_250407_sess6,app2,app2\app2_250407_sess6,neural3,c57b1/6,app/ps1,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,24,CA3 CA1 PTLp,POTometry
