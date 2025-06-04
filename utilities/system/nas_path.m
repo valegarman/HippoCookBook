@@ -21,7 +21,7 @@ function location = nas_path(input)
             location = whereIsThisNas1(input);
         case 'DESKTOP-BEPJ8P0' % pc of Martu
             location = whereIsThisNas1(input);
-        case 'DESKTOP-LNEJ4EN' % pc of Anel
+        case 'DESKTOP-LNEJ4EN' % pc of Ane
             location = whereIsThisNas1(input);
         otherwise
             location = whereIsThisNas1(input);
