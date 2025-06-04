@@ -68,131 +68,131 @@ for ii = 1:length(sessionsTable.SessionName)
         is_sncg_CA1 = strcmpi(cell_metrics.ground_truth_classification.cell_subtypes,'ID2_NOSNCG+')' & ismember(cell_metrics.brainRegion,inCA1);
 
         % if isempty(dir('*fiber_psth_ripples_PreSleep2.mat'))
-
-            ts_PreSleep2 = [];
-            ts_PostSleep2 = [];
-            ripples_fiber_pre = [];
-            ripples_fiber_post = [];
-
-            for jj = 1:length(session.epochs)
-                if strcmpi(session.epochs{jj}.behavioralParadigm,'PreSleep2') && strcmpi(session.epochs{jj}.manipulation,'Fiber')
-                    ts_PreSleep2 = [session.epochs{jj}.startTime session.epochs{jj}.stopTime];
-                    path_PreSleep2 = session.epochs{jj}.name;
-                elseif strcmpi(session.epochs{jj}.behavioralParadigm,'PreSleep2') && ~strcmpi(session.epochs{jj}.manipulation,'Fiber')
-                    error('Problems defining fiber epochs...');
-                end
-            end
-
-            for jj = 1:length(session.epochs)
-                if strcmpi(session.epochs{jj}.behavioralParadigm,'PostSleep2') && strcmpi(session.epochs{jj}.manipulation,'Fiber')
-                    ts_PostSleep2 = [session.epochs{jj}.startTime session.epochs{jj}.stopTime];
-                    path_PostSleep2 = session.epochs{jj}.name;
-                elseif strcmpi(session.epochs{jj}.behavioralParadigm,'PostSleep2') && ~strcmpi(session.epochs{jj}.manipulation,'Fiber')
-                    error('Problems defining fiber epochs...');  
-                end
-            end
+            % 
+            % ts_PreSleep2 = [];
+            % ts_PostSleep2 = [];
+            % ripples_fiber_pre = [];
+            % ripples_fiber_post = [];
+            % 
+            % for jj = 1:length(session.epochs)
+            %     if strcmpi(session.epochs{jj}.behavioralParadigm,'PreSleep2') && strcmpi(session.epochs{jj}.manipulation,'Fiber')
+            %         ts_PreSleep2 = [session.epochs{jj}.startTime session.epochs{jj}.stopTime];
+            %         path_PreSleep2 = session.epochs{jj}.name;
+            %     elseif strcmpi(session.epochs{jj}.behavioralParadigm,'PreSleep2') && ~strcmpi(session.epochs{jj}.manipulation,'Fiber')
+            %         error('Problems defining fiber epochs...');
+            %     end
+            % end
+            % 
+            % for jj = 1:length(session.epochs)
+            %     if strcmpi(session.epochs{jj}.behavioralParadigm,'PostSleep2') && strcmpi(session.epochs{jj}.manipulation,'Fiber')
+            %         ts_PostSleep2 = [session.epochs{jj}.startTime session.epochs{jj}.stopTime];
+            %         path_PostSleep2 = session.epochs{jj}.name;
+            %     elseif strcmpi(session.epochs{jj}.behavioralParadigm,'PostSleep2') && ~strcmpi(session.epochs{jj}.manipulation,'Fiber')
+            %         error('Problems defining fiber epochs...');  
+            %     end
+            % end
 
             % Compute fiber for pre-post maze epochs
-            if ~isempty(ts_PreSleep2)
-                cd(path_PreSleep2)
-                peri_spike_trace = peri_spike_trace_average(spikes);
-                cd(basepath);
-                close all;
-                save([session.general.name,'.peri_spike_trace_PreSleep2.mat'],'peri_spike_trace');
-
-                % plot
-                if length(find(is_Camk2)) > 0
-                    figure;
-                    plotFill(peri_spike_trace.lag_time(1,:),peri_spike_trace.corr_red_smoothed(is_Camk2,:));
-
-                    figure;
-                    plotFill(peri_spike_trace.lag_time(1,:),peri_spike_trace.corr_green_smoothed(is_Camk2,:));
-                end
-                if length(find(is_pv)) > 0
-                    figure;
-                    plotFill(peri_spike_trace.lag_time(1,:),peri_spike_trace.corr_red_smoothed(is_pv,:));
-
-                    figure;
-                    plotFill(peri_spike_trace.lag_time(1,:),peri_spike_trace.corr_green_smoothed(is_pv,:));
-                end
-
-                if length(find(is_sst)) > 0
-                    figure;
-                    plotFill(peri_spike_trace.lag_time(1,:),peri_spike_trace.corr_red_smoothed(is_sst,:));
-
-                    figure;
-                    plotFill(peri_spike_trace.lag_time(1,:),peri_spike_trace.corr_green_smoothed(is_sst,:));
-                end
-
-                if length(find(is_id2)) > 0
-                    figure;
-                    plotFill(peri_spike_trace.lag_time(1,:),peri_spike_trace.corr_red_smoothed(is_id2,:));
-
-                    figure;
-                    plotFill(peri_spike_trace.lag_time(1,:),peri_spike_trace.corr_green_smoothed(is_id2,:));
-                end
-
-                if length(find(is_vip)) > 0
-                    figure;
-                    plotFill(peri_spike_trace.lag_time(1,:),peri_spike_trace.corr_red_smoothed(is_vip,:));
-
-                    figure;
-                    plotFill(peri_spike_trace.lag_time(1,:),peri_spike_trace.corr_green_smoothed(is_vip,:));
-                end
-
-
-            end
-
-            peri_spike_trace = [];
-            if ~isempty(ts_PostSleep2)
-                cd(path_PostSleep2);
-                peri_spike_trace = peri_spike_trace_average(spikes);     
-                cd(basepath);
-                close all;
-                save([session.general.name,'.peri_spike_trace_PostSleep2.mat'],'peri_spike_trace');
-
-                close all;
-                % plot
-                if length(find(is_Camk2)) > 0
-                    figure;
-                    plotFill(peri_spike_trace.lag_time(1,:),peri_spike_trace.corr_red_smoothed(is_Camk2,:));
-
-                    figure;
-                    plotFill(peri_spike_trace.lag_time(1,:),peri_spike_trace.corr_green_smoothed(is_Camk2,:));
-                end
-                if length(find(is_pv)) > 0
-                    figure;
-                    plotFill(peri_spike_trace.lag_time(1,:),peri_spike_trace.corr_red_smoothed(is_pv,:));
-
-                    figure;
-                    plotFill(peri_spike_trace.lag_time(1,:),peri_spike_trace.corr_green_smoothed(is_pv,:));
-                end
-
-                if length(find(is_sst)) > 0
-                    figure;
-                    plotFill(peri_spike_trace.lag_time(1,:),peri_spike_trace.corr_red_smoothed(is_sst,:));
-
-                    figure;
-                    plotFill(peri_spike_trace.lag_time(1,:),peri_spike_trace.corr_green_smoothed(is_sst,:));
-                end
-
-                if length(find(is_id2)) > 0
-                    figure;
-                    plotFill(peri_spike_trace.lag_time(1,:),peri_spike_trace.corr_red_smoothed(is_id2,:));
-
-                    figure;
-                    plotFill(peri_spike_trace.lag_time(1,:),peri_spike_trace.corr_green_smoothed(is_id2,:));
-                end
-
-                if length(find(is_vip)) > 0
-                    figure;
-                    plotFill(peri_spike_trace.lag_time(1,:),peri_spike_trace.corr_red_smoothed(is_vip,:));
-
-                    figure;
-                    plotFill(peri_spike_trace.lag_time(1,:),peri_spike_trace.corr_green_smoothed(is_vip,:));
-                end
-
-            end
+            % if ~isempty(ts_PreSleep2)
+            %     cd(path_PreSleep2)
+            %     peri_spike_trace = peri_spike_trace_average(spikes);
+            %     cd(basepath);
+            %     close all;
+            %     save([session.general.name,'.peri_spike_trace_PreSleep2.mat'],'peri_spike_trace');
+            % 
+            %     % plot
+            %     if length(find(is_Camk2)) > 0
+            %         figure;
+            %         plotFill(peri_spike_trace.lag_time(1,:),peri_spike_trace.corr_red_smoothed(is_Camk2,:));
+            % 
+            %         figure;
+            %         plotFill(peri_spike_trace.lag_time(1,:),peri_spike_trace.corr_green_smoothed(is_Camk2,:));
+            %     end
+            %     if length(find(is_pv)) > 0
+            %         figure;
+            %         plotFill(peri_spike_trace.lag_time(1,:),peri_spike_trace.corr_red_smoothed(is_pv,:));
+            % 
+            %         figure;
+            %         plotFill(peri_spike_trace.lag_time(1,:),peri_spike_trace.corr_green_smoothed(is_pv,:));
+            %     end
+            % 
+            %     if length(find(is_sst)) > 0
+            %         figure;
+            %         plotFill(peri_spike_trace.lag_time(1,:),peri_spike_trace.corr_red_smoothed(is_sst,:));
+            % 
+            %         figure;
+            %         plotFill(peri_spike_trace.lag_time(1,:),peri_spike_trace.corr_green_smoothed(is_sst,:));
+            %     end
+            % 
+            %     if length(find(is_id2)) > 0
+            %         figure;
+            %         plotFill(peri_spike_trace.lag_time(1,:),peri_spike_trace.corr_red_smoothed(is_id2,:));
+            % 
+            %         figure;
+            %         plotFill(peri_spike_trace.lag_time(1,:),peri_spike_trace.corr_green_smoothed(is_id2,:));
+            %     end
+            % 
+            %     if length(find(is_vip)) > 0
+            %         figure;
+            %         plotFill(peri_spike_trace.lag_time(1,:),peri_spike_trace.corr_red_smoothed(is_vip,:));
+            % 
+            %         figure;
+            %         plotFill(peri_spike_trace.lag_time(1,:),peri_spike_trace.corr_green_smoothed(is_vip,:));
+            %     end
+            % 
+            % 
+            % end
+            % 
+            % peri_spike_trace = [];
+            % if ~isempty(ts_PostSleep2)
+            %     cd(path_PostSleep2);
+            %     peri_spike_trace = peri_spike_trace_average(spikes);     
+            %     cd(basepath);
+            %     close all;
+            %     save([session.general.name,'.peri_spike_trace_PostSleep2.mat'],'peri_spike_trace');
+            % 
+            %     close all;
+            %     % plot
+            %     if length(find(is_Camk2)) > 0
+            %         figure;
+            %         plotFill(peri_spike_trace.lag_time(1,:),peri_spike_trace.corr_red_smoothed(is_Camk2,:));
+            % 
+            %         figure;
+            %         plotFill(peri_spike_trace.lag_time(1,:),peri_spike_trace.corr_green_smoothed(is_Camk2,:));
+            %     end
+            %     if length(find(is_pv)) > 0
+            %         figure;
+            %         plotFill(peri_spike_trace.lag_time(1,:),peri_spike_trace.corr_red_smoothed(is_pv,:));
+            % 
+            %         figure;
+            %         plotFill(peri_spike_trace.lag_time(1,:),peri_spike_trace.corr_green_smoothed(is_pv,:));
+            %     end
+            % 
+            %     if length(find(is_sst)) > 0
+            %         figure;
+            %         plotFill(peri_spike_trace.lag_time(1,:),peri_spike_trace.corr_red_smoothed(is_sst,:));
+            % 
+            %         figure;
+            %         plotFill(peri_spike_trace.lag_time(1,:),peri_spike_trace.corr_green_smoothed(is_sst,:));
+            %     end
+            % 
+            %     if length(find(is_id2)) > 0
+            %         figure;
+            %         plotFill(peri_spike_trace.lag_time(1,:),peri_spike_trace.corr_red_smoothed(is_id2,:));
+            % 
+            %         figure;
+            %         plotFill(peri_spike_trace.lag_time(1,:),peri_spike_trace.corr_green_smoothed(is_id2,:));
+            %     end
+            % 
+            %     if length(find(is_vip)) > 0
+            %         figure;
+            %         plotFill(peri_spike_trace.lag_time(1,:),peri_spike_trace.corr_red_smoothed(is_vip,:));
+            % 
+            %         figure;
+            %         plotFill(peri_spike_trace.lag_time(1,:),peri_spike_trace.corr_green_smoothed(is_vip,:));
+            %     end
+            % 
+            % end
         % end
 
         close all;
@@ -202,62 +202,62 @@ for ii = 1:length(sessionsTable.SessionName)
         % computeRippleReversal;
         % cellTypeClassifier;
 
-        %  try
-        %     ripples_fiber = fiberPhotometryModulation_temp([],'eventType','ripples');
-        % catch
-        %     warning('No fiber recording in this session...');
-        % end
-        % 
-        % if isempty(dir('*fiber_psth_ripples_PreSleep2.mat'))
-        % 
-        %     % 
-        % 
-        %     ts_PreSleep2 = [];
-        %     ts_PostSleep2 = [];
-        %     ripples_fiber_pre = [];
-        %     ripples_fiber_post = [];
-        % 
-        %     for jj = 1:length(session.epochs)
-        %         if strcmpi(session.epochs{jj}.behavioralParadigm,'PreSleep2') && strcmpi(session.epochs{jj}.manipulation,'Fiber')
-        %             ts_PreSleep2 = [session.epochs{jj}.startTime session.epochs{jj}.stopTime];
-        %         elseif strcmpi(session.epochs{jj}.behavioralParadigm,'PreSleep2') && ~strcmpi(session.epochs{jj}.manipulation,'Fiber')
-        %             error('Problems defining fiber epochs...');
-        %         end
-        %     end
-        % 
-        %     for jj = 1:length(session.epochs)
-        %         if strcmpi(session.epochs{jj}.behavioralParadigm,'PostSleep2') && strcmpi(session.epochs{jj}.manipulation,'Fiber')
-        %             ts_PostSleep2 = [session.epochs{jj}.startTime session.epochs{jj}.stopTime];
-        %         elseif strcmpi(session.epochs{jj}.behavioralParadigm,'PostSleep2') && ~strcmpi(session.epochs{jj}.manipulation,'Fiber')
-        %             error('Problems defining fiber epochs...');
-        %         end
-        %     end
-        % 
-        %     % Compute fiber for pre-post maze epochs
-        %     if ~isempty(ts_PreSleep2)
-        %         ripples_fiber_pre = fiberPhotometryModulation_temp([],'restrictIntervals',ts_PreSleep2,'eventType','ripples','saveAs','PreSleep2','savePlotAs','PreSleep2');
-        %     end
-        %     if ~isempty(ts_PostSleep2)
-        %         ripples_fiber_post = fiberPhotometryModulation_temp([],'restrictIntervals',ts_PostSleep2,'eventType','ripples','saveAs','PostSleep2','savePlotAs','PostSleep2');
-        %     end
-        % 
-        %     try
-        %         figure;
-        %         plotFill([1:size(ripples_fiber_pre.red_normalized.responsecurveZSmooth,2)],ripples_fiber_pre.red_normalized.responsecurveZSmooth,'color',[0 0 0]);
-        %         hold on;
-        %         plotFill([1:size(ripples_fiber_post.red_normalized.responsecurveZSmooth,2)],ripples_fiber_post.red_normalized.responsecurveZSmooth,'color',[1 0 0]);
-        %         saveas(gca,['SummaryFigures\fiber_red_pre_post.png']);
-        % 
-        %         figure;
-        %         plotFill([1:size(ripples_fiber_pre.green_normalized.responsecurveZSmooth,2)],ripples_fiber_pre.green_normalized.responsecurveZSmooth,'color',[0 0 0]);
-        %         hold on;
-        %         plotFill([1:size(ripples_fiber_post.green_normalized.responsecurveZSmooth,2)],ripples_fiber_post.green_normalized.responsecurveZSmooth,'color',[0 1 0]);
-        %         saveas(gca,['SummaryFigures\fiber_green_pre_post.png']);
-        %     catch
-        %     end
-        % end
-        % 
-        % close all;
+         try
+            ripples_fiber = fiberPhotometryModulation_temp([],'eventType','ripples');
+        catch
+            warning('No fiber recording in this session...');
+        end
+
+        if isempty(dir('*fiber_psth_ripples_PreSleep2.mat'))
+
+            % 
+
+            ts_PreSleep2 = [];
+            ts_PostSleep2 = [];
+            ripples_fiber_pre = [];
+            ripples_fiber_post = [];
+
+            for jj = 1:length(session.epochs)
+                if strcmpi(session.epochs{jj}.behavioralParadigm,'PreSleep2') && strcmpi(session.epochs{jj}.manipulation,'Fiber')
+                    ts_PreSleep2 = [session.epochs{jj}.startTime session.epochs{jj}.stopTime];
+                elseif strcmpi(session.epochs{jj}.behavioralParadigm,'PreSleep2') && ~strcmpi(session.epochs{jj}.manipulation,'Fiber')
+                    error('Problems defining fiber epochs...');
+                end
+            end
+
+            for jj = 1:length(session.epochs)
+                if strcmpi(session.epochs{jj}.behavioralParadigm,'PostSleep2') && strcmpi(session.epochs{jj}.manipulation,'Fiber')
+                    ts_PostSleep2 = [session.epochs{jj}.startTime session.epochs{jj}.stopTime];
+                elseif strcmpi(session.epochs{jj}.behavioralParadigm,'PostSleep2') && ~strcmpi(session.epochs{jj}.manipulation,'Fiber')
+                    error('Problems defining fiber epochs...');
+                end
+            end
+
+            % Compute fiber for pre-post maze epochs
+            if ~isempty(ts_PreSleep2)
+                ripples_fiber_pre = fiberPhotometryModulation_temp([],'restrictIntervals',ts_PreSleep2,'eventType','ripples','saveAs','PreSleep2','savePlotAs','PreSleep2');
+            end
+            if ~isempty(ts_PostSleep2)
+                ripples_fiber_post = fiberPhotometryModulation_temp([],'restrictIntervals',ts_PostSleep2,'eventType','ripples','saveAs','PostSleep2','savePlotAs','PostSleep2');
+            end
+
+            try
+                figure;
+                plotFill([1:size(ripples_fiber_pre.red_normalized.responsecurveZSmooth,2)],ripples_fiber_pre.red_normalized.responsecurveZSmooth,'color',[0 0 0]);
+                hold on;
+                plotFill([1:size(ripples_fiber_post.red_normalized.responsecurveZSmooth,2)],ripples_fiber_post.red_normalized.responsecurveZSmooth,'color',[1 0 0]);
+                saveas(gca,['SummaryFigures\fiber_red_pre_post.png']);
+
+                figure;
+                plotFill([1:size(ripples_fiber_pre.green_normalized.responsecurveZSmooth,2)],ripples_fiber_pre.green_normalized.responsecurveZSmooth,'color',[0 0 0]);
+                hold on;
+                plotFill([1:size(ripples_fiber_post.green_normalized.responsecurveZSmooth,2)],ripples_fiber_post.green_normalized.responsecurveZSmooth,'color',[0 1 0]);
+                saveas(gca,['SummaryFigures\fiber_green_pre_post.png']);
+            catch
+            end
+        end
+
+        close all;
 
         
     end
