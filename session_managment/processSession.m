@@ -34,6 +34,7 @@ addParameter(p,'force_analogPulsesDetection',true,@islogical);
 addParameter(p,'force_loadingSpikes',true,@islogical);
 addParameter(p,'excludePulsesIntervals',[],@isnumeric);
 addParameter(p,'thetaChannel',[],@isnumeric);
+addParameter(p,'theta_epochs_channel',[]);
 addParameter(p,'rippleChannel',[],@isnumeric);% manually selecting ripple Channel in case getHippocampalLayers does not provide a right output
 addParameter(p,'SWChannel',[],@isnumeric); % manually selecting SW Channel in case getHippocampalLayers does not provide a right output
 addParameter(p,'digital_optogenetic_channels',[],@isnumeric);
@@ -68,6 +69,7 @@ force_analogPulsesDetection = p.Results.force_analogPulsesDetection;
 force_loadingSpikes = p.Results.force_loadingSpikes;
 excludePulsesIntervals = p.Results.excludePulsesIntervals;
 thetaChannel = p.Results.thetaChannel;
+theta_epochs_channel = p.Results.theta_epochs_channel;
 rippleChannel = p.Results.rippleChannel;
 SWChannel = p.Results.SWChannel;
 digital_optogenetic_channels = p.Results.digital_optogenetic_channels;
@@ -285,7 +287,6 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     getSpikesRank('events','upstates');
 
     % 8.2 Ripples
-    rippleMasterDetector_threshold= [0.5 1];
     ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',false,'eventSpikeThreshold',false,'thresholds',rippleMasterDetector_threshold); 
     psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10);
     % psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10,'restrict_to_manipulation',true);
@@ -300,7 +301,7 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
 
 
     % 8.3 Theta intervals
-    thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'channel',11);
+    thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'channel',theta_epochs_channel);
     
 end
 

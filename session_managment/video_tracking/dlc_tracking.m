@@ -237,6 +237,13 @@ x(art(:)) = NaN; y(art(:)) = NaN;
 F = fillmissing([x y],'linear');
 x = F(:,1); y = F(:,2);
 
+if length(xt) > length(x)
+    xt(end) = [];
+elseif length(x) > length(xt)
+    x(end) = [];
+    y(end) = [];
+end
+
 % Get velocity
 [~,~,~,vx,vy,ax,ay] = KalmanVel(x,y,xt,2);
 velocity = sqrt(vx.^2 + vy.^2);

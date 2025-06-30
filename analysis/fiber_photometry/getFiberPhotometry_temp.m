@@ -72,8 +72,12 @@ green_fpa = FPA(green.timestamps,green.data,isosbestic.data);
 % Sync fiber signal and recording
 
 digitalIn = getDigitalIn;
-ts = digitalIn.timestampsOn{ttl_fiber};
-
+try
+    ts = digitalIn.timestampsOn{ttl_fiber};
+catch
+    warning('Not digital inputs to sync fiber');
+end
+    
 fiber = [];
 fiber.red = red;
 fiber.green = green;
@@ -82,15 +86,24 @@ fiber.isosbestic = isosbestic;
 fiber.red_fpa = red_fpa;
 fiber.green_fpa = green_fpa;
 
-fiber.timestamps = fiber.green.timestamps + ts(1);
+try
+    fiber.timestamps = fiber.green.timestamps + ts(1);
+catch
+    fiber.timestamps = fiber.green.timestamps; 
+end
+
 fiber.sr = 1/mean(diff(fiber.timestamps)); 
 
 basename = basenameFromBasepath(pwd);
 fiber.folder = basename;
 
-fprintf('Last timestamp fiber in ephys, %3.2f \n', ts(end)); %\n
-fprintf('Last timestamp fiber in fiber, %3.2f \n', fiber.timestamps(end)); %\n
-fprintf('Error: %3.2f \n', abs(fiber.timestamps(end) - ts(end))); %\n
+try
+    fprintf('Last timestamp fiber in ephys, %3.2f \n', ts(end)); %\n
+    fprintf('Last timestamp fiber in fiber, %3.2f \n', fiber.timestamps(end)); %\n
+    fprintf('Error: %3.2f \n', abs(fiber.timestamps(end) - ts(end))); %\n
+catch
+end
+
 
 if saveMat
     save('fiber_photometry.mat','fiber');
