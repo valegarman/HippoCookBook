@@ -109,7 +109,7 @@ colors.int5_dark = color_int5_dark;
 
 figure
 [gs_predicted] = groupStats({camk2_error, camk2_shuffled_error, camk2_counter_error, camk2_shuffled_counter_error, int_error, int_shuffled_error},...
-    [],'color',[colors.camk2; .6 .6 .6; colors.camk2_dark; .6 .6 .6; colors.int; .6 .6 .6],'plotType','roundPlot','plotData',true,'labelSummary',false,'x_position',[1 1.5 3 3.5 5 5.5],'sigStar',false,'roundPlotSize',5,'inAxis',true,'dataSize',2, 'repeatedMeasures',false,'posthoc_test','lsd');
+    [1 1 2 2 3 3; 1 2 1 2 1 2],'color',[colors.camk2; .6 .6 .6; colors.camk2_dark; .6 .6 .6; colors.int; .6 .6 .6],'plotType','roundPlot','plotData',true,'labelSummary',false,'x_position',[1 1.5 3 3.5 5 5.5],'sigStar',false,'roundPlotSize',5,'inAxis',true,'dataSize',2, 'repeatedMeasures',false,'posthoc_test','lsd');
 ylim([0 40]);
 set(gca,'XTick',[1.25 3.25 5.25],'XTickLabel',{'Camk2' 'Camk2 counter', 'Int'},'XTickLabelRotation',45);
 ylabel('Decoding error (cm)');
@@ -122,6 +122,11 @@ ylim([0 40]);
 set(gca,'XTick',[1 2 3 4 5],'XTickLabel',{'PV-SST-ID2-SNCG' 'PV-ID2-VIP-SNCG', 'PV-SST-VIP-SNCG','SST-ID2-VIP-SNCG','PV-SST-ID2-VIP'},'XTickLabelRotation',45);
 ylabel('Decoding error (cm)');
 
+figure
+[gs_predicted] = groupStats({camk2_error,camk2_counter_error,int_error},...
+    [],'color',[color_camk2;color_camk2;color_int],'plotType','roundPlot','plotData',true,'labelSummary',false,'x_position',[1 2 3 4 5 6],'sigStar',true,'roundPlotSize',5,'inAxis',true,'dataSize',2, 'repeatedMeasures',false,'posthoc_test','lsd');
+ylim([0 40]);
+set(gca,'XTick',[1:3],'XTickLabel',{'CAMK2','CAMK2_c','INT'},'XTickLabelRotation',45);
 
 
 analysis_project_path = adapt_filesep([onedrive_path filesep 'NeuralComputationLab\ActiveProjects\Bibliocampus\data']);

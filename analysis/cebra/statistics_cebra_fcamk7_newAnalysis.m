@@ -218,10 +218,18 @@ colors.sncg_dark = color_sncg_dark;
 
 
 figure;
-[gs_leaveOneOut_predicted] = groupStats({int1_error, int2_error, int_id2_error, int_sncg_error, int4_error},...
+[gs_leaveOneOut_predicted] = groupStats({int1_error,int2_error, int_id2_error, int_sncg_error,  int4_error},...
     [],'color',[colors.int1; colors.int2; colors.id2; colors.sncg; colors.int4],'plotType','roundPlot','plotData',true,'labelSummary',false,'x_position',[1 2 3 4 5],'sigStar',false,'roundPlotSize',5,'inAxis',true,'dataSize',2, 'repeatedMeasures',true,'posthoc_test','lsd');
 ylim([0 40]);
 set(gca,'XTick',[1 2 3 4 5],'XTickLabel',{'PV-SST-ID2' 'PV-ID2-VIP', 'PV-VIP-SST-SNCG', 'PV-VIP-SST-ID2','SST-ID2-VIP'},'XTickLabelRotation',45);
+ylabel('Decoding error (cm)');
+
+
+figure;
+[gs_leaveOneOut_predicted] = groupStats({int1_error, int1_shuffled_error, int2_error, int2_shuffled_error, int_id2_error, int_shuffled_id2_error, int_sncg_error, int_shuffled_sncg_error, int4_error, int4_shuffled_error},...
+    [1 1 2 2 3 3 4 4 5 5 ; 1 2 1 2 1 2 1 2 1 2],'color',[colors.int1; [0 0 0]; colors.int2; [0 0 0]; colors.id2; [0 0 0]; colors.sncg; [0 0 0]; colors.int4; [0 0 0]],'plotType','roundPlot','plotData',true,'labelSummary',false,'sigStar',false,'roundPlotSize',5,'inAxis',true,'dataSize',2, 'repeatedMeasures',false,'posthoc_test','lsd');
+ylim([0 40]);
+set(gca,'XTick',[1 2 3 4 5 6 7 8 9 10],'XTickLabel',{'PV-SST-ID2', 's', 'PV-ID2-VIP', 's','PV-VIP-SST-SNCG', 's','PV-VIP-SST-ID2','s', 'SST-ID2-VIP','s'},'XTickLabelRotation',45);
 ylabel('Decoding error (cm)');
 %%
 % Figure

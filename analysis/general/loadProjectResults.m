@@ -292,6 +292,15 @@ projectResults.fiber_psth_ripples = stackSessionResult(projectSessionResults.fib
 projectResults.fiber_psth_ripples_PreSleep2 = stackSessionResult(projectSessionResults.fiber_psth_ripples_PreSleep2,projectSessionResults.num_ripples_pre);
 projectResults.fiber_psth_ripples_PostSleep2 = stackSessionResult(projectSessionResults.fiber_psth_ripples_PostSleep2,projectSessionResults.num_ripples_post);
 
+for ii = 1:length(projectSessionResults.SessionArmChoiceEvents)
+    if isstruct(projectSessionResults.SessionArmChoiceEvents{ii})
+        fld = fields(projectSessionResults.SessionArmChoiceEvents{ii});
+        performance(ii) = projectSessionResults.SessionArmChoiceEvents{ii}.(fld{1}).performance;
+    else
+        performance(ii) = NaN;
+    end 
+end
+projectResults.performance = performance;
 
 projectResults.cell_metrics = cell_metrics;
 
