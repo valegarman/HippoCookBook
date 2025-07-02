@@ -1,4 +1,4 @@
-u
+
 %% Notebook_for_checking_processSession_results
 % Andrea Gallardo and Manu Valero, 2023
 %% 0. Check metadata
@@ -22,6 +22,7 @@ TheStateEditor(session.general.name);
 % 
 % 2.2 If no clear bimodalities are visible, run scoring with different
 % channels and include noisy ignoretime epochs
+% Call Manu or Pablo!!!
 ThetaChannels = 60; % choose theta channels (ideally SLM)
 SWChannels = 36; % choose slow wave channels (ideally superficial cortex)
 ignoretime = [9000 15000];
@@ -39,7 +40,6 @@ SleepScoreMaster(pwd,'noPrompts',true,'ignoretime',ignoretime, 'overwrite', true
 
 % SleepScoreMaster(pwd,'noPrompts',true,'overwrite', true, 'ThetaChannels', ThetaChannels, 'SWChannels', SWChannels,'rejectChannels',[],'scoretime',[1 440*60]);
  
-
 % 2.3 As the last resource, you can edit the epochs in TheStateEditor. IT
 % IS NOT WORKING!!!!!
 TheStateEditor(session.general.name);
@@ -57,15 +57,22 @@ excludeIntervals = [];
 rippleChannel = [];
 SWChannel = [];
 noiseChannel = [];
-eventSpikeThreshold_shanks = [1 2 3]; % which shanks will be accounted for the spike threshold 
+eventSpikeThreshold_shanks = [1]; % which shanks will be accounted for the spike threshold 
 eventSpikeThreshold = 1.2; % .5
 
-rippleMasterDetector_threshold = [1.5 3.5]; % [1.5 3.5]
+rippleMasterDetector_threshold = [.5 1]; % [1.5 3.5]
 ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',false,'thresholds',...
     rippleMasterDetector_threshold,'eventSpikeThreshold_shanks', eventSpikeThreshold_shanks,'eventSpikeThreshold',eventSpikeThreshold,'excludeIntervals',excludeIntervals,'noise',noiseChannel); 
 psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10);
 % psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10,'restrict_to_manipulation',true);
 getSpikesRank('events','ripples');
+
+% from ripples.timestamps we want a text file 'basename.rip.evt'
+
+1.7826834 begRip
+1.712jkh  endRip
+1.89189 begRip
+
 
 %% 5. Theta epochs
 % Revise channel definition, theta band in thetaEpochs.png and cells
