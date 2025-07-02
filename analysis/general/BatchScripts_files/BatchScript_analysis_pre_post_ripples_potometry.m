@@ -4,6 +4,7 @@ clear; close all
 HCB_directory = what('HippoCookBook'); 
 sessionsTable = readtable([HCB_directory.path filesep 'indexedSessions.csv']); % the variable is called allSessions
 targetProject = 'POTometry';
+force_fiber_pre_post = true;
 
 % Indexes for cell location
 inHippocampus = {'CA1sp' 'CA1so' 'CA1sr' 'CA1slm' 'CA1' 'CA3' 'DG' 'CA3sp' 'CA3sr'}; % only using hippocampus data... :);
@@ -203,12 +204,12 @@ for ii = 1:length(sessionsTable.SessionName)
         % cellTypeClassifier;
 
          try
-            ripples_fiber = fiberPhotometryModulation_temp([],'eventType','ripples');
+            ripples_fiber = fiberPhotometryModulation_temp([],'eventType','ripples','reload_fiber',true);
         catch
             warning('No fiber recording in this session...');
         end
 
-        if isempty(dir('*fiber_psth_ripples_PreSleep2.mat'))
+        if isempty(dir('*fiber_psth_ripples_PreSleep2.mat')) || force_fiber_pre_post
 
             % 
 
@@ -253,6 +254,19 @@ for ii = 1:length(sessionsTable.SessionName)
                 hold on;
                 plotFill([1:size(ripples_fiber_post.green_normalized.responsecurveZSmooth,2)],ripples_fiber_post.green_normalized.responsecurveZSmooth,'color',[0 1 0]);
                 saveas(gca,['SummaryFigures\fiber_green_pre_post.png']);
+
+                figure;
+                plotFill([1:size(ripples_fiber_pre.red_PP.responsecurveZSmooth,2)],ripples_fiber_pre.red_PP.responsecurveZSmooth,'color',[0 0 0]);
+                hold on;
+                plotFill([1:size(ripples_fiber_post.red_PP.responsecurveZSmooth,2)],ripples_fiber_post.red_PP.responsecurveZSmooth,'color',[1 0 0]);
+                saveas(gca,['SummaryFigures\fiber_red_PP_pre_post.png']);
+
+                figure;
+                plotFill([1:size(ripples_fiber_pre.green_PP.responsecurveZSmooth,2)],ripples_fiber_pre.green_PP.responsecurveZSmooth,'color',[0 0 0]);
+                hold on;
+                plotFill([1:size(ripples_fiber_post.green_PP.responsecurveZSmooth,2)],ripples_fiber_post.green_PP.responsecurveZSmooth,'color',[0 1 0]);
+                saveas(gca,['SummaryFigures\fiber_green_pre_post.png']);
+
             catch
             end
         end

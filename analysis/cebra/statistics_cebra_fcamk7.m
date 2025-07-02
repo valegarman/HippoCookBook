@@ -1,6 +1,6 @@
 %% Load data from CEBRA
 
-sessions = {'Y:\fCamk7\fCamk7_220418_sess14\CEBRA analysis','Y:\fCamk7\fCamk7_220419_sess15\CEBRA analysis','Y:\fCamk7\fCamk7_220420_sess16\CEBRA analysis','Y:\fCamk7\fCamk7_220421_sess17\CEBRA analysis','Y:\fCamk7\fCamk7_220422_sess18\CEBRA analysis'};
+sessions = {'Y:\fCamk7\fCamk7_220418_sess14\CEBRA analysis','Y:\fCamk7\fCamk7_220419_sess15\CEBRA analysis','Y:\fCamk7\fCamk7_220420_sess16\CEBRA analysis','Y:\fCamk7\fCamk7_220421_sess17\CEBRA analysis','Y:\fCamk7\fCamk7_220422_sess18\CEBRA analysis','Y:\unindexedSubjects\Achilles\Achilles_10252013'};
 % sessions = {'Y:\fCamk7\fCamk7_220418_sess14','Y:\fCamk7\fCamk7_220419_sess15','Y:\fCamk7\fCamk7_220420_sess16'};
 % sessions = {'Y:\fCamk7\fCamk7_220418_sess14','Y:\fCamk7\fCamk7_220420_sess16','Y:\fCamk7\fCamk7_220421_sess17','Y:\fCamk7\fCamk7_220422_sess18'};
 % sessions = {'Y:\fCamk7\fCamk7_220418_sess14\CEBRA analysis','Y:\fCamk7\fCamk7_220420_sess16\CEBRA analysis','Y:\fCamk7\fCamk7_220421_sess17\CEBRA analysis'};
@@ -44,15 +44,25 @@ for ii = 1:length(sessions)
     catch
         warning('Not possible to load cebra decoding...');
     end
-
-    camk2_error(ii) = camk2_decoded_error;
-    % camk2_counter_merror{ii} = camk2_merror;
-
-    camk2_counter_error(ii) = camk2_counter_decoded_error;
-    int_error(ii) = int_decoded_error;
-    camk2_shuffled_error(ii) = camk2_shuffled_decoded_error;
-    camk2_shuffled_counter_error(ii) = camk2_shuffled_counter_decoded_error;
-    int_shuffled_error(ii) = int_shuffled_decoded_error;
+    if ii == 6
+        camk2_error(ii) = camk2_decoded_error*100;
+        % camk2_counter_merror{ii} = camk2_merror;
+    
+        camk2_counter_error(ii) = camk2_counter_decoded_error*100;
+        int_error(ii) = int_decoded_error*100;
+        camk2_shuffled_error(ii) = camk2_shuffled_decoded_error*100;
+        camk2_shuffled_counter_error(ii) = camk2_shuffled_counter_decoded_error*100;
+        int_shuffled_error(ii) = int_shuffled_decoded_error*100;
+    else
+        camk2_error(ii) = camk2_decoded_error;
+        % camk2_counter_merror{ii} = camk2_merror;
+    
+        camk2_counter_error(ii) = camk2_counter_decoded_error;
+        int_error(ii) = int_decoded_error;
+        camk2_shuffled_error(ii) = camk2_shuffled_decoded_error;
+        camk2_shuffled_counter_error(ii) = camk2_shuffled_counter_decoded_error;
+        int_shuffled_error(ii) = int_shuffled_decoded_error;
+    end
 
     % % int 1 (PV-SST-ID2)
     % int1_error(ii) = int_1_decoded_error;
