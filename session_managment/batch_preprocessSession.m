@@ -58,6 +58,7 @@ addParameter(p,'sessionSummary',true,@islogical);
 addParameter(p,'digitalChannelsList',[],@isnumeric);
 addParameter(p,'bazler_ttl_channel',[],@isnumeric);
 addParameter(p,'skipStimulationPeriods',true,@islogical);
+addParameter(p,'exclude_shanks',[]);
 
 % addParameter(p,'pullData',[],@isdir); To do... 
 parse(p,varargin{:});
@@ -74,6 +75,7 @@ digitalChannelsList = p.Results.digitalChannelsList;
 analysisPath = p.Results.analysisPath;
 bazler_ttl_channel = p.Results.bazler_ttl_channel;
 skipStimulationPeriods = p.Results.skipStimulationPeriods;
+exclude_shanks = p.Results.exclude_shanks;
 
 % batch processing...
 all_folders = dir(basepath);
@@ -85,7 +87,8 @@ for ii = 1:size(all_folders,1)
             if isempty(dir(['notPreprocessing.txt']))
                 disp([' * Preprocessing of ' all_folders(ii).folder filesep all_folders(ii).name]);
                 preprocessSession('basepath',pwd,'analysisPath',analysisPath,'analogChannelsList',analogChannelsList,'spikeSort',spikeSort,'getPos',getPos, 'cleanArtifacts',cleanArtifacts,...
-                    'medianSubstr',medianSubstr,'tracking_pixel_cm',tracking_pixel_cm,'sessionSummary',sessionSummary,'digitalChannelsList',digitalChannelsList,'bazler_ttl_channel',bazler_ttl_channel,'skipStimulationPeriods',skipStimulationPeriods);
+                    'medianSubstr',medianSubstr,'tracking_pixel_cm',tracking_pixel_cm,'sessionSummary',sessionSummary,'digitalChannelsList',digitalChannelsList,'bazler_ttl_channel',bazler_ttl_channel,'skipStimulationPeriods',skipStimulationPeriods,...
+                        'exclude_shanks',exclude_shanks);
             else
                 disp(['Not to preprocess',all_folders(ii).folder filesep all_folders(ii).name]);
             end

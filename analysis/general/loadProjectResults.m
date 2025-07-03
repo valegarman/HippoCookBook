@@ -12,7 +12,7 @@ p = inputParser;
 addParameter(p,'project','Undefined',@ischar);
 addParameter(p,'indexedSessionCSV_path',[]);
 addParameter(p,'indexedSessionCSV_name','indexedSessions');
-addParameter(p,'data_path',database_path,@isstring);
+%%addParameter(p,'data_path',database_path,@isstring);
 addParameter(p,'includeSpikes',true,@isstring);
 addParameter(p,'includeLFP',false,@isstring);
 addParameter(p,'analysis_project_path',[],@isfolder);
@@ -68,61 +68,58 @@ end
 %% find indexed sessions
 if isempty(list_of_paths)
 
-% <<<<<<< HEAD
-sessionsTable = readtable([indexedSessionCSV_path filesep indexedSessionCSV_name,'.csv']); % the variable is called allSessions
-
-for ii = 1:length(sessionsTable.SessionName)
-
-    sessions.basepaths{ii} = adapt_filesep([nas_path(sessionsTable.Location{ii}) filesep sessionsTable.Path{ii}]);
-
-end
-sessions.project = sessionsTable.Project;
-
-disp('Projects found: '); 
-for ii = 1:length(sessions.project) % remove to spaces together, if any
-    sessions.project{ii} = strrep(sessions.project{ii}, '  ', ' ');
-end
-project_list = unique(sessions.project);
-project_list_temp = cell(0);
-for jj = 1:length(project_list)
-    project_list_temp{1,length(project_list_temp)+1} = project_list{jj};
-    project_list_temp{1,length(project_list_temp)+1} = ' ';
-end    
-project_list_temp(end) = [];
-project_list = unique(split([project_list_temp{:}],' '));
-
-for ii = 1:length(project_list)
-    fprintf(' %3.i/ %s \n',ii,project_list{ii}); %\n
-end
-% fprintf('Taking all sessions from project "%s" \n',project)
-
-% selecting sessions
-if isempty(list_of_sessions)
-    list_of_sessions = sessionsTable.SessionName;
-end
-
-if ~isempty(reject_sessions)
-    list_of_sessions{find(contains(list_of_sessions,lower(reject_sessions)))} = ' ';
-end
-% =======
-%     if isempty(indexedSessionCSV_name)
-%         error('Need to provide the name of the index Project variable');
-%     end
-%     if isempty(indexedSessionCSV_path)
-%         warning('Not included the path where the indexed Projects .mat variable is located. Trying to find it...');
-%         indexedSessionCSV_path = fileparts(which([indexedSessionCSV_name,'.csv']));
-%     end
-%     if isempty(analysis_project_path)
-%         analysis_project_path = indexedSessionCSV_path;
-%     end
-% >>>>>>> a44f5ed7ef76cf090c2430220e48de8d504a3bde
-    
     sessionsTable = readtable([indexedSessionCSV_path filesep indexedSessionCSV_name,'.csv']); % the variable is called allSessions
     
     for ii = 1:length(sessionsTable.SessionName)
     
-        sessions.basepaths{ii} = [nas_path(sessionsTable.Location{ii}) filesep sessionsTable.Path{ii}];
+        sessions.basepaths{ii} = adapt_filesep([nas_path(sessionsTable.Location{ii}) filesep sessionsTable.Path{ii}]);
     
+    end
+    sessions.project = sessionsTable.Project;
+    
+    disp('Projects found: '); 
+    for ii = 1:length(sessions.project) % remove to spaces together, if any
+        sessions.project{ii} = strrep(sessions.project{ii}, '  ', ' ');
+    end
+    project_list = unique(sessions.project);
+    project_list_temp = cell(0);
+    for jj = 1:length(project_list)
+        project_list_temp{1,length(project_list_temp)+1} = project_list{jj};
+        project_list_temp{1,length(project_list_temp)+1} = ' ';
+    end    
+    project_list_temp(end) = [];
+
+    project_list = unique(split([project_list_temp{:}],' '));
+    
+    for ii = 1:length(project_list)
+        fprintf(' %3.i/ %s \n',ii,project_list{ii}); %\n
+    end
+    % fprintf('Taking all sessions from project "%s" \n',project)
+    
+    % selecting sessions
+    if isempty(list_of_sessions)
+        list_of_sessions = sessionsTable.SessionName;
+    end
+    
+    if ~isempty(reject_sessions)
+        list_of_sessions{find(contains(list_of_sessions,lower(reject_sessions)))} = ' ';
+    end
+    
+    % if isempty(indexedSessionCSV_name)
+    %     error('Need to provide the name of the index Project variable');
+    % end
+    % if isempty(indexedSessionCSV_path)
+    %     warning('Not included the path where the indexed Projects .mat variable is located. Trying to find it...');
+    %     indexedSessionCSV_path = fileparts(which([indexedSessionCSV_name,'.csv']));
+    % end
+    % if isempty(analysis_project_path)
+    %     analysis_project_path = indexedSessionCSV_path;
+    % end
+        
+    sessionsTable = readtable([indexedSessionCSV_path filesep indexedSessionCSV_name,'.csv']); % the variable is called allSessions
+        
+    for ii = 1:length(sessionsTable.SessionName)
+        sessions.basepaths{ii} = [nas_path(sessionsTable.Location{ii}) filesep sessionsTable.Path{ii}];
     end
     sessions.project = sessionsTable.Project;
     
@@ -152,8 +149,8 @@ end
     if ~isempty(reject_sessions)
         list_of_sessions{find(contains(list_of_sessions,lower(reject_sessions)))} = ' ';
     end
+            
         
-    
     if strcmpi(project,'Undefined') || strcmpi(project,'All')
         project = project_list;
     elseif ~any(ismember(project_list, project))
@@ -215,14 +212,42 @@ for ii = 1:length(sessions.basepaths)
     
     % loop results
     for jj= 1:length(list_of_results)
-        targetFile = dir(['*.' list_of_results{jj} '*.mat']); 
+        % targetFile = dir(['*.' list_of_results{jj} '*.mat']); 
+        targetFile = dir(['*.' list_of_results{jj} '.mat']);
         name_of_result = replace(list_of_results{jj},{'.','*'},'');
         list_of_results2{jj} = name_of_result;
         if isempty(targetFile)
             projectSessionResults.(name_of_result){ii} = NaN;
+            warning(['Not possible to load: ', name_of_result]);
         else
             projectSessionResults.(name_of_result){ii} = importdata(targetFile.name);
         end
+    end
+
+    try
+        if isfield(projectSessionResults,'fiber_psth_ripples')
+            if isstruct(projectSessionResults.fiber_psth_ripples{ii})
+                projectSessionResults.num_ripples(ii) = length(projectSessionResults.fiber_psth_ripples{ii}.times);
+            else
+                 projectSessionResults.num_ripples(ii) = NaN;
+            end
+        end
+        if isfield(projectSessionResults,'fiber_psth_ripples_PreSleep2') 
+            if isstruct(projectSessionResults.fiber_psth_ripples_PreSleep2{ii})
+                projectSessionResults.num_ripples_pre(ii) = length(projectSessionResults.fiber_psth_ripples_PreSleep2{ii}.times);
+            else
+                projectSessionResults.num_ripples_pre(ii) = NaN;
+            end
+        end
+        if isfield(projectSessionResults,'fiber_psth_ripples_PostSleep2')
+            if isstruct(projectSessionResults.fiber_psth_ripples_PostSleep2{ii})
+                projectSessionResults.num_ripples_post(ii) = length(projectSessionResults.fiber_psth_ripples_PostSleep2{ii}.times);
+            else
+                projectSessionResults.num_ripples_post(ii) = NaN;
+            end
+        end
+    catch
+
     end
     
     % if lightversion and checking fields
@@ -262,6 +287,20 @@ for ii = 1:length(list_of_results2)
     end
 end
 
+% stack results with different samples than neurons (i.e ripple events)
+projectResults.fiber_psth_ripples = stackSessionResult(projectSessionResults.fiber_psth_ripples,projectSessionResults.num_ripples);
+projectResults.fiber_psth_ripples_PreSleep2 = stackSessionResult(projectSessionResults.fiber_psth_ripples_PreSleep2,projectSessionResults.num_ripples_pre);
+projectResults.fiber_psth_ripples_PostSleep2 = stackSessionResult(projectSessionResults.fiber_psth_ripples_PostSleep2,projectSessionResults.num_ripples_post);
+
+for ii = 1:length(projectSessionResults.SessionArmChoiceEvents)
+    if isstruct(projectSessionResults.SessionArmChoiceEvents{ii})
+        fld = fields(projectSessionResults.SessionArmChoiceEvents{ii});
+        performance(ii) = projectSessionResults.SessionArmChoiceEvents{ii}.(fld{1}).performance;
+    else
+        performance(ii) = NaN;
+    end 
+end
+projectResults.performance = performance;
 
 projectResults.cell_metrics = cell_metrics;
 
@@ -281,6 +320,58 @@ for ii = 1:length(projectSessionResults.numcells)
          counCell = counCell + 1;
     end
 end
+
+% session, genetic line, experimentalSubjet (for ripples variables)
+counCell = 1;
+for ii = 1:length(projectSessionResults.num_ripples)
+    for jj = 1:projectSessionResults.num_ripples(ii)
+        % session
+        projectResults.session_ripples{counCell} = lower(projectSessionResults.sessionName{ii});
+        projectResults.sessionNumber_ripples(counCell) = ii;
+        
+        % geneticLine
+        projectResults.geneticLine_ripples{counCell} = lower(projectSessionResults.geneticLine{ii});
+        
+        % expSubject
+         projectResults.expSubject_ripples{counCell} = lower(projectSessionResults.expSubject{ii});
+         counCell = counCell + 1;
+    end
+end
+
+% session, genetic line, experimentalSubjet (for ripples variables)
+counCell = 1;
+for ii = 1:length(projectSessionResults.num_ripples_pre)
+    for jj = 1:projectSessionResults.num_ripples_pre(ii)
+        % session
+        projectResults.session_ripples_pre{counCell} = lower(projectSessionResults.sessionName{ii});
+        projectResults.sessionNumber_ripples_pre(counCell) = ii;
+        
+        % geneticLine
+        projectResults.geneticLine_ripples_pre{counCell} = lower(projectSessionResults.geneticLine{ii});
+        
+        % expSubject
+         projectResults.expSubject_ripples_pre{counCell} = lower(projectSessionResults.expSubject{ii});
+         counCell = counCell + 1;
+    end
+end
+
+% session, genetic line, experimentalSubjet (for ripples variables)
+counCell = 1;
+for ii = 1:length(projectSessionResults.num_ripples_post)
+    for jj = 1:projectSessionResults.num_ripples_post(ii)
+        % session
+        projectResults.session_ripples_post{counCell} = lower(projectSessionResults.sessionName{ii});
+        projectResults.sessionNumber_ripples_post(counCell) = ii;
+        
+        % geneticLine
+        projectResults.geneticLine_ripples_post{counCell} = lower(projectSessionResults.geneticLine{ii});
+        
+        % expSubject
+         projectResults.expSubject_ripples_post{counCell} = lower(projectSessionResults.expSubject{ii});
+         counCell = counCell + 1;
+    end
+end
+
 
 projectResults.sessionList = unique(projectResults.session);
 projectResults.geneticLineList = unique(projectResults.geneticLine);

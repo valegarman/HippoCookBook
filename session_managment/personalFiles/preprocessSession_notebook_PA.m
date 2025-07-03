@@ -1,18 +1,37 @@
+%% ASTRO3
+updateExpFolder_temp({'E:\astro3'},'D:\astro3');
+batch_preprocessSession('basepath','D:\astro3','sessionSummary',false,'getPos',false);
+
+preprocessSession('basepath','D:\astro3\astro3_250529_sess1','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
+preprocessSession('basepath','D:\astro3\astro3_250530_sess2','analysisPath',[],'exclude_shanks',3,'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
+preprocessSession('basepath','D:\astro3\astro3_250604_sess5','analysisPath',[],'exclude_shanks',[3],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
+preprocessSession('basepath','D:\astro3\astro3_250617_sess18','analysisPath',[],'exclude_shanks',[3],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
+
+
 %% APP2
 updateExpFolder_temp({'D:\app2'},'E:\app2');
 
 preprocessSession('basepath','C:\app2\app2_250331_sess1','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
+preprocessSession('basepath','E:\app2\app2_250415_sess12','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
+preprocessSession('basepath','E:\app2\app2_250416_sess13','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
+preprocessSession('basepath','F:\app2\app2_250411_sess10','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
+
+preprocessSession('basepath','F:\app2\app2_250507_sess17','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
+preprocessSession('basepath','F:\app2\app2_250508_sess18','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
+
 batch_preprocessSession('basepath','E:\app2','sessionSummary',false,'getPos',false);
 
-
 processSession('basepath','C:\app2\app2_250331_sess1','digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
+processSession('basepath','C:\data\app2\app2_250411_sess10','digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
+processSession('basepath','C:\data\app2\app2_250415_sess12','digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 
-indexNewSession('basepath','C:\data\app2\app2_250331_sess1');
+indexNewSession('basepath','C:\data\app2\app2_250411_sess10');
+
 %% WT7
-updateExpFolder_temp({'D:\wt7'},'E:\wt7');
+updateExpFolder_temp({'E:\wt7'},'D:\wt7');
 
 preprocessSession('basepath','E:\wt7\wt7_250415_090618','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
-batch_preprocessSession('basepath','E:\wt7','sessionSummary',false,'getPos',false);
+batch_preprocessSession('basepath','D:\wt7','sessionSummary',false,'getPos',false);
 
 editDatFile('E:\wt7\wt7_250404_sess1\wt7_250404_144632',[972 1018],'option','remove');
 
@@ -39,6 +58,7 @@ preprocessSession('basepath','C:\wt5\wt5_250317_sess11','analysisPath',[],'exclu
 processSession('basepath','C:\wt5\wt5_250326_sess18','digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 
 indexNewSession('basepath','C:\wt5\wt5_250326_sess18');
+indexNewSession('basepath','Y:\wt5\wt5_250320_sess14');
 %% WT6
 processSession('basepath','Y:\wt6\wt6_250306_sess2','digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 

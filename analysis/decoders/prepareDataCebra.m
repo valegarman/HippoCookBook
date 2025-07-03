@@ -215,9 +215,9 @@ units_sncg_cortex = units(:,is_sncg_cortex);
 units_sncg = units(:,is_sncg);
 
 
-is_camk2_hippo = ismember(cell_metrics.ground_truth_classification.cell_types,'CAMK2')' & ismember(cell_metrics.brainRegion,inHippocampus);
-is_camk2_cortex = ismember(cell_metrics.ground_truth_classification.cell_types,'CAMK2')' & ismember(cell_metrics.brainRegion,'mPFC');
-is_camk2 = ismember(cell_metrics.ground_truth_classification.cell_types,'CAMK2')';
+is_camk2_hippo = ismember(cell_metrics.ground_truth_classification.cell_types,'CAMK2+')' & ismember(cell_metrics.brainRegion,inHippocampus);
+is_camk2_cortex = ismember(cell_metrics.ground_truth_classification.cell_types,'CAMK2+')' & ismember(cell_metrics.brainRegion,'mPFC');
+is_camk2 = ismember(cell_metrics.ground_truth_classification.cell_types,'CAMK2+')';
 
 units_camk2_hippo = units(:,is_camk2_hippo); 
 units_camk2_cortex = units(:,is_camk2_cortex);

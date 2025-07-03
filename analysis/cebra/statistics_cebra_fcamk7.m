@@ -1,70 +1,84 @@
 %% Load data from CEBRA
 
-sessions = {'Y:\fCamk7\fCamk7_220418_sess14','Y:\fCamk7\fCamk7_220419_sess15','Y:\fCamk7\fCamk7_220420_sess16','Y:\fCamk7\fCamk7_220421_sess17','Y:\fCamk7\fCamk7_220422_sess18'};
+sessions = {'Y:\fCamk7\fCamk7_220418_sess14\CEBRA analysis','Y:\fCamk7\fCamk7_220419_sess15\CEBRA analysis','Y:\fCamk7\fCamk7_220420_sess16\CEBRA analysis','Y:\fCamk7\fCamk7_220421_sess17\CEBRA analysis','Y:\fCamk7\fCamk7_220422_sess18\CEBRA analysis','Y:\unindexedSubjects\Achilles\Achilles_10252013'};
+% sessions = {'Y:\fCamk7\fCamk7_220418_sess14','Y:\fCamk7\fCamk7_220419_sess15','Y:\fCamk7\fCamk7_220420_sess16'};
+% sessions = {'Y:\fCamk7\fCamk7_220418_sess14','Y:\fCamk7\fCamk7_220420_sess16','Y:\fCamk7\fCamk7_220421_sess17','Y:\fCamk7\fCamk7_220422_sess18'};
+% sessions = {'Y:\fCamk7\fCamk7_220418_sess14\CEBRA analysis','Y:\fCamk7\fCamk7_220420_sess16\CEBRA analysis','Y:\fCamk7\fCamk7_220421_sess17\CEBRA analysis'};
+% sessions = {'Y:\fCamk7\fCamk7_220418_sess14\CEBRA analysis','Y:\fCamk7\fCamk7_220419_sess15\CEBRA analysis','Y:\fCamk7\fCamk7_220420_sess16\CEBRA analysis','Y:\fCamk7\fCamk7_220421_sess17\CEBRA analysis'};
 
 for ii = 1:length(sessions)
 
     cd(sessions{ii})
+    % 
+    % file = dir('*cell_metrics.cellinfo.mat');
+    % load(file.name);
+    % 
+    % neurons.session{ii} = sessions{ii};
+    % neurons.number(ii) = length(cell_metrics.UID);
+    % neurons.camk2(ii) = length(find(ismember(cell_metrics.ground_truth_classification.cell_types,'CAMK2')));
+    % neurons.pv(ii) = length(find(ismember(cell_metrics.ground_truth_classification.cell_types,'PV+')));
+    % neurons.sst(ii) = length(find(ismember(cell_metrics.ground_truth_classification.cell_types,'SST+')));
+    % 
+    % neurons.vip(ii) = length(find(ismember(cell_metrics.ground_truth_classification.cell_types,'VIP+')));
+    % % New classes
+    % neurons.deep(ii) = length(find(ismember(cell_metrics.ground_truth_classification.cell_subtypes,'CAMK2_DEEP')));
+    % neurons.sup(ii) = length(find(ismember(cell_metrics.ground_truth_classification.cell_subtypes,'CAMK2_SUP')));
+    % neurons.id2(ii) = length(find(ismember(cell_metrics.ground_truth_classification.cell_subtypes,'ID2_NOSNCG+')));
+    % neurons.sncg(ii) = length(find(ismember(cell_metrics.ground_truth_classification.cell_subtypes,'ID2_SNCG+')));
+    % 
+    % neurons.int(ii) = neurons.pv(ii)+neurons.sst(ii)+neurons.id2(ii)+neurons.vip(ii)+neurons.sncg(ii);
 
-    file = dir('*cell_metrics.cellinfo.mat');
-    load(file.name);
 
-    neurons.session{ii} = sessions{ii};
-    neurons.number(ii) = length(cell_metrics.UID);
-    neurons.camk2(ii) = length(find(ismember(cell_metrics.ground_truth_classification.cell_types,'CAMK2')));
-    neurons.pv(ii) = length(find(ismember(cell_metrics.ground_truth_classification.cell_types,'PV+')));
-    neurons.sst(ii) = length(find(ismember(cell_metrics.ground_truth_classification.cell_types,'SST+')));
-    
-    neurons.vip(ii) = length(find(ismember(cell_metrics.ground_truth_classification.cell_types,'VIP+')));
-    % New classes
-    neurons.deep(ii) = length(find(ismember(cell_metrics.ground_truth_classification.cell_subtypes,'CAMK2_DEEP')));
-    neurons.sup(ii) = length(find(ismember(cell_metrics.ground_truth_classification.cell_subtypes,'CAMK2_SUP')));
-    neurons.id2(ii) = length(find(ismember(cell_metrics.ground_truth_classification.cell_subtypes,'ID2_NOSNCG+')));
-    neurons.sncg(ii) = length(find(ismember(cell_metrics.ground_truth_classification.cell_subtypes,'ID2_SNCG+')));
-
-    neurons.int(ii) = neurons.pv(ii)+neurons.sst(ii)+neurons.id2(ii)+neurons.vip(ii)+neurons.sncg(ii);
-
-
-
-    try
-        filename = dir('cebra_decoding_newClasses_leaveOneOut.mat');
-        load(filename.name);
-    catch
-
-        warning('Not possible to load cebra decoding...');
-    end
-
+    % 
     % try
-    %     filename = dir('cebra_camk2_counter_merror.mat');
+    %     filename = dir('cebra_decoding_leaveOneOut.mat');
     %     load(filename.name);
     % catch
+    % 
     %     warning('Not possible to load cebra decoding...');
     % end
-    % 
-    % camk2_error(ii) = camk2_decoded_error;
-    % camk2_counter_merror{ii} = camk2_merror;
-    % 
-    % camk2_counter_error(ii) = camk2_counter_decoded_error;
-    % int_error(ii) = int_decoded_error;
-    % camk2_shuffled_error(ii) = camk2_shuffled_decoded_error;
-    % camk2_shuffled_counter_error(ii) = camk2_shuffled_counter_decoded_error;
-    % int_shuffled_error(ii) = int_shuffled_decoded_error;
 
-    % int 1 (PV-SST-ID2)
-    int1_error(ii) = int_1_decoded_error;
-    int1_shuffled_error(ii) = int_1_shuffled_decoded_error;
-    % int 2 (PV-ID2-VIP)
-    int2_error(ii) = int_2_decoded_error;
-    int2_shuffled_error(ii) = int_2_shuffled_decoded_error;
-    % int 3 (PV-SST-VIP)
-    int3_error(ii) = int_3_decoded_error;
-    int3_shuffled_error(ii) = int_3_shuffled_decoded_error;
-    % int 4 (SST_ID2_VIP)
-    int4_error(ii) = int_4_decoded_error;
-    int4_shuffled_error(ii) = int_4_shuffled_decoded_error;
-    % int 5 ()
-    int5_error(ii) = int_5_decoded_error;
-    int5_shuffled_error(ii) = int_5_shuffled_decoded_error;
+    try
+        filename = dir('cebra_decoding_hippo.mat');
+        load(filename.name);
+    catch
+        warning('Not possible to load cebra decoding...');
+    end
+    if ii == 6
+        camk2_error(ii) = camk2_decoded_error*100;
+        % camk2_counter_merror{ii} = camk2_merror;
+    
+        camk2_counter_error(ii) = camk2_counter_decoded_error*100;
+        int_error(ii) = int_decoded_error*100;
+        camk2_shuffled_error(ii) = camk2_shuffled_decoded_error*100;
+        camk2_shuffled_counter_error(ii) = camk2_shuffled_counter_decoded_error*100;
+        int_shuffled_error(ii) = int_shuffled_decoded_error*100;
+    else
+        camk2_error(ii) = camk2_decoded_error;
+        % camk2_counter_merror{ii} = camk2_merror;
+    
+        camk2_counter_error(ii) = camk2_counter_decoded_error;
+        int_error(ii) = int_decoded_error;
+        camk2_shuffled_error(ii) = camk2_shuffled_decoded_error;
+        camk2_shuffled_counter_error(ii) = camk2_shuffled_counter_decoded_error;
+        int_shuffled_error(ii) = int_shuffled_decoded_error;
+    end
+
+    % % int 1 (PV-SST-ID2)
+    % int1_error(ii) = int_1_decoded_error;
+    % int1_shuffled_error(ii) = int_1_shuffled_decoded_error;
+    % % int 2 (PV-ID2-VIP)
+    % int2_error(ii) = int_2_decoded_error;
+    % int2_shuffled_error(ii) = int_2_shuffled_decoded_error;
+    % % int 3 (PV-SST-VIP)
+    % int3_error(ii) = int_3_decoded_error;
+    % int3_shuffled_error(ii) = int_3_shuffled_decoded_error;
+    % % int 4 (SST_ID2_VIP)
+    % int4_error(ii) = int_4_decoded_error;
+    % int4_shuffled_error(ii) = int_4_shuffled_decoded_error;
+    % % int 5 ()
+    % int5_error(ii) = int_5_decoded_error;
+    % int5_shuffled_error(ii) = int_5_shuffled_decoded_error;
 
 
 end
@@ -87,10 +101,10 @@ color_int4_dark = color_int4./2;
 color_int5 = [8,104,172] / 255;
 color_int5_dark = color_int4./2; 
 
-% colors.camk2 = color_camk2;
-% colors.camk2_dark = color_camk2;
-% colors.int = color_int;
-% colors.int_dark = color_int_dark;
+colors.camk2 = color_camk2;
+colors.camk2_dark = color_camk2;
+colors.int = color_int;
+colors.int_dark = color_int_dark;
 
 colors.int1 = color_int1;
 colors.int1_dark = color_int1_dark;
@@ -103,12 +117,12 @@ colors.int4_dark = color_int4_dark;
 colors.int5 = color_int5;
 colors.int5_dark = color_int5_dark;
 
-% figure
-% [gs_predicted] = groupStats({camk2_error, camk2_shuffled_error, camk2_counter_error, camk2_shuffled_counter_error, int_error, int_shuffled_error},...
-%     [],'color',[colors.camk2; .6 .6 .6; colors.camk2_dark; .6 .6 .6; colors.int; .6 .6 .6],'plotType','roundPlot','plotData',true,'labelSummary',false,'x_position',[1 1.5 3 3.5 5 5.5],'sigStar',false,'roundPlotSize',5,'inAxis',true,'dataSize',2, 'repeatedMeasures',true,'posthoc_test','lsd');
-% ylim([0 40]);
-% set(gca,'XTick',[1.25 3.25 5.25],'XTickLabel',{'Camk2' 'Camk2 counter', 'Int'},'XTickLabelRotation',45);
-% ylabel('Decoding error (cm)');
+figure
+[gs_predicted] = groupStats({camk2_error, camk2_shuffled_error, camk2_counter_error, camk2_shuffled_counter_error, int_error, int_shuffled_error},...
+    [1 1 2 2 3 3; 1 2 1 2 1 2],'color',[colors.camk2; .6 .6 .6; colors.camk2_dark; .6 .6 .6; colors.int; .6 .6 .6],'plotType','roundPlot','plotData',true,'labelSummary',false,'x_position',[1 1.5 3 3.5 5 5.5],'sigStar',false,'roundPlotSize',5,'inAxis',true,'dataSize',2, 'repeatedMeasures',false,'posthoc_test','lsd');
+ylim([0 40]);
+set(gca,'XTick',[1.25 3.25 5.25],'XTickLabel',{'Camk2' 'Camk2 counter', 'Int'},'XTickLabelRotation',45);
+ylabel('Decoding error (cm)');
 
 
 figure;
@@ -118,6 +132,11 @@ ylim([0 40]);
 set(gca,'XTick',[1 2 3 4 5],'XTickLabel',{'PV-SST-ID2-SNCG' 'PV-ID2-VIP-SNCG', 'PV-SST-VIP-SNCG','SST-ID2-VIP-SNCG','PV-SST-ID2-VIP'},'XTickLabelRotation',45);
 ylabel('Decoding error (cm)');
 
+figure
+[gs_predicted] = groupStats({camk2_error,camk2_counter_error,int_error},...
+    [],'color',[color_camk2;color_camk2;color_int],'plotType','roundPlot','plotData',true,'labelSummary',false,'x_position',[1 2 3 4 5 6],'sigStar',true,'roundPlotSize',5,'inAxis',true,'dataSize',2, 'repeatedMeasures',false,'posthoc_test','lsd');
+ylim([0 40]);
+set(gca,'XTick',[1:3],'XTickLabel',{'CAMK2','CAMK2_c','INT'},'XTickLabelRotation',45);
 
 
 analysis_project_path = adapt_filesep([onedrive_path filesep 'NeuralComputationLab\ActiveProjects\Bibliocampus\data']);
