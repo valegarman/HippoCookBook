@@ -63,9 +63,14 @@ if exist([session.general.name,'.MergePoints.events.mat'],'file')
     count = 1;
     for ii = 1:size(MergePoints.foldernames,2)
         %if sess(ii).isdir && ~isempty(dir([basepath filesep sess(ii).name filesep '*Basler*avi']))
+<<<<<<< HEAD
+         if ~isempty(dir([basepath filesep MergePoints.foldernames{ii} filesep '*uLED_ttl.txt']))  
+            interval = MergePoints.timestamps(ii,:);
+=======
          if ~isempty(dir([basepath filesep MergePoints.foldernames{ii} filesep '*uLED_ttl.txt']))  % or '*uLED_ttl.csv'
             % interval = MergePoints.timestamps(ii,:);
             interval = [0 inf];
+>>>>>>> e577f7ad5fa1dfc3a78c07fae9d009be16fdd81d
             cd([basepath filesep MergePoints.foldernames{ii}]); %cd([basepath filesep sess(ii).name]);
             fprintf('Getting uLEDsPulses in %s folder \n',MergePoints.foldernames{ii});
             % tempuLEDs{count}= getuLEDs_legacy('digitalIn',digitalIn,'interval',interval,'uLEDs_ttl',uLEDs_ttl);
