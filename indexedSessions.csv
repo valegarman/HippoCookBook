@@ -247,3 +247,4 @@ app2_250410_sess9,app2,app2\app2_250410_sess9,neural3,c57b1/6,app/ps1,"105µm (1
 app2_250411_sess10,app2,app2\app2_250411_sess210,neural3,c57b1/6,app/ps1,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,18,PTLp CA1 CA3,POTometry
 app2_250417_sess14,app2,app2\app2_250417_sess14,neural3,c57b1/6,app/ps1,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,18,CA3 CA1 PTLp,POTometry
 camk12_250507_sess5,camk12,camk12\camk12_250507_sess5,neural3,c57b1/6,camk/aii32,"uled-12led-32ch-4shanks",no,40,CA1so CA1sp,ReactInh
+camk12_250507_sess5,camk12,camk12\camk12_250507_sess5,neural3,c57b1/6,camk/aii32,"uled-12led-32ch-4shanks",no,40,CA1so CA1sp,ReactInh
