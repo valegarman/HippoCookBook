@@ -148,7 +148,6 @@ end
 
 if isempty(digitalPulses) && any(ledLayout.isDigital)
     digitalPulses = getDigitalIn;
-
     if length(digitalPulses.ints)<16
         digitalPulses.ints = [digitalPulses.ints cell(1,16-length(digitalPulses.ints))];
     end
@@ -322,7 +321,7 @@ end
 uLEDPulses.list_of_durations = uLEDPulses.conditions_table(:,1)';
 uLEDPulses.list_of_epochs = uLEDPulses.conditions_table(:,2)';
 
-if doPlot
+if doPlot 
     tiledlayout('vertical')
     session = loadSession;
     cmap = cool(size(session.epochs,2));

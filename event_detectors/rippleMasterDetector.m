@@ -76,6 +76,7 @@ function [ripples,SW] = rippleMasterDetector(varargin)
 %   
 %   Develop by Manu Valero and Pablo Abad 2022. Buzsaki Lab. Based on
 %   bz_findRipples
+
 warning('this function is under development and may not work... yet')
 
 %% Default values
@@ -204,6 +205,8 @@ if useCSD
     disp('Computing CSD...');
     rippleChannel = computeCSD([],'channels',rippleChannel);
 end
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 %% Computing Ripples

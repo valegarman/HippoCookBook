@@ -121,8 +121,8 @@ end
 
 % theta and gamma/s
 targetFile = dir('*.theta_6-12.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
-targetFile = dir('*.lgamma_20-60.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
-targetFile = dir('*.hgamma_60-100.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+targetFile = dir('*.lgamma_20-50.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
+targetFile = dir('*.hgamma_50-100.PhaseLockingData.cellinfo.mat'); load(targetFile.name);
 
 % Theta for REM and RUN
 targetFile = dir('*.thetaRun_6-12.PhaseLockingData.cellinfo.mat'); load(targetFile.name);

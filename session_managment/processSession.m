@@ -118,6 +118,7 @@ if length(excludeAnalysis) == 0
     excludeAnalysis = num2str(excludeAnalysis);
 end
 excludeAnalysis = lower(excludeAnalysis);
+keyboard; 
 
 %% 1. Runs sessionTemplate
 if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))
@@ -205,6 +206,7 @@ end
 
 restrict_ints = IntersectIntervals([ints; restrict_to]);
 
+
 %% 2. Remove previous cellinfo.spikes.mat and computes spikes again (manual clustered)
 if ~any(ismember(excludeAnalysis, {'2',lower('loadSpikes')}))
     disp('Loading Spikes...')
@@ -269,6 +271,8 @@ end
 %% 7. Getting Hippocampal Layers
 if ~any(ismember(excludeAnalysis, {'7',lower('getHippocampalLayers')}))
     [hippocampalLayers] = getHippocampalLayers('force',true,'promt',promt_hippo_layers,'removeRipplesStimulation', false);
+        [hippocampalLayers2] = getHippocampalLayers('force',true,'promt',false,'removeRipplesStimulation', false, 'saveSummary',false,'saveMat',false);
+
 end
 
 %% 8. Check Brain Events
@@ -276,15 +280,16 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     % Trying changes in detecUD_temp
     % 8.1 Up and downs
     
-%     UDStates = detectUD('plotOpt', true,'forceDetect',true','NREMInts','all');
+%     UDStates = detectUD('plotOpt',
+%     true,'forceDetect',true','NREMInts','all');[
 %     psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true);
 
-    UDStates = detectUpsDowns('plotOpt', true,'forceDetect',true,'NREMInts','all');
+    UDStates = detectUpsDowns('plotOpt', true,'forceDetect',true,'NREMInts','all','useparfor',true);
     psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true,'minNumberOfPulses',10,'restrict_to',restrict_ints);
     getSpikesRank('events','upstates');
 
     % 8.2 Ripples
-    ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',false,'thresholds',rippleMasterDetector_threshold,'eventSpikeThreshold_shanks', [],'eventSpikeThreshold',eventSpikeThreshold,'excludeIntervals',ExcludeIntervals); 
+    ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',false,'thresholds',rippleMasterDetector_threshold,'eventSpikeThreshold_shanks', 1); 
     psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10);
     % psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10,'restrict_to_manipulation',true);
     getSpikesRank('events','ripples');
@@ -298,9 +303,13 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
 
 
     % 8.3 Theta intervals
-    thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'channel',28);
+    thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'channel',[]);
     
 end
+
+%% 9.1. EMBEDDING
+
+[wave_ripple_mean, wave_theta_mean] = getManifold;
 
 %% 9. Phase Modulation
 if ~any(ismember(excludeAnalysis, {'9',lower('phaseModulation')}))
@@ -347,14 +356,14 @@ end
 if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
     try
         spikes = loadSpikes;
-        % getSessionTracking('roiTracking','manual','forceReload',false,'LED_threshold',LED_threshold,'convFact',tracking_pixel_cm,'leftTTL_reward',leftArmTtl_channel,'rightTTL_reward',rightArmTtl_channel);
+        %getSessionTracking('roiTracking','manual','forceReload',false,'LED_threshold',LED_threshold,'convFact',tracking_pixel_cm,'leftTTL_reward',leftArmTtl_channel,'rightTTL_reward',rightArmTtl_channel);
         getSessionTracking('forceReload',false,'leftTTL_reward',leftArmTtl_channel,'rightTTL_reward',rightArmTtl_channel,'homeTtl',homeDelayTtl_channel,'tracking_ttl_channel',tracking_ttl_channel);
         try
             getSessionArmChoice('task','alternation','leftArmTtl_channel',leftArmTtl_channel,'rightArmTtl_channel',rightArmTtl_channel,'homeDelayTtl_channel',homeDelayTtl_channel,'use_manual_ttls',use_manual_ttls);
         catch
             warning('Performance in task was not computed! maybe linear maze?');
         end
-        behaviour = getSessionLinearize('forceReload',false);  
+        behaviour = getSessionLinearize('forceReload',true);  
         firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',true,'speedThresh',0.1);
         placeFieldStats = bz_findPlaceFields1D('firingMaps',firingMaps,'maxSize',.75,'sepEdge',0.03); %% ,'maxSize',.75,'sepEdge',0.03
         firingTrialsMap = firingMapPerTrial('force',true,'saveMat',true);
@@ -422,10 +431,12 @@ if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
     end
 end
 
-%% 12. Summary per cell
+%% 12. ULED analysis 
+getuLEDPulses;
+
+%% 13. Summary per cell
 if ~any(ismember(excludeAnalysis, {'12',lower('summary')}))
-    plotSummary('showTagCells',false);
-    
+    plotSummary('showTagCells',false);    
 end
 
 cd(prevPath);

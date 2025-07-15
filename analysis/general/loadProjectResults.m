@@ -68,43 +68,6 @@ end
 %% find indexed sessions
 if isempty(list_of_paths)
 
-% <<<<<<< HEAD
-sessionsTable = readtable([indexedSessionCSV_path filesep indexedSessionCSV_name,'.csv']); % the variable is called allSessions
-
-for ii = 1:length(sessionsTable.SessionName)
-
-    sessions.basepaths{ii} = adapt_filesep([nas_path(sessionsTable.Location{ii}) filesep sessionsTable.Path{ii}]);
-
-end
-sessions.project = sessionsTable.Project;
-
-disp('Projects found: '); 
-for ii = 1:length(sessions.project) % remove to spaces together, if any
-    sessions.project{ii} = strrep(sessions.project{ii}, '  ', ' ');
-end
-project_list = unique(sessions.project);
-project_list_temp = cell(0);
-for jj = 1:length(project_list)
-    project_list_temp{1,length(project_list_temp)+1} = project_list{jj};
-    project_list_temp{1,length(project_list_temp)+1} = ' ';
-end    
-project_list_temp(end) = [];
-project_list = unique(split([project_list_temp{:}],' '));
-
-for ii = 1:length(project_list)
-    fprintf(' %3.i/ %s \n',ii,project_list{ii}); %\n
-end
-% fprintf('Taking all sessions from project "%s" \n',project)
-
-% selecting sessions
-if isempty(list_of_sessions)
-    list_of_sessions = sessionsTable.SessionName;
-end
-
-if ~isempty(reject_sessions)
-    list_of_sessions{find(contains(list_of_sessions,lower(reject_sessions)))} = ' ';
-end
-% =======
 %     if isempty(indexedSessionCSV_name)
 %         error('Need to provide the name of the index Project variable');
 %     end
@@ -115,8 +78,7 @@ end
 %     if isempty(analysis_project_path)
 %         analysis_project_path = indexedSessionCSV_path;
 %     end
-% >>>>>>> a44f5ed7ef76cf090c2430220e48de8d504a3bde
-    
+
     sessionsTable = readtable([indexedSessionCSV_path filesep indexedSessionCSV_name,'.csv']); % the variable is called allSessions
     
     for ii = 1:length(sessionsTable.SessionName)
@@ -152,8 +114,7 @@ end
     if ~isempty(reject_sessions)
         list_of_sessions{find(contains(list_of_sessions,lower(reject_sessions)))} = ' ';
     end
-        
-    
+       
     if strcmpi(project,'Undefined') || strcmpi(project,'All')
         project = project_list;
     elseif ~any(ismember(project_list, project))
@@ -221,7 +182,14 @@ for ii = 1:length(sessions.basepaths)
         if isempty(targetFile)
             projectSessionResults.(name_of_result){ii} = NaN;
         else
-            projectSessionResults.(name_of_result){ii} = importdata(targetFile.name);
+            if strcmp(name_of_result,'cell_metrics_after') || strcmp(name_of_result,'cell_metrics_before')
+               cell_metrics_temp = importdata(targetFile.name);
+               cell_metrics_PROVA = CellExplorer('metrics',cell_metrics_temp);% run CELLEXPLORER when adding new data
+               projectSessionResults.(name_of_result){ii} = cell_metrics_PROVA;
+
+            else
+               projectSessionResults.(name_of_result){ii} = importdata(targetFile.name);
+            end
         end
     end
     
@@ -256,7 +224,8 @@ for ii = 1:length(sessions.basepaths)
 end
 %% stack all results
 for ii = 1:length(list_of_results2)
-    try projectResults.(list_of_results2{ii}) = stackSessionResult(projectSessionResults.(list_of_results2{ii}), projectSessionResults.numcells);
+    try 
+        projectResults.(list_of_results2{ii}) = stackSessionResult(projectSessionResults.(list_of_results2{ii}), projectSessionResults.numcells);
     catch
          warning([list_of_results2{ii} ' was not staked!']);
     end

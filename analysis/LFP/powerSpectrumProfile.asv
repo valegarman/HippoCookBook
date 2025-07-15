@@ -71,7 +71,6 @@ save_as = p.Results.save_as;
 %% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 % Resolving inputs   
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-
 try [session] = loadSession(basepath);
     if (exist([session.general.name,'.PowerSpectrumProfile_',num2str(frange(1)),'_',num2str(frange(2)),'.channelinfo.mat'],'file') || ...
             exist([session.general.name,'.PowerSpectrumProfile_',num2str(frange(1)),'_',num2str(frange(2)),'.lfp.mat'],'file')) ...
@@ -154,6 +153,7 @@ powerProfileChannels = [];
 disp('Calculating spectrograms channelwise')
 
 
+keyboard;
 
 
 if useParfor
@@ -248,5 +248,32 @@ if showfig
     if ~exist('SummaryFigures','dir')
         mkdir('SummaryFigures')
     end
+
+    mkdir('SummaryFigures')
+    saveas(gcf,['SummaryFigures\', save_as,'_',num2str(frange(1)),'_',num2str(frange(2)),'.png']);
+%%
+    figure('Position', get(0,'screensize'),'Name',session.general.name)
+    cmap = jet(size(session.extracellular.electrodeGroups.channels,2));
+    plt1 = [];
+    for ii = 1:size(session.extracellular.electrodeGroups.channels,2)
+        if ~all(ismember(session.extracellular.electrodeGroups.channels{ii},session.channelTags.Bad.channels))
+            [Lia] = ismember(session.extracellular.electrodeGroups.channels{ii}, channels);
+            nC = 1:length(session.extracellular.electrodeGroups.channels{ii});
+            nC = nC(Lia);
+            hold on
+
+            dev1 = powerProfile.mean(session.extracellular.electrodeGroups.channels{ii}(Lia)) - powerProfile.ic95(session.extracellular.electrodeGroups.channels{ii}(Lia));
+            dev2 = powerProfile.mean(session.extracellular.electrodeGroups.channels{ii}(Lia)) + powerProfile.ic95(session.extracellular.electrodeGroups.channels{ii}(Lia));
+
+            hold on
+            fill([dev1 flip(dev2)],[nC flip(nC)],cmap(ii,:),'FaceAlpha',.2,'EdgeColor','none')
+            try plt1(ii) = plot(powerProfile.mean(session.extracellular.electrodeGroups.channels{ii}(Lia)),nC(Lia),'color',cmap(ii,:)); end
+        end
+    end
+    
+    ax=axis; axis tight; xlim(ax(1:2));
+    ylabel('Channels'); xlabel('Power'); title(strcat('Freq range:',num2str(frange),'Hz'),'FontWeight','normal');
+    set(gca,'YDir','reverse');
+%     legend(plt1,{num2str([1:size(session.extracellular.electrodeGroups.channels,2)]')})
 end
 

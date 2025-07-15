@@ -70,7 +70,7 @@ deb = p.Results.deb;
 restrict_intervals = p.Results.restrict_intervals;
 restrict_fiber_epochs = p.Results.restrict_fiber_epochs;
 
-
+keyboard;
 session = loadSession();
 % Load fiber
 fiber = getSessionFiberPhotometry_temp();
