@@ -50,7 +50,7 @@ if ~isempty(targetFile) && ~force
     load(targetFile.name);
     return
 end
-keyboard;
+
 if isempty(lfp)
     try lfp = bz_GetLFP('all');
     catch
@@ -61,6 +61,7 @@ end
 % Compute channels features
 sess = bz_getSessionInfo;
 channel_order = sess.AnatGrps.Channels;
+
 % channels.pyramidal = bz_GetBestRippleChan(lfp);
 powerProfile_theta = bz_PowerSpectrumProfile([3 12],'channels',[0:31],'showfig',false,'saveMat',false); % [0:63]
 powerProfile_hfo = bz_PowerSpectrumProfile([120 250],'channels',[0:31],'showfig',false,'saveMat',false); % [0:63]

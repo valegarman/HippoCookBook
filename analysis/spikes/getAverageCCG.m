@@ -434,7 +434,7 @@ if plotOpt
     end
     
 end
-close all;
+% close all;
 cd(prevPath);
 end
 
