@@ -68,10 +68,15 @@ psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'min
 getSpikesRank('events','ripples');
 
 % from ripples.timestamps we want a text file 'basename.rip.evt'
+ripples.rip.evt = cell(2 * size(ripples.timestamps, 1), 2);
 
-1.7826834 begRip
-1.712jkh  endRip
-1.89189 begRip
+% Fill first column: interleaved ON and OFF times
+ripples.rip.evt(1:2:end, 1) = num2cell(ripples.timestamps(:, 1));  % ON times
+ripples.rip.evt(2:2:end, 1) = num2cell(ripples.timestamps(:, 2));  % OFF times
+
+% Fill second column: alternating labels
+ripples.rip.evt(1:2:end, 2) = {'begRip'};  % ON labels
+ripples.rip.evt(2:2:end, 2) = {'endRip'};  % OFF labels
 
 
 %% 5. Theta epochs
