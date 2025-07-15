@@ -55,7 +55,7 @@ addParameter(p,'restrict_to',[0 Inf],@isnumeric);
 addParameter(p,'restrict_to_baseline',true,@islogical);
 addParameter(p,'restrict_to_manipulation',false,@islogical);
 addParameter(p,'selectProbe_automatic',false,@islogical);
-addParameter(p,'use_manual_ttls',false,@islogical),
+addParameter(p,'use_manual_ttls',false,@islogical);
 
 parse(p,varargin{:})
 
@@ -95,6 +95,7 @@ use_manual_ttls = p.Results.use_manual_ttls;
 % Deal with inputs
 prevPath = pwd;
 cd(basepath);
+keyboard;
 
 mkdir('SummaryFigures')
 if createLegacySummaryFolder
@@ -172,8 +173,7 @@ end
 leftArmTtl_channel = session.analysisTags.leftArmTtl_channel;
 rightArmTtl_channel = session.analysisTags.rightArmTtl_channel;
 homeDelayTtl_channel = session.analysisTags.homeDelayTtl_channel;
-
-tracking_ttl_channel = session.
+tracking_ttl_channel = session.analysisTags.bazler_ttl_channel;
 
 ints = [];
 if restrict_to_manipulation
@@ -285,7 +285,8 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     getSpikesRank('events','upstates');
 
     % 8.2 Ripples
-    ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',false,'thresholds',rippleMasterDetector_threshold,'eventSpikeThreshold_shanks', [],'eventSpikeThreshold',eventSpikeThreshold,'excludeIntervals',ExcludeIntervals); 
+    rippleMasterDetector_threshold= [0.5 1];
+    ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',false,'eventSpikeThreshold',false,'thresholds',rippleMasterDetector_threshold); 
     psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10);
     % psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10,'restrict_to_manipulation',true);
     getSpikesRank('events','ripples');
@@ -299,14 +300,13 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
 
 
     % 8.3 Theta intervals
-    thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection);
+    thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'channel',[]);
     
 end
 
 %% 9. Phase Modulation
 if ~any(ismember(excludeAnalysis, {'9',lower('phaseModulation')}))
     % LFP-spikes modulation
-
     [phaseMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel,'thetaChannel',thetaChannel,'lgammaChannel',thetaChannel,'hgammaChannel',thetaChannel,'restrict_to',restrict_ints);
     % [phaseMod] = computePhaseModulation('rippleChannel',rippleChannel,'SWChannel',SWChannel,'restrict_to',restrict_ints);
     computeCofiringModulation;
@@ -335,7 +335,7 @@ if ~any(ismember(excludeAnalysis, {'10',lower('cellMetrics')}))
 
     session = loadSession;
 
-    cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludePulsesIntervals,'forceReload',true); % after CellExplorar
+    cell_metrics = ProcessCellMetrics('session', session,'forceReload',true); % after CellExplorar
 
     
     getACGPeak('force',true);
@@ -350,7 +350,6 @@ if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
     try
         spikes = loadSpikes;
         % getSessionTracking('roiTracking','manual','forceReload',false,'LED_threshold',LED_threshold,'convFact',tracking_pixel_cm,'leftTTL_reward',leftArmTtl_channel,'rightTTL_reward',rightArmTtl_channel);
-
         getSessionTracking('forceReload',false,'leftTTL_reward',leftArmTtl_channel,'rightTTL_reward',rightArmTtl_channel,'homeTtl',homeDelayTtl_channel,'tracking_ttl_channel',tracking_ttl_channel);
         try
             getSessionArmChoice('task','alternation','leftArmTtl_channel',leftArmTtl_channel,'rightArmTtl_channel',rightArmTtl_channel,'homeDelayTtl_channel',homeDelayTtl_channel,'use_manual_ttls',use_manual_ttls);
@@ -381,7 +380,6 @@ if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
         if all(isnan(behaviour.events.intersection))
             behaviour.events.intersection = NaN;
         end
-
         psth_intersection = spikesPsth([behaviour.events.intersection],'numRep',100,'eventType','intersection','saveMat',false,...
             'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'raster_time',[-2 2]);
         psth_startPoint = spikesPsth([behaviour.events.startPoint],'numRep',100,'eventType','startPoint','saveMat',false,...
@@ -404,8 +402,8 @@ if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
         rReward_fiber = fiberPhotometryModulation_temp([behaviour.events.rReward],'eventType','rReward','saveMat',false);
         reward_fiber = fiberPhotometryModulation_temp([behaviour.events.lReward; behaviour.events.rReward],'eventType','reward','saveMat',false);
 
-        intersection_fiber = fiberPhotometryModulation_temp([behaviour.events.intersection],'eventType','intersection','saveMat',false,'savePlotAs','intersection');
-        startPoint_fiber = fiberPhotometryModulation_temp([behaviour.events.startPoint],'eventType','startPoint','saveMat',false,'savePlotAs','startPoint');
+        intersection_fiber = fiberPhotometryModulation_temp([behaviour.events.intersection],'eventType','intersection','saveMat',false);
+        startPoint_fiber = fiberPhotometryModulation_temp([behaviour.events.startPoint],'eventType','startPoint','saveMat',false);
 
         fiber_behavior.lReward = lReward_fiber;
         fiber_behavior.rReward = rReward_fiber;
@@ -428,7 +426,8 @@ end
 
 %% 12. Summary per cell
 if ~any(ismember(excludeAnalysis, {'12',lower('summary')}))
-    plotSummary('showTagCells',false);
+    plotSummary('showTagCells',false,'use_deltaThetaEpochs',false);
+    
 end
 
 cd(prevPath);
