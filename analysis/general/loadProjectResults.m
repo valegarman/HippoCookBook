@@ -68,7 +68,6 @@ end
 %% find indexed sessions
 if isempty(list_of_paths)
 
-% <<<<<<< HEAD
 sessionsTable = readtable([indexedSessionCSV_path filesep indexedSessionCSV_name,'.csv']); % the variable is called allSessions
 
 for ii = 1:length(sessionsTable.SessionName)
@@ -217,6 +216,7 @@ for ii = 1:length(sessions.basepaths)
     for jj= 1:length(list_of_results)
         targetFile = dir(['*.' list_of_results{jj} '*.mat']); 
         name_of_result = replace(list_of_results{jj},{'.','*'},'');
+        name_of_result = replace(name_of_result,{'-'},'_');
         list_of_results2{jj} = name_of_result;
         if isempty(targetFile)
             projectSessionResults.(name_of_result){ii} = NaN;

@@ -281,7 +281,7 @@ elseif strcmp(detector, 'filter2')
         pow_rip_ref(ii) = mean(rip_ref_seg.^2);
 
         % HF power in reference channel
-        hf_seg = hfo_ripple_reference_filt.data(onset_sample:offset_sample,1);
+        hf_seg = hfo_ripple_reference_filt.(onset_sample:offset_sample,1);
         pow_hf(ii) = mean(hf_seg.^2);
     end
 
@@ -295,15 +295,14 @@ elseif strcmp(detector, 'filter2')
     criterion3 = num_cycles >= 4;
     criterion4 = pow_rip_detect > 2 * pow_hf;
     
-    validEvents = criterion1 & criterion2' & criterion3' & criterion4;
+    validEvents = criterion1 & criterion2 & criterion3 & criterion4;
     
     valid_timestamps = ripples.timestamps(validEvents, :);
     valid_peaks = ripples.peaks(validEvents);
     
     % saving results
-    ripples.timestamps = valid_timestamps;
-    ripples.peaks = valid_peaks;
-    ripples.peakNormedPower = ripples.peakNormedPower(validEvents);
+    ripples.valid.timestamps = valid_timestamps;
+    ripples.valid.peaks = valid_peaks;
     
     fprintf('valid events found: %d su %d\n', sum(validEvents), numEvents);
 
