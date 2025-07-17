@@ -166,7 +166,6 @@ system(commandToExecute);
 
 cd(basepath);     
 
-keyboard;
 %% Removing dat files before copying files to buzsakilab or synology
 if removeDatFiles
     % Remove _original and _temp .dat
