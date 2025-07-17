@@ -67,10 +67,6 @@ if ~isempty(exclude_shanks)
     ch(ch_to_remove) = [];
 end
 
-
-
-
-
 duration = 60;
 
 fid = fopen(fileTargetAmplifier.name,'r'); filename = fileTargetAmplifier.name;

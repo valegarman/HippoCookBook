@@ -312,13 +312,22 @@ if ~isempty(spikeThreshold)
     disp('Population cell response... ');
     downPopResponse = [];
     tic
-    parfor (ii = 1: length(downValley),6)
-        try a = sSpkMat(spikemat.timestamps>=downValley(ii)-downWinSize ...
-            & spikemat.timestamps<=downValley(ii)+downWinSize);
-            downPopResponse(ii,:) = zscore(a(int32(1:downWinSize*2/(mean(diff(spikemat.timestamps)))-1)));
+    if useparfor
+        parfor (ii = 1: length(downValley),6)
+            try a = sSpkMat(spikemat.timestamps>=downValley(ii)-downWinSize ...
+                & spikemat.timestamps<=downValley(ii)+downWinSize);
+                downPopResponse(ii,:) = zscore(a(int32(1:downWinSize*2/(mean(diff(spikemat.timestamps)))-1)));
+            end
         end
+        toc
+    else
+         for ii = 1: length(downValley)
+            try a = sSpkMat(spikemat.timestamps>=downValley(ii)-downWinSize ...
+                & spikemat.timestamps<=downValley(ii)+downWinSize);
+                downPopResponse(ii,:) = zscore(a(int32(1:downWinSize*2/(mean(diff(spikemat.timestamps)))-1)));
+            end
+         end
     end
-    toc
     t_ds = linspace(-downWinSize,downWinSize,size(downPopResponse,2));
     
     % sort response according to population response
