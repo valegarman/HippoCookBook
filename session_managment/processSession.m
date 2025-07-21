@@ -346,15 +346,10 @@ if ~any(ismember(excludeAnalysis, {'10',lower('cellMetrics')}))
     end
 
     session = loadSession;
-<<<<<<< HEAD
 
-    cell_metrics = ProcessCellMetrics('session', session,'forceReload',true,'excludeMetrics',{'deepSuperficial'}); % after CellExplorar
-=======
+    cell_metrics = ProcessCellMetrics('session', session,'forceReload',true,'excludeIntervals',excludePulsesIntervals,'excludeMetrics',{'deepSuperficial'}); % after CellExplorar
     
-    cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludePulsesIntervals,'forceReload',true,'excludeMetrics',{'deepSuperficial'}); % after CellExplorar
->>>>>>> 3a96003482fd95de7b99e56d7c2987b91865c176
-
-    
+   
     getACGPeak('force',true);
 
     getAverageCCG('force',true);
