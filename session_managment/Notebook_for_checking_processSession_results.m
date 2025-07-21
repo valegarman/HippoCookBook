@@ -61,8 +61,13 @@ ExcludeIntervals = [];
 rippleChannel =29;
 SWChannel = 6;
 eventSpikeThreshold_shanks = [1 2 3 4 5]; % which shanks will be accounted for the spike threshold 
+<<<<<<< HEAD
+rippleMasterDetector_threshold = [1.5 3.5]; % [1.5 3.5]
+eventSpikeThreshold = 1.5; % .5
+=======
 rippleMasterDetector_threshold = [.75 1.5]; % [1.5 3.5]
 eventSpikeThreshold = 1.2; % .5
+>>>>>>> e577f7ad5fa1dfc3a78c07fae9d009be16fdd81d
 ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',false,'thresholds',rippleMasterDetector_threshold,'eventSpikeThreshold_shanks', eventSpikeThreshold_shanks,'eventSpikeThreshold',eventSpikeThreshold,'excludeIntervals',ExcludeIntervals); 
 psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10);
 % psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10,'restrict_to_manipulation',true);
@@ -73,9 +78,13 @@ getSpikesRank('events','ripples');
 % rhytmicity. If bad, you can change useCSD_for_theta_detection to false,
 % or change powerThreshold, even the channel
 
+<<<<<<< HEAD
+channel = 13;
+=======
 channel = 28;
+>>>>>>> e577f7ad5fa1dfc3a78c07fae9d009be16fdd81d
 useCSD_for_theta_detection = false;
-powerThreshold = 1;% .8
+powerThreshold = 1.6;% .8
 thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'powerThreshold',powerThreshold,'channel', channel);
 
 

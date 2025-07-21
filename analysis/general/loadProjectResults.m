@@ -68,6 +68,42 @@ end
 %% find indexed sessions
 if isempty(list_of_paths)
 
+sessionsTable = readtable([indexedSessionCSV_path filesep indexedSessionCSV_name,'.csv']); % the variable is called allSessions
+
+for ii = 1:length(sessionsTable.SessionName)
+
+    sessions.basepaths{ii} = adapt_filesep([nas_path(sessionsTable.Location{ii}) filesep sessionsTable.Path{ii}]);
+
+end
+sessions.project = sessionsTable.Project;
+
+disp('Projects found: '); 
+for ii = 1:length(sessions.project) % remove to spaces together, if any
+    sessions.project{ii} = strrep(sessions.project{ii}, '  ', ' ');
+end
+project_list = unique(sessions.project);
+project_list_temp = cell(0);
+for jj = 1:length(project_list)
+    project_list_temp{1,length(project_list_temp)+1} = project_list{jj};
+    project_list_temp{1,length(project_list_temp)+1} = ' ';
+end    
+project_list_temp(end) = [];
+project_list = unique(split([project_list_temp{:}],' '));
+
+for ii = 1:length(project_list)
+    fprintf(' %3.i/ %s \n',ii,project_list{ii}); %\n
+end
+% fprintf('Taking all sessions from project "%s" \n',project)
+
+% selecting sessions
+if isempty(list_of_sessions)
+    list_of_sessions = sessionsTable.SessionName;
+end
+
+if ~isempty(reject_sessions)
+    list_of_sessions{find(contains(list_of_sessions,lower(reject_sessions)))} = ' ';
+end
+
     sessionsTable = readtable([indexedSessionCSV_path filesep indexedSessionCSV_name,'.csv']); % the variable is called allSessions
     
     for ii = 1:length(sessionsTable.SessionName)
@@ -215,6 +251,7 @@ for ii = 1:length(sessions.basepaths)
         % targetFile = dir(['*.' list_of_results{jj} '*.mat']); 
         targetFile = dir(['*.' list_of_results{jj} '.mat']);
         name_of_result = replace(list_of_results{jj},{'.','*'},'');
+        name_of_result = replace(name_of_result,{'-'},'_');
         list_of_results2{jj} = name_of_result;
         if isempty(targetFile)
             projectSessionResults.(name_of_result){ii} = NaN;
