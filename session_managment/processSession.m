@@ -243,7 +243,7 @@ end
 %% 4. Spike Features, and optogenetic responses
 % 4.1 Light responses, if available
 if ~any(ismember(excludeAnalysis, {'4',lower('spikesFeatures')}))
-    getOptogeneticResponse('numRep',500,'force',true,'restrict_to', restrict_ints);
+    getOptogeneticResponse('numRep',500,'force',true,'restrict_to', restrict_ints,'digitalChannelsList',digital_optogenetic_channels);
     % 4.2 ACG and waveform
     spikeFeatures;
 end
@@ -336,7 +336,7 @@ if ~any(ismember(excludeAnalysis, {'10',lower('cellMetrics')}))
 
     session = loadSession;
 
-    cell_metrics = ProcessCellMetrics('session', session,'forceReload',true); % after CellExplorar
+    cell_metrics = ProcessCellMetrics('session', session,'forceReload',true,'excludeMetrics',{'deepSuperficial'}); % after CellExplorar
 
     
     getACGPeak('force',true);

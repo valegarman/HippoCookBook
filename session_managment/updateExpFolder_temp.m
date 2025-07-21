@@ -63,7 +63,7 @@ for jj = 1:length(inputFolder)
     expNameInput = strsplit(pwd,filesep);
     expNameInput = expNameInput{end};
     if ~strcmp(expName,expNameInput)
-        error('Experimental name does not match!!');
+        warning('Experimental name does not match!!');
     end
     
     % Open Ephys recordings typically start with the date (yyyy-mm-dd)

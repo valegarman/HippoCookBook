@@ -19,7 +19,7 @@ function medianSubtraction(basepath,varargin)
 p = inputParser;
 addParameter(p,'basepath',pwd,@isdir);
 addParameter(p,'ch','all');
-addParameter(p,'method','substractMean',@ischar);
+addParameter(p,'method','substractMedian',@ischar);
 addParameter(p,'keepDat',false,@islogical);
 addParameter(p,'exclude_shanks',[]);
 
