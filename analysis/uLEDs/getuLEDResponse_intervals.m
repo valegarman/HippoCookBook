@@ -36,7 +36,7 @@ addParameter(p,'uLEDPulses',NaN);
 addParameter(p,'spikes',[],@isstruct);
 addParameter(p,'basepath',pwd,@ischar);
 addParameter(p,'numRep',500,@isnumeric);
-% addParameter(p,'numRep_fake',500,@isnumeric);
+addParameter(p,'numRep_fake',500,@isnumeric);
 addParameter(p,'binSize',0.001,@isnumeric);
 addParameter(p,'winSize',.1,@isnumeric);
 addParameter(p,'doPlot',true,@islogical);
@@ -59,7 +59,7 @@ addParameter(p,'restrict_to_baseline',true,@islogical);
 addParameter(p,'restrict_to_manipulation',false,@islogical);
 addParameter(p,'duration_pulse',0.020,@isnumeric);
 addParameter(p,'save_as','uLEDResponse_interval',@ischar);
-% addParameter(p,'boostraping_type','pulses',@ischar);
+addParameter(p,'boostraping_type','pulses',@ischar);
 addParameter(p,'interpolate_pulse_sides',true,@islogical); % 
 
 % declare global variables
@@ -70,7 +70,7 @@ uLEDPulses = p.Results.uLEDPulses;
 basepath = p.Results.basepath;
 spikes = p.Results.spikes;
 numRep = p.Results.numRep;
-% numRep_fake = p.Results.numRep_fake;
+numRep_fake = p.Results.numRep_fake;
 binSize = p.Results.binSize;
 winSize = p.Results.winSize;
 doPlot = p.Results.doPlot;
@@ -93,7 +93,7 @@ restrict_to_baseline = p.Results.restrict_to_baseline;
 restrict_to_manipulation = p.Results.restrict_to_manipulation;
 duration_pulse = p.Results.duration_pulse;
 save_as = p.Results.save_as;
-% boostraping_type = p.Results.boostraping_type;
+boostraping_type = p.Results.boostraping_type;
 interpolate_pulse_sides = p.Results.interpolate_pulse_sides;
 
 % Deal with inputs
@@ -128,7 +128,7 @@ CONDITION =[];
 if length(uLEDPulses.list_of_conditions) > 1
        
     CONDITION_LIST = uLEDPulses.list_of_conditions(find(uLEDPulses.list_of_durations == duration_pulse))';
-    % CONDITION = CONDITION_LIST(unique(uLEDPulses.conditionID) == CONDITION_LIST);
+    CONDITION = CONDITION_LIST(unique(uLEDPulses.conditionID) == CONDITION_LIST);
       
     uLEDPulses.conditionID =uLEDPulses.conditionID(find(uLEDPulses.conditionID == CONDITION_LIST));
     uLEDPulses.timestamps = uLEDPulses.timestamps(find(uLEDPulses.conditionID == CONDITION_LIST),:);
