@@ -39,7 +39,7 @@ function [ripples,SW] = rippleMasterDetector(varargin)
 %                   compatibility
 %     'restrict'    interval used to compute normalization. By default,
 %                       tries to remove stimulated periods. Otherwise, 'off'
-%     'frequency'   sampling rate (in Hz) (default = 1250Hz)
+%     'sr'   sampling rate (in Hz) (default = 1250Hz)
 %     'stdev'       reuse previously computed stdev
 %     'show'        plot results (default = 'off')
 %     'noise'       noisy unfiltered channel used to exclude ripple-
@@ -76,30 +76,25 @@ function [ripples,SW] = rippleMasterDetector(varargin)
 %   
 %   Develop by Manu Valero and Pablo Abad 2022. Buzsaki Lab. Based on
 %   bz_findRipples
+
 warning('this function is under development and may not work... yet')
 
 %% Default values
 p = inputParser;
 addParameter(p,'basepath',pwd,@isdir);
 addParameter(p,'rippleChannel',[],@isnumeric);
+addParameter(p,'referenceChannel',[],@isnumeric);
 addParameter(p,'SWChannel',[],@isnumeric);
 addParameter(p,'thresholds',[1.5 3.5],@isnumeric);
-addParameter(p,'SWthresholds',[-0.5 -2], @isnumeric);
 addParameter(p,'durations',[30 100],@isnumeric);
 addParameter(p,'restrict',[],@isnumeric);
-addParameter(p,'frequency',1250,@isnumeric);
-addParameter(p,'stdev',[],@isnumeric);
-addParameter(p,'show','off',@isstr);
-addParameter(p,'noise',[],@ismatrix);
+addParameter(p,'sr',1250,@isnumeric);
 addParameter(p,'passband',[120 200],@isnumeric);
-addParameter(p,'SWpassband',[2 10],@isnumeric);
+addParameter(p,'hfo_passband',[200 500],@isnumeric);
 addParameter(p,'EMGThresh',1,@isnumeric);
 addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'minDuration',20,@isnumeric);
-addParameter(p,'plotType',2,@isnumeric);
-addParameter(p,'srLfp',1250,@isnumeric);
 addParameter(p,'rippleStats',true,@islogical);
-addParameter(p,'debug',false,@islogical);
 addParameter(p,'eventSpikeThreshold',.5);
 addParameter(p,'eventSpikeThreshold_shanks','all');
 addParameter(p,'force',false,@islogical);
@@ -120,24 +115,18 @@ parse(p,varargin{:})
 
 basepath = p.Results.basepath;
 rippleChannel = p.Results.rippleChannel;
+referenceChannel = p.Results.referenceChannel;
 SWChannel = p.Results.SWChannel;
 thresholds = p.Results.thresholds;
-SWthresholds = p.Results.SWthresholds;
 durations = p.Results.durations;
 restrict = p.Results.restrict;
-frequency = p.Results.frequency;
-stdev = p.Results.stdev;
-show = p.Results.show;
-noise = p.Results.noise;
+sr = p.Results.sr;
 passband = p.Results.passband;
-SWpassband = p.Results.SWpassband;
+hfo_passband = p.Results.hfo_passband;
 EMGThresh = p.Results.EMGThresh;
 saveMat = p.Results.saveMat;
 minDuration = p.Results.minDuration;
-plotType = p.Results.plotType;
-srLfp = p.Results.srLfp;
 rippleStats = p.Results.rippleStats;
-debug = p.Results.debug;
 eventSpikeThreshold = p.Results.eventSpikeThreshold;
 eventSpikeThreshold_shanks = p.Results.eventSpikeThreshold_shanks;
 force = p.Results.force;
@@ -205,13 +194,15 @@ if useCSD
     rippleChannel = computeCSD([],'channels',rippleChannel);
 end
 
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%
-%% Computing Ripples
+%% Detecting Ripples
 %%%%%%%%%%%%%%%%%%%%%%%%
 
 if strcmp(detector, 'filter')
     ripples = findRipples(rippleChannel,'thresholds',thresholds,'passband',passband,...
-        'EMGThresh',EMGThresh,'durations',durations, 'saveMat',false,'restrict',restrict,'frequency',frequency,'excludeIntervals',excludeIntervals,'noise',noise);
+        'EMGThresh',EMGThresh,'durations',durations, 'saveMat',false,'restrict',restrict,'frequency',sr,'excludeIntervals',excludeIntervals,'noise',referenceChannel, 'minDuration', minDuration);
 elseif strcmp(detector, 'cnn')
     % Load channel configuration
     load([session.general.name,'.session.mat']);
@@ -247,6 +238,78 @@ elseif strcmp(detector, 'cnn')
     ripples = detect_ripples_cnn(double(lfp.data), lfp.samplingRate, 'model_file', model_file, ...
         'pred_every', pred_every, 'verbose', verbose, 'handle_overlap', handle_overlap, ...
         'exec_env', exec_env);
+elseif strcmp(detector, 'filter2')
+    % As in Castelli et al, 2025
+    ripples = findRipples(rippleChannel,'thresholds',thresholds,'passband',passband,...
+        'EMGThresh',0,'durations',[20 300], 'saveMat',false,'restrict',restrict,'frequency',sr,'excludeIntervals',excludeIntervals,'noise',[], 'minDuration', 0);
+    lfp_ripple_reference =      getLFP([rippleChannel referenceChannel],'noPrompts', true);        % 
+    lfp_ripple_reference_filt = bz_Filter(lfp_ripple_reference, 'passband', passband, 'filter', 'butter', 'order', 4);
+    
+    hfo_ripple_reference_filt = bz_Filter(lfp_ripple_reference, 'passband', hfo_passband, 'filter', 'butter', 'order', 4);
+
+    % Use existing ripple events to calculate number of cycles and mean frequency
+    numEvents = length(ripples.peaks);
+    num_cycles = zeros(numEvents,1);        % num_cycles: number of cycles for each ripple
+    mean_freq = zeros(numEvents,1);         % mean_freq: avarage frequency of each ripple
+
+    phase = lfp_ripple_reference_filt.phase(:,1);
+    
+    for ii = 1:numEvents
+        % Convert times to samples
+        onset_sample = floor(ripples.timestamps(ii,1) * sr);
+        offset_sample = ceil(ripples.timestamps(ii,2) * sr);
+    
+        % Get phase for event window
+        event_phase = phase(onset_sample:offset_sample);
+        
+        % Unwrap phase to avoid discontinuities
+        unwrapped_phase = unwrap(event_phase);
+        
+        % Number of cycles = total phase change / 2*pi
+        phase_diff = unwrapped_phase(end) - unwrapped_phase(1);
+        num_cycles(ii) = phase_diff/(2*pi);
+        
+        % Duration in seconds
+        duration_s = (offset_sample - onset_sample)/sr;
+        
+        % Mean frequency of ripple event
+        mean_freq(ii) = num_cycles(ii) / duration_s;
+
+        % ripple power in ripple channel
+        rip_seg = lfp_ripple_reference_filt.data(onset_sample:offset_sample,1);
+        pow_rip_detect(ii) = mean(rip_seg.^2);
+
+        % ripple power in reference channel
+        rip_ref_seg = lfp_ripple_reference_filt.data(onset_sample:offset_sample,2);
+        pow_rip_ref(ii) = mean(rip_ref_seg.^2);
+
+        % HF power in reference channel
+        hf_seg = hfo_ripple_reference_filt.data(onset_sample:offset_sample,1);
+        pow_hf(ii) = mean(hf_seg.^2);
+    end
+
+    % 1. The ripple band power (derived from squaring the mean ripple amplitude) in the detection channel should exceed twice the magnitude obtained for the reference channel.  
+    % 2. The mean frequency of the event should surpass 100 Hz; 
+    % 3. The event must comprise a minimum of 4 complete ripple cycles; 
+    % 4. The power in the ripple band should be at least double compared to the control high frequency band.
+
+    criterion1 = pow_rip_detect > 2 * pow_rip_ref;
+    criterion2 = mean_freq > 100;
+    criterion3 = num_cycles >= 4;
+    criterion4 = pow_rip_detect > 2 * pow_hf;
+    
+    validEvents = criterion1 & criterion2' & criterion3' & criterion4;
+    
+    valid_timestamps = ripples.timestamps(validEvents, :);
+    valid_peaks = ripples.peaks(validEvents);
+    
+    % saving results
+    ripples.timestamps = valid_timestamps;
+    ripples.peaks = valid_peaks;
+    ripples.peakNormedPower = ripples.peakNormedPower(validEvents);
+    
+    fprintf('valid events found: %d su %d\n', sum(validEvents), numEvents);
+
 elseif strcmp(detector, 'consensus')
     
 else
@@ -304,24 +367,25 @@ if rippleStats
     ripples = computeRippleStats('ripples',ripples,'rippleChannel',rippleChannel);
 end
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Computing SharpWaves
-%%%%%%%%%%%%%%%%%%%%%%%%%
-try
-    SW = findSharpWaves('ripples',ripples,'rippleChannel',rippleChannel,'SWChannel',SWChannel,...
-        'passband',passband,'SWpassband',SWpassband);
-catch
-    disp('Not possible to compute Sharp Waves...');
-end
+% %%%%%%%%%%%%%%%%%%%%%%%%%%
+% %% Computing SharpWaves
+% %%%%%%%%%%%%%%%%%%%%%%%%%
+% if
+% try
+%     SW = findSharpWaves('ripples',ripples,'rippleChannel',rippleChannel,'SWChannel',SWChannel,...
+%         'passband',passband,'SWpassband',SWpassband);
+% catch
+%     disp('Not possible to compute Sharp Waves...');
+% end
 %% OUTPUT
 if saveMat
     disp('Saving Ripples Results...');
     save([session.general.name , '.ripples.events.mat'],'ripples');
-    try
-        disp('Saving SharpWaves Results...');
-        save([session.general.name , '.sharpwaves.events.mat'],'SW');
-    catch
-    end
+    % try
+    %     disp('Saving SharpWaves Results...');
+    %     save([session.general.name , '.sharpwaves.events.mat'],'SW');
+    % catch
+    % end
 end
 
 

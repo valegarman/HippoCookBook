@@ -139,8 +139,13 @@ if area_is_p
 end
 
 % axis square
-set(gca, 'TickDir','out','Xtick',[1:size(corrMat,1)],'XTickLabel',X_variablesNames,'XTickLabelRotation',45, 'YDir', 'reverse', ...
-    'Ytick', [1:size(corrMat,2)], 'YTickLabel', Y_variablesNames, 'XTickLabelRotation', 45);
+if onlyBelowDiagonal
+    set(gca, 'TickDir','out','Xtick',[1:size(corrMat,1)-1],'XTickLabel',X_variablesNames(1:end-1),'XTickLabelRotation',45, 'YDir', 'reverse', ...
+        'Ytick', [2:size(corrMat,2)], 'YTickLabel', Y_variablesNames(2:end), 'XTickLabelRotation', 45);
+else
+    set(gca, 'TickDir','out','Xtick',[1:size(corrMat,1)],'XTickLabel',X_variablesNames(1:end),'XTickLabelRotation',45, 'YDir', 'reverse', ...
+        'Ytick', [1:size(corrMat,2)], 'YTickLabel', Y_variablesNames(1:end), 'XTickLabelRotation', 45);
+end
 
 
 end

@@ -5,12 +5,13 @@
 %   'updateExpFolder({recordingPC_1, recordingPC_2, etc}, 'analysis unit')',
 %   Example:
 
-updateExpFolder_temp({'F:\camk12'},'D:\camk12');
+updateExpFolder_temp({'G:\camk13'},'D:\camk13');
 
 % 2% Then, preprocess session (includes artifacts removal, median signal
 %   removal, LFP and Kilosort, and running computeSessionSummary by 'batch_preprocessSession('basepath','sessionBasepath').
 %   Example:
-preprocessSession('basepath','D:\camk12\camk12_250508_sess6','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[]}),'digitalChannelsList',[1],'sessionSummary',false,'getPos',false);
+% preprocessSession('basepath','D:\camk13\camk13_250613_sess2\','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[1, 2]}),'digitalChannelsList',[1 2],'sessionSummary',false,'getPos',false, 'medianSubstr', [1:3 4 11:12 14:18 21:23 27 30 32]);
+preprocessSession('basepath','Y:\unindexedSubjects\cancer2\cancer2_250703_sess2','analysisPath','E:\','exclude_shanks',[],'cleanArtifacts',[],'digitalChannelsList',[1:8],'sessionSummary',true,'getPos',false, 'medianSubstr', true);
 
 computeSessionSummary('digitalChannelsList',[1,2]);
 
@@ -40,7 +41,7 @@ batch_sessionSummary('basepath','G:\data\fPv4','cleanArtifacts',({65,[]}),'analo
 
 % 4% Processs individual sessions by by 'processSession'. Example:
 % ANDREA!!!!!!! add ('LED_threshold',.8) in the function for fSst3!!!!!!!!!!!!
-processSession('digital_optogenetic_channels',[1,2],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
+processSession('digital_optogenetic_channels',[1,2,3,4],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 
 % 5% Revise output using ProcessSession_notebook
 edit Notebook_for_checking_processSession_results
