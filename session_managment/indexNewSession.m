@@ -13,9 +13,9 @@ addParameter(p,'project',[],@ischar);
 addParameter(p,'indexedSessionCSV_path',[],@isstring);
 addParameter(p,'indexedSessionCSV_name','indexedSessions',@isstring);
 addParameter(p,'hippoCookBook_path','HippoCookBook',@isstring);
-addParameter(p,'removeDatFiles',true,@islogical);
+addParameter(p,'removeDatFiles',false,@islogical);
 % addParameter(p,'removeDat',false,@islogical);
-addParameter(p,'copyFiles',true,@islogical);
+addParameter(p,'copyFiles',false,@islogical);
 % addParameter(p,'driveStorage_path','W:\Buzsakilabspace\Datasets\ValeroM',@isdir);
 addParameter(p,'driveStorage_path',[],@isdir);
 % addParameter(p,'driveStorage_name','Research',@isstring);
@@ -60,8 +60,6 @@ if isempty(indexedSessionCSV_path)
 end
 
 cd(basepath)
-keyboard;
-
 
 %% By default looks for Synology and copy files to it, it specified copy files to the specified folder
 if ~isempty(driveStorage_location) && ~isempty(driveStorage_path)
@@ -93,6 +91,7 @@ if isempty(project)
     project = session.general.projects;
 end
 % updated indexedSession table
+
 sessionsTable = readtable([indexedSessionCSV_path filesep indexedSessionCSV_name,'.csv'],'PreserveVariableNames',true); % the variable is called allSessions
 
 % new table entry

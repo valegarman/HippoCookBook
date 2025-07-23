@@ -1,5 +1,5 @@
 function location = nas_path(input)
-% return dropbox folder path
+% return nas path
     switch computer
        case 'MACI64'
             %computerName = char(java.net.InetAddress.getLocalHost.getHostName);
@@ -20,6 +20,8 @@ function location = nas_path(input)
         case 'IMW02703' % pc de andrea
             location = whereIsThisNas1(input);
         case 'DESKTOP-BEPJ8P0' % pc of Martu
+            location = whereIsThisNas1(input);
+        case 'DESKTOP-LNEJ4EN' % pc of Ane
             location = whereIsThisNas1(input);
         otherwise
             location = whereIsThisNas1(input);

@@ -71,6 +71,7 @@ save_as = p.Results.save_as;
 %% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 % Resolving inputs   
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+
 try [session] = loadSession(basepath);
     if (exist([session.general.name,'.PowerSpectrumProfile_',num2str(frange(1)),'_',num2str(frange(2)),'.channelinfo.mat'],'file') || ...
             exist([session.general.name,'.PowerSpectrumProfile_',num2str(frange(1)),'_',num2str(frange(2)),'.lfp.mat'],'file')) ...
@@ -99,9 +100,14 @@ end
 if ~exist('frange') || isempty(frange)
     frange = [6 12];
 end
-  
+
 %% Dealing with channels input
-channels = 1:session.extracellular.nChannels;
+if ischar('channels') && strcmpi(channels,'all')
+    channels = 1:session.extracellular.nChannels;
+else
+    channels = channels;
+end
+
 ints = [];
 session = loadSession;
 if isfield(session,'epochs') && isfield(session.epochs{1},'behavioralParadigm') && restrict_to_manipulation
@@ -146,6 +152,10 @@ powerProfileIc95 = [];
 powerProfileMedian = [];
 powerProfileChannels = [];
 disp('Calculating spectrograms channelwise')
+
+
+
+
 if useParfor
     parfor (ii = 1:length(channels),18)
         fprintf('Channel %3.i/%3.i, ',ii, length(channels));
@@ -238,7 +248,4 @@ if showfig
     if ~exist('SummaryFigures','dir')
         mkdir('SummaryFigures')
     end
-    saveas(gcf,['SummaryFigures\', save_as,'_',num2str(frange(1)),'_',num2str(frange(2)),'.png']);
-
 end
-

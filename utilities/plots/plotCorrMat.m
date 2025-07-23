@@ -32,6 +32,7 @@ addParameter(p,'showGrid',true,@islogical);
 addParameter(p,'inAxis',false,@islogical);
 addParameter(p,'area_is_p',true,@islogical);
 addParameter(p,'area_factor',10,@isnumeric);
+addParameter(p,'p_value_threshold',0.05,@isnumeric);
 
 parse(p,varargin{:});
 
@@ -46,6 +47,7 @@ inAxis = p.Results.inAxis;
 area_is_p = p.Results.area_is_p;
 area_factor = p.Results.area_factor;
 maxPvalue = p.Results.maxPvalue;
+p_value_threshold = p.Results.p_value_threshold;
 
 %%%
 if onlyBelowDiagonal
@@ -122,11 +124,28 @@ xlim([0 size(corrMat,1) + 1]);
 ylim([0 size(corrMat,2) + 1]);
 if area_is_p
     scatter([length(corrMat)-3 : length(corrMat)], zeros(4,1),-log10([minPvalue 0.001 0.01 0.05])*area_factor, [.5 .5 .5],'filled')
+    x_ax = [length(corrMat)-3 : length(corrMat)];
+    p_ax = [minPvalue 0.001 0.01 0.05];
+    for ii = 1:length(x_ax)
+        t = text(x_ax(ii), 0.1, num2str(p_ax(ii)));
+        t.Rotation = 320;
+    end
+    
+    x = x(:);
+    y = y(:);
+    is_sig = p_values > -log10(p_value_threshold);
+
+    scatter(x(is_sig),y(is_sig),area_values(is_sig)*area_factor, [.5 .5 .5],'LineWidth',1);
 end
 
-axis square
-set(gca, 'TickDir','out','Xtick',[1:size(corrMat,1)],'XTickLabel',X_variablesNames,'XTickLabelRotation',45, 'YDir', 'reverse', ...
-    'Ytick', [1:size(corrMat,2)], 'YTickLabel', Y_variablesNames, 'XTickLabelRotation', 45);
+% axis square
+if onlyBelowDiagonal
+    set(gca, 'TickDir','out','Xtick',[1:size(corrMat,1)-1],'XTickLabel',X_variablesNames(1:end-1),'XTickLabelRotation',45, 'YDir', 'reverse', ...
+        'Ytick', [2:size(corrMat,2)], 'YTickLabel', Y_variablesNames(2:end), 'XTickLabelRotation', 45);
+else
+    set(gca, 'TickDir','out','Xtick',[1:size(corrMat,1)],'XTickLabel',X_variablesNames(1:end),'XTickLabelRotation',45, 'YDir', 'reverse', ...
+        'Ytick', [1:size(corrMat,2)], 'YTickLabel', Y_variablesNames(1:end), 'XTickLabelRotation', 45);
+end
 
 
 end

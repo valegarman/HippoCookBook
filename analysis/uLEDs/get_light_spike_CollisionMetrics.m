@@ -90,9 +90,9 @@ uLEDResponses_OutInterval.is_in_rateBeforePuse_similar = [];
 uLEDResponses_OutInterval.responsecurve = [];
 uLEDResponses_OutInterval.responsecurveZ = [];
 uLEDResponses_OutInterval.responsecurveZSmooth = [];
-
-uLEDResponses_RandInterval.maxRatePulse = [];
-uLEDResponses_RandInterval.maxZPulse = [];
+% 
+% uLEDResponses_RandInterval.maxRatePulse = [];
+% uLEDResponses_RandInterval.maxZPulse = [];
 
 
 for ii = 1:length(uLEDResponses_interval)
@@ -148,21 +148,18 @@ for ii = 1:length(uLEDResponses_interval)
         (1:size(uLEDResponses_interval{ii}.bootsTrapRate,1))'];
     uLEDResponses_OutInterval.responsecurve = [uLEDResponses_OutInterval.responsecurve; ...
         squeeze(uLEDResponses_interval{ii}.out_interval.maxRespLED.responseCurve)];
-    % 
-    % for jj = 1 : length(uLEDResponses_interval{ii}.rand_interval) 
-    %      uLEDResponses_RandInterval{ii}.rate{jj} = uLEDResponses_interval{ii}.rand_interval{jj}.rate;
-    %      uLEDResponses_RandInterval{ii}.rateZ{jj}= uLEDResponses_interval{ii}.rand_interval{jj}.rateZ;
-    % end
 
-    % rand
-    temp_rand_rate = [];
-    temp_rand_rateZ = [];
-    for jj = 1:length(uLEDResponses_interval{ii}.rand_interval)
-        temp_rand_rate(:,jj) = uLEDResponses_interval{ii}.rand_interval{jj}.rate;
-        temp_rand_rateZ(:,jj) = uLEDResponses_interval{ii}.rand_interval{jj}.rateZ;
-    end
-    uLEDResponses_RandInterval.maxRatePulse = [uLEDResponses_RandInterval.maxRatePulse; temp_rand_rate];
-    uLEDResponses_RandInterval.maxZPulse = [uLEDResponses_RandInterval.maxZPulse; temp_rand_rateZ];
+ 
+    % 
+    % %rand
+    % temp_rand_rate = [];
+    % temp_rand_rateZ = [];
+    % for jj = 1:length(uLEDResponses_interval{ii}.rand_interval)
+    %     temp_rand_rate(:,jj) = uLEDResponses_interval{ii}.rand_interval{jj}.rate;
+    %     temp_rand_rateZ(:,jj) = uLEDResponses_interval{ii}.rand_interval{jj}.rateZ;
+    % end
+    % uLEDResponses_RandInterval.maxRatePulse = [uLEDResponses_RandInterval.maxRatePulse; temp_rand_rate];
+    % uLEDResponses_RandInterval.maxZPulse = [uLEDResponses_RandInterval.maxZPulse; temp_rand_rateZ];
 end
  
 timestamps = uLEDResponses_interval{1}.in_interval.timestamps;
@@ -314,23 +311,23 @@ collision_metrics.inhibitory_connectionsIn = histcounts(collision_metrics.putati
 collision_metrics.presynapticID = collision_metrics.uLEDResponses_InInterval.presynapticID;
 collision_metrics.postsynapticID = collision_metrics.uLEDResponses_InInterval.postsynapticID;
 
-% boostraping
-for ii = 1:length(collision_metrics.rate_difference)
-    rate_difference_rand(ii,:) = uLEDResponses_OutInterval.maxRatePulse(ii) - uLEDResponses_RandInterval.maxRatePulse(ii,:);
-    collision_metrics.boostrap_CI_05(ii,:) = prctile(rate_difference_rand(ii,:),[5 97.5]);
-    collision_metrics.boostrap_CI_01(ii,:) = prctile(rate_difference_rand(ii,:),[0.5 99.5]);
-    collision_metrics.boostrap_CI_001(ii,:) = prctile(rate_difference_rand(ii,:),[0.05 99.95]);
-    collision_metrics.boostrap_CI_0001(ii,:) = prctile(rate_difference_rand(ii,:),[0.005 99.995]);
-    collision_metrics.boostrap_CI_00001(ii,:) = prctile(rate_difference_rand(ii,:),[0.0005 99.9995]);
-
-    % make boostrap
- 
-
-    collision_metrics.boostrap_CI_05_test(ii) = ~InIntervals(collision_metrics.rate_difference(ii),[collision_metrics.boostrap_CI_05(ii,1)  collision_metrics.boostrap_CI_05(ii,2)]);
-    collision_metrics.boostrap_CI_01_test(ii) = ~InIntervals(collision_metrics.rate_difference(ii),[collision_metrics.boostrap_CI_01(ii,1)  collision_metrics.boostrap_CI_01(ii,2)]);
-    collision_metrics.boostrap_CI_001_test(ii) = ~InIntervals(collision_metrics.rate_difference(ii),[collision_metrics.boostrap_CI_001(ii,1)  collision_metrics.boostrap_CI_001(ii,2)]);
-    collision_metrics.boostrap_CI_0001_test(ii) = ~InIntervals(collision_metrics.rate_difference(ii),[collision_metrics.boostrap_CI_0001(ii,1)  collision_metrics.boostrap_CI_0001(ii,2)]);
-end
+% % boostraping
+% for ii = 1:length(collision_metrics.rate_difference)
+%     rate_difference_rand(ii,:) = uLEDResponses_OutInterval.maxRatePulse(ii) - uLEDResponses_RandInterval.maxRatePulse(ii,:);
+%     collision_metrics.boostrap_CI_05(ii,:) = prctile(rate_difference_rand(ii,:),[5 97.5]);
+%     collision_metrics.boostrap_CI_01(ii,:) = prctile(rate_difference_rand(ii,:),[0.5 99.5]);
+%     collision_metrics.boostrap_CI_001(ii,:) = prctile(rate_difference_rand(ii,:),[0.05 99.95]);
+%     collision_metrics.boostrap_CI_0001(ii,:) = prctile(rate_difference_rand(ii,:),[0.005 99.995]);
+%     collision_metrics.boostrap_CI_00001(ii,:) = prctile(rate_difference_rand(ii,:),[0.0005 99.9995]);
+% 
+%     % make boostrap
+% 
+% 
+%     collision_metrics.boostrap_CI_05_test(ii) = ~InIntervals(collision_metrics.rate_difference(ii),[collision_metrics.boostrap_CI_05(ii,1)  collision_metrics.boostrap_CI_05(ii,2)]);
+%     collision_metrics.boostrap_CI_01_test(ii) = ~InIntervals(collision_metrics.rate_difference(ii),[collision_metrics.boostrap_CI_01(ii,1)  collision_metrics.boostrap_CI_01(ii,2)]);
+%     collision_metrics.boostrap_CI_001_test(ii) = ~InIntervals(collision_metrics.rate_difference(ii),[collision_metrics.boostrap_CI_001(ii,1)  collision_metrics.boostrap_CI_001(ii,2)]);
+%     collision_metrics.boostrap_CI_0001_test(ii) = ~InIntervals(collision_metrics.rate_difference(ii),[collision_metrics.boostrap_CI_0001(ii,1)  collision_metrics.boostrap_CI_0001(ii,2)]);
+% end
 
 % select pairs
 prePyr_select = collision_metrics.candidate_pyr_pyr_pairs;
@@ -358,154 +355,183 @@ if doPlot
     prePyr_select = collision_metrics.candidate_pyr_pyr_pairs;
     preInt_select = collision_metrics.candidate_int_pyr_pairs;
     
-    figure
-    set(gcf,'Position',[200 -500 700 900]);
-    nexttile
-    hold on
-    h1 = histogram(collision_metrics.rate_difference(prePyr_select),...
-        [-10:.2:10],'FaceColor',color_pyr,'EdgeColor','none','Normalization','probability');
-    h2 = histogram(collision_metrics.rate_difference(preInt_select),...
-        [-10:.2:10]+.05,'FaceColor',color_int,'EdgeColor','none','Normalization','probability');
-    xlabel('Rate difference (Hz)'); ylabel('Probability');
-    set(gca,'TickDir','out');
-    legend([h1 h2],'Pre Pyr', 'Pre Int');
-    title(strcat('Spike light collision ',{' '}, label));
-    
-    nexttile
-    groupCorr(collision_metrics.rate_difference(prePyr_select), collision_metrics.rate_only_light(prePyr_select),...
-        'inAxis',true,'MarkerColor',color_pyr);
-    groupCorr(collision_metrics.rate_difference(preInt_select), collision_metrics.rate_only_light(preInt_select),...
-        'inAxis',true,'MarkerColor',color_int,'labelOffset',2);
-    xlabel('Rate difference (Hz)'); ylabel('Rate during light (Hz)');
+    try
+        figure
+        set(gcf,'Position',[200 -500 700 900]);
+        nexttile
+        hold on
+        h1 = histogram(collision_metrics.rate_difference(prePyr_select),...
+            [-10:.2:10],'FaceColor',color_pyr,'EdgeColor','none','Normalization','probability');
+        h2 = histogram(collision_metrics.rate_difference(preInt_select),...
+            [-10:.2:10]+.05,'FaceColor',color_int,'EdgeColor','none','Normalization','probability');
+        xlabel('Rate difference (Hz)'); ylabel('Probability');
+        set(gca,'TickDir','out');
+        legend([h1 h2],'Pre Pyr', 'Pre Int');
+        title(strcat('Spike light collision ',{' '}, label));
+    catch
+        warning('not enough pulses.')   
+    end 
 
     nexttile
-    hold on
-    bar([1 2], [1 1],'FaceColor',[.9 .9 .9],'EdgeColor','none');
-    frac = [length(find(collision_metrics.rate_difference(prePyr_select)>rate_change_threshold))/length(find(prePyr_select))];
-    bar([1], frac,'FaceColor', color_pyr,'EdgeColor','none');
-    text(1,frac+.05,[num2str(round(frac*100,1)), '%'],'Color',color_pyr,'FontSize',12);
-    frac = [length(find(collision_metrics.rate_difference(preInt_select)>rate_change_threshold))/length(find(preInt_select))];
-    bar([2], frac,'FaceColor', color_int,'EdgeColor','none');
-    text(2,frac+.05,[num2str(round(frac*100,1)), '%'],'Color',color_int,'FontSize',12);
-    set(gca,'TickDir','out','XTick',[1 2],'XTickLabel',{'Pre pyr','Pre int'},'XTickLabelRotation',45);
+    try
+        groupCorr(collision_metrics.rate_difference(prePyr_select), collision_metrics.rate_only_light(prePyr_select),...
+            'inAxis',true,'MarkerColor',color_pyr);
+        groupCorr(collision_metrics.rate_difference(preInt_select), collision_metrics.rate_only_light(preInt_select),...
+            'inAxis',true,'MarkerColor',color_int,'labelOffset',2);
+        xlabel('Rate difference (Hz)'); ylabel('Rate during light (Hz)');
+   catch
+        warning('not enough pulses.')   
+    end
+
+    try
+        nexttile
+        hold on
+        bar([1 2], [1 1],'FaceColor',[.9 .9 .9],'EdgeColor','none');
+        frac = [length(find(collision_metrics.rate_difference(prePyr_select)>rate_change_threshold))/length(find(prePyr_select))];
+        bar([1], frac,'FaceColor', color_pyr,'EdgeColor','none');
+        text(1,frac+.05,[num2str(round(frac*100,1)), '%'],'Color',color_pyr,'FontSize',12);
+        frac = [length(find(collision_metrics.rate_difference(preInt_select)>rate_change_threshold))/length(find(preInt_select))];
+        bar([2], frac,'FaceColor', color_int,'EdgeColor','none');
+        text(2,frac+.05,[num2str(round(frac*100,1)), '%'],'Color',color_int,'FontSize',12);
+        set(gca,'TickDir','out','XTick',[1 2],'XTickLabel',{'Pre pyr','Pre int'},'XTickLabelRotation',45);
     ylabel('Pairs with rate difference > 3 Hz');
-
-    nexttile
-    groupStats({(collision_metrics.rateZ_ligh_spike_collision(prePyr_select)),...
-        (collision_metrics.rateZ_only_light(prePyr_select)),...
-        (collision_metrics.rateZ_ligh_spike_collision(preInt_select)),...
-        (collision_metrics.rateZ_only_light(preInt_select))},...
-        [1 1 2 2; 1 2 1 2],'plotType','roundPlot','plotData',true,'color',...
-        [color_pyr; [.7 .2 .2]; color_int; [.2 .2 .7];],'inAxis',true);
-    set(gca,'XTick',[1 2 3.5 4.5],'XTickLabel', {'PrePyr L+Spk', 'PrePyr L', 'PreInt L+Spk', 'PreInt L'},...
-        'XTickLabelRotation',45);
-    ylabel('Rate responses (Std)');
-    
-    nexttile
-    groupStats({(collision_metrics.rate_ligh_spike_collision(prePyr_select)),...
-        (collision_metrics.rate_only_light(prePyr_select)),...
-        (collision_metrics.rate_ligh_spike_collision(preInt_select)),...
-        (collision_metrics.rate_only_light(preInt_select))},...
-        [1 1 2 2; 1 2 1 2],'plotType','roundPlot','plotData',true,'color',...
-        [color_pyr; [.7 .2 .2]; color_int; [.2 .2 .7];],'inAxis',true);
-    set(gca,'XTick',[1 2 3.5 4.5],'XTickLabel', {'PrePyr L+Spk', 'PrePyr L', 'PreInt L+Spk', 'PreInt L'},...
-        'XTickLabelRotation',45);
-    ylabel('Rate responses (Hz)');
-    
-    mkdir('SummaryFigures/');
-    saveas(gcf,strcat('SummaryFigures\Light_spike_Collision_',label,'.png'));
+   catch
+        warning('not enough pulses.')   
+    end
+    try
+        nexttile
+        groupStats({(collision_metrics.rateZ_ligh_spike_collision(prePyr_select)),...
+            (collision_metrics.rateZ_only_light(prePyr_select)),...
+            (collision_metrics.rateZ_ligh_spike_collision(preInt_select)),...
+            (collision_metrics.rateZ_only_light(preInt_select))},...
+            [1 1 2 2; 1 2 1 2],'plotType','roundPlot','plotData',true,'color',...
+            [color_pyr; [.7 .2 .2]; color_int; [.2 .2 .7];],'inAxis',true);
+        set(gca,'XTick',[1 2 3.5 4.5],'XTickLabel', {'PrePyr L+Spk', 'PrePyr L', 'PreInt L+Spk', 'PreInt L'},...
+            'XTickLabelRotation',45);
+        ylabel('Rate responses (Std)');
+       catch
+        warning('not enough pulses.')   
+    end
+    try
+        nexttile
+        groupStats({(collision_metrics.rate_ligh_spike_collision(prePyr_select)),...
+            (collision_metrics.rate_only_light(prePyr_select)),...
+            (collision_metrics.rate_ligh_spike_collision(preInt_select)),...
+            (collision_metrics.rate_only_light(preInt_select))},...
+            [1 1 2 2; 1 2 1 2],'plotType','roundPlot','plotData',true,'color',...
+            [color_pyr; [.7 .2 .2]; color_int; [.2 .2 .7];],'inAxis',true);
+        set(gca,'XTick',[1 2 3.5 4.5],'XTickLabel', {'PrePyr L+Spk', 'PrePyr L', 'PreInt L+Spk', 'PreInt L'},...
+            'XTickLabelRotation',45);
+        ylabel('Rate responses (Hz)');
+       catch
+        warning('not enough pulses.')   
+    end
+    try
+        mkdir('SummaryFigures/');
+        saveas(gcf,strcat('SummaryFigures\Light_spike_Collision_',label,'.png'));
+    catch
+        warning('not enough pulses.')   
+    end
 
     % visualize pairs
-    figure
-    subplot(2,3,[1 2]);
-    groupCorr(log10(collision_metrics.rate_only_light(preInt_select)),(collision_metrics.rate_difference(preInt_select)),...
-        'inAxis',true,'MarkerColor',color_int,'MarkerSize',15);
-    ax = axis;
-    plot(ax(1:2), [rate_change_threshold rate_change_threshold], '-r');
-    putative_inh_pairs = collision_metrics.putative_int_pyr_pairs;
-    plot(log10(collision_metrics.rate_only_light(putative_inh_pairs)), collision_metrics.rate_difference(putative_inh_pairs),'ok');
-    xlabel('Rate during light (Hz)'); ylabel('Rate difference [Hz]');
-    LogScale('x',10);
-    ax1 = ax;
-    subplot(2,3,[3]);
-    hold on
-    [counts, edges] = histcounts(collision_metrics.rate_difference(preInt_select),[-5:.5:15]);
-    bins = edges(1:end-1)+ diff(edges(1:2))/2;
-    barh(bins, counts,'FaceColor',color_int,'EdgeColor','none','BarWidth',1);
-    barh(bins(bins>rate_change_threshold), counts(bins>rate_change_threshold),...
-        'FaceColor',[.5 .5 .5],'EdgeColor','none','BarWidth',1,'FaceAlpha',.3);
-    ax = axis;
-    plot(ax(1:2), [rate_change_threshold rate_change_threshold], '-r');
-    ylim(ax1(3:4));
-    xlabel('Counts');
-    non_putative_inh_pairs = collision_metrics.is_lightResponsive & ~putative_inh_pairs;
-    subplot(2,2,3);
-    hold on
-    plotFill(collision_metrics.uLEDResponses_InInterval.timestamps,...
-    collision_metrics.uLEDResponses_InInterval.responsecurve(putative_inh_pairs,:),'color',[.1 .1 .1],'smoothOpt',5,'style','filled');
-    plotFill(collision_metrics.uLEDResponses_InInterval.timestamps,...
-    collision_metrics.uLEDResponses_OutInterval.responsecurve(putative_inh_pairs,:),'color',[.8 .1 .1],'smoothOpt',5,'style','filled');
-    plotFill(collision_metrics.uLEDResponses_InInterval.timestamps,...
-    collision_metrics.uLEDResponses_OutInterval.responsecurve(putative_inh_pairs,:) ...
-        - collision_metrics.uLEDResponses_InInterval.responsecurve(putative_inh_pairs,:)...
-        ,'color',[.1 .1 .1],'smoothOpt',5,'style','edge');
-    plotFill(collision_metrics.uLEDResponses_InInterval.timestamps,...
-    collision_metrics.uLEDResponses_OutInterval.responsecurve(non_putative_inh_pairs,:) ...
-        - collision_metrics.uLEDResponses_InInterval.responsecurve(non_putative_inh_pairs,:)...
-        ,'color',[.9 .9 .1],'smoothOpt',5,'style','edge');
-    xlim([-.02 .04]);
-    ylabel('Hz'); xlabel('Time (s)');
-    subplot(2,2,4);
-    hold on
-    scatter(cell_metrics.troughToPeak(pyr),cell_metrics.burstIndex_Royer2012(pyr),40,'filled',...
-        'MarkerFaceColor',color_pyr,'MarkerEdgeColor','none','MarkerFaceAlpha',.5);
-    scatter(cell_metrics.troughToPeak(nw),cell_metrics.burstIndex_Royer2012(nw),40,'filled',...
-        'MarkerFaceColor',color_int,'MarkerEdgeColor','none','MarkerFaceAlpha',.5);
-    scatter(cell_metrics.troughToPeak(ww),cell_metrics.burstIndex_Royer2012(ww),40,'filled',...
-        'MarkerFaceColor',color_wint,'MarkerEdgeColor','none','MarkerFaceAlpha',.5);
-
-    for ii = 1:length(cell_metrics.putativeConnections.excitatory)
-        pre_post = [cell_metrics.putativeConnections.excitatory(ii,1) cell_metrics.putativeConnections.excitatory(ii,2)];
-        plot(cell_metrics.troughToPeak(pre_post),...
-            cell_metrics.burstIndex_Royer2012(pre_post),'-','color',[.4 .1 .1 .2]);
-    end
-
-    for ii = 1:size(collision_metrics.putative_int_pyr_pairs_list,1)
-        pre_post = [collision_metrics.putative_int_pyr_pairs_list(ii,1) collision_metrics.putative_int_pyr_pairs_list(ii,2)];
-        plot(cell_metrics.troughToPeak(pre_post),...
-            cell_metrics.burstIndex_Royer2012(pre_post),'-','color',[.1 .1 .4]);
-    end
-    text(0.1, .9,[num2str(size(cell_metrics.putativeConnections.excitatory,1)) 'exc pairs (' num2str(round(collision_metrics.excitatory_connection_probability,2)) ' prob)'],"Units","normalized");
-    text(0.1, .8,[num2str(size(collision_metrics.putative_int_pyr_pairs_list,1)) 'inh pairs (' num2str(round(collision_metrics.inhibitory_connection_probability,2)) ' prob)'],"Units","normalized");
-    ylabel('Bursting Index (Royer2012)'); xlabel('Through to peak (ms)');
+    try
+        figure
+        subplot(2,3,[1 2]);
+        groupCorr(log10(collision_metrics.rate_only_light(preInt_select)),(collision_metrics.rate_difference(preInt_select)),...
+            'inAxis',true,'MarkerColor',color_int,'MarkerSize',15);
+        ax = axis;
+        plot(ax(1:2), [rate_change_threshold rate_change_threshold], '-r');
+        putative_inh_pairs = collision_metrics.putative_int_pyr_pairs;
+        plot(log10(collision_metrics.rate_only_light(putative_inh_pairs)), collision_metrics.rate_difference(putative_inh_pairs),'ok');
+        xlabel('Rate during light (Hz)'); ylabel('Rate difference [Hz]');
+        LogScale('x',10);
+        ax1 = ax;
+        subplot(2,3,[3]);
+        hold on
+        [counts, edges] = histcounts(collision_metrics.rate_difference(preInt_select),[-5:.5:15]);
+        bins = edges(1:end-1)+ diff(edges(1:2))/2;
+        barh(bins, counts,'FaceColor',color_int,'EdgeColor','none','BarWidth',1);
+        barh(bins(bins>rate_change_threshold), counts(bins>rate_change_threshold),...
+            'FaceColor',[.5 .5 .5],'EdgeColor','none','BarWidth',1,'FaceAlpha',.3);
+        ax = axis;
+        plot(ax(1:2), [rate_change_threshold rate_change_threshold], '-r');
+        ylim(ax1(3:4));
+        xlabel('Counts');
+        non_putative_inh_pairs = collision_metrics.is_lightResponsive & ~putative_inh_pairs;
+        subplot(2,2,3);
+        hold on
+        plotFill(collision_metrics.uLEDResponses_InInterval.timestamps,...
+        collision_metrics.uLEDResponses_InInterval.responsecurve(putative_inh_pairs,:),'color',[.1 .1 .1],'smoothOpt',5,'style','filled');
+        plotFill(collision_metrics.uLEDResponses_InInterval.timestamps,...
+        collision_metrics.uLEDResponses_OutInterval.responsecurve(putative_inh_pairs,:),'color',[.8 .1 .1],'smoothOpt',5,'style','filled');
+        plotFill(collision_metrics.uLEDResponses_InInterval.timestamps,...
+        collision_metrics.uLEDResponses_OutInterval.responsecurve(putative_inh_pairs,:) ...
+            - collision_metrics.uLEDResponses_InInterval.responsecurve(putative_inh_pairs,:)...
+            ,'color',[.1 .1 .1],'smoothOpt',5,'style','edge');
+        plotFill(collision_metrics.uLEDResponses_InInterval.timestamps,...
+        collision_metrics.uLEDResponses_OutInterval.responsecurve(non_putative_inh_pairs,:) ...
+            - collision_metrics.uLEDResponses_InInterval.responsecurve(non_putative_inh_pairs,:)...
+            ,'color',[.9 .9 .1],'smoothOpt',5,'style','edge');
+        xlim([-.02 .04]);
+        ylabel('Hz'); xlabel('Time (s)');
+        subplot(2,2,4);
+        hold on
+        scatter(cell_metrics.troughToPeak(pyr),cell_metrics.burstIndex_Royer2012(pyr),40,'filled',...
+            'MarkerFaceColor',color_pyr,'MarkerEdgeColor','none','MarkerFaceAlpha',.5);
+        scatter(cell_metrics.troughToPeak(nw),cell_metrics.burstIndex_Royer2012(nw),40,'filled',...
+            'MarkerFaceColor',color_int,'MarkerEdgeColor','none','MarkerFaceAlpha',.5);
+        scatter(cell_metrics.troughToPeak(ww),cell_metrics.burstIndex_Royer2012(ww),40,'filled',...
+            'MarkerFaceColor',color_wint,'MarkerEdgeColor','none','MarkerFaceAlpha',.5);
     
-    mkdir('SummaryFigures/');
-    saveas(gcf,strcat('SummaryFigures\Light_spike_Collision_pairs_',label,'.png'));
+        for ii = 1:length(cell_metrics.putativeConnections.excitatory)
+            pre_post = [cell_metrics.putativeConnections.excitatory(ii,1) cell_metrics.putativeConnections.excitatory(ii,2)];
+            plot(cell_metrics.troughToPeak(pre_post),...
+                cell_metrics.burstIndex_Royer2012(pre_post),'-','color',[.4 .1 .1 .2]);
+        end
+    
+        for ii = 1:size(collision_metrics.putative_int_pyr_pairs_list,1)
+            pre_post = [collision_metrics.putative_int_pyr_pairs_list(ii,1) collision_metrics.putative_int_pyr_pairs_list(ii,2)];
+            plot(cell_metrics.troughToPeak(pre_post),...
+                cell_metrics.burstIndex_Royer2012(pre_post),'-','color',[.1 .1 .4]);
+        end
+        text(0.1, .9,[num2str(size(cell_metrics.putativeConnections.excitatory,1)) 'exc pairs (' num2str(round(collision_metrics.excitatory_connection_probability,2)) ' prob)'],"Units","normalized");
+        text(0.1, .8,[num2str(size(collision_metrics.putative_int_pyr_pairs_list,1)) 'inh pairs (' num2str(round(collision_metrics.inhibitory_connection_probability,2)) ' prob)'],"Units","normalized");
+        ylabel('Bursting Index (Royer2012)'); xlabel('Through to peak (ms)');
+        
+        mkdir('SummaryFigures/');
+        saveas(gcf,strcat('SummaryFigures\Light_spike_Collision_pairs_',label,'.png'));
 
+    catch
+        warning('not enough pulses.')   
+    end    
+    
     % plotting pairs
-    figure,
-    subplot(2,3,1)
-    imagesc_ranked(uLEDResponses_OutInterval.timestamps, [], uLEDResponses_OutInterval.responsecurveZ(putative_inh_pairs,:),[-30 30],collision_metrics.rateZ_difference(putative_inh_pairs),'smoothOpt',5);
-    ylabel('Z-scored pairs (S.D.)');
-    subplot(2,3,2)
-    imagesc_ranked(uLEDResponses_OutInterval.timestamps, [], uLEDResponses_InInterval.responsecurveZ(putative_inh_pairs,:),[-30 30],collision_metrics.rateZ_difference(putative_inh_pairs),'smoothOpt',5);
-    subplot(2,3,3)
-    imagesc_ranked(uLEDResponses_InInterval.timestamps, [], uLEDResponses_OutInterval.responsecurveZ(putative_inh_pairs,:) - uLEDResponses_InInterval.responsecurveZ(putative_inh_pairs,:),...
-        [-30 30],collision_metrics.rateZ_difference(putative_inh_pairs),'smoothOpt',5);
-
-    subplot(2,3,4)
-    imagesc_ranked(uLEDResponses_OutInterval.timestamps, [], uLEDResponses_OutInterval.responsecurve(putative_inh_pairs,:),[0 30],collision_metrics.rate_difference(putative_inh_pairs),'smoothOpt',5);
-    ylabel('Rate pairs (Hz)');
-    subplot(2,3,5)
-    imagesc_ranked(uLEDResponses_OutInterval.timestamps, [], uLEDResponses_InInterval.responsecurve(putative_inh_pairs,:),[0 30],collision_metrics.rate_difference(putative_inh_pairs),'smoothOpt',5);
-    xlabel('Time since light stimulation (ms)')
-    subplot(2,3,6)
-    imagesc_ranked(uLEDResponses_InInterval.timestamps, [], uLEDResponses_OutInterval.responsecurve(putative_inh_pairs,:) - uLEDResponses_InInterval.responsecurve(putative_inh_pairs,:),...
-        [0 30],collision_metrics.rate_difference(putative_inh_pairs),'smoothOpt',5);
-    colormap jet
-    mkdir('SummaryFigures/');
-    saveas(gcf,strcat('SummaryFigures\Light_spike_Collision_ranked_pairs_',label,'.png'));
+    try 
+        figure,
+        subplot(2,3,1)
+        imagesc_ranked(uLEDResponses_OutInterval.timestamps, [], uLEDResponses_OutInterval.responsecurveZ(putative_inh_pairs,:),[-30 30],collision_metrics.rateZ_difference(putative_inh_pairs),'smoothOpt',5);
+        ylabel('Z-scored pairs (S.D.)');
+        subplot(2,3,2)
+        imagesc_ranked(uLEDResponses_OutInterval.timestamps, [], uLEDResponses_InInterval.responsecurveZ(putative_inh_pairs,:),[-30 30],collision_metrics.rateZ_difference(putative_inh_pairs),'smoothOpt',5);
+        subplot(2,3,3)
+        imagesc_ranked(uLEDResponses_InInterval.timestamps, [], uLEDResponses_OutInterval.responsecurveZ(putative_inh_pairs,:) - uLEDResponses_InInterval.responsecurveZ(putative_inh_pairs,:),...
+            [-30 30],collision_metrics.rateZ_difference(putative_inh_pairs),'smoothOpt',5);
     
+        subplot(2,3,4)
+        imagesc_ranked(uLEDResponses_OutInterval.timestamps, [], uLEDResponses_OutInterval.responsecurve(putative_inh_pairs,:),[0 30],collision_metrics.rate_difference(putative_inh_pairs),'smoothOpt',5);
+        ylabel('Rate pairs (Hz)');
+        subplot(2,3,5)
+        imagesc_ranked(uLEDResponses_OutInterval.timestamps, [], uLEDResponses_InInterval.responsecurve(putative_inh_pairs,:),[0 30],collision_metrics.rate_difference(putative_inh_pairs),'smoothOpt',5);
+        xlabel('Time since light stimulation (ms)')
+        subplot(2,3,6)
+        imagesc_ranked(uLEDResponses_InInterval.timestamps, [], uLEDResponses_OutInterval.responsecurve(putative_inh_pairs,:) - uLEDResponses_InInterval.responsecurve(putative_inh_pairs,:),...
+            [0 30],collision_metrics.rate_difference(putative_inh_pairs),'smoothOpt',5);
+        colormap jet
+        mkdir('SummaryFigures/');
+        saveas(gcf,strcat('SummaryFigures\Light_spike_Collision_ranked_pairs_',label,'.png'));
+     catch
+        warning('not enough pulses.')   
+    end
 end
 
 cd(prevPath);

@@ -63,7 +63,7 @@ for jj = 1:length(inputFolder)
     expNameInput = strsplit(pwd,filesep);
     expNameInput = expNameInput{end};
     if ~strcmp(expName,expNameInput)
-        error('Experimental name does not match!!');
+        warning('Experimental name does not match!!');
     end
     
     % Open Ephys recordings typically start with the date (yyyy-mm-dd)
@@ -131,30 +131,50 @@ for jj = 1:length(inputFolder)
                     doricName{count} = NaN;
                 end
 
+                % uLED ttl .csv file
+                if ~isempty(dir([inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'continuous\', strrep(session.recordNodes{1}.recordings{jj}.info.continuous.folder_name, '/','\'), '*uLED_ttll.csv']))
+                    uLED_ttl_csvFile = dir([inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'continuous\', strrep(session.recordNodes{1}.recordings{jj}.info.continuous.folder_name, '/','\'), '*uLED_ttll.csv']);
+                    uLED_ttl_csvInput{count} = [uLED_ttl_csvFile.folder filesep uLED_ttl_csvFile.name];
+                    uLED_ttl_csvName{count} = uLED_ttl_csvFile.name;
+                else
+                    uLED_ttl_csvInput{count} = NaN;
+                    uLED_ttl_csvName{count} = NaN;
+                end
+
+                % uLED ttl .txt file
+                if ~isempty(dir([inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'continuous\', strrep(session.recordNodes{1}.recordings{jj}.info.continuous.folder_name, '/','\'), '*uLED_ttl.txt']))
+                    uLED_ttl_txtFile = dir([inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'continuous\', strrep(session.recordNodes{1}.recordings{jj}.info.continuous.folder_name, '/','\'), '*uLED_ttl.txt']);
+                    uLED_ttl_txtInput{count} = [uLED_ttl_txtFile.folder filesep uLED_ttl_txtFile.name];
+                    uLED_ttl_txtName{count} = uLED_ttl_txtFile.name;
+                else
+                    uLED_ttl_txtInput{count} = NaN;
+                    uLED_ttl_txtName{count} = NaN;
+                end
+
                 fileInfo = System.IO.FileInfo(datInput{count});
-                fechaCreacion = fileInfo.CreationTime;
+                fechaCreacion = fileInfo.LastWriteTimeUtc;
                 % Day of creation of the file (for creating the subfolder)
-                yyyy = num2str(fileInfo.CreationTime.Year);
-                MM = num2str(fileInfo.CreationTime.Month); 
+                yyyy = num2str(fileInfo.LastWriteTimeUtc.Year);
+                MM = num2str(fileInfo.LastWriteTimeUtc.Month); 
                 if length(MM) < 2  
                     MM = strcat('0',MM);
                 end
-                dd = num2str(fileInfo.CreationTime.Day);
+                dd = num2str(fileInfo.LastWriteTimeUtc.Day);
                 if length(dd) < 2  
                     dd = strcat('0',dd);
                 end
 
                 % Time of creation of the file (for creating the subfolder)
 
-                hh = num2str(fileInfo.CreationTime.Hour);
+                hh = num2str(fileInfo.LastWriteTimeUtc.Hour);
                 if length(hh) < 2  
                     hh = strcat('0',hh);
                 end
-                mm = num2str(fileInfo.CreationTime.Minute);
+                mm = num2str(fileInfo.LastWriteTimeUtc.Minute);
                 if length(mm) < 2  
                     mm = strcat('0',mm);
                 end
-                ss = num2str(fileInfo.CreationTime.Second);
+                ss = num2str(fileInfo.LastWriteTimeUtc.Second);
                 if length(ss) < 2  
                     ss = strcat('0',ss);
                 end
@@ -226,18 +246,18 @@ for jj = 1:length(inputFolder)
         % Copy tracking (timestamps) CSV file
         if ~isnan(tracking_timestampsInput{newExp(ii)})
             copyfile(tracking_timestampsInput{newExp(ii)},...
-            strcat(datOutput{newExp(ii)},filesep,tracking_timestampsName{ii}));
+            strcat(datOutput{newExp(ii)},filesep,tracking_timestampsName{newExp(ii)}));
         end
 
         % Copy tracking (avi video)
         if ~isnan(trackingInput{newExp(ii)})
             copyfile(trackingInput{newExp(ii)},...
-            strcat(datOutput{newExp(ii)},filesep,trackingName{ii}));
+            strcat(datOutput{newExp(ii)},filesep,trackingName{newExp(ii)}));
         end
         % Copy crop tracking (avi video)
         if ~isnan(trackingCropInput{newExp(ii)})
             copyfile(trackingCropInput{newExp(ii)},...
-            strcat(datOutput{newExp(ii)},filesep,trackingCropName{ii}));
+            strcat(datOutput{newExp(ii)},filesep,trackingCropName{newExp(ii)}));
         end
         
         % Copy doric file (in case it exists)
@@ -245,6 +265,19 @@ for jj = 1:length(inputFolder)
             copyfile(doricInput{newExp(ii)},...
             strcat(datOutput{newExp(ii)},filesep,'fiber.doric'));
         end
+
+        % Copy uLED ttl .csv file
+        if ~isnan(uLED_ttl_csvInput{newExp(ii)})
+            copyfile(uLED_ttl_csvInput{newExp(ii)},...
+            strcat(datOutput{newExp(ii)},filesep,uLED_ttl_csvName{newExp(ii)}));
+        end
+
+        % Copy uLED ttl .txt file
+        if ~isnan(uLED_ttl_txtInput{newExp(ii)})
+            copyfile(uLED_ttl_txtInput{newExp(ii)},...
+            strcat(datOutput{newExp(ii)},filesep,uLED_ttl_txtName{newExp(ii)}));
+        end
+
 
     end
     % clear expNameInput recInput allRecInp

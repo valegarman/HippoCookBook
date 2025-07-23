@@ -141,6 +141,7 @@ elseif strcmpi(eventType,'ripples')
     event_ints = [-0.025 0.025];
     baseline_ints = [-0.5 -0.5 + diff(event_ints)];
     % win_Z = [-0.5 -0.1];
+
 end
 
 %% Spikes
@@ -546,6 +547,9 @@ if getRaster && any(any(~isnan(psth.responsecurve)))
         end
     end
     if savePlot
+        if exist('SummaryFigures','dir') == 7
+            mkdir('SummaryFigures');
+        end
         saveas(gcf,['SummaryFigures\' erase(save_raster_as,'_') eventType '.png']); 
     end
 end

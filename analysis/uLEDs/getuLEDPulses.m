@@ -148,7 +148,6 @@ end
 
 if isempty(digitalPulses) && any(ledLayout.isDigital)
     digitalPulses = getDigitalIn;
-
     if length(digitalPulses.ints)<16
         digitalPulses.ints = [digitalPulses.ints cell(1,16-length(digitalPulses.ints))];
     end
@@ -208,6 +207,7 @@ isDigital = isDigital(idx);
 probe = probe(idx);
 
 duration = diff(timestamps')';
+duration(isnan(duration)) = nanmedian(duration);
 durationRounded = round(duration,duration_round_decimal);
 % zeroDurationPulses = find(durationRounded==0);
 if length(unique(durationRounded))>1
@@ -321,7 +321,7 @@ end
 uLEDPulses.list_of_durations = uLEDPulses.conditions_table(:,1)';
 uLEDPulses.list_of_epochs = uLEDPulses.conditions_table(:,2)';
 
-if doPlot
+if doPlot 
     tiledlayout('vertical')
     session = loadSession;
     cmap = cool(size(session.epochs,2));

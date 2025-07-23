@@ -20,6 +20,8 @@ function dp = onedrive_path
             dp = 'C:\Users\mpicco\OneDrive - imim.es\';
         case 'IMW02838' % pc de Ane, la mejor
             dp = 'C:\Users\amartinez11\OneDrive - imim.es\';
+        case 'DESKTOP-LNEJ4EN'
+            dp = 'C:\Users\amartinez11\OneDrive - imim.es\';
         case 'DESKTOP-4MOGMGG' % pablo's pc
             dp = 'C:\Users\pabad\OneDrive - imim.es\';
         otherwise

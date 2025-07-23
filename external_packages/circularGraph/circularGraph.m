@@ -29,6 +29,7 @@ classdef circularGraph < handle
     Label;            % Cell array of strings
     ShowButton;       % Turn all nodes on
     HideButton;       % Turn all nodes off
+    Chords;
   end
   
   methods

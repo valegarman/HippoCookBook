@@ -144,10 +144,16 @@ for ii = 1:length(targetSessions)
         end
 end
 
-[projectResults, projectSessionResults] = ...
-        loadProjectResults('list_of_sessions',list_of_sessions,...
-        'analysis_project_path', [onedrive_path 'NeuralComputationLab\ActiveProjects\ReactInh\dataCoactivation'] ,'loadLast',false, 'save_as', 'reactInh_figureCoactivation');
+    list_of_results = {'optogeneticResponse','averageCCG','ripples_psth','theta_*.PhaseLockingData',...
+            'thetaRun*.PhaseLockingData','spatialModulation','placeFields','behavior.cellinfo','ACGPeak',...
+            'speedCorr','uLEDResponse.cellinfo', 'uLEDcoactivation'};
+    [projectResults, projectSessionResults] = loadProjectResults('list_of_sessions',list_of_sessions,...
+        'analysis_project_path', [onedrive_path 'NeuralComputationLab\ActiveProjects\ReactInh\dataCoactivation'] ,'loadLast',false, 'save_as', 'reactInh_figure_coactivation_v3', 'list_of_results', list_of_results);
+    
+    % stacking pairs
+    projectResults.uLEDcoactivation_pairs = stackSessionResult(projectSessionResults.uLEDcoactivation, projectSessionResults.numcells .* projectSessionResults.numcells);   
 
+    
 % to take a baseline session before and after uled stim, I am going to take
 % baselinePre, PostStim, BaselinePost
 % 
@@ -190,16 +196,3 @@ sessionsTable = readtable([HCB_directory.path filesep 'indexedSessions.csv']); %
 
 targetSessions = find((contains(sessionsTable.Project, targetProject) | strcmpi('all', targetProject))...
     & contains(lower(sessionsTable.SessionName), lower(list_of_sessions)));
-
-
-% 1. Arreglar el error
-% 2. Loop por los pares
-    list_of_results = {'optogeneticResponse','averageCCG','ripples_psth','theta_*.PhaseLockingData',...
-            'thetaRun*.PhaseLockingData','spatialModulation','placeFields','behavior.cellinfo','ACGPeak',...
-            'speedCorr','uLEDResponse.cellinfo', 'uLEDcoactivation'};
-    [projectResults, projectSessionResults] = loadProjectResults('list_of_sessions',list_of_sessions,...
-        'analysis_project_path', [onedrive_path 'NeuralComputationLab\ActiveProjects\ReactInh\dataCoactivation'] ,'loadLast',false, 'save_as', 'reactInh_figure_coactivation', 'list_of_results', list_of_results);
-    
-    % stacking pairs
-    projectResults.uLEDcoactivation_pairs = stackSessionResult(projectSessionResults.uLEDcoactivation, projectSessionResults.numcells .* projectSessionResults.numcells);   
-% 3. 
