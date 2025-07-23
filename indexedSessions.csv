@@ -203,11 +203,52 @@ fsst4_220928_sess12,fsst4,fsst4\fsst4_220928_sess12,neural3,c57b1/6,sst/ai32,"10
 fcamk7_220420_sess16,fcamk7,fcamk7\fcamk7_220420_sess16,neural3,c57b1/6,camkii/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,245,CA1so CA1sp CA1slm CA1sr mPFC,InterneuronsLibrary
 ny15session22,ny15,ny15\ny15session22,neural3,epilepsy,wild type,"none",no,20,CA1sp,evoNeurons
 fcamk7_220418_sess14,fcamk7,fcamk7\fcamk7_220418_sess14,neural3,c57b1/6,camkii/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",maze,218,mPFC pSUBsp CA1sr CA1sp CA1so,InterneuronsLibrary
-fcamk10_220913_sess3,fcamk10,fcamk10\fcamk10_220913_sess3,neural3,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,no,17,CA1so CA1sp,ReactInh
+fcamk10_220913_sess3,fcamk10,fcamk10\fcamk10_220913_sess3,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",no,17,CA1so CA1sp,ReactInh
 fcamk7_220419_sess15,fcamk7,fcamk7\fcamk7_220419_sess15,neural3,c57b1/6,camkii/ai32,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",maze,268,mPFC pSUBsp CA1sr CA1so CA1sp,InterneuronsLibrary
 fcamk10_220914_sess4,fcamk10,fcamk10\fcamk10_220914_sess4,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",no,29,CA1so CA1sp,ReactInh
 fcamk10_220915_sess5,fcamk10,fcamk10\fcamk10_220915_sess5,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",no,33,CA1so CA1sp,ReactInh
 fcamk10_220916_sess6,fcamk10,fcamk10\fcamk10_220916_sess6,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",no,42,CA1so CA1sp,ReactInh
 fcamk10_220907_sess2,fcamk10,fcamk10\fcamk10_220907_sess2,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",no,19,CA1so CA1sp,ReactInh
 fcamk10_220906_sess1,fcamk10,fcamk10\fcamk10_220906_sess1,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",no,41,CA1so CA1sp,ReactIn
-fcamk8_220609_sess8,fcamk8,fcamk8\fcamk8_220609_sess8,neural3,c57b1/6,camkii/ai32,diagnosticbiochip-128-6-128ch&uled_12led-32ch-4shanks,tmaze,154,mPFC CA1so CA1sp CA1sr pSUBsp,Bibliocampus
+fcamk8_220609_sess8,fcamk8,fcamk8\fcamk8_220609_sess8,neural3,c57b1/6,camkii/ai32,"diagnosticbiochip-128-6-128ch&uled_12led-32ch-4shanks",tmaze,154,mPFC CA1so CA1sp CA1sr pSUBsp,Bibliocampus
+faxo1_180501_sess1,faxo1,faxo1\faxo1_180501_sess1,neural3,c57b1/6,unc5b/Ai32,"105�m (125�m), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,23,CA1sp,Bibliocampus
+faxo2_180414_sess2,faxo2,faxo2\faxo2_180414_sess2,neural3,c57b1/6,unc5b/Ai32,"105�m (125�m), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,28,CA1sp,Bibliocampus
+faxo3_180415_sess1,faxo3,faxo2\faxo2_180414_sess2,neural3,c57b1/6,unc5b/Ai32,"105�m (125�m), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,25,CA1sp,Bibliocampus
+faxo2_180412_sess1,faxo2,faxo2\faxo2_180414_sess2,neural3,c57b1/6,unc5b/Ai32,"105�m (125�m), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,75,CA1sp,Bibliocampus
+wt6_250307_sess3,wt6,wt6\wt6_250307_sess3,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,26,CA1so pCA1sp CA1sr CA1slm PTLp,POTometry
+wt6_250306_sess2,wt6,wt6\wt6_250306_sess2,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,26,CA1so CA1sp CA1sr CA1slm PTLp,POTometry
+wt6_250310_sess4,wt6,wt6\wt6_250310_sess4,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,25,CA1so CA1sp CA1sr CA1slm PTLp,POTometry
+wt5_250314_sess10,wt5,wt5\wt5_250314_sess10,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,28,CA1so CA1sp,POTometry
+wt5_250311_sess7,wt5,wt5\wt5_250311_sess7,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,28,CA1so CA1sp,POTometry
+wt6_250305_sess1,wt6,wt6\wt6_250305_sess1,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,9,CA1so CA1sp CA1sr CA1slm PTLp,POTometry
+wt5_250318_sess12,wt5,wt5\wt5_250318_sess12,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,26,CA1so CA1sp,POTometry
+wt5_250317_sess11,wt5,wt5\wt5_250317_sess11,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,26,CA1so CA1sp,POTometry
+wt5_250319_sess13,wt5,wt5\wt5_250319_sess13,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,27,CA1so CA1sp,POTometry
+wt5_250321_sess15,wt5,wt5\wt5_250321_sess15,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,24,CA1so CA1sp,POTometry
+wt5_250324_sess16,wt5,wt5\wt5_250324_sess16,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,22,CA1so CA1sp,POTometry
+wt5_250325_sess17,wt5,wt5\wt5_250325_sess17,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,18,CA1so CA1sp,POTometry
+wt5_250326_sess18,wt5,wt5\wt5_250326_sess18,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,21,CA1so CA1sp,POTometry
+wt5_250320_sess14,wt5,wt5\wt5_250320_sess14,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,39,CA1 pCA1sp,POTometry
+app2_250401_sess2,app2,app2\app2_250401_sess2,neural3,c57b1/6,app/ps1,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,18,CA1 CA1so pCA1sp CA3 CA1sp CA1slm CA1sr,POTometry
+wt7_250404_sess1,wt7,wt7\wt7_250404_sess1,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,20,CA1so pCA1sp,POTometry
+app2_250331_sess1,app2,app2\app2_250331_sess1,neural3,c57b1/6,app/ps1,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,18,PTLp CA1so CA1sp,POTometry
+wt7_250407_sess2,wt7,wt7\wt7_250407_sess2,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,13,PTLp CA1sp CA1so,POTometry
+fcamk7_220328_sess5,fcamk7,fcamk7\fcamk7_220328_sess5,neural3,c57b1/6,camkii/ai32,"diagnosticbiochip-128-6-128ch&uled_12led-32ch-4shanks",no,248,CA1sp CA1so PTLp5 PTLp6 PTLp2_3 mPFC,Bibliocampus
+fcamk7_220324_sess3,fcamk7,fcamk7\fcamk7_220324_sess3,neural3,c57b1/6,camkii/ai32,"diagnosticbiochip-128-6-128ch&uled_12led-32ch-4shanks",no,162,PTLp5 PTLp6 PTLp2_3 mPFC,Bibliocampus
+camk12_250429_sess2,camk12,camk12\camk12_250429_sess2,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",no,10,PTLp6 CA1so,Bibliocampus
+camk12_250430_sess3,camk12,camk12\camk12_250430_sess3,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",no,15,PTLp,Bibliocampus
+camk12_250502_sess4,camk12,camk12\camk12_250502_sess4,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",no,12,PTLp,Bibliocampus
+wt7_250408_sess3,wt7,wt7\wt7_250408_sess3,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,22,CA1sp CA1so CA1sr,POTometry
+wt7_250409_sess4,wt7,wt7\wt7_250409_sess4,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,13,CA1so PTLp CA1sp CA1sr,POTometry
+wt7_250414_sess7,wt7,wt7\wt7_250414_sess7,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,23,PTLp CA1sp CA1sr,POTometry
+app2_250409_sess8,app2,app2\app2_250409_sess8,neural3,c57b1/6,app/ps1,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,19,PTLp CA1 CA3,POTometry
+app2_250407_sess6,app2,app2\app2_250407_sess6,neural3,c57b1/6,app/ps1,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,24,CA3 CA1 PTLp,POTometry
+app2_250410_sess9,app2,app2\app2_250410_sess9,neural3,c57b1/6,app/ps1,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,17,PTLp CA1 CA3,POTometry
+app2_250411_sess10,app2,app2\app2_250411_sess210,neural3,c57b1/6,app/ps1,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,18,PTLp CA1 CA3,POTometry
+app2_250417_sess14,app2,app2\app2_250417_sess14,neural3,c57b1/6,app/ps1,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,18,CA3 CA1 PTLp,POTometry
+camk12_250507_sess5,camk12,camk12\camk12_250507_sess5,neural3,c57b1/6,camk/aii32,"uled-12led-32ch-4shanks",no,40,CA1so CA1sp,ReactInh
+camk12_250508_sess6,camk12,camk12\camk12_250508_sess6,neural3,c57b1/6,camk/aii32,"uled-12led-32ch-4shanks",no,33,CA1sp CA1so,ReactInh
+fcamk1_200831_sess11,fcamk1,fcamk1\fcamk1_200831_sess11,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze,59,CA1sp CA1so CA1sr,LightInInh
+fcamk1_200903_sess14,fcamk1,fcamk1\fcamk1_200903_sess14,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze,64,CA1sp CA1so CA1sr,LightInInh
+fcamk3_201027_sess9,fcamk3,fcamk3\fcamk3_201027_sess9,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze  linear maze,26,CA1sp CA1so,LightInInh
+cancer2_250704_sess3,cancer2,cancer2\cancer2_250704_sess3,neural3,c57b1/6,wild type,"none",tmaze,72,CA1sp CA1so PTLp6 PTLp5,Cancer

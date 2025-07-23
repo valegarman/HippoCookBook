@@ -1,0 +1,79 @@
+
+% script for embeding
+
+% First, I have created an environment in python (in anaconda terminal, run)
+conda create -n matlab_env python=3.10.12
+conda activate matlab_env
+pip install numpy==1.23.5 scipy==1.15.2 scikit-learn==1.2.2 joblib==1.4.2 matplotlib==3.10.1
+% then, I copy the path obtained with (runned in the terminal) here
+where python 
+% which in my case was
+py_path = 'C:\Users\mvalero\.conda\envs\matlab_env\python.exe';
+embeding_path = 'C:\Users\mvalero\OneDrive - imim.es\Documents\Code\HippoCookBook\utilities\python\compute_lfp_embeding.py';
+command = ['"' py_path '" "' embeding_path '"'];
+[status, output] = system(command);
+disp(output)
+
+
+
+
+% --- 1. Channel to trajectory
+traj = lfp_embeding.model_trajectory;
+projs = lfp_embeding.data_projection_2d;
+precision = lfp_embeding.precision;
+
+
+n_channels = size(projs, 1);
+trajis = zeros(n_channels, 1);
+
+for i = 1:n_channels
+    dists = sum((traj - projs(i,:)).^2, 2);
+    [~, idx] = min(dists);
+    trajis(i) = idx;
+end
+
+% --- 2. Reference points
+ctrl_pts = lfp_embeding.all_training_data_points;
+ctrl_labels = cellstr(strtrim(string(lfp_embeding.all_training_data_labels)));
+
+ctrl_traj = zeros(size(ctrl_pts,1), 1);
+for i = 1:size(ctrl_pts,1)
+    dists = sum((traj - ctrl_pts(i,:)).^2, 2);
+    [~, idx] = min(dists);
+    ctrl_traj(i) = idx;
+end
+
+% Encontrar la media de los índices de los puntos 'pyr'
+pyr_idx = strcmp(ctrl_labels, 'pyr');
+pyr_center = mean(ctrl_traj(pyr_idx));
+
+trajis = double(trajis);
+pyr_center = double(pyr_center);
+precision = double(precision);
+
+trajis = trajis / precision - pyr_center / precision;  % ahora 0 = capa 'pyr'
+
+assigned_labels = strings(n_channels, 1);
+for i = 1:n_channels
+    x = trajis(i);
+    if x < -27
+        assigned_labels(i) = "gr";
+    elseif x < -22
+        assigned_labels(i) = "im";
+    elseif x < -18
+        assigned_labels(i) = "mm";
+    elseif x < -13
+        assigned_labels(i) = "om";
+    elseif x < -8
+        assigned_labels(i) = "hf";
+    elseif x < -3
+        assigned_labels(i) = "lm";
+    elseif x < 2
+        assigned_labels(i) = "rad";
+    else
+        assigned_labels(i) = "pyr";
+    end
+end
+
+disp("Distribución de etiquetas asignadas:")
+disp(groupcounts(assigned_labels))

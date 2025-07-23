@@ -53,12 +53,13 @@ addParameter(p,'roiTracking',[],@ismatrix);
 addParameter(p,'roiLED',[],@ismatrix);
 addParameter(p,'roisPath',[],@isfolder);
 addParameter(p,'saveMat',true,@islogical)
-addParameter(p,'forceReload',false,@islogical);
-addParameter(p,'anyMaze',false,@islogical);
+addParameter(p,'forceReload',true,@islogical);
 addParameter(p,'LED_threshold',0.98,@isnumeric);
 addParameter(p,'tracking_ttl_channel',[],@isnumeric);
 addParameter(p,'leftTTL_reward',[],@isnumeric);
 addParameter(p,'rightTTL_reward',[],@isnumeric);
+addParameter(p,'homeTtl',[],@isnumeric);
+addParameter(p,'tracking_software','dlc'); % Options are: 'basler', 'anymaze', 'dlc' (default).
 
 parse(p,varargin{:});
 basepath = p.Results.basepath;
@@ -68,22 +69,24 @@ roiLED = p.Results.roiLED;
 roisPath = p.Results.roisPath;
 saveMat = p.Results.saveMat;
 forceReload = p.Results.forceReload;
-anyMaze = p.Results.anyMaze;
 LED_threshold = p.Results.LED_threshold;
 tracking_ttl_channel = p.Results.tracking_ttl_channel;
 leftTTL_reward = p.Results.leftTTL_reward;
 rightTTL_reward = p.Results.rightTTL_reward;
+homeTtl = p.Results.homeTtl;
+tracking_software = p.Results.tracking_software;
+
 
 
 %% In case tracking already exists 
-if ~isempty(dir([basepath filesep '*Tracking.Behavior.mat'])) || forceReload
+if ~isempty(dir([basepath filesep '*Tracking.Behavior.mat'])) && forceReload
     disp('Trajectory already detected! Loading file.');
     file = dir([basepath filesep '*Tracking.Behavior.mat']);
     load(file.name);
     return
 end
 
-if ~anyMaze
+if strcmpi(tracking_software,'basler')
     %% Basler tracking
     cd(basepath); cd ..; upBasepath = pwd; cd(basepath);
     if isempty(roisPath)
@@ -123,7 +126,7 @@ if ~anyMaze
     else
         error('missing MergePoints, quiting...');
     end
-elseif anyMaze
+elseif strcmpi(tracking_software,'anymaze')
     % Find subfolder recordings
     cd(basepath);
     basename = basenameFromBasepath(basepath);
@@ -131,7 +134,7 @@ elseif anyMaze
         load(strcat(basename,'.MergePoints.events.mat'));
         count = 1;
         for ii = 1:size(MergePoints.foldernames,2)
-            if ~isempty(dir([basepath filesep MergePoints.foldernames{ii} filesep '*.csv*']))
+            if ~isempty(dir([basepath filesep MergePoints.foldernames{ii} filesep '*_filtered.csv*']))
                 cd([basepath filesep MergePoints.foldernames{ii}]);
                 fprintf('Computing tracking in %s folder \n',MergePoints.foldernames{ii});
                 tempTracking{count} = anyMazeTracking([],[]);
@@ -143,6 +146,28 @@ elseif anyMaze
     else
         error('Missing MergePoints, quitting...');
     end
+
+elseif strcmpi(tracking_software,'dlc')
+    % Deep lab cut tracking
+    cd(basepath);
+    basename = basenameFromBasepath(basepath);
+    if exist([basepath filesep strcat(basename,'.MergePoints.events.mat')],'file')
+        load(strcat(basename,'.MergePoints.events.mat'));
+        count = 1;
+        for ii = 1:size(MergePoints.foldernames,2)
+            if ~isempty(dir([basepath filesep MergePoints.foldernames{ii} filesep '*tracking*_crop.avi']))
+                cd([basepath filesep MergePoints.foldernames{ii}]);
+                fprintf('Computing tracking in %s folder \n',MergePoints.foldernames{ii});
+                 tempTracking{count} = dlc_tracking('leftTtl_reward',leftTTL_reward,'rightTtl_reward',rightTTL_reward,'homeTtl',homeTtl,'forceReload',forceReload);
+                trackFolder(count) = ii;
+                count = count + 1;
+            end
+        end
+        cd(basepath);
+    else
+        error('Missing MergePoints, quitting...');
+    end
+
 end
 %% Concatenate and sync timestamps
 if count > 1 % if traking
@@ -155,7 +180,7 @@ if count > 1 % if traking
                 subSessions = [subSessions; MergePoints.timestamps(trackFolder(ii),1:2)];
                 maskSessions = [maskSessions; ones(size(sumTs))*ii];
                 ts = [ts; sumTs];
-                if anyMaze
+                if strcmpi(tracking_software,'anymaze')
                     sumOriginalTs = tempTracking{ii}.originalTimestamps + MergePoints.timestamps(trackFolder(ii),1);
                     originalts = [originalts; sumOriginalTs];
                 end
@@ -173,18 +198,37 @@ if count > 1 % if traking
     end
 
     % Concatenating tracking fields...
-    x = []; y = []; folder = []; samplingRate = []; description = [];
+    x = []; y = []; likelihood = [];
+    x_back = []; y_back = []; likelihood_back = [];
+    x_tail1 = []; y_tail1 = []; likelihood_tail1 = [];
+    x_tail2 = []; y_tail2 = []; likelihood_tail2 = [];
+    
+    
+    folder = []; samplingRate = []; description = [];
     velocity = []; acceleration = []; 
     avFrame = []; apparatus = []; zone = []; pixelsmetre = [];
     for ii = 1:size(tempTracking,2) 
         x = [x; tempTracking{ii}.position.x]; 
-        y = [y; tempTracking{ii}.position.y]; 
+        y = [y; tempTracking{ii}.position.y];
+        likelihood = [likelihood; tempTracking{ii}.position.likelihood];
+        x_back = [x_back; tempTracking{ii}.position_back.x];
+        y_back = [y_back; tempTracking{ii}.position_back.y];
+        likelihood_back = [likelihood_back; tempTracking{ii}.position_back.likelihood];
+        x_tail1 = [x_tail1; tempTracking{ii}.position_tail1.x];
+        y_tail1 = [y_tail1; tempTracking{ii}.position_tail1.y];
+        likelihood_tail1 = [likelihood_tail1; tempTracking{ii}.position_tail1.likelihood];
+        x_tail2 = [x_tail2; tempTracking{ii}.position_tail2.x];
+        y_tail2 = [y_tail2; tempTracking{ii}.position_tail2.y];
+        likelihood_tail2 = [likelihood_tail2; tempTracking{ii}.position_tail2.likelihood];
+
+
+            
         velocity = [velocity; tempTracking{ii}.velocity];
         acceleration = [acceleration; tempTracking{ii}.acceleration];
         folder{ii} = tempTracking{ii}.folder; 
         samplingRate = [samplingRate; tempTracking{ii}.samplingRate];  
         description{ii} = tempTracking{ii}.description;
-        if anyMaze
+        if strcmpi(tracking_software,'anymaze')
             avFrame{ii} = tempTracking{ii}.avFrame;
             apparatus{ii} = tempTracking{ii}.apparatus;
             if isfield(tempTracking{ii},zone)
@@ -210,7 +254,7 @@ if count > 1 % if traking
     speed.timestamps = ts;
     speed.folders = folder;
     
-    if anyMaze
+    if strcmpi(tracking_software,'anymaze')
         tracking.avFrame = avFrame;
         tracking.apparatus = apparatus;
         tracking.zone = zone;

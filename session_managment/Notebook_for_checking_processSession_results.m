@@ -2,7 +2,14 @@
 %% Notebook_for_checking_processSession_results
 % Andrea Gallardo and Manu Valero, 2023
 %% 0. Check metadata
-gui_session;
+gui_session;ç
+
+%%.0.1 Check bad channelsç
+session = gui_session;
+% if they have been updated, run
+powerSpectrumProfile([6 12],'showfig',true,'forceDetect',true);
+powerSpectrumProfile([20 100],'showfig',true,'forceDetect',true);
+powerSpectrumProfile([100 500],'showfig',true,'forceDetect',true);
 
 %% 1. Optogenetic responses and cell identity
 % Check light responses. If two neurons are tagged, but they show a similar
@@ -51,11 +58,16 @@ hippocampalLayers = getHippocampalLayers('force',true,'promt',true);
 % analysis.
 
 ExcludeIntervals = [];
-rippleChannel =[] ;
-SWChannel = [];
+rippleChannel =29;
+SWChannel = 6;
 eventSpikeThreshold_shanks = [1 2 3 4 5]; % which shanks will be accounted for the spike threshold 
+<<<<<<< HEAD
 rippleMasterDetector_threshold = [1.5 3.5]; % [1.5 3.5]
-eventSpikeThreshold = 1; % .5
+eventSpikeThreshold = 1.5; % .5
+=======
+rippleMasterDetector_threshold = [.75 1.5]; % [1.5 3.5]
+eventSpikeThreshold = 1.2; % .5
+>>>>>>> e577f7ad5fa1dfc3a78c07fae9d009be16fdd81d
 ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',false,'thresholds',rippleMasterDetector_threshold,'eventSpikeThreshold_shanks', eventSpikeThreshold_shanks,'eventSpikeThreshold',eventSpikeThreshold,'excludeIntervals',ExcludeIntervals); 
 psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10);
 % psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10,'restrict_to_manipulation',true);
@@ -66,9 +78,13 @@ getSpikesRank('events','ripples');
 % rhytmicity. If bad, you can change useCSD_for_theta_detection to false,
 % or change powerThreshold, even the channel
 
-channel = 6;
+<<<<<<< HEAD
+channel = 13;
+=======
+channel = 28;
+>>>>>>> e577f7ad5fa1dfc3a78c07fae9d009be16fdd81d
 useCSD_for_theta_detection = false;
-powerThreshold = 1;% .8
+powerThreshold = 1.6;% .8
 thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'powerThreshold',powerThreshold,'channel', channel);
 
 
@@ -92,13 +108,13 @@ assignBrainRegion('showPowerProfile','theta','showEvent','ripples'); % hfo slowO
 % this code again (but unless you merge or discard cells in phy, you don´t
 % have to validate the monosynpatic connections again)
 session = loadSession;
-if ~isempty(dir([session.general.name,'.optogeneticPulses.events.mat']))
-    file = dir([session.general.name,'.optogeneticPulses.events.mat']);
-    load(file.name);
-end
-excludeManipulationIntervals = optoPulses.stimulationEpochs;
+% if ~isempty(dir([session.general.name,'.optogeneticPulses.events.mat']))
+%     file = dir([session.general.name,'.optogeneticPulses.events.mat']);
+%     load(file.name);
+% end
+% excludeManipulationIntervals = optoPulses.stimulationEpochs;
 
-cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludeManipulationIntervals,'forceReload',true,'getWaveformsFromDat', true);
+cell_metrics = ProcessCellMetrics('session', session,'forceReload',true,'getWaveformsFromDat', true);
 
 getACGPeak('force',true);
 
@@ -111,6 +127,7 @@ getSpikesReturnPlot('force',true);
 % no folder is present, you must run this code. You can play with the
 % LED_threshold level (threshold for LED detection), and check if TTL
 % channel are well defined. 
+% NOS ESPERAMOS
 LED_threshold = 0.98;
 spikes = loadSpikes;
 getSessionTracking('roiTracking','manual','forceReload',false,'LED_threshold',LED_threshold);
@@ -124,6 +141,87 @@ spatialModulation = getSpatialModulation('force',true);
 
 % if rReward or lReward dots are not clusterized in front of the IRSensor
 % position, pray (work in progress)
+
+%% 10. Checking analysis fiber
+% %% 11. Spatial modulation
+if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
+    try
+        spikes = loadSpikes;
+        % getSessionTracking('roiTracking','manual','forceReload',false,'LED_threshold',LED_threshold,'convFact',tracking_pixel_cm,'leftTTL_reward',leftArmTtl_channel,'rightTTL_reward',rightArmTtl_channel);
+        getSessionTracking('forceReload',false,'leftTTL_reward',leftArmTtl_channel,'rightTTL_reward',rightArmTtl_channel,'homeTtl',homeDelayTtl_channel,'tracking_ttl_channel',tracking_ttl_channel);
+        try
+            getSessionArmChoice('task','alternation','leftArmTtl_channel',leftArmTtl_channel,'rightArmTtl_channel',rightArmTtl_channel,'homeDelayTtl_channel',homeDelayTtl_channel,'use_manual_ttls',use_manual_ttls);
+        catch
+            warning('Performance in task was not computed! maybe linear maze?');
+        end
+        behaviour = getSessionLinearize('forceReload',false);  
+        firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',true,'speedThresh',0.1);
+        placeFieldStats = bz_findPlaceFields1D('firingMaps',firingMaps,'maxSize',.75,'sepEdge',0.03); %% ,'maxSize',.75,'sepEdge',0.03
+        firingTrialsMap = firingMapPerTrial('force',true,'saveMat',true);
+        spatialModulation = getSpatialModulation('force',true);
+    catch
+        warning('Not possible to run spatial modulation...');
+    end
+
+    try 
+        behaviour = getSessionLinearize;
+        psth_lReward = spikesPsth([behaviour.events.lReward],'numRep',100,'eventType','lReward','saveMat',false,...
+            'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01,'raster_time',[-2 2]);
+        psth_rReward = spikesPsth([behaviour.events.rReward],'numRep',100,'eventType','rReward','saveMat',false,...
+            'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'raster_time',[-2 2]);
+        psth_reward = spikesPsth([behaviour.events.lReward; behaviour.events.rReward],'numRep',100,'eventType','reward','saveMat',false,...
+            'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'raster_time',[-2 2]);
+        
+        if all(isnan(behaviour.events.startPoint))
+            behaviour.events.startPoint = NaN;
+        end
+        if all(isnan(behaviour.events.intersection))
+            behaviour.events.intersection = NaN;
+        end
+        psth_intersection = spikesPsth([behaviour.events.intersection],'numRep',100,'eventType','intersection','saveMat',false,...
+            'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'raster_time',[-2 2]);
+        psth_startPoint = spikesPsth([behaviour.events.startPoint],'numRep',100,'eventType','startPoint','saveMat',false,...
+            'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'raster_time',[-2 2]);
+
+        behaviour.psth_lReward = psth_lReward;
+        behaviour.psth_rReward = psth_rReward;
+        behaviour.psth_reward = psth_reward;
+        behaviour.psth_intersection = psth_intersection;
+        behaviour.psth_startPoint = psth_startPoint; 
+        behavior = behaviour; % british to american :)
+        save([basenameFromBasepath(pwd) '.behavior.cellinfo.mat'],'behavior','-v7.3');
+    catch
+        warning('Psth on behaviour events was not possible...');
+    end
+
+    % Fiber behaviour analysis
+    try
+        lReward_fiber = fiberPhotometryModulation_temp([behaviour.events.lReward],'eventType','lReward','saveMat',false);
+        rReward_fiber = fiberPhotometryModulation_temp([behaviour.events.rReward],'eventType','rReward','saveMat',false);
+        reward_fiber = fiberPhotometryModulation_temp([behaviour.events.lReward; behaviour.events.rReward],'eventType','reward','saveMat',false);
+
+        intersection_fiber = fiberPhotometryModulation_temp([behaviour.events.intersection],'eventType','intersection','saveMat',false,'savePlotAs','intersection');
+        startPoint_fiber = fiberPhotometryModulation_temp([behaviour.events.startPoint],'eventType','startPoint','saveMat',false,'savePlotAs','startPoint');
+
+        fiber_behavior.lReward = lReward_fiber;
+        fiber_behavior.rReward = rReward_fiber;
+        fiber_behavior.reward = reward_fiber;
+
+        fiber_behavior.intersection = intersection_fiber;
+        fiber_behavior.startPoint = startPoint_fiber;
+
+        save([basenameFromBasepath(pwd),'.behavior_fiber.events.mat'],'fiber_behavior');
+    catch
+        warning('No fiber recording in this session...');
+    end
+
+    try
+        speedCorr = getSpeedCorr('numQuantiles',20,'force',true);
+    catch
+        warning('Speed\rate correlation analysis was not possible!');
+    end
+end
+
 
 %% 10. Summary per cell
 % Check how many cells have been included for the further analysis

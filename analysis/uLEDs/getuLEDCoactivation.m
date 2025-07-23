@@ -23,6 +23,8 @@ addParameter(p,'winCoactivation',.01,@isnumeric);
 addParameter(p,'winSTD',[-.3 -.15],@isnumeric);
 addParameter(p,'offset_precoactivation', 0,@isnumeric);
 addParameter(p,'test_uled_responses', 'zscore',@ischar);
+addParameter(p,'numRep_uledResp', 500, @isscalar);
+addParameter(p,'curate_responses', true, @islogical);
 % addParameter(p,'epochs_names', {'precoactivation', 'coactivation', 'postcoactivation'} ,@iscell);
 
 parse(p,varargin{:});
@@ -43,6 +45,8 @@ winCoactivation = p.Results.winCoactivation;
 offset_precoactivation = p.Results.offset_precoactivation;
 test_uled_responses = p.Results.test_uled_responses;
 winSTD = p.Results.winSTD;
+numRep_uledResp = p.Results.numRep_uledResp;
+curate_responses = p.Results.curate_responses;
 % epochs_names = p.Results.epochs_names;
 
 prevPath = pwd;
@@ -57,7 +61,8 @@ end
 
 %% COACTIVATION ANALYSIS
 % 0 Compute uled responses according to local parameters
-uledResponses = getuLEDResponse('force', true, 'winSize', winSize_uled, 'before_pulse_win',before_pulse_win, 'during_pulse_win', during_pulse_win, 'winSizePlot', winSizePlot, 'saveMat', false, 'save_as', 'uledResponses_coactivation', 'test_in_plots',test_uled_responses, 'zscore_threshold', 1);
+uledResponses = getuLEDResponse('force', true, 'winSize', winSize_uled, 'before_pulse_win',before_pulse_win, 'during_pulse_win', during_pulse_win, 'winSizePlot', winSizePlot, 'saveMat', false,...
+    'save_as', 'uledResponses_coactivation', 'test_in_plots',test_uled_responses, 'zscore_threshold', 1, 'numRep', numRep_uledResp);
 switch lower(test_uled_responses)
     case 'boostrap'
         lightRespMat = squeeze((uledResponses.bootsTrapTest(:,1,:)));
@@ -101,15 +106,15 @@ uLEDcoactivation.averageCCG_postcoact = averageCCG_postcoact;
 % distance of neurons
 coordinates = [cell_metrics.trilat_x', cell_metrics.trilat_y'];
 D = pdist2(coordinates, coordinates);
-distance.units = D;
+distance.pairwise = D;
 distance.pairs = reshape(D',[],1);
 clear D
 maxWaveformCh1 = cell_metrics.maxWaveformCh1';
 D = pdist2(maxWaveformCh1, maxWaveformCh1);
 same_electrode = D == 0;
-distance.are_same_electrode_units = same_electrode;
+distance.are_same_electrode_pairwise = same_electrode;
 distance.are_same_electrode_pairs = reshape(same_electrode',[],1);
-distance.are_distint_electrode_units = distance.are_same_electrode_units == 0;
+distance.are_distint_electrode_pairwise = distance.are_same_electrode_pairwise == 0;
 distance.are_distint_electrode_pairs = distance.are_same_electrode_pairs == 0;
 
 % shanks
@@ -121,17 +126,17 @@ for ii = 1:length(spikes.shankID)
         end
     end
 end
-distance.are_same_shank_units = logical(same_shank);
+distance.are_same_shank_pairwise = logical(same_shank);
 distance.are_same_shank_pairs = logical(reshape(same_shank',[],1));
-distance.are_distint_shank_units = distance.are_same_shank_units == 0;
+distance.are_distint_shank_pairwise = distance.are_same_shank_pairwise == 0;
 distance.are_distint_shank_pairs = distance.are_same_shank_pairs == 0;
 
 uLEDcoactivation.distance = distance;
 
 % Compute z-score coactivation before, during and after
-units.preZ = [];
-units.coactZ = [];
-units.postZ = [];
+pairwise.preZ = [];
+pairwise.coactZ = [];
+pairwise.postZ = [];
 pairs.curve_preZ = [];
 pairs.curve_coactZ = [];
 pairs.curve_postZ = [];
@@ -146,33 +151,33 @@ for kk = 1:size(averageCCG_precoact.allCcg,2)
         pairs.pre_id = [pairs.pre_id; kk];
         pairs.post_id = [pairs.post_id; jj];
         if kk == jj
-            units.preZ(kk,jj) = NaN;
-            units.coactZ(kk,jj) = NaN;
-            units.postZ(kk,jj) = NaN;
+            pairwise.preZ(kk,jj) = NaN;
+            pairwise.coactZ(kk,jj) = NaN;
+            pairwise.postZ(kk,jj) = NaN;
             
             temp = nan(size(averageCCG_precoact.allCcg(:,1,1)));
             pairs.curve_preZ = [pairs.curve_preZ; temp'];
             pairs.curve_coactZ = [pairs.curve_coactZ; temp'];
             pairs.curve_postZ = [pairs.curve_postZ; temp'];
         else
-            % units
+            % pairwise
             % pre
             temp = averageCCG_precoact.allCcg(:,kk,jj);
             temp(zero_ind) = NaN;
             temp = (temp - mean(temp(win_Z)))/std(temp(win_Z));
-            units.preZ(kk,jj) = nanmean(temp(winCoactivation));
+            pairwise.preZ(kk,jj) = nanmean(temp(winCoactivation));
             pairs.curve_preZ = [pairs.curve_preZ; temp'];
             % coact
             temp = averageCCG_coact.allCcg(:,kk,jj);
             temp(zero_ind) = NaN;
             temp = (temp - mean(temp(win_Z)))/std(temp(win_Z));
-            units.coactZ(kk,jj) = nanmean(temp(winCoactivation));
+            pairwise.coactZ(kk,jj) = nanmean(temp(winCoactivation));
             pairs.curve_coactZ = [pairs.curve_coactZ; temp'];
             % post
             temp = averageCCG_postcoact.allCcg(:,kk,jj);
             temp(zero_ind) = NaN;
             temp = (temp - mean(temp(win_Z)))/std(temp(win_Z));
-            units.postZ(kk,jj) = nanmean(temp(winCoactivation));
+            pairwise.postZ(kk,jj) = nanmean(temp(winCoactivation));
             pairs.curve_postZ = [pairs.curve_postZ; temp'];
         end
     end
@@ -187,69 +192,84 @@ pairs.preZ(find(isinf(pairs.preZ))) = NaN;
 pairs.coactZ(find(isinf(pairs.coactZ))) = NaN;
 pairs.postZ(find(isinf(pairs.postZ))) = NaN;
 
-units.preZ(find(isinf(units.preZ))) = NaN;
-units.coactZ(find(isinf(units.coactZ))) = NaN;
-units.postZ(find(isinf(units.postZ))) = NaN;
+pairwise.preZ(find(isinf(pairwise.preZ))) = NaN;
+pairwise.coactZ(find(isinf(pairwise.coactZ))) = NaN;
+pairwise.postZ(find(isinf(pairwise.postZ))) = NaN;
 
-uLEDcoactivation.units = units;
+uLEDcoactivation.pairwise = pairwise;
 uLEDcoactivation.pairs = pairs;
 
 % pyramidal neurons (label as NaN all non pyramidal cells)
 pyramidal_neurons = ismember(cell_metrics.putativeCellType, 'Pyramidal Cell')';
-uLEDcoactivation.units_pyramidalCells = label_unit_as_nan(uLEDcoactivation.units, ~pyramidal_neurons);
+uLEDcoactivation.pairwise_pyramidalCells = label_unit_as_nan(uLEDcoactivation.pairwise, ~pyramidal_neurons);
 
 pyramidal_neuron_pair = ismember(uLEDcoactivation.pairs.pre_id, find(pyramidal_neurons)) & ismember(uLEDcoactivation.pairs.post_id, find(pyramidal_neurons));
 uLEDcoactivation.pairs_pyramidalCells = label_pairs_as_nan(uLEDcoactivation.pairs, ~pyramidal_neuron_pair);
 
+uLEDcoactivation.is_pyramidalCells = ismember(cell_metrics.putativeCellType, 'Pyramidal Cell')';
+
 % light responsive neurons and pyramidal neurons
 targetCells = pyramidal_neurons & lightRespNeurons;
-uLEDcoactivation.units_pyramidalCells_lightResponsive = label_unit_as_nan(uLEDcoactivation.units, ~targetCells);
+uLEDcoactivation.pairwise_pyramidalCells_lightResponsive = label_unit_as_nan(uLEDcoactivation.pairwise, ~targetCells);
 
 lightResponsive_pyr_pair = ismember(uLEDcoactivation.pairs.pre_id, find(targetCells)) & ismember(uLEDcoactivation.pairs.post_id, find(targetCells));
 uLEDcoactivation.pairs_pyramidalCells_lightResponsive = label_pairs_as_nan(uLEDcoactivation.pairs, ~lightResponsive_pyr_pair);
 
+uLEDcoactivation.is_pyramidalCells_lightResponsive = pyramidal_neurons & lightRespNeurons;
+
 % light responsive neurons
 targetCells = lightRespNeurons;
-uLEDcoactivation.units_lightResponsive = label_unit_as_nan(uLEDcoactivation.units, ~targetCells);
+uLEDcoactivation.pairwise_lightResponsive = label_unit_as_nan(uLEDcoactivation.pairwise, ~targetCells);
 
 lightResponsive_pair = ismember(uLEDcoactivation.pairs.pre_id, find(targetCells)) & ismember(uLEDcoactivation.pairs.post_id, find(targetCells));
 uLEDcoactivation.pairs_lightResponsive = label_pairs_as_nan(uLEDcoactivation.pairs, ~lightResponsive_pair);
 
+uLEDcoactivation.is_lightResponsive = lightRespNeurons;
+
 % Neurons in different electrode
-uLEDcoactivation.units_distinct_electrode = mask_unit_as_nan(uLEDcoactivation.units, distance.are_same_electrode_units);
+uLEDcoactivation.pairwise_distinct_electrode = mask_unit_as_nan(uLEDcoactivation.pairwise, distance.are_same_electrode_pairwise);
 uLEDcoactivation.pair_distinct_electrode = label_pairs_as_nan(uLEDcoactivation.pairs, distance.are_same_electrode_pairs);
+uLEDcoactivation.is_distinct_electrode = ~distance.are_same_electrode_pairwise;
 
 % Pyramidal neurons in different electrode
-uLEDcoactivation.units_pyramidalCells_distinct_electrode = mask_unit_as_nan(uLEDcoactivation.units_pyramidalCells, distance.are_same_electrode_units);
+uLEDcoactivation.pairwise_pyramidalCells_distinct_electrode = mask_unit_as_nan(uLEDcoactivation.pairwise_pyramidalCells, distance.are_same_electrode_pairwise);
 uLEDcoactivation.pair_pyramidalCells_distinct_electrode = label_pairs_as_nan(uLEDcoactivation.pairs_pyramidalCells, distance.are_same_electrode_pairs);
+uLEDcoactivation.is_pyramidalCells_distinct_electrode = pyramidal_neurons & ~distance.are_same_electrode_pairwise;
 
 % Light responsive, pyramidal neurons, in different electrode
-uLEDcoactivation.units_pyramidalCells_lightResponsive_distinct_electrode = mask_unit_as_nan(uLEDcoactivation.units_pyramidalCells_lightResponsive, distance.are_same_electrode_units);
+uLEDcoactivation.pairwise_pyramidalCells_lightResponsive_distinct_electrode = mask_unit_as_nan(uLEDcoactivation.pairwise_pyramidalCells_lightResponsive, distance.are_same_electrode_pairwise);
 uLEDcoactivation.pairs_pyramidalCells_lightResponsive_distinct_electrode = label_pairs_as_nan(uLEDcoactivation.pairs_pyramidalCells_lightResponsive, distance.are_same_electrode_pairs);
+uLEDcoactivation.is_pyramidalCells_lightResponsive_distinct_electrode = pyramidal_neurons & lightRespNeurons & ~distance.are_same_electrode_pairwise;
 
-% Units in different shank
-uLEDcoactivation.units_distinct_shank = mask_unit_as_nan(uLEDcoactivation.units, distance.are_same_shank_units); % label as Nan those units pairs in same shank
+% pairwise in different shank
+uLEDcoactivation.pairwise_distinct_shank = mask_unit_as_nan(uLEDcoactivation.pairwise, distance.are_same_shank_pairwise); % label as Nan those pairwise pairs in same shank
 uLEDcoactivation.pair_distinct_shank = label_pairs_as_nan(uLEDcoactivation.pairs, distance.are_same_shank_pairs);
+uLEDcoactivation.is_distinct_shank = ~distance.are_same_shank_pairwise;
 
 % Pyramidal neurons in different shank
-uLEDcoactivation.units_pyramidalCells_distinct_shank = mask_unit_as_nan(uLEDcoactivation.units_pyramidalCells, distance.are_same_shank_units);
+uLEDcoactivation.pairwise_pyramidalCells_distinct_shank = mask_unit_as_nan(uLEDcoactivation.pairwise_pyramidalCells, distance.are_same_shank_pairwise);
 uLEDcoactivation.pair_pyramidalCells_distinct_shank = label_pairs_as_nan(uLEDcoactivation.pairs_pyramidalCells, distance.are_same_shank_pairs);
+uLEDcoactivation.is_pyramidalCells_distinct_shank = pyramidal_neurons & ~distance.are_same_shank_pairwise;
 
 % Light responsive, pyramidal neurons, in different shank
-uLEDcoactivation.units_pyramidalCells_lightResponsive_distinct_shank = mask_unit_as_nan(uLEDcoactivation.units_pyramidalCells_lightResponsive, distance.are_same_shank_units);
+uLEDcoactivation.pairwise_pyramidalCells_lightResponsive_distinct_shank = mask_unit_as_nan(uLEDcoactivation.pairwise_pyramidalCells_lightResponsive, distance.are_same_shank_pairwise);
 uLEDcoactivation.pairs_pyramidalCells_lightResponsive_distinct_shank = label_pairs_as_nan(uLEDcoactivation.pairs_pyramidalCells_lightResponsive, distance.are_same_shank_pairs);
+uLEDcoactivation.is_pyramidalCells_lightResponsive_distinct_shank = pyramidal_neurons & lightRespNeurons & ~distance.are_same_shank_pairwise;
 
-% Units in same shank
-uLEDcoactivation.units_same_shank = mask_unit_as_nan(uLEDcoactivation.units, distance.are_distint_shank_units); % label as Nan those units pairs in distint shank
+% pairwise in same shank
+uLEDcoactivation.pairwise_same_shank = mask_unit_as_nan(uLEDcoactivation.pairwise, distance.are_distint_shank_pairwise); % label as Nan those pairwise pairs in distint shank
 uLEDcoactivation.pair_same_shank = label_pairs_as_nan(uLEDcoactivation.pairs, distance.are_distint_shank_pairs);
+uLEDcoactivation.is_same_shank = ~distance.are_distint_shank_pairwise;
 
 % Pyramidal neurons in same shank
-uLEDcoactivation.units_pyramidalCells_same_shank = mask_unit_as_nan(uLEDcoactivation.units_pyramidalCells, distance.are_distint_shank_units);
+uLEDcoactivation.pairwise_pyramidalCells_same_shank = mask_unit_as_nan(uLEDcoactivation.pairwise_pyramidalCells, distance.are_distint_shank_pairwise);
 uLEDcoactivation.pair_pyramidalCells_same_shank = label_pairs_as_nan(uLEDcoactivation.pairs_pyramidalCells, distance.are_distint_shank_pairs);
+uLEDcoactivation.is_pyramidalCells_same_shank = pyramidal_neurons & ~distance.are_distint_shank_pairwise;
 
 % Light responsive, pyramidal neurons, in same shank
-uLEDcoactivation.units_pyramidalCells_lightResponsive_same_shank = mask_unit_as_nan(uLEDcoactivation.units_pyramidalCells_lightResponsive, distance.are_distint_shank_units);
+uLEDcoactivation.pairwise_pyramidalCells_lightResponsive_same_shank = mask_unit_as_nan(uLEDcoactivation.pairwise_pyramidalCells_lightResponsive, distance.are_distint_shank_pairwise);
 uLEDcoactivation.pairs_pyramidalCells_lightResponsive_same_shank = label_pairs_as_nan(uLEDcoactivation.pairs_pyramidalCells_lightResponsive, distance.are_distint_shank_pairs);
+uLEDcoactivation.is_pyramidalCells_lightResponsive_same_shank = pyramidal_neurons & lightRespNeurons & ~distance.are_distint_shank_pairwise;
 
 % 1.2 % Coactivated LEDs
 % get pairs of coactivated uleds
@@ -289,11 +309,11 @@ for kk = 1:size(lightRespMat,2)
         uleds_temp.rateZmat(kk,jj) = nanmean(uledResponses.rateZDuringPulse(neurons_kk,1,jj));
 
         % coactivations
-        temp = units.preZ(neurons_kk,neurons_jj);
+        temp = pairwise.preZ(neurons_kk,neurons_jj);
         uleds_temp.preZ(kk,jj) = nanmean(temp(:));
-        temp = units.coactZ(neurons_kk,neurons_jj);
+        temp = pairwise.coactZ(neurons_kk,neurons_jj);
         uleds_temp.coactZ(kk,jj) = nanmean(temp(:));
-        temp = units.postZ(neurons_kk,neurons_jj);
+        temp = pairwise.postZ(neurons_kk,neurons_jj);
         uleds_temp.postZ(kk,jj) = nanmean(temp(:));
         uleds_temp.post_pre(kk,jj) = uleds_temp.postZ(kk,jj) - uleds_temp.preZ(kk,jj);
     end
@@ -314,11 +334,11 @@ for kk = 1:size(lightRespMat,2)
         uleds_temp.rateZmat(kk,jj) = nanmean(uledResponses.rateZDuringPulse(neurons_kk,1,jj));
 
         % coactivations of uleds
-        temp = units.preZ(neurons_kk,neurons_jj);
+        temp = pairwise.preZ(neurons_kk,neurons_jj);
         uleds_temp.preZ(kk,jj) = nanmean(temp(:));
-        temp = units.coactZ(neurons_kk,neurons_jj);
+        temp = pairwise.coactZ(neurons_kk,neurons_jj);
         uleds_temp.coactZ(kk,jj) = nanmean(temp(:));
-        temp = units.postZ(neurons_kk,neurons_jj);
+        temp = pairwise.postZ(neurons_kk,neurons_jj);
         uleds_temp.postZ(kk,jj) = nanmean(temp(:));
         uleds_temp.post_pre(kk,jj) = uleds_temp.postZ(kk,jj) - uleds_temp.preZ(kk,jj);
     end
@@ -334,65 +354,103 @@ for ii = 1:size(lightRespMat,1)
         end
     end
 end
-coactivated_neurons.are_coactivated_units = temp;
+coactivated_neurons.are_coactivated_pairwise = temp;
 coactivated_neurons.are_coactivated_pairs = reshape(temp',[],1);
 
-coactivated_neurons.are_distint_electrode_units = (temp + double(distance.are_distint_electrode_units)) == 2;
-coactivated_neurons.are_distint_electrode_pairs = reshape(coactivated_neurons.are_distint_electrode_units',[],1);
+coactivated_neurons.are_distint_electrode_pairwise = (temp + double(distance.are_distint_electrode_pairwise)) == 2;
+coactivated_neurons.are_distint_electrode_pairs = reshape(coactivated_neurons.are_distint_electrode_pairwise',[],1);
 
-coactivated_neurons.are_distint_shank_units = (temp + double(distance.are_distint_shank_units)) == 2;
-coactivated_neurons.are_distint_shank_pairs = reshape(coactivated_neurons.are_distint_shank_units',[],1);
+coactivated_neurons.are_distint_shank_pairwise = (temp + double(distance.are_distint_shank_pairwise)) == 2;
+coactivated_neurons.are_distint_shank_pairs = reshape(coactivated_neurons.are_distint_shank_pairwise',[],1);
 
-coactivated_neurons.are_same_shank_units = (temp + double(distance.are_same_shank_units)) == 2;
-coactivated_neurons.are_same_shank_pairs = reshape(coactivated_neurons.are_same_shank_units',[],1);
+coactivated_neurons.are_same_shank_pairwise = (temp + double(distance.are_same_shank_pairwise)) == 2;
+coactivated_neurons.are_same_shank_pairs = reshape(coactivated_neurons.are_same_shank_pairwise',[],1);
 
 uLEDcoactivation.coactivated_neurons = coactivated_neurons;
 
+
 % all neurons
 % Coactivation profile of coactivated neurons
-uLEDcoactivation.units_coactivated_neurons = mask_unit_as_nan(uLEDcoactivation.units, ~coactivated_neurons.are_coactivated_units);
+uLEDcoactivation.pairwise_coactivated_neurons = mask_unit_as_nan(uLEDcoactivation.pairwise, ~coactivated_neurons.are_coactivated_pairwise);
 uLEDcoactivation.pairs_coactivated_neurons = label_pairs_as_nan(uLEDcoactivation.pairs, ~coactivated_neurons.are_coactivated_pairs);
 
 % Coactivation profile of coactivated neurons in distinct electrodes
-uLEDcoactivation.units_coactivated_neurons_distint_electrode = mask_unit_as_nan(uLEDcoactivation.units_distinct_electrode, ~coactivated_neurons.are_coactivated_units);
+uLEDcoactivation.pairwise_coactivated_neurons_distint_electrode = mask_unit_as_nan(uLEDcoactivation.pairwise_distinct_electrode, ~coactivated_neurons.are_coactivated_pairwise);
 uLEDcoactivation.pairs_coactivated_neurons_distint_electrode = label_pairs_as_nan(uLEDcoactivation.pair_distinct_electrode, ~coactivated_neurons.are_coactivated_pairs);
 
 % Coactivation profile of coactivated neurons in distinct shank
-uLEDcoactivation.units_coactivated_neurons_distint_shank = mask_unit_as_nan(uLEDcoactivation.units_distinct_shank, ~coactivated_neurons.are_coactivated_units);
+uLEDcoactivation.pairwise_coactivated_neurons_distint_shank = mask_unit_as_nan(uLEDcoactivation.pairwise_distinct_shank, ~coactivated_neurons.are_coactivated_pairwise);
 uLEDcoactivation.pairs_coactivated_neurons_distint_shank = label_pairs_as_nan(uLEDcoactivation.pair_distinct_shank, ~coactivated_neurons.are_coactivated_pairs);
 
 % Coactivation profile of coactivated neurons in same shank
-uLEDcoactivation.units_coactivated_neurons_same_shank = mask_unit_as_nan(uLEDcoactivation.units_same_shank, ~coactivated_neurons.are_coactivated_units);
+uLEDcoactivation.pairwise_coactivated_neurons_same_shank = mask_unit_as_nan(uLEDcoactivation.pairwise_same_shank, ~coactivated_neurons.are_coactivated_pairwise);
 uLEDcoactivation.pairs_coactivated_neurons_same_shank = label_pairs_as_nan(uLEDcoactivation.pair_same_shank, ~coactivated_neurons.are_coactivated_pairs);
 
 % only pyr
 % Coactivation profile of coactivated neurons
-uLEDcoactivation.units_coactivated_pyramidalCells = mask_unit_as_nan(uLEDcoactivation.units_pyramidalCells, ~coactivated_neurons.are_coactivated_units);
+uLEDcoactivation.pairwise_coactivated_pyramidalCells = mask_unit_as_nan(uLEDcoactivation.pairwise_pyramidalCells, ~coactivated_neurons.are_coactivated_pairwise);
 uLEDcoactivation.pairs_coactivated_pyramidalCells = label_pairs_as_nan(uLEDcoactivation.pairs_pyramidalCells, ~coactivated_neurons.are_coactivated_pairs);
 
 % Coactivation profile of coactivated neurons in distinct electrodes
-uLEDcoactivation.units_coactivated_pyramidalCells_distint_electrode = mask_unit_as_nan(uLEDcoactivation.units_pyramidalCells_distinct_electrode, ~coactivated_neurons.are_coactivated_units);
+uLEDcoactivation.pairwise_coactivated_pyramidalCells_distint_electrode = mask_unit_as_nan(uLEDcoactivation.pairwise_pyramidalCells_distinct_electrode, ~coactivated_neurons.are_coactivated_pairwise);
 uLEDcoactivation.pairs_coactivated_pyramidalCells_distint_electrode = label_pairs_as_nan(uLEDcoactivation.pair_pyramidalCells_distinct_electrode, ~coactivated_neurons.are_coactivated_pairs);
 
 % Coactivation profile of coactivated neurons in distinct shank
-uLEDcoactivation.units_coactivated_pyramidalCells_distint_shank = mask_unit_as_nan(uLEDcoactivation.units_pyramidalCells_distinct_shank, ~coactivated_neurons.are_coactivated_units);
+uLEDcoactivation.pairwise_coactivated_pyramidalCells_distint_shank = mask_unit_as_nan(uLEDcoactivation.pairwise_pyramidalCells_distinct_shank, ~coactivated_neurons.are_coactivated_pairwise);
 uLEDcoactivation.pairs_coactivated_pyramidalCells_distint_shank = label_pairs_as_nan(uLEDcoactivation.pair_pyramidalCells_distinct_shank, ~coactivated_neurons.are_coactivated_pairs);
 
 % Coactivation profile of coactivated neurons in same shank
-uLEDcoactivation.units_coactivated_pyramidalCells_same_shank = mask_unit_as_nan(uLEDcoactivation.units_pyramidalCells_same_shank, ~coactivated_neurons.are_coactivated_units);
+uLEDcoactivation.pairwise_coactivated_pyramidalCells_same_shank = mask_unit_as_nan(uLEDcoactivation.pairwise_pyramidalCells_same_shank, ~coactivated_neurons.are_coactivated_pairwise);
 uLEDcoactivation.pairs_coactivated_pyramidalCells_same_shank = label_pairs_as_nan(uLEDcoactivation.pair_pyramidalCells_same_shank, ~coactivated_neurons.are_coactivated_pairs);
 
 % 1.3 % explained variance
-evStats_units = explained_variance(spikes, epochsInts(find(ismember(epochsNames,'precoactivation')),:), epochsInts(find(ismember(epochsNames,'coactivation')),:), epochsInts(find(ismember(epochsNames,'postcoactivation')),:),'saveMat',false);
+evStats_pairwise = explained_variance(spikes, epochsInts(find(ismember(epochsNames,'precoactivation')),:), epochsInts(find(ismember(epochsNames,'coactivation')),:), epochsInts(find(ismember(epochsNames,'postcoactivation')),:),'saveMat',false);
 temp_spikes = spikes;
 temp_spikes.times(~pyramidal_neurons) = [];
 evStats_pyramidalCells = explained_variance(temp_spikes, epochsInts(find(ismember(epochsNames,'precoactivation')),:), epochsInts(find(ismember(epochsNames,'coactivation')),:), epochsInts(find(ismember(epochsNames,'postcoactivation')),:),'saveMat',false);
 temp_spikes = spikes;
 temp_spikes.times(~targetCells) = [];
 evStats_pyramidalCells_lightResponsive = explained_variance(temp_spikes, epochsInts(find(ismember(epochsNames,'precoactivation')),:), epochsInts(find(ismember(epochsNames,'coactivation')),:), epochsInts(find(ismember(epochsNames,'postcoactivation')),:),'saveMat',false);
-uLEDcoactivation.evStats_units = evStats_units;
+uLEDcoactivation.evStats_pairwise = evStats_pairwise;
 uLEDcoactivation.evStats_pyramidalCells = evStats_pyramidalCells;
 uLEDcoactivation.evStats_pyramidalCells_lightResponsive = evStats_pyramidalCells_lightResponsive;
+
+% 1.4. % Groups of neurons
+neuronLED = lightRespMat;
+neuronLED(isnan(neuronLED) | neuronLED == -1) = 0;
+if curate_responses
+    neuronLED_curated = curateNeuronLED(neuronLED);
+    neuronLED = neuronLED_curated;
+end
+
+ledCoactivation = coactivation_matrix;
+
+nNeurons = size(neuronLED,1);
+coactivationMatrix_neurons = false(nNeurons);
+for i = 1:nNeurons
+    for j = i+1:nNeurons
+        leds_i = find(neuronLED(i,:));
+        leds_j = find(neuronLED(j,:));
+        
+        activatedTogether = false;
+        for li = leds_i
+            for lj = leds_j
+                if ledCoactivation(li, lj)
+                    activatedTogether = true;
+                    break
+                end
+            end
+            if activatedTogether, break; end
+        end
+        
+        coactivationMatrix_neurons(i,j) = activatedTogether;
+        coactivationMatrix_neurons(j,i) = activatedTogether;  % simetría
+    end
+end
+G = graph(coactivationMatrix_neurons);
+artificial_clusters = conncomp(G);
+artificial_clusters(degree(G) == 0) = 0;  % marcar como no coactivadas
+uLEDcoactivation.clusters.artificial_clusters = artificial_clusters;
 
 % Saving 
 if saveMat
@@ -636,7 +694,7 @@ if doPlot
     colormap jet
     title(['Coact'],'FontWeight','normal');
     axis square
-    xlabel({['Explain variance (EV vs REV)']; ['all: ' num2str(round(uLEDcoactivation.evStats_units.ev,1)) ' vs ' num2str(round(uLEDcoactivation.evStats_units.rev,1))]; ...
+    xlabel({['Explain variance (EV vs REV)']; ['all: ' num2str(round(uLEDcoactivation.evStats_pairwise.ev,1)) ' vs ' num2str(round(uLEDcoactivation.evStats_pairwise.rev,1))]; ...
         ['Pyr: ' num2str(round(uLEDcoactivation.evStats_pyramidalCells.ev,1)) ' vs ' num2str(round(uLEDcoactivation.evStats_pyramidalCells.rev,1))]; ...
         ['Light resp pyr: ' num2str(round(uLEDcoactivation.evStats_pyramidalCells_lightResponsive.ev,1)) ' vs ' num2str(round(uLEDcoactivation.evStats_pyramidalCells_lightResponsive.rev,1))]});
 
@@ -685,5 +743,41 @@ for ii = 1:length(fnames)
     output_struct.(fnames{ii})(nan_mask) = NaN;
 end
 
+end
+
+function neuronLED_curado = curateNeuronLED(neuronLED)
+
+    [nNeurons, nLEDs] = size(neuronLED);
+
+    data = num2cell(logical(neuronLED));
+
+    f = figure('Name', 'Curado manual de neuron-LED', ...
+               'Position', [100 100 100 + 54*nLEDs 100 + 20*nNeurons]);
+
+    % Create table
+    t = uitable(f, ...
+        'Data', data, ...
+        'ColumnEditable', true(1, nLEDs), ...
+        'ColumnName', strcat("LED_", string(1:nLEDs)), ...
+        'RowName', strcat("N", string(1:nNeurons)), ...
+        'Position', [20 60 54*nLEDs 20*nNeurons]);
+
+    % Save button
+    uicontrol(f, 'Style', 'pushbutton', ...
+        'String', 'Save', ...
+        'Position', [20 20 100 30], ...
+        'Callback', @(src, event) uiresume(f));
+
+    uiwait(f);
+
+    data_out = get(t, 'Data');
+    neuronLED_curado = false(nNeurons, nLEDs);
+    for i = 1:nNeurons
+        for j = 1:nLEDs
+            neuronLED_curado(i,j) = data_out{i,j};
+        end
+    end
+
+    close(f);
 end
 

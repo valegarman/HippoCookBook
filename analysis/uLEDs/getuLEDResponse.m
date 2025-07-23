@@ -43,8 +43,8 @@ addParameter(p,'doPlot',true,@islogical);
 addParameter(p,'offset',0,@isnumeric);
 addParameter(p,'onset',0,@isnumeric);
 addParameter(p,'winSizePlot',[-.02 .05],@isnumeric);
-addParameter(p,'before_pulse_win',[],@isnumeric);
-addParameter(p,'during_pulse_win',[],@isnumeric); % by default, pulse duration
+addParameter(p,'before_pulse_win',[-0.02 0],@isnumeric);
+addParameter(p,'during_pulse_win',[0 0.02],@isnumeric); % by default, pulse duration
 addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'force',false,@islogical);
 addParameter(p,'minNumberOfPulses',2000,@isnumeric);
@@ -93,6 +93,7 @@ zscore_threshold = p.Results.zscore_threshold;
 % Deal with inputs
 prevPath = pwd;
 cd(basepath);
+
 
 targetFile = dir('*.uLEDResponse.cellinfo.mat');
 if ~isempty(targetFile) && ~force
@@ -533,17 +534,17 @@ if saveMat
 end
 
 if doPlot
-    modulationSignificanceLevel = squeeze(uLEDResponses.modulationSignificanceLevel(ii,kk,:));
-    switch lower(test_in_plots)
-        case 'boostrap'
-            test = squeeze(uLEDResponses.bootsTrapTest(ii,kk,:));
-        case 'zscore'
-            test = squeeze(uLEDResponses.zscoreTest(ii,kk,:));
-        case 'salt'
-            test = squeeze(uLEDResponses.salt.p_value(ii,kk,:))<0.05;
-        case 'kolmogorov'
-            test = squeeze(uLEDResponses.modulationSignificanceLevel(ii,kk,:))<0.05;
-    end
+    % modulationSignificanceLevel = squeeze(uLEDResponses.modulationSignificanceLevel(ii,kk,:));
+    % switch lower(test_in_plots)
+    %     case 'boostrap'
+    %         test = squeeze(uLEDResponses.bootsTrapTest(ii,kk,:));
+    %     case 'zscore'
+    %         test = squeeze(uLEDResponses.zscoreTest(ii,kk,:));
+    %     case 'salt'
+    %         test = squeeze(uLEDResponses.salt.p_value(ii,kk,:))<0.05;
+    %     case 'kolmogorov'
+    %         test = squeeze(uLEDResponses.modulationSignificanceLevel(ii,kk,:))<0.05;
+    % end
 
     statisticDots = linspace(-0.015, -0.005, 4);
     nLEDS = size(uLEDResponses.responsecurve,3);
@@ -553,6 +554,19 @@ if doPlot
         tiledlayout(10,ceil(size(spikes.UID,2)/10),'TileSpacing','tight','Padding','tight');
         for ii = 1:size(uLEDResponses.bootsTrapCI,1)
             % subplot(10,ceil(size(spikes.UID,2)/10),ii); %
+
+            modulationSignificanceLevel = squeeze(uLEDResponses.modulationSignificanceLevel(ii,kk,:));
+            switch lower(test_in_plots)
+                case 'boostrap'
+                    test = squeeze(uLEDResponses.bootsTrapTest(ii,kk,:));
+                case 'zscore'
+                    test = squeeze(uLEDResponses.zscoreTest(ii,kk,:));
+                case 'salt'
+                    test = squeeze(uLEDResponses.salt.p_value(ii,kk,:))<0.05;
+                case 'kolmogorov'
+                    test = squeeze(uLEDResponses.modulationSignificanceLevel(ii,kk,:))<0.05;
+            end
+
             nexttile
             imagesc(uLEDResponses.timestamps, 1:nLEDS, squeeze(uLEDResponses.responsecurve(ii,kk,:,:))); caxis([0 30]); 
             xlim(winSizePlot); ylim([-0.5 nLEDS+0.5]);

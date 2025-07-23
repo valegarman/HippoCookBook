@@ -1,4 +1,4 @@
-function plotRippleChannel(varargin)
+function computeRippleReversal(varargin)
 % plotRippleChannel_temp(varargin)
 %
 % INPUT
@@ -159,6 +159,38 @@ for shk=1:length(SHANKS)
         Ripples_Power=[Ripples_Power; mean(Power) SHANKS{1,shk}(CH)] ;
         Ripples_Power_Matrix{1,shk}(CH,:)=Power;
         Ripples_CSD{1,shk}(CH,:)=[sum(diff(smooth1D(All_Ripple_Avg(50:70),10),2)) sum(diff(smooth1D(All_Ripple_Avg(70:100),10),2)) SHANKS{1,shk}(CH) ];
+    end
+end
+
+%% find Deep and superficial channels ######################################
+keyboard;
+Deep_Sup=[];
+con_sum_all=[];
+con_direction_all=[];
+
+for shk=1:size(SHANKS,2)
+    clear Reversal_channel
+    con_direction=Ripples_CSD{1,shk}(:,1).*Ripples_CSD{1,shk}(:,2);
+    con_sum=Ripples_CSD{1,shk}(:,1)+Ripples_CSD{1,shk}(:,2);
+    con_sum_all=[con_sum_all;con_sum Ripples_CSD{1,shk}(:,3)];
+    con_direction_all=[con_direction_all; con_direction Ripples_CSD{1,shk}(:,3)];
+    nd=find(con_direction<0);
+    ndx=find(con_sum<0);
+
+    if isempty(nd)==0
+        Reversal_channel=nd(end);
+        Deep_Sup{1,shk}(1:Reversal_channel,1)=Reversal_channel-(1:Reversal_channel);
+        if Reversal_channel< size(SHANKS{1,shk},2)
+            Deep_Sup{1,shk}(Reversal_channel+1:size(SHANKS{1,shk},2),1)=Reversal_channel-(Reversal_channel+1:size(SHANKS{1,shk},2));
+        end       
+    elseif isempty(ndx)==0
+        Reversal_channel=ndx(end);
+        Deep_Sup{1,shk}(1:Reversal_channel,1)=Reversal_channel-(1:Reversal_channel);
+        if Reversal_channel< size(SHANKS{1,shk},2)
+            Deep_Sup{1,shk}(Reversal_channel+1:size(SHANKS{1,shk},2),1)=Reversal_channel-(Reversal_channel+1:size(SHANKS{1,shk},2));
+        end
+    else
+        Deep_Sup{1,shk}(:,1)=-(1:size(SHANKS{1,shk},2));
     end
 end
 

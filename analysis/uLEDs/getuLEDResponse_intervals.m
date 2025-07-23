@@ -36,6 +36,7 @@ addParameter(p,'uLEDPulses',NaN);
 addParameter(p,'spikes',[],@isstruct);
 addParameter(p,'basepath',pwd,@ischar);
 addParameter(p,'numRep',500,@isnumeric);
+addParameter(p,'numRep_fake',500,@isnumeric);
 addParameter(p,'binSize',0.001,@isnumeric);
 addParameter(p,'winSize',.1,@isnumeric);
 addParameter(p,'doPlot',true,@islogical);
@@ -69,6 +70,7 @@ uLEDPulses = p.Results.uLEDPulses;
 basepath = p.Results.basepath;
 spikes = p.Results.spikes;
 numRep = p.Results.numRep;
+numRep_fake = p.Results.numRep_fake;
 binSize = p.Results.binSize;
 winSize = p.Results.winSize;
 doPlot = p.Results.doPlot;
@@ -128,15 +130,15 @@ if length(uLEDPulses.list_of_conditions) > 1
     CONDITION_LIST = uLEDPulses.list_of_conditions(find(uLEDPulses.list_of_durations == duration_pulse))';
     CONDITION = CONDITION_LIST(unique(uLEDPulses.conditionID) == CONDITION_LIST);
       
-    uLEDPulses.conditionID =uLEDPulses.conditionID(find(uLEDPulses.conditionID == CONDITION));
-    uLEDPulses.timestamps = uLEDPulses.timestamps(find(uLEDPulses.conditionID == CONDITION),:);
-    uLEDPulses.code = uLEDPulses.code(find(uLEDPulses.conditionID == CONDITION));
+    uLEDPulses.conditionID =uLEDPulses.conditionID(find(uLEDPulses.conditionID == CONDITION_LIST));
+    uLEDPulses.timestamps = uLEDPulses.timestamps(find(uLEDPulses.conditionID == CONDITION_LIST),:);
+    uLEDPulses.code = uLEDPulses.code(find(uLEDPulses.conditionID == CONDITION_LIST));
     
     uLEDPulses.list_of_epochs = 1;
     uLEDPulses.list_of_conditions = 1;
     uLEDPulses.list_of_durations(find(uLEDPulses.list_of_durations ~= duration_pulse)) =[];
     % uLEDPulses.conditionID = ones(length(uLEDPulses.conditionID),1); 
-    uLEDPulses.conditionID = ones(length(uLEDPulses.conditionID(find(uLEDPulses.conditionID == CONDITION))),1); 
+    uLEDPulses.conditionID = ones(length(uLEDPulses.conditionID(find(uLEDPulses.conditionID == CONDITION_LIST))),1); 
 
    % % INDEX = find(round(diff(uLEDPulses.timestamps'),3)==0.02)';
    % uLEDPulses.timestamps = uLEDPulses.timestamps(find(round(diff(uLEDPulses.timestamps'),3)==0.02)',:);
@@ -261,56 +263,58 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
     end
 
     for jj = 1:length(codes)
+        
         pulses = uLEDPulses.timestamps(uLEDPulses.code == codes(jj) & uLEDPulses.conditionID==kk,1);
         status = InIntervals(pulses, intervals);
         
         % for boostraping, create fake status
-        if strcmpi(boostraping_type, 'interval')
-            clear fake_status
-            nIntervals = size(intervals,1);
-            dur_interval = median(diff(intervals'));
-            if ~isempty(pulses) 
-                fake_train_of_intervals = intervals(1,1):0.001:intervals(end,1);
-                fake_status = cell(1, numRep); % Preallocate outside parfor
-    
-                parfor mm = 1:numRep
-                    rand_intervals = sort(fake_train_of_intervals(randperm(length(fake_train_of_intervals), nIntervals)));
-                    fake_status{mm} = InIntervals(pulses, [rand_intervals' rand_intervals'+ dur_interval]);            
-                end
-            else
-                for mm = 1:numRep
-                    fake_status{mm} = [0];            
-                end
-            end
-        elseif strcmpi(boostraping_type, 'pulses')
-            clear fake_status
-            nPulses = size(pulses,1);
-            nStatus = length(find(status==1));
-            
-            for mm = 1:numRep
-                % disp(mm);
-                rand_status = zeros(nPulses,1);
-                rand_status(randperm(nPulses, nStatus)) = 1;
-                fake_status{mm} = rand_status;            
-            end
 
-        else
-            error('Boostraping type do not recognized! ');
-        end
+        if strcmpi(boostraping_type, 'interval')
+        clear fake_status
+           nIntervals = size(intervals,1);
+           dur_interval = median(diff(intervals'));
+           if ~isempty(pulses) 
+               fake_train_of_intervals = intervals(1,1):0.001:intervals(end,1);
+                fake_status = cell(1, numRep_fake); % Preallocate outside parfor
         
-        % covert fake_status to times
-        for ii = 1:length(fake_status)
-            fake_status_temp{ii} = pulses(find(fake_status{ii}));
-        end
-        fake_status = fake_status_temp;
-        if isempty(pulses) || length(find(status)) < minNumberOfPulses % 0?
-            for iii = 1:numRep
-                fake_status{iii} = [0];
-            end
-        end
+              parfor mm = 1:numRep_fake
+                    rand_intervals = sort(fake_train_of_intervals(randperm(length(fake_train_of_intervals), nIntervals)));
+                  fake_status{mm} = InIntervals(pulses, [rand_intervals' rand_intervals'+ dur_interval]);            
+                 end
+             else
+                for mm = 1:numRep_fake
+                     fake_status{mm} = [0];            
+                 end
+             end
+         elseif strcmpi(boostraping_type, 'pulses')
+             clear fake_status
+             nPulses = size(pulses,1);
+            nStatus = length(find(status==1));
+         
+             for mm = 1:numRep_fake
+                 % disp(mm);
+                 rand_status = zeros(nPulses,1);
+                 rand_status(randperm(nPulses, nStatus)) = 1;
+                 fake_status{mm} = rand_status;            
+             end
+         
+         else
+             error('Boostraping type do not recognized! ');
+         end
+        
+          covert fake_status to times
+         for ii = 1:length(fake_status)
+             fake_status_temp{ii} = pulses(find(fake_status{ii}));
+         end
+         fake_status = fake_status_temp;
+         if isempty(pulses) || length(find(status)) < minNumberOfPulses % 0?
+             for iii = 1:numRep_fake
+                 fake_status{iii} = [0];
+             end
+         end
         
         times = spikes.times;        
-        if ~isempty(pulses)
+        if ~isempty(pulses) && length(pulses) > minNumberOfPulses
             times{length(times)+1} = pulses(status==1,1); 
             times{length(times)+1} = pulses(status==0,1); 
             
@@ -318,7 +322,11 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
             times{length(times)+1} = [0]; 
             times{length(times)+1} = [0]; 
         end
-        times = cat(2,times, fake_status);
+        
+        % times = cat(2,times, fake_status);
+        times = cat(2,times);
+
+
 
         fprintf('\n');
         [stccg, t] = CCG(times,[],'binSize',binSize,'duration',winSize,'norm','rate');
@@ -356,6 +364,7 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
         in_interval = aux_computeResponse(in_interval, kk, jj, t, t_duringPulse, t_beforePulse, codes, uLEDResponses_interval, pulseDuration, epoch, condition, pulses(status==1,1), spikes, getRaster);
         out_interval = aux_computeResponse(out_interval, kk, jj, t, t_duringPulse, t_beforePulse, codes, uLEDResponses_interval, pulseDuration, epoch, condition, pulses(status==0,1), spikes, getRaster);
 
+
         for ii = 1:size(in_interval.responsecurve,1)
             try 
                 [h,p]= kstest2(squeeze(in_interval.responsecurve(ii,kk,jj,t_beforePulse)),...
@@ -372,7 +381,6 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
             out_interval.is_rateBeforePulse_similar_p(ii,kk,jj,1) = p;
         end
         
-
         % computation for boostraping
         temp = permute(squeeze(stccg(:, numberOfcells+3:end, 1:numberOfcells)), [3,1,2]);
         
@@ -402,22 +410,16 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
          end
          for ii = 1:numRep
             rand_interval{ii} = aux_computeResponse(rand_interval{ii}, kk, jj, t, t_duringPulse, t_beforePulse, codes, uLEDResponses_interval, pulseDuration, epoch, condition, times{numberOfcells+2+ii}, spikes, getRaster);
-           
-            for mm = 1:size(in_interval.responsecurve,1)
-                try
-                [h,p]= kstest2(squeeze(in_interval.responsecurve(mm,kk,jj,t_beforePulse)),...
-                    squeeze( rand_interval{ii}.responsecurve(mm,kk,jj,t_beforePulse)));
-                h = ~h;
-                catch
-                h = NaN;
-                p = NaN;
-                end
+         end 
+ 
+          for ii = 1:numRep
                 rand_interval{ii}.is_rateBeforePulse_similar_h(mm,kk,jj,1) = double(h);
                 rand_interval{ii}.is_rateBeforePulse_similar_p(mm,kk,jj,1) = p;
            end
         end
 end
-end
+
+
  %%%%%%%%% SEAL OF MARTA APPORVAL -written by Mario
 out_interval.timestamps = t;
 in_interval.timestamps = t;
@@ -481,6 +483,7 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
     %
         in_interval = aux_computeResponse_2(in_interval, kk,spikes,t,out_interval,ii,t_duringPulse); 
         out_interval = aux_computeResponse_2(out_interval, kk, spikes,t,out_interval,ii,t_duringPulse);
+
          for mm = 1:numRep
          rand_interval{mm} = aux_computeResponse_2(rand_interval{mm}, kk,spikes,t,out_interval,ii,t_duringPulse);
         end
@@ -493,6 +496,7 @@ end
 
 in_interval.ratioBeforeAfter = in_interval.rateDuringPulse./in_interval.rateBeforePulse;
 out_interval.ratioBeforeAfter = out_interval.rateDuringPulse./out_interval.rateBeforePulse;
+
 for ii = 1:numRep
  rand_interval{ii}.ratioBeforeAfter = rand_interval{ii}.rateDuringPulse./rand_interval{ii}.rateBeforePulse;
 end
