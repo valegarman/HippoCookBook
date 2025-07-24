@@ -283,13 +283,17 @@ end
 endDelay = armChoice.delay.timestamps(:,2);
 for ii = 1:length(endDelay)
     [~,idx] = min(abs(endDelay(ii) - t));
-    p5 = plot(x(idx),y(idx),'o','MarkerFaceColor',[.8 .5 .8],'MarkerEdgeColor','k');
+    if idx < length(x)
+        p5 = plot(x(idx),y(idx),'o','MarkerFaceColor',[.8 .5 .8],'MarkerEdgeColor','k');
+    end
 end
 % startDelay = armChoice.delay.timestamps(1,:);
 startDelay = armChoice.delay.timestamps(:,1);
 for ii = 1:length(startDelay)
     [~,idx] = min(abs(startDelay(ii) - t));
-    p6 = plot(x(idx),y(idx),'o','MarkerFaceColor',[.5 .8 .5],'MarkerEdgeColor','k');
+    if idx < length(x)
+        p6 = plot(x(idx),y(idx),'o','MarkerFaceColor',[.5 .8 .5],'MarkerEdgeColor','k');
+    end
 end
 legend([p1 p2 p3 p4 p5 p6],'Inters', 'HomeCage', 'rReward', 'lReward', 'endDelay', 'startDelay','Location','best');
     

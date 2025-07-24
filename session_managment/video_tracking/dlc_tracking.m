@@ -63,6 +63,8 @@ addParameter(p,'rightTTL_reward',3,@isnumeric);
 addParameter(p,'homeTtl',4,@isnumeric);
 addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'dlc_ttl_channel',5,@isnumeric); % by default, 5
+addParameter(p,'interpolate_misstrackings',true);
+addParameter(p,'use_dlc_likelihood',0.7); % Default > 70%
 
 % addParameter(p,'RGBChannel',[],@isstr);
 
@@ -83,6 +85,8 @@ dlc_ttl_channel = p.Results.dlc_ttl_channel;
 leftTTL_reward = p.Results.leftTTL_reward;
 rightTTL_reward = p.Results.rightTTL_reward;
 homeTtl = p.Results.homeTtl;
+interpolate_misstrackings = p.Results.interpolate_misstrackings;
+use_dlc_likelihood = p.Results.use_dlc_likelihood;
 
 %% Deal with inputs
 if ~isempty(dir([basepath filesep '*Tracking.Behavior.mat'])) && forceReload
@@ -224,6 +228,14 @@ catch
 end
 
 %% Postprocessing of position
+if ~isempty(use_dlc_likelihood)
+    idx_likelihood = find(likelihood < 0.7);
+
+    x(idx_likelihood) = NaN;
+    y(idx_likelihood) = NaN;
+end
+
+
 pos = [x,y];
 pos = pos * convFact;                                   % cm or normalized
 art = find(sum(abs(diff(pos))>artifactThreshold,2))+1;  % remove artefacs as movement > 10cm/frame
@@ -234,15 +246,26 @@ xt = linspace(0,size(pos,1)/fs,size(pos,1));            % kalman filter
 art = find(sum(abs(diff([x y]))>artifactThreshold,2))+1;
 art = [art - 2 art - 1 art art + 1 art + 2];
 x(art(:)) = NaN; y(art(:)) = NaN;
-F = fillmissing([x y],'linear');
-x = F(:,1); y = F(:,2);
-
-if length(xt) > length(x)
-    xt(end) = [];
-elseif length(x) > length(xt)
-    x(end) = [];
-    y(end) = [];
+if interpolate_misstrackings
+    F = fillmissing([x y],'linear');
+    x = F(:,1); y = F(:,2);
 end
+
+difference = length(xt)-length(x);
+
+if difference > 0
+    xt(end-difference+1:end) = [];
+elseif difference < 0
+    x(end-difference+1:end) = [];
+    y(end-difference+1:end) = [];
+end
+
+% if length(xt) > length(x)
+%     xt(end) = [];
+% elseif length(x) > length(xt)
+%     x(end) = [];
+%     y(end) = [];
+% end
 
 % Get velocity
 [~,~,~,vx,vy,ax,ay] = KalmanVel(x,y,xt,2);
@@ -397,7 +420,7 @@ tracking.position_tail2.y = y_tail2;
 tracking.position_tail2.likelihood = likelihood_tail2;
 
 tracking.description = 'DeepLabCut';
-tracking.timestamps = timestamps + digitalIn.timestampsOn{dlc_ttl_channel}(1) - pul(1,1);
+tracking.timestamps = xt + digitalIn.timestampsOn{dlc_ttl_channel}(1) - pul(1,1);
 tracking.originalTimestamps = [];
 tracking.folder = fbasename;
 tracking.sync.sync = sync;
