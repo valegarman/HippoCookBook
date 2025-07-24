@@ -341,7 +341,6 @@ if ~any(ismember(excludeAnalysis, {'10',lower('cellMetrics')}))
 
     cell_metrics = ProcessCellMetrics('session', session,'forceReload',true,'excludeIntervals',excludePulsesIntervals,'excludeMetrics',{'deepSuperficial'}); % after CellExplorar
     
-   
     getACGPeak('force',true);
 
     getAverageCCG('force',true);
