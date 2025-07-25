@@ -29,7 +29,7 @@ addParameter(p,'fileTarget',[],@ischar);
 addParameter(p,'basepath',pwd,@isfolder);
 addParameter(p,'correctDC',true, @islogical);
 addParameter(p,'ch','all');
-addParameter(p,'winArt',0.0004,@isnumeric);
+addParameter(p,'winArt',0.0004,@isnumeric); % original: 0.0004
 addParameter(p,'winDC',0.005,@isnumeric);
 
 parse(p, varargin{:});

@@ -25,8 +25,11 @@ end
 
 
 % Load .txt file
-file = dir('uLED_ttl.txt'); % or uLED_ttl.csv
-uLEDs_txt = load(file.name);
+try
+    file = dir('uLED_ttl.txt'); % or uLED_ttl.csv
+    uLEDs_txt = load(file.name);
+catch
+end
 
 % get digital Inputs that are in the interval
 % tsOn = digitalIn.timestampsOn{uLEDs_ttl}(InIntervals(digitalIn.timestampsOn{uLEDs_ttl},interval));
