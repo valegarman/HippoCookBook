@@ -247,7 +247,7 @@ end
 %% 4. Spike Features, and optogenetic responses
 % 4.1 Light responses, if available
 if ~any(ismember(excludeAnalysis, {'4',lower('spikesFeatures')}))
-    getOptogeneticResponse('numRep',500,'force',true,'restrict_to', restrict_ints);
+    getOptogeneticResponse('numRep',500,'force',true,'restrict_to', restrict_ints,'digitalChannelsList',digital_optogenetic_channels);
     % 4.2 ACG and waveform
     spikeFeatures;
 end
@@ -276,7 +276,6 @@ end
 %% 7. Getting Hippocampal Layers
 if ~any(ismember(excludeAnalysis, {'7',lower('getHippocampalLayers')}))
     [hippocampalLayers] = getHippocampalLayers('force',true,'promt',promt_hippo_layers,'removeRipplesStimulation', false);
-        [hippocampalLayers2] = getHippocampalLayers('force',true,'promt',false,'removeRipplesStimulation', false, 'saveSummary',false,'saveMat',false);
 
 end
 
@@ -346,9 +345,8 @@ if ~any(ismember(excludeAnalysis, {'10',lower('cellMetrics')}))
     end
 
     session = loadSession;
-    
-    cell_metrics = ProcessCellMetrics('session', session,'excludeIntervals',excludePulsesIntervals,'forceReload',true,'excludeMetrics',{'deepSuperficial'}); % after CellExplorar
 
+    cell_metrics = ProcessCellMetrics('session', session,'forceReload',true,'excludeIntervals',excludePulsesIntervals,'excludeMetrics',{'deepSuperficial'}); % after CellExplorar
     
     getACGPeak('force',true);
 
