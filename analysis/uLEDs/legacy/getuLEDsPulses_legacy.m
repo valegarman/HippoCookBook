@@ -1,4 +1,4 @@
-function [uLEDPulses] = getuLEDsPulses(varargin)
+    function [uLEDPulses] = getuLEDsPulses(varargin)
 %   [uLEDsIn]  = getuLEDsPulses(varargin)
 % Find digital TTLs that correspond to the channel values found in .txt
 % file
@@ -63,7 +63,7 @@ if exist([session.general.name,'.MergePoints.events.mat'],'file')
     count = 1;
     for ii = 1:size(MergePoints.foldernames,2)
         %if sess(ii).isdir && ~isempty(dir([basepath filesep sess(ii).name filesep '*Basler*avi']))
-         if ~isempty(dir([basepath filesep MergePoints.foldernames{ii} filesep '*uLED_ttl.txt']))  % or '*uLED_ttl.csv'
+        if ~isempty(dir([basepath filesep MergePoints.foldernames{ii} filesep '*uLED_ttl.txt']))  % or '*uLED_ttl.csv'
             % interval = MergePoints.timestamps(ii,:);
             interval = [0 inf];
             cd([basepath filesep MergePoints.foldernames{ii}]); %cd([basepath filesep sess(ii).name]);

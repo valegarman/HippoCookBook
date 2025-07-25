@@ -10,7 +10,7 @@ function [cell_types, cell_classification_stats, cell_metrics, cell_subtypes] = 
     p = inputParser;
     addParameter(p,'basepath',pwd,@isdir);
     addParameter(p,'cell_metrics',[],@isstruct);
-    addParameter(p,'thetaMod',[],@isstruct);
+    addParameter(p,'thetaMod',[]);
     addParameter(p,'modelType','hippocampus5',@ischar);
     addParameter(p,'overwrite_cell_metrics',true,@islogical);
     addParameter(p,'score_cut_off',.70,@isnumeric);
@@ -22,7 +22,7 @@ function [cell_types, cell_classification_stats, cell_metrics, cell_subtypes] = 
     
     basepath = p.Results.basepath;
     cell_metrics = p.Results.cell_metrics;
-    thetaMod = p.Results.thetaMod;
+    thetaPhaseModulation = p.Results.thetaMod;
     modelType = p.Results.modelType;
     overwrite_cell_metrics = p.Results.overwrite_cell_metrics;
     score_cut_off = p.Results.score_cut_off;
@@ -51,12 +51,15 @@ function [cell_types, cell_classification_stats, cell_metrics, cell_subtypes] = 
     switch modelType
         case lower('hippocampus5')
             % collecting remaining features
-            if isempty(thetaMod) && strcmpi(modelType,'hippocampus5')
+            if isempty(thetaPhaseModulation) && strcmpi(modelType,'hippocampus5')
                 targetFile = dir('*theta_6-12.PhaseLockingData.cellinfo.mat');
                 if isempty(targetFile.name)
                     error('Feature not found! Did you use CellExplorer or HippoCookBook to process the current session?');
                 end
                 thetaPhaseModulation = importdata(targetFile.name);
+                thetamod_r = thetaPhaseModulation.phasestats.r';
+            else
+                thetamod_r = thetaPhaseModulation';
             end
             
             % get model and features
@@ -65,7 +68,7 @@ function [cell_types, cell_classification_stats, cell_metrics, cell_subtypes] = 
                 cell_metrics.acg_tau_rise' ...
                 cell_metrics.ab_ratio' ...
                 cell_metrics.cv2' ...
-                thetaPhaseModulation.phasestats.r' ...
+                thetamod_r' ...
             ];
         case 'fobrebrain5'
             % get model and features

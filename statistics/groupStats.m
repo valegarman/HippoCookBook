@@ -543,7 +543,7 @@ if doPlot
         hold on
         % plot([.5 max(pos)+.5],[0 0],'color',[.7 .7 .7]);
         for ii = 1:length(ind) 
-            m = stats.descriptive.median(ii);
+            m = stats.descriptive.mean(ii);
             s1 = stats.descriptive.q25(ii);
             s2 = stats.descriptive.q75(ii);
             if plotData && ~plotConnectors

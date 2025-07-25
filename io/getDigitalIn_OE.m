@@ -123,35 +123,45 @@ if exist('digitalInFolder','var')
 
             
     % Concatenating all variables timestamps
-    for i=1:length(sumTsOn)
-        num_channels(i) = length(sumTsOn{i});
-    end
-    num_channels = max(num_channels);
-
-    tsOn = cell(1,num_channels); tsOff = cell(1,num_channels);
-    tsDur = cell(1,num_channels); tsInts = cell(1,num_channels);
-    tsIntsPeriods = cell(1,num_channels);
-
-    for ii = 1:num_channels
-        tsOn_aux = [];
-        tsOff_aux = [];
-        tsDur_aux = [];
-        tsInts_aux = [];
-        tsIntsPeriods_aux = [];
-        for jj=1:length(sumTsOn)
-            if length(sumTsOn{jj}) >= ii
-                tsOn_aux = [tsOn_aux; sumTsOn{jj}{ii}];
-                tsOff_aux = [tsOff_aux; sumTsOff{jj}{ii}];
-                tsDur_aux = [tsDur_aux; sumTsDur{jj}{ii}];
-                tsInts_aux = [tsInts_aux; sumTsInts{jj}{ii}];
-                tsIntsPeriods_aux = [tsIntsPeriods_aux; sumTsIntsPeriods{jj}{ii}];
-            end
+    if exist('sumTsOn','var')
+        for i=1:length(sumTsOn)
+            num_channels(i) = length(sumTsOn{i});
         end
-        tsOn{1,ii} = tsOn_aux;
-        tsOff{1,ii} = tsOff_aux;
-        tsDur{1,ii} = tsDur_aux;
-        tsInts{1,ii} = tsInts_aux;
-        tsIntsPeriods{1,ii} = tsIntsPeriods_aux;
+        num_channels = max(num_channels);
+    
+        tsOn = cell(1,num_channels); tsOff = cell(1,num_channels);
+        tsDur = cell(1,num_channels); tsInts = cell(1,num_channels);
+        tsIntsPeriods = cell(1,num_channels);
+    
+        for ii = 1:num_channels
+            tsOn_aux = [];
+            tsOff_aux = [];
+            tsDur_aux = [];
+            tsInts_aux = [];
+            tsIntsPeriods_aux = [];
+            for jj=1:length(sumTsOn)
+                if length(sumTsOn{jj}) >= ii
+                    tsOn_aux = [tsOn_aux; sumTsOn{jj}{ii}];
+                    tsOff_aux = [tsOff_aux; sumTsOff{jj}{ii}];
+                    tsDur_aux = [tsDur_aux; sumTsDur{jj}{ii}];
+                    tsInts_aux = [tsInts_aux; sumTsInts{jj}{ii}];
+                    tsIntsPeriods_aux = [tsIntsPeriods_aux; sumTsIntsPeriods{jj}{ii}];
+                end
+            end
+            tsOn{1,ii} = tsOn_aux;
+            tsOff{1,ii} = tsOff_aux;
+            tsDur{1,ii} = tsDur_aux;
+            tsInts{1,ii} = tsInts_aux;
+            tsIntsPeriods{1,ii} = tsIntsPeriods_aux;
+        end
+
+    else
+        tsOn = [];
+        tsOff = [];
+        tsInts = [];
+        tsDur = [];
+        tsIntsPeriods = [];
+        folders = [];
     end
 
 

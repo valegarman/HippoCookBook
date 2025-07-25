@@ -88,6 +88,7 @@ powerProfile_theta = powerSpectrumProfile(theta_bandpass,'showfig',true,'saveMat
 powerProfile_gamma = powerSpectrumProfile(gamma_bandpass,'showfig',true,'saveMat',true);
 powerProfile_hfo = powerSpectrumProfile(hfo_bandpass,'showfig',true,'saveMat',true); 
 
+
 %% Computing Hippocampal Layers by looking at powerSpectrum profiles for theta and hfo
 f = figure;
 set(gcf,'Position',[100 100 1400 600])
@@ -100,6 +101,7 @@ eventTwin = [-.05 .05];
 twin_rip = eventTwin * session.extracellular.srLfp;
 
 zscor_xnan = @(x) bsxfun(@rdivide, bsxfun(@minus, x, mean(x,'omitnan')), std(x, 'omitnan'));
+
 for i = 1:length(session.extracellular.electrodeGroups.channels)
     if ~all(ismember(session.extracellular.electrodeGroups.channels{i},session.channelTags.Bad.channels))
         % Channel slm : Channel with bigger theta and gamma amplitude
