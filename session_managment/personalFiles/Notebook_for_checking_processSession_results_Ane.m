@@ -58,11 +58,11 @@ rippleChannel = [];
 SWChannel = [];
 noiseChannel = [];
 eventSpikeThreshold_shanks = [1]; % which shanks will be accounted for the spike threshold 
-eventSpikeThreshold = 1.2; % .5
+eventSpikeThreshold = .5 % .5
 
-rippleMasterDetector_threshold = [.5 1]; % [1.5 3.5]
+rippleMasterDetector_threshold = [.05 1]; % [1.5 3.5]
 ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',false,'thresholds',...
-    rippleMasterDetector_threshold,'eventSpikeThreshold_shanks', eventSpikeThreshold_shanks,'eventSpikeThreshold',eventSpikeThreshold,'excludeIntervals',excludeIntervals,'noise',noiseChannel); 
+    rippleMasterDetector_threshold,'eventSpikeThreshold_shanks', eventSpikeThreshold_shanks,'eventSpikeThreshold',eventSpikeThreshold,'excludeIntervals',excludeIntervals); 
 psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10);
 % psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10,'restrict_to_manipulation',true);
 getSpikesRank('events','ripples');
