@@ -451,6 +451,7 @@ G = graph(coactivationMatrix_neurons);
 artificial_clusters = conncomp(G);
 artificial_clusters(degree(G) == 0) = 0;  % marcar como no coactivadas
 uLEDcoactivation.clusters.artificial_clusters = artificial_clusters;
+uLEDcoactivation.neuronLED_matrix = neuronLED;
 
 % Saving 
 if saveMat
