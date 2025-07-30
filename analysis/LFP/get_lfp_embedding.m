@@ -261,7 +261,8 @@ end
 
 %% which in my case was
 
-py_path = python_path(name);
+% py_path = python_path(name);
+py_path =  'C:/Users/mvalero/.conda/envs/matlab_env/python.exe';
 directory = what('HippoCookBook');
 script_path = [directory.path,'\utilities\python\compute_lfp_embeding.py'];
 embedding_path = [directory.path,'\utilities\python\Hipp-LFP-embedding'];

@@ -292,15 +292,15 @@ ari_post_stim = adjusted_rand_index(post_labels, stim_labels);
 fprintf('ARI - Pre: %.3f | Stim: %.3f | Post: %.3f\n', ari_pre, ari_stim, ari_post);
 fprintf('ARI - Pre-Post: %.3f | Pre-Stim: %.3f | Post-Stim: %.3f\n', ari_pre_post, ari_pre_stim, ari_post_stim);
 
-nShuffles = 10000;
-ari_shuff_stim = zeros(nShuffles,1);
-ari_shuff_pre = zeros(nShuffles,1);
-ari_shuff_post = zeros(nShuffles,1);
-ari_shuff_pre_post = zeros(nShuffles,1);
-ari_shuff_pre_stim = zeros(nShuffles,1);
-ari_shuff_post_stim = zeros(nShuffles,1);
+nShuffles2 = 10000;
+ari_shuff_stim = zeros(nShuffles2,1);
+ari_shuff_pre = zeros(nShuffles2,1);
+ari_shuff_post = zeros(nShuffles2,1);
+ari_shuff_pre_post = zeros(nShuffles2,1);
+ari_shuff_pre_stim = zeros(nShuffles2,1);
+ari_shuff_post_stim = zeros(nShuffles2,1);
 
-for i = 1:nShuffles
+for i = 1:nShuffles2
     shuffled = true_labels(randperm(length(true_labels)));
     ari_shuff_stim(i) = adjusted_rand_index(shuffled, stim_labels);
     ari_shuff_pre(i) = adjusted_rand_index(shuffled, pre_labels);
@@ -518,9 +518,9 @@ end
 
 delta_mean = delta_sum ./ n_pairs;  % consistency
 
-delta_shuff = zeros(n_types, n_shuffles);
+delta_shuff = zeros(n_types, nShuffles);
 
-for s = 1:n_shuffles
+for s = 1:nShuffles
     shuffled_idx = type_idx(randperm(length(type_idx)));  % shuffling
 
     delta_sum = zeros(n_types,1);
@@ -646,13 +646,13 @@ disp('Computing cluster-wise metrics...');
 
 % Signed LOO impact: negative values suggest the neuron functionally promoted excitation or coordination across clusters.
 % Positive values suggest the neuron suppressed or inhibited interactions between clusters.
-[Z_nulls, Ci_nulls] = generateClusterPermutationNulls(Z_clipped, Q_stim.clusters_indices, n_shuffles, false);
+[Z_nulls, Ci_nulls] = generateClusterPermutationNulls(Z_clipped, Q_stim.clusters_indices, nShuffles, false);
 loo_interactions_stim = computeLOOimpact_allMetrics_withNull(Z_clipped, Q_stim.clusters_indices, Z_nulls, Ci_nulls);
 
-[Z_nulls, Ci_nulls] = generateClusterPermutationNulls(preZ_clipped, Q_stim.clusters_indices, n_shuffles, false);
+[Z_nulls, Ci_nulls] = generateClusterPermutationNulls(preZ_clipped, Q_stim.clusters_indices, nShuffles, false);
 loo_interactions_pre_by_stim = computeLOOimpact_allMetrics_withNull(preZ_clipped, Q_stim.clusters_indices, Z_nulls, Ci_nulls);
 
-[Z_nulls, Ci_nulls] = generateClusterPermutationNulls(postZ_clipped, Q_stim.clusters_indices, n_shuffles, false);
+[Z_nulls, Ci_nulls] = generateClusterPermutationNulls(postZ_clipped, Q_stim.clusters_indices, nShuffles, false);
 loo_interactions_post_by_stim = computeLOOimpact_allMetrics_withNull(postZ_clipped, Q_stim.clusters_indices, Z_nulls, Ci_nulls);
 
 loo_interactions_post_pre_by_stim = subtractLOOstructures(loo_interactions_post_by_stim, loo_interactions_pre_by_stim);
@@ -680,14 +680,13 @@ artificial_clusters2 = Ci_mapped;
 
 % Signed LOO impact: negative values suggest the neuron functionally promoted excitation or coordination across clusters.
 % Positive values suggest the neuron suppressed or inhibited interactions between clusters.
-n_shuffles = 1000;
-[Z_nulls, Ci_nulls] = generateClusterPermutationNulls(Z_clipped, artificial_clusters2, n_shuffles, false);
+[Z_nulls, Ci_nulls] = generateClusterPermutationNulls(Z_clipped, artificial_clusters2, nShuffles, false);
 loo_interactions_stim_by_artificial = computeLOOimpact_allMetrics_withNull(Z_clipped, artificial_clusters2, Z_nulls, Ci_nulls);
 
-[Z_nulls, Ci_nulls] = generateClusterPermutationNulls(preZ_clipped,artificial_clusters2, n_shuffles, false);
+[Z_nulls, Ci_nulls] = generateClusterPermutationNulls(preZ_clipped,artificial_clusters2, nShuffles, false);
 loo_interactions_pre_by_artificial = computeLOOimpact_allMetrics_withNull(preZ_clipped, artificial_clusters2, Z_nulls, Ci_nulls);
 
-[Z_nulls, Ci_nulls] = generateClusterPermutationNulls(postZ_clipped, artificial_clusters2, n_shuffles, false);
+[Z_nulls, Ci_nulls] = generateClusterPermutationNulls(postZ_clipped, artificial_clusters2, nShuffles, false);
 loo_interactions_post_by_artificial = computeLOOimpact_allMetrics_withNull(postZ_clipped, artificial_clusters2, Z_nulls, Ci_nulls);
 
 loo_interactions_post_pre_by_artificial = subtractLOOstructures(loo_interactions_post_by_stim, loo_interactions_pre_by_stim);
@@ -731,12 +730,12 @@ if do_plot
     
     subplot(2,3,5)
     gs = groupStats({cluster_interactions_pre_by_artificial.neighborPairs(:), cluster_interactions_stim_by_artificial.neighborPairs(:),...
-        cluster_interactions_post_by_stim.neighborPairs(:)},[], 'plotType', 'roundPlot', 'inAxis', true, 'repeatedMeasures', true, 'plotData', true, 'plotConnectors', true);
+        cluster_interactions_post_by_artificial.neighborPairs(:)},[], 'plotType', 'roundPlot', 'inAxis', true, 'repeatedMeasures', true, 'plotData', true, 'plotConnectors', true);
     title('Neigh-cluster','FontWeight','normal');
     
     subplot(2,3,6)
     gs = groupStats({cluster_interactions_pre_by_artificial.offDiag(:), cluster_interactions_stim_by_artificial.offDiag(:),...
-        cluster_interactions_post_by_stim.offDiag(:)},[], 'plotType', 'roundPlot', 'inAxis', true, 'repeatedMeasures', true, 'plotData', true, 'plotConnectors', true);
+        cluster_interactions_post_by_artificial.offDiag(:)},[], 'plotType', 'roundPlot', 'inAxis', true, 'repeatedMeasures', true, 'plotData', true, 'plotConnectors', true);
     title('Inter-cluster','FontWeight','normal');
 
     exportgraphics(gcf,['SummaryFigures\' save_as '_cluster_level_metrics.png']);
@@ -766,16 +765,16 @@ disp('Computing neuron-wise metrics...');
 %        → Captures the diversity of inhibitory (negative) interactions.
 %        → High = broad inhibitory influence; low = focused inhibition or none.
 % 4.1 By stim clusters
-[Z_nulls, Ci_nulls] = generateClusterPermutationNulls(preZ_clipped, Q_stim.clusters_indices, n_shuffles, false);
+[Z_nulls, Ci_nulls] = generateClusterPermutationNulls(preZ_clipped, Q_stim.clusters_indices, nShuffles, false);
 cluster_cell_metrics_pre_by_stim = computeNeuronClusterMetricsWithNull(preZ_clipped, Q_stim.clusters_indices, Z_nulls, Ci_nulls);
 
-[Z_nulls, Ci_nulls] = generateClusterPermutationNulls(Z_clipped, Q_stim.clusters_indices, n_shuffles, false);
+[Z_nulls, Ci_nulls] = generateClusterPermutationNulls(Z_clipped, Q_stim.clusters_indices, nShuffles, false);
 cluster_cell_metrics_stim = computeNeuronClusterMetricsWithNull(Z_clipped, Q_stim.clusters_indices, Z_nulls, Ci_nulls);
 
-[Z_nulls, Ci_nulls] = generateClusterPermutationNulls(postZ_clipped, Q_stim.clusters_indices, n_shuffles, false);
+[Z_nulls, Ci_nulls] = generateClusterPermutationNulls(postZ_clipped, Q_stim.clusters_indices, nShuffles, false);
 cluster_cell_metrics_post_by_stim = computeNeuronClusterMetricsWithNull(postZ_clipped, Q_stim.clusters_indices, Z_nulls, Ci_nulls);
 
-cluster_cell_metrics_post_pre_by_stim = subtractNeuronMetrics(cluster_cell_metrics_post_by_stim, cluster_cell_metrics_pre_by_stim);
+cluster_cell_metrics_post_pre_by_stim = subtractMetricsStructures(cluster_cell_metrics_post_by_stim, cluster_cell_metrics_pre_by_stim);
 
 % save values
 coactivation_metrics.neuron_metrics_by_stim.cluster_cell_metrics_pre_by_stim = cluster_cell_metrics_pre_by_stim;
@@ -784,16 +783,16 @@ coactivation_metrics.neuron_metrics_by_stim.cluster_cell_metrics_post_by_stim = 
 coactivation_metrics.neuron_metrics_by_stim.cluster_cell_metrics_post_pre_by_stim = cluster_cell_metrics_post_pre_by_stim;
 
 % 4.1 By artificial clusters
-[Z_nulls, Ci_nulls] = generateClusterPermutationNulls(preZ_clipped, artificial_clusters2', n_shuffles, false);
+[Z_nulls, Ci_nulls] = generateClusterPermutationNulls(preZ_clipped, artificial_clusters2', nShuffles, false);
 cluster_cell_metrics_pre_by_artificial = computeNeuronClusterMetricsWithNull(preZ_clipped, artificial_clusters2', Z_nulls, Ci_nulls);
 
-[Z_nulls, Ci_nulls] = generateClusterPermutationNulls(Z_clipped, artificial_clusters2', n_shuffles, false);
+[Z_nulls, Ci_nulls] = generateClusterPermutationNulls(Z_clipped, artificial_clusters2', nShuffles, false);
 cluster_cell_metrics_stim_by_artificial = computeNeuronClusterMetricsWithNull(Z_clipped, artificial_clusters2', Z_nulls, Ci_nulls);
 
-[Z_nulls, Ci_nulls] = generateClusterPermutationNulls(postZ_clipped, artificial_clusters2', n_shuffles, false);
+[Z_nulls, Ci_nulls] = generateClusterPermutationNulls(postZ_clipped, artificial_clusters2', nShuffles, false);
 cluster_cell_metrics_post_by_artificial = computeNeuronClusterMetricsWithNull(postZ_clipped, artificial_clusters2', Z_nulls, Ci_nulls);
 
-cluster_cell_metrics_post_pre_by_artificial = subtractNeuronMetrics(cluster_cell_metrics_post_by_artificial, cluster_cell_metrics_pre_by_artificial);
+cluster_cell_metrics_post_pre_by_artificial = subtractMetricsStructures(cluster_cell_metrics_post_by_artificial, cluster_cell_metrics_pre_by_artificial);
 
 % save values
 coactivation_metrics.neuron_metrics_by_artificial.cluster_cell_metrics_pre_by_artificial = cluster_cell_metrics_pre_by_artificial;
@@ -921,13 +920,13 @@ result.ari_full = ari_full;
 
 end
 
-function pairwise_consistency = compute_pairwise_consistency_all(C_all, C_ref, n_shuffles)
+function pairwise_consistency = compute_pairwise_consistency_all(C_all, C_ref, nShuffles)
 % Compute pairwise consistency and structure metrics vs. a reference clustering
 %
 % INPUTS:
 %   - C_all: N x K matrix of clustering labels (e.g., Pre, Stim, Post)
 %   - C_ref: N x 1 reference clustering
-%   - n_shuffles: optional (default: 1000) number of shuffles for null distributions
+%   - nShuffles: optional (default: 1000) number of shuffles for null distributions
 %
 % OUTPUTS: struct with fields:
 %   - consistency: N x K normalized pairwise consistency [0–1]
@@ -940,7 +939,7 @@ function pairwise_consistency = compute_pairwise_consistency_all(C_all, C_ref, n
 %   - within_vs_between_zscore, within_vs_between_pval: N x K stats from shuffled null
 
 if nargin < 3
-    n_shuffles = 1000;
+    nShuffles = 1000;
 end
 
 nNeurons = size(C_all, 1);
@@ -959,8 +958,8 @@ within_vs_between_diff = zeros(nNeurons, nConds);
 within_vs_between_zscore = zeros(nNeurons, nConds);
 within_vs_between_pval   = zeros(nNeurons, nConds);
 
-shuffle_vals = zeros(nNeurons, nConds, n_shuffles);
-shuffle_diff = zeros(nNeurons, nConds, n_shuffles);
+shuffle_vals = zeros(nNeurons, nConds, nShuffles);
+shuffle_diff = zeros(nNeurons, nConds, nShuffles);
 
 for k = 1:nConds
     Ci1 = C_all(:,k);
@@ -996,7 +995,7 @@ for k = 1:nConds
     end
 
     % Shuffling
-    for s = 1:n_shuffles
+    for s = 1:nShuffles
         Ci2_shuf = Ci2(randperm(nNeurons));
         A_shuf = zeros(nNeurons);
 
@@ -1029,7 +1028,7 @@ for k = 1:nConds
     consistency_zscore(:,k) = (consistency_norm(:,k) - null_mean) ./ null_std;
 
     for i = 1:nNeurons
-        p_vals(i,k) = (1 + sum(shuffle_vals(i,k,:) >= consistency_norm(i,k))) / (1 + n_shuffles);
+        p_vals(i,k) = (1 + sum(shuffle_vals(i,k,:) >= consistency_norm(i,k))) / (1 + nShuffles);
 
         % Within-between shuffle stats
         real_diff = within_vs_between_diff(i,k);
@@ -1037,7 +1036,7 @@ for k = 1:nConds
         mu_null = mean(null_diff);
         sigma_null = std(null_diff);
         within_vs_between_zscore(i,k) = (real_diff - mu_null) / sigma_null;
-        within_vs_between_pval(i,k) = (1 + sum(null_diff >= real_diff)) / (1 + n_shuffles);
+        within_vs_between_pval(i,k) = (1 + sum(null_diff >= real_diff)) / (1 + nShuffles);
     end
 end
 
@@ -1387,8 +1386,8 @@ function loo_results = computeLOOimpact_allMetrics_withNull(Z, Ci, Z_nulls, Ci_n
 % Inputs:
 %   - Z: NxN real interaction matrix
 %   - Ci: Nx1 real cluster labels
-%   - Z_nulls: cell array of null Z matrices (1 x n_shuffles)
-%   - Ci_nulls: cell array of null cluster labels (1 x n_shuffles)
+%   - Z_nulls: cell array of null Z matrices (1 x nShuffles)
+%   - Ci_nulls: cell array of null cluster labels (1 x nShuffles)
 %
 % Output:
 %   - loo_results: struct with fields:
