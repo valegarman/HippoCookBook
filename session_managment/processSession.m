@@ -97,7 +97,6 @@ use_manual_ttls = p.Results.use_manual_ttls;
 % Deal with inputs
 prevPath = pwd;
 cd(basepath);
-keyboard;
 
 mkdir('SummaryFigures')
 if createLegacySummaryFolder
@@ -122,8 +121,6 @@ if length(excludeAnalysis) == 0
 end
 excludeAnalysis = lower(excludeAnalysis);
 keyboard; 
-
-keyboard;
 
 %% 1. Runs sessionTemplate
 if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))
@@ -276,7 +273,7 @@ end
 %% 7. Getting Hippocampal Layers
 if ~any(ismember(excludeAnalysis, {'7',lower('getHippocampalLayers')}))
     [hippocampalLayers] = getHippocampalLayers('force',true,'promt',promt_hippo_layers,'removeRipplesStimulation', false);
-
+    %[hippocampalLayers2] = getHippocampalLayers('force',true,'promt',false,'removeRipplesStimulation', false, 'saveSummary',false,'saveMat',false);
 end
 
 %% 8. Check Brain Events
@@ -311,7 +308,6 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
 
     thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'channel',theta_epochs_channel);
 
-    
 end
 
 
@@ -345,9 +341,9 @@ if ~any(ismember(excludeAnalysis, {'10',lower('cellMetrics')}))
     end
 
     session = loadSession;
-
+        
     cell_metrics = ProcessCellMetrics('session', session,'forceReload',true,'excludeIntervals',excludePulsesIntervals,'excludeMetrics',{'deepSuperficial'}); % after CellExplorar
-    
+        
     getACGPeak('force',true);
 
     getAverageCCG('force',true);
