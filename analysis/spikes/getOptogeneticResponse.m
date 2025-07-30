@@ -180,6 +180,10 @@ if ~isempty(digitalChannelsList)
     digitalIn = getDigitalIn;
     if ~isempty(digitalIn)
         for ii = 1:length(digitalChannelsList)
+<<<<<<< HEAD
+=======
+            % pulsesDigital.timestamps = [pulsesDigital.timestamps; digitalIn.ints{digitalChannelsList(ii)}'];
+>>>>>>> 3d1f8563896a895ea2b477a79c568cd91581a661
             pulsesDigital.timestamps = [pulsesDigital.timestamps; digitalIn.ints{digitalChannelsList(ii)}];
             pulsesDigital.digitalChannelsList = [pulsesDigital.digitalChannelsList; [ones(size(digitalIn.ints{digitalChannelsList(ii)},2),1) * digitalChannelsList(ii)]];
         end
