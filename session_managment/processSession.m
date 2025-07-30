@@ -273,11 +273,7 @@ end
 %% 7. Getting Hippocampal Layers
 if ~any(ismember(excludeAnalysis, {'7',lower('getHippocampalLayers')}))
     [hippocampalLayers] = getHippocampalLayers('force',true,'promt',promt_hippo_layers,'removeRipplesStimulation', false);
-<<<<<<< HEAD
     %[hippocampalLayers2] = getHippocampalLayers('force',true,'promt',false,'removeRipplesStimulation', false, 'saveSummary',false,'saveMat',false);
-=======
->>>>>>> 6eef9062174362565549fad26651d6be0f067c97
-
 end
 
 %% 8. Check Brain Events
@@ -345,14 +341,9 @@ if ~any(ismember(excludeAnalysis, {'10',lower('cellMetrics')}))
     end
 
     session = loadSession;
-
-<<<<<<< HEAD
-    cell_metrics = ProcessCellMetrics('session', session,'forceReload',true,'excludeMetrics',{'deepSuperficial'}); % after CellExplorar
         
-=======
     cell_metrics = ProcessCellMetrics('session', session,'forceReload',true,'excludeIntervals',excludePulsesIntervals,'excludeMetrics',{'deepSuperficial'}); % after CellExplorar
-    
->>>>>>> 6eef9062174362565549fad26651d6be0f067c97
+        
     getACGPeak('force',true);
 
     getAverageCCG('force',true);

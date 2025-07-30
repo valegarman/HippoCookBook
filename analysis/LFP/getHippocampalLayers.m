@@ -82,42 +82,31 @@ end
 % Compute channels features
 % Updated by Pablo Abad to use session metadata instead of sessionInfo
 session = loadSession(basepath);
-<<<<<<< HEAD
 % channel_order = session.channels;
-=======
 channel_order = session.channels;
->>>>>>> 6eef9062174362565549fad26651d6be0f067c97
 % channels.pyramidal = bz_GetBestRippleChan(lfp);
 powerProfile_theta = powerSpectrumProfile(theta_bandpass,'showfig',true,'saveMat',true); 
 powerProfile_gamma = powerSpectrumProfile(gamma_bandpass,'showfig',true,'saveMat',true);
 powerProfile_hfo = powerSpectrumProfile(hfo_bandpass,'showfig',true,'saveMat',true); 
 
-<<<<<<< HEAD
 %% Computing Hippocampal Layers by looking at powerSpectrum profiles for theta and hfo
 f = figure;
 set(gcf,'Position',[100 100 1400 600])
 nShanks = length(session.extracellular.electrodeGroups.channels);
 index = reshape(1:2*nShanks, nShanks, 2).';
 
-=======
-
 %% Computing Hippocampal Layers by looking at powerSpectrum profiles for theta and hfo
 f = figure;
 set(gcf,'Position',[100 100 1400 600])
 nShanks = length(session.extracellular.electrodeGroups.channels);
 index = reshape(1:2*nShanks, nShanks, 2).';
 
->>>>>>> 6eef9062174362565549fad26651d6be0f067c97
 %
 data = lfp.data;
 eventTwin = [-.05 .05];
 twin_rip = eventTwin * session.extracellular.srLfp;
 
 zscor_xnan = @(x) bsxfun(@rdivide, bsxfun(@minus, x, mean(x,'omitnan')), std(x, 'omitnan'));
-<<<<<<< HEAD
-=======
-
->>>>>>> 6eef9062174362565549fad26651d6be0f067c97
 for i = 1:length(session.extracellular.electrodeGroups.channels)
     if ~all(ismember(session.extracellular.electrodeGroups.channels{i},session.channelTags.Bad.channels))
         % Channel slm : Channel with bigger theta and gamma amplitude
