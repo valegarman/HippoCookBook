@@ -20,6 +20,7 @@ args = parser.parse_args()
 
 folder = args.folder
 path = args.path
+print(["this is the path:", path])
 fnames = ['wave_ripple_mean', 'wave_theta_mean']  # .mat filenames (without extension)
 
 # --- Load and preprocess LFP waveform data ---
@@ -37,8 +38,8 @@ data['sw'] = np.hstack((
      data['sw'],
      data['sw'][:, -1][:, None]
  ))
-data['sw'] = data['sw'].T            # now shape (627, 64) - 64 features
-data['theta'] = data['theta'].T      # now shape (187, 64)
+#data['sw'] = data['sw'].T            # now shape (627, 64) - 64 features
+#data['theta'] = data['theta'].T      # now shape (187, 64)
 
 
 # Z-score across samples for each channel
