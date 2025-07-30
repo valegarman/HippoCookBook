@@ -116,8 +116,6 @@ maps.ripples_filtered = SyncMap(r,i,'durations',durations,'nbins',nBins,'smooth'
 [r,i] = Sync([timestamps double(unfiltered)],ripples.peaks,'durations',durations);
 maps.ripples_raw = SyncMap(r,i,'durations',durations,'nbins',nBins,'smooth',0);
 
-
-
 % Compute frequency Map
 [f,i] = Sync([timestamps frequency],ripples.peaks,'durations',durations);
 maps.frequency = SyncMap(f,i,'durations',durations,'nbins',nBins,'smooth',0);
