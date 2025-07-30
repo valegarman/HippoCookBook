@@ -29,5 +29,5 @@ switch lower(project)
     otherwise
         list = {'optogeneticResponse','ripples_psth','slowOscillations_psth','theta_*.PhaseLockingData','lgamma*.PhaseLockingData','hgamma*.PhaseLockingData','ripple*.PhaseLockingData',...
             'spatialModulation','placeFields','behavior.cellinfo','ACGPeak'};
-end
+end 
 end

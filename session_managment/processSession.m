@@ -97,7 +97,6 @@ use_manual_ttls = p.Results.use_manual_ttls;
 % Deal with inputs
 prevPath = pwd;
 cd(basepath);
-keyboard;
 
 mkdir('SummaryFigures')
 if createLegacySummaryFolder
@@ -122,8 +121,6 @@ if length(excludeAnalysis) == 0
 end
 excludeAnalysis = lower(excludeAnalysis);
 keyboard; 
-
-keyboard;
 
 %% 1. Runs sessionTemplate
 if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))
@@ -247,7 +244,7 @@ end
 %% 4. Spike Features, and optogenetic responses
 % 4.1 Light responses, if available
 if ~any(ismember(excludeAnalysis, {'4',lower('spikesFeatures')}))
-    getOptogeneticResponse('numRep',500,'force',true,'restrict_to', restrict_ints);
+    getOptogeneticResponse('numRep',500,'force',true,'restrict_to', restrict_ints,'digitalChannelsList',digital_optogenetic_channels);
     % 4.2 ACG and waveform
     spikeFeatures;
 end
@@ -276,7 +273,10 @@ end
 %% 7. Getting Hippocampal Layers
 if ~any(ismember(excludeAnalysis, {'7',lower('getHippocampalLayers')}))
     [hippocampalLayers] = getHippocampalLayers('force',true,'promt',promt_hippo_layers,'removeRipplesStimulation', false);
-        [hippocampalLayers2] = getHippocampalLayers('force',true,'promt',false,'removeRipplesStimulation', false, 'saveSummary',false,'saveMat',false);
+<<<<<<< HEAD
+    %[hippocampalLayers2] = getHippocampalLayers('force',true,'promt',false,'removeRipplesStimulation', false, 'saveSummary',false,'saveMat',false);
+=======
+>>>>>>> 6eef9062174362565549fad26651d6be0f067c97
 
 end
 
@@ -312,7 +312,6 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
 
     thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'channel',theta_epochs_channel);
 
-    
 end
 
 
@@ -347,8 +346,13 @@ if ~any(ismember(excludeAnalysis, {'10',lower('cellMetrics')}))
 
     session = loadSession;
 
-    cell_metrics = ProcessCellMetrics('session', session,'forceReload',true); % after CellExplorar
+<<<<<<< HEAD
+    cell_metrics = ProcessCellMetrics('session', session,'forceReload',true,'excludeMetrics',{'deepSuperficial'}); % after CellExplorar
         
+=======
+    cell_metrics = ProcessCellMetrics('session', session,'forceReload',true,'excludeIntervals',excludePulsesIntervals,'excludeMetrics',{'deepSuperficial'}); % after CellExplorar
+    
+>>>>>>> 6eef9062174362565549fad26651d6be0f067c97
     getACGPeak('force',true);
 
     getAverageCCG('force',true);
