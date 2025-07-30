@@ -122,10 +122,6 @@ if length(excludeAnalysis) == 0
     excludeAnalysis = num2str(excludeAnalysis);
 end
 excludeAnalysis = lower(excludeAnalysis);
-<<<<<<< HEAD
-=======
-keyboard; 
->>>>>>> 3d1f8563896a895ea2b477a79c568cd91581a661
 
 %% 1. Runs sessionTemplate
 if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))
