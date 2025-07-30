@@ -180,7 +180,7 @@ if ~isempty(digitalChannelsList)
     digitalIn = getDigitalIn;
     if ~isempty(digitalIn)
         for ii = 1:length(digitalChannelsList)
-            pulsesDigital.timestamps = [pulsesDigital.timestamps; digitalIn.ints{digitalChannelsList(ii)}'];
+            pulsesDigital.timestamps = [pulsesDigital.timestamps; digitalIn.ints{digitalChannelsList(ii)}];
             pulsesDigital.digitalChannelsList = [pulsesDigital.digitalChannelsList; [ones(size(digitalIn.ints{digitalChannelsList(ii)},2),1) * digitalChannelsList(ii)]];
         end
     end
@@ -203,7 +203,7 @@ pulses.isDigital = [zeros(size(pulsesAnalog.analogChannelsList)); ones(size(puls
 % restrict_pulses
 status = InIntervals(pulses.timestamps(:,1),restrict_ints);
 pulses.timestamps = pulses.timestamps(status,:);
-pulses.channel = pulses.channel(status,:);
+ pulses.channel = pulses.channel(status,:);
 pulses.analogChannelsList = pulses.analogChannelsList(status,:);
 pulses.digitalChannelsList = pulses.digitalChannelsList(status,:);
 pulses.duration = pulses.duration(status,:);

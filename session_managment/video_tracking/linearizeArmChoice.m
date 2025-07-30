@@ -146,14 +146,18 @@ if editLOI
     save([basepath filesep 'virtualMaze.mat'],'maze');
 end
 
-if strcmpi(tracking.description,'DeepLabCut')
+if strcmpi(tracking.description,'DeepLabCut') || strcmpi(tracking.description,'TMaze')
+    % eCB maze
      linMazeCont =    [0   58  ... % steam 
                  98       ... % r turn
                  168      ... % r arm
                  226      ... % steam again
                  266      ... % l turn
                  336];         % l arm   
+elseif strcmpi(tracking.description,'TMaze2')
+    % uLED maze
 else
+    % Buzsaki's lab maze
     linMazeCont =    [0   50  ... % steam 
                  85       ... % r turn
                  135      ... % r arm
