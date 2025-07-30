@@ -23,7 +23,7 @@ addParameter(p,'doPlot',true,@islogical);
 addParameter(p,'alpha',0.01,@isnumeric); 
 addParameter(p,'save_as','functionalConnectivity',@ischar); 
 addParameter(p,'savemat',true,@islogical); 
-addParameter(p,'ccg_win ',[-10 10],@isnumerictype); 
+addParameter(p,'ccg_win',[-10 10], @isnumeric); 
         
 parse(p,varargin{:})
 
@@ -38,6 +38,7 @@ doPlot = p.Results.doPlot;
 alpha = p.Results.alpha;
 save_as = p.Results.save_as;
 savemat = p.Results.savemat;
+ccg_win = p.Results.ccg_win;
 
 % 
 prevPath = pwd;
@@ -192,10 +193,16 @@ switch lower(method)
     glm_cond_p = nan(nCols, nCols);
     glm_cond_pseudoR2 = nan(nCols, nCols);
     glm_cond_deviance = nan(nCols, nCols);
+    warning('off', 'stats:glmfit:IterationLimit');
+    warning('off', 'stats:glmfit:IllConditioned');
 
+    % Fit with higher iteration limit
+    opts = statset('glmfit');
+    opts.MaxIter = 1000;
+    fprintf('\n');
     for j = 1:nCols
         Y = spikemat.data(:, j);  % target neuron
-
+        fprintf('\rComputing GLM: neuron %d of %d\n', j, nCols);
         for i = 1:nCols
             if i == j
                 continue;  % skip self-pairs
@@ -210,11 +217,18 @@ switch lower(method)
             z = sum(spikemat.data(:, exclude), 2);
 
             % Design matrix: predictors [x, z]
-            X = zscore([x z]);  % ✅ Apply zscore here
+            X = zscore([x z]);  % Apply zscore here
+            keep = std(X) > 1e-8;
+            X = X(:, keep);
 
             try
                 % Fit null model (intercept only)
-                [~, dev_null] = glmfit(ones(size(Y)), Y, 'poisson');
+                try
+                    [~, dev_null] = glmfit(ones(size(Y)), Y, 'poisson', 'Options', opts);
+                catch
+                    dev_null = NaN;
+                    warning('Null model failed for neuron %d', jj);
+                end
 
                 % Fit full model with predictors x and z
                 [b, dev, stats] = glmfit(X, Y, 'poisson');
@@ -226,17 +240,21 @@ switch lower(method)
                 glm_cond_deviance(i, j) = dev;
 
             catch ME
+                fprintf('\n');
                 warning('Conditional GLM failed for i = %d → j = %d: %s', i, j, ME.message);
+                fprintf('\n');
             end
         end
     end
-
+    fprintf('\n');
     % Store in output struct
     functional_connectivity.values = glm_cond_mat;
     functional_connectivity.p = glm_cond_p;
     functional_connectivity.pseudoR2 = glm_cond_pseudoR2;
     functional_connectivity.deviance = glm_cond_deviance;
     functional_connectivity.direction = 'i_to_j';
+    warning('on', 'stats:glmfit:IterationLimit');
+    warning('on', 'stats:glmfit:IllConditioned');
     
     case 'te'
 
@@ -436,43 +454,10 @@ if doPlot
             mkdir('SummaryFigures');
             exportgraphics(gcf,['SummaryFigures\' save_as '_' method '.png']);
         
-        case {'glm', 'glm_conditional'}
+        case {'glm', 'glm_conditional', 'te'}
             figure
             subplot(1,2,1)
             plotCorrMat(functional_connectivity.cell_families_conn_avg, functional_connectivity.cell_families_conn_p,'minPvalue', 1E-20,'maxPvalue',0.1, 'area_factor', 7,...
-            'Y_variablesNames', functional_connectivity.cell_families,...
-            'X_variablesNames', functional_connectivity.cell_families, 'p_value_threshold', 0.0001, 'inAxis', true);   
-            caxis([-0.05 .05]);
-            axis square
-            set(gca, 'TickLabelInterpreter', 'none');
-            
-            x_axis = functional_connectivity.cell_families;
-            avg = functional_connectivity.cell_families_conn_avg;
-            colors = getColors(functional_connectivity.cell_families);
-            G = digraph(avg);
-            subplot(1,2,2)
-            h = plot(G, 'Layout', 'layered'); % force circle
-            weights = G.Edges.Weight;
-            maxAbsWeight = max(abs(weights));
-            normalizedWeights = (weights + maxAbsWeight) / (2 * maxAbsWeight); % Centered around 0
-            normalizedWeights(normalizedWeights<0) = 0; normalizedWeights(normalizedWeights>1) = 1;
-            cmap = colormap(flip(brewermap(100,'RdYlBu'))); % 
-            edgeColors = cmap(round(normalizedWeights * 99) + 1, :);
-            h.EdgeColor = edgeColors;
-            h.LineWidth = 3; % 5 * abs(weights) / max(abs(weights));
-            h.NodeColor = colors; % ''; %  x_axis'
-            h.NodeLabel = functional_connectivity.cell_families; % ''; %  x_axis'
-            h.EdgeAlpha = 0.8;
-            h.MarkerSize = 8;
-            h.ArrowSize = 15;
-            axis off
-
-            mkdir('SummaryFigures');
-            exportgraphics(gcf,['SummaryFigures\' save_as '_' method '.png']);
-        case 'te'
-            figure
-            subplot(1,2,1)
-            plotCorrMat(functional_connectivity.cell_families_conn_avg, functional_connectivity.cell_families_conn_p,'minPvalue', 1E-20,'maxPvalue',0.1, 'area_factor', 20,...
             'Y_variablesNames', functional_connectivity.cell_families,...
             'X_variablesNames', functional_connectivity.cell_families, 'p_value_threshold', 0.0001, 'inAxis', true);   
             % caxis([-0.05 .05]);
@@ -518,7 +503,7 @@ if doPlot
             % Red como grafo
             x_axis = functional_connectivity.cell_families;
             avg = functional_connectivity.cell_families_conn_avg;
-            z_scores = functional_connectivity.cell_families_conn_avg;  % puedes poner otra cosa si lo agrupas
+            z_scores = functional_connectivity.cell_families_conn_avg;  % 
 
             colors = getColors(x_axis);
             G = digraph(avg);  %
