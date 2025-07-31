@@ -16,6 +16,7 @@ function [cell_types, cell_classification_stats, cell_metrics, cell_subtypes] = 
     addParameter(p,'score_cut_off',.70,@isnumeric);
     addParameter(p,'imposeCellExplorerPyr',true);
     addParameter(p,'ripples_psth',[],@isstruct);
+    addParameter(p,'force',false,@logical);
     
     parse(p,varargin{:});
     
@@ -27,6 +28,7 @@ function [cell_types, cell_classification_stats, cell_metrics, cell_subtypes] = 
     score_cut_off = p.Results.score_cut_off;
     imposeCellExplorerPyr = p.Results.imposeCellExplorerPyr;
     ripples_psth = p.Results.ripples_psth;
+    force = p.Results.force;
 
     %% Collect data
     previousPath = pwd;
@@ -34,6 +36,14 @@ function [cell_types, cell_classification_stats, cell_metrics, cell_subtypes] = 
 
     if isempty(cell_metrics)
         cell_metrics = loadCellMetrics;
+    end
+
+    if isfield(cell_metrics,'ground_truth_classification') && force == false
+        disp('Cell class already estimated! Returning from cell_metrics...');
+        cell_types = cell_metrics.ground_truth_classification.cell_types;
+        cell_subtypes = cell_metrics.ground_truth_classification.cell_subtypes;
+        cell_classification_stats = cell_metrics.ground_truth_classification.cell_classification_stats;
+        return
     end
     
     modelType = lower(modelType);
@@ -50,6 +60,10 @@ function [cell_types, cell_classification_stats, cell_metrics, cell_subtypes] = 
                 thetamod_r = thetaPhaseModulation.phasestats.r';
             else
                 thetamod_r = thetaPhaseModulation';
+            end
+
+            if size(thetamod_r,1) > size(thetamod_r,2)
+                thetamod_r = thetamod_r';
             end
             
             % get model and features

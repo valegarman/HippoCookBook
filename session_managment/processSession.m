@@ -42,9 +42,10 @@ addParameter(p,'analog_optogenetic_channels',[],@isnumeric);
 addParameter(p,'promt_hippo_layers',true,@islogical);
 addParameter(p,'manual_analog_pulses_threshold',false,@islogical);
 addParameter(p,'bazler_ttl_channel',[],@isnumeric);
-addParameter(p,'leftArmTtl_channel',[],@isnumeric)
-addParameter(p,'rightArmTtl_channel',[],@isnumeric)
-addParameter(p,'homeDelayTtl_channel',[],@isnumeric)
+addParameter(p,'leftArmTtl_channel',[],@isnumeric);
+addParameter(p,'rightArmTtl_channel',[],@isnumeric);
+addParameter(p,'homeDelayTtl_channel',[],@isnumeric);
+addParameter(p,'dlc_ttl_channel',[],@isnumeric);
 addParameter(p,'tracking_pixel_cm',0.1149,@isnumeric);
 addParameter(p,'excludeAnalysis',[]); % 
 addParameter(p,'profileType','hippocampus',@ischar); % options, 'hippocampus' and 'cortex'
@@ -79,6 +80,7 @@ manual_analog_pulses_threshold = p.Results.manual_analog_pulses_threshold;
 bazler_ttl_channel = p.Results.bazler_ttl_channel;
 leftArmTtl_channel = p.Results.leftArmTtl_channel;
 rightArmTtl_channel = p.Results.rightArmTtl_channel;
+dlc_ttl_channel = p.Results.dlc_ttl_channel;
 homeDelayTtl_channel = p.Results.homeDelayTtl_channel;
 tracking_pixel_cm = p.Results.tracking_pixel_cm;
 excludeAnalysis = p.Results.excludeAnalysis;
@@ -97,7 +99,6 @@ use_manual_ttls = p.Results.use_manual_ttls;
 % Deal with inputs
 prevPath = pwd;
 cd(basepath);
-keyboard;
 
 mkdir('SummaryFigures')
 if createLegacySummaryFolder
@@ -121,9 +122,6 @@ if length(excludeAnalysis) == 0
     excludeAnalysis = num2str(excludeAnalysis);
 end
 excludeAnalysis = lower(excludeAnalysis);
-keyboard; 
-
-keyboard;
 
 %% 1. Runs sessionTemplate
 if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))
@@ -146,6 +144,9 @@ if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))
             end
             if ~isfield(session.analysisTags,'bazler_ttl_channel')
                 session.analysisTags.bazler_ttl_channel = bazler_ttl_channel;
+            end
+            if ~isfield(session.analysisTags,'dlc_ttl_channel')
+                session.analysisTags.dlc_ttl_channel = dlc_ttl_channel;
             end
             
             if ~isfield(session.analysisTags,'leftArmTtl_channel')
@@ -276,8 +277,7 @@ end
 %% 7. Getting Hippocampal Layers
 if ~any(ismember(excludeAnalysis, {'7',lower('getHippocampalLayers')}))
     [hippocampalLayers] = getHippocampalLayers('force',true,'promt',promt_hippo_layers,'removeRipplesStimulation', false);
-        [hippocampalLayers2] = getHippocampalLayers('force',true,'promt',false,'removeRipplesStimulation', false, 'saveSummary',false,'saveMat',false);
-
+    %[hippocampalLayers2] = getHippocampalLayers('force',true,'promt',false,'removeRipplesStimulation', false, 'saveSummary',false,'saveMat',false);
 end
 
 %% 8. Check Brain Events
@@ -295,7 +295,6 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
 
     % 8.2 Ripples
     ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',false,'thresholds',rippleMasterDetector_threshold,'eventSpikeThreshold_shanks', 1); 
-
     psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10);
     % psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10,'restrict_to_manipulation',true);
     getSpikesRank('events','ripples');
@@ -307,12 +306,9 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
         warning('No fiber recording in this session...');
     end
 
-
     % 8.3 Theta intervals
-
     thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'channel',theta_epochs_channel);
 
-    
 end
 
 
@@ -346,9 +342,9 @@ if ~any(ismember(excludeAnalysis, {'10',lower('cellMetrics')}))
     end
 
     session = loadSession;
-
+        
     cell_metrics = ProcessCellMetrics('session', session,'forceReload',true,'excludeIntervals',excludePulsesIntervals,'excludeMetrics',{'deepSuperficial'}); % after CellExplorar
-    
+        
     getACGPeak('force',true);
 
     getAverageCCG('force',true);
@@ -361,13 +357,14 @@ if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
     try
         spikes = loadSpikes;
         %getSessionTracking('roiTracking','manual','forceReload',false,'LED_threshold',LED_threshold,'convFact',tracking_pixel_cm,'leftTTL_reward',leftArmTtl_channel,'rightTTL_reward',rightArmTtl_channel);
-        getSessionTracking('forceReload',false,'leftTTL_reward',leftArmTtl_channel,'rightTTL_reward',rightArmTtl_channel,'homeTtl',homeDelayTtl_channel,'tracking_ttl_channel',tracking_ttl_channel);
+        getSessionTracking('forceReload',true,'leftTTL_reward',leftArmTtl_channel,'rightTTL_reward',rightArmTtl_channel,'homeTtl',homeDelayTtl_channel,'dlc_ttl_channel',dlc_ttl_channel,...
+            'interpolate_misstrackings',false,'use_roi_led',false);
         try
             getSessionArmChoice('task','alternation','leftArmTtl_channel',leftArmTtl_channel,'rightArmTtl_channel',rightArmTtl_channel,'homeDelayTtl_channel',homeDelayTtl_channel,'use_manual_ttls',use_manual_ttls);
         catch
             warning('Performance in task was not computed! maybe linear maze?');
         end
-        behaviour = getSessionLinearize('forceReload',true);  
+        behaviour = getSessionLinearize('forceReload',true,'leftTtl',leftArmTtl_channel,'rightTtl',rightArmTtl_channel);  
         firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',true,'speedThresh',0.1);
         placeFieldStats = bz_findPlaceFields1D('firingMaps',firingMaps,'maxSize',.75,'sepEdge',0.03); %% ,'maxSize',.75,'sepEdge',0.03
         firingTrialsMap = firingMapPerTrial('force',true,'saveMat',true);

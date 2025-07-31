@@ -88,7 +88,9 @@ if exist([basepath filesep strcat(session.general.name, '.MergePoints.events.mat
     end
     cd(basepath)
 else
-    error('Missing MergePoints, quiting...')
+    warning('Missing MergePoints! Inside a subsession folder?' )
+    digitalIn = readDigitalIn_OE('fs',session.extracellular.sr);
+    return
 end
 
         
@@ -164,9 +166,6 @@ if exist('digitalInFolder','var')
         folders = [];
     end
 
-
-    %% Save variable digitalIn
-
     digitalIn = [];
 
     digitalIn.timestampsOn = tsOn;
@@ -175,7 +174,8 @@ if exist('digitalInFolder','var')
     digitalIn.dur = tsDur;
     digitalIn.intsPeriods = tsIntsPeriods;
     digitalIn.folders = folders;
-
+    
+    %% Save variable digitalIn
     if saveMat
         try
             save([basepath filesep session.general.name,'.digitalIn.events.mat'],'digitalIn');
@@ -183,8 +183,8 @@ if exist('digitalInFolder','var')
            save([basepath filesep session.general.name,'.digitalIn.events.mat'],'digitalIn','-v7.3'); 
         end
     end
-    
-else 
+else
     digitalIn = [];
+end
 
 end

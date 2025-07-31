@@ -62,7 +62,10 @@ addParameter(p,'leftTTL_reward',2,@isnumeric);
 addParameter(p,'rightTTL_reward',3,@isnumeric);
 addParameter(p,'homeTtl',4,@isnumeric);
 addParameter(p,'saveMat',true,@islogical);
-addParameter(p,'dlc_ttl_channel',5,@isnumeric); % by default, 5
+addParameter(p,'dlc_ttl_channel',[],@isnumeric); % by default, 5
+addParameter(p,'interpolate_misstrackings',true);
+addParameter(p,'use_dlc_likelihood',0.7); % Default > 70%
+addParameter(p,'use_roi_led',true);
 
 % addParameter(p,'RGBChannel',[],@isstr);
 
@@ -83,6 +86,9 @@ dlc_ttl_channel = p.Results.dlc_ttl_channel;
 leftTTL_reward = p.Results.leftTTL_reward;
 rightTTL_reward = p.Results.rightTTL_reward;
 homeTtl = p.Results.homeTtl;
+interpolate_misstrackings = p.Results.interpolate_misstrackings;
+use_dlc_likelihood = p.Results.use_dlc_likelihood;
+use_roi_led = p.Results.use_roi_led;
 
 %% Deal with inputs
 if ~isempty(dir([basepath filesep '*Tracking.Behavior.mat'])) && forceReload
@@ -105,6 +111,14 @@ if isempty(dlc_ttl_channel)
     end
 end
 cd(basepath)
+
+% Dealing with leftTTl_reward, rightTtl_reward
+if isempty(leftTTL_reward)
+    leftTTL_reward = session.analysisTags.leftArmTtl_channel;
+end
+if isempty(rightTTL_reward)
+    rightTTL_reward = session.analysisTags.rightArmTtl_channel;
+end
 
 if ~exist('aviFile') || isempty(aviFile)
     if ~isempty(dir([basepath filesep '*tracking*_crop.avi']))
@@ -148,22 +162,24 @@ end
 average_frame = mean(frames.r,3);                                          % get average frames
 
 % deal with the ROI for the LED
-cd(basepath); cd ..; upBasepath = pwd; pwd; cd ..; up_upBasepath = pwd;cd(basepath);
-if exist([basepath filesep 'roiLED.mat'],'file')
-    load([basepath filesep 'roiLED.mat'],'roiLED');
-elseif exist([upBasepath filesep 'roiLED.mat'],'file')
-    load([upBasepath filesep 'roiLED.mat'],'roiLED');
-    disp('ROI LED from master folder... copying locally...');
-    save([basepath filesep 'roiLED.mat'],'roiLED');
-elseif isempty(roiLED)
-    disp('Draw ROI for LED...');
-    h1 = figure;
-    imagesc(average_frame);
-    colormap gray;
-    roi = drawpolygon;
-    roiLED = [roi.Position; roi.Position(1,:)];
-    save([basepath filesep 'roiLED.mat'],'roiLED');
-    close(h1);
+if use_roi_led
+    cd(basepath); cd ..; upBasepath = pwd; pwd; cd ..; up_upBasepath = pwd;cd(basepath);
+    if exist([basepath filesep 'roiLED.mat'],'file')
+        load([basepath filesep 'roiLED.mat'],'roiLED');
+    elseif exist([upBasepath filesep 'roiLED.mat'],'file')
+        load([upBasepath filesep 'roiLED.mat'],'roiLED');
+        disp('ROI LED from master folder... copying locally...');
+        save([basepath filesep 'roiLED.mat'],'roiLED');
+    elseif isempty(roiLED)
+        disp('Draw ROI for LED...');
+        h1 = figure;
+        imagesc(average_frame);
+        colormap gray;
+        roi = drawpolygon;
+        roiLED = [roi.Position; roi.Position(1,:)];
+        save([basepath filesep 'roiLED.mat'],'roiLED');
+        close(h1);
+    end
 end
 
 % xMaze = [0 size(frames.r,2) * convFact];
@@ -186,10 +202,12 @@ h1 = figure;
 hold on
 imagesc(xMaze, yMaze,average_frame); colormap gray;
 set(gca,'YDir','normal', 'TickDir','out');
-p = plot(roiLED(:,1)*convFact, roiLED(:,2)*convFact,'r','LineWidth',2);
+if exist(roiLED,'var')
+    p = plot(roiLED(:,1)*convFact, roiLED(:,2)*convFact,'r','LineWidth',2);
+    legend(p,'LED ROI');
+end
 axis tight;
 axis ij;
-legend(p,'LED ROI');
 xlabel('Normalize/ cm');
 mkdir('Behavior');
 saveas(h1,'Behavior\MazeROI.png');
@@ -224,6 +242,14 @@ catch
 end
 
 %% Postprocessing of position
+if ~isempty(use_dlc_likelihood)
+    idx_likelihood = find(likelihood < 0.7);
+
+    x(idx_likelihood) = NaN;
+    y(idx_likelihood) = NaN;
+end
+
+
 pos = [x,y];
 pos = pos * convFact;                                   % cm or normalized
 art = find(sum(abs(diff(pos))>artifactThreshold,2))+1;  % remove artefacs as movement > 10cm/frame
@@ -234,15 +260,26 @@ xt = linspace(0,size(pos,1)/fs,size(pos,1));            % kalman filter
 art = find(sum(abs(diff([x y]))>artifactThreshold,2))+1;
 art = [art - 2 art - 1 art art + 1 art + 2];
 x(art(:)) = NaN; y(art(:)) = NaN;
-F = fillmissing([x y],'linear');
-x = F(:,1); y = F(:,2);
-
-if length(xt) > length(x)
-    xt(end) = [];
-elseif length(x) > length(xt)
-    x(end) = [];
-    y(end) = [];
+if interpolate_misstrackings
+    F = fillmissing([x y],'linear');
+    x = F(:,1); y = F(:,2);
 end
+
+difference = length(xt)-length(x);
+
+if difference > 0
+    xt(end-difference+1:end) = [];
+elseif difference < 0
+    x(end-difference+1:end) = [];
+    y(end-difference+1:end) = [];
+end
+
+% if length(xt) > length(x)
+%     xt(end) = [];
+% elseif length(x) > length(xt)
+%     x(end) = [];
+%     y(end) = [];
+% end
 
 % Get velocity
 [~,~,~,vx,vy,ax,ay] = KalmanVel(x,y,xt,2);
@@ -331,22 +368,25 @@ end
 
 if isempty(dlcTtl)
     digitalIn = getDigitalIn;
-    dlcTtl = digitalIn.timestampsOn{dlc_ttl_channel};
+    if ~isempty(dlc_ttl_channel)
+        dlcTtl = digitalIn.timestampsOn{dlc_ttl_channel};
+    end
 end
 
 
 % match dlc frames with ttl pulses
-if length(dlcTtl) == size(pul,2)
-    disp('Number of frames match!!');
-elseif length(dlcTtl) < size(pul,2)
-    disp('More blinks were detected than TTLs');
-elseif length(dlcTtl) > size(pul,2)
-    disp('More Ttls were detected than blinks');
+if ~isempty(dlc_ttl_channel)
+    if length(dlcTtl) == size(pul,2)
+        disp('Number of frames match!!');
+    elseif length(dlcTtl) < size(pul,2)
+        disp('More blinks were detected than TTLs');
+    elseif length(dlcTtl) > size(pul,2)
+        disp('More Ttls were detected than blinks');
+    end
 end
 
-if pul(1,1) < 1 || pul(1,1) > 1200 % if blinked light few than 1 second or more than 2 minutes, synchronize using the first TTl
+if isempty(pul) || pul(1,1) < 1 || pul(1,1) > 1200 % if blinked light few than 1 second or more than 2 minutes, synchronize using the first TTl
 
-    keyboard;
     warning('Problem with blinking led. Alingning timestamps to the first IR TTL...');
     
     f1 = figure;
@@ -361,16 +401,20 @@ if pul(1,1) < 1 || pul(1,1) > 1200 % if blinked light few than 1 second or more 
         disp('Mouse turned left first. Mark y-position for left IR sensor...');
         roiIR = drawpoint;
         idx = find((y <= (roiIR.Position(2)+0.75)) & (y >= (roiIR.Position(2)- 0.75)) & x<20); %% tentative left IR location
-        timediff = lReward-dlcTtl(idx(1));
-        % correct TTLs
-        dlcTtl = dlcTtl + timediff;
+        % timediff = lReward-dlcTtl(idx(1));
+        % % correct TTLs
+        % dlcTtl = dlcTtl + timediff;
+        timediff = lReward-xt(idx(1));
     else % If the animal turned right first, find the location based on the IR location
         disp('Mouse turned right first. Mark y-position for right IR sensor...');
         roiIR = drawpoint;
         idx = find((y <= (roiIR.Position(2)+0.01)) & (y >= (roiIR.Position(2)- 0.01)) & x>0.8); %% tentative right IR location
-        timediff = rReward-dlcTtl(idx(1));
-        % correct TTLs
-        dlcTtl = dlcTtl + timediff;
+        % timediff = rReward-dlcTtl(idx(1));
+        % % correct TTLs
+        % dlcTtl = dlcTtl + timediff;
+        timediff = rReward-xt(idx(1));
+
+
     end
     close(f1);
 end
@@ -396,8 +440,21 @@ tracking.position_tail2.x = x_tail2;
 tracking.position_tail2.y = y_tail2;
 tracking.position_tail2.likelihood = likelihood_tail2;
 
-tracking.description = 'DeepLabCut';
-tracking.timestamps = timestamps + digitalIn.timestampsOn{dlc_ttl_channel}(1) - pul(1,1);
+% We use the DLC model for description and for future use
+pattern = {'TMaze','TMaze2'};
+[pattern_position_start] = regexp(csv_file.name, pattern, 'start');
+
+if ~isempty(pattern_position_start{1}) && isempty(pattern_position_start{2})
+    tracking.description = pattern{1};
+elseif ~isempty(pattern_position_start{2})
+    tracking.description = pattern{2};
+end
+
+if ~isempty(dlc_ttl_channel)
+    tracking.timestamps = xt + digitalIn.timestampsOn{dlc_ttl_channel}(1) - pul(1,1);
+else
+    tracking.timestamps = xt + timediff;
+end
 tracking.originalTimestamps = [];
 tracking.folder = fbasename;
 tracking.sync.sync = sync;
