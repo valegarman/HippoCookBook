@@ -259,3 +259,5 @@ camk13_250721_sess30,camk13,camk13\camk13_250721_sess30,neural3,c57b1/6,camkii/a
 camk13_250618_sess5,camk13,camk13\camk13_250618_sess5,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze linear maze,22,CA1sp,uLEDiscotheque ReactInh
 camk13_250702_sess13,camk13,camk13\camk13_250702_sess13,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",tmaze,21,CA1sp,uLEDiscotheque LightInInh
 camk13_250717_sess28,camk13,camk13\camk13_250717_sess28,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",no,23,CA1sp,uLEDiscotheque LightInInh
+astro6_250716_sess10,astro6,astro6\astro6_250716_sess10,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,27,CA1sp CA1so CA1sr CA1slm CA3 PTLp,Astrometry
+astro3_250605_sess6,astro3,astro3\astro3_250605_sess6,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,50,CA1sp CA1so CA1sr,Astrometry
