@@ -16,7 +16,7 @@ preprocessSession('basepath','D:\astro5\astro5_250710_sess4','analysisPath',[],'
 
 %% ASTRO6
 updateExpFolder_temp({'E:\astro6'},'F:\astro6');
-preprocessSession('basepath','F:\astro6\astro6_250711_sess5','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
+preprocessSession('basepath','C:\data\astro6\astro6_250716_sess10','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
 
 %% CANCER2
 updateExpFolder_temp({'E:\cancer2'},'D:\cancer2');

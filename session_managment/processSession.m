@@ -97,7 +97,6 @@ use_manual_ttls = p.Results.use_manual_ttls;
 % Deal with inputs
 prevPath = pwd;
 cd(basepath);
-keyboard;
 
 mkdir('SummaryFigures')
 if createLegacySummaryFolder
@@ -121,9 +120,6 @@ if length(excludeAnalysis) == 0
     excludeAnalysis = num2str(excludeAnalysis);
 end
 excludeAnalysis = lower(excludeAnalysis);
-keyboard; 
-
-keyboard;
 
 %% 1. Runs sessionTemplate
 if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))
@@ -276,7 +272,7 @@ end
 %% 7. Getting Hippocampal Layers
 if ~any(ismember(excludeAnalysis, {'7',lower('getHippocampalLayers')}))
     [hippocampalLayers] = getHippocampalLayers('force',true,'promt',promt_hippo_layers,'removeRipplesStimulation', false);
-        [hippocampalLayers2] = getHippocampalLayers('force',true,'promt',false,'removeRipplesStimulation', false, 'saveSummary',false,'saveMat',false);
+        % [hippocampalLayers2] = getHippocampalLayers('force',true,'promt',false,'removeRipplesStimulation', false, 'saveSummary',false,'saveMat',false);
 
 end
 
@@ -301,20 +297,14 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     getSpikesRank('events','ripples');
 
     % 8.4 Fiber ripple analysis
-<<<<<<< HEAD
-    % ripples_fiber = fiberPhotometryModulation([],'eventType','ripples');
-    ripples_fiber = fiberPhotometryModulation_temp([],'eventType','ripples');
-=======
     try
         ripples_fiber = fiberPhotometryModulation_temp([],'eventType','ripples');
     catch
         warning('No fiber recording in this session...');
     end
->>>>>>> 7d33c7832d81758d76728062bb5460925ccc0fcc
-
 
     % 8.3 Theta intervals
-
+    cd(basepath);
     thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'channel',theta_epochs_channel);
 
     

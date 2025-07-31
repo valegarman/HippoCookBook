@@ -26,9 +26,9 @@ saveMat = p.Results.saveMat;
 force = p.Results.force;
 
 %% In case already exists
-if ~isempty(dir([basepath filesep '*fiber_photometry.mat'])) & ~force
+if ~isempty(dir([basepath filesep '*FiberPhotometry.mat'])) & ~force
     disp('Fiber photometry already detected! Loading file.')
-    file = dir([basepath filesep '*fiber_photometry.mat']); 
+    file = dir([basepath filesep '*FiberPhotometry.mat']); 
     load(file.name)
     return;
 end
@@ -49,7 +49,7 @@ if exist([basepath filesep strcat(basename,'.MergePoints.events.mat')],'file')
             cd([basepath filesep MergePoints.foldernames{ii}]); %cd([basepath filesep sess(ii).name]);
             fprintf('Computing fiber photometry in %s folder \n',MergePoints.foldernames{ii});
             % tempFiber{count} = getFiberPhotometry();
-            tempFiber{count} = getFiberPhotometry_temp('force',force);
+            tempFiber{count} = getFiberPhotometry_temp_Nacho('force',true);
 
             fiberFolder(count) = ii;
             count = count +1;
@@ -102,11 +102,11 @@ if count > 1 % if fiber recording
     red_fpa.f = []; red_fpa.fSmoothed = []; red_fpa.fNormalized = []; red_fpa.f0 = []; red_fpa.f1 = []; red_fpa.duration = []; red_fpa.area = []; red_fpa.normalizedArea = []; red_fpa.peakIds = []; red_fpa.peakLabels = []; red_fpa.peakCounts = []; red_fpa.maskSessions_peaks = [];
     
     
-    fiber_red_PP.iso = []; fiber_red_PP.red=[]; fiber_red_PP.iso_clean=[]; fiber_red_PP.red_clean=[]; fiber_red_PP.iso_detrended=[]; fiber_red_PP.red_detrended=[]; fiber_red_PP.red_corrected=[]; 
-    fiber_red_PP.red_dFF=[]; fiber_red_PP.red_dFF_Z=[]; fiber_red_PP.red_dFF_Smoothed=[]; fiber_red_PP.red_dFF_Smoothed_Z=[]; 
+    fiber_iso_PP.iso = []; fiber_iso_PP.iso_clean=[]; fiber_iso_PP.iso_detrended=[]; fiber_iso_PP.iso_dFF=[]; fiber_iso_PP.iso_dFF_Z=[]; fiber_iso_PP.iso_dFF_Smoothed=[]; fiber_iso_PP.iso_dFF_Smoothed_Z=[];
+    
+    fiber_red_PP.red=[]; fiber_red_PP.red_clean=[]; fiber_red_PP.red_detrended=[]; fiber_red_PP.red_corrected=[]; fiber_red_PP.red_dFF=[]; fiber_red_PP.red_dFF_Z=[]; fiber_red_PP.red_dFF_Smoothed=[]; fiber_red_PP.red_dFF_Smoothed_Z=[]; 
 
-    fiber_green_PP.iso = []; fiber_green_PP.green=[]; fiber_green_PP.iso_clean=[]; fiber_green_PP.green_clean=[]; fiber_green_PP.iso_detrended=[]; fiber_green_PP.green_detrended=[]; fiber_green_PP.green_corrected=[]; 
-    fiber_green_PP.green_dFF=[]; fiber_green_PP.green_dFF_Z=[]; fiber_green_PP.green_dFF_Smoothed=[]; fiber_green_PP.green_dFF_Smoothed_Z=[]; 
+    fiber_green_PP.green=[];  fiber_green_PP.green_clean=[];  fiber_green_PP.green_detrended=[]; fiber_green_PP.green_corrected=[]; fiber_green_PP.green_dFF=[];  fiber_green_PP.green_dFF_Z=[];  fiber_green_PP.green_dFF_Smoothed=[];  fiber_green_PP.green_dFF_Smoothed_Z=[]; 
 
     for ii = 1:size(tempFiber,2)
 
@@ -149,12 +149,9 @@ if count > 1 % if fiber recording
             red_fpa.maskSessions_peaks = [red_fpa.maskSessions_peaks; ones(length(tempFiber{ii}.red_fpa.peakIds),1)*ii];
 
            
-            % Red preprocessing NeuCompLab:
-            fiber_red_PP.iso=[fiber_red_PP.iso; tempFiber{ii}.red_PP.iso];
+            % Red preprocessing NeuCompLab:           
             fiber_red_PP.red=[fiber_red_PP.red; tempFiber{ii}.red_PP.channel];
-            fiber_red_PP.iso_clean=[fiber_red_PP.iso_clean; tempFiber{ii}.red_PP.iso_clean];
             fiber_red_PP.red_clean=[fiber_red_PP.red_clean; tempFiber{ii}.red_PP.channel_clean];            
-            fiber_red_PP.iso_detrended=[fiber_red_PP.iso_detrended; tempFiber{ii}.red_PP.iso_detrended];
             fiber_red_PP.red_detrended=[fiber_red_PP.red_detrended; tempFiber{ii}.red_PP.channel_detrended];           
             fiber_red_PP.red_corrected=[fiber_red_PP.red_corrected; tempFiber{ii}.red_PP.channel_corrected];           
             fiber_red_PP.red_dFF=[fiber_red_PP.red_dFF; tempFiber{ii}.red_PP.channel_dFF];            
@@ -200,17 +197,24 @@ if count > 1 % if fiber recording
 
 
             % Green preprocessing NeuCompLab:
-            fiber_green_PP.iso=[fiber_green_PP.iso; tempFiber{ii}.green_PP.iso];
-            fiber_green_PP.green=[fiber_green_PP.green; tempFiber{ii}.green_PP.channel];
-            fiber_green_PP.iso_clean=[fiber_green_PP.iso_clean; tempFiber{ii}.green_PP.iso_clean];
-            fiber_green_PP.green_clean=[fiber_green_PP.green_clean; tempFiber{ii}.green_PP.channel_clean];            
-            fiber_green_PP.iso_detrended=[fiber_green_PP.iso_detrended; tempFiber{ii}.green_PP.iso_detrended];
+            
+            fiber_green_PP.green=[fiber_green_PP.green; tempFiber{ii}.green_PP.channel];            
+            fiber_green_PP.green_clean=[fiber_green_PP.green_clean; tempFiber{ii}.green_PP.channel_clean];                     
             fiber_green_PP.green_detrended=[fiber_green_PP.green_detrended; tempFiber{ii}.green_PP.channel_detrended];           
             fiber_green_PP.green_corrected=[fiber_green_PP.green_corrected; tempFiber{ii}.green_PP.channel_corrected];           
             fiber_green_PP.green_dFF=[fiber_green_PP.green_dFF; tempFiber{ii}.green_PP.channel_dFF];            
             fiber_green_PP.green_dFF_Z=[fiber_green_PP.green_dFF_Z; tempFiber{ii}.green_PP.channel_dFF_Z];     
             fiber_green_PP.green_dFF_Smoothed=[fiber_green_PP.green_dFF_Smoothed; tempFiber{ii}.green_PP.channel_dFF_Smoothed];  
             fiber_green_PP.green_dFF_Smoothed_Z=[fiber_green_PP.green_dFF_Smoothed_Z; tempFiber{ii}.green_PP.channel_dFF_Smoothed_Z];
+
+            % Green preprocessing NeuCompLab:
+            fiber_iso_PP.iso=[fiber_iso_PP.iso; tempFiber{ii}.green_PP.iso];
+            fiber_iso_PP.iso_clean=[fiber_iso_PP.iso_clean; tempFiber{ii}.green_PP.iso_clean];
+            fiber_iso_PP.iso_detrended=[fiber_iso_PP.iso_detrended; tempFiber{ii}.green_PP.iso_detrended];
+            fiber_iso_PP.iso_dFF=[fiber_iso_PP.iso_dFF; tempFiber{ii}.green_PP.iso_dFF];
+            fiber_iso_PP.iso_dFF_Z=[fiber_iso_PP.iso_dFF_Z; tempFiber{ii}.green_PP.iso_dFF_Z];
+            fiber_iso_PP.iso_dFF_Smoothed=[fiber_iso_PP.iso_dFF_Smoothed; tempFiber{ii}.green_PP.iso_dFF_Smoothed];
+            fiber_iso_PP.iso_dFF_Smoothed_Z=[fiber_iso_PP.iso_dFF_Smoothed_Z; tempFiber{ii}.green_PP.iso_dFF_Smoothed_Z];
 
         end
   
@@ -232,6 +236,7 @@ if count > 1 % if fiber recording
         fiber.green = green; 
         fiber.green_fpa = green_fpa;        
         fiber.green_PP=fiber_green_PP;
+        fiber.iso_PP=fiber_iso_PP;
     end
 
     fiber.sr = sr{1};
