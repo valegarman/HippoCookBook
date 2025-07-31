@@ -69,7 +69,10 @@ all_nw = ismember(cell_metrics.putativeCellType,'Narrow Interneuron');
 all_ww = ismember(cell_metrics.putativeCellType,'Wide Interneuron');
 
 % opto responses
-optogenetic_responses = getOptogeneticResponse;
+try
+    optogenetic_responses = getOptogeneticResponse;
+catch
+end
 spikes = loadSpikes;
 winSizePlot_opto = [-.1 .5];
 
