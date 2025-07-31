@@ -50,8 +50,8 @@ addParameter(p,'editLOI',false,@islogical);
 addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'forceReload',false,@islogical);
 addParameter(p,'verbose',false,@islogical);
-addParameter(p,'leftTtl',3,@isnumeric);
-addParameter(p,'rightTtl',4,@isnumeric);
+addParameter(p,'leftTtl',[],@isnumeric);
+addParameter(p,'rightTtl',[],@isnumeric);
 
 parse(p,varargin{:});
 tracking = p.Results.tracking;
@@ -108,7 +108,8 @@ else
     scatter(x,y,3,t,'filled','MarkerEdgeColor','none','MarkerFaceAlpha',.5); colormap jet
     caxis([t(1) t(end)]);
     xlim([xMaze]); ylim([yMaze]);
-    title('Draw a line (hold cursor) following animal trajectory (top to bottom)...','FontWeight','normal');
+    % title('Draw a line (hold cursor) following animal trajectory (top to bottom)...','FontWeight','normal');
+    title('Draw a line (hold cursor) following animal trajectory (left to right)...','FontWeight','normal');
     maze = drawline;
     maze = [maze.Position];
     editLOI = 'true';
@@ -133,7 +134,17 @@ if editLOI
     save([basepath filesep 'virtualMaze.mat'],'maze');
 end
 
-linMazeCont = [0   110]; % left to right
+if strcmpi(tracking.description,'DeepLabCut') || strcmpi(tracking.description,'TMaze')
+    % eCB maze
+
+elseif strcmpi(tracking.description,'TMaze2')
+    % uLED maze
+    linMazeCont = [0   70]; % left to right
+else
+    linMazeCont = [0   110]; % left to right
+
+end
+
              
 % gets steps along the maze
 dMaze = diff(maze,1);
@@ -160,6 +171,16 @@ try
     cd(basepath)
 end
 digitalIn = getDigitalIn('fs',session.extracellular.sr);
+
+if isempty(leftTtl) 
+    leftTtl = session.analysisTags.leftArmTtl_channel;
+end
+
+if isempty(rightTtl)
+    rightTtl = session.analysisTags.rightArmTtl_channel;
+end
+
+
 if length(digitalIn.timestampsOn{leftTtl}) <  length(digitalIn.timestampsOn{rightTtl})- 5 || length(digitalIn.timestampsOn{leftTtl}) >  length(digitalIn.timestampsOn{rightTtl})+ 5
     warning('Malfunctioning sensor!! Trying to fix');
     if length(digitalIn.timestampsOn{leftTtl}) <  length(digitalIn.timestampsOn{rightTtl})- 5

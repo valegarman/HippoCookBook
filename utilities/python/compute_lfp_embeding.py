@@ -8,40 +8,67 @@ from scipy.stats import zscore
 from joblib import load
 import sys, os
 from pathlib import Path
+import argparse
+
 
 # --- Configure paths ---
-folder = 'C:\\Users\\mvalero\\OneDrive - imim.es\\Documents\\Code\\HippoCookBook\\utilities\\python\\'
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--folder', required=True, help='Path to the folder containing .mat files')
+parser.add_argument('--path', required=True, help='Path to Hipp-LFP-embedding folder')
+args = parser.parse_args()
+
+folder = args.folder
+path = args.path
+print(["this is the path:", path])
 fnames = ['wave_ripple_mean', 'wave_theta_mean']  # .mat filenames (without extension)
 
 # --- Load and preprocess LFP waveform data ---
 data = {}
 for fname in fnames:
-    path = f'{folder}{fname}.mat'
-    data_ = loadmat(path)[fname]
+    filepath = os.path.join(folder, f'{fname}.mat')
+    data_ = loadmat(filepath)[fname]
     key = 'sw' if 'ripple' in fname else 'theta'
     data[key] = data_
 
+
 # Pad ripple waveform with one sample at beginning and end
 data['sw'] = np.hstack((
-    data['sw'][:, 0][:, None],
-    data['sw'],
-    data['sw'][:, -1][:, None]
-))
+     data['sw'][:, 0][:, None],
+     data['sw'],
+     data['sw'][:, -1][:, None]
+ ))
+#data['sw'] = data['sw'].T            # now shape (627, 64) - 64 features
+#data['theta'] = data['theta'].T      # now shape (187, 64)
+
 
 # Z-score across samples for each channel
 for key in data:
     data[key] = zscore(data[key], axis=1)
 
 # --- Load embedding models and project data ---
-path = 'C:\\Users\\mvalero\\OneDrive - imim.es\\Documents\\Code\\Hipp-LFP-embedding'
+
 sys.path.append(os.path.abspath(path))
 from hipp_embedding import embedding, trajectory
 
-pca_model = load(f'{path}/models/pca')
+pca_model_single = load(f'{path}/models/pca')
+pca_model = {
+    'sw': pca_model_single,
+    'theta': pca_model_single
+}
 embedding_model = load(f'{path}/models/iso')
+
+# Debug info: stampa le shape dei dati e delle PCA
+print("Shape di data['sw']:", data['sw'].shape)
+print("Shape di data['theta']:", data['theta'].shape)
+
+print("Numero componenti PCA sw:", pca_model['sw'].n_components_)
+print("Numero componenti PCA theta:", pca_model['theta'].n_components_)
+
 projections = embedding.project(data, pca_model, embedding_model)
 
 # --- Define the anatomical trajectory and identify labeled control points ---
+
 train_data_path = f'{path}/data/trajectory_points.npz'
 traj, ctrlpts_proj, ctrlpts_labels = trajectory.define_trajectory(pca_model, embedding_model, input_data=train_data_path)
 
@@ -97,8 +124,13 @@ plt.axis('equal')
 plt.xlabel('Feature component 2', fontsize=13)
 plt.ylabel('Feature component 1', fontsize=13)
 plt.tight_layout()
-plt.savefig("lfp_embedding_2d_projection.png", dpi=300)
+
+outpath1 = os.path.join(folder, "lfp_embedding_2d_projection.png")
+plt.savefig(outpath1, dpi=300)
+print(f"Saved: {outpath1}")
+
 plt.close()
+
 
 # --- Compute linearized coordinate along anatomical axis ---
 precision = 2

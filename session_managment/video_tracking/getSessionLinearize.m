@@ -27,8 +27,8 @@ addParameter(p,'forceReload',false,@islogical)
 addParameter(p,'verbose',false,@islogical)
 addParameter(p,'saveMat',true,@islogical)
 addParameter(p,'maze',[],@ischar)
-addParameter(p,'leftTtl',3,@isnumeric)
-addParameter(p,'rightTtl',4,@isnumeric)
+addParameter(p,'leftTtl',[],@isnumeric)
+addParameter(p,'rightTtl',[],@isnumeric)
 
 parse(p,varargin{:});
 forceReload = p.Results.forceReload;
@@ -102,13 +102,13 @@ if size(tracking.events.subSessions,1) == size(efields,1)
     disp('Correctiong timestamps for session recording...');
     for ii = 1:size(efields,1)
         preRec = tracking.events.subSessions(ii,1);
-        timestamps = [timestamps; behaviorTemp.(efields{ii}).timestamps + preRec];
+        timestamps = [timestamps; behaviorTemp.(efields{ii}).timestamps' + preRec];
         x = [x; behaviorTemp.(efields{ii}).position.x];
         y = [y; behaviorTemp.(efields{ii}).position.y];
         lin = [lin; behaviorTemp.(efields{ii}).position.lin];
         armMask = [armMask; behaviorTemp.(efields{ii}).masks.arm];
-        trialMask = [trialMask; behaviorTemp.(efields{ii}).masks.trials];
-        recMask = [recMask; ii * ones(size(behaviorTemp.(efields{ii}).masks.trials))];
+        trialMask = [trialMask; behaviorTemp.(efields{ii}).masks.trials'];
+        recMask = [recMask; ii * ones(size(behaviorTemp.(efields{ii}).masks.trials'))];
         startPoint = [startPoint; behaviorTemp.(efields{ii}).events.startPoint + preRec];
         rReward = [rReward; behaviorTemp.(efields{ii}).events.rReward + preRec];
         lReward = [lReward; behaviorTemp.(efields{ii}).events.lReward + preRec];
