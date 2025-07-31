@@ -24,6 +24,4 @@ for ii = 3:length(sessionsTable.SessionName)
     % end
 end
 
-spikes = loadSpikes;
-cell_metrics = ProcessCellMetrics; % after CellExplorar
-fc = getFunctionalConnectivity('method', 'glm', 'savemat', true, 'n_shuffles', 100);
+fc_pre = getFunctionalConnectivity('method', 'glm', 'savemat', false, 'n_shuffles', 10);

@@ -112,6 +112,8 @@ switch lower(method)
         disp('... glm...');
         nCols = size(spikemat.data, 2);
         T = size(spikemat.data, 1);
+        warning('off', 'stats:glmfit:IterationLimit');
+        warning('off', 'stats:glmfit:IllConditioned');
         
         % Step 1: Select 10 random target neurons
         rng(1);  % for reproducibility
@@ -142,11 +144,14 @@ switch lower(method)
         glm_mat = nan(nCols, nCols);
         glm_p = nan(nCols, nCols);
         
+        fprintf('\n');
         for jj = 1:nCols
-            fprintf('Computing GLM: neuron %d of %d\n', jj, nCols);
+            fprintf('\rComputing GLM: neuron %d of %d', jj, nCols);
             predictorCells = ones(nCols, 1);
             predictorCells(jj) = 0;
-        
+            opts = statset('glmfit');
+            opts.MaxIter = 1000;
+
             X = spikemat.data(:, find(predictorCells));
             Y = spikemat.data(:, find(predictorCells == 0));
         
@@ -156,12 +161,14 @@ switch lower(method)
         
                 if ~isempty(selected)
                     X_sel = zscore(X(:, selected));
+                    keep = std(X_sel) > 1e-8;
+                    X_sel = X_sel(:, keep);
                    
                     % Fit null model (intercept only)
-                    [~, dev_null] = glmfit(ones(size(Y)), Y, 'poisson');
+                    [~, dev_null] = glmfit(ones(size(Y)), Y, 'poisson', 'Options', opts);
                     
                     % Fit full model
-                    [b_glm, dev, stats] = glmfit(X_sel, Y, 'poisson');
+                    [b_glm, dev, stats] = glmfit(X_sel, Y, 'poisson', 'Options', opts);
 
                     % Compute pseudo R²
                     glm_pseudoR2(jj) = 1 - (dev / dev_null);
@@ -185,6 +192,8 @@ switch lower(method)
         functional_connectivity.p = glm_p;
         functional_connectivity.deviance = glm_deviance;
         functional_connectivity.pseudoR2  = glm_pseudoR2;
+        warning('on', 'stats:glmfit:IterationLimit');
+        warning('on', 'stats:glmfit:IllConditioned');
     
     case 'glm_conditional'
     disp('... glm with conditional population covariate...');
@@ -202,7 +211,7 @@ switch lower(method)
     fprintf('\n');
     for j = 1:nCols
         Y = spikemat.data(:, j);  % target neuron
-        fprintf('\rComputing GLM: neuron %d of %d\n', j, nCols);
+        fprintf('\rComputing GLM: neuron %d of %d', j, nCols);
         for i = 1:nCols
             if i == j
                 continue;  % skip self-pairs
@@ -231,7 +240,7 @@ switch lower(method)
                 end
 
                 % Fit full model with predictors x and z
-                [b, dev, stats] = glmfit(X, Y, 'poisson');
+                [b, dev, stats] = glmfit(X, Y, 'poisson', 'Options', opts);
 
                 % Store results
                 glm_cond_mat(i, j) = b(2);              % β: effect of i on j
