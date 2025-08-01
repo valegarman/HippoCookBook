@@ -281,13 +281,7 @@ end
 
 %% 8. Check Brain Events
 if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
-    % Trying changes in detecUD_temp
     % 8.1 Up and downs
-    
-%     UDStates = detectUD('plotOpt',
-%     true,'forceDetect',true','NREMInts','all');[
-%     psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true);
-
     UDStates = detectUpsDowns('plotOpt', true,'forceDetect',true,'NREMInts','all','useparfor',true);
     psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true,'minNumberOfPulses',10,'restrict_to',restrict_ints);
     getSpikesRank('events','upstates');
