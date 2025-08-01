@@ -47,12 +47,12 @@ function [fiber_PP] = fiberPreprocessing_v2(fiber, channel , varargin)
 %       Output: channel_corrected
 %          Note: if iso subtraction worsenes the signal (signal is now more correlated to the isosbestic than before), then this step is skipped, so that the signal detrended and signal corrected are equivalent
 %   5) Compute dF/F, dF/F z-score, dF/F smoothed and dF/F smoothed z-score - computes dF/F as (f-f0)/f0 where f0 is a low percentile of data, and dF/F smoothed as a moving mean of a defined window    
-%       Input: channel_corrected
-%       Output: channel_dFF, channel_dFF_Z, channel_dFF_Smoothed, channel_dFF_Smoothed_Z
+%       Input: iso_detrended, channel_corrected
+%       Output: iso_dFF, iso_dFF_Z, iso_dFF_Smoothed, iso_dFF_Smoothed_Z, channel_dFF, channel_dFF_Z, channel_dFF_Smoothed, channel_dFF_Smoothed_Z
 % 
 % 
 % Developed by Ignacio del Castillo and Mario Martín. Neural Computational Lab.
-% Last update: 15th of May 2025
+% Last update: 17th of June 2025
 
 
 % Default parameters
@@ -149,13 +149,16 @@ Iso_out_val=Out_val_IC{1};
 channel_out=Out_ID_IC{2};
 channel_out_values=Out_val_IC{2};
 channel_out_errors=zeros(size(channel_out));
-for i=1:length(channel_out)
-  Current=channel_out(i);
-  I_C_diff=abs(Iso_out-Current);
-  channel_out_errors(i)=min(I_C_diff)>round(0.25*samplingRate);
+if length(Iso_out) >= length(channel_out) 
+    for i=1:length(channel_out)
+      Current=channel_out(i);
+      I_C_diff=abs(Iso_out-Current);
+      channel_out_errors(i)=min(I_C_diff)>round(0.25*samplingRate);
+    end
+    channel_out(find(channel_out_errors))=[];
+    channel_out_values(find(channel_out_errors))=[];
 end
-channel_out(find(channel_out_errors))=[];
-channel_out_values(find(channel_out_errors))=[];
+
 
 
 
@@ -211,13 +214,13 @@ substracted=toSubstract-Iso_amplified; %now that both signals are in similar sca
 [r, p]=corr(iso_detrended,toSubstract); %assess correlation of iso and the signal before the substraction
 [r2, p2]=corr(iso_detrended,substracted); %assess correlation of iso and the signal after the substraction
 
-if abs(r2)<abs(r) %if the correlation is lower after the susbtraction (= correction improved data), then keep the substracted signal
+if abs(r2)<3*abs(r) %if the correlation is lower after the susbtraction (= correction improved data), then keep the substracted signal
    channel_corrected=substracted;
    disp('correction: true')
-   if prctile(channel_corrected, range_dff) < 0 %the iso substraction might turn the signal negative, so in the next step when computing a pctl that has a negative value and using it to divide to get DFF, it inverts the signal. With this I solve it
+   % if prctile(channel_corrected, range_dff) < 0 %the iso substraction might turn the signal negative, so in the next step when computing a pctl that has a negative value and using it to divide to get DFF, it inverts the signal. With this I solve it
      channel_corrected_temp=channel_corrected;
      channel_corrected= channel_corrected_temp + (mean(channel_detrended)-mean(channel_corrected_temp)); 
-   end
+   % end
 else
    channel_corrected=toSubstract; %If substraction worsens the signal, then keep data without iso substraction
    disp('correction: false ==> channel corrected = channel detrended')
@@ -227,11 +230,22 @@ end
 %% 5- Compute dF/F, dF/F smoothed and z-scores
 % dF/F calculated as (F-Fo)/Fo, where F is each point of the trace and Fo a low percentil to set as baseline
 
-pctl_channel=prctile(channel_corrected, range_dff); %Find a Fo that falls in the lower side of the data but still in the data
-channel_dFF=(channel_corrected-pctl_channel)./pctl_channel; %compute DF/F using the Fo as baseline
-channel_dFF_Z=zscore(channel_dFF); %Obtain the Z-scores of dF/F
-channel_dFF_Smoothed=smoothdata(channel_dFF,'movmean',win_S); %Smooth dF/F     
-channel_dFF_Smoothed_Z=zscore(channel_dFF_Smoothed); %Obtain the z-scores of the smoothed DF/F
+
+pctl_iso=prctile(iso_detrended, range_dff); %Find a Fo that falls in the lower side of the data but still in the data
+iso_dFF=(iso_detrended-pctl_iso)./pctl_iso; %compute DF/F using the Fo as baseline
+iso_dFF_Z=zscore(iso_dFF); %Obtain the Z-scores of dF/F
+iso_dFF_Smoothed=smoothdata(iso_dFF,'movmean',win_S); %Smooth dF/F     
+iso_dFF_Smoothed_Z=zscore(iso_dFF_Smoothed); %Obtain the z-scores of the smoothed DF/F
+
+
+pctl_channel=prctile(channel_corrected, range_dff); 
+channel_dFF=(channel_corrected-pctl_channel)./pctl_channel; 
+channel_dFF_Z=zscore(channel_dFF); 
+channel_dFF_Smoothed=smoothdata(channel_dFF,'movmean',win_S);    
+channel_dFF_Smoothed_Z=zscore(channel_dFF_Smoothed); 
+
+
+
 
 
 %% 6- Saved data following lab convetion
@@ -246,9 +260,13 @@ fiber_PP.channel_clean=channel_clean;
 fiber_PP.iso_detrended=iso_detrended;
 fiber_PP.channel_detrended=channel_detrended;
 fiber_PP.channel_corrected=channel_corrected;
+fiber_PP.iso_dFF=iso_dFF;
 fiber_PP.channel_dFF=channel_dFF;
+fiber_PP.iso_dFF_Z=iso_dFF_Z;
 fiber_PP.channel_dFF_Z=channel_dFF_Z;
+fiber_PP.iso_dFF_Smoothed=iso_dFF_Smoothed;
 fiber_PP.channel_dFF_Smoothed=channel_dFF_Smoothed;
+fiber_PP.iso_dFF_Smoothed_Z=iso_dFF_Smoothed_Z;
 fiber_PP.channel_dFF_Smoothed_Z=channel_dFF_Smoothed_Z;
 
 % rec_name=[mousename '_' 'rec' num2str(rec) '_PP']; %set the name of each recording variable to be saved

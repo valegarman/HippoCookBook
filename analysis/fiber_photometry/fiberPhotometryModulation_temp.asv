@@ -230,16 +230,13 @@ for jj = 1:max(timestamps(:,2))
         red_smooth{jj}.responsecurve = [];
         red_normalized{jj}.responsecurve = [];
         red_PP{jj}.responsecurve = [];
-        disp('Processing red channel')
     end
     if isfield(fiber, 'green') 
         green{jj}.responsecurve = [];
         green_smooth{jj}.responsecurve = [];
         green_normalized{jj}.responsecurve = [];
         green_PP{jj}.responsecurve = [];
-        disp('Processing green channel')
     end
-
     times{jj} = [];
 
 
@@ -367,9 +364,9 @@ for jj = 1:max(timestamps(:,2))
     end 
     
     % GREEN FLUORESCENCE (eCB)
-    if isfield(fiber, 'green') 
+    if isfield(fiber, 'red') 
         % green
-        f_green_normalized_prctl20 = prctile(fiber.green_fpa.fNormalized,20);
+        f_green_normalized_prctl20 = prctile(fiber.red_fpa.fNormalized,20);
         
         for ii = 1:min(size(green{jj}.responsecurve))
             if numberOfPulses > minNumberOfPulses

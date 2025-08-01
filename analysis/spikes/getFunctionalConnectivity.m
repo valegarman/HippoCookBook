@@ -18,11 +18,12 @@ addParameter(p,'method','te',@ischar); % options are mi, glm, te
 addParameter(p,'restrict',[],@isnumeric); % ints to restrict to
 addParameter(p,'dt',0.1,@isnumeric); % 
 addParameter(p,'k',3,@isnumeric); % history length in bins, for transfer entropy
-addParameter(p,'n_shuffles',100,@isnumeric); 
+addParameter(p,'n_shuffles',1000,@isnumeric); 
 addParameter(p,'doPlot',true,@islogical); 
 addParameter(p,'alpha',0.01,@isnumeric); 
 addParameter(p,'save_as','functionalConnectivity',@ischar); 
 addParameter(p,'savemat',true,@islogical); 
+addParameter(p,'ccg_win',[-10 10], @isnumeric); 
         
 parse(p,varargin{:})
 
@@ -37,6 +38,7 @@ doPlot = p.Results.doPlot;
 alpha = p.Results.alpha;
 save_as = p.Results.save_as;
 savemat = p.Results.savemat;
+ccg_win = p.Results.ccg_win;
 
 % 
 prevPath = pwd;
@@ -110,6 +112,8 @@ switch lower(method)
         disp('... glm...');
         nCols = size(spikemat.data, 2);
         T = size(spikemat.data, 1);
+        warning('off', 'stats:glmfit:IterationLimit');
+        warning('off', 'stats:glmfit:IllConditioned');
         
         % Step 1: Select 10 random target neurons
         rng(1);  % for reproducibility
@@ -140,11 +144,14 @@ switch lower(method)
         glm_mat = nan(nCols, nCols);
         glm_p = nan(nCols, nCols);
         
+        fprintf('\n');
         for jj = 1:nCols
-            fprintf('Computing GLM: neuron %d of %d\n', jj, nCols);
+            fprintf('\rComputing GLM: neuron %d of %d', jj, nCols);
             predictorCells = ones(nCols, 1);
             predictorCells(jj) = 0;
-        
+            opts = statset('glmfit');
+            opts.MaxIter = 1000;
+
             X = spikemat.data(:, find(predictorCells));
             Y = spikemat.data(:, find(predictorCells == 0));
         
@@ -153,23 +160,111 @@ switch lower(method)
                 selected = find(B ~= 0);
         
                 if ~isempty(selected)
-                    X_sel = X(:, selected);
-                    [b_glm, dev, stats] = glmfit(X_sel, Y, 'poisson');
+                    X_sel = zscore(X(:, selected));
+                    keep = std(X_sel) > 1e-8;
+                    X_sel = X_sel(:, keep);
+                   
+                    % Fit null model (intercept only)
+                    [~, dev_null] = glmfit(ones(size(Y)), Y, 'poisson', 'Options', opts);
+                    
+                    % Fit full model
+                    [b_glm, dev, stats] = glmfit(X_sel, Y, 'poisson', 'Options', opts);
+
+                    % Compute pseudo R²
+                    glm_pseudoR2(jj) = 1 - (dev / dev_null);
         
                     selectedIndices = find(predictorCells);
                     selected_orig = selectedIndices(selected);
         
-                    glm_mat(jj, selected_orig) = b_glm(2:end);
-                    glm_p(jj, selected_orig) = stats.p(2:end);
+                    glm_mat(selected_orig, jj) = b_glm(2:end);
+                    glm_p(selected_orig, jj) = stats.p(2:end);
+
+                    % Store model deviance for target neuron jj
+                    glm_deviance(jj) = dev;
                 end
-        
+            
             catch ME
                 warning('GLM failed for neuron %d: %s', jj, ME.message);
             end
         end
-
+        
         functional_connectivity.values = glm_mat;
         functional_connectivity.p = glm_p;
+        functional_connectivity.deviance = glm_deviance;
+        functional_connectivity.pseudoR2  = glm_pseudoR2;
+        warning('on', 'stats:glmfit:IterationLimit');
+        warning('on', 'stats:glmfit:IllConditioned');
+    
+    case 'glm_conditional'
+    disp('... glm with conditional population covariate...');
+    nCols = size(spikemat.data, 2);
+    glm_cond_mat = nan(nCols, nCols);
+    glm_cond_p = nan(nCols, nCols);
+    glm_cond_pseudoR2 = nan(nCols, nCols);
+    glm_cond_deviance = nan(nCols, nCols);
+    warning('off', 'stats:glmfit:IterationLimit');
+    warning('off', 'stats:glmfit:IllConditioned');
+
+    % Fit with higher iteration limit
+    opts = statset('glmfit');
+    opts.MaxIter = 1000;
+    fprintf('\n');
+    for j = 1:nCols
+        Y = spikemat.data(:, j);  % target neuron
+        fprintf('\rComputing GLM: neuron %d of %d', j, nCols);
+        for i = 1:nCols
+            if i == j
+                continue;  % skip self-pairs
+            end
+
+            % Predictor 1: activity of source neuron i
+            x = spikemat.data(:, i);
+
+            % Predictor 2: summed population activity excluding i and j
+            exclude = true(1, nCols);
+            exclude([i j]) = false;
+            z = sum(spikemat.data(:, exclude), 2);
+
+            % Design matrix: predictors [x, z]
+            X = zscore([x z]);  % Apply zscore here
+            keep = std(X) > 1e-8;
+            X = X(:, keep);
+
+            try
+                % Fit null model (intercept only)
+                try
+                    [~, dev_null] = glmfit(ones(size(Y)), Y, 'poisson', 'Options', opts);
+                catch
+                    dev_null = NaN;
+                    warning('Null model failed for neuron %d', jj);
+                end
+
+                % Fit full model with predictors x and z
+                [b, dev, stats] = glmfit(X, Y, 'poisson', 'Options', opts);
+
+                % Store results
+                glm_cond_mat(i, j) = b(2);              % β: effect of i on j
+                glm_cond_p(i, j) = stats.p(2);          % p-value for β
+                glm_cond_pseudoR2(i, j) = 1 - (dev / dev_null);
+                glm_cond_deviance(i, j) = dev;
+
+            catch ME
+                fprintf('\n');
+                warning('Conditional GLM failed for i = %d → j = %d: %s', i, j, ME.message);
+                fprintf('\n');
+            end
+        end
+    end
+    fprintf('\n');
+    % Store in output struct
+    functional_connectivity.values = glm_cond_mat;
+    functional_connectivity.p = glm_cond_p;
+    functional_connectivity.pseudoR2 = glm_cond_pseudoR2;
+    functional_connectivity.deviance = glm_cond_deviance;
+    functional_connectivity.direction = 'i_to_j';
+    warning('on', 'stats:glmfit:IterationLimit');
+    warning('on', 'stats:glmfit:IllConditioned');
+    
     case 'te'
 
         % Transfer entropy
@@ -190,40 +285,49 @@ switch lower(method)
         functional_connectivity.p = te_p;
 
     case 'ccg'
-        disp('... CCG method using compiled CCGHeart...');
+       disp('... CCG method using compiled CCGHeart...');
+
+        % Parameters
+        binSize = 0.001;       % in seconds (e.g., 1 ms bins)
+        winSize = 0.1;         % total window size (±50 ms)
         
-        % Preparación
+        % Setup
         nCols = spikes.numcells;
-        binSize = 0.001;     % en segundos
-        winSize = 0.1;       % ventana total (±50 ms)
-        center_bin = ceil((winSize / binSize + 1) / 2);
         session = loadSession;
         Fs = 1 / session.extracellular.sr;
-
-        % Calcula todos los CCGs simultáneamente
+        
+        % Compute all CCGs
         [allCcg, t_ccg] = CCG(spikes.times, [], ...
                               'binSize', binSize, ...
                               'duration', winSize, ...
                               'Fs', Fs, ...
                               'normtype', 'counts');
-
-        % Extrae el valor del bin central (lag ≈ 0)
-        ccg_raw = squeeze(allCcg(center_bin, :, :));  % NxN
-
-        % Normalización por tasa de disparo esperada
+        
+        % Get center bin
+        center_bin = ceil((winSize / binSize + 1) / 2);
+        
+        % Apply custom window
+        offset_bins = ccg_win(1):ccg_win(2);
+        selected_bins = center_bin + offset_bins;
+        selected_bins = selected_bins(selected_bins > 0 & selected_bins <= size(allCcg,1));
+        
+        % Average across selected bins (raw coactivation)
+        ccg_raw = squeeze(mean(allCcg(selected_bins, :, :), 1));  % NxN
+        
+        % Normalize by expected coactivation
         non_empty_times = spikes.times(~cellfun(@isempty, spikes.times));
         max_time = max(cellfun(@max, non_empty_times));
         min_time = min(cellfun(@min, non_empty_times));
         total_time = max_time - min_time;
         fr = cellfun(@(x) numel(x) / total_time, spikes.times);  % Hz
-        expected_coactivation = fr(:) * fr(:)' * winSize;
+        expected_coactivation = fr(:) * fr(:)' * (binSize * length(selected_bins));
         ccg_norm = ccg_raw ./ expected_coactivation;
-
-        % Shuffling (desplazamiento circular)
+        
+        % Shuffling (circular)
         n_shuffles = p.Results.n_shuffles;
         ccg_null = zeros(n_shuffles, nCols, nCols);
-        rng(1);  % para reproducibilidad
-
+        rng(1);  % reproducibility
+        
         for s = 1:n_shuffles
             shuffled_times = cellfun(@(x) mod(x + rand * total_time, total_time), ...
                                      spikes.times, 'UniformOutput', false);
@@ -232,19 +336,24 @@ switch lower(method)
                              'duration', winSize, ...
                              'Fs', Fs, ...
                              'normtype', 'counts');
-            ccg_null(s,:,:) = squeeze(ccg_s(center_bin, :, :));
+            ccg_null(s,:,:) = squeeze(mean(ccg_s(selected_bins, :, :), 1));
         end
-
+        
+        % Null distribution statistics
         mu_null = squeeze(mean(ccg_null, 1));
         std_null = squeeze(std(ccg_null, 0, 1));
         z_mat = (ccg_raw - mu_null) ./ std_null;
         p_mat = squeeze(mean(ccg_null >= reshape(ccg_raw, [1 nCols nCols]), 1));  % one-tailed
-
-        % Asignar resultados
+        DI_z = (z_mat - z_mat') ./ (z_mat + z_mat');
+        
+        % Assign outputs
         functional_connectivity.values = ccg_norm;
         functional_connectivity.raw = ccg_raw;
         functional_connectivity.z = z_mat;
         functional_connectivity.p = p_mat;
+        functional_connectivity.ccg_window = ccg_win;
+        functional_connectivity.directionality_indexZ = DI_z;
+        functional_connectivity.direction = '';
     otherwise
         error('Method do not recognized...');
 end
@@ -353,51 +462,20 @@ if doPlot
 
             mkdir('SummaryFigures');
             exportgraphics(gcf,['SummaryFigures\' save_as '_' method '.png']);
-        case 'glm'
+        
+        case {'glm', 'glm_conditional', 'te'}
             figure
             subplot(1,2,1)
             plotCorrMat(functional_connectivity.cell_families_conn_avg, functional_connectivity.cell_families_conn_p,'minPvalue', 1E-20,'maxPvalue',0.1, 'area_factor', 7,...
             'Y_variablesNames', functional_connectivity.cell_families,...
             'X_variablesNames', functional_connectivity.cell_families, 'p_value_threshold', 0.0001, 'inAxis', true);   
-            caxis([-0.05 .05]);
+            % caxis([-0.05 .05]);
             axis square
             set(gca, 'TickLabelInterpreter', 'none');
             
             x_axis = functional_connectivity.cell_families;
             avg = functional_connectivity.cell_families_conn_avg;
-            colors = getColors(functional_connectivity.cell_families);
-            G = digraph(avg);
-            subplot(1,2,2)
-            h = plot(G, 'Layout', 'layered'); % force circle
-            weights = G.Edges.Weight;
-            maxAbsWeight = max(abs(weights));
-            normalizedWeights = (weights + maxAbsWeight) / (2 * maxAbsWeight); % Centered around 0
-            normalizedWeights(normalizedWeights<0) = 0; normalizedWeights(normalizedWeights>1) = 1;
-            cmap = colormap(flip(brewermap(100,'RdYlBu'))); % 
-            edgeColors = cmap(round(normalizedWeights * 99) + 1, :);
-            h.EdgeColor = edgeColors;
-            h.LineWidth = 3; % 5 * abs(weights) / max(abs(weights));
-            h.NodeColor = colors; % ''; %  x_axis'
-            h.NodeLabel = functional_connectivity.cell_families; % ''; %  x_axis'
-            h.EdgeAlpha = 0.8;
-            h.MarkerSize = 8;
-            h.ArrowSize = 15;
-            axis off
-
-            mkdir('SummaryFigures');
-            exportgraphics(gcf,['SummaryFigures\' save_as '_' method '.png']);
-        case 'te'
-            figure
-            subplot(1,2,1)
-            plotCorrMat(functional_connectivity.cell_families_conn_avg, functional_connectivity.cell_families_conn_p,'minPvalue', 1E-20,'maxPvalue',0.1, 'area_factor', 20,...
-            'Y_variablesNames', functional_connectivity.cell_families,...
-            'X_variablesNames', functional_connectivity.cell_families, 'p_value_threshold', 0.0001, 'inAxis', true);   
-            caxis([-0.05 .05]);
-            axis square
-            set(gca, 'TickLabelInterpreter', 'none');
-            
-            x_axis = functional_connectivity.cell_families;
-            avg = functional_connectivity.cell_families_conn_avg;
+            avg(isnan(avg)) = 0;
             colors = getColors(functional_connectivity.cell_families);
             G = digraph(avg);
             subplot(1,2,2)
@@ -434,7 +512,7 @@ if doPlot
             % Red como grafo
             x_axis = functional_connectivity.cell_families;
             avg = functional_connectivity.cell_families_conn_avg;
-            z_scores = functional_connectivity.cell_families_conn_avg;  % puedes poner otra cosa si lo agrupas
+            z_scores = functional_connectivity.cell_families_conn_avg;  % 
 
             colors = getColors(x_axis);
             G = digraph(avg);  %

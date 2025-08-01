@@ -61,6 +61,10 @@ function [cell_types, cell_classification_stats, cell_metrics, cell_subtypes] = 
             else
                 thetamod_r = thetaPhaseModulation';
             end
+
+            if size(thetamod_r,1) > size(thetamod_r,2)
+                thetamod_r = thetamod_r';
+            end
             
             % get model and features
             Mdl = importdata([directory.path filesep 'Mdl_hippocampus5.mat']);
