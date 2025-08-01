@@ -277,7 +277,6 @@ end
 %% 7. Getting Hippocampal Layers
 if ~any(ismember(excludeAnalysis, {'7',lower('getHippocampalLayers')}))
     [hippocampalLayers] = getHippocampalLayers('force',true,'promt',promt_hippo_layers,'removeRipplesStimulation', false);
-    %[hippocampalLayers2] = getHippocampalLayers('force',true,'promt',false,'removeRipplesStimulation', false, 'saveSummary',false,'saveMat',false);
 end
 
 %% 8. Check Brain Events
@@ -307,6 +306,7 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     end
 
     % 8.3 Theta intervals
+    cd(basepath);
     thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'channel',theta_epochs_channel);
 
 end
