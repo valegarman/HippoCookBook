@@ -76,7 +76,7 @@ end
 
 %% 1 % CLUSTERING RESPONSES
 % 1.1 % Remove bad rows/cols
-to_remove = all(isnan(coact), 2);  % 
+\to_remove = all(isnan(coact), 2);  % 
 valid_units = ~to_remove;
 Z = coact(valid_units, valid_units);
 preZ = pre(valid_units, valid_units);
@@ -106,7 +106,7 @@ cluster_stim = Ci;
 Q_pre_by_stim = modularity_signed(preZ_clipped, Ci);
 Q_post_by_stim = modularity_signed(postZ_clipped, Ci);
 
-fprintf('Modularity (Q) - Pre: %.3f | Stim: %.3f | Post: %.3f\n', Q_pre, Q, Q_post);
+fprintf('Modularity (Q) - Pre: %.3f | Stim: %.3f | Post: %.3f\n', Q_pre_by_stim, Q, Q_post_by_stim);
 
 % 1.4 % Assortability
 % Assortativity measures whether nodes preferentially connect to others in the same group.
@@ -476,13 +476,26 @@ loo_ari = compute_loo_ari_all(C_all, C_ref);
 
 pairwise_consistency = compute_pairwise_consistency_all(C_all, C_ref);
 
+% include cell types
+cellTypeClassifier
+
+% to do, loo ari by pairs
+% save values
+coactivation_metrics.adjusted_rand_index.leave_one_out_test = loo_ari;
+coactivation_metrics.adjusted_rand_index.pairwise_consistency = pairwise_consistency;
+
+if do_plot
+end
+
 figure
 imagesc(loo_ari.importance)
 xticks(1:3)
 xticklabels({'Pre', 'Stim', 'Post'})
 colorbar
 ylabel('Neuron #')
-title('LOO-ARI impact per neuron and condition')
+title('LOO-ARI impact per neuron and condition');
+
+
 
 
 cd(prevPath);
