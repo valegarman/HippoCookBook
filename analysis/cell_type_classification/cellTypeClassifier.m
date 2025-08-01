@@ -10,23 +10,25 @@ function [cell_types, cell_classification_stats, cell_metrics, cell_subtypes] = 
     p = inputParser;
     addParameter(p,'basepath',pwd,@isdir);
     addParameter(p,'cell_metrics',[],@isstruct);
-    addParameter(p,'thetaMod',[],@isstruct);
+    addParameter(p,'thetaMod',[]);
     addParameter(p,'modelType','hippocampus5',@ischar);
     addParameter(p,'overwrite_cell_metrics',true,@islogical);
     addParameter(p,'score_cut_off',.70,@isnumeric);
     addParameter(p,'imposeCellExplorerPyr',true);
     addParameter(p,'ripples_psth',[],@isstruct);
+    addParameter(p,'force',false,@logical);
     
     parse(p,varargin{:});
     
     basepath = p.Results.basepath;
     cell_metrics = p.Results.cell_metrics;
-    thetaMod = p.Results.thetaMod;
+    thetaPhaseModulation = p.Results.thetaMod;
     modelType = p.Results.modelType;
     overwrite_cell_metrics = p.Results.overwrite_cell_metrics;
     score_cut_off = p.Results.score_cut_off;
     imposeCellExplorerPyr = p.Results.imposeCellExplorerPyr;
     ripples_psth = p.Results.ripples_psth;
+    force = p.Results.force;
 
     %% Collect data
     previousPath = pwd;
@@ -35,18 +37,33 @@ function [cell_types, cell_classification_stats, cell_metrics, cell_subtypes] = 
     if isempty(cell_metrics)
         cell_metrics = loadCellMetrics;
     end
+
+    if isfield(cell_metrics,'ground_truth_classification') && force == false
+        disp('Cell class already estimated! Returning from cell_metrics...');
+        cell_types = cell_metrics.ground_truth_classification.cell_types;
+        cell_subtypes = cell_metrics.ground_truth_classification.cell_subtypes;
+        cell_classification_stats = cell_metrics.ground_truth_classification.cell_classification_stats;
+        return
+    end
     
     modelType = lower(modelType);
     directory = what('HippoCookBook\analysis\cell_type_classification');
     switch modelType
         case lower('hippocampus5')
             % collecting remaining features
-            if isempty(thetaMod) && strcmpi(modelType,'hippocampus5')
+            if isempty(thetaPhaseModulation) && strcmpi(modelType,'hippocampus5')
                 targetFile = dir('*theta_6-12.PhaseLockingData.cellinfo.mat');
                 if isempty(targetFile.name)
                     error('Feature not found! Did you use CellExplorer or HippoCookBook to process the current session?');
                 end
                 thetaPhaseModulation = importdata(targetFile.name);
+                thetamod_r = thetaPhaseModulation.phasestats.r';
+            else
+                thetamod_r = thetaPhaseModulation';
+            end
+
+            if size(thetamod_r,1) > size(thetamod_r,2)
+                thetamod_r = thetamod_r';
             end
             
             % get model and features
@@ -55,7 +72,7 @@ function [cell_types, cell_classification_stats, cell_metrics, cell_subtypes] = 
                 cell_metrics.acg_tau_rise' ...
                 cell_metrics.ab_ratio' ...
                 cell_metrics.cv2' ...
-                thetaPhaseModulation.phasestats.r' ...
+                thetamod_r' ...
             ];
         case 'fobrebrain5'
             % get model and features

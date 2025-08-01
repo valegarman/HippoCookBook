@@ -1,0 +1,27 @@
+%% BatchScript_analysis_ripplesPerSubsession
+
+clear; close all
+d = dir(pwd);
+folders = d([d.isdir]);  
+folders = folders(~ismember({folders.name}, {'.', '..'}));
+sessFolders = folders(contains({folders.name}, 'sess'));
+sessionsTable.SessionName  = {sessFolders.name}';  % Folder names
+sessionsTable.Path  = fullfile(pwd, sessionsTable.SessionName);  % Full paths
+
+theta_bandpass = [5 12];
+gamma_bandpass = [20 100];
+hfo_bandpass = [100 500];
+
+for ii = 3:length(sessionsTable.SessionName)
+        fprintf(' > %3.i/%3.i session \n',ii, length(sessionsTable.SessionName)); %\n
+        cd([sessionsTable.Path{ii}]);
+        
+        % your code goes here...
+        powerSpectrumProfile(theta_bandpass,'showfig',true,'forceDetect',true);
+        powerSpectrumProfile(gamma_bandpass,'showfig',true,'forceDetect',true);
+        powerSpectrumProfile(hfo_bandpass,'showfig',true,'forceDetect',true);
+        
+    % end
+end
+
+fc_pre = getFunctionalConnectivity('method', 'glm', 'savemat', false, 'n_shuffles', 10);

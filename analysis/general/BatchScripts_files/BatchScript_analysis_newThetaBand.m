@@ -1,27 +1,29 @@
 %% BatchScript_analysis_ripplesPerSubsession
 
 clear; close all
-HCB_directory = what('HippoCookBook'); 
-sessionsTable = readtable([HCB_directory.path filesep 'indexedSessions.csv']); % the variable is called allSessions
-targetProject = 'Bibliocampus';
+d = dir(pwd);
+folders = d([d.isdir]);  
+folders = folders(~ismember({folders.name}, {'.', '..'}));
+sessFolders = folders(contains({folders.name}, 'sess'));
+sessionsTable.SessionName  = {sessFolders.name}';  % Folder names
+sessionsTable.Path  = fullfile(pwd, sessionsTable.SessionName);  % Full paths
 
-for ii = 1:length(sessionsTable.SessionName)
-    if contains(sessionsTable.Project(ii), targetProject) || strcmpi('all', targetProject)
+theta_bandpass = [5 12];
+gamma_bandpass = [20 100];
+hfo_bandpass = [100 500];
+
+for ii = 3:length(sessionsTable.SessionName)
         fprintf(' > %3.i/%3.i session \n',ii, length(sessionsTable.SessionName)); %\n
-        cd([nas_path(sessionsTable.Location{ii}) filesep sessionsTable.Path{ii}]);
-
-        % 
-        clear basepath
-        [phaseMod] = computePhaseModulation('saveMat', false);
-
-        thetaMod = phaseMod.theta;
-        save([basenameFromBasepath(pwd) '.theta_5-12.PhaseLockingData.cellinfo.mat'], 'thetaMod');
-
-        thetaREMMod = phaseMod.thetaREMMod;
-        save([basenameFromBasepath(pwd) '.thetaREM_5-12.PhaseLockingData.cellinfo.mat'], 'thetaREMMod');
-
-        thetaRunMod = phaseMod.thetaRunMod;
-        save([basenameFromBasepath(pwd) '.thetaRun_5-12.PhaseLockingData.cellinfo.mat'], 'thetaRunMod');
-    end
-    close all;
+        cd([sessionsTable.Path{ii}]);
+        
+        % your code goes here...
+        powerSpectrumProfile(theta_bandpass,'showfig',true,'forceDetect',true);
+        powerSpectrumProfile(gamma_bandpass,'showfig',true,'forceDetect',true);
+        powerSpectrumProfile(hfo_bandpass,'showfig',true,'forceDetect',true);
+        
+    % end
 end
+
+spikes = loadSpikes;
+cell_metrics = ProcessCellMetrics; % after CellExplorar
+fc = getFunctionalConnectivity('method', 'glm', 'savemat', true, 'n_shuffles', 100);

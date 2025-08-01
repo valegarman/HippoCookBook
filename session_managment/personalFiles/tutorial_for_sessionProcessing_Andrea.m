@@ -15,20 +15,10 @@ preprocessSession('basepath','Y:\unindexedSubjects\cancer2\cancer2_250703_sess2'
 
 computeSessionSummary('digitalChannelsList',[1,2]);
 
-uLEDPulses = getuLEDsPulses_legacy();
+uLEDPulses = getuLEDsPulses_legacy('uLEDs_ttl',[1 2]);
 getuLEDResponse('restrict_to_baseline',false,'uLEDPulses',uLEDPulses);
 
 optogeneticResponses = getOptogeneticResponse('force',true,'digitalChannelsList',[1,2,3,4,5,6,7,8,9,10,11,12,13]);
-
-
-
-
-
-
-
-
-
-
 
 
 

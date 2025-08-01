@@ -59,6 +59,7 @@ addParameter(p,'duration_round_decimal',3,@isscalar);
 addParameter(p,'minNumberOfPulses',200,@isnumeric);
 addParameter(p,'conditionEpochs',[]);
 addParameter(p,'doPlot',true,@islogical);
+addParameter(p,'restrict_intervals',true,@isnumeric);
 
 parse(p,varargin{:});
 basepath = p.Results.basepath;
@@ -72,6 +73,7 @@ duration_round_decimal = p.Results.duration_round_decimal;
 minNumberOfPulses = p.Results.minNumberOfPulses;
 conditionEpochs = p.Results.conditionEpochs;
 doPlot = p.Results.doPlot;
+restrict_intervals = p.Results.restrict_intervals;
 
 prevPath = pwd;
 cd(basepath);
@@ -148,7 +150,6 @@ end
 
 if isempty(digitalPulses) && any(ledLayout.isDigital)
     digitalPulses = getDigitalIn;
-
     if length(digitalPulses.ints)<16
         digitalPulses.ints = [digitalPulses.ints cell(1,16-length(digitalPulses.ints))];
     end
@@ -224,6 +225,10 @@ for ii = 1:length(uniqueToDiscard)
 end
 pulsesToDiscard(durationRounded==0) = 1;
 pulsesToDiscard = find(pulsesToDiscard);
+
+% discard out of restricted area
+[status] = InIntervals(timestamps(:,1), restrict_intervals);
+pulsesToDiscard = [pulsesToDiscard; find(status==0)];
 
 timestamps(pulsesToDiscard,:) = [];
 duration(pulsesToDiscard) = [];
@@ -322,7 +327,7 @@ end
 uLEDPulses.list_of_durations = uLEDPulses.conditions_table(:,1)';
 uLEDPulses.list_of_epochs = uLEDPulses.conditions_table(:,2)';
 
-if doPlot
+if doPlot 
     tiledlayout('vertical')
     session = loadSession;
     cmap = cool(size(session.epochs,2));
