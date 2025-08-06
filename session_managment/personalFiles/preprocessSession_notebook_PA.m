@@ -4,7 +4,8 @@ preprocessSession('basepath','D:\cancer4\cancer4_250718_sess3','analysisPath',[]
 
 %% CANCER5
 updateExpFolder_temp({'E:\cancer5'},'D:\cancer5');
-preprocessSession('basepath','D:\cancer5\cancer5_250722_sess7','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
+preprocessSession('basepath','D:\cancer5\cancer5_250724_sess9','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
+preprocessSession('basepath','D:\cancer5\cancer5_250725_sess10','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
 
 
 %% CANCER6
@@ -13,7 +14,7 @@ updateExpFolder_temp({'E:\cancer6'},'D:\cancer6');
 
 %% ASTRO5
 updateExpFolder_temp({'E:\astro5'},'F:\astro5');
-preprocessSession('basepath','F:\astro5\astro5_250725_sess19','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
+preprocessSession('basepath','F:\astro5\astro5_250728_sess20','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
 
 %% ASTRO6
 updateExpFolder_temp({'E:\astro6'},'F:\astro6');
@@ -31,9 +32,11 @@ preprocessSession('basepath','D:\cancer2\cancer2_250708_sess7','analysisPath',[]
 preprocessSession('basepath','D:\cancer2\cancer2_250709_sess8','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
 preprocessSession('basepath','D:\cancer2\cancer2_250710_sess9','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
 
-processSession('basepath','C:\data\cancer2\cancer2_250708_sess7','digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
+processSession('basepath','Y:\cancer2\cancer2_250710_sess9','digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 
 indexNewSession('basepath','C:\data\cancer2\cancer2_250708_sess7');
+indexNewSession('basepath','Y:\cancer2\cancer2_250710_sess9');
+
 %% CANCER 3
 updateExpFolder_temp({'E:\cancer3'},'D:\cancer3');
 
