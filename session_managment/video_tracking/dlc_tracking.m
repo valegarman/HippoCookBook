@@ -65,7 +65,6 @@ addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'dlc_ttl_channel',[],@isnumeric); % by default, 5
 addParameter(p,'interpolate_misstrackings',true);
 addParameter(p,'use_dlc_likelihood',0.7); % Default > 70%
-addParameter(p,'use_roi_led',true);
 
 % addParameter(p,'RGBChannel',[],@isstr);
 
@@ -88,7 +87,6 @@ rightTTL_reward = p.Results.rightTTL_reward;
 homeTtl = p.Results.homeTtl;
 interpolate_misstrackings = p.Results.interpolate_misstrackings;
 use_dlc_likelihood = p.Results.use_dlc_likelihood;
-use_roi_led = p.Results.use_roi_led;
 
 %% Deal with inputs
 if ~isempty(dir([basepath filesep '*Tracking.Behavior.mat'])) && forceReload
@@ -162,7 +160,7 @@ end
 average_frame = mean(frames.r,3);                                          % get average frames
 
 % deal with the ROI for the LED
-if use_roi_led
+if ~isempty(dlc_ttl_channel)
     cd(basepath); cd ..; upBasepath = pwd; pwd; cd ..; up_upBasepath = pwd;cd(basepath);
     if exist([basepath filesep 'roiLED.mat'],'file')
         load([basepath filesep 'roiLED.mat'],'roiLED');
