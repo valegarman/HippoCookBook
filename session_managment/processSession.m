@@ -287,11 +287,11 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     getSpikesRank('events','upstates');
 
     % 8.2 Ripples
-<<<<<<< HEAD
+
     ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',false,'thresholds',rippleMasterDetector_threshold,'eventSpikeThreshold', false); 
-=======
+
     ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',false,'thresholds',rippleMasterDetector_threshold,'eventSpikeThreshold',false); 
->>>>>>> a474b5282772782748213eaa2564343474037608
+
     psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10);
     % psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10,'restrict_to_manipulation',true);
     getSpikesRank('events','ripples');
