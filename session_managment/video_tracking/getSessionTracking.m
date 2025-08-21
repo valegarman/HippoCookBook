@@ -62,7 +62,6 @@ addParameter(p,'rightTTL_reward',[],@isnumeric);
 addParameter(p,'homeTtl',[],@isnumeric);
 addParameter(p,'tracking_software','dlc'); % Options are: 'basler', 'anymaze', 'dlc' (default).
 addParameter(p,'interpolate_misstrackings',true);
-addParameter(p,'use_roi_led',true);
 
 parse(p,varargin{:});
 basepath = p.Results.basepath;
@@ -80,7 +79,6 @@ rightTTL_reward = p.Results.rightTTL_reward;
 homeTtl = p.Results.homeTtl;
 tracking_software = p.Results.tracking_software;
 interpolate_misstrackings = p.Results.interpolate_misstrackings;
-use_roi_led = p.Results.use_roi_led;
 
 
 
@@ -164,8 +162,7 @@ elseif strcmpi(tracking_software,'dlc')
             if ~isempty(dir([basepath filesep MergePoints.foldernames{ii} filesep '*tracking*_crop.avi']))
                 cd([basepath filesep MergePoints.foldernames{ii}]);
                 fprintf('Computing tracking in %s folder \n',MergePoints.foldernames{ii});
-                 tempTracking{count} = dlc_tracking('leftTtl_reward',leftTTL_reward,'rightTtl_reward',rightTTL_reward,'homeTtl',homeTtl,'dlc_ttl_channel',dlc_ttl_channel,'forceReload',forceReload,'interpolate_misstrackings',interpolate_misstrackings,...
-                     'use_roi_led',use_roi_led);
+                 tempTracking{count} = dlc_tracking('leftTtl_reward',leftTTL_reward,'rightTtl_reward',rightTTL_reward,'homeTtl',homeTtl,'dlc_ttl_channel',dlc_ttl_channel,'forceReload',forceReload,'interpolate_misstrackings',interpolate_misstrackings);
                 trackFolder(count) = ii;
                 count = count + 1;
             end
