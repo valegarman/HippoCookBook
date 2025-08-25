@@ -200,7 +200,7 @@ h1 = figure;
 hold on
 imagesc(xMaze, yMaze,average_frame); colormap gray;
 set(gca,'YDir','normal', 'TickDir','out');
-if exist(roiLED,'var')
+if ~isempty(roiLED)
     p = plot(roiLED(:,1)*convFact, roiLED(:,2)*convFact,'r','LineWidth',2);
     legend(p,'LED ROI');
 end

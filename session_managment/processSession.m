@@ -426,7 +426,10 @@ if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
 end
 
 %% 12. ULED analysis 
-getuLEDPulses;
+try
+    getuLEDPulses;
+catch
+end
 
 %% 13. Summary per cell
 if ~any(ismember(excludeAnalysis, {'12',lower('summary')}))
