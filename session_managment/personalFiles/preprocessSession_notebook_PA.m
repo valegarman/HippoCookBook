@@ -49,6 +49,7 @@ processSession('basepath','C:\data\cancer3\cancer3_250703_sess2','digital_optoge
 processSession('basepath','C:\data\cancer3\cancer3_250708_sess7','digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 
 indexNewSession('basepath','C:\data\cancer3\cancer3_250703_sess2');
+indexNewSession('basepath','C:\data\cancer3\cancer3_250708_sess7');
 
 %% CAMK13
 updateExpFolder_temp({'E:\camk13'},'D:\camk13');
