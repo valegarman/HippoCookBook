@@ -82,6 +82,7 @@ end
 % Compute channels features
 % Updated by Pablo Abad to use session metadata instead of sessionInfo
 session = loadSession(basepath);
+
 % channel_order = session.channels;
 channel_order = session.channels;
 % channels.pyramidal = bz_GetBestRippleChan(lfp);
@@ -107,6 +108,7 @@ eventTwin = [-.05 .05];
 twin_rip = eventTwin * session.extracellular.srLfp;
 
 zscor_xnan = @(x) bsxfun(@rdivide, bsxfun(@minus, x, mean(x,'omitnan')), std(x, 'omitnan'));
+
 for i = 1:length(session.extracellular.electrodeGroups.channels)
     if ~all(ismember(session.extracellular.electrodeGroups.channels{i},session.channelTags.Bad.channels))
         % Channel slm : Channel with bigger theta and gamma amplitude

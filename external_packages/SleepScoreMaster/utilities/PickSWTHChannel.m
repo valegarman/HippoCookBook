@@ -182,7 +182,8 @@ peakTH = zeros(numThetaChannels,1);
 %% Get info to allow to pick SW channel
 %parfor_progress(numSWChannels);
 %tstart = tic;
-parfor idx = 1:numSWChannels;
+parfor idx = 1:numSWChannels
+% for idx = 1:numSWChannels
     %Progress Counter
 %     timespent=toc(tstart);
 %     percdone = parfor_progress;
