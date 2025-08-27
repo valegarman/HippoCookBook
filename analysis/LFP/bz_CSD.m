@@ -66,7 +66,7 @@ elseif isnumeric(lfp)
     timestamps = [1:length(lfp)]'./samplingRate;
 end
 
-win = p.Results.win*samplingRate;
+win = p.Results.win; % *samplingRate;
 
 
 %% Compute CSD
