@@ -115,7 +115,7 @@ else
     scatter(x,y,3,t,'filled','MarkerEdgeColor','none','MarkerFaceAlpha',.5); colormap jet
     caxis([t(1) t(end)]);
     xlim([xMaze]); ylim([yMaze]);
-    if strcmpi(tracking.description,'DeepLabCut')
+    if strcmpi(tracking.description,'TMaze') || strcmpi(tracking.description,'TMaze2') || strcmpi(tracking.description,'Deeplabcut')
         axis ij;
     end
     title('Draw a polyline following animal trajectory (first turn right)...','FontWeight','normal');
@@ -135,7 +135,7 @@ if editLOI
     scatter(x,y,3,t,'filled','MarkerEdgeColor','none','MarkerFaceAlpha',.5); colormap jet
     caxis([t(1) t(end)]);
     xlim([xMaze]); ylim([yMaze]);
-    if strcmpi(tracking.description,'DeepLabCut')
+    if strcmpi(tracking.description,'TMaze') || strcmpi(tracking.description,'TMaze2') || strcmpi(tracking.description,'Deeplabcut')
         axis ij;
     end
     title('Move vertex to match trajectory and press Enter...','FontWeight','normal');
@@ -146,14 +146,27 @@ if editLOI
     save([basepath filesep 'virtualMaze.mat'],'maze');
 end
 
-if strcmpi(tracking.description,'DeepLabCut')
+if strcmpi(tracking.description,'DeepLabCut') || strcmpi(tracking.description,'TMaze')
+    % eCB maze
      linMazeCont =    [0   58  ... % steam 
                  98       ... % r turn
                  168      ... % r arm
                  226      ... % steam again
                  266      ... % l turn
                  336];         % l arm   
+elseif strcmpi(tracking.description,'TMaze2')
+    % uLED maze
+    linMazeCont =    [0   70  ... % steam 
+                 101       ... % right turn 
+                 168        ... % r arm
+                 178      ... % r arm-steam
+                 248       ... % steam again
+                 279       ... % l turn
+                 346      ... % l arm     
+                 356       ... % l turn-steam
+                 ];         
 else
+    % Buzsaki's lab maze
     linMazeCont =    [0   50  ... % steam 
                  85       ... % r turn
                  135      ... % r arm
@@ -176,9 +189,12 @@ mazeVirtual = interp1(cum_dist, maze, dist_steps);
 vlinMazeCont = interp1(cum_dist, linMazeCont, dist_steps);
 
 % correct steam linearization
-if strcmpi(tracking.description,'DeepLabCut')
+if strcmpi(tracking.description,'DeepLabCut') || strcmpi(tracking.description,'TMaze')
     vlinMazeCont(vlinMazeCont>=linMazeCont(4)) = ...
     vlinMazeCont(vlinMazeCont>=linMazeCont(4)) - linMazeCont(4); 
+elseif strcmpi(tracking.description,'TMaze2')
+    vlinMazeCont(vlinMazeCont>=linMazeCont(5)) = ...
+    vlinMazeCont(vlinMazeCont>=linMazeCont(5)) - linMazeCont(5); 
 else
     vlinMazeCont(vlinMazeCont>=linMazeCont(5)) = ...
         vlinMazeCont(vlinMazeCont>=linMazeCont(5)) - linMazeCont(5); 
@@ -211,7 +227,7 @@ subplot(3,1,[1 2])
 hold on
 % scatter(x,y,3,[.8 .8 .8],'filled','MarkerEdgeColor','none','MarkerFaceAlpha',.5);
 plot(mazeVirtual(:,1), mazeVirtual(:,2),'k-');
-if strcmpi(tracking.description,'DeepLabCut')
+if strcmpi(tracking.description,'TMaze') || strcmpi(tracking.description,'TMaze2') || strcmpi(tracking.description,'Deeplabcut')
     axis ij;
 end
 colormap parula
@@ -240,7 +256,7 @@ for ii = 1:size(armChoice.timestamps,1)
         if armChoice.visitedArm(ii) == 0
             arm(xspam) = 0;
         end
-        [~,idxInt] = min(abs(linCont(xspam)-58)); % find point closer to 58 in lin
+        [~,idxInt] = min(abs(linCont(xspam)-linMazeCont(2))); % find point closer to 58 in lin
         intersection(ii) = t(xspam(idxInt));
         sampleIntersection(ii) = xspam(idxInt);
 
@@ -283,13 +299,17 @@ end
 endDelay = armChoice.delay.timestamps(:,2);
 for ii = 1:length(endDelay)
     [~,idx] = min(abs(endDelay(ii) - t));
-    p5 = plot(x(idx),y(idx),'o','MarkerFaceColor',[.8 .5 .8],'MarkerEdgeColor','k');
+    if idx < length(x)
+        p5 = plot(x(idx),y(idx),'o','MarkerFaceColor',[.8 .5 .8],'MarkerEdgeColor','k');
+    end
 end
 % startDelay = armChoice.delay.timestamps(1,:);
 startDelay = armChoice.delay.timestamps(:,1);
 for ii = 1:length(startDelay)
     [~,idx] = min(abs(startDelay(ii) - t));
-    p6 = plot(x(idx),y(idx),'o','MarkerFaceColor',[.5 .8 .5],'MarkerEdgeColor','k');
+    if idx < length(x)
+        p6 = plot(x(idx),y(idx),'o','MarkerFaceColor',[.5 .8 .5],'MarkerEdgeColor','k');
+    end
 end
 legend([p1 p2 p3 p4 p5 p6],'Inters', 'HomeCage', 'rReward', 'lReward', 'endDelay', 'startDelay','Location','best');
     
