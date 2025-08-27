@@ -252,3 +252,36 @@ fcamk1_200831_sess11,fcamk1,fcamk1\fcamk1_200831_sess11,neural3,c57b1/6,camkii/a
 fcamk1_200903_sess14,fcamk1,fcamk1\fcamk1_200903_sess14,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze,64,CA1sp CA1so CA1sr,LightInInh
 fcamk3_201027_sess9,fcamk3,fcamk3\fcamk3_201027_sess9,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze  linear maze,26,CA1sp CA1so,LightInInh
 cancer2_250704_sess3,cancer2,cancer2\cancer2_250704_sess3,neural3,c57b1/6,wild type,"none",tmaze,72,CA1sp CA1so PTLp6 PTLp5,Cancer
+cancer2_250703_sess2,cancer2,cancer2\cancer2_250703_sess2,neural3,c57b1/6,wild type,"none",tmaze,73,CA1sp CA1so CA1sr PTLp6 PTLp5 PTLp4,Cancer
+camk13_250716_sess27,camk13,camk13\camk13_250716_sess27,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",no,45,CA1sp,ReactInh
+camk13_250718_sess29,camk13,camk13\camk13_250718_sess29,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",no,30,CA1sp CA1so,ReactInh
+camk13_250721_sess30,camk13,camk13\camk13_250721_sess30,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",no,39,CA1so CA1sp,ReactInh
+camk13_250618_sess5,camk13,camk13\camk13_250618_sess5,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze linear maze,22,CA1sp,uLEDiscotheque ReactInh
+camk13_250702_sess13,camk13,camk13\camk13_250702_sess13,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",tmaze,21,CA1sp,uLEDiscotheque LightInInh
+camk13_250717_sess28,camk13,camk13\camk13_250717_sess28,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",no,23,CA1sp,uLEDiscotheque LightInInh
+camk12_250507_sess5,camk12,camk12\camk12_250507_sess5,neural3,c57b1/6,camk/aii32,"uled-12led-32ch-4shanks",no,40,CA1so CA1sp,ReactInh
+camk12_250508_sess6,camk12,camk12\camk12_250508_sess6,neural3,c57b1/6,camk/aii32,"uled-12led-32ch-4shanks",no,33,CA1sp CA1so,ReactInh
+fcamk1_200831_sess11,fcamk1,fcamk1\fcamk1_200831_sess11,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze,59,CA1sp CA1so CA1sr,LightInInh
+fcamk1_200903_sess14,fcamk1,fcamk1\fcamk1_200903_sess14,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze,64,CA1sp CA1so CA1sr,LightInInh
+fcamk3_201027_sess9,fcamk3,fcamk3\fcamk3_201027_sess9,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze  linear maze,26,CA1sp CA1so,LightInInh
+cancer2_250704_sess3,cancer2,cancer2\cancer2_250704_sess3,neural3,c57b1/6,wild type,"none",tmaze,72,CA1sp CA1so PTLp6 PTLp5,Cancer
+cancer2_250703_sess2,cancer2,cancer2\cancer2_250703_sess2,neural3,c57b1/6,wild type,"none",tmaze,73,CA1sp CA1so CA1sr PTLp6 PTLp5 PTLp4,Cancer
+camk13_250716_sess27,camk13,camk13\camk13_250716_sess27,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",no,45,CA1sp,ReactInh
+camk13_250718_sess29,camk13,camk13\camk13_250718_sess29,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",no,30,CA1sp CA1so,ReactInh
+camk13_250721_sess30,camk13,camk13\camk13_250721_sess30,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",no,39,CA1so CA1sp,ReactInh
+camk13_250618_sess5,camk13,camk13\camk13_250618_sess5,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze linear maze,22,CA1sp,uLEDiscotheque ReactInh
+camk13_250702_sess13,camk13,camk13\camk13_250702_sess13,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",tmaze,21,CA1sp,uLEDiscotheque LightInInh
+camk13_250717_sess28,camk13,camk13\camk13_250717_sess28,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",no,23,CA1sp,uLEDiscotheque LightInInh
+astro6_250716_sess10,astro6,astro6\astro6_250716_sess10,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,27,CA1sp CA1so CA1sr CA1slm CA3 PTLp,Astrometry
+astro3_250605_sess6,astro3,astro3\astro3_250605_sess6,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,50,CA1sp CA1so CA1sr,Astrometry
+cancer2_250708_sess7,cancer2,cancer2\cancer2_250708_sess7,neural3,c57b1/6,wild type,"none",tmaze,35,CA1so pCA1sp PTLp,Cancer
+cancer3_250703_sess2,cancer3,cancer3\cancer3_250703_sess2,neural3,c57b1/6,wild type,"none",tmaze,79,CA1so CA1sp CA1sr,Cancer
+camk13_250723_sess32,camk13,camk13\camk13_250723_sess32,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",no,28,CA1sp,uLEDiscotheque LightInInh
+cancer2_250710_sess9,cancer2,cancer2\cancer2_250710_sess9,neural3,c57b1/6,wild type,"none",tmaze,5,CA1sp CA1so,Cancer
+astro5_250710_sess4,astro5,astro5\astro5_250710_sess4,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,27,PTLp CA1so CA1sp CA1sr CA1slm CA3,Astrometry
+astro5_250719_sess13,astro5,astro5\astro5_250719_sess13,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze tmaze,23,PTLp CA1sr CA1slm CA3 CA1so pCA1sp CA1sp,Astrometry
+astro6_250717_sess11,astro6,astro6\astro6_250717_sess11,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,16,CA1sr CA1sp CA1slm PTLp CA1so CA3,Astrometry
+astro6_250719_sess13,astro6,astro6\astro6_250719_sess13,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze tmaze,16,PTLp CA3 CA1so CA1sp CA1sr CA1slm,Astrometry
+astro6_250720_sess14,astro6,astro6\astro6_250720_sess14,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze tmaze,26,CA1sp CA1sr CA1slm CA3 PTLp CA1so,Astrometry
+cancer3_250708_sess7,cancer3,cancer3\cancer3_250708_sess7,neural3,c57b1/6,wild type,"none",tmaze,37,PTLp CA1so CA1sp CA1sr,Cancer
+cancer3_250709_sess8,cancer3,cancer3\cancer3_250709_sess8,neural3,c57b1/6,wild type,"none",tmaze,99,PTLp CA1so CA1sp CA1sr CA1slm,Cancer
