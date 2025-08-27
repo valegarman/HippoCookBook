@@ -749,19 +749,46 @@ end
 function neuronLED_curado = curateNeuronLED(neuronLED)
 
     [nNeurons, nLEDs] = size(neuronLED);
-
     data = num2cell(logical(neuronLED));
 
-    f = figure('Name', 'Curado manual de neuron-LED', ...
-               'Position', [100 100 100 + 54*nLEDs 100 + 20*nNeurons]);
+    % Table visual parameters
+    visibleRows = 20;         % number of visible rows
+    rowHeight = 20;           % row height in pixels
+    colWidth = 54;            % width per LED column
+    tableWidth = min(nLEDs * colWidth, 1600);  % max width to avoid overflowing the screen
+    tableHeight = visibleRows * rowHeight;
 
-    % Create table
-    t = uitable(f, ...
+    % Create main figure
+    f = figure('Name', 'Manual curation of neuron-LED table', ...
+               'Position', [100 100 tableWidth + 80 tableHeight + 100], ...
+               'MenuBar', 'none', ...
+               'NumberTitle', 'off', ...
+               'Resize', 'off');
+
+    % Panel containing the table
+    panel = uipanel('Parent', f, ...
+                    'Units', 'pixels', ...
+                    'Position', [20 60 tableWidth tableHeight]);
+
+    % Create full table
+    t = uitable(panel, ...
         'Data', data, ...
         'ColumnEditable', true(1, nLEDs), ...
         'ColumnName', strcat("LED_", string(1:nLEDs)), ...
         'RowName', strcat("N", string(1:nNeurons)), ...
-        'Position', [20 60 54*nLEDs 20*nNeurons]);
+        'Units', 'normalized', ...
+        'Position', [0 0 1 1]);
+
+    % Add vertical scroll bar if needed
+    if nNeurons > visibleRows
+        uicontrol(f, 'Style', 'slider', ...
+            'Min', 1, ...
+            'Max', nNeurons - visibleRows + 1, ...
+            'Value', 1, ...
+            'SliderStep', [1/(nNeurons-visibleRows), 10/(nNeurons-visibleRows)], ...
+            'Position', [tableWidth + 40 60 20 tableHeight], ...
+            'Callback', @(src, event) scrollTable(t, round(get(src, 'Value')), visibleRows));
+    end
 
     % Save button
     uicontrol(f, 'Style', 'pushbutton', ...
@@ -769,8 +796,10 @@ function neuronLED_curado = curateNeuronLED(neuronLED)
         'Position', [20 20 100 30], ...
         'Callback', @(src, event) uiresume(f));
 
+    % Wait for user to click "Save"
     uiwait(f);
 
+    % Read curated data
     data_out = get(t, 'Data');
     neuronLED_curado = false(nNeurons, nLEDs);
     for i = 1:nNeurons
@@ -782,3 +811,12 @@ function neuronLED_curado = curateNeuronLED(neuronLED)
     close(f);
 end
 
+% Helper function to scroll vertically through the table
+function scrollTable(t, startRow, nRowsVisible)
+    data = get(t, 'Data');
+    rowNames = get(t, 'RowName');
+
+    endRow = min(startRow + nRowsVisible - 1, size(data, 1));
+    set(t, 'Data', data(startRow:endRow, :));
+    set(t, 'RowName', rowNames(startRow:endRow));
+end
