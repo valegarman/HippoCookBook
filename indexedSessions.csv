@@ -285,3 +285,4 @@ astro6_250719_sess13,astro6,astro6\astro6_250719_sess13,neural3,c57b1/6,wild typ
 astro6_250720_sess14,astro6,astro6\astro6_250720_sess14,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze tmaze,26,CA1sp CA1sr CA1slm CA3 PTLp CA1so,Astrometry
 cancer3_250708_sess7,cancer3,cancer3\cancer3_250708_sess7,neural3,c57b1/6,wild type,"none",tmaze,37,PTLp CA1so CA1sp CA1sr,Cancer
 cancer3_250709_sess8,cancer3,cancer3\cancer3_250709_sess8,neural3,c57b1/6,wild type,"none",tmaze,99,PTLp CA1so CA1sp CA1sr CA1slm,Cancer
+cancer5_250716_sess1,cancer5,cancer5\cancer5_250716_sess1,neural3,c57b1/6,wild type,"none",tmaze,57,CA1so CA1sp CA1sr,Cancer
