@@ -163,7 +163,6 @@ for shk=1:length(SHANKS)
 end
 
 %% find Deep and superficial channels ######################################
-keyboard;
 Deep_Sup=[];
 con_sum_all=[];
 con_direction_all=[];
