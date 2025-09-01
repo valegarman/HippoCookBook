@@ -13,6 +13,7 @@ processSession('basepath','D:\cancer5\cancer5_250719_sess4','digital_optogenetic
 processSession('basepath','C:\data\cancer5\cancer5_250721_sess6','digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 
 indexNewSession('basepath','C:\data\cancer5\cancer5_250716_sess1');
+indexNewSession('basepath','C:\data\cancer5\cancer5_250721_sess6');
 
 %% CANCER6
 updateExpFolder_temp({'E:\cancer6'},'D:\cancer6');
