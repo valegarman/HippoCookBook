@@ -10,6 +10,7 @@ updateExpFolder_temp({'E:\cancer5'},'D:\cancer5');
 preprocessSession('basepath','D:\cancer5\cancer5_250719_sess4','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
 
 processSession('basepath','D:\cancer5\cancer5_250719_sess4','digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
+processSession('basepath','C:\data\cancer5\cancer5_250721_sess6','digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 
 indexNewSession('basepath','C:\data\cancer5\cancer5_250716_sess1');
 

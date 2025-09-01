@@ -429,7 +429,9 @@ end
 %% 12. ULED analysis 
 try
     getuLEDPulses;
+    getuLEDResponse;         
 catch
+    warning('Not possible to run getULEDResponse...');
 end
 
 %% 13. Summary per cell
