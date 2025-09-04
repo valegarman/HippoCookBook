@@ -210,7 +210,7 @@ elseif strcmpi(task,'alternation')
 
     if ~use_manual_ttls
         % score for alternation task
-        if isfield(digitalIn,'timestampsOn') && size(digitalIn.timestampsOn,2)>= 5
+        if isfield(digitalIn,'timestampsOn') && size(digitalIn.timestampsOn,2)>= 4
             armChoice.timestamps = [digitalIn.timestampsOn{leftArmTtl_channel}; digitalIn.timestampsOn{rightArmTtl_channel}]; 
             % 0 is left, 1 is right
             armChoice.visitedArm = [zeros(size(digitalIn.timestampsOn{leftArmTtl_channel})); ones(size(digitalIn.timestampsOn{rightArmTtl_channel}))];
@@ -246,16 +246,21 @@ elseif strcmpi(task,'alternation')
             
             [armChoice.timestamps, idx] = sort(armChoice.timestamps);
             armChoice.visitedArm = armChoice.visitedArm(idx);
-            
-            armChoice.delay.dur = nanmean(armChoice.delay.timestamps(:,2) - armChoice.delay.timestamps(:,1));
-            armChoice.delay.durations = round(armChoice.delay.timestamps(:,2) - armChoice.delay.timestamps(:,1),0);
+            try
+                armChoice.delay.dur = nanmean(armChoice.delay.timestamps(:,2) - armChoice.delay.timestamps(:,1));
+                armChoice.delay.durations = round(armChoice.delay.timestamps(:,2) - armChoice.delay.timestamps(:,1),0);
+                if ~isnan(armChoice.delay.durations(end))
+                    armChoice.delay.durations(end) = NaN;
+                end
+            catch
+                armChoice.delay.dur = NaN;
+                armChoice.delay.durations = NaN;
+            end
             armChoice.choice = [NaN; abs(diff(armChoice.visitedArm))]; % 1 is right, 0 is wrong
             armChoice.performance = nansum(armChoice.choice)/(length(armChoice.choice) - 1);
             performance = [];
             
-            if ~isnan(armChoice.delay.durations(end))
-                armChoice.delay.durations(end) = NaN;
-            end
+
             durations = unique(armChoice.delay.durations);
             for ii = 1:length(durations)- 1
                 performance = [performance; sum(armChoice.choice(find(armChoice.delay.durations == durations(ii)) + 1)) / length(find(armChoice.delay.durations == durations(ii)))];
