@@ -104,14 +104,14 @@ if ~isempty(reject_sessions)
     list_of_sessions{find(contains(list_of_sessions,lower(reject_sessions)))} = ' ';
 end
 
-    sessionsTable = readtable([indexedSessionCSV_path filesep indexedSessionCSV_name,'.csv']); % the variable is called allSessions
+sessionsTable = readtable([indexedSessionCSV_path filesep indexedSessionCSV_name,'.csv']); % the variable is called allSessions
     
-    for ii = 1:length(sessionsTable.SessionName)
+for ii = 1:length(sessionsTable.SessionName)
     
-        sessions.basepaths{ii} = adapt_filesep([nas_path(sessionsTable.Location{ii}) filesep sessionsTable.Path{ii}]);
+    sessions.basepaths{ii} = adapt_filesep([nas_path(sessionsTable.Location{ii}) filesep sessionsTable.Path{ii}]);
     
-    end
-    sessions.project = sessionsTable.Project;
+end
+sessions.project = sessionsTable.Project;
     
     disp('Projects found: '); 
     for ii = 1:length(sessions.project) % remove to spaces together, if any
@@ -325,9 +325,11 @@ for ii = 1:length(list_of_results2)
 end
 
 % stack results with different samples than neurons (i.e ripple events)
-projectResults.fiber_psth_ripples = stackSessionResult(projectSessionResults.fiber_psth_ripples,projectSessionResults.num_ripples);
-projectResults.fiber_psth_ripples_PreSleep2 = stackSessionResult(projectSessionResults.fiber_psth_ripples_PreSleep2,projectSessionResults.num_ripples_pre);
-projectResults.fiber_psth_ripples_PostSleep2 = stackSessionResult(projectSessionResults.fiber_psth_ripples_PostSleep2,projectSessionResults.num_ripples_post);
+try
+    projectResults.fiber_psth_ripples = stackSessionResult(projectSessionResults.fiber_psth_ripples,projectSessionResults.num_ripples);
+    projectResults.fiber_psth_ripples_PreSleep2 = stackSessionResult(projectSessionResults.fiber_psth_ripples_PreSleep2,projectSessionResults.num_ripples_pre);
+    projectResults.fiber_psth_ripples_PostSleep2 = stackSessionResult(projectSessionResults.fiber_psth_ripples_PostSleep2,projectSessionResults.num_ripples_post);
+
 
 for ii = 1:length(projectSessionResults.SessionArmChoiceEvents)
     if isstruct(projectSessionResults.SessionArmChoiceEvents{ii})
@@ -338,6 +340,9 @@ for ii = 1:length(projectSessionResults.SessionArmChoiceEvents)
     end 
 end
 projectResults.performance = performance;
+
+catch
+end
 
 projectResults.cell_metrics = cell_metrics;
 
@@ -358,6 +363,7 @@ for ii = 1:length(projectSessionResults.numcells)
     end
 end
 
+try
 % session, genetic line, experimentalSubjet (for ripples variables)
 counCell = 1;
 for ii = 1:length(projectSessionResults.num_ripples)
@@ -408,7 +414,7 @@ for ii = 1:length(projectSessionResults.num_ripples_post)
          counCell = counCell + 1;
     end
 end
-
+end
 
 projectResults.sessionList = unique(projectResults.session);
 projectResults.geneticLineList = unique(projectResults.geneticLine);
