@@ -58,11 +58,13 @@ processSession('basepath','C:\data\camk13\camk13_250723_sess32','digital_optogen
 processSession('basepath','Y:\camk13\camk13_250722_sess31','digital_optogenetic_channels',[1 2],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 
 processSession('basepath','Y:\camk13\camk13_250718_sess29','digital_optogenetic_channels',[1 2],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
+processSession('basepath','C:\data\camk13\camk13_250731_sess38','digital_optogenetic_channels',[1 2],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 
 indexNewSession('basepath','Y:\camk13\camk13_250618_sess5');
 indexNewSession('basepath','Y:\camk13\camk13_250702_sess13');
 indexNewSession('basepath','C:\data\camk13\camk13_250717_sess28');
 indexNewSession('basepath','C:\data\camk13\camk13_250723_sess32');
+indexNewSession('basepath','C:\data\camk13\camk13_250731_sess38');
 
 %% ASTRO3
 updateExpFolder_temp({'E:\astro3'},'D:\astro3');
