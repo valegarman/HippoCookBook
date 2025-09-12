@@ -252,6 +252,7 @@ fcamk1_200831_sess11,fcamk1,fcamk1\fcamk1_200831_sess11,neural3,c57b1/6,camkii/a
 fcamk1_200903_sess14,fcamk1,fcamk1\fcamk1_200903_sess14,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze,64,CA1sp CA1so CA1sr,LightInInh
 fcamk3_201027_sess9,fcamk3,fcamk3\fcamk3_201027_sess9,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze  linear maze,26,CA1sp CA1so,LightInInh
 cancer2_250704_sess3,cancer2,cancer2\cancer2_250704_sess3,neural3,c57b1/6,wild type,"none",tmaze,72,CA1sp CA1so PTLp6 PTLp5,Cancer
+camk13_250730_sess37,camk13,camk13\camk13_250730_sess37,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",no,16,CA1sp,ReactInh
 cancer2_250703_sess2,cancer2,cancer2\cancer2_250703_sess2,neural3,c57b1/6,wild type,"none",tmaze,73,CA1sp CA1so CA1sr PTLp6 PTLp5 PTLp4,Cancer
 camk13_250716_sess27,camk13,camk13\camk13_250716_sess27,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",no,45,CA1sp,ReactInh
 camk13_250718_sess29,camk13,camk13\camk13_250718_sess29,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",no,30,CA1sp CA1so,ReactInh
@@ -292,3 +293,4 @@ camk13_250725_sess34,camk13,camk13\camk13_250725_sess34,neural3,c57b1/6,camkii/a
 camk13_250728_sess35,camk13,camk13\camk13_250728_sess35,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",no,38,CA1sp,ReactInh
 cancer5_250721_sess6,cancer5,cancer5\cancer5_250721_sess6,neural3,c57b1/6,wild type,"none",tmaze,48,CA1so CA1sp CA1sr,Cancer
 camk13_250731_sess38,camk13,camk13\camk13_250731_sess38,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",no,21,CA1sp,ReactInh
+
