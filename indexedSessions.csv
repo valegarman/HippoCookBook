@@ -252,3 +252,4 @@ fcamk1_200831_sess11,fcamk1,fcamk1\fcamk1_200831_sess11,neural3,c57b1/6,camkii/a
 fcamk1_200903_sess14,fcamk1,fcamk1\fcamk1_200903_sess14,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze,64,CA1sp CA1so CA1sr,LightInInh
 fcamk3_201027_sess9,fcamk3,fcamk3\fcamk3_201027_sess9,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze  linear maze,26,CA1sp CA1so,LightInInh
 cancer2_250704_sess3,cancer2,cancer2\cancer2_250704_sess3,neural3,c57b1/6,wild type,"none",tmaze,72,CA1sp CA1so PTLp6 PTLp5,Cancer
+camk13_250730_sess37,camk13,camk13\camk13_250730_sess37,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",no,16,CA1sp,ReactInh
