@@ -72,6 +72,7 @@ indexNewSession('basepath','Y:\camk13\camk13_250702_sess13');
 indexNewSession('basepath','C:\data\camk13\camk13_250717_sess28');
 indexNewSession('basepath','C:\data\camk13\camk13_250723_sess32');
 indexNewSession('basepath','C:\data\camk13\camk13_250731_sess38');
+indexNewSession('basepath','C:\data\camk13\camk13_250714_sess25');
 
 %% ASTRO3
 updateExpFolder_temp({'E:\astro3'},'D:\astro3');
