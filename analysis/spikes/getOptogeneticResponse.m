@@ -181,7 +181,7 @@ if ~isempty(digitalChannelsList)
     if ~isempty(digitalIn)
         for ii = 1:length(digitalChannelsList)
             pulsesDigital.timestamps = [pulsesDigital.timestamps; digitalIn.ints{digitalChannelsList(ii)}];
-            pulsesDigital.digitalChannelsList = [pulsesDigital.digitalChannelsList; [ones(size(digitalIn.ints{digitalChannelsList(ii)},2),1) * digitalChannelsList(ii)]];
+            pulsesDigital.digitalChannelsList = [pulsesDigital.digitalChannelsList; [ones(size(digitalIn.ints{digitalChannelsList(ii)},1),1) * digitalChannelsList(ii)]];
         end
     end
 end
