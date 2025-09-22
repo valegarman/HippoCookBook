@@ -68,6 +68,7 @@ processSession('basepath','C:\data\camk13\camk13_250731_sess38','digital_optogen
 processSession('basepath','C:\data\camk13\camk13_250714_sess25','digital_optogenetic_channels',[1 2],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 processSession('basepath','C:\data\camk13\camk13_250715_sess26','digital_optogenetic_channels',[1 2],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 processSession('basepath','C:\data\camk13\camk13_250713_sess24','digital_optogenetic_channels',[1 2],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
+processSession('basepath','C:\data\camk13\camk13_250712_sess23','digital_optogenetic_channels',[1 2],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 
 indexNewSession('basepath','Y:\camk13\camk13_250618_sess5');
 indexNewSession('basepath','Y:\camk13\camk13_250702_sess13');
