@@ -249,11 +249,20 @@ end
 % 4.1 Light responses, if available
 if ~any(ismember(excludeAnalysis, {'4',lower('spikesFeatures')}))
     try
-        getOptogeneticResponse('numRep',500,'force',true,'restrict_to', restrict_ints,'digitalChannelsList',digital_optogenetic_channels);
+        getOptogeneticResponse('numRep',500,'force',true,'restrict_to', restrict_ints,'digitalChannelsList',digital_optogenetic_channels,'analogChannelsList',[]);
     catch
     end
+
     % 4.2 ACG and waveform
     spikeFeatures;
+
+    % 1.3 ULED analysis 
+    try
+        getuLEDPulses;
+        getuLEDResponse;         
+    catch
+        warning('Not possible to run getULEDResponse...');
+    end
 end
 
 %% 5. Check Sleep Score
@@ -290,9 +299,6 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     getSpikesRank('events','upstates');
 
     % 8.2 Ripples
-
-
-
     ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',true,'thresholds',rippleMasterDetector_threshold,'eventSpikeThreshold', false); 
     psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10);
     % psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10,'restrict_to_manipulation',true);
@@ -362,6 +368,8 @@ if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
         getSessionTracking('forceReload',true,'leftTTL_reward',leftArmTtl_channel,'rightTTL_reward',rightArmTtl_channel,'homeTtl',homeDelayTtl_channel,'dlc_ttl_channel',dlc_ttl_channel);
         try
             getSessionArmChoice('task','alternation','leftArmTtl_channel',leftArmTtl_channel,'rightArmTtl_channel',rightArmTtl_channel,'homeDelayTtl_channel',homeDelayTtl_channel,'use_manual_ttls',use_manual_ttls);
+            getSessionArmChoice('task','uLED','leftArmTtl_channel',leftArmTtl_channel,'rightArmTtl_channel',rightArmTtl_channel,'homeDelayTtl_channel',homeDelayTtl_channel,'use_manual_ttls',use_manual_ttls);
+
         catch
             warning('Performance in task was not computed! maybe linear maze?');
         end
@@ -433,13 +441,7 @@ if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
     end
 end
 
-%% 12. ULED analysis 
-try
-    getuLEDPulses;
-    getuLEDResponse;         
-catch
-    warning('Not possible to run getULEDResponse...');
-end
+
 
 %% 13. Summary per cell
 if ~any(ismember(excludeAnalysis, {'12',lower('summary')}))
