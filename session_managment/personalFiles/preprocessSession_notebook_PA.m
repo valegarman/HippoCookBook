@@ -1,3 +1,8 @@
+%% KOBE
+preprocessSession('basepath','D:\kobe\kobe_000001_sess1','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
+
+
+
 %% WT9
 updateExpFolder_temp({'E:\wt9'},'D:\wt9');
 
@@ -78,6 +83,7 @@ indexNewSession('basepath','C:\data\camk13\camk13_250731_sess38');
 indexNewSession('basepath','C:\data\camk13\camk13_250714_sess25');
 indexNewSession('basepath','C:\data\camk13\camk13_250715_sess26');
 indexNewSession('basepath','C:\data\camk13\camk13_250713_sess24');
+indexNewSession('basepath','C:\data\camk13\camk13_250712_sess23');
 
 %% ASTRO3
 updateExpFolder_temp({'E:\astro3'},'D:\astro3');
