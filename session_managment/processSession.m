@@ -368,7 +368,7 @@ if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
         getSessionTracking('forceReload',true,'leftTTL_reward',leftArmTtl_channel,'rightTTL_reward',rightArmTtl_channel,'homeTtl',homeDelayTtl_channel,'dlc_ttl_channel',dlc_ttl_channel);
         try
             getSessionArmChoice('task','alternation','leftArmTtl_channel',leftArmTtl_channel,'rightArmTtl_channel',rightArmTtl_channel,'homeDelayTtl_channel',homeDelayTtl_channel,'use_manual_ttls',use_manual_ttls);
-            getSessionArmChoice('task','uLED','leftArmTtl_channel',leftArmTtl_channel,'rightArmTtl_channel',rightArmTtl_channel,'homeDelayTtl_channel',homeDelayTtl_channel,'use_manual_ttls',use_manual_ttls);
+            % getSessionArmChoice('task','uLED','leftArmTtl_channel',leftArmTtl_channel,'rightArmTtl_channel',rightArmTtl_channel,'homeDelayTtl_channel',homeDelayTtl_channel,'use_manual_ttls',use_manual_ttls);
 
         catch
             warning('Performance in task was not computed! maybe linear maze?');
