@@ -407,7 +407,7 @@ if isempty(pul) || pul(1,1) < 1 || pul(1,1) > 1200 % if blinked light few than 1
     else % If the animal turned right first, find the location based on the IR location
         disp('Mouse turned right first. Mark y-position for right IR sensor...');
         roiIR = drawpoint;
-        idx = find((y <= (roiIR.Position(2)+0.01)) & (y >= (roiIR.Position(2)- 0.01)) & x>0.8); %% tentative right IR location
+        idx = find((y <= (roiIR.Position(2)+0.04)) & (y >= (roiIR.Position(2)- 0.03)) & x>0.8); %% tentative right IR location
         % timediff = rReward-dlcTtl(idx(1));
         % % correct TTLs
         % dlcTtl = dlcTtl + timediff;
