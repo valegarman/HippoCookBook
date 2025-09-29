@@ -421,50 +421,54 @@ if length(yC) == 2
 end
 
 % post-hocs
-if size(groupAll,2) < 2    
-    anph=multcompare(statsA,'CType',posthoc_test,'Display','off');
-    kkph=multcompare(statsK,'Display','off','CriticalValueType',posthoc_test);
-
-    if repeatedMeasures
-        stats.r_anova.posthoc.tbl = anph;
-        stats.r_anova.posthoc.test = posthoc_test;
-        stats.friedman.posthoc.tbl = kkph;
-        stats.friedman.posthoc.test = posthoc_test;
-    else
-        stats.anova.posthoc.tbl = anph;
-        stats.anova.posthoc.test = posthoc_test;
-        stats.kruskalWallis.posthoc.tbl = kkph;
-        stats.kruskalWallis.posthoc.test = posthoc_test;
-    end
-else
-    anph=multcompare(statsA,'CType',posthoc_test,'Display','off','Dimension',[1:size(groupAll,2)]);
-    % change numbers
-    posLin = [1:length(ind)];                                              
-    c=unique(indAll(:,end));
-    postMult = [];
-    for ii = 1:length(c)
-        postMult = [postMult posLin(indAll(:,2)==c(ii))];
-    end       
-
-    % 1 2 3 4 5 6    to 1 3 5 2 4 6
-    gs = anph(:,1:2);
-    codeMult = anph(:,1:2);
-    codeMultInd = anph(:,1:2);
-    for ii = 1:length(posLin)
-        codeMult(find(gs==posLin(ii))) = postMult(ii); %  postMult posLin
-    end
-    codeMultInd = codeMult;
-    for ii = 1:length(posLin)
-        codeMultInd(find(codeMult==posLin(ii))) = ind(ii); %  postMult posLin
-    end
-    anph(:,1:2) = codeMult;
-    anphInd = [(codeMultInd) anph(:,3:end)];
-    anph = sortrows(anph,[1 2]);
-    anphInd = sortrows(anphInd,[1 2]);
+try
+    if size(groupAll,2) < 2    
+        anph=multcompare(statsA,'CType',posthoc_test,'Display','off');
+        kkph=multcompare(statsK,'Display','off','CriticalValueType',posthoc_test);
     
-    stats.anova.posthoc.tbl = anphInd;
-    stats.anova.posthoc.test = posthoc_test;
- end
+        if repeatedMeasures
+            stats.r_anova.posthoc.tbl = anph;
+            stats.r_anova.posthoc.test = posthoc_test;
+            stats.friedman.posthoc.tbl = kkph;
+            stats.friedman.posthoc.test = posthoc_test;
+        else
+            stats.anova.posthoc.tbl = anph;
+            stats.anova.posthoc.test = posthoc_test;
+            stats.kruskalWallis.posthoc.tbl = kkph;
+            stats.kruskalWallis.posthoc.test = posthoc_test;
+        end
+    else
+        anph=multcompare(statsA,'CType',posthoc_test,'Display','off','Dimension',[1:size(groupAll,2)]);
+        % change numbers
+        posLin = [1:length(ind)];                                              
+        c=unique(indAll(:,end));
+        postMult = [];
+        for ii = 1:length(c)
+            postMult = [postMult posLin(indAll(:,2)==c(ii))];
+        end       
+    
+        % 1 2 3 4 5 6    to 1 3 5 2 4 6
+        gs = anph(:,1:2);
+        codeMult = anph(:,1:2);
+        codeMultInd = anph(:,1:2);
+        for ii = 1:length(posLin)
+            codeMult(find(gs==posLin(ii))) = postMult(ii); %  postMult posLin
+        end
+        codeMultInd = codeMult;
+        for ii = 1:length(posLin)
+            codeMultInd(find(codeMult==posLin(ii))) = ind(ii); %  postMult posLin
+        end
+        anph(:,1:2) = codeMult;
+        anphInd = [(codeMultInd) anph(:,3:end)];
+        anph = sortrows(anph,[1 2]);
+        anphInd = sortrows(anphInd,[1 2]);
+        
+        stats.anova.posthoc.tbl = anphInd;
+        stats.anova.posthoc.test = posthoc_test;
+    end
+catch
+    warning('Posthoc anlaysis could not be run...');
+end
 
 if pvar>=0.05
     varDiff='homocedasticity';
@@ -833,30 +837,34 @@ if doPlot
     hold off
     set(gca,'TickDir','out')
     if addSigStar
-        if strcmpi(sigStarTest,'KW')
-            phtest = kkph;
-        elseif strcmpi(sigStarTest,'anova')
-            phtest = anph;
-        else
-            error('significance star test not recognized!');
+        try
+            if strcmpi(sigStarTest,'KW')
+                phtest = kkph;
+            elseif strcmpi(sigStarTest,'anova')
+                phtest = anph;
+            else
+                error('significance star test not recognized!');
+            end
+            
+            gs = phtest(:, [1 2]);
+            ps = phtest(:, end);
+            gs(ps>.05,:) = []; ps(ps>.05)=[];
+            
+            posLin = [1:length(ind)];                                          % exange positions
+            gs2 = gs;
+            for ii = 1:length(posLin)
+                gs2(find(gs==posLin(ii))) = pos(ii);
+            end
+            
+            sigstar_aux(num2cell(gs2,2),ps);
+        catch
+            warning('Stars could not be added!');
         end
-        
-        gs = phtest(:, [1 2]);
-        ps = phtest(:, end);
-        gs(ps>.05,:) = []; ps(ps>.05)=[];
-        
-        posLin = [1:length(ind)];                                          % exange positions
-        gs2 = gs;
-        for ii = 1:length(posLin)
-            gs2(find(gs==posLin(ii))) = pos(ii);
-        end
-        
-        sigstar_aux(num2cell(gs2,2),ps);
     end
 end
 
 disp('ANOVA pairwise comparison ');
-disp(anph);
+try disp(anph); end
 disp('KK pairwise comparison ');
 try disp(kkph); end
 

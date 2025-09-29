@@ -248,8 +248,8 @@ for ii = 1:length(sessions.basepaths)
     
     % loop results
     for jj= 1:length(list_of_results)
-        targetFile = dir(['*.' list_of_results{jj} '*.mat']); 
-        % targetFile = dir(['*.' list_of_results{jj} '.mat']);
+        % targetFile = dir(['*.' list_of_results{jj} '*.mat']); 
+        targetFile = dir(['*.' list_of_results{jj} '.mat']);
         name_of_result = replace(list_of_results{jj},{'.','*'},'');
         name_of_result = replace(name_of_result,{'-'},'_');
         list_of_results2{jj} = name_of_result;
@@ -261,6 +261,32 @@ for ii = 1:length(sessions.basepaths)
         end
     end
 
+    try
+        if isfield(projectSessionResults,'fiber_psth_ripples')
+            if isstruct(projectSessionResults.fiber_psth_ripples{ii})
+                projectSessionResults.num_ripples(ii) = length(projectSessionResults.fiber_psth_ripples{ii}.times);
+            else
+                 projectSessionResults.num_ripples(ii) = NaN;
+            end
+        end
+        if isfield(projectSessionResults,'fiber_psth_ripples_PreSleep2') 
+            if isstruct(projectSessionResults.fiber_psth_ripples_PreSleep2{ii})
+                projectSessionResults.num_ripples_pre(ii) = length(projectSessionResults.fiber_psth_ripples_PreSleep2{ii}.times);
+            else
+                projectSessionResults.num_ripples_pre(ii) = NaN;
+            end
+        end
+        if isfield(projectSessionResults,'fiber_psth_ripples_PostSleep2')
+            if isstruct(projectSessionResults.fiber_psth_ripples_PostSleep2{ii})
+                projectSessionResults.num_ripples_post(ii) = length(projectSessionResults.fiber_psth_ripples_PostSleep2{ii}.times);
+            else
+                projectSessionResults.num_ripples_post(ii) = NaN;
+            end
+        end
+    catch
+
+    end
+    
     % if lightversion and checking fields
     if isfield(projectSessionResults,'optogeneticResponse') && ~isfield(projectSessionResults.optogeneticResponse{ii},'checkedCells') && isfield(projectSessionResults.optogeneticResponse{ii},'bootsTrapRate')
          projectSessionResults.optogeneticResponse{ii}.checkedCells = zeros(length(projectSessionResults.optogeneticResponse{ii}.bootsTrapRate(:,1)),1);
@@ -298,6 +324,23 @@ for ii = 1:length(list_of_results2)
     end
 end
 
+% stack results with different samples than neurons (i.e ripple events)
+projectResults.fiber_psth_ripples = stackSessionResult(projectSessionResults.fiber_psth_ripples,projectSessionResults.num_ripples);
+projectResults.fiber_psth_ripples_PreSleep2 = stackSessionResult(projectSessionResults.fiber_psth_ripples_PreSleep2,projectSessionResults.num_ripples_pre);
+projectResults.fiber_psth_ripples_PostSleep2 = stackSessionResult(projectSessionResults.fiber_psth_ripples_PostSleep2,projectSessionResults.num_ripples_post);
+
+for ii = 1:length(projectSessionResults.SessionArmChoiceEvents)
+    if isstruct(projectSessionResults.SessionArmChoiceEvents{ii})
+        fld = fields(projectSessionResults.SessionArmChoiceEvents{ii});
+        performance(ii) = projectSessionResults.SessionArmChoiceEvents{ii}.(fld{1}).performance;
+    else
+        performance(ii) = NaN;
+    end 
+end
+projectResults.performance = performance;
+
+projectResults.cell_metrics = cell_metrics;
+
 % session, genetic line, experimentalSubject
 counCell = 1;
 for ii = 1:length(projectSessionResults.numcells)
@@ -305,13 +348,67 @@ for ii = 1:length(projectSessionResults.numcells)
         % session
         projectResults.session{counCell} = lower(projectSessionResults.sessionName{ii});
         projectResults.sessionNumber(counCell) = ii;
+        
         % geneticLine
         projectResults.geneticLine{counCell} = lower(projectSessionResults.geneticLine{ii});
+        
         % expSubject
-        projectResults.expSubject{counCell} = lower(projectSessionResults.expSubject{ii});
-        counCell = counCell + 1;
+         projectResults.expSubject{counCell} = lower(projectSessionResults.expSubject{ii});
+         counCell = counCell + 1;
     end
 end
+
+% session, genetic line, experimentalSubjet (for ripples variables)
+counCell = 1;
+for ii = 1:length(projectSessionResults.num_ripples)
+    for jj = 1:projectSessionResults.num_ripples(ii)
+        % session
+        projectResults.session_ripples{counCell} = lower(projectSessionResults.sessionName{ii});
+        projectResults.sessionNumber_ripples(counCell) = ii;
+        
+        % geneticLine
+        projectResults.geneticLine_ripples{counCell} = lower(projectSessionResults.geneticLine{ii});
+        
+        % expSubject
+         projectResults.expSubject_ripples{counCell} = lower(projectSessionResults.expSubject{ii});
+         counCell = counCell + 1;
+    end
+end
+
+% session, genetic line, experimentalSubjet (for ripples variables)
+counCell = 1;
+for ii = 1:length(projectSessionResults.num_ripples_pre)
+    for jj = 1:projectSessionResults.num_ripples_pre(ii)
+        % session
+        projectResults.session_ripples_pre{counCell} = lower(projectSessionResults.sessionName{ii});
+        projectResults.sessionNumber_ripples_pre(counCell) = ii;
+        
+        % geneticLine
+        projectResults.geneticLine_ripples_pre{counCell} = lower(projectSessionResults.geneticLine{ii});
+        
+        % expSubject
+         projectResults.expSubject_ripples_pre{counCell} = lower(projectSessionResults.expSubject{ii});
+         counCell = counCell + 1;
+    end
+end
+
+% session, genetic line, experimentalSubjet (for ripples variables)
+counCell = 1;
+for ii = 1:length(projectSessionResults.num_ripples_post)
+    for jj = 1:projectSessionResults.num_ripples_post(ii)
+        % session
+        projectResults.session_ripples_post{counCell} = lower(projectSessionResults.sessionName{ii});
+        projectResults.sessionNumber_ripples_post(counCell) = ii;
+        
+        % geneticLine
+        projectResults.geneticLine_ripples_post{counCell} = lower(projectSessionResults.geneticLine{ii});
+        
+        % expSubject
+         projectResults.expSubject_ripples_post{counCell} = lower(projectSessionResults.expSubject{ii});
+         counCell = counCell + 1;
+    end
+end
+
 
 projectResults.sessionList = unique(projectResults.session);
 projectResults.geneticLineList = unique(projectResults.geneticLine);
