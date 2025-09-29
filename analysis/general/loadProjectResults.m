@@ -298,6 +298,23 @@ for ii = 1:length(list_of_results2)
     end
 end
 
+% session, genetic line, experimentalSubject
+counCell = 1;
+for ii = 1:length(projectSessionResults.numcells)
+    for jj = 1:projectSessionResults.numcells(ii)
+        % session
+        projectResults.session{counCell} = lower(projectSessionResults.sessionName{ii});
+        projectResults.sessionNumber(counCell) = ii;
+        
+        % geneticLine
+        projectResults.geneticLine{counCell} = lower(projectSessionResults.geneticLine{ii});
+        
+        % expSubject
+         projectResults.expSubject{counCell} = lower(projectSessionResults.expSubject{ii});
+         counCell = counCell + 1;
+    end
+end
+
 projectResults.sessionList = unique(projectResults.session);
 projectResults.geneticLineList = unique(projectResults.geneticLine);
 projectResults.expSubjectList = unique(projectResults.expSubject);
