@@ -625,6 +625,22 @@ if plt
                     saveas(gca,['SummaryFigures\fiber_green_PP_',eventType,'.png']);
                 end
             end
+
+
+            figure;
+            plotFill(time_vector,green_PP{ii}.responsecurveZSmooth,'color',[0 1 0]);
+            ylim([-1 1]);
+
+            if savePlot
+                if restrict_fiber_epochs | ~isempty(savePlotAs)
+                    saveas(gca,['SummaryFigures\fiber_green_mean_PP_',eventType,'_',save_plt_as{ii},'.png']);
+                else
+                    saveas(gca,['SummaryFigures\fiber_green_mean_PP_',eventType,'.png']);
+                end
+            end
+
+
+
         end
 
         % if savePlot

@@ -175,8 +175,8 @@ for ii = 1:length(sessions.basepaths)
     
     % loop results
     for jj= 1:length(list_of_results)
-        % targetFile = dir(['*.' list_of_results{jj} '*.mat']); 
-        targetFile = dir(['*.' list_of_results{jj} '.mat']);
+        targetFile = dir(['*.' list_of_results{jj} '*.mat']); 
+        % targetFile = dir(['*.' list_of_results{jj} '.mat']);
         name_of_result = replace(list_of_results{jj},{'.','*'},'');
         name_of_result = replace(name_of_result,{'-'},'_');
         list_of_results2{jj} = name_of_result;
@@ -188,32 +188,6 @@ for ii = 1:length(sessions.basepaths)
         end
     end
 
-    try
-        if isfield(projectSessionResults,'fiber_psth_ripples')
-            if isstruct(projectSessionResults.fiber_psth_ripples{ii})
-                projectSessionResults.num_ripples(ii) = length(projectSessionResults.fiber_psth_ripples{ii}.times);
-            else
-                 projectSessionResults.num_ripples(ii) = NaN;
-            end
-        end
-        if isfield(projectSessionResults,'fiber_psth_ripples_PreSleep2') 
-            if isstruct(projectSessionResults.fiber_psth_ripples_PreSleep2{ii})
-                projectSessionResults.num_ripples_pre(ii) = length(projectSessionResults.fiber_psth_ripples_PreSleep2{ii}.times);
-            else
-                projectSessionResults.num_ripples_pre(ii) = NaN;
-            end
-        end
-        if isfield(projectSessionResults,'fiber_psth_ripples_PostSleep2')
-            if isstruct(projectSessionResults.fiber_psth_ripples_PostSleep2{ii})
-                projectSessionResults.num_ripples_post(ii) = length(projectSessionResults.fiber_psth_ripples_PostSleep2{ii}.times);
-            else
-                projectSessionResults.num_ripples_post(ii) = NaN;
-            end
-        end
-    catch
-
-    end
-    
     % if lightversion and checking fields
     if isfield(projectSessionResults,'optogeneticResponse') && ~isfield(projectSessionResults.optogeneticResponse{ii},'checkedCells') && isfield(projectSessionResults.optogeneticResponse{ii},'bootsTrapRate')
          projectSessionResults.optogeneticResponse{ii}.checkedCells = zeros(length(projectSessionResults.optogeneticResponse{ii}.bootsTrapRate(:,1)),1);
@@ -280,13 +254,11 @@ for ii = 1:length(projectSessionResults.numcells)
         % session
         projectResults.session{counCell} = lower(projectSessionResults.sessionName{ii});
         projectResults.sessionNumber(counCell) = ii;
-        
         % geneticLine
         projectResults.geneticLine{counCell} = lower(projectSessionResults.geneticLine{ii});
-        
         % expSubject
-         projectResults.expSubject{counCell} = lower(projectSessionResults.expSubject{ii});
-         counCell = counCell + 1;
+        projectResults.expSubject{counCell} = lower(projectSessionResults.expSubject{ii});
+        counCell = counCell + 1;
     end
 end
 
