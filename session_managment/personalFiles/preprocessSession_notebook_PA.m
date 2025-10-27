@@ -11,8 +11,10 @@ preprocessSession('basepath','D:\camk14\camk14_250929_sess5','analysisPath',[],'
 preprocessSession('basepath','D:\camk14\camk14_250930_sess6','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[1 2]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',true,'getPos',false);
 preprocessSession('basepath','D:\camk14\camk14_251001_sess7','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[1 2]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',true,'getPos',false);
 preprocessSession('basepath','D:\camk14\camk14_251002_sess8','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[1 2]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',true,'getPos',false);
+preprocessSession('basepath','D:\camk14\camk14_251010_sess9','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[1 2]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',true,'getPos',false);
 
 processSession('basepath','Y:\unindexedSubjects\fCamk14\camk14_250922_sess1','digital_optogenetic_channels',[1 2],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
+processSession('basepath','Y:\unindexedSubjects\fCamk14\camk14_250923_sess2','digital_optogenetic_channels',[1 2],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 
 
 indexNewSession('basepath','Y:\unindexedSubjects\fCamk14\camk14_250922_sess1');
