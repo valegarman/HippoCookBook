@@ -123,6 +123,8 @@ if length(excludeAnalysis) == 0
 end
 excludeAnalysis = lower(excludeAnalysis);
 
+keyboard;
+
 %% 1. Runs sessionTemplate
 if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))
         try
@@ -198,7 +200,7 @@ elseif restrict_to_baseline
     list_of_manipulations = list_of_manipulations_names;
     session = loadSession;
     for ii = 1:length(session.epochs)
-        if ismember(session.epochs{ii}.behavioralParadigm, list_of_manipulations)
+        if isfield(session.epochs{ii},'behavioralParadigm') && ismember(session.epochs{ii}.behavioralParadigm, list_of_manipulations)
             ints = [0 session.epochs{ii}.startTime];
             warning('Epoch with manipulations found! Restricting analysis to baseline interval!');
         end
@@ -249,7 +251,7 @@ end
 % 4.1 Light responses, if available
 if ~any(ismember(excludeAnalysis, {'4',lower('spikesFeatures')}))
     try
-        getOptogeneticResponse('numRep',500,'force',true,'restrict_to', restrict_ints,'digitalChannelsList',digital_optogenetic_channels,'analogChannelsList',[]);
+        getOptogeneticResponse('numRep',500,'force',true,'restrict_to', restrict_ints,'digitalChannelsList',digital_optogenetic_channels,'analogChannelsList',[],'minNumberOfPulses',10,'minDuration',0);
     catch
     end
 
