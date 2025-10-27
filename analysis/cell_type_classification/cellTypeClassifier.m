@@ -13,7 +13,7 @@ addParameter(p,'cell_metrics',[],@isstruct);
 addParameter(p,'thetaMod',[]);
 addParameter(p,'modelType','hippocampus5',@ischar);
 addParameter(p,'overwrite_cell_metrics',true,@islogical);
-addParameter(p,'score_cut_off',.60,@isnumeric);
+addParameter(p,'score_cut_off',.70,@isnumeric);
 addParameter(p,'imposeCellExplorerPyr',true);
 addParameter(p,'ripples_psth',[],@isstruct);
 addParameter(p,'force',false,@logical);
@@ -226,6 +226,7 @@ cell_types(ismember(cell_types,'CAMK2')) = {'CAMK2+'};
 % Impose pyramidal cells from CellExplorer (conservative)
 if imposeCellExplorerPyr
     ceMask = ismember(cell_metrics.putativeCellType,'Pyramidal Cell');
+    % percentAgreement  = sum(ceMask == ismember(cell_types', 'CAMK2+')) / numel(ceMask) * 100;
     cell_types(ceMask) = {'CAMK2+'};
 end
 
@@ -410,20 +411,21 @@ if doPlot
     cell_classes = unique(cell_types);
     for ii = 1:length(cell_classes)
         if length(find(ismember(cell_types, cell_classes(ii))==1))>1
-            plotFill(time, W(:, ismember(cell_types, cell_classes(ii)))', 'color', getColors(cell_classes(ii)), 'style', 'filled');
+            plotFill(time, zscore(W(:, ismember(cell_types, cell_classes(ii)))',[],2), 'color', getColors(cell_classes(ii)), 'style', 'filled');
         elseif length(find(ismember(cell_types, cell_classes(ii))==1))==1
-            plot(time, W(:, ismember(cell_types, cell_classes(ii)))','-', 'color', getColors(cell_classes(ii)), 'LineWidth', 1);
+            plot(time, zscore(W(:, ismember(cell_types, cell_classes(ii)))',[],2),'-', 'color', getColors(cell_classes(ii)), 'LineWidth', 1);
         end
     end
     axis tight
     xlabel('Time (ms)');
-    ylabel('Amplitude (uV)');
+    ylabel('Amplitude (S.D.)');
 
     ax4 = nexttile(tl,4); hold(ax4,'on'); box(ax4,'on');
     if isfield(cell_metrics.acg, 'narrow_normalized')
         W = cell_metrics.acg.narrow_normalized;
     elseif isfield(cell_metrics.acg, 'narrow')
         W = cell_metrics.acg.narrow;
+        W = W./sum(W,1);
         % W = normalize(W, 2, 'range');
     end
     time = linspace(-50,50,size(W,1));
