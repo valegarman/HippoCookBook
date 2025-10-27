@@ -14,6 +14,9 @@ preprocessSession('basepath','D:\camk14\camk14_251002_sess8','analysisPath',[],'
 
 processSession('basepath','Y:\unindexedSubjects\fCamk14\camk14_250922_sess1','digital_optogenetic_channels',[1 2],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 
+
+indexNewSession('basepath','Y:\unindexedSubjects\fCamk14\camk14_250922_sess1');
+
 %% MIA
 preprocessSession('basepath','D:\mia\mia_000001_sess1','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
 
