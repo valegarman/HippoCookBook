@@ -254,11 +254,21 @@ for ii = 1:length(projectSessionResults.numcells)
         % session
         projectResults.session{counCell} = lower(projectSessionResults.sessionName{ii});
         projectResults.sessionNumber(counCell) = ii;
+<<<<<<< HEAD
+        
+        % geneticLine
+        projectResults.geneticLine{counCell} = lower(projectSessionResults.geneticLine{ii});
+        
+        % expSubject
+         projectResults.expSubject{counCell} = lower(projectSessionResults.expSubject{ii});
+         counCell = counCell + 1;
+=======
         % geneticLine
         projectResults.geneticLine{counCell} = lower(projectSessionResults.geneticLine{ii});
         % expSubject
         projectResults.expSubject{counCell} = lower(projectSessionResults.expSubject{ii});
         counCell = counCell + 1;
+>>>>>>> 81879e83d9559f0508582f8345d4a552c83afe22
     end
 end
 
