@@ -440,7 +440,7 @@ if doPlot
     xlabel('Time (ms)');
     ylabel('Probability (normalized)');
 
-    exportgraphics(fig, ['SummaryFigures\cell_familty_classification.png']);
+    % exportgraphics(fig, ['SummaryFigures\cell_familty_classification.png']);
 
 end
 

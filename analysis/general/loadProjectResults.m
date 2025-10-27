@@ -195,11 +195,18 @@ end
     
     sessions.basepaths = sessions.basepaths(contains(lower(sessions.project), lower(project)) & contains(lower(sessionsTable.SessionName), lower(list_of_sessions)));
     sessions.project = sessions.project(contains(lower(sessions.project), lower(project)) & contains(lower(sessionsTable.SessionName), lower(list_of_sessions)));
+
 else
     sessions.basepaths = list_of_paths;
 end
 
 fprintf('Loading %3.i sessions... \n',length(sessions.basepaths)); %\n
+
+for ii = 1:length(sessions.basepaths)
+    sessions.basepaths_before{ii} = [sessions.basepaths{ii},'.cell_metrics_before'];
+    sessions.basepaths_after{ii} = [sessions.basepaths{ii},'.cell_metrics_after'];
+end
+files_clean = cellfun(@(f) [fileparts(f)], sessions.basepaths_before, 'UniformOutput', false);
 
 %% load cellexplorer results
 cell_metrics = loadCellMetricsBatch('basepaths',sessions.basepaths);
@@ -207,6 +214,15 @@ cell_metrics = loadCellMetricsBatch('basepaths',sessions.basepaths);
 cell_metrics = CellExplorer('metrics',cell_metrics);% run CELLEXPLORER when adding new data
 close(gcf);
 
+cell_metrics_before = loadCellMetricsBatch('basepaths',sessions.basepaths,'saveAs','cell_metrics_before');
+% disp('Close when done exploring...');
+cell_metrics_before = CellExplorer('metrics',cell_metrics_before);% run CELLEXPLORER when adding new data
+close(gcf);
+
+cell_metrics_after = loadCellMetricsBatch('basepaths',sessions.basepaths,'saveAs','cell_metrics_after');
+% disp('Close when done exploring...');
+cell_metrics_after = CellExplorer('metrics',cell_metrics_after);% run CELLEXPLORER when adding new data
+close(gcf);
 %% collect data per session
 if saveSummaries
     mkdir(analysis_project_path,'Summaries');
@@ -312,6 +328,10 @@ for ii = 1:length(projectSessionResults.numcells)
         counCell = counCell + 1;
     end
 end
+
+projectResults.cell_metrics = cell_metrics;
+projectResults.cell_metrics_before = cell_metrics_before;
+projectResults.cell_metrics_after = cell_metrics_after;
 
 projectResults.sessionList = unique(projectResults.session);
 projectResults.geneticLineList = unique(projectResults.geneticLine);
