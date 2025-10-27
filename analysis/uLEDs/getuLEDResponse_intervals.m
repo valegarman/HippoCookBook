@@ -274,12 +274,12 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
            nIntervals = size(intervals,1);
            dur_interval = median(diff(intervals'));
            if ~isempty(pulses) 
-               fake_train_of_intervals = intervals(1,1):0.001:intervals(end,1);
+                fake_train_of_intervals = intervals(1,1):0.001:intervals(end,1);
                 fake_status = cell(1, numRep_fake); % Preallocate outside parfor
         
               parfor mm = 1:numRep_fake
                     rand_intervals = sort(fake_train_of_intervals(randperm(length(fake_train_of_intervals), nIntervals)));
-                  fake_status{mm} = InIntervals(pulses, [rand_intervals' rand_intervals'+ dur_interval]);            
+                    fake_status{mm} = InIntervals(pulses, [rand_intervals' rand_intervals'+ dur_interval]);            
                  end
              else
                 for mm = 1:numRep_fake
@@ -302,7 +302,7 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
              error('Boostraping type do not recognized! ');
          end
         
-          covert fake_status to times
+         % covert fake_status to times
          for ii = 1:length(fake_status)
              fake_status_temp{ii} = pulses(find(fake_status{ii}));
          end
@@ -323,10 +323,8 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
             times{length(times)+1} = [0]; 
         end
         
-        % times = cat(2,times, fake_status);
-        times = cat(2,times);
-
-
+        times = cat(2,times, fake_status);
+        %times = cat(2,times);
 
         fprintf('\n');
         [stccg, t] = CCG(times,[],'binSize',binSize,'duration',winSize,'norm','rate');
@@ -342,7 +340,8 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
         if length(times{numberOfcells + 2}) < minNumberOfPulses
             out_interval.responsecurve(:,kk,jj,:) = out_interval.responsecurve(:,kk,jj,:) * NaN;
         end
-    %% interpolation in e out
+  
+        %% interpolation in e out
      if interpolate_pulse_sides   
         samples_to_interpolate = [find(t==0)-1:find(t==0)+1; ...
         find(t==pulseDuration)-1:find(t==pulseDuration)+1];
@@ -492,7 +491,6 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
 end
 
 % check here if the code still works
-
 
 in_interval.ratioBeforeAfter = in_interval.rateDuringPulse./in_interval.rateBeforePulse;
 out_interval.ratioBeforeAfter = out_interval.rateDuringPulse./out_interval.rateBeforePulse;

@@ -198,7 +198,11 @@ elseif restrict_to_baseline
     list_of_manipulations = list_of_manipulations_names;
     session = loadSession;
     for ii = 1:length(session.epochs)
+<<<<<<< HEAD
+        if ismember(session.epochs{ii}.behavioralParadigm, list_of_manipulations)
+=======
         if isfield(session.epochs{ii},'behavioralParadigm') && ismember(session.epochs{ii}.behavioralParadigm, list_of_manipulations)
+>>>>>>> d08c828f114bb705a8e0d7cf75da28b668fe709e
             ints = [0 session.epochs{ii}.startTime];
             warning('Epoch with manipulations found! Restricting analysis to baseline interval!');
         end
@@ -249,7 +253,11 @@ end
 % 4.1 Light responses, if available
 if ~any(ismember(excludeAnalysis, {'4',lower('spikesFeatures')}))
     try
+<<<<<<< HEAD
+        getOptogeneticResponse('numRep',500,'force',true,'restrict_to', restrict_ints,'digitalChannelsList',digital_optogenetic_channels,'analogChannelsList',[]);
+=======
         getOptogeneticResponse('numRep',500,'force',true,'restrict_to', restrict_ints,'digitalChannelsList',digital_optogenetic_channels,'analogChannelsList',[],'minNumberOfPulses',10,'minDuration',0);
+>>>>>>> d08c828f114bb705a8e0d7cf75da28b668fe709e
     catch
     end
 
