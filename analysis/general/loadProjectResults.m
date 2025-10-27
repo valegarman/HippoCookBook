@@ -122,7 +122,7 @@ if isempty(list_of_paths)
     for ii = 1:length(list_of_sessions)
         sessions_basepaths{ii} = adapt_filesep([nas_path(sessionsTable.Location{sessions_found(ii)}) filesep sessionsTable.Path{sessions_found(ii)}]);
     end
-<<<<<<< HEAD
+
     
     % if isempty(indexedSessionCSV_name)
     %     error('Need to provide the name of the index Project variable');
@@ -179,8 +179,6 @@ if isempty(list_of_paths)
     sessions.basepaths = sessions.basepaths(contains(lower(sessions.project), lower(project)) & contains(lower(sessionsTable.SessionName), lower(list_of_sessions)));
     sessions.project = sessions.project(contains(lower(sessions.project), lower(project)) & contains(lower(sessionsTable.SessionName), lower(list_of_sessions)));
 
-=======
->>>>>>> d08c828f114bb705a8e0d7cf75da28b668fe709e
 else
     sessions_basepaths = list_of_paths;
 end
@@ -328,29 +326,19 @@ for ii = 1:length(projectSessionResults.numcells)
         % session
         projectResults.session{counCell} = lower(projectSessionResults.sessionName{ii});
         projectResults.sessionNumber(counCell) = ii;
-<<<<<<< HEAD
-        
-        % geneticLine
-        projectResults.geneticLine{counCell} = lower(projectSessionResults.geneticLine{ii});
-        
-        % expSubject
-         projectResults.expSubject{counCell} = lower(projectSessionResults.expSubject{ii});
-         counCell = counCell + 1;
-=======
         % geneticLine
         projectResults.geneticLine{counCell} = lower(projectSessionResults.geneticLine{ii});
         % expSubject
         projectResults.expSubject{counCell} = lower(projectSessionResults.expSubject{ii});
         counCell = counCell + 1;
->>>>>>> 81879e83d9559f0508582f8345d4a552c83afe22
+
     end
 end
 
-<<<<<<< HEAD
 projectResults.cell_metrics = cell_metrics;
-projectResults.cell_metrics_before = cell_metrics_before;
-projectResults.cell_metrics_after = cell_metrics_after;
-=======
+% projectResults.cell_metrics_before = cell_metrics_before;
+% projectResults.cell_metrics_after = cell_metrics_after;
+
 try
 % session, genetic line, experimentalSubjet (for ripples variables)
 counCell = 1;
@@ -403,7 +391,6 @@ for ii = 1:length(projectSessionResults.num_ripples_post)
     end
 end
 end
->>>>>>> d08c828f114bb705a8e0d7cf75da28b668fe709e
 
 projectResults.sessionList = unique(projectResults.session);
 projectResults.geneticLineList = unique(projectResults.geneticLine);
