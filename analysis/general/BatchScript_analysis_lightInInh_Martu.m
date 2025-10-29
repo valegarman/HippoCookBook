@@ -36,15 +36,13 @@ for ii = 56: length(sessionsTable.SessionName)
                 % 
             end
 
-            collision_metrics_1_21 = get_light_spike_CollisionMetrics(uLEDResponses_interval,'label','1msTo21ms','saveMat',true,'update_cell_metrics',false,'save_as','lightSpikeCollisions_randInt','rate_change_threshold',3, 'rand_analysis',true);
+            collision_metrics_1_21 = get_light_spike_CollisionMetrics(uLEDResponses_interval,'label','1msTo21ms','saveMat',true,'update_cell_metrics',false,'save_as','lightSpikeCollisions_trial','rate_change_threshold',3);
             % collision_metrics_control = get_light_spike_CollisionMetrics(uLEDResponses_control,'label','control','saveMat',true,'update_cell_metrics',true,'save_as','lightSpikeCollisions_control','rate_change_threshold',3);
 
             clear uLEDResponses_interval
             clear uLEDResponses_control
             close all;
-        % catch
-        %     warning('Analysis was not possible!');
-        % end
+        
     end
 end
 
