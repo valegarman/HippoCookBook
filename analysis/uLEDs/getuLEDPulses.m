@@ -59,7 +59,7 @@ addParameter(p,'duration_round_decimal',3,@isscalar);
 addParameter(p,'minNumberOfPulses',200,@isnumeric);
 addParameter(p,'conditionEpochs',[]);
 addParameter(p,'doPlot',true,@islogical);
-addParameter(p,'restrict_intervals',true,@isnumeric);
+addParameter(p,'restrict_intervals',[0 Inf],@isnumeric);
 
 parse(p,varargin{:});
 basepath = p.Results.basepath;

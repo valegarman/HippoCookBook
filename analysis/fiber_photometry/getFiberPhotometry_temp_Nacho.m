@@ -109,6 +109,11 @@ try
     fprintf('Last timestamp fiber in ephys, %3.2f \n', ts(end)); %\n
     fprintf('Last timestamp fiber in fiber, %3.2f \n', fiber.timestamps(end)); %\n
     fprintf('Error: %3.2f \n', abs(fiber.timestamps(end) - ts(end))); %\n
+
+    if abs(fiber.timestamps(end) - ts(end)) > 1
+        warning('Check fiber recording. Probably ephys stopped before fiber?...');
+        keyboard;
+    end
 catch
 end
 
@@ -154,11 +159,11 @@ end
 % fig4=figure('Name','PP fiber green');
 % plot(fiber.timestamps, fiber.green_PP.green_dFF_Smoothed)
 % title('Green preprocessed')
-
+% 
 % fig4=figure('Name','PP fiber red');
 % plot(fiber.timestamps, fiber.red_PP.red_dFF_Smoothed)
 % title('Red preprocessed')
-
+% 
 % try
 %     if plt
 % 

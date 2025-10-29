@@ -1,8 +1,8 @@
-function [projectResults, projectSessionResults] =  loadProjectResults(varargin)
+function [projectResults, projectSessionResults] =  loadProjectResults_fiber_pablo(varargin)
 % [projectResults, projectSessionResults] =  loadProjectResults(varargin)
 %   Load and stack all results for a given project
 %
-% MV 2022, 2025
+% MV 2022
 %
 % TO DO: Improve multiple projects managment
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -12,6 +12,7 @@ p = inputParser;
 addParameter(p,'project','Undefined',@ischar);
 addParameter(p,'indexedSessionCSV_path',[]);
 addParameter(p,'indexedSessionCSV_name','indexedSessions');
+%%addParameter(p,'data_path',database_path,@isstring);
 addParameter(p,'includeSpikes',true,@isstring);
 addParameter(p,'includeLFP',false,@isstring);
 addParameter(p,'analysis_project_path',[],@isfolder);
@@ -20,7 +21,8 @@ addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'saveSummaries',true,@islogical);
 addParameter(p,'lightVersion',true,@islogical);
 addParameter(p,'list_of_sessions',[],@iscell);
-addParameter(p,'add_results',[]);
+addParameter(p,'reject_sessions',[],@iscell);
+addParameter(p,'list_of_results',[]);
 addParameter(p,'list_of_paths',[]); % if list of paths is provide, then it overides the sessions path from the CSV
 addParameter(p,'save_as',[],@ischar);
 
@@ -38,42 +40,16 @@ saveSummaries = p.Results.saveSummaries;
 lightVersion = p.Results.lightVersion;
 list_of_sessions = p.Results.list_of_sessions;
 save_as = p.Results.save_as;
-add_results = p.Results.add_results;
+list_of_results = p.Results.list_of_results;
+reject_sessions = p.Results.reject_sessions;
 list_of_paths = p.Results.list_of_paths;
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% By default it loads the following results:
-% {...
-% 'optogeneticResponse',       ...
-% 'ripples_psth,               ...
-% 'slowOscillations_psth',     ...
-% 'theta_*.PhaseLockingData',  ...
-% 'lgamma*.PhaseLockingData',  ...
-% 'hgamma*.PhaseLockingData',  ...
-% 'ripple*.PhaseLockingData',  ...
-% 'spatialModulation',         ...
-% 'placeFields',               ...
-% 'behavior.cellinfo',         ...
-% 'ACGPeak',                   ...
-% }
-
-% Some results previusly used in addition:
-% {...
-% 'optogeneticResponse',       ...
-% 'ripples_psth',              ...
-% 'slowOscillations_psth',     ...
-% 'speedCorr',                 ...
-% 'uLEDResponse.cellinfo',     ...
-% 'spikeCCGchange',            ...
-% 'fiber_psth_ripples',        ...
-% 'FiberPhotometry',           ...
-% 'behavior_fiber',            ...
-% }; % etc
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% If previous results are found...
 if isempty(save_as)
     save_as = [datestr(datetime('now'),29) '_' project];
+end
+
+if isempty(list_of_results)
+    list_of_results = loadListOfResults(project);
 end
 
 if loadLast
@@ -89,40 +65,81 @@ if loadLast
     end
 end
 
-% List of results
-% default list is
-list_of_results = {'optogeneticResponse','ripples_psth','slowOscillations_psth','theta_*.PhaseLockingData','lgamma*.PhaseLockingData','hgamma*.PhaseLockingData','ripple*.PhaseLockingData',...
-            'spatialModulation','placeFields','behavior.cellinfo','ACGPeak'};
-% adding new results
-list_of_results = unique([list_of_results, add_results], 'stable');
-
-
 %% find indexed sessions
 if isempty(list_of_paths)
-    
-    % check sessions to load
+
+sessionsTable = readtable([indexedSessionCSV_path filesep indexedSessionCSV_name,'.csv']); % the variable is called allSessions
+
+for ii = 1:length(sessionsTable.SessionName)
+
+    sessions.basepaths{ii} = adapt_filesep([nas_path(sessionsTable.Location{ii}) filesep sessionsTable.Path{ii}]);
+
+end
+sessions.project = sessionsTable.Project;
+
+disp('Projects found: '); 
+for ii = 1:length(sessions.project) % remove to spaces together, if any
+    sessions.project{ii} = strrep(sessions.project{ii}, '  ', ' ');
+end
+project_list = unique(sessions.project);
+project_list_temp = cell(0);
+for jj = 1:length(project_list)
+    project_list_temp{1,length(project_list_temp)+1} = project_list{jj};
+    project_list_temp{1,length(project_list_temp)+1} = ' ';
+end    
+project_list_temp(end) = [];
+project_list = unique(split([project_list_temp{:}],' '));
+
+for ii = 1:length(project_list)
+    fprintf(' %3.i/ %s \n',ii,project_list{ii}); %\n
+end
+% fprintf('Taking all sessions from project "%s" \n',project)
+
+% selecting sessions
+if isempty(list_of_sessions)
+    list_of_sessions = sessionsTable.SessionName;
+end
+
+if ~isempty(reject_sessions)
+    list_of_sessions{find(contains(list_of_sessions,lower(reject_sessions)))} = ' ';
+end
+
     sessionsTable = readtable([indexedSessionCSV_path filesep indexedSessionCSV_name,'.csv']); % the variable is called allSessions
-    if ischar(list_of_sessions) && strcmpi(list_of_sessions, 'all')
-        list_of_sessions = sessionsTable.SessionName;
-    else
-        sessions_found = find(ismember(sessionsTable.SessionName, list_of_sessions));
-        
-        if length(sessions_found) < length(list_of_sessions)
-            error('Sessions not found: %s', strjoin(setxor(list_of_sessions, sessionsTable.SessionName(sessions_found)), ', '));
-        end
+    
+    for ii = 1:length(sessionsTable.SessionName)
+    
+        sessions.basepaths{ii} = adapt_filesep([nas_path(sessionsTable.Location{ii}) filesep sessionsTable.Path{ii}]);
+    
+    end
+    sessions.project = sessionsTable.Project;
+    
+    disp('Projects found: '); 
+    for ii = 1:length(sessions.project) % remove to spaces together, if any
+        sessions.project{ii} = strrep(sessions.project{ii}, '  ', ' ');
+    end
+    project_list = unique(sessions.project);
+    project_list_temp = cell(0);
+    for jj = 1:length(project_list)
+        project_list_temp{1,length(project_list_temp)+1} = project_list{jj};
+        project_list_temp{1,length(project_list_temp)+1} = ' ';
+    end    
+    project_list_temp(end) = [];
 
-        if numel(sessionsTable.SessionName(sessions_found)) ~= numel(unique(sessionsTable.SessionName(sessions_found)))
-            [uniqueElems, ~, idx] = unique(sessionsTable.SessionName(sessions_found));
-            counts = accumarray(idx, 1);
-            error('Duplicated sessions: %s', strjoin(uniqueElems(counts > 1), ', '));
-        end
+    project_list = unique(split([project_list_temp{:}],' '));
+    
+    for ii = 1:length(project_list)
+        fprintf(' %3.i/ %s \n',ii,project_list{ii}); %\n
+    end
+    % fprintf('Taking all sessions from project "%s" \n',project)
+    
+    % selecting sessions
+    if isempty(list_of_sessions)
+        list_of_sessions = sessionsTable.SessionName;
     end
     
-    sessions_found = find(ismember(sessionsTable.SessionName, list_of_sessions));
-    for ii = 1:length(list_of_sessions)
-        sessions_basepaths{ii} = adapt_filesep([nas_path(sessionsTable.Location{sessions_found(ii)}) filesep sessionsTable.Path{sessions_found(ii)}]);
+    if ~isempty(reject_sessions)
+        list_of_sessions{find(contains(list_of_sessions,lower(reject_sessions)))} = ' ';
     end
-
     
     % if isempty(indexedSessionCSV_name)
     %     error('Need to provide the name of the index Project variable');
@@ -178,18 +195,11 @@ if isempty(list_of_paths)
     
     sessions.basepaths = sessions.basepaths(contains(lower(sessions.project), lower(project)) & contains(lower(sessionsTable.SessionName), lower(list_of_sessions)));
     sessions.project = sessions.project(contains(lower(sessions.project), lower(project)) & contains(lower(sessionsTable.SessionName), lower(list_of_sessions)));
-
 else
-    sessions_basepaths = list_of_paths;
+    sessions.basepaths = list_of_paths;
 end
 
 fprintf('Loading %3.i sessions... \n',length(sessions.basepaths)); %\n
-
-for ii = 1:length(sessions.basepaths)
-    sessions.basepaths_before{ii} = [sessions.basepaths{ii},'.cell_metrics_before'];
-    sessions.basepaths_after{ii} = [sessions.basepaths{ii},'.cell_metrics_after'];
-end
-files_clean = cellfun(@(f) [fileparts(f)], sessions.basepaths_before, 'UniformOutput', false);
 
 %% load cellexplorer results
 cell_metrics = loadCellMetricsBatch('basepaths',sessions.basepaths);
@@ -197,15 +207,6 @@ cell_metrics = loadCellMetricsBatch('basepaths',sessions.basepaths);
 cell_metrics = CellExplorer('metrics',cell_metrics);% run CELLEXPLORER when adding new data
 close(gcf);
 
-cell_metrics_before = loadCellMetricsBatch('basepaths',sessions.basepaths,'saveAs','cell_metrics_before');
-% disp('Close when done exploring...');
-cell_metrics_before = CellExplorer('metrics',cell_metrics_before);% run CELLEXPLORER when adding new data
-close(gcf);
-
-cell_metrics_after = loadCellMetricsBatch('basepaths',sessions.basepaths,'saveAs','cell_metrics_after');
-% disp('Close when done exploring...');
-cell_metrics_after = CellExplorer('metrics',cell_metrics_after);% run CELLEXPLORER when adding new data
-close(gcf);
 %% collect data per session
 if saveSummaries
     mkdir(analysis_project_path,'Summaries');
@@ -247,8 +248,8 @@ for ii = 1:length(sessions.basepaths)
     
     % loop results
     for jj= 1:length(list_of_results)
-        targetFile = dir(['*.' list_of_results{jj} '*.mat']); 
-        % targetFile = dir(['*.' list_of_results{jj} '.mat']);
+        % targetFile = dir(['*.' list_of_results{jj} '*.mat']); 
+        targetFile = dir(['*.' list_of_results{jj} '.mat']);
         name_of_result = replace(list_of_results{jj},{'.','*'},'');
         name_of_result = replace(name_of_result,{'-'},'_');
         list_of_results2{jj} = name_of_result;
@@ -260,6 +261,32 @@ for ii = 1:length(sessions.basepaths)
         end
     end
 
+    try
+        if isfield(projectSessionResults,'fiber_psth_ripples')
+            if isstruct(projectSessionResults.fiber_psth_ripples{ii})
+                projectSessionResults.num_ripples(ii) = length(projectSessionResults.fiber_psth_ripples{ii}.times);
+            else
+                 projectSessionResults.num_ripples(ii) = NaN;
+            end
+        end
+        if isfield(projectSessionResults,'fiber_psth_ripples_PreSleep2') 
+            if isstruct(projectSessionResults.fiber_psth_ripples_PreSleep2{ii})
+                projectSessionResults.num_ripples_pre(ii) = length(projectSessionResults.fiber_psth_ripples_PreSleep2{ii}.times);
+            else
+                projectSessionResults.num_ripples_pre(ii) = NaN;
+            end
+        end
+        if isfield(projectSessionResults,'fiber_psth_ripples_PostSleep2')
+            if isstruct(projectSessionResults.fiber_psth_ripples_PostSleep2{ii})
+                projectSessionResults.num_ripples_post(ii) = length(projectSessionResults.fiber_psth_ripples_PostSleep2{ii}.times);
+            else
+                projectSessionResults.num_ripples_post(ii) = NaN;
+            end
+        end
+    catch
+
+    end
+    
     % if lightversion and checking fields
     if isfield(projectSessionResults,'optogeneticResponse') && ~isfield(projectSessionResults.optogeneticResponse{ii},'checkedCells') && isfield(projectSessionResults.optogeneticResponse{ii},'bootsTrapRate')
          projectSessionResults.optogeneticResponse{ii}.checkedCells = zeros(length(projectSessionResults.optogeneticResponse{ii}.bootsTrapRate(:,1)),1);
@@ -298,11 +325,9 @@ for ii = 1:length(list_of_results2)
 end
 
 % stack results with different samples than neurons (i.e ripple events)
-try
-    projectResults.fiber_psth_ripples = stackSessionResult(projectSessionResults.fiber_psth_ripples,projectSessionResults.num_ripples);
-    projectResults.fiber_psth_ripples_PreSleep2 = stackSessionResult(projectSessionResults.fiber_psth_ripples_PreSleep2,projectSessionResults.num_ripples_pre);
-    projectResults.fiber_psth_ripples_PostSleep2 = stackSessionResult(projectSessionResults.fiber_psth_ripples_PostSleep2,projectSessionResults.num_ripples_post);
-
+projectResults.fiber_psth_ripples = stackSessionResult(projectSessionResults.fiber_psth_ripples,projectSessionResults.num_ripples);
+projectResults.fiber_psth_ripples_PreSleep2 = stackSessionResult(projectSessionResults.fiber_psth_ripples_PreSleep2,projectSessionResults.num_ripples_pre);
+projectResults.fiber_psth_ripples_PostSleep2 = stackSessionResult(projectSessionResults.fiber_psth_ripples_PostSleep2,projectSessionResults.num_ripples_post);
 
 for ii = 1:length(projectSessionResults.SessionArmChoiceEvents)
     if isstruct(projectSessionResults.SessionArmChoiceEvents{ii})
@@ -314,9 +339,6 @@ for ii = 1:length(projectSessionResults.SessionArmChoiceEvents)
 end
 projectResults.performance = performance;
 
-catch
-end
-
 projectResults.cell_metrics = cell_metrics;
 
 % session, genetic line, experimentalSubject
@@ -326,20 +348,16 @@ for ii = 1:length(projectSessionResults.numcells)
         % session
         projectResults.session{counCell} = lower(projectSessionResults.sessionName{ii});
         projectResults.sessionNumber(counCell) = ii;
+        
         % geneticLine
         projectResults.geneticLine{counCell} = lower(projectSessionResults.geneticLine{ii});
+        
         % expSubject
-        projectResults.expSubject{counCell} = lower(projectSessionResults.expSubject{ii});
-        counCell = counCell + 1;
-
+         projectResults.expSubject{counCell} = lower(projectSessionResults.expSubject{ii});
+         counCell = counCell + 1;
     end
 end
 
-projectResults.cell_metrics = cell_metrics;
-% projectResults.cell_metrics_before = cell_metrics_before;
-% projectResults.cell_metrics_after = cell_metrics_after;
-
-try
 % session, genetic line, experimentalSubjet (for ripples variables)
 counCell = 1;
 for ii = 1:length(projectSessionResults.num_ripples)
@@ -390,7 +408,7 @@ for ii = 1:length(projectSessionResults.num_ripples_post)
          counCell = counCell + 1;
     end
 end
-end
+
 
 projectResults.sessionList = unique(projectResults.session);
 projectResults.geneticLineList = unique(projectResults.geneticLine);
