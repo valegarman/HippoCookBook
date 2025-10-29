@@ -176,10 +176,8 @@ for ii = 1:length(uLEDResponses_interval)
         squeeze(uLEDResponses_interval{ii}.out_interval.maxRespLED.responseCurve_REM)];
    uLEDResponses_OutInterval.responsecurve_NREM = [uLEDResponses_OutInterval.responsecurve_NREM; ...
         squeeze(uLEDResponses_interval{ii}.out_interval.maxRespLED.responseCurve_NREM)];
-  
 
-
-    if rand_analysis
+   if rand_analysis
         %rand
         temp_rand_rate = [];
         temp_rand_rateZ = [];
