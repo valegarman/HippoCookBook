@@ -115,7 +115,10 @@ else
     scatter(x,y,3,t,'filled','MarkerEdgeColor','none','MarkerFaceAlpha',.5); colormap jet
     caxis([t(1) t(end)]);
     xlim([xMaze]); ylim([yMaze]);
+<<<<<<< HEAD
 
+=======
+>>>>>>> e6e653a7f78efe9a81aedd0faae5adbe3cb48ee9
     if strcmpi(tracking.description,'TMaze') || strcmpi(tracking.description,'TMaze2') || strcmpi(tracking.description,'Deeplabcut')
         axis ij;
     end
@@ -136,8 +139,11 @@ if editLOI
     scatter(x,y,3,t,'filled','MarkerEdgeColor','none','MarkerFaceAlpha',.5); colormap jet
     caxis([t(1) t(end)]);
     xlim([xMaze]); ylim([yMaze]);
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> e6e653a7f78efe9a81aedd0faae5adbe3cb48ee9
     if strcmpi(tracking.description,'TMaze') || strcmpi(tracking.description,'TMaze2') || strcmpi(tracking.description,'Deeplabcut')
         axis ij;
     end
@@ -192,8 +198,11 @@ mazeVirtual = interp1(cum_dist, maze, dist_steps);
 vlinMazeCont = interp1(cum_dist, linMazeCont, dist_steps);
 
 % correct steam linearization
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> e6e653a7f78efe9a81aedd0faae5adbe3cb48ee9
 if strcmpi(tracking.description,'DeepLabCut') || strcmpi(tracking.description,'TMaze')
     vlinMazeCont(vlinMazeCont>=linMazeCont(4)) = ...
     vlinMazeCont(vlinMazeCont>=linMazeCont(4)) - linMazeCont(4); 
@@ -232,10 +241,14 @@ subplot(3,1,[1 2])
 hold on
 % scatter(x,y,3,[.8 .8 .8],'filled','MarkerEdgeColor','none','MarkerFaceAlpha',.5);
 plot(mazeVirtual(:,1), mazeVirtual(:,2),'k-');
+<<<<<<< HEAD
 
 
 if strcmpi(tracking.description,'TMaze') || strcmpi(tracking.description,'TMaze2') || strcmpi(tracking.description,'Deeplabcut')
 
+=======
+if strcmpi(tracking.description,'TMaze') || strcmpi(tracking.description,'TMaze2') || strcmpi(tracking.description,'Deeplabcut')
+>>>>>>> e6e653a7f78efe9a81aedd0faae5adbe3cb48ee9
     axis ij;
 end
 colormap parula

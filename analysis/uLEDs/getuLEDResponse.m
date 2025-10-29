@@ -598,6 +598,7 @@ if doPlot
             end
         end
         colormap(jet);
+        mkdir('SummaryFigures');
         exportgraphics(gcf,['SummaryFigures\', save_as, '_rate_condition' ,num2str(kk),'_dur',num2str(uLEDResponses.pulseDuration(ii,kk,1)),'s.png']);
         
         figure;
