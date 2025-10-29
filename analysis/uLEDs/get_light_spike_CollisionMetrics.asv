@@ -140,12 +140,8 @@ for ii = 1:length(uLEDResponses_interval)
     uLEDResponses_InInterval.responsecurve = [uLEDResponses_InInterval.responsecurve; ...
         squeeze(uLEDResponses_interval{ii}.in_interval.maxRespLED.responseCurve)];
     % sleep state
-    uLEDResponses_InInterval.responsecurve_WAKE = [uLEDResponses_InInterval.responsecurve_WAKE; ...
-        squeeze(uLEDResponses_interval{ii}.in_interval.maxRespLED.responseCurve_WAKE)];
-   uLEDResponses_InInterval.responsecurve_REM = [uLEDResponses_InInterval.responsecurve_REM; ...
-        squeeze(uLEDResponses_interval{ii}.in_interval.maxRespLED.responseCurve_REM)];
-   uLEDResponses_InInterval.responsecurve_NREM = [uLEDResponses_InInterval.responsecurve_NREM; ...
-        squeeze(uLEDResponses_interval{ii}.in_interval.maxRespLED.responseCurve_NREM)];
+    uLEDResponses_InInterval.responsecurve = [uLEDResponses_InInterval.responsecurve_WAKE; ...
+        squeeze(uLEDResponses_interval{ii}.in_interval.maxRespLED.responseCurve)];
   
 
     % out
@@ -169,15 +165,6 @@ for ii = 1:length(uLEDResponses_interval)
         (1:size(uLEDResponses_interval{ii}.bootsTrapRate,1))'];
     uLEDResponses_OutInterval.responsecurve = [uLEDResponses_OutInterval.responsecurve; ...
         squeeze(uLEDResponses_interval{ii}.out_interval.maxRespLED.responseCurve)];
-  % sleep state
-   uLEDResponses_OutInterval.responsecurve_WAKE = [uLEDResponses_OutInterval.responsecurve_WAKE; ...
-        squeeze(uLEDResponses_interval{ii}.out_interval.maxRespLED.responseCurve_WAKE)];
-   uLEDResponses_OutInterval.responsecurve_REM = [uLEDResponses_OutInterval.responsecurve_REM; ...
-        squeeze(uLEDResponses_interval{ii}.out_interval.maxRespLED.responseCurve_REM)];
-   uLEDResponses_OutInterval.responsecurve_NREM = [uLEDResponses_OutInterval.responsecurve_NREM; ...
-        squeeze(uLEDResponses_interval{ii}.out_interval.maxRespLED.responseCurve_NREM)];
-  
-
 
     if rand_analysis
         %rand

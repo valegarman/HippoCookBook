@@ -182,6 +182,8 @@ leftArmTtl_channel = session.analysisTags.leftArmTtl_channel;
 rightArmTtl_channel = session.analysisTags.rightArmTtl_channel;
 homeDelayTtl_channel = session.analysisTags.homeDelayTtl_channel;
 tracking_ttl_channel = session.analysisTags.bazler_ttl_channel;
+digital_optogenetic_channels = session.analysisTags.digital_optogenetic_channels;
+
 
 ints = [];
 if restrict_to_manipulation
