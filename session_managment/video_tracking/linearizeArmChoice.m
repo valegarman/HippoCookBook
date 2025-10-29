@@ -115,11 +115,8 @@ else
     scatter(x,y,3,t,'filled','MarkerEdgeColor','none','MarkerFaceAlpha',.5); colormap jet
     caxis([t(1) t(end)]);
     xlim([xMaze]); ylim([yMaze]);
-<<<<<<< HEAD
-    if strcmpi(tracking.description,'DeepLabCut') || strcmpi(tracking.description,'TMaze') || strcmpi(tracking.description,'TMaze2')
-=======
+
     if strcmpi(tracking.description,'TMaze') || strcmpi(tracking.description,'TMaze2') || strcmpi(tracking.description,'Deeplabcut')
->>>>>>> a474b5282772782748213eaa2564343474037608
         axis ij;
     end
     title('Draw a polyline following animal trajectory (first turn right)...','FontWeight','normal');
@@ -139,11 +136,9 @@ if editLOI
     scatter(x,y,3,t,'filled','MarkerEdgeColor','none','MarkerFaceAlpha',.5); colormap jet
     caxis([t(1) t(end)]);
     xlim([xMaze]); ylim([yMaze]);
-<<<<<<< HEAD
-    if strcmpi(tracking.description,'DeepLabCut')  || strcmpi(tracking.description,'TMaze') || strcmpi(tracking.description,'TMaze2')
-=======
+
+
     if strcmpi(tracking.description,'TMaze') || strcmpi(tracking.description,'TMaze2') || strcmpi(tracking.description,'Deeplabcut')
->>>>>>> a474b5282772782748213eaa2564343474037608
         axis ij;
     end
     title('Move vertex to match trajectory and press Enter...','FontWeight','normal');
@@ -197,11 +192,9 @@ mazeVirtual = interp1(cum_dist, maze, dist_steps);
 vlinMazeCont = interp1(cum_dist, linMazeCont, dist_steps);
 
 % correct steam linearization
-<<<<<<< HEAD
-if strcmpi(tracking.description,'DeepLabCut')  || strcmpi(tracking.description,'TMaze')
-=======
+
+
 if strcmpi(tracking.description,'DeepLabCut') || strcmpi(tracking.description,'TMaze')
->>>>>>> a474b5282772782748213eaa2564343474037608
     vlinMazeCont(vlinMazeCont>=linMazeCont(4)) = ...
     vlinMazeCont(vlinMazeCont>=linMazeCont(4)) - linMazeCont(4); 
 elseif strcmpi(tracking.description,'TMaze2')
@@ -239,11 +232,10 @@ subplot(3,1,[1 2])
 hold on
 % scatter(x,y,3,[.8 .8 .8],'filled','MarkerEdgeColor','none','MarkerFaceAlpha',.5);
 plot(mazeVirtual(:,1), mazeVirtual(:,2),'k-');
-<<<<<<< HEAD
-if strcmpi(tracking.description,'DeepLabCut')  || strcmpi(tracking.description,'TMaze') || strcmpi(tracking.description,'TMaze2')
-=======
+
+
 if strcmpi(tracking.description,'TMaze') || strcmpi(tracking.description,'TMaze2') || strcmpi(tracking.description,'Deeplabcut')
->>>>>>> a474b5282772782748213eaa2564343474037608
+
     axis ij;
 end
 colormap parula
