@@ -65,6 +65,8 @@ indexNewSession('basepath','C:\data\cancer5\cancer5_250716_sess1');
 indexNewSession('basepath','C:\data\cancer5\cancer5_250721_sess6');
 indexNewSession('basepath','C:\data\cancer5\cancer5_250720_sess5');
 indexNewSession('basepath','C:\data\cancer5\cancer5_250722_sess7');
+indexNewSession('basepath','C:\data\cancer5\cancer5_250717_sess2');
+indexNewSession('basepath','C:\data\cancer5\cancer5_250718_sess3');
 
 %% CANCER6
 updateExpFolder_temp({'E:\cancer6'},'D:\cancer6');
