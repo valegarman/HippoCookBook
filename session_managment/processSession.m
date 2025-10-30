@@ -1,4 +1,4 @@
-function [] = processSession(varargin)
+ function [] = processSession(varargin)
 
 % [] = indexSession_InterneuronsLibrary(varargin)
 
@@ -182,6 +182,8 @@ leftArmTtl_channel = session.analysisTags.leftArmTtl_channel;
 rightArmTtl_channel = session.analysisTags.rightArmTtl_channel;
 homeDelayTtl_channel = session.analysisTags.homeDelayTtl_channel;
 tracking_ttl_channel = session.analysisTags.bazler_ttl_channel;
+digital_optogenetic_channels = session.analysisTags.digital_optogenetic_channels;
+
 
 ints = [];
 if restrict_to_manipulation
@@ -301,7 +303,13 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     getSpikesRank('events','upstates');
 
     % 8.2 Ripples
+<<<<<<< HEAD
+
+    ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',false,'thresholds',rippleMasterDetector_threshold,'eventSpikeThreshold',false); 
+
+=======
     ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',true,'thresholds',rippleMasterDetector_threshold,'eventSpikeThreshold', false); 
+>>>>>>> e6e653a7f78efe9a81aedd0faae5adbe3cb48ee9
     psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10);
     % psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10,'restrict_to_manipulation',true);
     getSpikesRank('events','ripples');

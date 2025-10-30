@@ -5,7 +5,7 @@ function h = plotFill(datax,datay,varargin)
 % 
 % INPUTS
 %    'datax'        1 x M, x axis, same for all datay
-%    'datay'        N x M, Different entries must be in columns.
+%   SE 'datay'        N x M, Different entries must be in columns.
 %
 % <optional>
 %    'error'        'ci95' (default), 'std' or 'SE'.
