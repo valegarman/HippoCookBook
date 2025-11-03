@@ -309,4 +309,10 @@ astro6_250712_sess6,astro6,astro6\astro6_250712_sess6,neural3,c57b1/6,wild type,
 astro6_250713_sess7,astro6,astro6\astro6_250713_sess7,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,23,PTLp CA1so CA1sp CA1sr CA1slm CA3,Astrometry
 astro6_250714_sess8,astro6,astro6\astro6_250714_sess8,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,13,PTLp CA1so CA1sp CA1sr CA1slm CA3,Astrometry
 astro6_250718_sess12,astro6,astro6\astro6_250718_sess12,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,18,CA1sr PTLp CA1so CA1sp CA1slm CA3,Astrometry
+<<<<<<< HEAD
 camk14_250926_sess4,camk14,camk14\camk14_250926_sess4,neural3,c57b1/6,camkii/ai32,uled-12led-32ch-4shanks,linear maze linear maze,31,CA1so pCA1sp CA1sp disCA1sr pCA1slm pCA1sr CA1sr CA1slm,uLEDiscotheque
+=======
+camk14_250926_sess4,camk14,camk14\camk14_250926_sess4,neural3,c57b1/6,camkii/ai32,"uled-12led-32ch-4shanks",linear maze linear maze,31,CA1so pCA1sp CA1sp disCA1sr pCA1slm pCA1sr CA1sr CA1slm,uLEDiscotheque
+cancer5_250717_sess2,cancer5,cancer5\cancer5_250717_sess2,neural3,c57b1/6,wild type,"none",tmaze,51,CA1so CA1sp CA1sr,Cancer
+cancer5_250718_sess3,cancer5,cancer5\cancer5_250718_sess3,neural3,c57b1/6,wild type,"none",tmaze,47,CA1so CA1sp CA1sr,Cancer
+>>>>>>> 94e962390ffc924c2afa4a305a88ae47cb966b24
