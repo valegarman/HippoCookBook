@@ -303,7 +303,11 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     getSpikesRank('events','upstates');
 
     % 8.2 Ripples
+<<<<<<< HEAD
+    ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',true,'thresholds',rippleMasterDetector_threshold,'eventSpikeThreshold', false); 
+=======
     ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',false,'thresholds',rippleMasterDetector_threshold,'eventSpikeThreshold',false); 
+>>>>>>> 40d8d80f9e3413a435f31d121d0419d0d98c4115
     psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10);
     % psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10,'restrict_to_manipulation',true);
     getSpikesRank('events','ripples');
@@ -366,25 +370,23 @@ end
 
 %% 11. Spatial modulation
 if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
-    try
-        spikes = loadSpikes;
-        %getSessionTracking('roiTracking','manual','forceReload',false,'LED_threshold',LED_threshold,'convFact',tracking_pixel_cm,'leftTTL_reward',leftArmTtl_channel,'rightTTL_reward',rightArmTtl_channel);
-        getSessionTracking('forceReload',true,'leftTTL_reward',leftArmTtl_channel,'rightTTL_reward',rightArmTtl_channel,'homeTtl',homeDelayTtl_channel,'dlc_ttl_channel',dlc_ttl_channel);
-        try
-            getSessionArmChoice('task','alternation','leftArmTtl_channel',leftArmTtl_channel,'rightArmTtl_channel',rightArmTtl_channel,'homeDelayTtl_channel',homeDelayTtl_channel,'use_manual_ttls',use_manual_ttls);
-            % getSessionArmChoice('task','uLED','leftArmTtl_channel',leftArmTtl_channel,'rightArmTtl_channel',rightArmTtl_channel,'homeDelayTtl_channel',homeDelayTtl_channel,'use_manual_ttls',use_manual_ttls);
 
-        catch
-            warning('Performance in task was not computed! maybe linear maze?');
-        end
-        behaviour = getSessionLinearize('forceReload',true,'leftTtl',leftArmTtl_channel,'rightTtl',rightArmTtl_channel);  
-        firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',true,'speedThresh',0.1);
-        placeFieldStats = bz_findPlaceFields1D('firingMaps',firingMaps,'maxSize',.75,'sepEdge',0.03); %% ,'maxSize',.75,'sepEdge',0.03
-        firingTrialsMap = firingMapPerTrial('force',true,'saveMat',true);
-        spatialModulation = getSpatialModulation('force',true);
+    spikes = loadSpikes;
+    getSessionTracking('forceReload',true,'leftTTL_reward',leftArmTtl_channel,'rightTTL_reward',rightArmTtl_channel,'homeTtl',homeDelayTtl_channel,'dlc_ttl_channel',dlc_ttl_channel);
+
+    try
+        getSessionArmChoice('task','alternation','leftArmTtl_channel',leftArmTtl_channel,'rightArmTtl_channel',rightArmTtl_channel,'homeDelayTtl_channel',homeDelayTtl_channel,'use_manual_ttls',use_manual_ttls);
+        % getSessionArmChoice('task','uLED','leftArmTtl_channel',leftArmTtl_channel,'rightArmTtl_channel',rightArmTtl_channel,'homeDelayTtl_channel',homeDelayTtl_channel,'use_manual_ttls',use_manual_ttls);
+
     catch
-        warning('Not possible to run spatial modulation...');
+        warning('Performance in task was not computed! maybe linear maze?');
     end
+
+    behaviour = getSessionLinearize('forceReload',true,'leftTtl',leftArmTtl_channel,'rightTtl',rightArmTtl_channel);  
+    firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',true,'speedThresh',0.1);
+    placeFieldStats = bz_findPlaceFields1D('firingMaps',firingMaps,'maxSize',.75,'sepEdge',0.03); %% ,'maxSize',.75,'sepEdge',0.03
+    firingTrialsMap = firingMapPerTrial('force',true,'saveMat',true);
+    spatialModulation = getSpatialModulation('force',true);
 
     try 
         behaviour = getSessionLinearize;
