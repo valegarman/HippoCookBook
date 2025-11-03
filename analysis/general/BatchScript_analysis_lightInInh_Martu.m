@@ -11,7 +11,7 @@ HCB_directory = what('HippoCookBook');
 
 sessionsTable = readtable([HCB_directory.path filesep 'indexedSessions.csv']); % the variable is called allSessions
 
-for ii = 56: length(sessionsTable.SessionName)
+for ii = 57: length(sessionsTable.SessionName)
      %% Analysis general all over Camkii/32 animal
     if contains(sessionsTable.Project{ii}, targetProject) || strcmpi('all', targetProject)
 
@@ -97,4 +97,7 @@ for ii = 57 :length(sessionsTable.SessionName)
         
     end 
 end
+
+
+thetaCycles = findThetaCycles;
 
