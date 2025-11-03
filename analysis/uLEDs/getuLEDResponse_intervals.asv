@@ -125,28 +125,29 @@ uLEDPulses.nonStimulatedShank = uLEDPulses_temp.nonStimulatedShank;
 clear uLEDPulses_temp
 
 %check that the pulse duration is 0.02 
-CONDITION =[];
+Condition =[];
 
-if length(uLEDPulses.list_of_conditions) > 1
-       
-    CONDITION_LIST = uLEDPulses.list_of_conditions(find(uLEDPulses.list_of_durations == duration_pulse))';
-    CONDITION = CONDITION_LIST(unique(uLEDPulses.conditionID) == CONDITION_LIST);
-      
-    uLEDPulses.conditionID =uLEDPulses.conditionID(find(uLEDPulses.conditionID == CONDITION_LIST));
-    uLEDPulses.timestamps = uLEDPulses.timestamps(find(uLEDPulses.conditionID == CONDITION_LIST),:);
-    uLEDPulses.code = uLEDPulses.code(find(uLEDPulses.conditionID == CONDITION_LIST));
-    
-    uLEDPulses.list_of_epochs = 1;
-    uLEDPulses.list_of_conditions = 1;
-    uLEDPulses.list_of_durations(find(uLEDPulses.list_of_durations ~= duration_pulse)) =[];
-    % uLEDPulses.conditionID = ones(length(uLEDPulses.conditionID),1); 
-    uLEDPulses.conditionID = ones(length(uLEDPulses.conditionID(find(uLEDPulses.conditionID == CONDITION_LIST))),1); 
+if length(uLEDPulses.list_of_conditions) > 1 
+    if all(uLEDPulses.list_of_durations == duration_pulse)
+        uLEDPulses.list_of_epochs = 1;
+        uLEDPulses.list_of_conditions = 1;
+        uLEDPulses.list_of_durations = duration_pulse;
+        uLEDPulses.conditionID = ones(length(uLEDPulses.conditionID),1);
+    else   
+        condition_list = uLEDPulses.list_of_conditions(find(uLEDPulses.list_of_durations == duration_pulse))';
+        % Condition = condition_list(unique(uLEDPulses.conditionID) == condition_list);
+        index = find(uLEDPulses.conditionID == condition_list);
 
-   % % INDEX = find(round(diff(uLEDPulses.timestamps'),3)==0.02)';
-   % uLEDPulses.timestamps = uLEDPulses.timestamps(find(round(diff(uLEDPulses.timestamps'),3)==0.02)',:);
-   % uLEDPulses.conditionID =uLEDPulses.conditionID(find(round(diff(uLEDPulses.timestamps'),3)==0.02));
-   % uLEDPulses.code = uLEDPulses.code(find(round(diff(uLEDPulses.timestamps'),3)==0.02));
-      
+        uLEDPulses.conditionID = uLEDPulses.conditionID(find(uLEDPulses.conditionID == condition_list));
+        uLEDPulses.timestamps = uLEDPulses.timestamps(find(uLEDPulses.conditionID == condition_list),:);
+        
+        uLEDPulses.code = uLEDPulses.code(find(uLEDPulses.conditionID == Condition));
+        uLEDPulses.conditionID = ones(length(uLEDPulses.conditionID),1); 
+        uLEDPulses.conditionID = ones(length(uLEDPulses.conditionID(find(uLEDPulses.conditionID == condition_list))),1);
+        uLEDPulses.list_of_epochs = 1;
+        uLEDPulses.list_of_conditions = 1;
+        uLEDPulses.list_of_durations = duration_pulse;
+    end
 end
 
 ints = [];
@@ -610,7 +611,7 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
 
         in_interval = aux_computeResponse_2(in_interval, kk,spikes,t,out_interval,ii,t_duringPulse); 
         out_interval = aux_computeResponse_2(out_interval, kk, spikes,t,out_interval,ii,t_duringPulse);
-        
+
 %%
 
 
@@ -1073,9 +1074,14 @@ out_interval=interval_out;
         x_interval.maxRespLED.responseCurve(ii,kk,:) = squeeze(x_interval.responsecurve(ii,kk,out_interval.maxRespLED.LEDs(ii,kk),:));
         x_interval.maxRespLED.responseCurveZ(ii,kk,:) = squeeze(x_interval.responsecurveZ(ii,kk,out_interval.maxRespLED.LEDs(ii,kk),:));
         x_interval.maxRespLED.responseCurveZSmooth(ii,kk,:) = squeeze(x_interval.responsecurveZSmooth(ii,kk,out_interval.maxRespLED.LEDs(ii,kk),:));
+
+        % sleep state
+        x_interval.maxRespLED.responseCurve_WAKE(ii,kk,:) = squeeze(x_interval.responsecurve_WAKE(ii,kk,out_interval.maxRespLED.LEDs(ii,kk),:));
+        x_interval.maxRespLED.responseCurve_REM(ii,kk,:) = squeeze(x_interval.responsecurve_REM(ii,kk,out_interval.maxRespLED.LEDs(ii,kk),:));
+        x_interval.maxRespLED.responseCurve_NREM(ii,kk,:) = squeeze(x_interval.responsecurve_NREM(ii,kk,out_interval.maxRespLED.LEDs(ii,kk),:));
+
         if mean(x_interval.maxRespLED.responseCurve(ii,kk,t_duringPulse)) ~= x_interval.rateDuringPulse(ii,kk,out_interval.maxRespLED.LEDs(ii,kk)) && ~isnan(x_interval.rateDuringPulse(ii,kk,out_interval.maxRespLED.LEDs(ii,kk)))
             warning('Something terrible happened with indexing!!')
-            % keyboard;
         end
     else
         x_interval.maxRespLED.rate(ii,kk) = NaN;
@@ -1089,6 +1095,9 @@ out_interval=interval_out;
         x_interval.maxRespLED.responseCurve(ii,kk,:) = nan(size(t));
         x_interval.maxRespLED.responseCurveZ(ii,kk,:) = nan(size(t));
         x_interval.maxRespLED.responseCurveZSmooth(ii,kk,:) = nan(size(t));
+        x_interval.maxRespLED.responseCurve_WAKE(ii,kk,:) = nan(size(t)); 
+        x_interval.maxRespLED.responseCurve_REM(ii,kk,:) = nan(size(t)); 
+        x_interval.maxRespLED.responseCurve_NREM(ii,kk,:) = nan(size(t)); 
     end
     
     % minRespLED
