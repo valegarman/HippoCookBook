@@ -33,6 +33,7 @@ indexNewSession('basepath','Y:\unindexedSubjects\fCamk14\camk14_250922_sess1');
 indexNewSession('basepath','C:\data\camk14\camk14_250929_sess5');
 indexNewSession('basepath','C:\data\camk14\camk14_251013_sess10');
 indexNewSession('basepath','C:\data\camk14\camk14_251002_sess8');
+indexNewSession('basepath','C:\data\camk14\camk14_250923_sess2');
 
 
 
