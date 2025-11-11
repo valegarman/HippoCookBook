@@ -28,12 +28,15 @@ processSession('basepath','C:\data\camk14\camk14_250929_sess5','digital_optogene
 processSession('basepath','C:\data\camk14\camk14_251013_sess10','digital_optogenetic_channels',[1 2],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 processSession('basepath','C:\data\camk14\camk14_251002_sess8','digital_optogenetic_channels',[1 2],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 processSession('basepath','C:\data\camk14\camk14_250923_sess2','digital_optogenetic_channels',[1 2],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
+processSession('basepath','C:\data\camk14\camk14_250930_sess6','digital_optogenetic_channels',[1 2],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
+processSession('basepath','C:\data\camk14\camk14_251014_sess11','digital_optogenetic_channels',[1 2],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 
 indexNewSession('basepath','Y:\unindexedSubjects\fCamk14\camk14_250922_sess1');
 indexNewSession('basepath','C:\data\camk14\camk14_250929_sess5');
 indexNewSession('basepath','C:\data\camk14\camk14_251013_sess10');
 indexNewSession('basepath','C:\data\camk14\camk14_251002_sess8');
 indexNewSession('basepath','C:\data\camk14\camk14_250923_sess2');
+indexNewSession('basepath','C:\data\camk14\camk14_251014_sess11');
 
 
 
@@ -52,7 +55,7 @@ updateExpFolder_temp({'E:\wt9'},'D:\wt9');
 
 preprocessSession('basepath','D:\wt9\wt9_251001_sess13','cleanArtifacts',({[],[6]}),'analysisPath',[],'exclude_shanks',[],'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
 
-preprocessSession('basepath','Y:\unindexedSubjects\wt9\wt9_250924_sess8','cleanArtifacts',({[],[]}),'analysisPath',[],'exclude_shanks',[],'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
+preprocessSession('basepath','D:\wt9\wt9_251107_sess24','cleanArtifacts',({[],[]}),'analysisPath',[],'exclude_shanks',[],'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
 
 processSession('basepath','C:\data\wt9\wt9_250923_sess7','digital_optogenetic_channels',[6],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 processSession('basepath','C:\data\wt9\wt9_250925_sess9','digital_optogenetic_channels',[6],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
