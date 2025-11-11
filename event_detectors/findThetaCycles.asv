@@ -134,6 +134,10 @@ thetaCycles.lfp_phase = phase_all;
 thetaCycles.ints.peak_trough_peak = [[valid_cycles.peak1]'/sr [valid_cycles.peak2]'/sr]; 
 thetaCycles.ints.zero_peak = [[valid_cycles.zero_before]'/sr [valid_cycles.zero_after_peak1]'/sr]; 
 thetaCycles.ints.zero_trough = [[valid_cycles.zero_before]'/sr [valid_cycles.zero_after_trough]'/sr]; 
+
+thetaCycles.ints.positive_curve = [[valid_cycles.zero_before]'/sr [valid_cycles.zero_after_peak1]'/sr]; 
+thetaCycles.ints.negative_curve = [[valid_cycles.zero_after_peak1]'/sr [valid_cycles.zero_after_trough]'/sr]; 
+
 thetaCycles.zero_cross_timestamps = [valid_cycles.zero_after_peak1]'./sr;
 % work in progress...
 

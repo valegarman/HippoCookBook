@@ -8,7 +8,7 @@ addParameter(p,'basepath',pwd,@isstruct);
 addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'theta_bandpass',[6 12], @isnumeric)
 addParameter(p,'theta_channel',[], @isnumeric);
-addParameter(p,'amplitude_threshold',.2, @isnumeric);
+addParameter(p,'amplitude_threshold',0, @isnumeric);
 
 parse(p,varargin{:})
 basepath = p.Results.basepath;
@@ -25,6 +25,13 @@ cd(basepath);
 % work in progress
 % 1. Improve the output
 % 2. Amplitude threshold!!! 
+
+% targetFile = dir('*.thetaCycles.events.mat');
+% if ~isempty(targetFile)
+%     disp('Theta cycles already sorted! Loading file.');
+%     load(targetFile.name);
+%     return
+% end
 
 session = loadSession;
 sr = session.extracellular.srLfp;
@@ -134,6 +141,10 @@ thetaCycles.lfp_phase = phase_all;
 thetaCycles.ints.peak_trough_peak = [[valid_cycles.peak1]'/sr [valid_cycles.peak2]'/sr]; 
 thetaCycles.ints.zero_peak = [[valid_cycles.zero_before]'/sr [valid_cycles.zero_after_peak1]'/sr]; 
 thetaCycles.ints.zero_trough = [[valid_cycles.zero_before]'/sr [valid_cycles.zero_after_trough]'/sr]; 
+
+thetaCycles.ints.positive_curve = [[valid_cycles.zero_before]'/sr [valid_cycles.zero_after_peak1]'/sr]; 
+thetaCycles.ints.negative_curve = [[valid_cycles.zero_after_peak1]'/sr [valid_cycles.zero_after_trough]'/sr]; 
+
 thetaCycles.zero_cross_timestamps = [valid_cycles.zero_after_peak1]'./sr;
 % work in progress...
 
