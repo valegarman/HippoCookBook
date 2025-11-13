@@ -37,6 +37,7 @@ indexNewSession('basepath','C:\data\camk14\camk14_251013_sess10');
 indexNewSession('basepath','C:\data\camk14\camk14_251002_sess8');
 indexNewSession('basepath','C:\data\camk14\camk14_250923_sess2');
 indexNewSession('basepath','C:\data\camk14\camk14_251014_sess11');
+indexNewSession('basepath','C:\data\camk14\camk14_250930_sess6');
 
 
 
@@ -53,7 +54,7 @@ preprocessSession('basepath','D:\kobe\kobe_000001_sess1','analysisPath',[],'excl
 %% WT9
 updateExpFolder_temp({'E:\wt9'},'D:\wt9');
 
-preprocessSession('basepath','D:\wt9\wt9_251001_sess13','cleanArtifacts',({[],[6]}),'analysisPath',[],'exclude_shanks',[],'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
+preprocessSession('basepath','D:\wt9\wt9_251103_sess20','cleanArtifacts',({[],[6]}),'analysisPath',[],'exclude_shanks',[],'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
 
 preprocessSession('basepath','D:\wt9\wt9_251107_sess24','cleanArtifacts',({[],[]}),'analysisPath',[],'exclude_shanks',[],'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
 
