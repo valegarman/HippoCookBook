@@ -30,6 +30,7 @@ processSession('basepath','C:\data\camk14\camk14_251002_sess8','digital_optogene
 processSession('basepath','C:\data\camk14\camk14_250923_sess2','digital_optogenetic_channels',[1 2],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 processSession('basepath','C:\data\camk14\camk14_250930_sess6','digital_optogenetic_channels',[1 2],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 processSession('basepath','C:\data\camk14\camk14_251014_sess11','digital_optogenetic_channels',[1 2],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
+processSession('basepath','C:\data\camk14\camk14_251016_sess12','digital_optogenetic_channels',[1 2],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 
 indexNewSession('basepath','Y:\unindexedSubjects\fCamk14\camk14_250922_sess1');
 indexNewSession('basepath','C:\data\camk14\camk14_250929_sess5');
@@ -38,6 +39,7 @@ indexNewSession('basepath','C:\data\camk14\camk14_251002_sess8');
 indexNewSession('basepath','C:\data\camk14\camk14_250923_sess2');
 indexNewSession('basepath','C:\data\camk14\camk14_251014_sess11');
 indexNewSession('basepath','C:\data\camk14\camk14_250930_sess6');
+indexNewSession('basepath','C:\data\camk14\camk14_251016_sess12');
 
 
 
@@ -54,7 +56,8 @@ preprocessSession('basepath','D:\kobe\kobe_000001_sess1','analysisPath',[],'excl
 %% WT9
 updateExpFolder_temp({'E:\wt9'},'D:\wt9');
 
-preprocessSession('basepath','D:\wt9\wt9_251103_sess20','cleanArtifacts',({[],[6]}),'analysisPath',[],'exclude_shanks',[],'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
+preprocessSession('basepath','D:\wt9\wt9_251030_sess18','cleanArtifacts',({[],[6]}),'analysisPath',[],'exclude_shanks',[],'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
+preprocessSession('basepath','D:\wt9\wt9_251029_sess17','cleanArtifacts',({[],[6]}),'analysisPath',[],'exclude_shanks',[],'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
 
 preprocessSession('basepath','D:\wt9\wt9_251107_sess24','cleanArtifacts',({[],[]}),'analysisPath',[],'exclude_shanks',[],'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
 
