@@ -1,7 +1,16 @@
+%% CAMK15
+updateExpFolder_temp({'E:\camk15'},'D:\camk15');
+
+preprocessSession('basepath','D:\camk15\camk15_251112_sess1','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[1 2]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',true,'getPos',false);
+preprocessSession('basepath','D:\camk15\camk15_251113_sess2','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[1 2]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
+
+processSession('basepath','C:\data\camk15\camk15_251112_sess1','digital_optogenetic_channels',[1 2],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 
 %% WT10
 updateExpFolder_temp({'E:\wt10'},'D:\wt10');
 
+preprocessSession('basepath','D:\wt10\wt10_251027_sess1','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
+preprocessSession('basepath','D:\wt10\wt10_251028_sess2','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
 
 %% CAMK14
 updateExpFolder_temp({'E:\camk14'},'D:\camk14');
@@ -32,6 +41,7 @@ processSession('basepath','C:\data\camk14\camk14_250930_sess6','digital_optogene
 processSession('basepath','C:\data\camk14\camk14_251014_sess11','digital_optogenetic_channels',[1 2],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 processSession('basepath','C:\data\camk14\camk14_251016_sess12','digital_optogenetic_channels',[1 2],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 processSession('basepath','C:\data\camk14\camk14_251017_sess13','digital_optogenetic_channels',[1 2],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
+processSession('basepath','C:\data\camk14\camk14_251010_sess9','digital_optogenetic_channels',[1 2],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 
 indexNewSession('basepath','Y:\unindexedSubjects\fCamk14\camk14_250922_sess1');
 indexNewSession('basepath','C:\data\camk14\camk14_250929_sess5');
@@ -42,6 +52,7 @@ indexNewSession('basepath','C:\data\camk14\camk14_251014_sess11');
 indexNewSession('basepath','C:\data\camk14\camk14_250930_sess6');
 indexNewSession('basepath','C:\data\camk14\camk14_251016_sess12');
 indexNewSession('basepath','C:\data\camk14\camk14_251017_sess13');
+indexNewSession('basepath','C:\data\camk14\camk14_251010_sess9');
 
 
 %% MIA
