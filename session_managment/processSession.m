@@ -378,11 +378,15 @@ if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
         warning('Performance in task was not computed! maybe linear maze?');
     end
 
-    behaviour = getSessionLinearize('forceReload',true,'leftTtl',leftArmTtl_channel,'rightTtl',rightArmTtl_channel);  
-    firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',true,'speedThresh',0.1);
-    placeFieldStats = bz_findPlaceFields1D('firingMaps',firingMaps,'maxSize',.75,'sepEdge',0.03); %% ,'maxSize',.75,'sepEdge',0.03
-    firingTrialsMap = firingMapPerTrial('force',true,'saveMat',true);
-    spatialModulation = getSpatialModulation('force',true);
+    try
+
+        behaviour = getSessionLinearize('forceReload',true,'leftTtl',leftArmTtl_channel,'rightTtl',rightArmTtl_channel);  
+        firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',true,'speedThresh',0.1);
+        placeFieldStats = bz_findPlaceFields1D('firingMaps',firingMaps,'maxSize',.75,'sepEdge',0.03); %% ,'maxSize',.75,'sepEdge',0.03
+        firingTrialsMap = firingMapPerTrial('force',true,'saveMat',true);
+        spatialModulation = getSpatialModulation('force',true);
+    catch
+    end
 
     try 
         behaviour = getSessionLinearize;
