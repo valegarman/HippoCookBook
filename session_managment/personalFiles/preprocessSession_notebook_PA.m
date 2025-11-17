@@ -3,11 +3,13 @@ updateExpFolder_temp({'E:\camk15'},'D:\camk15');
 
 preprocessSession('basepath','D:\camk15\camk15_251112_sess1','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[1 2]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',true,'getPos',false);
 preprocessSession('basepath','D:\camk15\camk15_251113_sess2','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[1 2]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
+preprocessSession('basepath','D:\camk15\camk15_251114_sess3','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[1 2]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
 
 processSession('basepath','C:\data\camk15\camk15_251112_sess1','digital_optogenetic_channels',[1 2],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 processSession('basepath','C:\data\camk15\camk15_251113_sess2','digital_optogenetic_channels',[1 2],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 
 indexNewSession('basepath','C:\data\camk15\camk15_251112_sess1');
+indexNewSession('basepath','C:\data\camk15\camk15_251113_sess2');
 
 %% WT10
 updateExpFolder_temp({'E:\wt10'},'D:\wt10');
