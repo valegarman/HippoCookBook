@@ -8,7 +8,7 @@ addParameter(p,'basepath',pwd,@isstruct);
 addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'theta_bandpass',[6 12], @isnumeric)
 addParameter(p,'theta_channel',[], @isnumeric);
-addParameter(p,'amplitude_threshold',0, @isnumeric);
+addParameter(p,'amplitude_threshold',.2, @isnumeric);
 
 parse(p,varargin{:})
 basepath = p.Results.basepath;
@@ -25,13 +25,6 @@ cd(basepath);
 % work in progress
 % 1. Improve the output
 % 2. Amplitude threshold!!! 
-
-% targetFile = dir('*.thetaCycles.events.mat');
-% if ~isempty(targetFile)
-%     disp('Theta cycles already sorted! Loading file.');
-%     load(targetFile.name);
-%     return
-% end
 
 session = loadSession;
 sr = session.extracellular.srLfp;

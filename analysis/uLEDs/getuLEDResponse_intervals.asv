@@ -129,19 +129,25 @@ Condition =[];
 
 if length(uLEDPulses.list_of_conditions) > 1 
     if all(uLEDPulses.list_of_durations == duration_pulse)
+        uLEDPulses.list_of_epochs = 1;
+        uLEDPulses.list_of_conditions = 1;
+        uLEDPulses.list_of_durations = duration_pulse;
         uLEDPulses.conditionID = ones(length(uLEDPulses.conditionID),1);
     else   
         condition_list = uLEDPulses.list_of_conditions(find(uLEDPulses.list_of_durations == duration_pulse))';
         % Condition = condition_list(unique(uLEDPulses.conditionID) == condition_list);
+        index = find(uLEDPulses.conditionID == condition_list);
+
         uLEDPulses.conditionID = uLEDPulses.conditionID(find(uLEDPulses.conditionID == condition_list));
         uLEDPulses.timestamps = uLEDPulses.timestamps(find(uLEDPulses.conditionID == condition_list),:);
-        uLEDPulses.code = uLEDPulses.code(find(uLEDPulses.conditionID == condition_list));
+        
+        uLEDPulses.code = uLEDPulses.code(find(uLEDPulses.conditionID == Condition));
         uLEDPulses.conditionID = ones(length(uLEDPulses.conditionID),1); 
-     
+        uLEDPulses.conditionID = ones(length(uLEDPulses.conditionID(find(uLEDPulses.conditionID == condition_list))),1);
+        uLEDPulses.list_of_epochs = 1;
+        uLEDPulses.list_of_conditions = 1;
+        uLEDPulses.list_of_durations = duration_pulse;
     end
-    uLEDPulses.list_of_epochs = 1;
-    uLEDPulses.list_of_conditions = 1;
-    uLEDPulses.list_of_durations = duration_pulse;
 end
 
 ints = [];
@@ -352,116 +358,116 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
          end
 
          % SPIKES IN TIMES OF SLEEP STATES     
-        %  WAKEstate = SleepState.ints.WAKEstate;
-        %  NREMstate = SleepState.ints.NREMstate;
-        %  REMstate = SleepState.ints.REMstate;
-        % 
-        %  for ii = 1:length(spikes.times)
-        % 
-        %      status_all = false(size(spikes.times{ii})); 
-        % 
-        %     for rr = 1:size(WAKEstate,1)
-        %         status_temp = InIntervals(spikes.times{ii}, WAKEstate(rr,:));
-        %         status_all = status_all | status_temp; 
-        %     end
-        %     spikes_WAKEstate{ii} = spikes.times{ii}(status_all);
-        % 
-        %     for rr = 1:size(NREMstate,1)
-        %         status_temp = InIntervals(spikes.times{ii}, NREMstate(rr,:));
-        %         status_all = status_all | status_temp; 
-        %     end
-        %     spikes_NREMstate{ii} = spikes.times{ii}(status_all);
-        % 
-        %     for rr = 1:size(REMstate,1)
-        %         status_temp = InIntervals(spikes.times{ii}, REMstate(rr,:));
-        %         status_all = status_all | status_temp; 
-        %     end
-        %     spikes_REMstate{ii} = spikes.times{ii}(status_all);
-        % 
-        %  end
-        % 
-        % % AWAKE
-        %  times_WAKE = spikes_WAKEstate;        
-        %  if ~isempty(pulses) && length(pulses) > minNumberOfPulses
-        %     times_WAKE{length(times_WAKE)+1} = pulses(status==1,1); 
-        %     times_WAKE{length(times_WAKE)+1} = pulses(status==0,1); 
-        % 
-        %  else
-        %     times_WAKE{length(times_WAKE)+1} = [0]; 
-        %     times_WAKE{length(times_WAKE)+1} = [0]; 
-        %  end
-        %  times_WAKE = cat(2,times_WAKE);
-        % 
-        %  fprintf('\n');
-        %  [stccg_WAKE, t] = CCG(times_WAKE,[],'binSize',binSize,'duration',winSize,'norm','rate');
-        %  fprintf('\n');
-        %  numberOfcells = length(spikes.shankID);
-        % 
-        %  in_interval.responsecurve_WAKE(:,kk,jj,:) = squeeze(stccg_WAKE(:,numberOfcells + 1 , 1:numberOfcells))';
-        %  out_interval.responsecurve_WAKE(:,kk,jj,:) = squeeze(stccg_WAKE(:, numberOfcells + 2 , 1:numberOfcells))';
-        % 
-        %  if length(times{numberOfcells + 1}) < minNumberOfPulses
-        %      in_interval.responsecurve_WAKE(:,kk,jj,:) = in_interval.responsecurve_WAKE(:,kk,jj,:) * NaN;
-        %  end
-        %  if length(times{numberOfcells + 2}) < minNumberOfPulses
-        %      out_interval.responsecurve_WAKE(:,kk,jj,:) = out_interval.responsecurve_WAKE(:,kk,jj,:) * NaN;
-        %  end
-        % 
-        % % REM
-        % 
-        %  times_REM = spikes_REMstate;        
-        %  if ~isempty(pulses) && length(pulses) > minNumberOfPulses
-        %     times_REM{length(times_REM)+1} = pulses(status==1,1); 
-        %     times_REM{length(times_REM)+1} = pulses(status==0,1); 
-        % 
-        %  else
-        %     times_REM{length(times_REM)+1} = [0]; 
-        %     times_REM{length(times_REM)+1} = [0]; 
-        %  end
-        %  times_REM = cat(2,times_REM);
-        % 
-        %  fprintf('\n');
-        %  [stccg_REM, t] = CCG(times_REM,[],'binSize',binSize,'duration',winSize,'norm','rate');
-        %  fprintf('\n');
-        %  numberOfcells = length(spikes.shankID);
-        % 
-        %  in_interval.responsecurve_REM(:,kk,jj,:) = squeeze(stccg_REM(:,numberOfcells + 1 , 1:numberOfcells))';
-        %  out_interval.responsecurve_REM(:,kk,jj,:) = squeeze(stccg_REM(:, numberOfcells + 2 , 1:numberOfcells))';
-        % 
-        %  if length(times{numberOfcells + 1}) < minNumberOfPulses
-        %      in_interval.responsecurve_REM(:,kk,jj,:) = in_interval.responsecurve_REM(:,kk,jj,:) * NaN;
-        %  end
-        %  if length(times{numberOfcells + 2}) < minNumberOfPulses
-        %      out_interval.responsecurve_REM(:,kk,jj,:) = out_interval.responsecurve_REM(:,kk,jj,:) * NaN;
-        %  end
-        % 
-        % % NREM
-        % 
-        %  times_nREM = spikes_NREMstate;        
-        %  if ~isempty(pulses) && length(pulses) > minNumberOfPulses
-        %     times_nREM{length(times_nREM)+1} = pulses(status==1,1); 
-        %     times_nREM{length(times_nREM)+1} = pulses(status==0,1); 
-        % 
-        %  else
-        %     times_nREM{length(times_nREM)+1} = [0]; 
-        %     times_nREM{length(times_nREM)+1} = [0]; 
-        %  end
-        %  times_nREM = cat(2,times_nREM);
-        % 
-        %  fprintf('\n');
-        %  [stccg_NREM, t] = CCG(times_nREM,[],'binSize',binSize,'duration',winSize,'norm','rate');
-        %  fprintf('\n');
-        %  numberOfcells = length(spikes.shankID);
-        % 
-        %  in_interval.responsecurve_NREM(:,kk,jj,:) = squeeze(stccg_NREM(:,numberOfcells + 1 , 1:numberOfcells))';
-        %  out_interval.responsecurve_NREM(:,kk,jj,:) = squeeze(stccg_NREM(:, numberOfcells + 2 , 1:numberOfcells))';
-        % 
-        %  if length(times{numberOfcells + 1}) < minNumberOfPulses
-        %      in_interval.responsecurve_NREM(:,kk,jj,:) = in_interval.responsecurve_NREM(:,kk,jj,:) * NaN;
-        %  end
-        %  if length(times{numberOfcells + 2}) < minNumberOfPulses
-        %      out_interval.responsecurve_NREM(:,kk,jj,:) = out_interval.responsecurve_NREM(:,kk,jj,:) * NaN;
-        %  end
+         WAKEstate = SleepState.ints.WAKEstate;
+         NREMstate = SleepState.ints.NREMstate;
+         REMstate = SleepState.ints.REMstate;
+
+         for ii = 1:length(spikes.times)
+            
+             status_all = false(size(spikes.times{ii})); 
+
+            for rr = 1:size(WAKEstate,1)
+                status_temp = InIntervals(spikes.times{ii}, WAKEstate(rr,:));
+                status_all = status_all | status_temp; 
+            end
+            spikes_WAKEstate{ii} = spikes.times{ii}(status_all);
+
+            for rr = 1:size(NREMstate,1)
+                status_temp = InIntervals(spikes.times{ii}, NREMstate(rr,:));
+                status_all = status_all | status_temp; 
+            end
+            spikes_NREMstate{ii} = spikes.times{ii}(status_all);
+
+            for rr = 1:size(REMstate,1)
+                status_temp = InIntervals(spikes.times{ii}, REMstate(rr,:));
+                status_all = status_all | status_temp; 
+            end
+            spikes_REMstate{ii} = spikes.times{ii}(status_all);
+
+         end
+
+        % AWAKE
+         times_WAKE = spikes_WAKEstate;        
+         if ~isempty(pulses) && length(pulses) > minNumberOfPulses
+            times_WAKE{length(times_WAKE)+1} = pulses(status==1,1); 
+            times_WAKE{length(times_WAKE)+1} = pulses(status==0,1); 
+            
+         else
+            times_WAKE{length(times_WAKE)+1} = [0]; 
+            times_WAKE{length(times_WAKE)+1} = [0]; 
+         end
+         times_WAKE = cat(2,times_WAKE);
+    
+         fprintf('\n');
+         [stccg_WAKE, t] = CCG(times_WAKE,[],'binSize',binSize,'duration',winSize,'norm','rate');
+         fprintf('\n');
+         numberOfcells = length(spikes.shankID);
+
+         in_interval.responsecurve_WAKE(:,kk,jj,:) = squeeze(stccg_WAKE(:,numberOfcells + 1 , 1:numberOfcells))';
+         out_interval.responsecurve_WAKE(:,kk,jj,:) = squeeze(stccg_WAKE(:, numberOfcells + 2 , 1:numberOfcells))';
+        
+         if length(times{numberOfcells + 1}) < minNumberOfPulses
+             in_interval.responsecurve_WAKE(:,kk,jj,:) = in_interval.responsecurve_WAKE(:,kk,jj,:) * NaN;
+         end
+         if length(times{numberOfcells + 2}) < minNumberOfPulses
+             out_interval.responsecurve_WAKE(:,kk,jj,:) = out_interval.responsecurve_WAKE(:,kk,jj,:) * NaN;
+         end
+         
+        % REM
+
+         times_REM = spikes_REMstate;        
+         if ~isempty(pulses) && length(pulses) > minNumberOfPulses
+            times_REM{length(times_REM)+1} = pulses(status==1,1); 
+            times_REM{length(times_REM)+1} = pulses(status==0,1); 
+            
+         else
+            times_REM{length(times_REM)+1} = [0]; 
+            times_REM{length(times_REM)+1} = [0]; 
+         end
+         times_REM = cat(2,times_REM);
+    
+         fprintf('\n');
+         [stccg_REM, t] = CCG(times_REM,[],'binSize',binSize,'duration',winSize,'norm','rate');
+         fprintf('\n');
+         numberOfcells = length(spikes.shankID);
+
+         in_interval.responsecurve_REM(:,kk,jj,:) = squeeze(stccg_REM(:,numberOfcells + 1 , 1:numberOfcells))';
+         out_interval.responsecurve_REM(:,kk,jj,:) = squeeze(stccg_REM(:, numberOfcells + 2 , 1:numberOfcells))';
+        
+         if length(times{numberOfcells + 1}) < minNumberOfPulses
+             in_interval.responsecurve_REM(:,kk,jj,:) = in_interval.responsecurve_REM(:,kk,jj,:) * NaN;
+         end
+         if length(times{numberOfcells + 2}) < minNumberOfPulses
+             out_interval.responsecurve_REM(:,kk,jj,:) = out_interval.responsecurve_REM(:,kk,jj,:) * NaN;
+         end
+
+        % NREM
+        
+         times_nREM = spikes_NREMstate;        
+         if ~isempty(pulses) && length(pulses) > minNumberOfPulses
+            times_nREM{length(times_nREM)+1} = pulses(status==1,1); 
+            times_nREM{length(times_nREM)+1} = pulses(status==0,1); 
+            
+         else
+            times_nREM{length(times_nREM)+1} = [0]; 
+            times_nREM{length(times_nREM)+1} = [0]; 
+         end
+         times_nREM = cat(2,times_nREM);
+    
+         fprintf('\n');
+         [stccg_NREM, t] = CCG(times_nREM,[],'binSize',binSize,'duration',winSize,'norm','rate');
+         fprintf('\n');
+         numberOfcells = length(spikes.shankID);
+
+         in_interval.responsecurve_NREM(:,kk,jj,:) = squeeze(stccg_NREM(:,numberOfcells + 1 , 1:numberOfcells))';
+         out_interval.responsecurve_NREM(:,kk,jj,:) = squeeze(stccg_NREM(:, numberOfcells + 2 , 1:numberOfcells))';
+        
+         if length(times{numberOfcells + 1}) < minNumberOfPulses
+             in_interval.responsecurve_NREM(:,kk,jj,:) = in_interval.responsecurve_NREM(:,kk,jj,:) * NaN;
+         end
+         if length(times{numberOfcells + 2}) < minNumberOfPulses
+             out_interval.responsecurve_NREM(:,kk,jj,:) = out_interval.responsecurve_NREM(:,kk,jj,:) * NaN;
+         end
   
          %% interpolation in e out
          if interpolate_pulse_sides   
@@ -1070,9 +1076,9 @@ out_interval=interval_out;
         x_interval.maxRespLED.responseCurveZSmooth(ii,kk,:) = squeeze(x_interval.responsecurveZSmooth(ii,kk,out_interval.maxRespLED.LEDs(ii,kk),:));
 
         % sleep state
-        % x_interval.maxRespLED.responseCurve_WAKE(ii,kk,:) = squeeze(x_interval.responsecurve_WAKE(ii,kk,out_interval.maxRespLED.LEDs(ii,kk),:));
-        % x_interval.maxRespLED.responseCurve_REM(ii,kk,:) = squeeze(x_interval.responsecurve_REM(ii,kk,out_interval.maxRespLED.LEDs(ii,kk),:));
-        % x_interval.maxRespLED.responseCurve_NREM(ii,kk,:) = squeeze(x_interval.responsecurve_NREM(ii,kk,out_interval.maxRespLED.LEDs(ii,kk),:));
+        x_interval.maxRespLED.responseCurve_WAKE(ii,kk,:) = squeeze(x_interval.responsecurve_WAKE(ii,kk,out_interval.maxRespLED.LEDs(ii,kk),:));
+        x_interval.maxRespLED.responseCurve_REM(ii,kk,:) = squeeze(x_interval.responsecurve_REM(ii,kk,out_interval.maxRespLED.LEDs(ii,kk),:));
+        x_interval.maxRespLED.responseCurve_NREM(ii,kk,:) = squeeze(x_interval.responsecurve_NREM(ii,kk,out_interval.maxRespLED.LEDs(ii,kk),:));
 
         if mean(x_interval.maxRespLED.responseCurve(ii,kk,t_duringPulse)) ~= x_interval.rateDuringPulse(ii,kk,out_interval.maxRespLED.LEDs(ii,kk)) && ~isnan(x_interval.rateDuringPulse(ii,kk,out_interval.maxRespLED.LEDs(ii,kk)))
             warning('Something terrible happened with indexing!!')
@@ -1089,9 +1095,9 @@ out_interval=interval_out;
         x_interval.maxRespLED.responseCurve(ii,kk,:) = nan(size(t));
         x_interval.maxRespLED.responseCurveZ(ii,kk,:) = nan(size(t));
         x_interval.maxRespLED.responseCurveZSmooth(ii,kk,:) = nan(size(t));
-        % x_interval.maxRespLED.responseCurve_WAKE(ii,kk,:) = nan(size(t)); 
-        % x_interval.maxRespLED.responseCurve_REM(ii,kk,:) = nan(size(t)); 
-        % x_interval.maxRespLED.responseCurve_NREM(ii,kk,:) = nan(size(t)); 
+        x_interval.maxRespLED.responseCurve_WAKE(ii,kk,:) = nan(size(t)); 
+        x_interval.maxRespLED.responseCurve_REM(ii,kk,:) = nan(size(t)); 
+        x_interval.maxRespLED.responseCurve_NREM(ii,kk,:) = nan(size(t)); 
     end
     
     % minRespLED
