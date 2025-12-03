@@ -50,7 +50,7 @@ if isempty(spikes)
 end
 
 if ischar(shanksID) && strcmpi(shanksID,'all')
-    inShank = ones(size(spikes.times));
+    inShank = logical(ones(size(spikes.times)));
 else
     try
         inShank = ismember(spikes.shankID, shanksID);

@@ -388,7 +388,7 @@ for ii = 1:length(UID)
     if showTagCells
         scatter(2.2, rem_nrem_index(UID(ii)),20,cell_color,'filled');
     end
-    
+
     scatter(rand(length(find(all_pyr)),1)/5 + 2.9, cv(all_pyr),20,pyr_color,'filled');
     scatter(rand(length(find(all_nw)),1)/5 + 3.1, cv(all_nw),20,nw_color,'filled');
     scatter(rand(length(find(all_ww)),1)/5 + 3.3, cv(all_ww),20,ww_color,'filled');

@@ -259,12 +259,12 @@ if ~any(ismember(excludeAnalysis, {'4',lower('spikesFeatures')}))
     spikeFeatures;
 
     % 1.3 ULED analysis 
-    try
-        getuLEDPulses;
-        getuLEDResponse;         
-    catch
-        warning('Not possible to run getULEDResponse...');
-    end
+    % try
+    %     getuLEDPulses;
+    %     getuLEDResponse;         
+    % catch
+    %     warning('Not possible to run getULEDResponse...');
+    % end
 end
 
 %% 5. Check Sleep Score
@@ -277,7 +277,7 @@ if ~any(ismember(excludeAnalysis, {'5',lower('checkSleep')}))
     end
     
     SleepScoreMaster(pwd,'noPrompts',true,'ignoretime',pulses.stimulationEpochs, 'overwrite', true);
-%     TheStateEditor(session.general.name);
+    % TheStateEditor(session.general.name);
     bz_ThetaStates(pwd);
 end
 
@@ -301,13 +301,10 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     getSpikesRank('events','upstates');
 
     % 8.2 Ripples
-<<<<<<< HEAD
 
-    ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',false,'thresholds',rippleMasterDetector_threshold,'eventSpikeThreshold',false); 
 
-=======
-    ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',true,'thresholds',rippleMasterDetector_threshold,'eventSpikeThreshold', false); 
->>>>>>> e6e653a7f78efe9a81aedd0faae5adbe3cb48ee9
+    ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',true,'thresholds',rippleMasterDetector_threshold, 'eventSpikeThreshold',0.75,'referenceChannel',noiseChannel); 
+
     psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10);
     % psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10,'restrict_to_manipulation',true);
     getSpikesRank('events','ripples');
@@ -321,7 +318,8 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
 
     % 8.3 Theta intervals
     cd(basepath);
-    thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'channel',theta_epochs_channel);
+    % thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'channel',theta_epochs_channel);
+    thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'powerThreshold',powerThreshold,'channel', channel);
 
 end
 
