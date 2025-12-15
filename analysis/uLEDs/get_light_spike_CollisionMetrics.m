@@ -21,6 +21,8 @@ addParameter(p,'uLEDPulses',getuLEDPulses,@isstruct); %
 addParameter(p,'interpolate_pulse_sides',false,@islogical); % 
 addParameter(p,'update_cell_metrics',true,@islogical); % 
 addParameter(p,'save_as','lightSpikeCollisions',@ischar);
+addParameter(p,'rand_analysis',false,@islogical); % if you put yes you would save also rand interval values and boostatrapping values
+
 
 
 parse(p, uLEDResponses_interval, varargin{:});
@@ -38,6 +40,7 @@ spikes = p.Results.spikes;
 interpolate_pulse_sides = p.Results.interpolate_pulse_sides;
 update_cell_metrics = p.Results.update_cell_metrics;
 save_as = p.Results.save_as;
+rand_analysis = p.Results.rand_analysis;
 
 
 % Deal with inputs
@@ -77,6 +80,11 @@ uLEDResponses_InInterval.is_out_rateBeforePuse_similar = [];
 uLEDResponses_InInterval.responsecurve = [];
 uLEDResponses_InInterval.responsecurveZ = [];
 uLEDResponses_InInterval.responsecurveZSmooth = [];
+% sleep state
+% uLEDResponses_InInterval.responsecurve_WAKE = [];
+% uLEDResponses_InInterval.responsecurve_REM = [];
+% uLEDResponses_InInterval.responsecurve_NREM = [];
+
 
 uLEDResponses_OutInterval.presynapticID = [];
 uLEDResponses_OutInterval.presynapticCellType = [];
@@ -90,10 +98,15 @@ uLEDResponses_OutInterval.is_in_rateBeforePuse_similar = [];
 uLEDResponses_OutInterval.responsecurve = [];
 uLEDResponses_OutInterval.responsecurveZ = [];
 uLEDResponses_OutInterval.responsecurveZSmooth = [];
+% sleep state
+% uLEDResponses_OutInterval.responsecurve_WAKE = [];
+% uLEDResponses_OutInterval.responsecurve_REM = [];
+% uLEDResponses_OutInterval.responsecurve_NREM = [];
 % 
-% uLEDResponses_RandInterval.maxRatePulse = [];
-% uLEDResponses_RandInterval.maxZPulse = [];
-
+if rand_analysis
+    uLEDResponses_RandInterval.maxRatePulse = [];
+    uLEDResponses_RandInterval.maxZPulse = [];
+end 
 
 for ii = 1:length(uLEDResponses_interval)
     if strcmpi(cell_metrics.putativeCellType{ii},'Pyramidal Cell')
@@ -126,6 +139,14 @@ for ii = 1:length(uLEDResponses_interval)
         (1:size(uLEDResponses_interval{ii}.bootsTrapRate,1))'];
     uLEDResponses_InInterval.responsecurve = [uLEDResponses_InInterval.responsecurve; ...
         squeeze(uLEDResponses_interval{ii}.in_interval.maxRespLED.responseCurve)];
+    % sleep state
+   % uLEDResponses_InInterval.responsecurve_WAKE = [uLEDResponses_InInterval.responsecurve_WAKE; ...
+   %      squeeze(uLEDResponses_interval{ii}.in_interval.maxRespLED.responseCurve_WAKE)];
+   % uLEDResponses_InInterval.responsecurve_REM = [uLEDResponses_InInterval.responsecurve_REM; ...
+   %      squeeze(uLEDResponses_interval{ii}.in_interval.maxRespLED.responseCurve_REM)];
+   % uLEDResponses_InInterval.responsecurve_NREM = [uLEDResponses_InInterval.responsecurve_NREM; ...
+   %      squeeze(uLEDResponses_interval{ii}.in_interval.maxRespLED.responseCurve_NREM)];
+   % 
 
     % out
     uLEDResponses_OutInterval.presynapticID = [uLEDResponses_OutInterval.presynapticID; ...
@@ -148,18 +169,25 @@ for ii = 1:length(uLEDResponses_interval)
         (1:size(uLEDResponses_interval{ii}.bootsTrapRate,1))'];
     uLEDResponses_OutInterval.responsecurve = [uLEDResponses_OutInterval.responsecurve; ...
         squeeze(uLEDResponses_interval{ii}.out_interval.maxRespLED.responseCurve)];
+  % sleep state
+   % uLEDResponses_OutInterval.responsecurve_WAKE = [uLEDResponses_OutInterval.responsecurve_WAKE; ...
+   %      squeeze(uLEDResponses_interval{ii}.out_interval.maxRespLED.responseCurve_WAKE)];
+   % uLEDResponses_OutInterval.responsecurve_REM = [uLEDResponses_OutInterval.responsecurve_REM; ...
+   %      squeeze(uLEDResponses_interval{ii}.out_interval.maxRespLED.responseCurve_REM)];
+   % uLEDResponses_OutInterval.responsecurve_NREM = [uLEDResponses_OutInterval.responsecurve_NREM; ...
+   %      squeeze(uLEDResponses_interval{ii}.out_interval.maxRespLED.responseCurve_NREM)];
 
- 
-    % 
-    % %rand
-    % temp_rand_rate = [];
-    % temp_rand_rateZ = [];
-    % for jj = 1:length(uLEDResponses_interval{ii}.rand_interval)
-    %     temp_rand_rate(:,jj) = uLEDResponses_interval{ii}.rand_interval{jj}.rate;
-    %     temp_rand_rateZ(:,jj) = uLEDResponses_interval{ii}.rand_interval{jj}.rateZ;
-    % end
-    % uLEDResponses_RandInterval.maxRatePulse = [uLEDResponses_RandInterval.maxRatePulse; temp_rand_rate];
-    % uLEDResponses_RandInterval.maxZPulse = [uLEDResponses_RandInterval.maxZPulse; temp_rand_rateZ];
+   if rand_analysis
+        %rand
+        temp_rand_rate = [];
+        temp_rand_rateZ = [];
+        for jj = 1:length(uLEDResponses_interval{ii}.rand_interval)
+            temp_rand_rate(:,jj) = uLEDResponses_interval{ii}.rand_interval{jj}.rate;
+            temp_rand_rateZ(:,jj) = uLEDResponses_interval{ii}.rand_interval{jj}.rateZ;
+        end
+        uLEDResponses_RandInterval.maxRatePulse = [uLEDResponses_RandInterval.maxRatePulse; temp_rand_rate];
+        uLEDResponses_RandInterval.maxZPulse = [uLEDResponses_RandInterval.maxZPulse; temp_rand_rateZ];
+    end
 end
  
 timestamps = uLEDResponses_interval{1}.in_interval.timestamps;
@@ -311,24 +339,26 @@ collision_metrics.inhibitory_connectionsIn = histcounts(collision_metrics.putati
 collision_metrics.presynapticID = collision_metrics.uLEDResponses_InInterval.presynapticID;
 collision_metrics.postsynapticID = collision_metrics.uLEDResponses_InInterval.postsynapticID;
 
-% % boostraping
-% for ii = 1:length(collision_metrics.rate_difference)
-%     rate_difference_rand(ii,:) = uLEDResponses_OutInterval.maxRatePulse(ii) - uLEDResponses_RandInterval.maxRatePulse(ii,:);
-%     collision_metrics.boostrap_CI_05(ii,:) = prctile(rate_difference_rand(ii,:),[5 97.5]);
-%     collision_metrics.boostrap_CI_01(ii,:) = prctile(rate_difference_rand(ii,:),[0.5 99.5]);
-%     collision_metrics.boostrap_CI_001(ii,:) = prctile(rate_difference_rand(ii,:),[0.05 99.95]);
-%     collision_metrics.boostrap_CI_0001(ii,:) = prctile(rate_difference_rand(ii,:),[0.005 99.995]);
-%     collision_metrics.boostrap_CI_00001(ii,:) = prctile(rate_difference_rand(ii,:),[0.0005 99.9995]);
-% 
-%     % make boostrap
-% 
-% 
-%     collision_metrics.boostrap_CI_05_test(ii) = ~InIntervals(collision_metrics.rate_difference(ii),[collision_metrics.boostrap_CI_05(ii,1)  collision_metrics.boostrap_CI_05(ii,2)]);
-%     collision_metrics.boostrap_CI_01_test(ii) = ~InIntervals(collision_metrics.rate_difference(ii),[collision_metrics.boostrap_CI_01(ii,1)  collision_metrics.boostrap_CI_01(ii,2)]);
-%     collision_metrics.boostrap_CI_001_test(ii) = ~InIntervals(collision_metrics.rate_difference(ii),[collision_metrics.boostrap_CI_001(ii,1)  collision_metrics.boostrap_CI_001(ii,2)]);
-%     collision_metrics.boostrap_CI_0001_test(ii) = ~InIntervals(collision_metrics.rate_difference(ii),[collision_metrics.boostrap_CI_0001(ii,1)  collision_metrics.boostrap_CI_0001(ii,2)]);
-% end
-
+if rand_analysis
+    collision_metrics.uLEDResponses_RandInterval   = uLEDResponses_RandInterval; 
+    % % boostraping
+    for ii = 1:length(collision_metrics.rate_difference)
+        rate_difference_rand(ii,:) = uLEDResponses_OutInterval.maxRatePulse(ii) - uLEDResponses_RandInterval.maxRatePulse(ii,:);
+        collision_metrics.boostrap_CI_05(ii,:) = prctile(rate_difference_rand(ii,:),[5 97.5]);
+        collision_metrics.boostrap_CI_01(ii,:) = prctile(rate_difference_rand(ii,:),[0.5 99.5]);
+        collision_metrics.boostrap_CI_001(ii,:) = prctile(rate_difference_rand(ii,:),[0.05 99.95]);
+        collision_metrics.boostrap_CI_0001(ii,:) = prctile(rate_difference_rand(ii,:),[0.005 99.995]);
+        collision_metrics.boostrap_CI_00001(ii,:) = prctile(rate_difference_rand(ii,:),[0.0005 99.9995]);
+    
+        % make boostrap
+    
+    
+        collision_metrics.boostrap_CI_05_test(ii) = ~InIntervals(collision_metrics.rate_difference(ii),[collision_metrics.boostrap_CI_05(ii,1)  collision_metrics.boostrap_CI_05(ii,2)]);
+        collision_metrics.boostrap_CI_01_test(ii) = ~InIntervals(collision_metrics.rate_difference(ii),[collision_metrics.boostrap_CI_01(ii,1)  collision_metrics.boostrap_CI_01(ii,2)]);
+        collision_metrics.boostrap_CI_001_test(ii) = ~InIntervals(collision_metrics.rate_difference(ii),[collision_metrics.boostrap_CI_001(ii,1)  collision_metrics.boostrap_CI_001(ii,2)]);
+        collision_metrics.boostrap_CI_0001_test(ii) = ~InIntervals(collision_metrics.rate_difference(ii),[collision_metrics.boostrap_CI_0001(ii,1)  collision_metrics.boostrap_CI_0001(ii,2)]);
+    end
+end
 % select pairs
 prePyr_select = collision_metrics.candidate_pyr_pyr_pairs;
 preInt_select = collision_metrics.candidate_int_pyr_pairs;

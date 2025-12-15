@@ -20,6 +20,7 @@ addParameter(p,'copyFiles',false,@islogical);
 addParameter(p,'driveStorage_path',[],@isdir);
 % addParameter(p,'driveStorage_name','Research',@isstring);
 addParameter(p,'driveStorage_location','neural3',@isstring);
+addParameter(p,'git_automatic',false);
 
 parse(p,varargin{:})
 
@@ -34,6 +35,7 @@ copyFiles = p.Results.copyFiles;
 driveStorage_path = p.Results.driveStorage_path;
 % driveStorage_name = p.Results.driveStorage_name;
 driveStorage_location = p.Results.driveStorage_location;
+git_automatic = p.Results.git_automatic;
 
 %% Creates a pointer to the folder where the index variable is located
 if isempty(indexedSessionCSV_name)
@@ -103,6 +105,8 @@ switch session.extracellular.chanCoords.layout
         optogenetics = {session.extracellular.chanCoords.layout};
     case 'BehnkeFried-8ch.csv'
         optogenetics = {'None'};
+    case 'A8x8-Edge-5mm-50-150-177'
+        optogenetics = {'None'};
     otherwise
         for ii = 1:length(session.animal.opticFiberImplants)
             optogenetics{1, length(optogenetics)+1} = session.animal.opticFiberImplants{ii}.opticFiber;
@@ -121,6 +125,7 @@ end
 
 if ~isempty(behav)
     behav(end) = [];
+    behav = unique(behav);
     if isempty(behav)
         behav{1,1} = 'no';
     end
@@ -144,26 +149,28 @@ sessionEntry = cell2table(sessionEntry,"VariableNames",["SessionName", "Subject"
 sessionsTable = [sessionsTable; sessionEntry];
 writetable(sessionsTable,[indexedSessionCSV_path filesep indexedSessionCSV_name,'.csv']); % the variable is called allSessions
 
-% Lets do a push for git repository
-cd(indexedSessionCSV_path);
-% Git pull 
-commandToExecute = ['git pull'];
-system(commandToExecute);
-% Git add variable to the repository
-commandToExecute = ['git add ', indexedSessionCSV_name,'.csv']
-system(commandToExecute);
-% Git Commit
-commentToCommit = ['Added Session: ' session.general.name];
-commandToExecute = ['git commit -m "' commentToCommit '"'];
-system(commandToExecute);
-% Git Pull
-commandToExecute = ['git pull'];
-system(commandToExecute);
-% Git Push
-commandToExecute = ['git push'];
-system(commandToExecute);
-
-cd(basepath);     
+if git_automatic
+    % Lets do a push for git repository
+    cd(indexedSessionCSV_path);
+    % Git pull 
+    commandToExecute = ['git pull'];
+    system(commandToExecute);
+    % Git add variable to the repository
+    commandToExecute = ['git add ', indexedSessionCSV_name,'.csv']
+    system(commandToExecute);
+    % Git Commit
+    commentToCommit = ['Added Session: ' session.general.name];
+    commandToExecute = ['git commit -m "' commentToCommit '"'];
+    system(commandToExecute);
+    % Git Pull
+    commandToExecute = ['git pull'];
+    system(commandToExecute);
+    % Git Push
+    commandToExecute = ['git push'];
+    system(commandToExecute);
+    
+    cd(basepath);     
+end
 
 %% Removing dat files before copying files to buzsakilab or synology
 if removeDatFiles

@@ -5,7 +5,7 @@
 %   'updateExpFolder({recordingPC_1, recordingPC_2, etc}, 'analysis unit')',
 %   Example:
 
-updateExpFolder_temp({'G:\camk13'},'D:\camk13');
+updateExpFolder_temp({'E:\cancer4'},'D:\cancer4');
 
 % 2% Then, preprocess session (includes artifacts removal, median signal
 %   removal, LFP and Kilosort, and running computeSessionSummary by 'batch_preprocessSession('basepath','sessionBasepath').
@@ -15,20 +15,10 @@ preprocessSession('basepath','Y:\unindexedSubjects\cancer2\cancer2_250703_sess2'
 
 computeSessionSummary('digitalChannelsList',[1,2]);
 
-uLEDPulses = getuLEDsPulses_legacy();
+uLEDPulses = getuLEDsPulses_legacy('uLEDs_ttl',[1 2]);
 getuLEDResponse('restrict_to_baseline',false,'uLEDPulses',uLEDPulses);
 
 optogeneticResponses = getOptogeneticResponse('force',true,'digitalChannelsList',[1,2,3,4,5,6,7,8,9,10,11,12,13]);
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -41,7 +31,7 @@ batch_sessionSummary('basepath','G:\data\fPv4','cleanArtifacts',({65,[]}),'analo
 
 % 4% Processs individual sessions by by 'processSession'. Example:
 % ANDREA!!!!!!! add ('LED_threshold',.8) in the function for fSst3!!!!!!!!!!!!
-processSession('digital_optogenetic_channels',[1,2,3,4],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
+processSession('digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 
 % 5% Revise output using ProcessSession_notebook
 edit Notebook_for_checking_processSession_results
