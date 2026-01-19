@@ -3,7 +3,7 @@
 % project
 
 clear; close all
-targetProject= 'all';
+targetProject= 'astr';
 
 HCB_directory = what('HippoCookBook'); 
 

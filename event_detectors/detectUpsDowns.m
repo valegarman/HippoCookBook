@@ -347,11 +347,12 @@ if ~isempty(spikeThreshold)
 end
 %% Saving...
 
-UDStates.ints.DOWN = DOWN(classEvs,:);
-UDStates.ints.UP = UP;
-UDStates.timestamps.DOWN = downValley(classEvs);
-UDStates.timestamps.UP = upPeaks;
-UDStates.timestamps.deltaWave = deltaPeak(~isnan(deltaPeak(classEvs)))';
+UDStates.ints_DOWN = DOWN(classEvs,:);
+UDStates.ints_UP = UP;
+UDStates.timestamps_DOWN = downValley(classEvs);
+UDStates.timestamps = downValley(classEvs);
+UDStates.timestamps_UP = upPeaks;
+UDStates.timestamps_deltaWave = deltaPeak(~isnan(deltaPeak(classEvs)))';
 UDStates.detectionInfo.ch = ch;
 UDStates.detectionInfo.spikeThreshold = spikeThreshold;
 UDStates.detectionInfo.gamm_thr = gamm_thr;

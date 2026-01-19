@@ -15,7 +15,7 @@ function [p, stats] = chi2test(varargin)
 % P
 % stats.
 % 
-% By Manu Valero, Buzsaki-Lab 2020
+% By Manu Valero 2020
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     for ii = 1:nargin
         n(ii) = varargin{ii}(1);

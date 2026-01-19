@@ -1,11 +1,9 @@
-function [patterns, activities] = detectCellAssemblies(varargin)
+function [assemblies] = detectCellAssemblies(varargin)
 % Detect cell assemblies
 % 
 % INPUTS
 %
-% spikemat              Spike matrix. Rows represent neurons, columns time
-%                       bins. Each element of the matrix carries the spike
-%                       count of a given neuron at a given time bin.
+% spikes              
 %
 % <optional>
 % 'basepath'            Default pwd
@@ -57,12 +55,12 @@ function [patterns, activities] = detectCellAssemblies(varargin)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Parse options
 p = inputParser;
+addParameter(p,'spikes',loadSpikes,@isstruct);
 addParameter(p,'basepath',pwd,@isstruct);
 addParameter(p,'saveSummary',true,@islogical);
-addParameter(p,'saveMat',true,@islogical);
+addParameter(p,'saveMat',false,@islogical);
 addParameter(p,'dt',0.025,@islogical);
-addParameter(p,'restrict_to',[]);
-addParameter(p,'win',[]);
+addParameter(p,'restrict_to',[0 Inf]);
 addParameter(p,'threshold_method','MarcenkoPastur');
 addParameter(p,'permutations_percentile',[]);
 addParameter(p,'number_of_permutations',[]);
@@ -71,13 +69,15 @@ addParameter(p,'number_of_iterations',500);
 
 parse(p,varargin{:})
 
+spikes = p.Results.spikes;
 basepath = p.Results.basepath;
+restrict_to = p.Results.restrict_to;
 saveMat = p.Results.saveMat;
-saveSummary = p.Results.saveSummary;
+% saveSummary = p.Results.saveSummary;
 dt = p.Results.dt;
 threshold_method = p.Results.threshold_method;
-permutations_percentile = p.Results.permutations_percentile;
-number_of_permutations = p.Results.number_of_permutations;
+%permutations_percentile = p.Results.permutations_percentile;
+%number_of_permutations = p.Results.number_of_permutations;
 method = p.Results.method;
 number_of_iterations = p.Results.number_of_iterations;
 
@@ -93,15 +93,8 @@ opts.Patterns.number_of_iterations = number_of_iterations;
 % colormap
 colorMap = [5 48 97; 33 102 172; 67 147 195; 146 197 222; 209 229 240; 247 247 247; 253 219 199; 244 165 130; 214 96 77; 178 24 43; 103 0 31] / 255;
 
-% load spikes
-spikes = loadSpikes();
-
-% Load behavior
-file = dir('*behavior.mat');
-load(file.name);
-
 % Compute binned matrix
-spikemat = bz_SpktToSpkmat(spikes,'dt',dt,'bintype','boxcar','units','counts','win',win);
+spikemat = bz_SpktToSpkmat(spikes,'dt',dt,'bintype','boxcar','units','counts','win',restrict_to);
 
 % z-score rates for each bin
 % spikemat.data_zscore = zscore(spikemat.data);
@@ -115,53 +108,51 @@ Patterns_sig = zeros(size(Patterns));
 for ii = 1:size(Patterns,2)
     Patterns_sig(:,ii) = Patterns(:,ii) > mean(Patterns(:,ii)) + 2*std(Patterns(:,ii));
 end
-
 % The correlation matrix of the network can be visualized by running:
 
-correlationmat = corr(spikemat.data);
-figure; clf
-imagesc(correlationmat(1:10,1:10));
-colormap(jet(15))
+% correlationmat = corr(spikemat.data);
+% figure; clf
+% imagesc(correlationmat(1:10,1:10));
+% colormap(jet(15))
+% 
+% figure;
+% subplot(311)
+% stem([1:size(Patterns,1)],Patterns(:,1),'k','MarkerSize',3,'MarkerFaceColor','k');
+% hold on;
+% a = Patterns(:,1);
+% a(~Patterns_sig(:,1),1) =   NaN;
+% hold on;
+% stem([1:size(a)],a(:,1),'r','MarkerSize',3,'MarkerFaceColor','r');
+% 
+% subplot(312)
+% stem([1:size(Patterns,1)],Patterns(:,2),'k','MarkerSize',3,'MarkerFaceColor','k');
+% hold on;
+% a = Patterns(:,2);
+% a(~Patterns_sig(:,2),1) =   NaN;
+% hold on;
+% stem([1:size(a)],a(:,1),'b','MarkerSize',3,'MarkerFaceColor','b');
+% 
+% subplot(313)
+% stem([1:size(Patterns,1)],Patterns(:,3),'k','MarkerSize',3,'MarkerFaceColor','k');
+% hold on;
+% a = Patterns(:,3);
+% a(~Patterns_sig(:,3),1) =   NaN;
+% hold on;
+% stem([1:size(a)],a(:,1),'g','MarkerSize',3,'MarkerFaceColor','g');
 
-figure;
-subplot(311)
-stem([1:size(Patterns,1)],Patterns(:,1),'k','MarkerSize',3,'MarkerFaceColor','k');
-hold on;
-a = Patterns(:,1);
-a(~Patterns_sig(:,1),1) =   NaN;
-hold on;
-stem([1:size(a)],a(:,1),'r','MarkerSize',3,'MarkerFaceColor','r');
-
-subplot(312)
-stem([1:size(Patterns,1)],Patterns(:,2),'k','MarkerSize',3,'MarkerFaceColor','k');
-hold on;
-a = Patterns(:,2);
-a(~Patterns_sig(:,2),1) =   NaN;
-hold on;
-stem([1:size(a)],a(:,1),'b','MarkerSize',3,'MarkerFaceColor','b');
-
-subplot(313)
-stem([1:size(Patterns,1)],Patterns(:,3),'k','MarkerSize',3,'MarkerFaceColor','k');
-hold on;
-a = Patterns(:,3);
-a(~Patterns_sig(:,3),1) =   NaN;
-hold on;
-stem([1:size(a)],a(:,1),'g','MarkerSize',3,'MarkerFaceColor','g');
-
-
-% Detect Cell Types that compose each ensemble
-for ii = 1:length(Patterns)
-    cellAssembly{ii}.putativeCellTypes = cell_metrics.putativeCellType(find(Patterns_sig(:,ii)));
-end
-
-% Not computing activity of the ensembles for the moment
 
 % Output
-CellAssembly = [];
-CellAssembly.patterns = Patterns;
-CellAssembly.activity = [];
+assemblies.templates = Patterns;
+assemblies.binarized_templates = Patterns_sig;
+Patterns_sig(:, sum(Patterns_sig~=0,1) <= 1) = [];
+assemblies.assemblies = arrayfun(@(c) find(Patterns_sig(:,c)), 1:size(Patterns_sig,2), 'UniformOutput', false);
+assemblies.threshold_method = threshold_method;
+assemblies.dt = dt;
 
-save('CellAssembly.mat','CellAssembly');
+if saveMat
+    disp('Saving results...');
+    save([basenameFromBasepath(pwd) '.assemblies.cellinfo.mat'],'assemblies');
+end
 
 cd(prevBasepath);
 end

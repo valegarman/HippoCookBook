@@ -145,6 +145,7 @@ addParameter(p,'stickytrigger',false);
 addParameter(p,'saveLFP',true);
 addParameter(p,'winparms',[2 15]);
 addParameter(p,'ignoreManual',false)
+addParameter(p,'overwrite_EMG',false)
 
 parse(p,varargin{:})
 %Clean up this junk...
@@ -166,6 +167,7 @@ stickytrigger = p.Results.stickytrigger;
 saveLFP = p.Results.saveLFP;
 winparms = p.Results.winparms;
 ignoreManual = p.Results.ignoreManual; 
+overwrite_EMG = p.Results.overwrite_EMG;
 
 prevPath = pwd;
 cd(basePath);
@@ -246,7 +248,7 @@ end
 % Load/Calculate EMG based on cross-shank correlations 
 % (high frequency correlation signal = high EMG).  
 % Schomburg E.W. Neuron 84, 470?485. 2014)
-EMGFromLFP = bz_EMGFromLFP(basePath,'overwrite',overwrite,...
+EMGFromLFP = bz_EMGFromLFP(basePath,'overwrite',overwrite_EMG,...
                                      'rejectChannels',rejectChannels,'noPrompts',noPrompts,...
                                      'saveMat',savebool,'ignoretime',ignoretime);
 

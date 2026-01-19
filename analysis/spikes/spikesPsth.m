@@ -36,6 +36,7 @@ p = inputParser;
 addRequired(p,'timestamps',@isnumeric);
 addParameter(p,'basepath',pwd,@isdir);
 addParameter(p,'spikes',[],@isstruct);
+addParameter(p,'session',[],@isstruct);
 addParameter(p,'numRep',500,@isnumeric);
 addParameter(p,'binSize',0.001,@isnumeric);
 addParameter(p,'winSize',1,@isnumeric);
@@ -62,7 +63,6 @@ addParameter(p,'restrict_to_manipulation',false,@islogical);
 addParameter(p,'save_as','_psth',@ischar);
 addParameter(p,'save_raster_as','_raster',@ischar);
 addParameter(p,'sr',[],@isnumeric);
-
 
 parse(p, timestamps,varargin{:});
 
@@ -94,6 +94,7 @@ restrict_to_manipulation = p.Results.restrict_to_manipulation;
 save_as = p.Results.save_as;
 save_raster_as = p.Results.save_raster_as;
 sr = p.Results.sr;
+session = p.Results.session;
 
 %% Session Template
 % Deal with inputs
@@ -104,7 +105,10 @@ if minNumberOfPulses < 2
     error('Number of pulses should be lager than 1');
 end
 
-session = loadSession;
+if isempty(session)
+    session = loadSession;
+end
+
 if exist([session.general.name '.' eventType '_psth.cellinfo.mat'],'file') ...
         && ~force
     disp(['Psth already computed for ', session.general.name, ' ', eventType,'. Loading file.']);
@@ -120,7 +124,7 @@ end
 if strcmpi(eventType,'slowOscillations')
     if isempty(timestamps)
         UDStates = detectUpsDowns;
-        timestamps = UDStates.timestamps.DOWN;
+        timestamps = UDStates.timestamps_DOWN;
     end
     warning('Using default parameters for slow oscillations!');
     binSize = 0.01;
@@ -141,7 +145,6 @@ elseif strcmpi(eventType,'ripples')
     event_ints = [-0.025 0.025];
     baseline_ints = [-0.5 -0.5 + diff(event_ints)];
     % win_Z = [-0.5 -0.1];
-
 end
 
 %% Spikes
@@ -159,8 +162,8 @@ if ~isfield(spikes, 'numcells')
     spikes.numcells = length(spikes.times); 
 end
 
+% session features
 ints = [];
-session = loadSession;
 if isfield(session,'epochs') && isfield(session.epochs{1},'behavioralParadigm') && restrict_to_manipulation
     list_of_manipulations = list_of_manipulations_names;
     
@@ -176,7 +179,6 @@ if isfield(session,'epochs') && isfield(session.epochs{1},'behavioralParadigm') 
     end
 elseif isfield(session,'epochs') && isfield(session.epochs{1},'behavioralParadigm') && restrict_to_baseline
     list_of_manipulations = list_of_manipulations_names;
-    session = loadSession;
     for ii = 1:length(session.epochs)
         if ismember(session.epochs{ii}.behavioralParadigm, list_of_manipulations)
             ints = [0 session.epochs{ii}.startTime];
@@ -190,11 +192,10 @@ else
     ints = [0 Inf];
 end
 
-restrict_ints = IntersectIntervals([ints; restrict_to]);
+restrict_ints = intersectIntervalSets(ints, restrict_to);
 timestamps = Restrict(timestamps, restrict_ints);
 
 if isempty(sr)
-    session = loadSession;
     if isfield(session,'extracellular') && isfield(session.extracellular,'sr')
         sr = session.extracellular.sr;
     else

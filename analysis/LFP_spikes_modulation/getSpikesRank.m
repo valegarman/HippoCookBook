@@ -123,7 +123,7 @@ elseif ischar(events)
     switch lower(events)
         case 'upstates'
             UDStates = detectUpsDowns;
-            events = [(UDStates.ints.DOWN(1:end-1,2)) (UDStates.ints.DOWN(2:end,2))];
+            events = [(UDStates.ints_DOWN(1:end-1,2)) (UDStates.ints_DOWN(2:end,2))];
             max_duration = 20;
             min_duration = 0.1;
 

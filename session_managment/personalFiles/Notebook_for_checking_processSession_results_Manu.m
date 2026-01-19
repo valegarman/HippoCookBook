@@ -1,14 +1,16 @@
 
 %% Notebook_for_checking_processSession_results
 % Andrea Gallardo and Manu Valero, 2023
+
 %% 0. Check metadata
 gui_session;
 
-%% 1. Optogenetic responses and cell identity
-% Check light responses. If two neurons are tagged, but they show a similar
-% waveform and same max channel, they are probably the same cell.
-% The only way of fixing this is merging them in Phy!!!!!!! (and then run
-% processSession again)
+% %% 1. Optogenetic responses and cell identity
+% % Check light responses. If two neurons are tagged, but they show a similar
+% % waveform and same max channel, they are probably the same cell.
+% % The only way of fixing this is merging them in Phy!!!!!!! (and then run
+% % processSession again)
+% getOptogeneticResponse('numRep',500,'force',true,'digitalChannelsList', [1 2],'analogChannelsList',[]);
 
 %% 2. Brain state scoring
 % Inspect content in StateScoreFigures. Three nice clusters must be visible
@@ -17,15 +19,17 @@ gui_session;
 % 2. 1 Edit scoring with 
 session = loadSession;
 TheStateEditor(session.general.name);
+
 % press 'a', click Sticky and move thresholds for improving detections of
 % bimodalities. 
 % 
 % 2.2 If no clear bimodalities are visible, run scoring with different
-% channels and include noisy ignoretime epochs
+% channels as below, and include noisy ignoretime epochs
 % Call Manu or Pablo!!!
-ThetaChannels = 60; % choose theta channels (ideally SLM)
-SWChannels = 36; % choose slow wave channels (ideally superficial cortex)
-ignoretime = [9000 15000];
+
+ThetaChannels = []; % choose theta channels (ideally SLM)
+SWChannels = []; % choose slow wave channels (ideally superficial cortex)
+ignoretime = [];
 % if EMG is not been quantified correctly, try discarting channels with
 % bz_EMGFromLFP(pwd,'rejectChannels',[],'overwrite', true,'ignoretime',ignoretime);
 
@@ -48,41 +52,38 @@ TheStateEditor(session.general.name);
 % Revise hippocapmal layer definition. Upon disagrements, run again
 hippocampalLayers = getHippocampalLayers('force',true,'promt',true);
 
-%% 4. Ripples
+%% 4. Ripples and slow oscillations
 % Revise number of ripples, shape and channel. You can also specifiy a
 % different trhresold or restrict the shanks for the spikeThreshold
 % analysis.
 
 excludeIntervals = [];
-rippleChannel = [];
+rippleChannel = 17;
 SWChannel = [];
-noiseChannel = [];
-eventSpikeThreshold_shanks = [1]; % which shanks will be accounted for the spike threshold 
-eventSpikeThreshold = 1.2; % .5
+noiseChannel = 14;
+eventSpikeThreshold_shanks = [1:4]; % which shanks will be accounted for the spike threshold 
+eventSpikeThreshold = .5; % .5
 
-rippleMasterDetector_threshold = [.5 1]; % [1.5 3.5]
-ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',false,'thresholds',...
-    rippleMasterDetector_threshold,'eventSpikeThreshold_shanks', eventSpikeThreshold_shanks,'eventSpikeThreshold',eventSpikeThreshold,'excludeIntervals',excludeIntervals,'noise',noiseChannel); 
+rippleMasterDetector_threshold = [1.5 3.5]; % [1.5 3.5] you can decrease this as needeed!!!
+
+ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',true,'thresholds',...
+    rippleMasterDetector_threshold,'eventSpikeThreshold_shanks', eventSpikeThreshold_shanks,'eventSpikeThreshold',eventSpikeThreshold,'excludeIntervals',excludeIntervals,'referenceChannel',noiseChannel); 
 psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10);
 % psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10,'restrict_to_manipulation',true);
 getSpikesRank('events','ripples');
 
-% from ripples.timestamps we want a text file 'basename.rip.evt'
-
-1.7826834 begRip
-1.712jkh  endRip
-1.89189 begRip
-
+UDStates = detectUpsDowns('plotOpt', true,'forceDetect',true,'NREMInts','all','useparfor',true);
+psthUD = spikesPsth([],'eventType','slowOscillations','numRep',500,'force',true,'minNumberOfPulses',10);
+getSpikesRank('events','upstates');
 
 %% 5. Theta epochs
 % Revise channel definition, theta band in thetaEpochs.png and cells
 % rhytmicity. If bad, you can change useCSD_for_theta_detection to false,
 % or change powerThreshold, even the channel
 
-
-channel = 47;
-useCSD_for_theta_detection = true;
-powerThreshold = 1.5;% .8
+channel = 29;
+useCSD_for_theta_detection = false; % try false and true
+powerThreshold = .8;% by default, .8, if noisy you go higher
 
 thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'powerThreshold',powerThreshold,'channel', channel);
 
@@ -134,7 +135,7 @@ getSessionTracking('roiTracking','manual','forceReload',false,'LED_threshold',LE
 % only if the animal run a figure-eight maze behavior
 %getSessionArmChoice('task','alternation','leftArmTtl_channel',2,'rightArmTtl_channel',3,'homeDelayTtl_channel',4);
 behaviour = getSessionLinearize('forceReload',true,'maze','tMaze');  
-firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',true);
+firingMaps = bz_firingMapAvg(behavior, spikes,'saveMat',true);
 placeFieldStats = bz_findPlaceFields1D('firingMaps',firingMaps,'maxSize',.75,'sepEdge',0.03); %% ,'maxSize',.75,'sepEdge',0.03
 firingTrialsMap = firingMapPerTrial('force',true);
 spatialModulation = getSpatialModulation('force',true);
@@ -150,6 +151,12 @@ plotSummary('showTagCells',true);
 close all;
 
 % -------------------------------------------------------------------------
+% other analysis
 
+% 2.1.1 Reanalyse bands
+theta_bandpass = [5 12]; gamma_bandpass = [20 100]; hfo_bandpass = [100 500];
+powerSpectrumProfile(theta_bandpass,'showfig',true,'forceDetect',true);
+powerSpectrumProfile(gamma_bandpass,'showfig',true,'forceDetect',true);
+powerSpectrumProfile(hfo_bandpass,'showfig',true,'forceDetect',true);
 
 

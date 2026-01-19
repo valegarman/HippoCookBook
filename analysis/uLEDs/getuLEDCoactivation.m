@@ -25,7 +25,7 @@ addParameter(p,'offset_precoactivation', 0,@isnumeric);
 addParameter(p,'test_uled_responses', 'zscore',@ischar);
 addParameter(p,'numRep_uledResp', 500, @isscalar);
 addParameter(p,'curate_responses', true, @islogical);
-% addParameter(p,'epochs_names', {'precoactivation', 'coactivation', 'postcoactivation'} ,@iscell);
+addParameter(p,'epochs_names', {'precoactivation', 'coactivation', 'postcoactivation'} ,@iscell);
 
 parse(p,varargin{:});
 basepath = p.Results.basepath;
@@ -47,7 +47,7 @@ test_uled_responses = p.Results.test_uled_responses;
 winSTD = p.Results.winSTD;
 numRep_uledResp = p.Results.numRep_uledResp;
 curate_responses = p.Results.curate_responses;
-% epochs_names = p.Results.epochs_names;
+epochs_names_target = p.Results.epochs_names;
 
 prevPath = pwd;
 cd(basepath);
@@ -61,8 +61,8 @@ end
 
 %% COACTIVATION ANALYSIS
 % 0 Compute uled responses according to local parameters
-uledResponses = getuLEDResponse('force', true, 'winSize', winSize_uled, 'before_pulse_win',before_pulse_win, 'during_pulse_win', during_pulse_win, 'winSizePlot', winSizePlot, 'saveMat', false,...
-    'save_as', 'uledResponses_coactivation', 'test_in_plots',test_uled_responses, 'zscore_threshold', 1, 'numRep', numRep_uledResp);
+uledResponses = getuLEDResponse('force', true, 'winSize', winSize_uled, 'before_pulse_win',before_pulse_win, 'during_pulse_win', during_pulse_win, 'winSizePlot', winSizePlot, 'saveMat', true,...
+    'save_as', 'uledResponses_coactivation', 'test_in_plots',test_uled_responses, 'zscore_threshold', 1, 'numRep', numRep_uledResp, 'save_as', 'uledResponses_20');
 switch lower(test_uled_responses)
     case 'boostrap'
         lightRespMat = squeeze((uledResponses.bootsTrapTest(:,1,:)));
@@ -82,20 +82,20 @@ lightRespNeurons = nansum(lightRespMat==1,2)>0;
 epochsNames = [];
 epochsInts = [];
 for ii = 1:size(session.epochs,2)
-    epochsNames{ii} = session.epochs{ii}.behavioralParadigm;
+    epochsNames{ii} = lower(session.epochs{ii}.behavioralParadigm);
     epochsInts(ii,:) = [session.epochs{ii}.startTime session.epochs{ii}.stopTime];
 end
 if sum(ismember({'precoactivation', 'coactivation', 'postcoactivation'}, epochsNames)) ~= 3
-    error('Epochs names do not match the expected results! Define "precoactivation", "coactivation", and "postcoactivation" epochs in the current session!');
+    warning('Epochs names do not match the expected results! Define "precoactivation", "coactivation", and "postcoactivation" epochs in the current session!');
 end
 
 disp('Computing CCG...');
 disp('... CCG during pre-coactivation');
-averageCCG_precoact = getAverageCCG('restrict_to',epochsInts(find(ismember(epochsNames,'precoactivation')),:) + [0 offset_precoactivation], 'saveMat', false, 'skipStimulationPeriods', false ,'force', true, 'plotOpt', false);
+averageCCG_precoact = getAverageCCG('restrict_to',epochsInts(find(ismember(epochsNames,lower(epochs_names_target{1}))),:) + [0 offset_precoactivation], 'saveMat', false, 'skipStimulationPeriods', false ,'force', true, 'plotOpt', false);
 disp('... CCG during coactivation');
-averageCCG_coact = getAverageCCG('restrict_to',epochsInts(find(ismember(epochsNames,'coactivation')),:), 'saveMat', false, 'skipStimulationPeriods', false ,'force', true, 'plotOpt', false);
+averageCCG_coact = getAverageCCG('restrict_to',epochsInts(find(ismember(epochsNames,lower(epochs_names_target{2}))),:), 'saveMat', false, 'skipStimulationPeriods', false ,'force', true, 'plotOpt', false);
 disp('... CCG during post-coactivation');
-averageCCG_postcoact = getAverageCCG('restrict_to',epochsInts(find(ismember(epochsNames,'postcoactivation')),:), 'saveMat', false, 'skipStimulationPeriods', false ,'force', true, 'plotOpt', false);
+averageCCG_postcoact = getAverageCCG('restrict_to',epochsInts(find(ismember(epochsNames,lower(epochs_names_target{3}))),:), 'saveMat', false, 'skipStimulationPeriods', false ,'force', true, 'plotOpt', false);
 
 uLEDcoactivation.epochsNames = epochsNames;
 uLEDcoactivation.epochsInts = epochsInts;
@@ -273,7 +273,7 @@ uLEDcoactivation.is_pyramidalCells_lightResponsive_same_shank = pyramidal_neuron
 
 % 1.2 % Coactivated LEDs
 % get pairs of coactivated uleds
-[status] = InIntervals(uledpulses.timestamps(:,1),epochsInts(find(ismember(epochsNames,'coactivation')),:));
+[status] = InIntervals(uledpulses.timestamps(:,1),epochsInts(find(ismember(epochsNames,lower(epochs_names_target{2}))),:));
 times_coactivation = uledpulses.timestamps(status==1,1);
 codes_coactivation = uledpulses.code(status==1,1);
 % list_codes = unique(codes_coactivation);
@@ -404,13 +404,13 @@ uLEDcoactivation.pairwise_coactivated_pyramidalCells_same_shank = mask_unit_as_n
 uLEDcoactivation.pairs_coactivated_pyramidalCells_same_shank = label_pairs_as_nan(uLEDcoactivation.pair_pyramidalCells_same_shank, ~coactivated_neurons.are_coactivated_pairs);
 
 % 1.3 % explained variance
-evStats_pairwise = explained_variance(spikes, epochsInts(find(ismember(epochsNames,'precoactivation')),:), epochsInts(find(ismember(epochsNames,'coactivation')),:), epochsInts(find(ismember(epochsNames,'postcoactivation')),:),'saveMat',false);
+evStats_pairwise = explained_variance(spikes, epochsInts(find(ismember(epochsNames,lower(epochs_names_target{1}))),:), epochsInts(find(ismember(epochsNames,lower(epochs_names_target{2}))),:), epochsInts(find(ismember(epochsNames,lower(epochs_names_target{3}))),:),'saveMat',false);
 temp_spikes = spikes;
 temp_spikes.times(~pyramidal_neurons) = [];
-evStats_pyramidalCells = explained_variance(temp_spikes, epochsInts(find(ismember(epochsNames,'precoactivation')),:), epochsInts(find(ismember(epochsNames,'coactivation')),:), epochsInts(find(ismember(epochsNames,'postcoactivation')),:),'saveMat',false);
+evStats_pyramidalCells = explained_variance(temp_spikes, epochsInts(find(ismember(epochsNames,lower(epochs_names_target{1}))),:), epochsInts(find(ismember(epochsNames,lower(epochs_names_target{2}))),:), epochsInts(find(ismember(epochsNames,lower(epochs_names_target{3}))),:),'saveMat',false);
 temp_spikes = spikes;
 temp_spikes.times(~targetCells) = [];
-evStats_pyramidalCells_lightResponsive = explained_variance(temp_spikes, epochsInts(find(ismember(epochsNames,'precoactivation')),:), epochsInts(find(ismember(epochsNames,'coactivation')),:), epochsInts(find(ismember(epochsNames,'postcoactivation')),:),'saveMat',false);
+evStats_pyramidalCells_lightResponsive = explained_variance(temp_spikes, epochsInts(find(ismember(epochsNames,lower(epochs_names_target{1}))),:), epochsInts(find(ismember(epochsNames,lower(epochs_names_target{2}))),:), epochsInts(find(ismember(epochsNames,lower(epochs_names_target{3}))),:),'saveMat',false);
 uLEDcoactivation.evStats_pairwise = evStats_pairwise;
 uLEDcoactivation.evStats_pyramidalCells = evStats_pyramidalCells;
 uLEDcoactivation.evStats_pyramidalCells_lightResponsive = evStats_pyramidalCells_lightResponsive;
@@ -431,23 +431,27 @@ end
 nNeurons = size(neuronLED,1);
 coactivationMatrix_neurons = false(nNeurons);
 for i = 1:nNeurons
+    leds_i = find(neuronLED(i,:));
+    if isempty(leds_i), continue; end
+
     for j = i+1:nNeurons
-        leds_i = find(neuronLED(i,:));
         leds_j = find(neuronLED(j,:));
-        
+        if isempty(leds_j), continue; end
+
         activatedTogether = false;
+
         for li = leds_i
             for lj = leds_j
-                if ledCoactivation(li, lj)
+                if li == lj || ledCoactivation(li, lj)
                     activatedTogether = true;
                     break
                 end
             end
             if activatedTogether, break; end
         end
-        
+
         coactivationMatrix_neurons(i,j) = activatedTogether;
-        coactivationMatrix_neurons(j,i) = activatedTogether;  % simetría
+        coactivationMatrix_neurons(j,i) = activatedTogether;
     end
 end
 G = graph(coactivationMatrix_neurons);
@@ -754,60 +758,60 @@ function neuronLED_curado = curateNeuronLED(neuronLED)
     [nNeurons, nLEDs] = size(neuronLED);
     data = num2cell(logical(neuronLED));
 
-    % Table visual parameters
-    visibleRows = 20;         % number of visible rows
-    rowHeight = 20;           % row height in pixels
-    colWidth = 54;            % width per LED column
-    tableWidth = min(nLEDs * colWidth, 1600);  % max width to avoid overflowing the screen
-    tableHeight = visibleRows * rowHeight;
+    % ---- Screen + layout params ----
+    screen = get(0,'ScreenSize');                  % [x y width height]
+    margin = 140;                                  % total horizontal margins
+    maxWidthAvail = max(600, screen(3) - margin);  % pixels we can use for the table
+    visibleRows = 20;
+    rowHeight   = 22;
+    minColW     = 36;                              % don't go smaller than this
+    prefColW    = 60;                              % preferred width
 
-    % Create main figure
-    f = figure('Name', 'Manual curation of neuron-LED table', ...
-               'Position', [100 100 tableWidth + 80 tableHeight + 100], ...
-               'MenuBar', 'none', ...
-               'NumberTitle', 'off', ...
-               'Resize', 'off');
+    % Compute column width to try to fit ALL columns in view
+    totalPrefWidth = nLEDs * prefColW;
+    if totalPrefWidth <= maxWidthAvail
+        colW = prefColW;                           % we can show all columns at preferred width
+        figWidth = totalPrefWidth + 40;            % + small padding
+    else
+        % squeeze columns to fit the available width (but keep a reasonable minimum)
+        colW = max(minColW, floor(maxWidthAvail / nLEDs));
+        figWidth = nLEDs * colW + 40;
+    end
 
-    % Panel containing the table
-    panel = uipanel('Parent', f, ...
-                    'Units', 'pixels', ...
-                    'Position', [20 60 tableWidth tableHeight]);
+    tableHeight = visibleRows * rowHeight + 4;
 
-    % Create full table
-    t = uitable(panel, ...
+    % ---- Use uifigure (UI components have proper scrolling) ----
+    f = uifigure('Name','Manual curation of neuron-LED table', ...
+                 'Position',[100 100 figWidth max(tableHeight+110, 240)], ...
+                 'Resize','on');
+
+    % Table (UI version)
+    t = uitable(f, ...
         'Data', data, ...
         'ColumnEditable', true(1, nLEDs), ...
         'ColumnName', strcat("LED_", string(1:nLEDs)), ...
         'RowName', strcat("N", string(1:nNeurons)), ...
-        'Units', 'normalized', ...
-        'Position', [0 0 1 1]);
+        'Position', [20 70 figWidth-40 tableHeight]);
 
-    % Add vertical scroll bar if needed
-    if nNeurons > visibleRows
-        uicontrol(f, 'Style', 'slider', ...
-            'Min', 1, ...
-            'Max', nNeurons - visibleRows + 1, ...
-            'Value', 1, ...
-            'SliderStep', [1/(nNeurons-visibleRows), 10/(nNeurons-visibleRows)], ...
-            'Position', [tableWidth + 40 60 20 tableHeight], ...
-            'Callback', @(src, event) scrollTable(t, round(get(src, 'Value')), visibleRows));
-    end
+    % Force column widths so all columns are visible at once (if colW calc allowed it)
+    t.ColumnWidth = repmat({colW}, 1, nLEDs);  % cell array of fixed widths
 
     % Save button
-    uicontrol(f, 'Style', 'pushbutton', ...
-        'String', 'Save', ...
+    uibutton(f, 'Text', 'Save', ...
         'Position', [20 20 100 30], ...
-        'Callback', @(src, event) uiresume(f));
+        'ButtonPushedFcn', @(~,~) uiresume(f));
 
-    % Wait for user to click "Save"
+    % If we still ended up wider than the screen (e.g., too many LEDs),
+    % you’ll get a horizontal scrollbar automatically in uifigure/uitable.
+
     uiwait(f);
 
     % Read curated data
-    data_out = get(t, 'Data');
+    data_out = t.Data;
     neuronLED_curado = false(nNeurons, nLEDs);
     for i = 1:nNeurons
         for j = 1:nLEDs
-            neuronLED_curado(i,j) = data_out{i,j};
+            neuronLED_curado(i,j) = logical(data_out{i,j});
         end
     end
 

@@ -361,8 +361,10 @@ end
 %% Classify cell types
 [cell_types, cell_classification_stats, cell_metrics, cell_subtypes] = cellTypeClassifier('modelType','hippocampus5');
 % Unique classes (excluding 'Noisy_unit')
-cell_classes = unique(cell_subtypes);
+cell_classes = unique(cell_types);
 cell_classes(strcmp(cell_classes, 'Noisy_unit')) = [];  % remove noisy
+cell_classes(strcmp(cell_classes, 'Undetermined')) = [];  % remove undetermined
+
 
 n_classes = length(cell_classes);
 class_conn_avg = nan(n_classes, n_classes);  % rows: target, cols: source
@@ -374,8 +376,8 @@ funcContSig(functional_connectivity.p > alpha) = NaN;  %
 for tgt = 1:n_classes
     for src = 1:n_classes
         % Logical index of cells in each class
-        tgt_idx = strcmp(cell_subtypes, cell_classes{tgt});
-        src_idx = strcmp(cell_subtypes, cell_classes{src});
+        tgt_idx = strcmp(cell_types, cell_classes{tgt});
+        src_idx = strcmp(cell_types, cell_classes{src});
 
         % Extract relevant submatrix
         conn_block = funcContSig(tgt_idx, src_idx);
@@ -392,7 +394,7 @@ for tgt = 1:n_classes
         end
 
         if ~isempty(p_vals)
-            class_conn_p(tgt, src) = mean(p_vals);
+            class_conn_p(tgt, src) = nanmean(p_vals);
         end
     end
 end
@@ -489,7 +491,8 @@ if doPlot
             h.EdgeColor = edgeColors;
             h.LineWidth = 3; % 5 * abs(weights) / max(abs(weights));
             h.NodeColor = colors; % ''; %  x_axis'
-            h.NodeLabel = functional_connectivity.cell_families; % ''; %  x_axis'
+            % h.NodeLabel = functional_connectivity.cell_families; % ''; %  x_axis'
+            h.NodeLabel = '';
             h.EdgeAlpha = 0.8;
             h.MarkerSize = 8;
             h.ArrowSize = 15;

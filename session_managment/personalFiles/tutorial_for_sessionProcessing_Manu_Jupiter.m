@@ -19,7 +19,6 @@ batch_sessionSummary('basepath','G:\data\fPv4','cleanArtifacts',({65,[]}),'analo
 preprocessSession('basepath',pwd,'analogChannelsList',[],'spikeSort',true,'getPos',false, 'cleanArtifacts',false,...
                     'medianSubstr',true,'sessionSummary',true,'digitalChannelsList',[1:16]);
 
-
 % 3% CLEAN SESSIONS MANUALLY BY PHY
 
 % 4% Processs individual sessions by by 'processSession'. Example:
@@ -48,3 +47,19 @@ NotebookMonoSynBition;
 
 % 
 getOptogeneticResponse('digitalChannelsList', 9, 'force', true)
+
+% 
+% <OPTIONAL> 
+preprocessSession('basepath',pwd,'analogChannelsList',[],'spikeSort',true,'getPos',false, 'cleanArtifacts',false,...
+                    'medianSubstr',true,'sessionSummary',true,'digitalChannelsList',[]);
+
+list_of_paths = {'Y:\astro5\astro5_250707_sess1','Y:\astro5\astro5_250708_sess2','Y:\astro5\astro5_250709_sess3','Y:\astro5\astro5_250710_sess4',...
+    'Y:\astro5\astro5_250711_sess5', 'Y:\astro5\astro5_250712_sess6', 'Y:\astro5\astro5_250713_sess7', 'Y:\astro5\astro5_250714_sess8', 'Y:\astro5\astro5_250715_sess9', ...
+    'Y:\astro5\astro5_250716_sess10', 'Y:\astro5\astro5_250717_sess11', 'Y:\astro5\astro5_250718_sess12', 'Y:\astro6\astro6_250708_sess2', 'Y:\astro6\astro6_250709_sess3',...
+    'Y:\astro6\astro6_250710_sess4', 'Y:\astro6\astro6_250711_sess5', 'Y:\astro6\astro6_250712_sess6', 'Y:\astro6\astro6_250713_sess7', 'Y:\astro6\astro6_250714_sess8', ...
+    'Y:\astro6\astro6_250716_sess10', 'Y:\astro6\astro6_250717_sess11', 'Y:\astro6\astro6_250718_sess12'};
+add_results = {'fiberevent_onset_psth'};
+[projectResults, projectSessionResults] = ...;
+        loadProjectResults('list_of_paths',list_of_paths,...
+        'analysis_project_path', 'C:\Users\mvalero\OneDrive - imim.es\NeuralComputationLab\ActiveProjects\Astrometry'  ,'project', 'Astrometry','loadLast',false, 'save_as', 'astrometry_results2', 'add_results', add_results, 'includeSpikes', false);
+

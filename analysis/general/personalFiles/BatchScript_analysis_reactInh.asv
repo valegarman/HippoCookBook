@@ -11,12 +11,10 @@ list_of_sessions = {'fCamk1_200827_sess9', 'fCamk1_200901_sess12', 'fCamk1_20090
     'fCamk1_200911_sess19','fCamk3_201028_sess10_cleanned','fCamk3_201029_sess11_cleanned',...
     'fCamk3_201030_sess12','fCamk3_201102_sess13','fCamk3_201103_sess14','fCamk3_201111_sess20',...
     'fCamk3_201113_sess22','fCamk3_201105_sess16','fCamk3_201106_sess17','fCamk3_201110_sess19',...
-    'fCamk3_201109_sess18', ''};
+    'fCamk3_201109_sess18'};
 
 
-list_of_sessions = {'Y:\camk12\camk12_250507_sess5', 'Y:\camk14\camk14_251010_sess9', 'Y:\camk14\camk14_251013_sess10',...
-    'Y:\camk14\camk14_251014_sess11', 'Y:\camk14\camk14_251017_sess13'};
-
+list_of_sessions = {'camk12_250507_sess5', 
 
 HCB_directory = what('HippoCookBook'); 
 sessionsTable = readtable([HCB_directory.path filesep 'indexedSessions.csv']); % the variable is called allSessions

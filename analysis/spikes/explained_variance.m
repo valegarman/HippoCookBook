@@ -67,29 +67,45 @@ ev = 100*((corr(c_maze(:),c_post(:)) - corr(c_maze(:),c_pre(:)) * corr(c_post(:)
 rev = 100*((corr(c_maze(:),c_pre(:)) - corr(c_maze(:),c_post(:)) * corr(c_pre(:),c_post(:)))/sqrt((1-corr(c_maze(:),c_post(:))^2)*(1-corr(c_pre(:),c_post(:))^2)))^2;
 
 % single-cell contribution on EV and REV 
-delta_ev = [];
-for jj = 1:size(c_pre,1)
-    for kk = 1:size(c_pre,2)
-        c_pre_temp =  c_pre;
-        c_maze_temp = c_maze;
-        c_post_temp = c_post;
-        
-        c_pre_temp(jj,kk) = NaN;
-        c_maze_temp(jj,kk) = NaN;
-        c_post_temp(jj,kk) = NaN;
-        
-        c_r_p2 = corr(c_maze_temp(:),c_post_temp(:),'rows','pairwise');
-        c_r_p1 = corr(c_maze_temp(:),c_pre_temp(:),'rows','pairwise');
-        c_p1_p2 = corr(c_post_temp(:),c_pre_temp(:),'rows','pairwise');
-        
-        delta_ev_temp = ev - 100*((c_r_p2 - c_r_p1 * c_p1_p2)/sqrt((1-c_r_p1^2)*(1-c_p1_p2^2)))^2;
-        delta_ev(jj,kk) = delta_ev_temp;
+nCells = size(c_pre,1);
+ev_perCell_local = nan(nCells,1);
+for i = 1:nCells
+    
+    idx = setdiff(1:nCells, i);  % all other cells
+    
+    r_pre_i  = c_pre(i,  idx);
+    r_maze_i = c_maze(i, idx);
+    r_post_i = c_post(i, idx);
+    
+    % Make column vectors and remove NaNs if needed
+    v_pre  = r_pre_i(:);
+    v_maze = r_maze_i(:);
+    v_post = r_post_i(:);
+    
+    valid = ~isnan(v_pre) & ~isnan(v_maze) & ~isnan(v_post);
+    v_pre  = v_pre(valid);
+    v_maze = v_maze(valid);
+    v_post = v_post(valid);
+    
+    if numel(v_pre) < 3
+        continue  % not enough data
     end
+    
+    % Correlations
+    c_r_p2 = corr(v_maze, v_post);
+    c_r_p1 = corr(v_maze, v_pre);
+    c_p1_p2 = corr(v_post, v_pre);
+    
+    % Partial correlation R–P2 controlling for P1, squared and in %
+    ev_i = 100*((c_r_p2 - c_r_p1*c_p1_p2) / ...
+               sqrt((1-c_r_p1^2)*(1-c_p1_p2^2)))^2;
+    
+    ev_perCell_local(i) = ev_i;
 end
 
 evStats.ev = ev;
 evStats.rev = rev;
-evStats.ev_perCell = mean(delta_ev)';
+evStats.ev_perCell = ev_perCell_local;
 evStats.P1 = c_pre;
 evStats.R = c_maze;
 evStats.P2 = c_post;

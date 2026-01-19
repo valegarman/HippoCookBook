@@ -181,7 +181,9 @@ end
 if ~isempty(dir('*digitalIn.dat')) 
     digitalIn = getDigitalIn('fs',session.extracellular.sr); 
 else
-    digitalIn = getDigitalIn_OE('all','fs',session.extracellular.sr);
+    try
+        digitalIn = getDigitalIn_OE('all','fs',session.extracellular.sr);
+    end
 end
 
 %% Remove stimulation artifacts

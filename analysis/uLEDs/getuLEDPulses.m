@@ -60,6 +60,7 @@ addParameter(p,'minNumberOfPulses',200,@isnumeric);
 addParameter(p,'conditionEpochs',[]);
 addParameter(p,'doPlot',true,@islogical);
 addParameter(p,'restrict_intervals',[0 Inf],@isnumeric);
+addParameter(p,'gap_threshold',NaN,@isnumeric);
 
 parse(p,varargin{:});
 basepath = p.Results.basepath;
@@ -74,6 +75,7 @@ minNumberOfPulses = p.Results.minNumberOfPulses;
 conditionEpochs = p.Results.conditionEpochs;
 doPlot = p.Results.doPlot;
 restrict_intervals = p.Results.restrict_intervals;
+gap_threshold = p.Results.gap_threshold;
 
 prevPath = pwd;
 cd(basepath);
@@ -229,6 +231,7 @@ pulsesToDiscard = find(pulsesToDiscard);
 % discard out of restricted area
 [status] = InIntervals(timestamps(:,1), restrict_intervals);
 pulsesToDiscard = [pulsesToDiscard; find(status==0)];
+pulsesToDiscard = [pulsesToDiscard; find(code==0)];
 
 timestamps(pulsesToDiscard,:) = [];
 duration(pulsesToDiscard) = [];
@@ -279,53 +282,92 @@ if isempty(uLEDPulses.nonStimulatedShank)
 end
 
 % parse conditions
+% prepare epochs
 if isempty(conditionEpochs)
-    conditionEpochs = 1:size(session.epochs,2);
+    conditionEpochs = 1:numel(session.epochs);
+end
+if any(conditionEpochs < 1) || any(conditionEpochs > numel(session.epochs))
+    error('conditionEpochs contiene índices fuera de rango.');
+end
+uLEDPulses.conditionEpochs_sequence = conditionEpochs(:)';
+
+% duration
+uLEDPulses.conditionDuration = unique(uLEDPulses.durationRounded,'stable');
+
+% assign epoch per pulse
+nPulses = size(uLEDPulses.timestamps,1);
+uLEDPulses.conditionEpochsID = nan(nPulses,1);
+
+for ii = 1:numel(conditionEpochs)
+    idxEpoch = conditionEpochs(ii);
+    t0 = session.epochs{idxEpoch}.startTime;
+    t1 = session.epochs{idxEpoch}.stopTime;
+
+    status = InIntervals(uLEDPulses.timestamps(:,1), [t0 t1]);
+    uLEDPulses.conditionEpochsID(status) = uLEDPulses.conditionEpochs_sequence(ii);
 end
 
-uLEDPulses.conditionDuration = unique(uLEDPulses.durationRounded);
-uLEDPulses.conditionEpochs_sequence = conditionEpochs;
-uLEDPulses.conditionEpochs = unique(conditionEpochs);
-uLEDPulses.conditionEpochsID = ones(size(uLEDPulses.durationRounded));
-
-if ~isempty(conditionEpochs) && length(conditionEpochs) ~= length(session.epochs)
-    error('Number of defined epochs does not match with number of real epochs!');
-elseif ~isempty(conditionEpochs)
-    for ii = 1:length(conditionEpochs)
-        [status] = InIntervals(uLEDPulses.timestamps(:,1),[session.epochs{ii}.startTime session.epochs{ii}.stopTime]);
-        uLEDPulses.conditionEpochsID(status) = uLEDPulses.conditionEpochs_sequence(ii);
-    end
-else
-end
-uLEDPulses.conditionEpochs = unique(uLEDPulses.conditionEpochsID);
-
-uLEDPulses.conditionDurationID = ones(size(code));
-for ii = 1:length(uLEDPulses.conditionDuration)
+% duration id
+uLEDPulses.conditionDurationID = ones(nPulses,1);
+for ii = 1:numel(uLEDPulses.conditionDuration)
     uLEDPulses.conditionDurationID(uLEDPulses.durationRounded == uLEDPulses.conditionDuration(ii)) = ii;
 end
 
-% combine duration and epochs
+% duration x epoch
+epochs_validos = unique(uLEDPulses.conditionEpochsID(~isnan(uLEDPulses.conditionEpochsID)),'stable');
+
 conditionID = 1;
-uLEDPulses.conditionID = ones(size(code));
+uLEDPulses.conditionID = nan(nPulses,1);
 uLEDPulses.conditions_table = [];
-for ii = 1:length(uLEDPulses.conditionDuration)
-    for jj = 1:length(uLEDPulses.conditionEpochs)
-        uLEDPulses.conditionID(uLEDPulses.durationRounded == uLEDPulses.conditionDuration(ii) ...
-            & uLEDPulses.conditionEpochsID == uLEDPulses.conditionEpochs(jj)) = conditionID;
-        uLEDPulses.conditions_table = [uLEDPulses.conditions_table; ...
-            uLEDPulses.conditionDuration(ii) uLEDPulses.conditionEpochs(jj)];
-        uLEDPulses.list_of_conditions(conditionID) = conditionID;
-        conditionID = conditionID + 1;
+uLEDPulses.list_of_conditions = [];
+
+for ii = 1:numel(uLEDPulses.conditionDuration)
+    for jj = 1:numel(epochs_validos)
+        mask = (uLEDPulses.durationRounded == uLEDPulses.conditionDuration(ii)) & ...
+               (uLEDPulses.conditionEpochsID == epochs_validos(jj));
+        if any(mask)
+            uLEDPulses.conditionID(mask) = conditionID;
+            uLEDPulses.conditions_table(end+1,:) = [uLEDPulses.conditionDuration(ii) epochs_validos(jj)]; 
+            uLEDPulses.list_of_conditions(end+1) = conditionID; 
+            conditionID = conditionID + 1;
+        end
     end
 end
 
-if isempty(uLEDPulses.conditionEpochs)
+% create list
+if ~isempty(uLEDPulses.conditions_table)
+    uLEDPulses.list_of_durations = uLEDPulses.conditions_table(:,1)';
+    uLEDPulses.list_of_epochs    = uLEDPulses.conditions_table(:,2)';
+else
+    uLEDPulses.list_of_durations = [];
+    uLEDPulses.list_of_epochs    = [];
+end
+
+% summary
+uLEDPulses.conditionEpochs = epochs_validos;
+if isempty(epochs_validos)
     uLEDPulses.conditionEpochs = NaN;
     uLEDPulses.conditionEpochs_sequence = NaN;
 end
 
-uLEDPulses.list_of_durations = uLEDPulses.conditions_table(:,1)';
-uLEDPulses.list_of_epochs = uLEDPulses.conditions_table(:,2)';
+% find trains
+if ~isnan(gap_threshold) && gap_threshold>0 &&  gap_threshold<Inf
+    dt = diff(uLEDPulses.timestamps(:,1))';
+    train_starts_idx = [1, find(dt > gap_threshold) + 1];
+    fields = fieldnames(uLEDPulses);
+    uLEDPulses.trains = uLEDPulses;
+    for ii = 1:numel(fields)
+        field = fields{ii};
+        data  = uLEDPulses.(field);
+    
+        % Keep only entries corresponding to first pulses
+        if size(data,1) >= max(train_starts_idx)
+            uLEDPulses.trains.(field) = data(train_starts_idx, :);
+        else
+            warning('Field %s has fewer entries than expected.', field);
+        end
+    end
+end
 
 if doPlot 
     tiledlayout('vertical')

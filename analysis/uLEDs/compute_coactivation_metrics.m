@@ -117,6 +117,7 @@ Q_post = compare_modularity_to_null(postZ_clipped, gamma, nShuffles, method, fal
 
 Q_pre_by_stim = compare_fixed_modularity_to_null(preZ_clipped, Ci, nShuffles, false);
 Q_post_by_stim = compare_fixed_modularity_to_null(postZ_clipped, Ci, nShuffles, false);
+Q_pre_by_stim.z_score = (Q_pre_by_stim.Q_real - Q_pre_by_stim.Q_mean_null)/Q_pre_by_stim.Q_std_null;
 
 fprintf('Modularity (Q) - Pre: %.3f | Stim: %.3f | Post: %.3f\n', Q_pre_by_stim.Q_real, Q, Q_post_by_stim.Q_real);
 
@@ -126,6 +127,7 @@ fprintf('Modularity (Q) - Pre: %.3f | Stim: %.3f | Post: %.3f\n', Q_pre_by_stim.
 r_pre = compare_assortativity_to_null(preZ_clipped, Ci, nShuffles, false);
 r_stim = compare_assortativity_to_null(Z_clipped, Ci, nShuffles, false);
 r_post = compare_assortativity_to_null(postZ_clipped, Ci, nShuffles, false);
+r_pre.z_score = (r_pre.r_real - r_pre.r_mean_null)/r_pre.r_std_null;
 
 fprintf('Assortability by cluster - Pre: %.3f | Stim: %.3f | Post: %.3f\n', r_pre.r_real, r_stim.r_real, r_post.r_real);
 
@@ -176,7 +178,7 @@ if do_plot
     
     subplot(3,3,6)
     sorted_matrix = postZ_clipped(perm, perm);
-    imagesc(sorted_matrix); colormap('parula'); colorbar;
+    imagesc((sorted_matrix+Z_clipped(perm, perm))./2); colormap('parula'); colorbar;
     caxis([-caxis_lim caxis_lim]);
     hold on;
     b = find(diff(sorted_Ci) ~= 0) + 0.5;
@@ -283,8 +285,11 @@ stim_labels  = Q_stim.clusters_indices(validIdx);
 post_labels  = Q_post.clusters_indices(validIdx);
 
 ari_pre  = adjusted_rand_index(true_labels, pre_labels);
+ari_stim = adjusted_rand_index(true_labels, stim_labels);
+ari_post = adjusted_rand_index(true_labels, post_labels);
 ari_pre_post = adjusted_rand_index(pre_labels, post_labels);
 ari_pre_stim = adjusted_rand_index(pre_labels, stim_labels);
+ari_post_stim = adjusted_rand_index(post_labels, stim_labels);
 
 fprintf('ARI - Pre: %.3f | Stim: %.3f | Post: %.3f\n', ari_pre, ari_stim, ari_post);
 fprintf('ARI - Pre-Post: %.3f | Pre-Stim: %.3f | Post-Stim: %.3f\n', ari_pre_post, ari_pre_stim, ari_post_stim);
@@ -327,7 +332,9 @@ end
 % artificial clusters
 Q_pre_by_artificial = compare_fixed_modularity_to_null(preZ_clipped, artificial_clusters', nShuffles, false);
 Q_stim_by_artificial = compare_fixed_modularity_to_null(Z_clipped, artificial_clusters', nShuffles, false);
-Q_post_by_artificial = compare_fixed_modularity_to_null(postZ_clipped, artificial_clusters', nShuffles, false);
+Q_stim_by_artificial.z_score = (Q_stim_by_artificial.Q_real - Q_stim_by_artificial.Q_mean_null)/Q_stim_by_artificial.Q_std_null;
+Q_post_by_artificial = compare_fixed_modularity_to_null(postZ_clipped+Z_clipped, artificial_clusters', nShuffles, false);
+Q_post_by_artificial.z_score = (Q_post_by_artificial.Q_real - Q_post_by_artificial.Q_mean_null)/Q_post_by_artificial.Q_std_null;
 
 % save values
 coactivation_metrics.artificial_clusters = artificial_clusters';
@@ -423,64 +430,64 @@ if do_plot
 
     exportgraphics(gcf,['SummaryFigures\' save_as '_adjusted_rand_index.png']);
 
-    % Sankey diagrams
-    output_name = ['sankey_comparison'];
+    % % Sankey diagrams
+    % output_name = ['sankey_comparison'];
+    % 
+    % % Pre vs Artificial
+    % T1 = table(Q_pre.clusters_indices(:), artificial_clusters(:), 'VariableNames', {'Ci1', 'Ci2'});
+    % writetable(T1, 'sankey_pre.csv');
+    % 
+    % % Stim vs Artificial
+    % T2 = table(Q_stim.clusters_indices(:), artificial_clusters(:), 'VariableNames', {'Ci1', 'Ci2'});
+    % writetable(T2, 'sankey_stim.csv');
+    % 
+    % % Post vs Artificial
+    % T3 = table(Q_pre.clusters_indices(:), artificial_clusters(:), 'VariableNames', {'Ci1', 'Ci2'});
+    % writetable(T3, 'sankey_post.csv');
+    % 
+    % script_path = which('sankey_triple_plot.py');
+    % python_path = char(pyenv().Executable);
+    % command = ['"', python_path, '" "', script_path, '" ', output_name];
+    % system(command);
+    % 
+    % img_path = fullfile('SummaryFigures', [output_name, '.png']);
+    % img = imread(img_path);
+    % fig = figure('Name', ['Sankey: ', output_name]);
+    % imshow(img);
 
-    % Pre vs Artificial
-    T1 = table(Q_pre.clusters_indices(:), artificial_clusters(:), 'VariableNames', {'Ci1', 'Ci2'});
-    writetable(T1, 'sankey_pre.csv');
-    
-    % Stim vs Artificial
-    T2 = table(Q_stim.clusters_indices(:), artificial_clusters(:), 'VariableNames', {'Ci1', 'Ci2'});
-    writetable(T2, 'sankey_stim.csv');
-    
-    % Post vs Artificial
-    T3 = table(Q_pre.clusters_indices(:), artificial_clusters(:), 'VariableNames', {'Ci1', 'Ci2'});
-    writetable(T3, 'sankey_post.csv');
-    
-    script_path = which('sankey_triple_plot.py');
-    python_path = char(pyenv().Executable);
-    command = ['"', python_path, '" "', script_path, '" ', output_name];
-    system(command);
+    % % Sankey multi step, pre, stim, post
+    % output_name = 'sankey_pre_stim_post';
+    % 
+    % T = table(Q_pre.clusters_indices(:), Q_stim.clusters_indices(:), Q_post.clusters_indices(:), ...
+    %           'VariableNames', {'Pre', 'Stim', 'Post'});
+    % writetable(T, 'multi_stage_clusters.csv');
+    % 
+    % script_path = which('sankey_multistage_plot.py');
+    % python_path = char(pyenv().Executable);
+    % command = ['"', python_path, '" "', script_path, '" ', output_name];
+    % system(command);
+    % 
+    % img_path = fullfile('SummaryFigures', [output_name, '.png']);
+    % img = imread(img_path);
+    % fig = figure('Name', ['Sankey: ', output_name]);
+    % imshow(img);
 
-    img_path = fullfile('SummaryFigures', [output_name, '.png']);
-    img = imread(img_path);
-    fig = figure('Name', ['Sankey: ', output_name]);
-    imshow(img);
-
-    % Sankey multi step, pre, stim, post
-    output_name = 'sankey_pre_stim_post';
-
-    T = table(Q_pre.clusters_indices(:), Q_stim.clusters_indices(:), Q_post.clusters_indices(:), ...
-              'VariableNames', {'Pre', 'Stim', 'Post'});
-    writetable(T, 'multi_stage_clusters.csv');
-    
-    script_path = which('sankey_multistage_plot.py');
-    python_path = char(pyenv().Executable);
-    command = ['"', python_path, '" "', script_path, '" ', output_name];
-    system(command);
-    
-    img_path = fullfile('SummaryFigures', [output_name, '.png']);
-    img = imread(img_path);
-    fig = figure('Name', ['Sankey: ', output_name]);
-    imshow(img);
-
-    % Sankey multi step, pre, artificial, post
-    output_name = 'sankey_artificial_stim_post';
-
-    T = table(Q_pre.clusters_indices(:), artificial_clusters(:), Q_post.clusters_indices(:), ...
-              'VariableNames', {'Pre', 'Artificial', 'Post'});
-    writetable(T, 'multi_stage_clusters.csv');
-    
-    script_path = which('sankey_multistage_plot.py');
-    python_path = char(pyenv().Executable);
-    command = ['"', python_path, '" "', script_path, '" ', output_name];
-    system(command);
-    
-    img_path = fullfile('SummaryFigures', [output_name, '.png']);
-    img = imread(img_path);
-    fig = figure('Name', ['Sankey: ', output_name]);
-    imshow(img);
+    % % Sankey multi step, pre, artificial, post
+    % output_name = 'sankey_artificial_stim_post';
+    % 
+    % T = table(Q_pre.clusters_indices(:), artificial_clusters(:), Q_post.clusters_indices(:), ...
+    %           'VariableNames', {'Pre', 'Artificial', 'Post'});
+    % writetable(T, 'multi_stage_clusters.csv');
+    % 
+    % script_path = which('sankey_multistage_plot.py');
+    % python_path = char(pyenv().Executable);
+    % command = ['"', python_path, '" "', script_path, '" ', output_name];
+    % system(command);
+    % 
+    % img_path = fullfile('SummaryFigures', [output_name, '.png']);
+    % img = imread(img_path);
+    % fig = figure('Name', ['Sankey: ', output_name]);
+    % imshow(img);
 end
 
 %% 3. ESTIMATING NEURON CONTRIBUTIONS
@@ -678,7 +685,6 @@ for k = 1:length(unique_vals)
 end
 artificial_clusters2 = Ci_mapped;
 [cluster_interactions_stim_by_artificial] = computeClusterInteractions(Z_clipped, artificial_clusters2);
-
 [cluster_interactions_pre_by_artificial] = computeClusterInteractions(preZ_clipped, artificial_clusters2);
 [cluster_interactions_post_by_artificial] = computeClusterInteractions(postZ_clipped, artificial_clusters2);
 
@@ -855,9 +861,9 @@ end
 
 % save results...
 if saveMat
+    disp("Saving results...");
     save(fullfile(basepath, [basenameFromBasepath(pwd) '.' save_as '.cellinfo.mat']), 'coactivation_metrics');
 end
-
 
 cd(prevPath);
 end

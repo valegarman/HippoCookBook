@@ -54,12 +54,14 @@ addParameter(p,'salt_time',[-0.250 0.250],@isscalar);
 addParameter(p,'salt_win',[0.005],@isscalar);
 addParameter(p,'salt_binSize',[0.001],@isscalar);
 addParameter(p,'getRaster',false,@islogical);
-addParameter(p,'restrict_to',[0 Inf],@isscalar);
+addParameter(p,'restrict_to',[0 Inf],@isnumeric);
 addParameter(p,'restrict_to_baseline',true,@islogical);
 addParameter(p,'restrict_to_manipulation',false,@islogical);
 addParameter(p,'save_as','uLEDResponse',@ischar);
 addParameter(p,'test_in_plots','boostrap',@ischar); % other options are boostrap, zscore, salt, and Kolmogorov
 addParameter(p,'zscore_threshold',1.96,@isnumeric); % other options are boostrap, zscore, salt, and Kolmogorov
+addParameter(p,'removeNaNFields',false,@islogical); % other options are boostrap, zscore, salt, and Kolmogorov
+
 
 parse(p, varargin{:});
 uLEDPulses = p.Results.uLEDPulses;
@@ -89,11 +91,11 @@ before_pulse_win = p.Results.before_pulse_win;
 during_pulse_win = p.Results.during_pulse_win;
 test_in_plots = p.Results.test_in_plots;
 zscore_threshold = p.Results.zscore_threshold;
+removeNaNFields = p.Results.removeNaNFields;
 
 % Deal with inputs
 prevPath = pwd;
 cd(basepath);
-
 
 targetFile = dir('*.uLEDResponse.cellinfo.mat');
 if ~isempty(targetFile) && ~force
@@ -175,44 +177,54 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
     nPulses = int32(length(find(uLEDPulses.conditionID == uLEDPulses.list_of_conditions(kk) & ...
         InIntervals(uLEDPulses.timestamps,restrict_ints)))/...
         length(unique(uLEDPulses.code(uLEDPulses.conditionID == uLEDPulses.list_of_conditions(kk)))));
-    randomEvents = [];
-    disp('Generating boostrap template...');
-    for mm = 1:numRep
-        randomEvents{mm} = sort(randsample(timestamps_recording, nPulses));
-    end
-    pulseDuration = uLEDPulses.list_of_durations(kk);
-    epoch = uLEDPulses.list_of_epochs(kk);
-    condition = uLEDPulses.list_of_conditions(kk);
     
-    [stccg, t] = CCG([spikes.times randomEvents],[],'binSize',binSize,'duration',winSize,'norm','rate','Fs',1/session.extracellular.sr);
-    fprintf('\n'); %
-    t_duringPulse = t > 0 + onset(kk) & t < pulseDuration + offset(kk); 
-    randomRatesDuringPulse = squeeze(mean(stccg(t_duringPulse, length(spikes.UID)+1:end,1:length(spikes.UID)),1));
-    uLEDResponses.bootsTrapRate(:,kk) = mean(randomRatesDuringPulse,1);
-    uLEDResponses.bootsTrapRateStd(:,kk) = std(randomRatesDuringPulse,[],1);
-    uLEDResponses.bootsTrapRateSEM(:,kk) = std(randomRatesDuringPulse,[],1)/sqrt(numRep);
-    if ~isempty(randomRatesDuringPulse)
-        for jj = 1:size(randomRatesDuringPulse,2)
-            pd = fitdist(randomRatesDuringPulse(:,jj),'normal');
-            uLEDResponses.bootsTrapCI(jj,kk,1:2) = pd.icdf(bootsTrapCI);
+    if nPulses > minNumberOfPulses
+        randomEvents = [];
+        disp('Generating boostrap template...');
+        for mm = 1:numRep
+            randomEvents{mm} = sort(randsample(timestamps_recording, nPulses));
+        end
+        pulseDuration = uLEDPulses.list_of_durations(kk);
+        epoch = uLEDPulses.list_of_epochs(kk);
+        condition = uLEDPulses.list_of_conditions(kk);
+        
+        [stccg, t] = CCG([spikes.times randomEvents],[],'binSize',binSize,'duration',winSize,'norm','rate','Fs',1/session.extracellular.sr);
+        fprintf('\n'); %
+        t_duringPulse = t > 0 + onset(kk) & t < pulseDuration + offset(kk); 
+        randomRatesDuringPulse = squeeze(mean(stccg(t_duringPulse, length(spikes.UID)+1:end,1:length(spikes.UID)),1));
+        uLEDResponses.bootsTrapRate(:,kk) = mean(randomRatesDuringPulse,1);
+        uLEDResponses.bootsTrapRateStd(:,kk) = std(randomRatesDuringPulse,[],1);
+        uLEDResponses.bootsTrapRateSEM(:,kk) = std(randomRatesDuringPulse,[],1)/sqrt(numRep);
+        if ~isempty(randomRatesDuringPulse)
+            for jj = 1:size(randomRatesDuringPulse,2)
+                pd = fitdist(randomRatesDuringPulse(:,jj),'normal');
+                uLEDResponses.bootsTrapCI(jj,kk,1:2) = pd.icdf(bootsTrapCI);
+            end
+        else
+            uLEDResponses.bootsTrapCI(1:size(randomRatesDuringPulse,2),kk,1:2) = NaN;
         end
     else
-        uLEDResponses.bootsTrapCI(1:size(randomRatesDuringPulse,2),kk,1:2) = NaN;
+        uLEDResponses.bootsTrapRate(:,kk) = nan(spikes.numcells,1);
+        uLEDResponses.bootsTrapRateStd(:,kk) = nan(spikes.numcells,1);
+        uLEDResponses.bootsTrapRateSEM(:,kk) = nan(spikes.numcells,1);
+        uLEDResponses.bootsTrapCI(1:spikes.numcells,kk,1:2) = NaN;
     end
+    
     for jj = 1:length(codes)
         fprintf('\n **Pulse %3.i/%3.i ',jj,length(codes)); %
         pulses = uLEDPulses.timestamps(uLEDPulses.code == codes(jj)...
             & uLEDPulses.conditionID==uLEDPulses.list_of_conditions(kk),1);
         pulses = Restrict(pulses, restrict_ints);
         if isempty(pulses)
-            pulses = [0];
+            numberOfPulses = 0;
+            uLEDResponses.responsecurve(:,kk,jj,:) = nan(spikes.numcells, winSize/binSize + 1);
+        else
+            numberOfPulses = size(pulses,1);
+            times = spikes.times; times{length(times)+1} = pulses;
+            [stccg, t] = CCG(times,[],'binSize',binSize,'duration',winSize,'norm','rate','Fs',1/session.extracellular.sr);
+            uLEDResponses.responsecurve(:,kk,jj,:) = squeeze(stccg(:, end , 1:end-1))';
         end
-        times = spikes.times; times{length(times)+1} = pulses;
-        [stccg, t] = CCG(times,[],'binSize',binSize,'duration',winSize,'norm','rate','Fs',1/session.extracellular.sr);
-        uLEDResponses.responsecurve(:,kk,jj,:) = squeeze(stccg(:, end , 1:end-1))';
-        if length(times{end}) < minNumberOfPulses
-            uLEDResponses.responsecurve(:,kk,jj,:) = uLEDResponses.responsecurve(:,kk,jj,:) * NaN;
-        end
+
         if isempty(during_pulse_win)
             t_duringPulse = t > 0 + onset(kk) & t < pulseDuration + onset(kk); 
         else
@@ -225,7 +237,6 @@ for kk = 1:length(uLEDPulses.list_of_conditions)
             t_beforePulse = t > before_pulse_win(1) & t < before_pulse_win(2);
         end
         
-        numberOfPulses = size(pulses,1);
         for ii = 1:size(uLEDResponses.responsecurve,1)
             if numberOfPulses > minNumberOfPulses
                 uLEDResponses.responsecurveSmooth(ii,kk,jj,:) = smooth(uLEDResponses.responsecurve(ii,kk,jj,:));
@@ -527,6 +538,11 @@ end
 
 uLEDResponses_raster = uLEDResponses;
 uLEDResponses = rmfield(uLEDResponses,'raster');
+
+if removeNaNFields
+    uLEDResponses = removeNaNFieldsRecursive(uLEDResponses);
+end
+
 if saveMat
     disp('Saving...');
     save([basenameFromBasepath(pwd) '.' save_as '.cellinfo.mat'],'uLEDResponses');
@@ -548,7 +564,7 @@ if doPlot
 
     statisticDots = linspace(-0.015, -0.005, 4);
     nLEDS = size(uLEDResponses.responsecurve,3);
-    for kk = 1:length(uLEDPulses.list_of_conditions)
+    for kk = 1:size(uLEDResponses.modulationSignificanceLevel,2)
         figure;
         set(gcf,'Position',[100 -600 2500 1200]);
         tiledlayout(10,ceil(size(spikes.UID,2)/10),'TileSpacing','tight','Padding','tight');
@@ -643,4 +659,74 @@ if doPlot
 end
 
 cd(prevPath);
+end
+
+function S = removeNaNFieldsRecursive(S)
+% Recorre la estructura (incluye arrays de structs / anidada) y limpia
+% campos numéricos eliminando rebanadas completamente NaN en TODAS las dimensiones.
+
+    if numel(S) > 1
+        for k = 1:numel(S)
+            S(k) = removeNaNFieldsRecursive(S(k));
+        end
+        return
+    end
+
+    fn = fieldnames(S);
+    for i = 1:numel(fn)
+        val = S.(fn{i});
+        if isstruct(val)
+            S.(fn{i}) = removeNaNFieldsRecursive(val);
+        elseif isnumeric(val)
+            S.(fn{i}) = cleanNumericAllDims(val);
+        end
+    end
+end
+
+function val = cleanNumericAllDims(val)
+% Elimina:
+% - NaN en vectores (borra esos elementos).
+% - En N-D: rebanadas completamente NaN a lo largo de CADA dimensión.
+% Repite hasta estabilidad.
+
+    if isempty(val); return; end
+
+    % Caso vector sencillo
+    if isvector(val)
+        val = val(~isnan(val));
+        return;
+    end
+
+    changed = true;
+    while changed
+        changed = false;
+        nd = ndims(val);
+        % Recorremos todas las dimensiones
+        for d = 1:nd
+            sz = size(val);
+            if sz(d) == 0
+                continue; % nada que hacer
+            end
+
+            % Máscara N-D de NaNs
+            M = isnan(val);
+
+            % Reducimos sobre todas las dimensiones excepto d
+            other = setdiff(1:nd, d);
+            for k = other
+                M = all(M, k);
+            end
+
+            % M ahora tiene tamaño 1 en todas las dims salvo en d (que conserva sz(d))
+            keep = ~reshape(M, [sz(d), 1]);  % vector lógico de longitud sz(d)
+
+            % Si hay algo que eliminar en la dimensión d
+            if ~all(keep)
+                idx = repmat({':'}, 1, nd);
+                idx{d} = keep;
+                val = val(idx{:});   % reindexamos conservando solo los índices válidos
+                changed = true;
+            end
+        end
+    end
 end

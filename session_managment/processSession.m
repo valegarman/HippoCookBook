@@ -123,8 +123,6 @@ if length(excludeAnalysis) == 0
 end
 excludeAnalysis = lower(excludeAnalysis);
 
-keyboard;
-
 %% 1. Runs sessionTemplate
 if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))
         try
@@ -301,7 +299,7 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     getSpikesRank('events','upstates');
 
     % 8.2 Ripples
-    ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',true,'thresholds',rippleMasterDetector_threshold,'eventSpikeThreshold', false); 
+    ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',true,'thresholds',rippleMasterDetector_threshold,'eventSpikeThreshold', true); 
     psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10);
     % psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10,'restrict_to_manipulation',true);
     getSpikesRank('events','ripples');
@@ -314,7 +312,7 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     end
 
     % 8.3 Theta intervals
-    cd(basepath);
+    % cd(basepath);
     thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'channel',theta_epochs_channel);
 
 end
@@ -351,7 +349,6 @@ if ~any(ismember(excludeAnalysis, {'10',lower('cellMetrics')}))
 
     session = loadSession;
 
-        
     cell_metrics = ProcessCellMetrics('session', session,'forceReload',true,'excludeIntervals',excludePulsesIntervals,'excludeMetrics',{'deepSuperficial'}); % after CellExplorar
         
 

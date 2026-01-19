@@ -22,7 +22,7 @@ preprocessSession('basepath',pwd,'analogChannelsList',[1:3],'spikeSort',true,'ge
 % 3% CLEAN SESSIONS MANUALLY BY PHY
 
 % 4% Processs individual sessions by by 'processSession'. Example:
-processSession('digital_optogenetic_channels',[0],'analog_optogenetic_channels',[1],'promt_hippo_layers',true,'profileType','hippocampus');
+processSession('digital_optogenetic_channels',[1],'analog_optogenetic_channels',[],'promt_hippo_layers',true,'profileType','hippocampus');
 
 % 5% Index session
 indexNewSession('copyFiles',true);
