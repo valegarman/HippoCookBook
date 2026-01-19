@@ -510,6 +510,30 @@ if doPlot
             view([90 90]); 
         end
         xlim([0.5 max(pos)+.5]);
+    elseif strcmpi(plotType, 'violinPlot2')
+        groupPos = zeros(size(group));
+        idGroup = unique(group);
+
+        hold on;
+        for ii = 1:length(idGroup)
+            % plot violin
+            v(ii) = violinplot(pos(ii), y(group==idGroup(ii)));
+            set(v(ii),'FaceColor', color(ii,:), 'EdgeColor', color(ii,:), 'FaceAlpha', fillAlpha);
+
+            if plotData
+                posData = randn(length(find(group==ind(ii))),1)/10; 
+                posData((posData)>0.3) = posData((posData)>0.3)/2;
+                posData((posData)<-0.3) = posData((posData)<-0.3)/2;
+                plot(pos(ii)+ posData, y(group==ind(ii)),'o','color',[1 1 1],...
+                       'MarkerFaceColor',cloudColor,'MarkerEdgeColor',cloudColor,'MarkerSize',dataSize);
+            end
+        end
+        set(gca,'TickDir','out','xtick',[]);
+        if strcmpi(orientation, 'horizontal')
+            view([90 90]); 
+        end
+        xlim([0.5 max(pos)+.5]);
+
     elseif strcmpi(plotType,'symRoundPlot')
         
         hold on
