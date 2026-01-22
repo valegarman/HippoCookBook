@@ -328,3 +328,4 @@ fcck3_220222_sess3,fcck3,fcck3\fcck3_220222_sess3,neural3,c57b1/6,vip/cck/ai80,"
 fcck3_220224_sess5,fcck3,fcck3\fcck3_220224_sess5,neural3,c57b1/6,vip/cck/ai80,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,27,CA1so PTLp CA1sp CA1sr CA1slm CA3,desVIPnhibition
 cancer3_250706_sess5,cancer3,cancer3\cancer3_250706_sess5,neural3,c57b1/6,wild type,"none",tmaze,57,PTLp CA1so CA1sp CA1sr,Cancer
 cancer3_250707_sess6,cancer3,cancer3\cancer3_250707_sess6,neural3,c57b1/6,wild type,"none",tmaze,56,PTLp CA1so CA1sp CA1sr,Cancer
+cancer3_250705_sess4,cancer3,cancer3\cancer3_250705_sess4,neural3,c57b1/6,wild type,"none",tmaze,69,PTLp CA1so CA1sp CA1sr CA1slm,Cancer
