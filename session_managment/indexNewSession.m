@@ -37,8 +37,6 @@ driveStorage_path = p.Results.driveStorage_path;
 driveStorage_location = p.Results.driveStorage_location;
 git_automatic = p.Results.git_automatic;
 
-keyboard;
-
 %% Creates a pointer to the folder where the index variable is located
 if isempty(indexedSessionCSV_name)
     error('Need to provide the name of the index Project variable');
@@ -127,6 +125,7 @@ end
 
 if ~isempty(behav)
     behav(end) = [];
+    behav = unique(behav);
     if isempty(behav)
         behav{1,1} = 'no';
     end

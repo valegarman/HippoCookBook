@@ -8,7 +8,7 @@ addParameter(p,'basepath',pwd,@isstruct);
 addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'theta_bandpass',[6 12], @isnumeric)
 addParameter(p,'theta_channel',[], @isnumeric);
-addParameter(p,'amplitude_threshold',.2, @isnumeric);
+addParameter(p,'amplitude_threshold',0, @isnumeric);
 
 parse(p,varargin{:})
 basepath = p.Results.basepath;
@@ -26,8 +26,21 @@ cd(basepath);
 % 1. Improve the output
 % 2. Amplitude threshold!!! 
 
+% targetFile = dir('*.thetaCycles.events.mat');
+% if ~isempty(targetFile)
+%     disp('Theta cycles already sorted! Loading file.');
+%     load(targetFile.name);
+%     return
+% end
+
 session = loadSession;
 sr = session.extracellular.srLfp;
+
+if isempty(theta_channel)
+    targetFile = dir('*.thetaEpochs.states.mat');
+    load(targetFile.name,'thetaEpochs');
+    theta_channel = thetaEpochs.channel;  
+end
 
 % Detecting theta oscillations
 lfp_theta = getLFP(theta_channel, 'noPrompts', true);        % 
@@ -45,6 +58,7 @@ lfp_theta_filt = double(lfp_theta_filt.data);
 hilb_theta = hilbert(lfp_theta_filt);           % analytic signal
 envelope_theta = abs(hilb_theta);           %  envelope
 amp_threshold = amplitude_threshold * max(envelope_theta);
+
 % 2.3 Find valid cycles: peak-trough-peak
 % They took as a valid cycle sequences having their peak-trough and trough-peak intervals falling within the 31 to 100 ms range 
 % (corresponding to the half period of cycles with frequencies ranging from  ~16 to 4 Hz); 
@@ -127,6 +141,10 @@ thetaCycles.lfp_phase = phase_all;
 thetaCycles.ints.peak_trough_peak = [[valid_cycles.peak1]'/sr [valid_cycles.peak2]'/sr]; 
 thetaCycles.ints.zero_peak = [[valid_cycles.zero_before]'/sr [valid_cycles.zero_after_peak1]'/sr]; 
 thetaCycles.ints.zero_trough = [[valid_cycles.zero_before]'/sr [valid_cycles.zero_after_trough]'/sr]; 
+
+thetaCycles.ints.positive_curve = [[valid_cycles.zero_before]'/sr [valid_cycles.zero_after_peak1]'/sr]; 
+thetaCycles.ints.negative_curve = [[valid_cycles.zero_after_peak1]'/sr [valid_cycles.zero_after_trough]'/sr]; 
+
 thetaCycles.zero_cross_timestamps = [valid_cycles.zero_after_peak1]'./sr;
 % work in progress...
 

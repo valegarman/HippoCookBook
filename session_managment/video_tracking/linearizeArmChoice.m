@@ -115,9 +115,8 @@ else
     scatter(x,y,3,t,'filled','MarkerEdgeColor','none','MarkerFaceAlpha',.5); colormap jet
     caxis([t(1) t(end)]);
     xlim([xMaze]); ylim([yMaze]);
-
     if strcmpi(tracking.description,'TMaze') || strcmpi(tracking.description,'TMaze2') || strcmpi(tracking.description,'Deeplabcut')
-        axis ij;
+        % axis ij;
     end
     title('Draw a polyline following animal trajectory (first turn right)...','FontWeight','normal');
     maze = drawpolyline;
@@ -136,9 +135,8 @@ if editLOI
     scatter(x,y,3,t,'filled','MarkerEdgeColor','none','MarkerFaceAlpha',.5); colormap jet
     caxis([t(1) t(end)]);
     xlim([xMaze]); ylim([yMaze]);
-
     if strcmpi(tracking.description,'TMaze') || strcmpi(tracking.description,'TMaze2') || strcmpi(tracking.description,'Deeplabcut')
-        axis ij;
+        % axis ij;
     end
     title('Move vertex to match trajectory and press Enter...','FontWeight','normal');
     roi = images.roi.Polyline(gca,'Position',maze);
@@ -155,7 +153,8 @@ if strcmpi(tracking.description,'DeepLabCut') || strcmpi(tracking.description,'T
                  168      ... % r arm
                  226      ... % steam again
                  266      ... % l turn
-                 336];         % l arm   
+                 336];         % l arm        
+
 elseif strcmpi(tracking.description,'TMaze2')
     % uLED maze
     linMazeCont =    [0   70  ... % steam 
@@ -166,7 +165,18 @@ elseif strcmpi(tracking.description,'TMaze2')
                  279       ... % l turn
                  346      ... % l arm     
                  356       ... % l turn-steam
-                 ];         
+                 ];  
+elseif strcmpi(tracking.description,'TMaze_3')
+         % We changed the maze
+     linMazeCont =    [0   50  ... % steam 
+                 75       ... % r turn
+                 125      ... % r arm
+                 150      ... % r turn
+                 200      ... % steam again
+                 225      ... % l turn
+                 275      ... % larm
+                 300      ... % l turn
+                 ];    
 else
     % Buzsaki's lab maze
     linMazeCont =    [0   50  ... % steam 
@@ -191,12 +201,15 @@ mazeVirtual = interp1(cum_dist, maze, dist_steps);
 vlinMazeCont = interp1(cum_dist, linMazeCont, dist_steps);
 
 % correct steam linearization
-if strcmpi(tracking.description,'DeepLabCut') || strcmpi(tracking.description,'TMaze')
+if strcmpi(tracking.description,'DeepLabCut') || strcmpi(tracking.description,'TMaze') 
     vlinMazeCont(vlinMazeCont>=linMazeCont(4)) = ...
     vlinMazeCont(vlinMazeCont>=linMazeCont(4)) - linMazeCont(4); 
 elseif strcmpi(tracking.description,'TMaze2')
     vlinMazeCont(vlinMazeCont>=linMazeCont(5)) = ...
     vlinMazeCont(vlinMazeCont>=linMazeCont(5)) - linMazeCont(5); 
+elseif strcmpi(tracking.description,'TMaze_3')
+    vlinMazeCont(vlinMazeCont>=linMazeCont(5)) = ...
+        vlinMazeCont(vlinMazeCont>=linMazeCont(5)) - linMazeCont(5); 
 else
     vlinMazeCont(vlinMazeCont>=linMazeCont(5)) = ...
         vlinMazeCont(vlinMazeCont>=linMazeCont(5)) - linMazeCont(5); 
@@ -229,8 +242,7 @@ subplot(3,1,[1 2])
 hold on
 % scatter(x,y,3,[.8 .8 .8],'filled','MarkerEdgeColor','none','MarkerFaceAlpha',.5);
 plot(mazeVirtual(:,1), mazeVirtual(:,2),'k-');
-
-if strcmpi(tracking.description,'TMaze') || strcmpi(tracking.description,'TMaze2') || strcmpi(tracking.description,'Deeplabcut')
+if strcmpi(tracking.description,'TMaze') || strcmpi(tracking.description,'TMaze2') || strcmpi(tracking.description,'TMaze_3') || strcmpi(tracking.description,'Deeplabcut')
     axis ij;
 end
 colormap parula
@@ -334,13 +346,23 @@ startDelay = [t(1) startDelay'];
 
 trials0 = [homeCage' [(homeCage(2:end))'; t(end)]]; % trials defined as epochs between 0 position crossings
 trialsDelay = [endDelay' [(endDelay(2:end))'; t(end)]]; % trials defined as epochs between end delays positions
+trials = [sort([lReward; rReward]); t(end)];
+trials = [trials(1:end-1) trials(2:end)]; % trials defined as epochs between rewards (TTLs), in the same way rateMaps are computed.
 
 % generate trials mask
+% trialMask = nan(size(tracking.timestamps));
+% for ii = 1:length(trials0)
+%     posTrials = find(tracking.timestamps >= trials0(ii,1) & tracking.timestamps <= trials0(ii,2));
+%     trialMask(posTrials) = ii;
+% end
+
+% generate trials mask but using the trials defined as times between reward
 trialMask = nan(size(tracking.timestamps));
-for ii = 1:length(trials0)
-    posTrials = find(tracking.timestamps >= trials0(ii,1) & tracking.timestamps <= trials0(ii,2));
+for ii = 1:length(trials)
+    posTrials = find(tracking.timestamps >= trials(ii,1) & tracking.timestamps <= trials(ii,2));
     trialMask(posTrials) = ii;
 end
+
 
 % populate behavior
 behavior.timestamps = tracking.timestamps;
@@ -367,6 +389,9 @@ behavior.events.intersection = intersection';
 
 behavior.trials.startPoint = trials0;
 behavior.trials.endDelay = trialsDelay;
+
+% behavior.trials.startPoint = trials0;
+% behavior.trials.endDelay = trialsDelay;
 
 behavior.trials.visitedArm = armChoice.visitedArm;
 behavior.trials.choice = armChoice.choice;

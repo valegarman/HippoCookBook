@@ -10,6 +10,8 @@ function [projectResults, projectSessionResults] =  loadProjectResults(varargin)
 %% Defaults and Parms
 p = inputParser;
 addParameter(p,'project','Undefined',@ischar);
+addParameter(p,'behavior','Undefined',@ischar);
+addParameter(p,'brainRegions','Undefined',@ischar);
 addParameter(p,'indexedSessionCSV_path',[]);
 addParameter(p,'indexedSessionCSV_name','indexedSessions');
 addParameter(p,'includeSpikes',true,@isstring);
@@ -20,6 +22,7 @@ addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'saveSummaries',true,@islogical);
 addParameter(p,'lightVersion',true,@islogical);
 addParameter(p,'list_of_sessions',[],@iscell);
+addParameter(p,'before_after',false);
 addParameter(p,'add_results',[]);
 addParameter(p,'list_of_paths',[]); % if list of paths is provide, then it overides the sessions path from the CSV
 addParameter(p,'save_as',[],@ischar);
@@ -27,6 +30,8 @@ addParameter(p,'save_as',[],@ischar);
 parse(p,varargin{:});
 
 project = p.Results.project;
+behavior = p.Results.behavior;
+brainRegions = p.Results.brainRegions;
 indexedSessionCSV_path = p.Results.indexedSessionCSV_path;
 indexedSessionCSV_name = p.Results.indexedSessionCSV_name;
 includeSpikes = p.Results.includeSpikes;
@@ -40,6 +45,7 @@ list_of_sessions = p.Results.list_of_sessions;
 save_as = p.Results.save_as;
 add_results = p.Results.add_results;
 list_of_paths = p.Results.list_of_paths;
+before_after = p.Results.before_after;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % By default it loads the following results:
@@ -92,10 +98,12 @@ end
 % List of results
 % default list is
 list_of_results = {'optogeneticResponse','ripples_psth','slowOscillations_psth','theta_*.PhaseLockingData','lgamma*.PhaseLockingData','hgamma*.PhaseLockingData','ripple*.PhaseLockingData',...
-            'spatialModulation','placeFields','behavior.cellinfo','ACGPeak'};
+            'spatialModulation','placeFields','behavior.cellinfo','ACGPeak','averageCCG'};
 % adding new results
 list_of_results = unique([list_of_results, add_results], 'stable');
 
+%%
+[list_of_sessions, indexedSession_index] = findProjectSeesions('project',project,'Behavior', behavior,'brainRegions', brainRegions);
 
 %% find indexed sessions
 if isempty(list_of_paths)
@@ -165,10 +173,10 @@ if isempty(list_of_paths)
         list_of_sessions = sessionsTable.SessionName;
     end
     
-    if ~isempty(reject_sessions)
-        list_of_sessions{find(contains(list_of_sessions,lower(reject_sessions)))} = ' ';
-    end
-            
+    % if ~isempty(reject_sessions)
+    %     list_of_sessions{find(contains(list_of_sessions,lower(reject_sessions)))} = ' ';
+    % end
+    % 
         
     if strcmpi(project,'Undefined') || strcmpi(project,'All')
         project = project_list;
@@ -197,15 +205,18 @@ cell_metrics = loadCellMetricsBatch('basepaths',sessions.basepaths);
 cell_metrics = CellExplorer('metrics',cell_metrics);% run CELLEXPLORER when adding new data
 close(gcf);
 
-cell_metrics_before = loadCellMetricsBatch('basepaths',sessions.basepaths,'saveAs','cell_metrics_before');
-% disp('Close when done exploring...');
-cell_metrics_before = CellExplorer('metrics',cell_metrics_before);% run CELLEXPLORER when adding new data
-close(gcf);
+if before_after
+    cell_metrics_before = loadCellMetricsBatch('basepaths',sessions.basepaths,'saveAs','cell_metrics_before');
+    % disp('Close when done exploring...');
+    cell_metrics_before = CellExplorer('metrics',cell_metrics_before);% run CELLEXPLORER when adding new data
+    close(gcf);
+    
+    cell_metrics_after = loadCellMetricsBatch('basepaths',sessions.basepaths,'saveAs','cell_metrics_after');
+    % disp('Close when done exploring...');
+    cell_metrics_after = CellExplorer('metrics',cell_metrics_after);% run CELLEXPLORER when adding new data
+    close(gcf);
+end
 
-cell_metrics_after = loadCellMetricsBatch('basepaths',sessions.basepaths,'saveAs','cell_metrics_after');
-% disp('Close when done exploring...');
-cell_metrics_after = CellExplorer('metrics',cell_metrics_after);% run CELLEXPLORER when adding new data
-close(gcf);
 %% collect data per session
 if saveSummaries
     mkdir(analysis_project_path,'Summaries');
@@ -248,7 +259,7 @@ for ii = 1:length(sessions.basepaths)
     % loop results
     for jj= 1:length(list_of_results)
         targetFile = dir(['*.' list_of_results{jj} '*.mat']); 
-        % targetFile = dir(['*.' list_of_results{jj} '.mat']);
+        % targetjjFile = dir(['*.' list_of_results{jj} '.mat']);
         name_of_result = replace(list_of_results{jj},{'.','*'},'');
         name_of_result = replace(name_of_result,{'-'},'_');
         list_of_results2{jj} = name_of_result;
@@ -256,8 +267,9 @@ for ii = 1:length(sessions.basepaths)
             projectSessionResults.(name_of_result){ii} = NaN;
             warning(['Not possible to load: ', name_of_result]);
         else
-            projectSessionResults.(name_of_result){ii} = importdata(targetFile.name);
-        end
+            projectSessionResults.(name_of_result){ii} = importdata(targetFile(1).name);
+        en
+
     end
 
     % if lightversion and checking fields
@@ -391,7 +403,6 @@ for ii = 1:length(projectSessionResults.num_ripples_post)
     end
 end
 end
->>>>>>> d08c828f114bb705a8e0d7cf75da28b668fe709e
 
 projectResults.sessionList = unique(projectResults.session);
 projectResults.geneticLineList = unique(projectResults.geneticLine);
