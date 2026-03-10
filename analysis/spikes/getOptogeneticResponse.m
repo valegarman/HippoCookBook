@@ -38,7 +38,7 @@ addParameter(p,'binSize',0.001,@isnumeric);
 addParameter(p,'winSize',1,@isnumeric);
 addParameter(p,'rasterPlot',true,@islogical);
 addParameter(p,'ratePlot',true,@islogical);
-addParameter(p,'winSizePlot',[-.1 .5],@islogical);
+addParameter(p,'winSizePlot',[-.1 .5]);
 addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'force',false,@islogical);
 addParameter(p,'minNumberOfPulses',99,@isnumeric);
@@ -173,6 +173,7 @@ if isempty(pulsesAnalog)
     lastAnalogChannels = 0;
 else
     lastAnalogChannels = max(pulsesAnalog.analogChannelsList);
+    lastAnalogChannels = 0;
 end
 
 pulsesDigital.timestamps = []; pulsesDigital.digitalChannelsList = [];

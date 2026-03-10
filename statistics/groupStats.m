@@ -503,7 +503,7 @@ if doPlot
         hold on
         for ii = 1:length(idGroup)
             v(ii) = Violin(y(group==idGroup(ii)),pos(ii),'ShowData',plotData,'ViolinAlpha',fillAlpha,'ViolinColor', color(ii,:),...
-                'BoxColor', color(ii,:),'EdgeColor',color(ii,:), 'MedianColor', color(ii,:),'ShowNotches', false); % ,'EdgeColor',[1 1 1]
+                'BoxColor', color(ii,:),'EdgeColor',color(ii,:), 'MedianColor', [1 1 1],'ShowNotches', false); % ,'EdgeColor',[1 1 1]color(ii,:)
         end
         set(gca,'TickDir','out','xtick',[]);
         if strcmpi(orientation, 'horizontal')

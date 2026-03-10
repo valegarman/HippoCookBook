@@ -329,3 +329,18 @@ fcck3_220224_sess5,fcck3,fcck3\fcck3_220224_sess5,neural3,c57b1/6,vip/cck/ai80,"
 cancer3_250706_sess5,cancer3,cancer3\cancer3_250706_sess5,neural3,c57b1/6,wild type,"none",tmaze,57,PTLp CA1so CA1sp CA1sr,Cancer
 cancer3_250707_sess6,cancer3,cancer3\cancer3_250707_sess6,neural3,c57b1/6,wild type,"none",tmaze,56,PTLp CA1so CA1sp CA1sr,Cancer
 cancer3_250705_sess4,cancer3,cancer3\cancer3_250705_sess4,neural3,c57b1/6,wild type,"none",tmaze,69,PTLp CA1so CA1sp CA1sr CA1slm,Cancer
+astro7_260210_sess1,astro7,astro7\astro7_260210_sess1,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,31,CA1so CA1sp CA1sr CA1slm CA3 PTLp,Astrometry
+astro7_260211_sess2,astro7,astro7\astro7_260211_sess2,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,37,CA1so CA1sp CA1sr CA1slm CA3 PTLp,Astrometry
+astro7_260214_sess5,astro7,astro7\astro7_260214_sess5,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,20,CA1so PTLp CA1sp CA1sr CA1slm CA3,Astrometry
+astro7_260217_sess7,astro7,astro7\astro7_260217_sess7,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,17,CA1so PTLp CA1sp CA1sr CA1slm CA3,Astrometry
+astro7_260222_sess12,astro7,astro7\astro7_260222_sess12,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,25,PTLp CA1sr CA1slm CA3,Astrometry
+astro8_260212_sess1,astro8,astro8\astro8_260212_sess1,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,21,PTLp CA1so CA1sp CA1sr CA1slm CA3,Astrometry
+astro8_260213_sess2,astro8,astro8\astro8_260213_sess2,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,17,PTLp CA1so CA1sr CA1slm CA3,Astrometry
+astro8_260214_sess3,astro8,astro8\astro8_260214_sess3,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,14,CA1so PTLp CA1sp CA1sr CA1slm CA3,Astrometry
+astro8_260216_sess4,astro8,astro8\astro8_260216_sess4,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,13,PTLp CA1so CA1sp CA1sr CA1slm CA3,Astrometry
+astro8_260219_sess7,astro8,astro8\astro8_260219_sess7,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,35,CA1so CA1sp CA1sr CA1slm PTLp CA3,Astrometry
+astro8_260220_sess8,astro8,astro8\astro8_260220_sess8,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,27,PTLp CA1so CA1sp CA1sr CA1slm CA3,Astrometry
+astro8_260221_sess9,astro8,astro8\astro8_260221_sess9,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,22,PTLp CA1so CA1sp CA1sr CA1slm CA3,Astrometry
+astro8_260224_sess12,astro8,astro8\astro8_260224_sess12,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,28,PTLp CA1so CA1sp CA1sr CA1slm CA3,Astrometry
+astro8_260228_sess16,astro8,astro8\astro8_260228_sess16,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",no,13,PTLp CA1so CA1sp CA1sr CA1slm CA3,Astrometry
+astro8_260302_sess18,astro8,astro8\astro8_260302_sess18,neural3,c57b1/6,wild type,"105µm (125µm), na 0.22 etched cone shaped (thorlabs, fg105lca)",tmaze,14,PTLp pCA1so CA1so CA1sp CA1sr CA1slm CA3,Astrometry
