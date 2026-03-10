@@ -26,3 +26,26 @@ updateExpFolder_temp({'E:\astro87'},'C:\data\astro8');
 % preprocessSession('basepath','C:\data\astro8\astro8_260212_sess1','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[8]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
 preprocessSession('basepath','C:\data\astro8\astro8_260302_sess18','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[8]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
 % preprocessSession('basepath','F:\astro8\astro8_260222_sess10','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[8]}),'analogChannelsList',[],'digitalChannelsList',[],'sessionSummary',false,'getPos',false);
+
+
+
+%% Once they have also been processed, then:
+% 
+% indexNewSession('basepath','Z:\astro7\astro7_260210_sess1');
+% indexNewSession('basepath','Z:\astro7\astro7_260211_sess2');
+% indexNewSession('basepath','Z:\astro7\astro7_260214_sess5');
+% indexNewSession('basepath','Z:\astro7\astro7_260217_sess7');
+% indexNewSession('basepath','Z:\astro7\astro7_260222_sess12');
+% 
+% indexNewSession('basepath','Z:\astro8\astro8_260212_sess1');
+% indexNewSession('basepath','Z:\astro8\astro8_260213_sess2');
+% indexNewSession('basepath','Z:\astro8\astro8_260214_sess3');
+% indexNewSession('basepath','Z:\astro8\astro8_260216_sess4');
+% indexNewSession('basepath','Z:\astro8\astro8_260219_sess7');
+indexNewSession('basepath','Z:\astro8\astro8_260220_sess8');
+indexNewSession('basepath','Z:\astro8\astro8_260221_sess9');
+indexNewSession('basepath','Z:\astro8\astro8_260224_sess12');
+indexNewSession('basepath','Z:\astro8\astro8_260228_sess16');
+indexNewSession('basepath','Z:\astro8\astro8_260302_sess18');
+
+
