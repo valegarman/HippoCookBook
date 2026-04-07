@@ -392,36 +392,6 @@ if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
     catch
     end
 
-    try 
-        behaviour = getSessionLinearize;
-        psth_lReward = spikesPsth([behaviour.events.lReward],'numRep',100,'eventType','lReward','saveMat',false,...
-            'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01,'raster_time',[-2 2]);
-        psth_rReward = spikesPsth([behaviour.events.rReward],'numRep',100,'eventType','rReward','saveMat',false,...
-            'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'raster_time',[-2 2]);
-        psth_reward = spikesPsth([behaviour.events.lReward; behaviour.events.rReward],'numRep',100,'eventType','reward','saveMat',false,...
-            'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'raster_time',[-2 2]);
-        
-        if all(isnan(behaviour.events.startPoint))
-            behaviour.events.startPoint = NaN;
-        end
-        if all(isnan(behaviour.events.intersection))
-            behaviour.events.intersection = NaN;
-        end
-        psth_intersection = spikesPsth([behaviour.events.intersection],'numRep',100,'eventType','intersection','saveMat',false,...
-            'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'raster_time',[-2 2]);
-        psth_startPoint = spikesPsth([behaviour.events.startPoint],'numRep',100,'eventType','startPoint','saveMat',false,...
-            'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'raster_time',[-2 2]);
-
-        behaviour.psth_lReward = psth_lReward;
-        behaviour.psth_rReward = psth_rReward;
-        behaviour.psth_reward = psth_reward;
-        behaviour.psth_intersection = psth_intersection;
-        behaviour.psth_startPoint = psth_startPoint; 
-        behavior = behaviour; % british to american :)
-        save([basenameFromBasepath(pwd) '.behavior.cellinfo.mat'],'behavior','-v7.3');
-    catch
-        warning('Psth on behaviour events was not possible...');
-    end
 
     % Fiber behaviour analysis
     try
@@ -450,8 +420,6 @@ if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
         warning('Speed\rate correlation analysis was not possible!');
     end
 end
-
-
 
 %% 13. Summary per cell
 if ~any(ismember(excludeAnalysis, {'12',lower('summary')}))
