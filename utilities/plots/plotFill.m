@@ -5,7 +5,7 @@ function h = plotFill(datax,datay,varargin)
 % 
 % INPUTS
 %    'datax'        1 x M, x axis, same for all datay
-%    'datay'        N x M, Different entries must be in columns.
+%   SE 'datay'        N x M, Different entries must be in columns.
 %
 % <optional>
 %    'error'        'ci95' (default), 'std' or 'SE'.
@@ -34,7 +34,7 @@ function h = plotFill(datax,datay,varargin)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 p = inputParser;
 addParameter(p,'color',[],@isnumeric);
-addParameter(p,'error','ci95',@ischar); % SE
+addParameter(p,'error','SE',@ischar); % SE
 addParameter(p,'style','alpha',@ischar);
 addParameter(p,'smoothOpt',1,@isnumeric);
 addParameter(p,'xscale','linear',@ischar);

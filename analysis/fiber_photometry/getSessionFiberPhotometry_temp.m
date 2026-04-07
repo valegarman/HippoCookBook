@@ -50,7 +50,6 @@ if exist([basepath filesep strcat(basename,'.MergePoints.events.mat')],'file')
             fprintf('Computing fiber photometry in %s folder \n',MergePoints.foldernames{ii});
             % tempFiber{count} = getFiberPhotometry();
             tempFiber{count} = getFiberPhotometry_temp_Nacho('force',true);
-
             fiberFolder(count) = ii;
             count = count +1;
         end

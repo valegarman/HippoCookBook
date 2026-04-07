@@ -46,6 +46,12 @@ if nargin < 1
 else
     colors = [];
     input_colors = varargin{1};
+    if ~iscell(input_colors)
+        temp = input_colors;
+        input_colors = cell(1);
+        input_colors{1} = temp;
+    end
+
     for ii = 1:length(input_colors)
         colors = [colors; selectColor(input_colors{ii})];
     end
@@ -96,6 +102,18 @@ switch lower(input)
     case 'pyr'
         cmap = brewermap(256,'Spectral');
         output = cmap(5,:);
+    case 'int'
+        cmap = brewermap(256,'Spectral');
+        output = cmap(220,:);
+    case 'pyramidal cell'
+        cmap = brewermap(256,'Spectral');
+        output = cmap(5,:);
+    case 'narrow interneuron'
+        cmap = brewermap(256,'Spectral');
+        output = cmap(220,:);
+    case 'wide interneuron'
+        cmap = brewermap(256,'Spectral');
+        output = cmap(220,:);
     otherwise 
         output = [.5 .5 .5];
 end

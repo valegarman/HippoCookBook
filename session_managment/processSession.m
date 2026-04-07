@@ -178,10 +178,12 @@ if ~any(ismember(excludeAnalysis, {'1',lower('sessionTemplate')}))
     close all
 end
 
-leftArmTtl_channel = session.analysisTags.leftArmTtl_channel;
+leftArmTtl_channel =  session.analysisTags.leftArmTtl_channel;
 rightArmTtl_channel = session.analysisTags.rightArmTtl_channel;
 homeDelayTtl_channel = session.analysisTags.homeDelayTtl_channel;
 tracking_ttl_channel = session.analysisTags.bazler_ttl_channel;
+digital_optogenetic_channels = session.analysisTags.digital_optogenetic_channels;
+
 
 ints = [];
 if restrict_to_manipulation
@@ -200,7 +202,7 @@ elseif restrict_to_baseline
     list_of_manipulations = list_of_manipulations_names;
     session = loadSession;
     for ii = 1:length(session.epochs)
-        if ismember(session.epochs{ii}.behavioralParadigm, list_of_manipulations)
+        if isfield(session.epochs{ii},'behavioralParadigm') && ismember(session.epochs{ii}.behavioralParadigm, list_of_manipulations)
             ints = [0 session.epochs{ii}.startTime];
             warning('Epoch with manipulations found! Restricting analysis to baseline interval!');
         end
@@ -251,7 +253,7 @@ end
 % 4.1 Light responses, if available
 if ~any(ismember(excludeAnalysis, {'4',lower('spikesFeatures')}))
     try
-        getOptogeneticResponse('numRep',500,'force',true,'restrict_to', restrict_ints,'digitalChannelsList',digital_optogenetic_channels,'analogChannelsList',[]);
+        getOptogeneticResponse('numRep',500,'force',true,'restrict_to', restrict_ints,'digitalChannelsList',digital_optogenetic_channels,'analogChannelsList',[],'minNumberOfPulses',10,'minDuration',0);
     catch
     end
 
@@ -259,12 +261,12 @@ if ~any(ismember(excludeAnalysis, {'4',lower('spikesFeatures')}))
     spikeFeatures;
 
     % 1.3 ULED analysis 
-    try
-        getuLEDPulses;
-        getuLEDResponse;         
-    catch
-        warning('Not possible to run getULEDResponse...');
-    end
+    % try
+    %     getuLEDPulses;
+    %     getuLEDResponse;         
+    % catch
+    %     warning('Not possible to run getULEDResponse...');
+    % end
 end
 
 %% 5. Check Sleep Score
@@ -277,7 +279,7 @@ if ~any(ismember(excludeAnalysis, {'5',lower('checkSleep')}))
     end
     
     SleepScoreMaster(pwd,'noPrompts',true,'ignoretime',pulses.stimulationEpochs, 'overwrite', true);
-%     TheStateEditor(session.general.name);
+    % TheStateEditor(session.general.name);
     bz_ThetaStates(pwd);
 end
 
@@ -301,7 +303,10 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     getSpikesRank('events','upstates');
 
     % 8.2 Ripples
-    ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',true,'thresholds',rippleMasterDetector_threshold,'eventSpikeThreshold', false); 
+
+
+    ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',true,'thresholds',rippleMasterDetector_threshold, 'eventSpikeThreshold',0.5,'referenceChannel', 30); 
+
     psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10);
     % psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10,'restrict_to_manipulation',true);
     getSpikesRank('events','ripples');
@@ -315,7 +320,8 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
 
     % 8.3 Theta intervals
     cd(basepath);
-    thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'channel',theta_epochs_channel);
+    % thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'channel',theta_epochs_channel);
+    thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'powerThreshold',0.8 ,'channel', 17);
 
 end
 
@@ -364,24 +370,26 @@ end
 
 %% 11. Spatial modulation
 if ~any(ismember(excludeAnalysis, {'11',lower('spatialModulation')}))
-    try
-        spikes = loadSpikes;
-        %getSessionTracking('roiTracking','manual','forceReload',false,'LED_threshold',LED_threshold,'convFact',tracking_pixel_cm,'leftTTL_reward',leftArmTtl_channel,'rightTTL_reward',rightArmTtl_channel);
-        getSessionTracking('forceReload',true,'leftTTL_reward',leftArmTtl_channel,'rightTTL_reward',rightArmTtl_channel,'homeTtl',homeDelayTtl_channel,'dlc_ttl_channel',dlc_ttl_channel);
-        try
-            getSessionArmChoice('task','alternation','leftArmTtl_channel',leftArmTtl_channel,'rightArmTtl_channel',rightArmTtl_channel,'homeDelayTtl_channel',homeDelayTtl_channel,'use_manual_ttls',use_manual_ttls);
-            getSessionArmChoice('task','uLED','leftArmTtl_channel',leftArmTtl_channel,'rightArmTtl_channel',rightArmTtl_channel,'homeDelayTtl_channel',homeDelayTtl_channel,'use_manual_ttls',use_manual_ttls);
 
-        catch
-            warning('Performance in task was not computed! maybe linear maze?');
-        end
+    spikes = loadSpikes;
+    getSessionTracking('forceReload',true,'leftTTL_reward',leftArmTtl_channel,'rightTTL_reward',rightArmTtl_channel,'homeTtl',homeDelayTtl_channel,'dlc_ttl_channel',dlc_ttl_channel);
+
+    try
+        getSessionArmChoice('task','alternation','leftArmTtl_channel',leftArmTtl_channel,'rightArmTtl_channel',rightArmTtl_channel,'homeDelayTtl_channel',homeDelayTtl_channel,'use_manual_ttls',use_manual_ttls);
+        % getSessionArmChoice('task','uLED','leftArmTtl_channel',leftArmTtl_channel,'rightArmTtl_channel',rightArmTtl_channel,'homeDelayTtl_channel',homeDelayTtl_channel,'use_manual_ttls',use_manual_ttls);
+
+    catch
+        warning('Performance in task was not computed! maybe linear maze?');
+    end
+
+    try
+
         behaviour = getSessionLinearize('forceReload',true,'leftTtl',leftArmTtl_channel,'rightTtl',rightArmTtl_channel);  
         firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',true,'speedThresh',0.1);
         placeFieldStats = bz_findPlaceFields1D('firingMaps',firingMaps,'maxSize',.75,'sepEdge',0.03); %% ,'maxSize',.75,'sepEdge',0.03
         firingTrialsMap = firingMapPerTrial('force',true,'saveMat',true);
         spatialModulation = getSpatialModulation('force',true);
     catch
-        warning('Not possible to run spatial modulation...');
     end
 
 
@@ -415,8 +423,7 @@ end
 
 %% 13. Summary per cell
 if ~any(ismember(excludeAnalysis, {'12',lower('summary')}))
-    plotSummary('showTagCells',false,'use_deltaThetaEpochs',false);
-    
+plotSummary('showTagCells',false,'use_deltaThetaEpochs',true);
 end
 
 cd(prevPath);
