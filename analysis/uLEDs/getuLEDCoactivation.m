@@ -424,6 +424,9 @@ if curate_responses
 end
 
 ledCoactivation = coactivation_matrix;
+if size(ledCoactivation,1) == 2
+    ledCoactivation = eye(2);
+end
 
 nNeurons = size(neuronLED,1);
 coactivationMatrix_neurons = false(nNeurons);

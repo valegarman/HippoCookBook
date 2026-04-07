@@ -7,7 +7,7 @@ function coactivation_metrics = compute_coactivation_metrics(uLEDcoactivation, v
 p = inputParser;
 addRequired(p,'uLEDcoactivation');
 addParameter(p,'basepath',pwd,@ischar);
-addParameter(p,'saveMat',false,@islogical);
+addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'force',false,@islogical);
 addParameter(p,'save_as','coactivation_metrics',@ischar);
 addParameter(p,'include_units', 'all'); % possible values: binary vector, 'pyramidal cells', 'all' (default),
@@ -283,11 +283,8 @@ stim_labels  = Q_stim.clusters_indices(validIdx);
 post_labels  = Q_post.clusters_indices(validIdx);
 
 ari_pre  = adjusted_rand_index(true_labels, pre_labels);
-ari_stim = adjusted_rand_index(true_labels, stim_labels);
-ari_post = adjusted_rand_index(true_labels, post_labels);
 ari_pre_post = adjusted_rand_index(pre_labels, post_labels);
 ari_pre_stim = adjusted_rand_index(pre_labels, stim_labels);
-ari_post_stim = adjusted_rand_index(post_labels, stim_labels);
 
 fprintf('ARI - Pre: %.3f | Stim: %.3f | Post: %.3f\n', ari_pre, ari_stim, ari_post);
 fprintf('ARI - Pre-Post: %.3f | Pre-Stim: %.3f | Post-Stim: %.3f\n', ari_pre_post, ari_pre_stim, ari_post_stim);
@@ -325,6 +322,12 @@ for i = 1:6
     z_scores(i) = (real_ari(i) - mu) / sigma;
     p_vals(i) = mean(shuffled_ari{i} >= real_ari(i));  % unilateral (efecto positivo)
 end
+
+% Modularity (Q) (how well a network is divided into clusters) for
+% artificial clusters
+Q_pre_by_artificial = compare_fixed_modularity_to_null(preZ_clipped, artificial_clusters', nShuffles, false);
+Q_stim_by_artificial = compare_fixed_modularity_to_null(Z_clipped, artificial_clusters', nShuffles, false);
+Q_post_by_artificial = compare_fixed_modularity_to_null(postZ_clipped, artificial_clusters', nShuffles, false);
 
 % save values
 coactivation_metrics.artificial_clusters = artificial_clusters';
@@ -391,7 +394,7 @@ if do_plot
     b = find(diff(sorted_Ci) ~= 0) + 0.5;
     for x = b; xline(x,'k','LineWidth',1.5); yline(x,'k','LineWidth',1.5); end
     hold off;
-    title({['Stim']});
+    title({['Stim'], ['Q = ' num2str(Q_stim_by_artificial.Q_real,2) ', Z = ' num2str(Q_stim_by_artificial.z_score,4)]});
     xlabel('# Neurons');
     axis square
 
@@ -403,7 +406,7 @@ if do_plot
     b = find(diff(sorted_Ci) ~= 0) + 0.5;
     for x = b; xline(x,'k','LineWidth',1.5); yline(x,'k','LineWidth',1.5); end
     hold off;
-    title({['Pre']});
+    title({['Pre'], ['Q = ' num2str(Q_pre_by_artificial.Q_real,2) ', Z = ' num2str(Q_pre_by_artificial.z_score,4)]});
     ylabel('Clustering by uLEDs groups', 'FontWeight','bold');
     axis square
     
@@ -415,7 +418,7 @@ if do_plot
     b = find(diff(sorted_Ci) ~= 0) + 0.5;
     for x = b; xline(x,'k','LineWidth',1.5); yline(x,'k','LineWidth',1.5); end
     hold off;
-    title({['Post']});
+    title({['Post'], ['Q = ' num2str(Q_post_by_artificial.Q_real,2) ', Z = ' num2str(Q_post_by_artificial.z_score,4)]});
     axis square
 
     exportgraphics(gcf,['SummaryFigures\' save_as '_adjusted_rand_index.png']);
@@ -675,6 +678,7 @@ for k = 1:length(unique_vals)
 end
 artificial_clusters2 = Ci_mapped;
 [cluster_interactions_stim_by_artificial] = computeClusterInteractions(Z_clipped, artificial_clusters2);
+
 [cluster_interactions_pre_by_artificial] = computeClusterInteractions(preZ_clipped, artificial_clusters2);
 [cluster_interactions_post_by_artificial] = computeClusterInteractions(postZ_clipped, artificial_clusters2);
 
@@ -830,20 +834,20 @@ if do_plot
     subplot(2,3,4)
     gs = groupStats({cluster_cell_metrics_pre_by_artificial.z_score.intra(:), cluster_cell_metrics_stim_by_artificial.z_score.intra(:),...
         cluster_cell_metrics_post_by_artificial.z_score.intra(:)},[], 'plotType', 'roundPlot', 'inAxis', true, 'repeatedMeasures', true, 'plotData', true, 'plotConnectors', true);
-    ylabel('Median interaction by stim (SD)');
+    ylabel('Median interaction by artificial (SD)');
     title('Intra-cluster','FontWeight','normal');
 
     subplot(2,3,5)
     gs = groupStats({cluster_cell_metrics_pre_by_artificial.z_score.neigh(:), cluster_cell_metrics_stim_by_artificial.z_score.neigh(:),...
         cluster_cell_metrics_post_by_artificial.z_score.neigh(:)},[], 'plotType', 'roundPlot', 'inAxis', true, 'repeatedMeasures', true, 'plotData', true, 'plotConnectors', true);
-    ylabel('Median interaction by stim (SD)');
+    ylabel('Median interaction by artificial (SD)');
     title('Neigh-cluster','FontWeight','normal');
 
     subplot(2,3,6)
     gs = groupStats({cluster_cell_metrics_post_pre_by_artificial.z_score.intra(:),...
         cluster_cell_metrics_post_pre_by_artificial.z_score.neigh(:), cluster_cell_metrics_post_pre_by_artificial.z_score.participation_total(:), ...
         cluster_cell_metrics_post_pre_by_artificial.z_score.participation_excitation(:), cluster_cell_metrics_post_pre_by_artificial.z_score.participation_inhibition(:)}, [], 'plotType', 'roundPlot', 'inAxis', true, 'repeatedMeasures', true, 'plotData', true, 'plotConnectors', false);
-    ylabel('\DeltaMedian interaction by stim (SD)');
+    ylabel('\DeltaMedian interaction by artificial (SD)');
     ylim([-5 5]);
     set(gca, 'XTick', [1:5], 'XTickLabel', {'Intra', 'Neigh', 'Participation', 'Part Exc', 'Part Inh'});
 
@@ -851,7 +855,7 @@ end
 
 % save results...
 if saveMat
-    save(fullfile(basepath, [save_as '.coactivation_metrics.cellinfo.mat']), 'coactivation_metrics');
+    save(fullfile(basepath, [basenameFromBasepath(pwd) '.' save_as '.cellinfo.mat']), 'coactivation_metrics');
 end
 
 

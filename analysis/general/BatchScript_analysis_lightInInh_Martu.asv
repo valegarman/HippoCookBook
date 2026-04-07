@@ -11,7 +11,7 @@ HCB_directory = what('HippoCookBook');
 
 sessionsTable = readtable([HCB_directory.path filesep 'indexedSessions.csv']); % the variable is called allSessions
 
-for ii = 57: length(sessionsTable.SessionName)
+for ii = 56: length(sessionsTable.SessionName)
      %% Analysis general all over Camkii/32 animal
     if contains(sessionsTable.Project{ii}, targetProject) || strcmpi('all', targetProject)
 
@@ -33,31 +33,31 @@ for ii = 57: length(sessionsTable.SessionName)
             for mm = 1:spikes.numcells
                 disp(mm);
                 spike_times_temp =spikes_times{mm};
-                % 
-                % spike_pos_index =  InIntervals(spike_times_temp,theta_positive);
-                % spike_time_positive_theta = spike_times_temp(spike_pos_index);
+
+                spike_pos_index =  InIntervals(spike_times_temp,theta_positive);
+                spike_time_positive_theta = spike_times_temp(spike_pos_index);
 
                 spike_neg_index =  InIntervals(spike_times_temp,theta_negative);
                 spike_time_negative_theta = spike_times_temp(spike_neg_index);
 
-                %  uLEDResponses_interval_theta_positive{mm} = getuLEDResponse_intervals([spike_time_positive_theta + monosyn_inh_win(1) spike_time_positive_theta + monosyn_inh_win(2)],...
-                % 'saveMat', false,'numRep',500,'doPlot', false,'getRaster', false, 'verbose', false, 'boostraping_type','pulses');
-
+                 uLEDResponses_interval_theta_positive{mm} = getuLEDResponse_intervals([spike_time_positive_theta + monosyn_inh_win(1) spike_time_positive_theta + monosyn_inh_win(2)],...
+                'saveMat', false,'numRep',500,'doPlot', false,'getRaster', false, 'verbose', false, 'boostraping_type','pulses');
+           
                   uLEDResponses_interval_theta_negative{mm} = getuLEDResponse_intervals([spike_time_negative_theta + monosyn_inh_win(1) spike_time_negative_theta+ monosyn_inh_win(2)],...
                 'saveMat', false,'numRep',500,'doPlot', false,'getRaster', false, 'verbose', false, 'boostraping_type','pulses');
-
-                % % uLEDResponses_interval{mm} = getuLEDResponse_intervals([spikes_times{mm} + monosyn_inh_win(1) spikes_times{mm} + monosyn_inh_win(2)],...
+           
+                % uLEDResponses_interval{mm} = getuLEDResponse_intervals([spikes_times{mm} + monosyn_inh_win(1) spikes_times{mm} + monosyn_inh_win(2)],...
                 % 'saveMat', false,'numRep',500,'doPlot', false,'getRaster', false, 'verbose', false, 'boostraping_type','pulses');
                 % 
             end
 
             collision_metrics_1_21 = get_light_spike_CollisionMetrics(uLEDResponses_interval_theta_positive,'label','1msTo21ms','saveMat',true,'update_cell_metrics',false,'save_as','CollisionMetrics_theta_positive','rate_change_threshold',3);
-            collision_metrics_theta_neg = get_light_spike_CollisionMetrics(uLEDResponses_interval_theta_negative,'label','1msTo21ms','saveMat',true,'update_cell_metrics',false,'save_as','CollisionMetrics_theta_negative','rate_change_threshold',3);
+            collision_metrics_theta_neg = get_light_spike_CollisionMetrics(uLEDResponses_interval_theta_negative,'label','1msTo21ms','saveMat',true,'update_cell_metrics',false,'save_as','CollisionMetrics_theta_negaive','rate_change_threshold',3);
 
             % collision_metrics_control = get_light_spike_CollisionMetrics(uLEDResponses_control,'label','control','saveMat',true,'update_cell_metrics',true,'save_as','lightSpikeCollisions_control','rate_change_threshold',3);
 
-            clear uLEDResponses_interval_theta_positive
-            clear uLEDResponses_interval_theta_negative
+            clear uLEDResponses_interval
+            clear uLEDResponses_control
             close all;
         
     end
