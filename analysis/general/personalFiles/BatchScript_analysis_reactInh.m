@@ -24,6 +24,8 @@ sessionsTable = readtable([HCB_directory.path filesep 'indexedSessions.csv']); %
 targetSessions = find((contains(sessionsTable.Project, targetProject) | strcmpi('all', targetProject))...
     & contains(lower(sessionsTable.SessionName), lower(list_of_sessions)));
 
+
+
 for ii = 1:length(targetSessions)
         fprintf(' > %3.i/%3.i session \n',ii, length(targetSessions)); %\n
         cd(adapt_filesep([database_path filesep sessionsTable.Path{targetSessions(ii)}]));

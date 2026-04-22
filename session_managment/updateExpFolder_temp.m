@@ -56,10 +56,10 @@ if ~iscell(inputFolder)
     inputFolder{1} = ifol;
 end
 
-for jj = 1:length(inputFolder)
-    fprintf(' Input folder %i of %i ...\n',jj,length(inputFolder));
+for rr = 1:length(inputFolder)
+    fprintf(' Input folder %i of %i ...\n',rr,length(inputFolder));
     
-    cd(inputFolder{jj});
+    cd(inputFolder{rr});
     expNameInput = strsplit(pwd,filesep);
     expNameInput = expNameInput{end};
     if ~strcmp(expName,expNameInput)
@@ -80,20 +80,26 @@ for jj = 1:length(inputFolder)
                 structureInput_general{count} = [inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'structure.oebin'];
                 sync_messagesInput_general{count} = [inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'sync_messages.txt'];
 
+                fname = session.recordNodes{1}.recordings{jj}.info.continuous.folder_name;
+                fname = char(string(fname));                 % 
+                fname = regexprep(fname,'[\\/]+$','');       % 
+                fname = [fname filesep];
+
+
                 % Dat-related data for each recording
-                datInput{count} = [inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'continuous\', strrep(session.recordNodes{1}.recordings{jj}.info.continuous.folder_name, '/','\'), 'continuous.dat'];
-                sample_numbers_datInput{count} = [inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'continuous\', strrep(session.recordNodes{1}.recordings{jj}.info.continuous.folder_name, '/','\'), 'sample_numbers.npy'];
-                timestamps_datInput{count} = [inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'continuous\', strrep(session.recordNodes{1}.recordings{jj}.info.continuous.folder_name, '/','\'), 'timestamps.npy'];
+                datInput{count} = [inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'continuous\', fname, 'continuous.dat'];
+                sample_numbers_datInput{count} = [inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'continuous\', fname, 'sample_numbers.npy'];
+                timestamps_datInput{count} = [inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'continuous\', fname, 'timestamps.npy'];
                 
                 % TTL-related data for each recording
-                eventsInput_TTL{count} = [inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'events\', strrep(session.recordNodes{1}.recordings{jj}.info.continuous.folder_name, '/','\'), 'TTL\','states.npy'];
-                eventstimestamps_TTL{count} = [inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'events\', strrep(session.recordNodes{1}.recordings{jj}.info.continuous.folder_name, '/','\'), 'TTL\','timestamps.npy'];
-                fullWordsInput_TTL{count} = [inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'events\', strrep(session.recordNodes{1}.recordings{jj}.info.continuous.folder_name, '/','\'), 'TTL\','full_words.npy'];
-                sample_number_TTL{count} = [inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'events\', strrep(session.recordNodes{1}.recordings{jj}.info.continuous.folder_name, '/','\'), 'TTL\','sample_numbers.npy'];
+                eventsInput_TTL{count} = [inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'events\', fname, 'TTL\','states.npy'];
+                eventstimestamps_TTL{count} = [inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'events\', fname, 'TTL\','timestamps.npy'];
+                fullWordsInput_TTL{count} = [inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'events\', fname, 'TTL\','full_words.npy'];
+                sample_number_TTL{count} = [inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'events\', fname, 'TTL\','sample_numbers.npy'];
                 
                 % Tracking (timestamps) file
-                if ~isempty(dir([inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'continuous\', strrep(session.recordNodes{1}.recordings{jj}.info.continuous.folder_name, '/','\'), '*timestamps.csv']))
-                    tracking_timestampsFile = dir([inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'continuous\', strrep(session.recordNodes{1}.recordings{jj}.info.continuous.folder_name, '/','\'), '*timestamps.csv']);
+                if ~isempty(dir([inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'continuous\', fname, '*timestamps.csv']))
+                    tracking_timestampsFile = dir([inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'continuous\', fname, '*timestamps.csv']);
                     tracking_timestampsInput{count} = [tracking_timestampsFile.folder filesep tracking_timestampsFile.name];
                     tracking_timestampsName{count} = tracking_timestampsFile.name;
                 else
@@ -102,8 +108,8 @@ for jj = 1:length(inputFolder)
                 end
 
                 % Tracking (video) file
-                if ~isempty(dir([inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'continuous\', strrep(session.recordNodes{1}.recordings{jj}.info.continuous.folder_name, '/','\'), '*tracking.avi']))
-                    trackingFile = dir([inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'continuous\', strrep(session.recordNodes{1}.recordings{jj}.info.continuous.folder_name, '/','\'), '*tracking.avi']);
+                if ~isempty(dir([inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'continuous\', fname, '*tracking.avi']))
+                    trackingFile = dir([inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'continuous\', fname, '*tracking.avi']);
                     trackingInput{count} = [trackingFile.folder filesep trackingFile.name];
                     trackingName{count} = trackingFile.name;
                 else
@@ -112,8 +118,8 @@ for jj = 1:length(inputFolder)
                 end
 
                 % Tracking (CROP video) file
-                if ~isempty(dir([inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'continuous\', strrep(session.recordNodes{1}.recordings{jj}.info.continuous.folder_name, '/','\'), '*crop.avi']))
-                    trackingCropFile = dir([inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'continuous\', strrep(session.recordNodes{1}.recordings{jj}.info.continuous.folder_name, '/','\'), '*crop.avi']);
+                if ~isempty(dir([inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'continuous\', fname, '*crop.avi']))
+                    trackingCropFile = dir([inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'continuous\', fname, '*crop.avi']);
                     trackingCropInput{count} = [trackingCropFile.folder filesep trackingCropFile.name];
                     trackingCropName{count} = trackingCropFile.name;
                 else
@@ -122,8 +128,8 @@ for jj = 1:length(inputFolder)
                 end
 
                 % Fiber photometry file (Doric)
-                if ~isempty(dir([inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'continuous\', strrep(session.recordNodes{1}.recordings{jj}.info.continuous.folder_name, '/','\'), '*.doric']))
-                    doricFile = dir([inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'continuous\', strrep(session.recordNodes{1}.recordings{jj}.info.continuous.folder_name, '/','\'), '*.doric']);
+                if ~isempty(dir([inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'continuous\', fname, '*.doric']))
+                    doricFile = dir([inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'continuous\', fname, '*.doric']);
                     doricInput{count} = [doricFile.folder filesep doricFile.name];
                     doricName{count} = doricFile.name;
                 else
@@ -132,8 +138,8 @@ for jj = 1:length(inputFolder)
                 end
 
                 % uLED ttl .csv file
-                if ~isempty(dir([inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'continuous\', strrep(session.recordNodes{1}.recordings{jj}.info.continuous.folder_name, '/','\'), '*uLED_ttll.csv']))
-                    uLED_ttl_csvFile = dir([inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'continuous\', strrep(session.recordNodes{1}.recordings{jj}.info.continuous.folder_name, '/','\'), '*uLED_ttll.csv']);
+                if ~isempty(dir([inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'continuous\', fname, '*uLED_ttll.csv']))
+                    uLED_ttl_csvFile = dir([inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'continuous\', fname, '*uLED_ttll.csv']);
                     uLED_ttl_csvInput{count} = [uLED_ttl_csvFile.folder filesep uLED_ttl_csvFile.name];
                     uLED_ttl_csvName{count} = uLED_ttl_csvFile.name;
                 else
@@ -142,8 +148,8 @@ for jj = 1:length(inputFolder)
                 end
 
                 % uLED ttl .txt file
-                if ~isempty(dir([inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'continuous\', strrep(session.recordNodes{1}.recordings{jj}.info.continuous.folder_name, '/','\'), '*uLED_ttl.txt']))
-                    uLED_ttl_txtFile = dir([inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'continuous\', strrep(session.recordNodes{1}.recordings{jj}.info.continuous.folder_name, '/','\'), '*uLED_ttl.txt']);
+                if ~isempty(dir([inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'continuous\', fname, '*uLED_ttl.txt']))
+                    uLED_ttl_txtFile = dir([inputFolder{1} filesep session.recordNodes{1}.recordings{jj}.directory,'continuous\', fname, '*uLED_ttl.txt']);
                     uLED_ttl_txtInput{count} = [uLED_ttl_txtFile.folder filesep uLED_ttl_txtFile.name];
                     uLED_ttl_txtName{count} = uLED_ttl_txtFile.name;
                 else

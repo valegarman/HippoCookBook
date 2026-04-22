@@ -286,6 +286,7 @@ winSize = [1];
 [allCcg, t_ccg] = CCG(uLEDcoactivation.coactivation_times,[],'binSize',binSize,'duration',winSize,'Fs',1/session.extracellular.sr);
 winCoactivation = p.Results.winCoactivation;
 winCoactivation = InIntervals(t_ccg, [-winCoactivation winCoactivation]);
+coactivation_matrix = eye(12);
 for kk = 1:size(allCcg,2)
     for jj = 1:size(allCcg,2)
         temp = zscore(allCcg(:,kk,jj));

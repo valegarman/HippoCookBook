@@ -1,19 +1,19 @@
 %% Tutorial for session processing
 
-% 1% First, transfer files from recording computer to analysis unit (wheter
+% 1% First, transfer files from recording SSD to analysis unit (wheter
 %   a computer, NASS or Cloud Share site) by
 %   'updateExpFolder({recordingPC_1, recordingPC_2, etc}, 'analysis unit')',
 %   Example:
 
-updateExpFolder({'V:\data\fCck1', 'Y:\fCck1'},'E:\data\fCck1');
+updateExpFolder_temp('G:\nore1','E:\nore1');
 
 % 2% Then, preprocess session (includes artifacts removal, median signal
 %   removal, LFP and Kilosort, and running computeSessionSummary by 'batch_preprocessSession('basepath','sessionBasepath').
 %   Example:
-batch_preprocessSession('basepath','E:\wt3');
+batch_preprocessSession('basepath','E:\nore1');
 
 % <OPTIONAL> If summary was not processed, it can be run in batch by 'batch_preprocessSession'
-batch_sessionSummary('basepath','G:\data\fPv4','cleanArtifacts',({65,[]}),'analogChannelsList',65,'digitalChannelsList',0);
+batch_sessionSummary('basepath','E:\nore1','cleanArtifacts',({65,[]}),'analogChannelsList',65,'digitalChannelsList',0);
 
 % <OPTIONAL> If only a single session should be processed
 preprocessSession('basepath',pwd,'analogChannelsList',[],'spikeSort',true,'getPos',false, 'cleanArtifacts', true,...
@@ -32,6 +32,32 @@ indexNewSession('copyFiles',true);
 [projectResults, projectSessionResults] = ...
         loadProjectResults('project', 'InterneuronsLibrary',...
         'analysis_project_path', 'C:\Users\valeg\Dropbox\ProjectsOnLine\interneuronsLibrary\data','loadLast',false);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 % run getOptogeneticResponses with uLEDs
 pulses = getAnalogPulses('manualThr',true,'force',true); % 1-index

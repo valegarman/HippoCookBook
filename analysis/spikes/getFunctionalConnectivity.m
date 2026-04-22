@@ -16,7 +16,7 @@ addParameter(p,'basepath',pwd,@isdir);
 addParameter(p,'spikes',[]);
 addParameter(p,'method','te',@ischar); % options are mi, glm, te
 addParameter(p,'restrict',[],@isnumeric); % ints to restrict to
-addParameter(p,'dt',0.1,@isnumeric); % 
+addParameter(p,'dt',0.02,@isnumeric); % 
 addParameter(p,'k',3,@isnumeric); % history length in bins, for transfer entropy
 addParameter(p,'n_shuffles',1000,@isnumeric); 
 addParameter(p,'doPlot',true,@islogical); 

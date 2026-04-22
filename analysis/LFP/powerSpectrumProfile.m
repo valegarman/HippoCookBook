@@ -245,7 +245,6 @@ if showfig
     ylabel('Channels'); xlabel('Power'); title(strcat('Freq range:',num2str(frange),'Hz'),'FontWeight','normal');
     set(gca,'YDir','reverse');
 %     legend(plt1,{num2str([1:size(session.extracellular.electrodeGroups.channels,2)]')})
-    if ~exist('SummaryFigures','dir')
-        mkdir('SummaryFigures')
-    end
+    mkdir('SummaryFigures')
+    saveas(gcf,['SummaryFigures\', save_as,'_',num2str(frange(1)),'_',num2str(frange(2)),'.png']);
 end

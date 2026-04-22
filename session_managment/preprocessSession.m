@@ -240,12 +240,8 @@ else
 end
 
 %% Fiber photometry analysis
-try
-    fiber = getSessionFiberPhotometry();
-catch
-    warning('No possible loading fiber photometry data. Was fiber photometry signal recorded in this experiment? ...')
-end
-cd(basepath)
+fiber = getSessionFiberPhotometry_pablo();
+cd (basepath);
 
 %% Kilosort concatenated sessions
 if spikeSort
