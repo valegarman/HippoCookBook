@@ -86,6 +86,8 @@ elseif  strcmp(error, 'sd') || strcmp(error, 'std')
         f1 = 1;
 elseif  strcmp(error, 'SE')
         f1 = 1/ sqrt(size(datay,2));
+elseif  strcmp(error, 'ci99')
+        f1 = 3.291/ sqrt(size(datay,2));
 end
 
 if isempty(color)

@@ -74,6 +74,7 @@ addParameter(p,'x_position',[]);
 addParameter(p,'plotConnectors',false,@islogical);
 addParameter(p,'isCircular',false,@islogical);
 addParameter(p,'posthoc_test','tukey-kramer',@ischar);
+addParameter(p,'discard_nan_inf',false, @islogical);
 
 parse(p,varargin{:});
 color = p.Results.color;
@@ -101,6 +102,7 @@ roundPlotCenterColor = p.Results.roundPlotCenterColor;
 plotConnectors = p.Results.plotConnectors;
 isCircular = p.Results.isCircular;
 posthoc_test = p.Results.posthoc_test;
+discard_nan_inf = p.Results.discard_nan_inf;
 
 % Dealing with inputs
 if size(y,1) < size(y,2)
@@ -110,6 +112,20 @@ end
 if posOffset > 0
     inAxis = true;
 end
+
+if discard_nan_inf
+    if iscell(y)
+        for ii = 1:length(y)
+            toDiscard = isnan(y{ii}) | isinf(y{ii});
+            y{ii}(toDiscard) = [];
+        end 
+    else
+        toDiscard = isnan(y) | isinf(y);
+        y(toDiscard) = [];
+        group(toDiscard) = [];
+    end
+end
+
 if ~exist('group') || isempty(group)
     if iscell(y)
         dataC = y;
@@ -510,6 +526,30 @@ if doPlot
             view([90 90]); 
         end
         xlim([0.5 max(pos)+.5]);
+    elseif strcmpi(plotType, 'violinPlot2')
+        groupPos = zeros(size(group));
+        idGroup = unique(group);
+
+        hold on;
+        for ii = 1:length(idGroup)
+            % plot violin
+            v(ii) = violinplot(pos(ii), y(group==idGroup(ii)));
+            set(v(ii),'FaceColor', color(ii,:), 'EdgeColor', color(ii,:), 'FaceAlpha', fillAlpha);
+
+            if plotData
+                posData = randn(length(find(group==ind(ii))),1)/10; 
+                posData((posData)>0.3) = posData((posData)>0.3)/2;
+                posData((posData)<-0.3) = posData((posData)<-0.3)/2;
+                plot(pos(ii)+ posData, y(group==ind(ii)),'o','color',[1 1 1],...
+                       'MarkerFaceColor',cloudColor,'MarkerEdgeColor',cloudColor,'MarkerSize',dataSize);
+            end
+        end
+        set(gca,'TickDir','out','xtick',[]);
+        if strcmpi(orientation, 'horizontal')
+            view([90 90]); 
+        end
+        xlim([0.5 max(pos)+.5]);
+
     elseif strcmpi(plotType,'symRoundPlot')
         
         hold on
