@@ -74,6 +74,7 @@ addParameter(p,'x_position',[]);
 addParameter(p,'plotConnectors',false,@islogical);
 addParameter(p,'isCircular',false,@islogical);
 addParameter(p,'posthoc_test','tukey-kramer',@ischar);
+addParameter(p,'discard_nan_inf',false, @islogical);
 
 parse(p,varargin{:});
 color = p.Results.color;
@@ -101,6 +102,7 @@ roundPlotCenterColor = p.Results.roundPlotCenterColor;
 plotConnectors = p.Results.plotConnectors;
 isCircular = p.Results.isCircular;
 posthoc_test = p.Results.posthoc_test;
+discard_nan_inf = p.Results.discard_nan_inf;
 
 % Dealing with inputs
 if size(y,1) < size(y,2)
@@ -110,6 +112,20 @@ end
 if posOffset > 0
     inAxis = true;
 end
+
+if discard_nan_inf
+    if iscell(y)
+        for ii = 1:length(y)
+            toDiscard = isnan(y{ii}) | isinf(y{ii});
+            y{ii}(toDiscard) = [];
+        end 
+    else
+        toDiscard = isnan(y) | isinf(y);
+        y(toDiscard) = [];
+        group(toDiscard) = [];
+    end
+end
+
 if ~exist('group') || isempty(group)
     if iscell(y)
         dataC = y;

@@ -50,7 +50,7 @@ addParameter(p,'histBins',10,@isnumeric)
 addParameter(p,'labelOffset',1,@isnumeric)
 addParameter(p,'removeOutliers',false,@islogical)
 addParameter(p,'plotData',true,@islogical)
-
+addParameter(p,'marker','o')
 
 parse(p,varargin{:});
 MarkerColor = p.Results.MarkerColor;
@@ -70,7 +70,7 @@ histBins = p.Results.histBins;
 labelOffset = p.Results.labelOffset;
 removeOutliers = p.Results.removeOutliers;
 plotData = p.Results.plotData;
-
+marker = p.Results.marker;
 
 % Dealing with inputs
 if size(varX,1) < size(varX,2)
@@ -166,7 +166,8 @@ if doPlot
         end
         hold on
         if plotData
-            scatter(varX(inBounds==1),varY(inBounds==1),MarkerSize,'filled','MarkerFaceColor',MarkerColor,'MarkerEdgeColor','none','MarkerFaceAlpha',MarkerAlpha);
+            scatter(varX(inBounds==1),varY(inBounds==1),MarkerSize,'filled','MarkerFaceColor',MarkerColor, ...
+                'MarkerEdgeColor','none','MarkerFaceAlpha',MarkerAlpha, 'Marker',marker);
             plot(varX(inBounds==0),varY(inBounds==0),'x','MarkerSize',MarkerSize,'MarkerEdgeColor',BoundsColor);
         end
         plot([min(varX) max(varX)],feval(fitresult,[min(varX) max(varX)]),'color',MarkerColor);

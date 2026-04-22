@@ -55,7 +55,7 @@ function [assemblies] = detectCellAssemblies(varargin)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Parse options
 p = inputParser;
-addParameter(p,'spikes',loadSpikes,@isstruct);
+addParameter(p,'spikes',[],@isstruct);
 addParameter(p,'basepath',pwd,@isstruct);
 addParameter(p,'saveSummary',true,@islogical);
 addParameter(p,'saveMat',false,@islogical);
@@ -84,6 +84,10 @@ number_of_iterations = p.Results.number_of_iterations;
 % Deal with inputs
 prevBasepath = pwd;
 cd(basepath);
+
+if isempty(spikes)
+    spikes = loadSpikes;
+end
 
 % Parameters
 opts.threshold.method = threshold_method;
