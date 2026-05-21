@@ -21,10 +21,13 @@ processSession('basepath','Z:\unindexedSubjects\asso1\asso1_260408_sess3','digit
 processSession('basepath','Z:\unindexedSubjects\asso1\asso1_260420_sess4','digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 processSession('basepath','Z:\unindexedSubjects\asso1\asso1_260421_sess5','digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 processSession('basepath','Z:\unindexedSubjects\asso1\asso1_260422_sess6','digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
-
 processSession('basepath','D:\asso1\asso1_260423_sess7','digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 processSession('basepath','D:\asso1\asso1_260424_sess8','digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);
 
+indexNewSession('basepath','Z:\unindexedSubjects\asso1\asso1_260402_sess1');
+indexNewSession('basepath','Z:\unindexedSubjects\asso1\asso1_260403_sess2');
+indexNewSession('basepath','Z:\unindexedSubjects\asso1\asso1_260408_sess3');
+indexNewSession('basepath','Z:\unindexedSubjects\asso1\asso1_260420_sess4');
 %% cancer8
 updateExpFolder_temp({'E:\cancer8'},'D:\cancer8');
 
