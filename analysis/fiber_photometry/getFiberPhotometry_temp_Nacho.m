@@ -18,7 +18,7 @@ addParameter(p,'saveFig',true);
 addParameter(p,'ttl_fiber',1);
 addParameter(p,'plt',true);
 addParameter(p,'force',false);
-addParameter(p, 'preprocess', true, @islogical )
+addParameter(p, 'preprocess', true, @islogical);
 
 parse(p,varargin{:})
 
@@ -46,7 +46,6 @@ file = dir('fiber.doric');
 % 
 % fiber.green.AF_F = green_fpa.fNormalized;
 % fiber.green.zscore = zscore(green_fpa.fNormalized);
-
 
 for ii = 1:length(fiberData)
     if contains(fiberData(ii).Name,'LockInAOUT01')
@@ -95,10 +94,11 @@ end
 try
     fiber.timestamps = fiber.isosbestic.timestamps + ts(1);
 catch
-    fiber.timestamps = fiber.isosbestic.timestamps; 
+    error('Error with timestamps');
 end
 
-fiber.sr = 1/mean(diff(fiber.timestamps)); 
+% fiber.sr = 1/mean(diff(fiber.timestamps));
+fiber.sr = 1/median(diff(fiber.timestamps));
 
 % basename = basenameFromBasepath(pwd);
 [~,fbasename,~]=fileparts(pwd);
@@ -125,7 +125,7 @@ if preprocess
         disp('Green preprocessing done')
     end
     if isfield(fiber, 'red') %in case we have a signal from the red channel
-        fiber_red_PP = fiberPreprocessing_v2(fiber, fiber.red.data); %preprocess the red signal. Check the function to change default parameters if desired
+        fiber_red_PP = fiberPreprocessing_v2(fiber, fiber.red.data,'plt','true'); %preprocess the red signal. Check the function to change default parameters if desired
         fiber.red_PP = fiber_red_PP;
         disp('Red preprocessing done')
     end

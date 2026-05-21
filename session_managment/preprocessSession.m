@@ -169,19 +169,24 @@ catch
     warning('Not possible to concatenate dats');
 end
 
+%% Remove some chanells from the .dat
+% removeChannelsFromDat(pwd,'ch',[17:32]);
 %% Get analog and digital pulses
-cd(basepath);
-if  ~isempty(analogChannelsList)
-    try
-        [pulses] = getAnalogPulses('analogChannelsList',analogChannelsList,'manualThr', manualThr);
-    catch
-        warning('No analog pulses detected');
+try
+    cd(basepath);
+    if  ~isempty(analogChannelsList)
+        try
+            [pulses] = getAnalogPulses('analogChannelsList',analogChannelsList,'manualThr', manualThr);
+        catch
+            warning('No analog pulses detected');
+        end
     end
-end
-if ~isempty(dir('*digitalIn.dat')) 
-    digitalIn = getDigitalIn('fs',session.extracellular.sr); 
-else
-    digitalIn = getDigitalIn_OE('all','fs',session.extracellular.sr);
+    if ~isempty(dir('*digitalIn.dat')) 
+        digitalIn = getDigitalIn('fs',session.extracellular.sr); 
+    else
+        digitalIn = getDigitalIn_OE('all','fs',session.extracellular.sr);
+    end
+catch
 end
 
 %% Remove stimulation artifacts
@@ -238,12 +243,12 @@ else
 end
 
 %% Fiber photometry analysis
-try
-    fiber = getSessionFiberPhotometry();
-catch
-    warning('No possible loading fiber photometry data. Was fiber photometry signal recorded in this experiment? ...')
-end
-cd(basepath)
+% try
+%     fiber = getSessionFiberPhotometry();
+% catch
+%     warning('No possible loading fiber photometry data. Was fiber photometry signal recorded in this experiment? ...')
+% end
+% cd(basepath)
 
 %% Kilosort concatenated sessions
 if spikeSort
@@ -280,6 +285,11 @@ if getPos
         warning('Tracking extraction was not possible. Skipping...')
     end
 end
+
+% Update kilosort folder
+file = dir('Kilosort*');
+session.spikeSorting{1}.relativePath = file.name;
+save([session.general.name,'.session.mat'],'session');
 
 if sessionSummary
     cd(basepath);

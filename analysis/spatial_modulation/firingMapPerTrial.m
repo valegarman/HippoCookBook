@@ -171,12 +171,13 @@ if plotOpt
         set(gcf,'Position',[100 -100 2500 1200])
         for unit = 1:size(firingTrialsMap.UID,2)
             subplot(7,ceil(size(firingTrialsMap.UID,2)/7),unit); 
-            imagesc(firingTrialsMap.raster_x, 1:length(firingTrialsMap.rateMaps{unit}{c}), firingTrialsMap.raster_count{unit}{c});
+            imagesc(firingTrialsMap.raster_x, 1:size(firingTrialsMap.raster_count{unit}{c},1), firingTrialsMap.raster_count{unit}{c});
             caxis([0 1]); 
             if unit == 1
                 ylabel('Trial [#]');
                 xlabel('Track [cm]');
             end
+            ylim([0 size(firingTrialsMap.raster_count{unit}{c},1)]);
             title(num2str(unit),'FontWeight','normal','FontSize',10);
         end
         colormap(flip(gray));
