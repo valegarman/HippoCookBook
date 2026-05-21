@@ -1,4 +1,4 @@
- function [] = processSession(varargin)
+function [] = processSession(varargin)
 
 % [] = indexSession_InterneuronsLibrary(varargin)
 
@@ -266,6 +266,7 @@ if ~any(ismember(excludeAnalysis, {'4',lower('spikesFeatures')}))
     % 4.2 ACG and waveform
     spikeFeatures;
 
+<<<<<<< HEAD
     % 4.3 ULED analysis 
     try
         getuLEDPulses;
@@ -290,6 +291,15 @@ if ~any(ismember(excludeAnalysis, {'4',lower('spikesFeatures')}))
     % optoPulses = getFiberOptogeneticPulses('digitalChannelsList',digital_optogenetic_channels,'minNumberOfPulses',10,'minDuration',0);
     % opto_fiber = fiberPhotometryOptogeneticModulation_pablo(optoPulses.timestamps,'eventType','opto','reload_fiber',false);
     % opto_fiber = fiberPhotometryOptogeneticModulation_pablo_v2(optoPulses.timestamps,'eventType','opto','reload_fiber',false);
+=======
+    % 1.3 ULED analysis 
+    % try
+    %     getuLEDPulses;
+    %     getuLEDResponse;         
+    % catch
+    %     warning('Not possible to run getULEDResponse...');
+    % end
+>>>>>>> f940dbf8a8530c0c568fa2f89e543f50261b4810
 end
 
 %% 5. Check Sleep Score
@@ -302,8 +312,13 @@ if ~any(ismember(excludeAnalysis, {'5',lower('checkSleep')}))
     end
     
     SleepScoreMaster(pwd,'noPrompts',true,'ignoretime',pulses.stimulationEpochs, 'overwrite', true);
+<<<<<<< HEAD
 %     TheStateEditor(session.general.name);
     % Brain
+=======
+    % TheStateEditor(session.general.name);
+    bz_ThetaStates(pwd);
+>>>>>>> f940dbf8a8530c0c568fa2f89e543f50261b4810
 end
 
 %% 6. Power Profiles
@@ -326,7 +341,14 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     getSpikesRank('events','upstates');
 
     % 8.2 Ripples
+<<<<<<< HEAD
     [ripples,SW] = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',true,'thresholds',rippleMasterDetector_threshold,'eventSpikeThreshold',false); 
+=======
+
+
+    ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',true,'thresholds',rippleMasterDetector_threshold, 'eventSpikeThreshold',0.5,'referenceChannel', 30); 
+
+>>>>>>> f940dbf8a8530c0c568fa2f89e543f50261b4810
     psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10);
     % psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10,'restrict_to_manipulation',true);
     getSpikesRank('events','ripples');
@@ -357,7 +379,8 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
 
     % 8.3 Theta intervals
     cd(basepath);
-    thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'channel',theta_epochs_channel);
+    % thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'channel',theta_epochs_channel);
+    thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'powerThreshold',0.8 ,'channel', 17);
 
 end
 
@@ -434,36 +457,6 @@ if ~any(ismember(excludeAnalysis, {'12',lower('spatialModulation')}))
     catch
     end
 
-    try 
-        behaviour = getSessionLinearize;
-        psth_lReward = spikesPsth([behaviour.events.lReward],'numRep',100,'eventType','lReward','saveMat',false,...
-            'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01,'raster_time',[-2 2]);
-        psth_rReward = spikesPsth([behaviour.events.rReward],'numRep',100,'eventType','rReward','saveMat',false,...
-            'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'raster_time',[-2 2]);
-        psth_reward = spikesPsth([behaviour.events.lReward; behaviour.events.rReward],'numRep',100,'eventType','reward','saveMat',false,...
-            'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'raster_time',[-2 2]);
-        
-        if all(isnan(behaviour.events.startPoint))
-            behaviour.events.startPoint = NaN;
-        end
-        if all(isnan(behaviour.events.intersection))
-            behaviour.events.intersection = NaN;
-        end
-        psth_intersection = spikesPsth([behaviour.events.intersection],'numRep',100,'eventType','intersection','saveMat',false,...
-            'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'raster_time',[-2 2]);
-        psth_startPoint = spikesPsth([behaviour.events.startPoint],'numRep',100,'eventType','startPoint','saveMat',false,...
-            'minNumberOfPulses',5,'winSize',6,'event_ints',[0 0.2],'winSizePlot',[-2 2],'binSize',0.01, 'raster_time',[-2 2]);
-
-        behaviour.psth_lReward = psth_lReward;
-        behaviour.psth_rReward = psth_rReward;
-        behaviour.psth_reward = psth_reward;
-        behaviour.psth_intersection = psth_intersection;
-        behaviour.psth_startPoint = psth_startPoint; 
-        behavior = behaviour; % british to american :)
-        save([basenameFromBasepath(pwd) '.behavior.cellinfo.mat'],'behavior','-v7.3');
-    catch
-        warning('Psth on behaviour events was not possible...');
-    end
 
     % Fiber spatial modulation
     try
@@ -502,11 +495,14 @@ if ~any(ismember(excludeAnalysis, {'12',lower('spatialModulation')}))
     end
 end
 
-
-
 %% 13. Summary per cell
+<<<<<<< HEAD
 if ~any(ismember(excludeAnalysis, {'13',lower('summary')}))
     plotSummary('showTagCells',false,'use_deltaThetaEpochs',true); 
+=======
+if ~any(ismember(excludeAnalysis, {'12',lower('summary')}))
+plotSummary('showTagCells',false,'use_deltaThetaEpochs',true);
+>>>>>>> f940dbf8a8530c0c568fa2f89e543f50261b4810
 end
 
 cd(prevPath);

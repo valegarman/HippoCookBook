@@ -80,7 +80,7 @@ count = 1;
 for shankNumber = include_shanks
     shank_electrodes = session.extracellular.electrodeGroups.channels{shankNumber};
     for jj = 1:length(shank_electrodes)
-        voltage = 0.5.*(smooth(double(continuous(:,shank_electrodes(jj))),smoothOpt) - y_position);
+        voltage = 0.5*(smooth(double(continuous(:,shank_electrodes(jj))),smoothOpt) - y_position);
         plot(x_time, voltage,'color', cmap_elect(count,:));
         y_position = y_position - y_separation;
         count = count + 1;

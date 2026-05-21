@@ -188,7 +188,7 @@ if isempty(list_of_paths)
     sessions.project = sessions.project(contains(lower(sessions.project), lower(project)) & contains(lower(sessionsTable.SessionName), lower(list_of_sessions)));
 
 else
-    sessions_basepaths = list_of_paths;
+    sessions.basepaths = list_of_paths;
 end
 
 fprintf('Loading %3.i sessions... \n',length(sessions.basepaths)); %\n
@@ -287,8 +287,8 @@ for ii = 1:length(sessions.basepaths)
 
     if includeLFP
         lfp = getLFP;
-        projectSessionResults.lfp{ii} = spikes;
-        clear spikes
+        projectSessionResults.lfp{ii} = lfp;
+        clear lfp
     end
     
     if saveSummaries

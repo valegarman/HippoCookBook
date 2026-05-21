@@ -116,7 +116,7 @@ else
     caxis([t(1) t(end)]);
     xlim([xMaze]); ylim([yMaze]);
     if strcmpi(tracking.description,'TMaze') || strcmpi(tracking.description,'TMaze2') || strcmpi(tracking.description,'Deeplabcut')
-        axis ij;
+        % axis ij;
     end
     title('Draw a polyline following animal trajectory (first turn right)...','FontWeight','normal');
     maze = drawpolyline;
@@ -136,7 +136,7 @@ if editLOI
     caxis([t(1) t(end)]);
     xlim([xMaze]); ylim([yMaze]);
     if strcmpi(tracking.description,'TMaze') || strcmpi(tracking.description,'TMaze2') || strcmpi(tracking.description,'Deeplabcut')
-        axis ij;
+        % axis ij;
     end
     title('Move vertex to match trajectory and press Enter...','FontWeight','normal');
     roi = images.roi.Polyline(gca,'Position',maze);

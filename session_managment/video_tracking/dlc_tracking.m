@@ -205,7 +205,7 @@ if ~isempty(roiLED)
     legend(p,'LED ROI');
 end
 axis tight;
-axis ij;
+% axis ij;
 xlabel('Normalize/ cm');
 mkdir('Behavior');
 saveas(h1,'Behavior\MazeROI.png');
@@ -294,7 +294,7 @@ imagesc(xMaze, yMaze,average_frame); colormap gray;
 freezeColors;
 scatter(x,y,3,t,'filled','MarkerEdgeColor','none','MarkerFaceAlpha',.5); colormap jet
 caxis([t(1) t(end)])
-axis ij;
+% axis ij;
 xlabel('norm/cm'); ylabel('norm/cm'); colorbar;
 xlim(xMaze); ylim(yMaze);
 mkdir('Behavior');

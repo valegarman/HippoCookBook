@@ -14,7 +14,7 @@ addParameter(p,'thetaMod',[]);
 addParameter(p,'modelType','hippocampus5',@ischar);
 addParameter(p,'overwrite_cell_metrics',true,@islogical);
 addParameter(p,'score_cut_off',.70,@isnumeric);
-addParameter(p,'imposeCellExplorerPyr',true);
+addParameter(p,'imposeCellExplorerPyr',false);
 addParameter(p,'ripples_psth',[],@isstruct);
 addParameter(p,'force',false,@logical);
 addParameter(p,'pv_sst_tradeoff',.25,@(x) isscalar(x) && x>=0 && x<=1); %  Noisy units overcall PV, PV↔SST fader (0=SST, 0.5=neutral, 1=PV);
