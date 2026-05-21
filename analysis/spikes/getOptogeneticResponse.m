@@ -310,6 +310,7 @@ pulses.digitalChannelsList(toRemove) = [];
 pulses.duration(toRemove) = [];
 pulses.isAnalog(toRemove) = [];
 pulses.isDigital(toRemove) = [];
+pulses.nConditions = nConditions;
 
 %%
 spikes = loadSpikes;

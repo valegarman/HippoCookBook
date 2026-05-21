@@ -94,8 +94,11 @@ acg = cell_metrics.acg.narrow;
 acg = acg./sum(acg);
 
 % acg PeakTime
-targetFile = dir('*.ACGPeak.cellinfo.mat'); 
-acgPeak = importdata(targetFile.name);
+try
+    targetFile = dir('*.ACGPeak.cellinfo.mat'); 
+    acgPeak = importdata(targetFile.name);
+catch
+end
 
 % firing rate
 spikemat = bz_SpktToSpkmat(loadSpikes,'dt',10,'units','rate');
@@ -282,26 +285,29 @@ for ii = 1:length(UID)
     axis tight; xlabel('ms'); ylabel('ACG (prob)');
     
     % ACG Peak
-    subplot(5,5,5)
-    hold on
-    plotFill(acgPeak.acg_time, acgPeak.acg_smoothed_norm(:,all_pyr)','style','filled','color',pyr_color,'faceAlpha',0.7);
-    plotFill(acgPeak.acg_time, acgPeak.acg_smoothed_norm(:,all_nw)','style','filled','color',nw_color,'faceAlpha',0.7);
-    plotFill(acgPeak.acg_time, acgPeak.acg_smoothed_norm(:,all_ww)','style','filled','color',ww_color,'faceAlpha',0.7);
-    
-    scatter(acgPeak.acg_time(acgPeak.acgPeak_sample(all_pyr)),rand(length(find(all_pyr)),1)/100 + 0.03,20,pyr_color,'filled');
-    scatter(acgPeak.acg_time(acgPeak.acgPeak_sample(all_nw)),rand(length(find(all_nw)),1)/100 + 0.032,20,nw_color,'filled');
-    scatter(acgPeak.acg_time(acgPeak.acgPeak_sample(all_ww)),rand(length(find(all_ww)),1)/100 + 0.036,20,ww_color,'filled');
-    
-    if showTagCells
-        plot(acgPeak.acg_time, acgPeak.acg_smoothed_norm(:,UID(ii)),'LineWidth',1.5,'color',cell_color);
-        scatter(acgPeak.acg_time(acgPeak.acgPeak_sample(UID(ii))),rand(length(find(UID(ii))),1)/100 + 0.048,20,cell_color,'filled');
+    try
+        subplot(5,5,5)
+        hold on
+        plotFill(acgPeak.acg_time, acgPeak.acg_smoothed_norm(:,all_pyr)','style','filled','color',pyr_color,'faceAlpha',0.7);
+        plotFill(acgPeak.acg_time, acgPeak.acg_smoothed_norm(:,all_nw)','style','filled','color',nw_color,'faceAlpha',0.7);
+        plotFill(acgPeak.acg_time, acgPeak.acg_smoothed_norm(:,all_ww)','style','filled','color',ww_color,'faceAlpha',0.7);
+        
+        scatter(acgPeak.acg_time(acgPeak.acgPeak_sample(all_pyr)),rand(length(find(all_pyr)),1)/100 + 0.03,20,pyr_color,'filled');
+        scatter(acgPeak.acg_time(acgPeak.acgPeak_sample(all_nw)),rand(length(find(all_nw)),1)/100 + 0.032,20,nw_color,'filled');
+        scatter(acgPeak.acg_time(acgPeak.acgPeak_sample(all_ww)),rand(length(find(all_ww)),1)/100 + 0.036,20,ww_color,'filled');
+        
+        if showTagCells
+            plot(acgPeak.acg_time, acgPeak.acg_smoothed_norm(:,UID(ii)),'LineWidth',1.5,'color',cell_color);
+            scatter(acgPeak.acg_time(acgPeak.acgPeak_sample(UID(ii))),rand(length(find(UID(ii))),1)/100 + 0.048,20,cell_color,'filled');
+        end
+        XTick = [-2 -1 0 1];
+        set(gca,'XTick',XTick);
+        XTickLabels = cellstr(num2str(round((XTick(:))), '10^{%d}'));
+        set(gca,'XTickLabel',XTickLabels);
+        ylabel('logACG (prob)'); xlabel('Time(s)');
+        axis tight;
+    catch
     end
-    XTick = [-2 -1 0 1];
-    set(gca,'XTick',XTick);
-    XTickLabels = cellstr(num2str(round((XTick(:))), '10^{%d}'));
-    set(gca,'XTickLabel',XTickLabels);
-    ylabel('logACG (prob)'); xlabel('Time(s)');
-    axis tight;
     
     % cell position
     subplot(5,5,6)

@@ -254,6 +254,7 @@ if ~isempty(timestamps) && all(~isnan(timestamps))
 else
     pul = [0];
 end
+
 disp('Computing responses...');
 times = spikes.times; times{length(times)+1} = pul;
 [stccg, t] = CCG(times,[],'binSize',binSize,'duration',winSize,'norm','rate','Fs',1/sr); fprintf('\n'); %

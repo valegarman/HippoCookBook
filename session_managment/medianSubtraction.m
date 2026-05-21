@@ -48,7 +48,11 @@ catch
     total_duration = [];
 end
 
-fileTargetAmplifier = dir('amplifier*.dat');
+[~,basename] = fileparts(basepath);
+
+% fileTargetAmplifier = dir('amplifier*.dat');
+fileTargetAmplifier = dir([basename,'.dat']);
+
 if isempty(fileTargetAmplifier)
     filename = split(pwd,filesep); filename = filename{end};
     fileTargetAmplifier = dir([filename '*.dat']);

@@ -33,7 +33,7 @@ clusterfig = figure('visible','off');
         set(gca,'YTick',(log2([1 2 4 8 16 32 64 128])))
         set(gca,'YTickLabel',{'1','2','4','8','16','32','64','128'})
         caxis([3.5 6.5])
-        caxis([min(mu)-2*max(sig) max(mu)+2*max(sig)])
+        caxis([double(round(min(mu)-2*max(sig),1)) double(round(max(mu)+2*max(sig),1))])
         xlim(viewwin)
         colorbar('east')
         ylim([log2(swFFTfreqs(1)) log2(swFFTfreqs(end))+0.2])

@@ -90,10 +90,23 @@ addParameter(p,'sepEdge',0.05,@isnumeric);
 addParameter(p,'verbose','off',@isstr);
 addParameter(p,'saveMat', true, @islogical);
 addParameter(p,'plotOpt', true, @islogical);
+addParameter(p,'forceReload',false);
 
 
 parse(p,varargin{:});
 basepath = p.Results.basepath;
+forceReload = p.Results.forceReload;
+
+filename = split(pwd,filesep); filename = filename{end};
+basepath = pwd;
+
+if ~isempty(dir([basepath filesep filename '.placeFields.cellinfo.mat'])) && ~forceReload
+    disp('Place Field Stats already computed! Loading file');
+    file = dir([basepath filesep filename '.placeFields.cellinfo.mat']);
+    load(file.name);
+    return
+end
+
 
 firingMaps = p.Results.firingMapsAvg;
 % Get session info

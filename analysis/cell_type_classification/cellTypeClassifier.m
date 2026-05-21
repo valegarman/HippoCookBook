@@ -262,7 +262,7 @@ catch
     end
 end
 if ~isempty(deep_sup)
-    cell_subtypes(ismember(deep_sup',{'Superficial'}) & ismember(cell_subtypes, 'CAMK2+')) = {'CAMK2_SUP'};
+    cell_subtypes(ismember(deep_sup',{'Superficial'}) & ismember(cell_subtypes, {'CAMK2+'})) = {'CAMK2_SUP'};
     cell_subtypes(ismember(deep_sup','Deep') & ismember(cell_subtypes, 'CAMK2+')) = {'CAMK2_DEEP'};
 end
 
@@ -441,7 +441,10 @@ if doPlot
     axis tight
     xlabel('Time (ms)');
     ylabel('Probability (normalized)');
-
+    try
+        saveas(fig, ['SummaryFigures\cell_familty_classification.png']);
+    catch
+    end
     % exportgraphics(fig, ['SummaryFigures\cell_familty_classification.png']);
 
 end

@@ -86,9 +86,13 @@ for ii = 1:size(all_folders,1)
         if isempty(kilosortFolder)
             if isempty(dir(['notPreprocessing.txt']))
                 disp([' * Preprocessing of ' all_folders(ii).folder filesep all_folders(ii).name]);
-                preprocessSession('basepath',pwd,'analysisPath',analysisPath,'analogChannelsList',analogChannelsList,'spikeSort',spikeSort,'getPos',getPos, 'cleanArtifacts',cleanArtifacts,...
-                    'medianSubstr',medianSubstr,'tracking_pixel_cm',tracking_pixel_cm,'sessionSummary',sessionSummary,'digitalChannelsList',digitalChannelsList,'bazler_ttl_channel',bazler_ttl_channel,'skipStimulationPeriods',skipStimulationPeriods,...
-                        'exclude_shanks',exclude_shanks);
+                try
+                    preprocessSession('basepath',pwd,'analysisPath',analysisPath,'analogChannelsList',analogChannelsList,'spikeSort',spikeSort,'getPos',getPos, 'cleanArtifacts',cleanArtifacts,...
+                        'medianSubstr',medianSubstr,'tracking_pixel_cm',tracking_pixel_cm,'sessionSummary',sessionSummary,'digitalChannelsList',digitalChannelsList,'bazler_ttl_channel',bazler_ttl_channel,'skipStimulationPeriods',skipStimulationPeriods,...
+                            'exclude_shanks',exclude_shanks);
+                catch
+                    warning(['Not able to preprocess:' all_folders(ii).folder filesep all_folders(ii).name]);
+                end
             else
                 disp(['Not to preprocess',all_folders(ii).folder filesep all_folders(ii).name]);
             end

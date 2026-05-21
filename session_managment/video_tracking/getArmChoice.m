@@ -319,7 +319,9 @@ elseif strcmpi(task,'alternation')
             armChoice.timestamps = [digitalIn.timestampsOn{leftArmTtl_channel}; digitalIn.timestampsOn{rightArmTtl_channel}]; 
             % 0 is left, 1 is right
             armChoice.visitedArm = [zeros(size(digitalIn.timestampsOn{leftArmTtl_channel})); ones(size(digitalIn.timestampsOn{rightArmTtl_channel}))];
-            armChoice.delay.timestamps = digitalIn.ints{homeDelayTtl_channel};
+            if ~isempty(homeDelayTtl_channel)
+                armChoice.delay.timestamps = digitalIn.ints{homeDelayTtl_channel};
+            end
             if size(armChoice.visitedArm,1) < size(digitalIn.timestampsOn{homeDelayTtl_channel},1) - 10
                 warning('There was problem with one of the sensors! Triying to fix it!')
                 leftArmSensor = digitalIn.timestampsOn{leftArmTtl_channel};

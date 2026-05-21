@@ -91,6 +91,7 @@ addParameter(p,'durations',[30 100],@isnumeric);
 addParameter(p,'restrict',[],@isnumeric);
 addParameter(p,'sr',1250,@isnumeric);
 addParameter(p,'passband',[120 200],@isnumeric);
+addParameter(p,'SWpassband',[2 10],@isnumeric);
 addParameter(p,'hfo_passband',[200 500],@isnumeric);
 addParameter(p,'EMGThresh',1,@isnumeric);
 addParameter(p,'saveMat',true,@islogical);
@@ -124,6 +125,7 @@ durations = p.Results.durations;
 restrict = p.Results.restrict;
 sr = p.Results.sr;
 passband = p.Results.passband;
+SWpassband = p.Results.SWpassband;
 hfo_passband = p.Results.hfo_passband;
 EMGThresh = p.Results.EMGThresh;
 saveMat = p.Results.saveMat;
@@ -191,9 +193,24 @@ if skipStimulationPeriods && ~isempty(dir('*optogeneticPulses.events.mat'))
     end
 end
 
+if skipStimulationPeriods && ~isempty(dir('*optogeneticFiberPulses.events.mat'))
+    targetFile = dir('*optogeneticFiberPulses.events.mat'); load(targetFile.name);
+    try
+        restrict_temp = SubtractIntervals([0 Inf],optoPulses.stimulationEpochs);
+        restrict =  ConsolidateIntervals([restrict; restrict_temp; restrict_temp]);
+    catch
+        restrict_temp = SubtractIntervals([0 Inf],pulses.stimulationEpochs);
+        restrict =  ConsolidateIntervals([restrict; restrict_temp; restrict_temp]);
+    end
+end
+
 if useCSD
-    disp('Computing CSD...');
-    rippleChannel = computeCSD([],'channels',rippleChannel);
+    try
+        disp('Computing CSD...');
+        rippleChannel = computeCSD([],'channels',rippleChannel);
+    catch
+        warning('Not possible to compute CSD.');
+    end
 end
 
 
@@ -299,12 +316,12 @@ elseif strcmp(detector, 'filter2')
     criterion2 = mean_freq > 100;
     criterion3 = num_cycles >= 4;
     criterion4 = pow_rip_detect > 2 * pow_hf;
-    
+
     validEvents = criterion1 & criterion2' & criterion3' & criterion4;
-    
+
     valid_timestamps = ripples.timestamps(validEvents, :);
     valid_peaks = ripples.peaks(validEvents);
-    
+
     % saving results
     ripples.timestamps = valid_timestamps;
     ripples.peaks = valid_peaks;
@@ -333,6 +350,11 @@ if skipStimulationPeriods
             disp('Using stimulation periods from pulses.events.mat file');
             load(f.name);
             pulPeriods = pulses.intsPeriods;
+        elseif ~isempty(dir('*.optogeneticFiberPulses.events.mat'))
+            f = dir('*.optogeneticFiberPulses.events.mat');
+            disp('Using stimulation periods from optogeneticFiberPulses.events.mat file');
+            load(f.name);
+            pulPeriods = optoPulses.stimulationEpochs;
         else
             warning('No pulses epochs detected!');
         end
@@ -361,11 +383,26 @@ if isnumeric(eventSpikeThreshold) || eventSpikeThreshold
     ripples = eventSpikingTreshold(ripples,[],'spikingThreshold',eventSpikeThreshold,'shanksID',eventSpikeThreshold_shanks);
 end
 
-plotRippleChannel('rippleChannel',rippleChannel,'ripples',ripples); % to do, run this after ripple detection
+if ripples.timestamps(1,1) < 10
+    ripples.timestamps(1,:) = [];
+    ripples.peaks(1) = [];
+    ripples.peakNormedPower(1) = [];
+end
+
+if isstruct(rippleChannel)
+    plotRippleChannel('rippleChannel',rippleChannel.channels,'ripples',ripples); % to do, run this after ripple detection
+else
+    plotRippleChannel('rippleChannel',rippleChannel,'ripples',ripples); % to do, run this after ripple detection
+end
 % EventExplorer(pwd, ripples)
 
 %% Ripple Stats
 if rippleStats
+    if isstruct(rippleChannel)
+        ripples = computeRippleStats('ripples',ripples,'rippleChannel',rippleChannel.channels);
+    else
+        ripples = computeRippleStats('ripples',ripples,'rippleChannel',rippleChannel);
+    end
     ripples = computeRippleStats('ripples',ripples,'rippleChannel',rippleChannel);
     % keyboard;
     % 
@@ -477,21 +514,27 @@ end
 % %% Computing SharpWaves
 % %%%%%%%%%%%%%%%%%%%%%%%%%
 % if
-% try
-%     SW = findSharpWaves('ripples',ripples,'rippleChannel',rippleChannel,'SWChannel',SWChannel,...
-%         'passband',passband,'SWpassband',SWpassband);
-% catch
-%     disp('Not possible to compute Sharp Waves...');
-% end
+try
+    if isstruct(rippleChannel)
+        SW = findSharpWaves('ripples',ripples,'rippleChannel',rippleChannel.channels,'SWChannel',SWChannel,...
+            'passband',passband,'SWpassband',SWpassband);
+    else
+        SW = findSharpWaves('ripples',ripples,'rippleChannel',rippleChannel,'SWChannel',SWChannel,...
+            'passband',passband,'SWpassband',SWpassband);
+    end
+catch
+    disp('Not possible to compute Sharp Waves...');
+    SW = [];
+end
 %% OUTPUT
 if saveMat
     disp('Saving Ripples Results...');
     save([session.general.name , '.ripples.events.mat'],'ripples');
-    % try
-    %     disp('Saving SharpWaves Results...');
-    %     save([session.general.name , '.sharpwaves.events.mat'],'SW');
-    % catch
-    % end
+    try
+        disp('Saving SharpWaves Results...');
+        save([session.general.name , '.sharpwaves.events.mat'],'SW');
+    catch
+    end
 end
 
 
