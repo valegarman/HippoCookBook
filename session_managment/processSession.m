@@ -291,7 +291,7 @@ if ~any(ismember(excludeAnalysis, {'4',lower('spikesFeatures')}))
     % optoPulses = getFiberOptogeneticPulses('digitalChannelsList',digital_optogenetic_channels,'minNumberOfPulses',10,'minDuration',0);
     % opto_fiber = fiberPhotometryOptogeneticModulation_pablo(optoPulses.timestamps,'eventType','opto','reload_fiber',false);
     % opto_fiber = fiberPhotometryOptogeneticModulation_pablo_v2(optoPulses.timestamps,'eventType','opto','reload_fiber',false);
-=======
+
     % 1.3 ULED analysis 
     % try
     %     getuLEDPulses;
@@ -299,7 +299,6 @@ if ~any(ismember(excludeAnalysis, {'4',lower('spikesFeatures')}))
     % catch
     %     warning('Not possible to run getULEDResponse...');
     % end
->>>>>>> f940dbf8a8530c0c568fa2f89e543f50261b4810
 end
 
 %% 5. Check Sleep Score
@@ -312,13 +311,9 @@ if ~any(ismember(excludeAnalysis, {'5',lower('checkSleep')}))
     end
     
     SleepScoreMaster(pwd,'noPrompts',true,'ignoretime',pulses.stimulationEpochs, 'overwrite', true);
-<<<<<<< HEAD
-%     TheStateEditor(session.general.name);
-    % Brain
-=======
+
     % TheStateEditor(session.general.name);
     bz_ThetaStates(pwd);
->>>>>>> f940dbf8a8530c0c568fa2f89e543f50261b4810
 end
 
 %% 6. Power Profiles
@@ -341,14 +336,8 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
     getSpikesRank('events','upstates');
 
     % 8.2 Ripples
-<<<<<<< HEAD
-    [ripples,SW] = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',true,'thresholds',rippleMasterDetector_threshold,'eventSpikeThreshold',false); 
-=======
-
 
     ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',true,'thresholds',rippleMasterDetector_threshold, 'eventSpikeThreshold',0.5,'referenceChannel', 30); 
-
->>>>>>> f940dbf8a8530c0c568fa2f89e543f50261b4810
     psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10);
     % psthRipples = spikesPsth([],'eventType','ripples','numRep',500,'force',true,'minNumberOfPulses',10,'restrict_to_manipulation',true);
     getSpikesRank('events','ripples');
@@ -496,14 +485,9 @@ if ~any(ismember(excludeAnalysis, {'12',lower('spatialModulation')}))
 end
 
 %% 13. Summary per cell
-<<<<<<< HEAD
 if ~any(ismember(excludeAnalysis, {'13',lower('summary')}))
     plotSummary('showTagCells',false,'use_deltaThetaEpochs',true); 
-=======
-if ~any(ismember(excludeAnalysis, {'12',lower('summary')}))
-plotSummary('showTagCells',false,'use_deltaThetaEpochs',true);
->>>>>>> f940dbf8a8530c0c568fa2f89e543f50261b4810
-end
+
 
 cd(prevPath);
 end

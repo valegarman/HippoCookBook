@@ -398,13 +398,11 @@ end
 
 %% Ripple Stats
 if rippleStats
-<<<<<<< HEAD
     if isstruct(rippleChannel)
         ripples = computeRippleStats('ripples',ripples,'rippleChannel',rippleChannel.channels);
     else
         ripples = computeRippleStats('ripples',ripples,'rippleChannel',rippleChannel);
     end
-=======
     ripples = computeRippleStats('ripples',ripples,'rippleChannel',rippleChannel);
     % keyboard;
     % 
@@ -510,7 +508,6 @@ if rippleStats
     %     ripples.rippleStats.data.firingRate.Mean_across_cells=nan(length(ripples.peaks),1);
     % end
 
->>>>>>> f940dbf8a8530c0c568fa2f89e543f50261b4810
 end
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%
