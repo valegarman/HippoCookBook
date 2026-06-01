@@ -32,8 +32,8 @@ indexNewSession('basepath','Z:\unindexedSubjects\asso1\asso1_260420_sess4');
 indexNewSession('basepath','Z:\unindexedSubjects\asso1\asso1_260421_sess5');
 indexNewSession('basepath','Z:\unindexedSubjects\asso1\asso1_260422_sess6');
 indexNewSession('basepath','Z:\unindexedSubjects\asso1\asso1_260423_sess7');
-indexNewSession('basepath','Z:\unindexedSubjects\asso1\asso1_260424_sess8');
-
+indexNewSession('basepath','Z:\unindexedSubjects\asso1\asso1_260420_sess4');
+indexNewSession('basepath','Z:\unindexedSubjects\asso1\asso1_260420_sess4');
 
 
 %% cancer8
