@@ -205,7 +205,7 @@ if ~isempty(roiLED)
     legend(p,'LED ROI');
 end
 axis tight;
-axis ij;
+% axis ij;
 xlabel('Normalize/ cm');
 mkdir('Behavior');
 saveas(h1,'Behavior\MazeROI.png');
@@ -215,8 +215,11 @@ end
 
 %% GET POSITION FROM DEEPLABCUT
 try
-    if ~isempty(dir(['*tracking*_filtered.csv']))
-        csv_file = dir(['*tracking*_filtered.csv']); 
+    % if ~isempty(dir(['*tracking*_filtered.csv']))
+        % csv_file = dir(['*tracking*_filtered.csv']); 
+    if ~isempty(dir(['*tracking*.csv']))
+        csv_file = dir(['*tracking*.csv']); 
+        csv_file = csv_file(1);
         tracking_data = readmatrix(csv_file.name);
 
         timestamps = linspace(0,size(frames.r,3)/fs,size(frames.r,3));
@@ -291,7 +294,7 @@ imagesc(xMaze, yMaze,average_frame); colormap gray;
 freezeColors;
 scatter(x,y,3,t,'filled','MarkerEdgeColor','none','MarkerFaceAlpha',.5); colormap jet
 caxis([t(1) t(end)])
-axis ij;
+% axis ij;
 xlabel('norm/cm'); ylabel('norm/cm'); colorbar;
 xlim(xMaze); ylim(yMaze);
 mkdir('Behavior');
@@ -440,10 +443,12 @@ tracking.position_tail2.y = y_tail2;
 tracking.position_tail2.likelihood = likelihood_tail2;
 
 % We use the DLC model for description and for future use
-pattern = {'TMaze','TMaze2'};
+pattern = {'TMaze','TMaze2','TMaze_3'};
 [pattern_position_start] = regexp(csv_file.name, pattern, 'start');
 
-if ~isempty(pattern_position_start{1}) && isempty(pattern_position_start{2})
+if ~isempty(pattern_position_start{3})
+    tracking.description = pattern{3}
+elseif ~isempty(pattern_position_start{1}) && isempty(pattern_position_start{2})
     tracking.description = pattern{1};
 elseif ~isempty(pattern_position_start{2})
     tracking.description = pattern{2};

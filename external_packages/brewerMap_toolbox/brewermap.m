@@ -227,6 +227,8 @@ end
 %
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%brewermap
+
+
 function N = cmDefaultN()
 % Get the colormap size from the current figure or default colormap.
 try

@@ -72,7 +72,7 @@ for ii = 1:size(sess,1)
         cd([basepath filesep sess(ii).name]);
         fprintf('Computing linearization in %s folder \n',sess(ii).name);
         if strcmpi(maze,'tMaze')
-            behaviorTemp.(sess(ii).name)= linearizeArmChoice('verbose',true);
+            behaviorTemp.(sess(ii).name)= linearizeArmChoice('verbose',true,'forceReload',forceReload);
         elseif strcmpi(maze,'linearMaze')
             behaviorTemp.(sess(ii).name)= linearizeLinearMaze('verbose',verbose, 'leftTtl',leftTtl ,'rightTtl',rightTtl);
         end

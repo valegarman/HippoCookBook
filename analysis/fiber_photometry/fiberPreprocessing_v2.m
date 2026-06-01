@@ -64,7 +64,8 @@ addParameter(p,'pol_degree',3,@isnumeric);
 addParameter(p,'range_subs',5,@isnumeric);
 addParameter(p,'range_dff',5,@isnumeric);
 addParameter(p,'win_S',[5 5]); 
-addParameter(p,'plt',false)
+addParameter(p,'plt',false);
+addParameter(p,'channel_tag',[]);
 % addParameter(p,'saveMat',true);
 % addParameter(p,'saveAs',[]);
 % addParameter(p,'savePlotAs',[]);
@@ -79,10 +80,12 @@ range_subs = p.Results.range_subs;
 range_dff = p.Results.range_dff;
 win_S = p.Results.win_S;
 plt = p.Results.plt;
+channel_tag = p.Results.channel_tag;
 
-samplingRate=60.24;
-timestamps=fiber.timestamps;
-iso=fiber.isosbestic.data;
+
+samplingRate = fiber.sr;
+timestamps = fiber.timestamps;
+iso = fiber.isosbestic.data;
 
 %% 1- Detect artifacts in a given fiber recording: define outliers 
 
@@ -285,7 +288,9 @@ fiber_PP.channel_dFF_Smoothed_Z=channel_dFF_Smoothed_Z;
 %% 7- Figures
 %In case of any error with the preprocessing or you just want to check the results from every step, check this figures: 
 
-if plt==true
+if plt
+    mkdir('FiberPreprocessing');
+    
     blue=[0 0.4470 0.7410];
     grey=[0.5 0.5 0.5];
     
@@ -298,6 +303,9 @@ if plt==true
     hold off
     title('Common outliers to channel and iso')
     legend('Channel', 'Iso')
+
+    saveas(gca,['FiberPreprocessing\',channel_tag,'_artifact_detection.png']);
+
     
     % 2. Artifact removal
     figure;
@@ -315,7 +323,9 @@ if plt==true
     plot(channel_clean,'r','LineWidth',1.0) 
     % plot(channel_out,channel_clean_values,'o','MarkerEdgeColor','k')           
     hold off
-    title('Clean channel');         
+    title('Clean channel');    
+
+    saveas(gca,['FiberPreprocessing\',channel_tag,'_artifact_removal.png']);
     
     % 3 - Detrending
     figure();
@@ -331,7 +341,9 @@ if plt==true
     hold on
     plot(timestamps, channel_clean,'Color',grey)
     title('Channel detrended')
-    legend('Channel detrended','Channel clean')          
+    legend('Channel detrended','Channel clean')    
+
+    saveas(gca,['FiberPreprocessing\',channel_tag,'_detrending.png']);
     
     % 4- Signal correction (iso substraction)
     figure; %for some cases, both signals will be equal (if iso subtraction worsenes the signal, the subtraction is not applied)
@@ -341,6 +353,8 @@ if plt==true
     hold off
     title('Channel corrected')
     legend('Channel detrended','Channel corrected') 
+
+    saveas(gca,['FiberPreprocessing\',channel_tag,'_signalCorrection(iso substraction).png']);
              
     % 5 - DF/F and Smoothing: 
     figure; %DF/F
@@ -349,7 +363,8 @@ if plt==true
     plot(timestamps, channel_corrected - mean(channel_corrected))
     hold off
     title('Fluorescence change')
-    legend('Channel dFF','Channel corrected')         
+    legend('Channel dFF','Channel corrected')   
+    saveas(gca,['FiberPreprocessing\',channel_tag,'_dFF.png']);
     
     figure(); %smoothing 
     plot(timestamps, channel_dFF)
@@ -357,7 +372,8 @@ if plt==true
     plot(timestamps, channel_dFF_Smoothed)
     hold off
     title('Smoothing')
-    legend('Channel dFF','Channel dFF Smooth')
+    legend('Channel dFF','Channel dFF Smooth');
+    saveas(gca,['FiberPreprocessing\',channel_tag,'_dFF(smoothing).png']);
     
     % All steps 
     figure();
@@ -366,6 +382,9 @@ if plt==true
     plot(timestamps,channel_dFF_Smoothed - mean(channel_dFF_Smoothed))
     title('Channel processing')
     legend('Channel originally', 'Channel dFF Smoothed')
+    saveas(gca,['FiberPreprocessing\',channel_tag,'_AllSteps.png']);
+
+    close all;
     
 end    
 

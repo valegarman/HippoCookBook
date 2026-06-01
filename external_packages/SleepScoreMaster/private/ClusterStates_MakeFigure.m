@@ -26,14 +26,14 @@ end
  viewwin  =[t_clus(1) t_clus(end)];
  %viewwin  =[32000 34000];
 %viewwin=[9000 11000];
-clusterfig = figure('visible','off');
+clusterfig = figure('visible','on');
 	subplot(8,1,[1:2])
         imagesc(t_clus,log2(swFFTfreqs),log10(swFFTspec))
         axis xy
         set(gca,'YTick',(log2([1 2 4 8 16 32 64 128])))
         set(gca,'YTickLabel',{'1','2','4','8','16','32','64','128'})
         caxis([3.5 6.5])
-        caxis([min(mu)-2*max(sig) max(mu)+2*max(sig)])
+        caxis([double(round(min(mu)-2*max(sig),1)) double(round(max(mu)+2*max(sig),1))])
         xlim(viewwin)
         colorbar('east')
         ylim([log2(swFFTfreqs(1)) log2(swFFTfreqs(end))+0.2])
@@ -110,7 +110,7 @@ IDX = interp1(SleepState.idx.timestamps,SleepState.idx.states,t_clus,'nearest');
 %NREMtimes = IDX==3;
 
 if noprompts
-    figure('visible','off');
+    figure('visible','on');
 else
     figure
 end
@@ -177,7 +177,7 @@ end
 coloridx = colormat(IDX,:);
 
 if noprompts
-    figure('visible','off');
+    figure('visible','on');
 else
     figure
 end

@@ -108,11 +108,15 @@ switch session.extracellular.chanCoords.layout
     case 'A8x8-Edge-5mm-50-150-177'
         optogenetics = {'None'};
     otherwise
-        for ii = 1:length(session.animal.opticFiberImplants)
-            optogenetics{1, length(optogenetics)+1} = session.animal.opticFiberImplants{ii}.opticFiber;
-            optogenetics{1, length(optogenetics)+1} = ' ';
-        end 
-        optogenetics(end) = [];
+        try
+            for ii = 1:length(session.animal.opticFiberImplants)
+                optogenetics{1, length(optogenetics)+1} = session.animal.opticFiberImplants{ii}.opticFiber;
+                optogenetics{1, length(optogenetics)+1} = ' ';
+            end 
+            optogenetics(end) = [];
+        catch
+            optogenetics = {'None'};
+        end
 end
 
 behav = cell(0); 

@@ -83,6 +83,7 @@ warning('this function is under development and may not work... yet')
 p = inputParser;
 addParameter(p,'basepath',pwd,@isdir);
 addParameter(p,'rippleChannel',[],@isnumeric);
+addParameter(p,'rad_channel',[],@isnumeric);
 addParameter(p,'referenceChannel',[],@isnumeric);
 addParameter(p,'SWChannel',[],@isnumeric);
 addParameter(p,'thresholds',[1.5 3.5],@isnumeric);
@@ -90,6 +91,7 @@ addParameter(p,'durations',[30 100],@isnumeric);
 addParameter(p,'restrict',[],@isnumeric);
 addParameter(p,'sr',1250,@isnumeric);
 addParameter(p,'passband',[120 200],@isnumeric);
+addParameter(p,'SWpassband',[2 10],@isnumeric);
 addParameter(p,'hfo_passband',[200 500],@isnumeric);
 addParameter(p,'EMGThresh',1,@isnumeric);
 addParameter(p,'saveMat',true,@islogical);
@@ -115,6 +117,7 @@ parse(p,varargin{:})
 
 basepath = p.Results.basepath;
 rippleChannel = p.Results.rippleChannel;
+rad_channel = p.Results.rad_channel;
 referenceChannel = p.Results.referenceChannel;
 SWChannel = p.Results.SWChannel;
 thresholds = p.Results.thresholds;
@@ -122,6 +125,7 @@ durations = p.Results.durations;
 restrict = p.Results.restrict;
 sr = p.Results.sr;
 passband = p.Results.passband;
+SWpassband = p.Results.SWpassband;
 hfo_passband = p.Results.hfo_passband;
 EMGThresh = p.Results.EMGThresh;
 saveMat = p.Results.saveMat;
@@ -189,9 +193,24 @@ if skipStimulationPeriods && ~isempty(dir('*optogeneticPulses.events.mat'))
     end
 end
 
+if skipStimulationPeriods && ~isempty(dir('*optogeneticFiberPulses.events.mat'))
+    targetFile = dir('*optogeneticFiberPulses.events.mat'); load(targetFile.name);
+    try
+        restrict_temp = SubtractIntervals([0 Inf],optoPulses.stimulationEpochs);
+        restrict =  ConsolidateIntervals([restrict; restrict_temp; restrict_temp]);
+    catch
+        restrict_temp = SubtractIntervals([0 Inf],pulses.stimulationEpochs);
+        restrict =  ConsolidateIntervals([restrict; restrict_temp; restrict_temp]);
+    end
+end
+
 if useCSD
-    disp('Computing CSD...');
-    rippleChannel = computeCSD([],'channels',rippleChannel);
+    try
+        disp('Computing CSD...');
+        rippleChannel = computeCSD([],'channels',rippleChannel);
+    catch
+        warning('Not possible to compute CSD.');
+    end
 end
 
 
@@ -297,12 +316,12 @@ elseif strcmp(detector, 'filter2')
     criterion2 = mean_freq > 100;
     criterion3 = num_cycles >= 4;
     criterion4 = pow_rip_detect > 2 * pow_hf;
-    
+
     validEvents = criterion1 & criterion2' & criterion3' & criterion4;
-    
+
     valid_timestamps = ripples.timestamps(validEvents, :);
     valid_peaks = ripples.peaks(validEvents);
-    
+
     % saving results
     ripples.timestamps = valid_timestamps;
     ripples.peaks = valid_peaks;
@@ -331,6 +350,11 @@ if skipStimulationPeriods
             disp('Using stimulation periods from pulses.events.mat file');
             load(f.name);
             pulPeriods = pulses.intsPeriods;
+        elseif ~isempty(dir('*.optogeneticFiberPulses.events.mat'))
+            f = dir('*.optogeneticFiberPulses.events.mat');
+            disp('Using stimulation periods from optogeneticFiberPulses.events.mat file');
+            load(f.name);
+            pulPeriods = optoPulses.stimulationEpochs;
         else
             warning('No pulses epochs detected!');
         end
@@ -359,33 +383,158 @@ if isnumeric(eventSpikeThreshold) || eventSpikeThreshold
     ripples = eventSpikingTreshold(ripples,[],'spikingThreshold',eventSpikeThreshold,'shanksID',eventSpikeThreshold_shanks);
 end
 
-plotRippleChannel('rippleChannel',rippleChannel,'ripples',ripples); % to do, run this after ripple detection
+if ripples.timestamps(1,1) < 10
+    ripples.timestamps(1,:) = [];
+    ripples.peaks(1) = [];
+    ripples.peakNormedPower(1) = [];
+end
+
+if isstruct(rippleChannel)
+    plotRippleChannel('rippleChannel',rippleChannel.channels,'ripples',ripples); % to do, run this after ripple detection
+else
+    plotRippleChannel('rippleChannel',rippleChannel,'ripples',ripples); % to do, run this after ripple detection
+end
 % EventExplorer(pwd, ripples)
 
 %% Ripple Stats
 if rippleStats
+    if isstruct(rippleChannel)
+        ripples = computeRippleStats('ripples',ripples,'rippleChannel',rippleChannel.channels);
+    else
+        ripples = computeRippleStats('ripples',ripples,'rippleChannel',rippleChannel);
+    end
     ripples = computeRippleStats('ripples',ripples,'rippleChannel',rippleChannel);
+    % keyboard;
+    % 
+    % % 1 - Extra stats: Compute sharp-wave amplitude  -  ISSUE: code will automatically pick rad channel from best shank or from another shank, but doesn't have the option to give the desired one as input
+    % 
+    % % 1.1 - Find the radiatum (and adjacent) channels
+    % 
+    % if ~isnan(hippocampalLayers.bestShankLayers.radiatum) %if the best shank computed has a radiatum channel, take that one
+    % 
+    %     rad_channel=hippocampalLayers.bestShankLayers.radiatum; % extract the channel which was considered best for the radiatum (check if indeed this channel is the one with the sharp wave most pronounced)
+    %     rad_shank=hippocampalLayers.bestShank;
+    %     disp(['Using radiatum channel from best shank (', num2str(rad_shank), ') to analyse the sharp wave']);
+    % 
+    %     Channel_disposition=session.extracellular.electrodeGroups.channels{rad_shank}; %extract the channel numbers of the shank
+    %     rad_channel_pos=find(Channel_disposition==rad_channel); %obtain the radiatum channel position within the shank
+    %     prev_rad_channel=Channel_disposition(rad_channel_pos-1); %find the channel before the radiatum one using the position
+    %     post_rad_channel=Channel_disposition(rad_channel_pos+1); %find the channel after the radiatum one using the position
+    % 
+    % else   %otherwise, find another shank containing radiatum
+    %     for s=1:length(hippocampalLayers.layers) %for each shank
+    % 
+    %         current_shank_layers=hippocampalLayers.layers{s}; %extract the channel layers of the current shank
+    % 
+    %         if ~isnan(current_shank_layers.radiatum) %if the current shank has a radiatum channel, use this one:
+    %             rad_channel=current_shank_layers.radiatum; 
+    %             Channel_disposition=session.extracellular.electrodeGroups.channels{s};
+    %             rad_channel_pos=find(Channel_disposition==rad_channel); %obtain the radiatum channel position within the shank
+    %             prev_rad_channel=Channel_disposition(rad_channel_pos-1); %find the channel before the radiatum one using the position
+    %             post_rad_channel=Channel_disposition(rad_channel_pos+1); %find the channel after the radiatum one using the position
+    %             rad_shank=s;
+    %             disp(['Using radiatum channel from shank (', num2str(rad_shank), ') to analyse the sharp wave']);
+    %             break
+    %         end
+    % 
+    %     end
+    % 
+    % end
+    % 
+    % % 1.2 - Find the sharp wave lfp and csd amplitude around each ripple
+    % 
+    % try %in case of having found a rad channel:
+    %     lfp = getLFP(rad_channel); %Load the lfp data from the radiatum channel 
+    %     lfp_csd = getLFP([prev_rad_channel , rad_channel , post_rad_channel]); %Load the lfp data from the radiatum channel and the two adjacent channels
+    %     csd = 2.*lfp_csd.data(:,2) - lfp_csd.data(:,1) - lfp_csd.data(:,3) ; %to compute the csd, you need to double the lfp from the channel of interest and substract the lfp from the adjacent channels
+    % 
+    %     [~ , ripple_idx] = InIntervals(lfp.timestamps, [ripples.peaks-0.015 , ripples.peaks+0.015]); %find the timestamps around the ripples to compute the sharp-wave amplitude
+    %     sharp_wave_amplitude_lfp=[];
+    %     sharp_wave_amplitude_csd=[];
+    % 
+    %     for i=1:length(ripples.peaks) %compute the mean lpf and csd value for the timestamps windows found
+    %         current_win=find(ripple_idx==i);
+    %         current_lfp=lfp.data(current_win);
+    %         current_csd=csd(current_win);
+    %         sharp_wave_amplitude_lfp= [sharp_wave_amplitude_lfp ; mean(current_lfp) ];
+    %         sharp_wave_amplitude_csd= [sharp_wave_amplitude_csd ; mean(current_csd) ];
+    % 
+    %     end
+    %     % lfp_cor=groupCorr(sharp_wave_amplitude_lfp, ripples.rippleStats.data.peakAmplitude); %just to check which window around ripple peak is best (the one with highest correlation with ripple peak)
+    %     % csd_cor=groupCorr(sharp_wave_amplitude_csd, ripples.rippleStats.data.peakAmplitude);
+    % 
+    %     % 1.3 - Incorporate them to the ripple stats structure
+    %     ripples.rippleStats.data.sharp_wave_amplitude.lfp=sharp_wave_amplitude_lfp;
+    %     ripples.rippleStats.data.sharp_wave_amplitude.csd=sharp_wave_amplitude_csd;
+    % 
+    % catch %in case none of the shanks had a radiatum channel, leave this analysis as nan
+    %     warning('No rad channel found in the data!');
+    %     ripples.rippleStats.data.sharp_wave_amplitude.lfp=nan(length(ripples.peaks),1);
+    %     ripples.rippleStats.data.sharp_wave_amplitude.csd=nan(length(ripples.peaks),1);
+    % end
+    % 
+    % 
+    % % 2 - Extra stats: find the firing rate of the neurons in each ripple
+    % try 
+    %     spikes = loadSpikes;
+    %     firing_rate_inRipples=[];
+    % 
+    %     for j=1:spikes.numcells
+    % 
+    %         current_cell_spikes=spikes.times{j}; % spikes times of the current cell
+    %         [~, spikesRipple_idx]=InIntervals(current_cell_spikes, ripples.timestamps); %find which of those spikes fall within the different ripple periods
+    %         inRipple_cellSpikeRate=zeros(length(ripples.peaks),1); %preallocate a variable for the firing rate of this cell in each ripple
+    % 
+    %         for k=1:length(ripples.peaks)
+    %             ripple_dur=ripples.timestamps(k,2)-ripples.timestamps(k,1); %find current ripple_duration
+    %             current_spikeRipple=find(spikesRipple_idx==k); %find the spikes of the current cell associated to the current ripple
+    %             current_rate=length(current_spikeRipple)./ripple_dur; %find the firing rate of the cell in the current ripple
+    %             inRipple_cellSpikeRate(k)=current_rate; %variable with the rate of the cell in all ripples
+    %         end
+    % 
+    %         firing_rate_inRipples=[firing_rate_inRipples , inRipple_cellSpikeRate]; %store the results from the current cell into a matrix for all cells
+    % 
+    %     end
+    % 
+    %     cellMean_firing_rate_inRipples=mean(firing_rate_inRipples,2); %obtain the mean firing rate across neurons for each ripple
+    % 
+    %     %save results:
+    %     ripples.rippleStats.data.firingRate.Individual=firing_rate_inRipples;
+    %     ripples.rippleStats.data.firingRate.Mean_across_cells=cellMean_firing_rate_inRipples;
+    % 
+    % catch
+    %     warning('Spikes data was not found!');
+    %     ripples.rippleStats.data.firingRate.Individual=nan(length(ripples.peaks),spikes.numcells);
+    %     ripples.rippleStats.data.firingRate.Mean_across_cells=nan(length(ripples.peaks),1);
+    % end
+
 end
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%
 % %% Computing SharpWaves
 % %%%%%%%%%%%%%%%%%%%%%%%%%
 % if
-% try
-%     SW = findSharpWaves('ripples',ripples,'rippleChannel',rippleChannel,'SWChannel',SWChannel,...
-%         'passband',passband,'SWpassband',SWpassband);
-% catch
-%     disp('Not possible to compute Sharp Waves...');
-% end
+try
+    if isstruct(rippleChannel)
+        SW = findSharpWaves('ripples',ripples,'rippleChannel',rippleChannel.channels,'SWChannel',SWChannel,...
+            'passband',passband,'SWpassband',SWpassband);
+    else
+        SW = findSharpWaves('ripples',ripples,'rippleChannel',rippleChannel,'SWChannel',SWChannel,...
+            'passband',passband,'SWpassband',SWpassband);
+    end
+catch
+    disp('Not possible to compute Sharp Waves...');
+    SW = [];
+end
 %% OUTPUT
 if saveMat
     disp('Saving Ripples Results...');
     save([session.general.name , '.ripples.events.mat'],'ripples');
-    % try
-    %     disp('Saving SharpWaves Results...');
-    %     save([session.general.name , '.sharpwaves.events.mat'],'SW');
-    % catch
-    % end
+    try
+        disp('Saving SharpWaves Results...');
+        save([session.general.name , '.sharpwaves.events.mat'],'SW');
+    catch
+    end
 end
 
 

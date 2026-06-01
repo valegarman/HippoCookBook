@@ -59,6 +59,7 @@ addParameter(p,'CellInspector',false,@islogical);
 addParameter(p,'mode','discard',@isstr);
 addParameter(p,'maxDistance',5,@isnumeric);
 addParameter(p,'orderKalmanVel',2,@isnumeric);
+addParameter(p,'forceReload',false);
 
 parse(p,varargin{:});
 smooth = p.Results.smooth;
@@ -71,6 +72,17 @@ CellInspector = p.Results.CellInspector;
 mode = p.Results.mode;
 maxDistance = p.Results.maxDistance;
 order = p.Results.orderKalmanVel;
+forceReload = p.Results.forceReload;
+
+filename = split(pwd,filesep); filename = filename{end};
+basepath = pwd;
+
+if ~isempty(dir([basepath filesep filename '.firingMapsAvg.cellinfo.mat'])) && ~forceReload
+    disp('Firing Map Average already detected! Loading file');
+    file = dir([basepath filesep filename '.firingMapsAvg.cellinfo.mat']);
+    load(file.name);
+    return
+end
 
 if isstruct(positions)
     positions = positions.maps;
