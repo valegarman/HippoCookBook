@@ -19,7 +19,7 @@ addParameter(p,'copyFiles',false,@islogical);
 % addParameter(p,'driveStorage_path','W:\Buzsakilabspace\Datasets\ValeroM',@isdir);
 addParameter(p,'driveStorage_path',[],@isdir);
 % addParameter(p,'driveStorage_name','Research',@isstring);
-addParameter(p,'driveStorage_location','neural3',@isstring);
+addParameter(p,'driveStorage_location','neural',@isstring);
 addParameter(p,'git_automatic',false);
 
 parse(p,varargin{:})
