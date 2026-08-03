@@ -266,7 +266,6 @@ if ~any(ismember(excludeAnalysis, {'4',lower('spikesFeatures')}))
     % 4.2 ACG and waveform
     spikeFeatures;
 
-<<<<<<< HEAD
     % 4.3 ULED analysis 
     try
         getuLEDPulses;
@@ -368,8 +367,7 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
 
     % 8.3 Theta intervals
     cd(basepath);
-    % thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'channel',theta_epochs_channel);
-    thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'powerThreshold',0.8 ,'channel', 17);
+    thetaEpochs = detectThetaEpochs('force',true,'useCSD',useCSD_for_theta_detection,'channel',theta_epochs_channel);
 
 end
 
@@ -389,7 +387,7 @@ end
             session = assignBrainRegion('showPowerProfile','theta','showEvent','ripples','eventTwin',[-0.05 0.05]);
         elseif strcmpi(profileType,'cortex')
             session = assignBrainRegion('showPowerProfile','hfo','showEvent','slowOscilations','eventTwin',[-.5 .5]); % hfo slowOscilations [-.5 .5]
-        end% Cell 
+        end
         
         if isempty(excludePulsesIntervals)
             try
@@ -491,7 +489,3 @@ if ~any(ismember(excludeAnalysis, {'13',lower('summary')}))
 
 cd(prevPath);
 end
-
-
-
-
