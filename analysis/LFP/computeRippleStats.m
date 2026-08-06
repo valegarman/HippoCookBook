@@ -169,7 +169,7 @@ if plotOpt
     mkdir('SummaryFigures'); % create folder
     saveas(gcf,['SummaryFigures\ripplesDetection.png']);
 end
-    
+
     h = figure;
     subplot(3,2,1)
     computeWavelet(mean(maps.ripples_raw), maps.timestamps, [80 300]);

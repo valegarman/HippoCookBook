@@ -70,6 +70,7 @@ zSW = zscore(filteredSW.data);
 ts = filteredRipple.timestamps;
 
 eliminatedSW = false;
+
 for i = 1:size(ripples.timestamps,1)
     dur = 0.01;
     signalSW = zSW(round((ripples.timestamps(i,1)-dur)*srLfp):round((ripples.timestamps(i,2)+dur)*srLfp));

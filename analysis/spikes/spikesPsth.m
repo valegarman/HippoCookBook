@@ -254,6 +254,7 @@ if ~isempty(timestamps) && all(~isnan(timestamps))
 else
     pul = [0];
 end
+
 disp('Computing responses...');
 times = spikes.times; times{length(times)+1} = pul;
 [stccg, t] = CCG(times,[],'binSize',binSize,'duration',winSize,'norm','rate','Fs',1/sr); fprintf('\n'); %
@@ -435,7 +436,7 @@ t = psth.timestamps;
 if any(~isnan(psth.responsecurve))
     for ii = 1:length(spikes.UID)
         for jj = 1:nConditions
-            t_duringPulse = t > 0 & t < 0.1; 
+            t_duringPulse = t > 0 & t < event_ints(2); 
             responseMetrics.maxResponse(ii,jj) = max(squeeze(psth.responsecurve(ii,jj,t_duringPulse)));
             responseMetrics.minResponse(ii,jj) = min(squeeze(psth.responsecurve(ii,jj,t_duringPulse)));
             responseMetrics.maxResponseZ(ii,jj) = max(squeeze(psth.responsecurveZ(ii,jj,t_duringPulse)));

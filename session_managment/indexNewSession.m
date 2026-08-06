@@ -19,7 +19,7 @@ addParameter(p,'copyFiles',false,@islogical);
 % addParameter(p,'driveStorage_path','W:\Buzsakilabspace\Datasets\ValeroM',@isdir);
 addParameter(p,'driveStorage_path',[],@isdir);
 % addParameter(p,'driveStorage_name','Research',@isstring);
-addParameter(p,'driveStorage_location','neural3',@isstring);
+addParameter(p,'driveStorage_location','neural',@isstring);
 addParameter(p,'git_automatic',false);
 
 parse(p,varargin{:})
@@ -108,11 +108,15 @@ switch session.extracellular.chanCoords.layout
     case 'A8x8-Edge-5mm-50-150-177'
         optogenetics = {'None'};
     otherwise
-        for ii = 1:length(session.animal.opticFiberImplants)
-            optogenetics{1, length(optogenetics)+1} = session.animal.opticFiberImplants{ii}.opticFiber;
-            optogenetics{1, length(optogenetics)+1} = ' ';
-        end 
-        optogenetics(end) = [];
+        try
+            for ii = 1:length(session.animal.opticFiberImplants)
+                optogenetics{1, length(optogenetics)+1} = session.animal.opticFiberImplants{ii}.opticFiber;
+                optogenetics{1, length(optogenetics)+1} = ' ';
+            end 
+            optogenetics(end) = [];
+        catch
+            optogenetics = {'None'};
+        end
 end
 
 behav = cell(0); 

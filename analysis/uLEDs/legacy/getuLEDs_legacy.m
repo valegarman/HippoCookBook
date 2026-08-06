@@ -26,7 +26,7 @@ end
 
 % Load .txt file
 try
-    file = dir('uLED_ttl.txt'); % or uLED_ttl.csv
+    file = dir('uLEDs.txt'); % or 'uLED_ttl.csv' or 'uLED_ttl.csv' or 'uLEDs.txt'
     uLEDs_txt = load(file.name);
 catch
 end
@@ -101,7 +101,11 @@ if isempty(uLEDPulses.nonStimulatedShank)
 end
 
 % parse conditions
-session = loadSession(fullfile(pwd, '..'));
+actualPath = pwd;
+cd ..
+prevPath = pwd;
+session = loadSession;
+cd(actualPath)
 
 file_folder = strsplit(file.folder,'\');
 file_folder = file_folder{end};

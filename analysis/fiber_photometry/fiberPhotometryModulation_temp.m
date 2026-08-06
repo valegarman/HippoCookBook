@@ -73,6 +73,7 @@ restrict_fiber_epochs = p.Results.restrict_fiber_epochs;
 reload_fiber = p.Results.reload_fiber;
 
 session = loadSession();
+
 % Load fiber
 fiber = getSessionFiberPhotometry_temp('force',reload_fiber);
 
@@ -89,10 +90,10 @@ if strcmpi(eventType,'ripples')
         timestamps = ripples.peaks;
     end
     warning('Using default parameters for ripples!');
-    win = [-10 10];
+    win = [-3 3];
     win_size = round(fiber.sr * win);
-    event_ints = [0 8];
-    baseline_ints = [-8 -8+diff(event_ints)]; 
+    event_ints = [0 3];
+    baseline_ints = [-3 -3+diff(event_ints)]; 
     time_vector = baseline_ints(1):1/fiber.sr:event_ints(2);
     c_axis = 3;
 
@@ -115,6 +116,8 @@ if strcmpi(eventType,'ripples')
     % ripples.peaks(b) = NaN;
 
     timestamps = ripples.peaks;
+    t_beforePulse = time_vector > -3 & time_vector < 0;
+    t_Z = time_vector > -3 & time_vector < 0;
 
 
 elseif strcmpi(eventType,'slowOscillations')
@@ -179,6 +182,16 @@ elseif strcmpi(eventType,'reward') | strcmpi(eventType,'lReward') | strcmpi(even
     time_vector = baseline_ints(1):1/fiber.sr:event_ints(2);
     c_axis = 5;
 
+else
+    warning('Using default parameters');
+    win = [-6 6];
+    win_size = round(fiber.sr * win);
+    event_ints = [0 6];
+    baseline_ints = [-6 -6+diff(event_ints)]; 
+    time_vector = baseline_ints(1):1/fiber.sr:event_ints(2);
+    c_axis = 5;
+
+
 end
 
 timestamps(:,2) = nan(1,length(timestamps));
@@ -239,6 +252,11 @@ for jj = 1:max(timestamps(:,2))
         green_PP{jj}.responsecurve = [];
         disp('Processing green channel')
     end
+    if isfield(fiber, 'isosbestic') 
+        iso{jj}.responsecurve = [];
+        iso_PP{jj}.responsecurve = [];
+        disp('Processing green channel')
+    end
 
     times{jj} = [];
 
@@ -275,6 +293,15 @@ for jj = 1:max(timestamps(:,2))
     
                     green_PP{jj}.responsecurve = [green_PP{jj}.responsecurve; fiber.green_PP.green_dFF_Smoothed(idx_range)'];
                 end
+
+                % green
+                if isfield(fiber, 'isosbestic') 
+                    iso{jj}.responsecurve = [iso{jj}.responsecurve; fiber.isosbestic(idx_range)'];
+                    % green_smooth{jj}.responsecurve = [green_smooth{jj}.responsecurve; fiber.green_fpa.fSmoothed(idx_range)'];
+                    % green_normalized{jj}.responsecurve = [green_normalized{jj}.responsecurve; fiber.green_fpa.fNormalized(idx_range)'];
+    
+                    iso_PP{jj}.responsecurve = [iso_PP{jj}.responsecurve; fiber.iso_PP.iso_dFF_Smoothed(idx_range)'];
+                end
         
                 ripples_fiber.timestamps(count) = fiber.timestamps(idx);
                 times{jj}(count) = fiber.timestamps(idx);
@@ -282,9 +309,9 @@ for jj = 1:max(timestamps(:,2))
         end
     end
     
-    t_duringPulse = time_vector > event_ints(1) & time_vector < event_ints(2);
-    t_beforePulse = time_vector > baseline_ints(1) & time_vector < baseline_ints(2);
-    t_Z = time_vector <= event_ints(1);
+    % t_duringPulse = time_vector > event_ints(1) & time_vector < event_ints(2);
+    % t_beforePulse = time_vector > baseline_ints(1) & time_vector < baseline_ints(2);
+    % t_Z = time_vector <= event_ints(1);
     
     numberOfPulses = count;
     
@@ -293,7 +320,7 @@ for jj = 1:max(timestamps(:,2))
         % red
         f_red_prctl20 = prctile(fiber.red,20);
         
-        for ii = 1: min(size(red{jj}.responsecurve))
+        for ii = 1: size(red{jj}.responsecurve,1)
             if numberOfPulses > minNumberOfPulses
                 red{jj}.responsecurveSmooth(ii,:) = smooth(red{jj}.responsecurve(ii,:));
                 red{jj}.responsecurveZ(ii,:) = (red{jj}.responsecurve(ii,:)...
@@ -301,10 +328,10 @@ for jj = 1:max(timestamps(:,2))
                     /std(red{jj}.responsecurve(ii,t_Z));
                 red{jj}.responsecurveZSmooth(ii,:) = smooth(red{jj}.responsecurveZ(ii,:));
                 f0 = mean(red{jj}.responsecurve(ii,t_beforePulse));
-                red{jj}.AF_F(ii,:) = red{jj}.responsecurve(ii,:) - f0/f0;
+                red{jj}.AF_F(ii,:) = (red{jj}.responsecurve(ii,:) - f0)/f0;
         
                 % Using the 20th percentile
-                red{jj}.prctile(ii,:) = red{jj}.responsecurve(ii,:) - f_red_prctl20/f_red_prctl20;
+                red{jj}.prctile(ii,:) = (red{jj}.responsecurve(ii,:) - f_red_prctl20)/f_red_prctl20;
         
                 % Statistics
         
@@ -315,7 +342,7 @@ for jj = 1:max(timestamps(:,2))
         % red_smooth
         f_red_smooth_prctl20 = prctile(fiber.red_fpa.fSmoothed,20);
         
-        for ii = 1:min(size(red_smooth{jj}.responsecurve))
+        for ii = 1:size(red_smooth{jj}.responsecurve,1)
             if numberOfPulses > minNumberOfPulses
                 red_smooth{jj}.responsecurveSmooth(ii,:) = smooth(red_smooth{jj}.responsecurve(ii,:));
                 red_smooth{jj}.responsecurveZ(ii,:) = (red_smooth{jj}.responsecurve(ii,:)...
@@ -323,10 +350,10 @@ for jj = 1:max(timestamps(:,2))
                     /std(red_smooth{jj}.responsecurve(ii,t_Z));
                 red_smooth{jj}.responsecurveZSmooth(ii,:) = smooth(red_smooth{jj}.responsecurveZ(ii,:));
                 f0 = mean(red_smooth{jj}.responsecurve(ii,t_beforePulse));
-                red_smooth{jj}.AF_F(ii,:) = red_smooth{jj}.responsecurve(ii,:) - f0/f0;
+                red_smooth{jj}.AF_F(ii,:) = (red_smooth{jj}.responsecurve(ii,:) - f0)/f0;
         
                 % Using the 20th percentile
-                red_smooth{jj}.prctile(ii,:) = red_smooth{jj}.responsecurve(ii,:) - f_red_smooth_prctl20/f_red_smooth_prctl20;
+                red_smooth{jj}.prctile(ii,:) = (red_smooth{jj}.responsecurve(ii,:) - f_red_smooth_prctl20)/f_red_smooth_prctl20;
         
             end
         end
@@ -334,16 +361,18 @@ for jj = 1:max(timestamps(:,2))
         % red_normalized
         f_red_normalized_prctl20 = prctile(fiber.red_fpa.fNormalized,20);
         
-        for ii = 1:min (size(red_normalized{jj}.responsecurve))
+        for ii = 1:size(red_normalized{jj}.responsecurve,1)
             if numberOfPulses > minNumberOfPulses
                 red_normalized{jj}.responsecurveSmooth(ii,:) = smooth(red_normalized{jj}.responsecurve(ii,:));
                 red_normalized{jj}.responsecurveZ(ii,:) = (red_normalized{jj}.responsecurve(ii,:)...
                     -mean(red_normalized{jj}.responsecurve(ii,t_Z)))...
                     /std(red_normalized{jj}.responsecurve(ii,t_Z));
                 red_normalized{jj}.responsecurveZSmooth(ii,:) = smooth(red_normalized{jj}.responsecurveZ(ii,:));
+                f0 = mean(red_normalized{jj}.responsecurve(ii,t_beforePulse));
+                red_normalized{jj}.AF_F(ii,:) = (red_normalized{jj}.responsecurve(ii,:) - f0)/f0;  
         
                 % Using the 20th percentile
-                red_normalized{jj}.prctile(ii,:) = red_normalized{jj}.responsecurve(ii,:) - f_red_normalized_prctl20/f_red_normalized_prctl20;
+                red_normalized{jj}.prctile(ii,:) = (red_normalized{jj}.responsecurve(ii,:) - f_red_normalized_prctl20)/f_red_normalized_prctl20;
         
             end
         end
@@ -351,16 +380,18 @@ for jj = 1:max(timestamps(:,2))
         % red_PP
         f_red_PP_prctl20 = prctile(fiber.red_PP.red_dFF_Smoothed,20);
         
-        for ii = 1:min(size(red_PP{jj}.responsecurve))
+        for ii = 1:size(red_PP{jj}.responsecurve,1)
             if numberOfPulses > minNumberOfPulses
                 red_PP{jj}.responsecurveSmooth(ii,:) = smooth(red_PP{jj}.responsecurve(ii,:));
                 red_PP{jj}.responsecurveZ(ii,:) = (red_PP{jj}.responsecurve(ii,:)...
                     -mean(red_PP{jj}.responsecurve(ii,t_Z)))...
                     /std(red_PP{jj}.responsecurve(ii,t_Z));
                 red_PP{jj}.responsecurveZSmooth(ii,:) = smooth(red_PP{jj}.responsecurveZ(ii,:));
+                f0 = mean(red_PP{jj}.responsecurve(ii,t_beforePulse));
+                red_PP{jj}.AF_F(ii,:) = (red_PP{jj}.responsecurve(ii,:) - f0)/f0;  
         
                 % Using the 20th percentile
-                red_PP{jj}.prctile(ii,:) = red_PP{jj}.responsecurve(ii,:) - f_red_normalized_prctl20/f_red_normalized_prctl20;
+                red_PP{jj}.prctile(ii,:) = (red_PP{jj}.responsecurve(ii,:) - f_red_normalized_prctl20)/f_red_normalized_prctl20;
         
             end
         end
@@ -369,18 +400,21 @@ for jj = 1:max(timestamps(:,2))
     % GREEN FLUORESCENCE (eCB)
     if isfield(fiber, 'green') 
         % green
-        f_green_normalized_prctl20 = prctile(fiber.green_fpa.fNormalized,20);
+        f_green_prctl20 = prctile(fiber.green,20);
         
-        for ii = 1:min(size(green{jj}.responsecurve))
+        for ii = 1:size(green{jj}.responsecurve,1)
             if numberOfPulses > minNumberOfPulses
                 green{jj}.responsecurveSmooth(ii,:) = smooth(green{jj}.responsecurve(ii,:));
                 green{jj}.responsecurveZ(ii,:) = (green{jj}.responsecurve(ii,:)...
                     -mean(green{jj}.responsecurve(ii,t_Z)))...
                     /std(green{jj}.responsecurve(ii,t_Z));
                 green{jj}.responsecurveZSmooth(ii,:) = smooth(green{jj}.responsecurveZ(ii,:));
+                f0 = mean(green{jj}.responsecurve(ii,t_beforePulse));
+                green{jj}.AF_F(ii,:) = (green{jj}.responsecurve(ii,:) - f0)/f0;
+                
         
                 % Using the 20th percentile
-                green{jj}.prctile(ii,:) = green{jj}.responsecurve(ii,:) - f_green_normalized_prctl20/f_green_normalized_prctl20;
+                green{jj}.prctile(ii,:) = (green{jj}.responsecurve(ii,:) - f_green_prctl20)/f_green_prctl20;
         
             end
         end
@@ -389,16 +423,18 @@ for jj = 1:max(timestamps(:,2))
         % green smooth
         f_green_smooth_prctl20 = prctile(fiber.green_fpa.fSmoothed,20);
         
-        for ii = 1:min(size(green_smooth{jj}.responsecurve))
+        for ii = 1:size(green_smooth{jj}.responsecurve,1)
             if numberOfPulses > minNumberOfPulses
                 green_smooth{jj}.responsecurveSmooth(ii,:) = smooth(green_smooth{jj}.responsecurve(ii,:));
                 green_smooth{jj}.responsecurveZ(ii,:) = (green_smooth{jj}.responsecurve(ii,:)...
                     -mean(green_smooth{jj}.responsecurve(ii,t_Z)))...
                     /std(green_smooth{jj}.responsecurve(ii,t_Z));
                 green_smooth{jj}.responsecurveZSmooth(ii,:) = smooth(green_smooth{jj}.responsecurveZ(ii,:));
+                f0 = mean(green_smooth{jj}.responsecurve(ii,t_beforePulse));
+                green_smooth{jj}.AF_F(ii,:) = (green_smooth{jj}.responsecurve(ii,:) - f0)/f0;
         
                 % Using the 20th percentile
-                green_smooth{jj}.prctile(ii,:) = green_smooth{jj}.responsecurve(ii,:) - f_green_smooth_prctl20/f_green_smooth_prctl20;
+                green_smooth{jj}.prctile(ii,:) = (green_smooth{jj}.responsecurve(ii,:) - f_green_smooth_prctl20)/f_green_smooth_prctl20;
             end
         end
         
@@ -406,16 +442,18 @@ for jj = 1:max(timestamps(:,2))
         % green normalized
         f_green_normalized_prctl20 = prctile(fiber.green_fpa.fNormalized,20);
         
-        for ii = 1:min(size(green_normalized{jj}.responsecurve))
+        for ii = 1:size(green_normalized{jj}.responsecurve,1)
             if numberOfPulses > minNumberOfPulses
                 green_normalized{jj}.responsecurveSmooth(ii,:) = smooth(green_normalized{jj}.responsecurve(ii,:));
                 green_normalized{jj}.responsecurveZ(ii,:) = (green_normalized{jj}.responsecurve(ii,:)...
                     -mean(green_normalized{jj}.responsecurve(ii,t_Z)))...
                     /std(green_normalized{jj}.responsecurve(ii,t_Z));
                 green_normalized{jj}.responsecurveZSmooth(ii,:) = smooth(green_normalized{jj}.responsecurveZ(ii,:));
+                f0 = mean(green_normalized{jj}.responsecurve(ii,t_beforePulse));
+                green_normalized{jj}.AF_F(ii,:) = (green_normalized{jj}.responsecurve(ii,:) - f0)/f0;
         
                 % Using the 20th percentile
-                green_normalized{jj}.prctile(ii,:) = green_normalized{jj}.responsecurve(ii,:) - f_green_normalized_prctl20/f_green_normalized_prctl20;
+                green_normalized{jj}.prctile(ii,:) = (green_normalized{jj}.responsecurve(ii,:) - f_green_normalized_prctl20)/f_green_normalized_prctl20;
         
             end
         end
@@ -423,20 +461,68 @@ for jj = 1:max(timestamps(:,2))
         % green PP
         f_green_PP_prctl20 = prctile(fiber.green_PP.green_dFF_Smoothed,20);
         
-        for ii = 1:min(size(green_PP{jj}.responsecurve))
+        for ii = 1:size(green_PP{jj}.responsecurve,1)
             if numberOfPulses > minNumberOfPulses
                 green_PP{jj}.responsecurveSmooth(ii,:) = smooth(green_PP{jj}.responsecurve(ii,:));
                 green_PP{jj}.responsecurveZ(ii,:) = (green_PP{jj}.responsecurve(ii,:)...
                     -mean(green_PP{jj}.responsecurve(ii,t_Z)))...
                     /std(green_PP{jj}.responsecurve(ii,t_Z));
                 green_PP{jj}.responsecurveZSmooth(ii,:) = smooth(green_PP{jj}.responsecurveZ(ii,:));
+                f0 = mean(green_PP{jj}.responsecurve(ii,t_beforePulse));
+                green_PP{jj}.AF_F(ii,:) = (green_PP{jj}.responsecurve(ii,:) - f0)/f0;
         
                 % Using the 20th percentile
-                green_PP{jj}.prctile(ii,:) = green_PP{jj}.responsecurve(ii,:) - f_green_normalized_prctl20/f_green_normalized_prctl20;
+                green_PP{jj}.prctile(ii,:) = (green_PP{jj}.responsecurve(ii,:) - f_green_normalized_prctl20)/f_green_normalized_prctl20;
         
             end
         end
     end
+
+
+    % ISOSBESTIC
+    if isfield(fiber, 'isosbestic') 
+        % green
+        f_iso_prctl20 = prctile(fiber.isosbestic,20);
+        
+        for ii = 1:size(iso{jj}.responsecurve,1)
+            if numberOfPulses > minNumberOfPulses
+                iso{jj}.responsecurveSmooth(ii,:) = smooth(iso{jj}.responsecurve(ii,:));
+                iso{jj}.responsecurveZ(ii,:) = (iso{jj}.responsecurve(ii,:)...
+                    -mean(iso{jj}.responsecurve(ii,t_Z)))...
+                    /std(iso{jj}.responsecurve(ii,t_Z));
+                iso{jj}.responsecurveZSmooth(ii,:) = smooth(iso{jj}.responsecurveZ(ii,:));
+                f0 = mean(iso{jj}.responsecurve(ii,t_beforePulse));
+                iso{jj}.AF_F(ii,:) = (iso{jj}.responsecurve(ii,:) - f0)/f0;
+                
+        
+                % Using the 20th percentile
+                iso{jj}.prctile(ii,:) = (iso{jj}.responsecurve(ii,:) - f_green_prctl20)/f_green_prctl20;
+        
+            end
+        end
+        
+       
+        % green PP
+        % f_iso_PP_prctl20 = prctile(fiber.isosbestic.green_dFF_Smoothed,20);
+        
+        for ii = 1:size(iso_PP{jj}.responsecurve,1)
+            if numberOfPulses > minNumberOfPulses
+                iso_PP{jj}.responsecurveSmooth(ii,:) = smooth(iso_PP{jj}.responsecurve(ii,:));
+                iso_PP{jj}.responsecurveZ(ii,:) = (iso_PP{jj}.responsecurve(ii,:)...
+                    -mean(iso_PP{jj}.responsecurve(ii,t_Z)))...
+                    /std(iso_PP{jj}.responsecurve(ii,t_Z));
+                iso_PP{jj}.responsecurveZSmooth(ii,:) = smooth(iso_PP{jj}.responsecurveZ(ii,:));
+                f0 = mean(iso_PP{jj}.responsecurve(ii,t_beforePulse));
+                iso_PP{jj}.AF_F(ii,:) = (iso_PP{jj}.responsecurve(ii,:) - f0)/f0;
+        
+                % Using the 20th percentile
+                % green_PP{jj}.prctile(ii,:) = (green_PP{jj}.responsecurve(ii,:) - f_green_normalized_prctl20)/f_green_normalized_prctl20;
+        
+            end
+        end
+    end
+
+
         
 end
 
@@ -458,6 +544,14 @@ if saveMat
             psth.green_smooth = green_smooth{ii};
             psth.green_normalized = green_normalized{ii};
             psth.green_PP = green_PP{ii};
+            psth.times = times{ii};
+        end
+
+        if isfield(fiber,'isosbestic')
+            psth.iso = iso{ii};
+            % psth.green_smooth = green_smooth{ii};
+            % psth.green_normalized = green_normalized{ii};
+            psth.iso_PP = iso_PP{ii};
             psth.times = times{ii};
         end
 
@@ -488,6 +582,14 @@ else
             psth.green_PP = green_PP{ii};
             psth.times = times{ii};
         end
+
+        if isfield(fiber,'isosbestic')
+            psth.isosbestic = iso{ii};
+            % psth.green_smooth = green_smooth{ii};
+            % psth.green_normalized = green_normalized{ii};
+            psth.iso_PP = iso_PP{ii};
+            psth.times = times{ii};
+        end
     end
 end
 
@@ -512,6 +614,34 @@ if plt
         %     saveas(gca,['SummaryFigures\fiber_psth_red_',eventType,'.png']);
         % end
         if isfield(fiber,'red')
+
+
+            % red
+            figure;
+            imagesc(time_vector, 1:count, red{ii}.responsecurveZSmooth); % Mapa de calor de todos los trials
+            colormap(jet);  % Código de colores para visualizar cambios en la actividad
+            colorbar;  % Agregar barra de color
+            xlabel('Time (s)');
+            ylabel(['Trials ', eventType]);
+            title(['Ca2+ during ', eventType]);
+            caxis([-c_axis c_axis]);
+            set(gca,'YDir','normal');
+            hold on; 
+            zmean = mean(red{ii}.responsecurveZSmooth);
+            zmean = zmean-min(zmean); 
+            zmean = zmean/max(zmean) * size(red{ii}.responsecurveZSmooth,1)+1 * std(zmean);
+            plot(time_vector,smooth(zmean,10),'k','LineWidth',2);
+            xline(0, '--', 'Color',[.5 .5 .5], 'LineWidth', 2); % Line in t=0 
+        
+            if savePlot
+                if restrict_fiber_epochs | ~isempty(savePlotAs)
+                    saveas(gca,['SummaryFigures\fiber_red_',eventType,'_',save_plt_as{ii},'.png']);
+                else
+                    saveas(gca,['SummaryFigures\fiber_red_',eventType,'.png']);
+                end
+            end
+            
+            % red normalized
             figure;
             imagesc(time_vector, 1:count, red_normalized{ii}.responsecurveZSmooth); % Mapa de calor de todos los trials
             colormap(jet);  % Código de colores para visualizar cambios en la actividad
@@ -530,13 +660,41 @@ if plt
         
             if savePlot
                 if restrict_fiber_epochs | ~isempty(savePlotAs)
-                    saveas(gca,['SummaryFigures\fiber_red_',eventType,'_',save_plt_as{ii},'.png']);
+                    saveas(gca,['SummaryFigures\fiber_red_normalized_',eventType,'_',save_plt_as{ii},'.png']);
                 else
-                    saveas(gca,['SummaryFigures\fiber_red_',eventType,'.png']);
+                    saveas(gca,['SummaryFigures\fiber_red_normalized_',eventType,'.png']);
                 end
             end
-    
-    
+
+
+            % red smooth
+            figure;
+            imagesc(time_vector, 1:count, red_smooth{ii}.responsecurveZSmooth); % Mapa de calor de todos los trials
+            colormap(jet);  % Código de colores para visualizar cambios en la actividad
+            colorbar;  % Agregar barra de color
+            xlabel('Time (s)');
+            ylabel(['Trials ', eventType]);
+            title(['Ca2+ during ', eventType]);
+            caxis([-c_axis c_axis]);
+            set(gca,'YDir','normal');
+            hold on; 
+            zmean = mean(red_smooth{ii}.responsecurveZSmooth);
+            zmean = zmean-min(zmean); 
+            zmean = zmean/max(zmean) * size(red_smooth{ii}.responsecurveZSmooth,1)+1 * std(zmean);
+            plot(time_vector,smooth(zmean,10),'k','LineWidth',2);
+            xline(0, '--', 'Color',[.5 .5 .5], 'LineWidth', 2); % Line in t=0 
+        
+            if savePlot
+                if restrict_fiber_epochs | ~isempty(savePlotAs)
+                    saveas(gca,['SummaryFigures\fiber_red_smooth_',eventType,'_',save_plt_as{ii},'.png']);
+                else
+                    saveas(gca,['SummaryFigures\fiber_red_smooth_',eventType,'.png']);
+                end
+            end
+
+
+        
+            % red PP
             figure;
             imagesc(time_vector, 1:count, red_PP{ii}.responsecurveZSmooth); % Mapa de calor de todos los trials
             colormap(jet);  % Código de colores para visualizar cambios en la actividad
@@ -547,7 +705,6 @@ if plt
             caxis([-c_axis c_axis]);
             set(gca,'YDir','normal');
             hold on; 
-    
             zmean = mean(red_PP{ii}.responsecurveZSmooth);
             zmean = zmean-min(zmean); 
             zmean = zmean/max(zmean) * size(red_PP{ii}.responsecurveZSmooth,1)+1 * std(zmean);
@@ -561,6 +718,7 @@ if plt
                     saveas(gca,['SummaryFigures\fiber_red_PP_',eventType,'.png']);
                 end
             end
+
         end
 
 
@@ -574,6 +732,35 @@ if plt
             % else
             %     saveas(gca,['SummaryFigures\fiber_psth_green_',eventType,'.png']);
             % end
+
+            % green
+            figure;
+            imagesc(time_vector, 1:count, green{ii}.responsecurveZSmooth); % Mapa de calor de todos los trials
+            colormap(jet);  % Código de colores para visualizar cambios en la actividad
+            colorbar;  % Agregar barra de color
+            xlabel('Time (s)');
+            ylabel(['Trials ', eventType]);
+            title(['eCB during ', eventType]);
+            caxis([-c_axis c_axis]);
+            set(gca,'YDir','normal');
+            hold on; 
+            xlim([-3 3])
+    
+            zmean = mean(green{ii}.responsecurveZSmooth);
+            zmean = zmean-min(zmean); 
+            zmean = zmean/max(zmean) * size(green{ii}.responsecurveZSmooth,1)+1 * std(zmean);
+            plot(time_vector,smooth(zmean,10),'k','LineWidth',2);
+            xline(0, '--', 'Color',[.5 .5 .5], 'LineWidth', 2); % Line in t=0 
+    
+            if savePlot
+                if restrict_fiber_epochs | ~isempty(savePlotAs)
+                    saveas(gca,['SummaryFigures\fiber_green_',eventType,'_',save_plt_as{ii},'.png']);
+                else
+                    saveas(gca,['SummaryFigures\fiber_green_',eventType,'.png']);
+                end
+            end
+
+            % green normalized
             
             figure;
             imagesc(time_vector, 1:count, green_normalized{ii}.responsecurveZSmooth); % Mapa de calor de todos los trials
@@ -585,6 +772,8 @@ if plt
             caxis([-c_axis c_axis]);
             set(gca,'YDir','normal');
             hold on; 
+            xlim([-3 3])
+
     
             zmean = mean(green_normalized{ii}.responsecurveZSmooth);
             zmean = zmean-min(zmean); 
@@ -594,13 +783,43 @@ if plt
     
             if savePlot
                 if restrict_fiber_epochs | ~isempty(savePlotAs)
-                    saveas(gca,['SummaryFigures\fiber_green_',eventType,'_',save_plt_as{ii},'.png']);
+                    saveas(gca,['SummaryFigures\fiber_green_normalized_',eventType,'_',save_plt_as{ii},'.png']);
                 else
-                    saveas(gca,['SummaryFigures\fiber_green_',eventType,'.png']);
+                    saveas(gca,['SummaryFigures\fiber_green_normalized_',eventType,'.png']);
+                end
+            end
+
+
+            % green smooth          
+            figure;
+            imagesc(time_vector, 1:count, green_smooth{ii}.responsecurveZSmooth); % Mapa de calor de todos los trials
+            colormap(jet);  % Código de colores para visualizar cambios en la actividad
+            colorbar;  % Agregar barra de color
+            xlabel('Time (s)');
+            ylabel(['Trials ', eventType]);
+            title(['eCB during ', eventType]);
+            caxis([-c_axis c_axis]);
+            set(gca,'YDir','normal');
+            hold on; 
+            xlim([-3 3])
+
+    
+            zmean = mean(green_smooth{ii}.responsecurveZSmooth);
+            zmean = zmean-min(zmean); 
+            zmean = zmean/max(zmean) * size(green_smooth{ii}.responsecurveZSmooth,1)+1 * std(zmean);
+            plot(time_vector,smooth(zmean,10),'k','LineWidth',2);
+            xline(0, '--', 'Color',[.5 .5 .5], 'LineWidth', 2); % Line in t=0 
+    
+            if savePlot
+                if restrict_fiber_epochs | ~isempty(savePlotAs)
+                    saveas(gca,['SummaryFigures\fiber_green_smooth_',eventType,'_',save_plt_as{ii},'.png']);
+                else
+                    saveas(gca,['SummaryFigures\fiber_green_smooth_',eventType,'.png']);
                 end
             end
     
             
+            % green PP
             figure;
             imagesc(time_vector, 1:count, green_PP{ii}.responsecurveZSmooth); % Mapa de calor de todos los trials
             colormap(jet);  % Código de colores para visualizar cambios en la actividad
@@ -611,7 +830,8 @@ if plt
             caxis([-c_axis c_axis]);
             set(gca,'YDir','normal');
             hold on; 
-    
+            xlim([-3 3])
+   
             zmean = mean(green_PP{ii}.responsecurveZSmooth);
             zmean = zmean-min(zmean); 
             zmean = zmean/max(zmean) * size(green_PP{ii}.responsecurveZSmooth,1)+1 * std(zmean);
@@ -626,10 +846,11 @@ if plt
                 end
             end
 
-
             figure;
             plotFill(time_vector,green_PP{ii}.responsecurveZSmooth,'color',[0 1 0]);
-            ylim([-1 1]);
+            % ylim([-1 1]);
+            xlim([-3 3])
+
 
             if savePlot
                 if restrict_fiber_epochs | ~isempty(savePlotAs)
@@ -638,8 +859,6 @@ if plt
                     saveas(gca,['SummaryFigures\fiber_green_mean_PP_',eventType,'.png']);
                 end
             end
-
-
 
         end
 
@@ -651,9 +870,120 @@ if plt
         %     end
         % end
 
+        if isfield(fiber,'isosbestic')
+
+            % greenZSmooth
+            % figure;
+            % plotFill(time_vector,green_normalized{ii}.responsecurveZSmooth,'color',[.2 .8 .2],'smoothOp',10);
+            % if restrict_fiber_epochs
+            %     saveas(gca,['SummaryFigures\fiber_psth_green_',eventType,'_',save_plt_as{ii},'.png']);
+            % else
+            %     saveas(gca,['SummaryFigures\fiber_psth_green_',eventType,'.png']);
+            % end
+
+            % green
+            figure;
+            imagesc(time_vector, 1:count, iso{ii}.responsecurveZSmooth); % Mapa de calor de todos los trials
+            colormap(jet);  % Código de colores para visualizar cambios en la actividad
+            colorbar;  % Agregar barra de color
+            xlabel('Time (s)');
+            ylabel(['Trials ', eventType]);
+            title(['eCB during ', eventType]);
+            caxis([-c_axis c_axis]);
+            set(gca,'YDir','normal');
+            hold on; 
+            xlim([-3 3])
+    
+            zmean = mean(iso{ii}.responsecurveZSmooth);
+            zmean = zmean-min(zmean); 
+            zmean = zmean/max(zmean) * size(iso{ii}.responsecurveZSmooth,1)+1 * std(zmean);
+            plot(time_vector,smooth(zmean,10),'k','LineWidth',2);
+            xline(0, '--', 'Color',[.5 .5 .5], 'LineWidth', 2); % Line in t=0 
+    
+            if savePlot
+                if restrict_fiber_epochs | ~isempty(savePlotAs)
+                    saveas(gca,['SummaryFigures\fiber_iso_',eventType,'_',save_plt_as{ii},'.png']);
+                else
+                    saveas(gca,['SummaryFigures\fiber_iso_',eventType,'.png']);
+                end
+            end
+
+            
+            % iso PP
+            figure;
+            imagesc(time_vector, 1:count, iso_PP{ii}.responsecurveZSmooth); % Mapa de calor de todos los trials
+            colormap(jet);  % Código de colores para visualizar cambios en la actividad
+            colorbar;  % Agregar barra de color
+            xlabel('Time (s)');
+            ylabel(['Trials ', eventType]);
+            title(['eCB during ', eventType]);
+            caxis([-c_axis c_axis]);
+            set(gca,'YDir','normal');
+            hold on; 
+            xlim([-3 3])
+   
+            zmean = mean(iso_PP{ii}.responsecurveZSmooth);
+            zmean = zmean-min(zmean); 
+            zmean = zmean/max(zmean) * size(iso_PP{ii}.responsecurveZSmooth,1)+1 * std(zmean);
+            plot(time_vector,smooth(zmean,10),'k','LineWidth',2);
+            xline(0, '--', 'Color',[.5 .5 .5], 'LineWidth', 2); % Line in t=0 
+    
+            if savePlot
+                if restrict_fiber_epochs | ~isempty(savePlotAs)
+                    saveas(gca,['SummaryFigures\fiber_iso_PP_',eventType,'_',save_plt_as{ii},'.png']);
+                else
+                    saveas(gca,['SummaryFigures\fiber_iso_PP_',eventType,'.png']);
+                end
+            end
+
+            figure;
+            plotFill(time_vector,iso_PP{ii}.responsecurveZSmooth,'color',[0 1 0]);
+            % ylim([-1 1]);
+            xlim([-3 3])
+
+
+            if savePlot
+                if restrict_fiber_epochs | ~isempty(savePlotAs)
+                    saveas(gca,['SummaryFigures\fiber_iso_mean_PP_',eventType,'_',save_plt_as{ii},'.png']);
+                else
+                    saveas(gca,['SummaryFigures\fiber_iso_mean_PP_',eventType,'.png']);
+                end
+            end
+        end
+
+        % if savePlot
+        %     if restrict_fiber_epochs | ~isempty(savePlotAs)
+        %         saveas(gca,['SummaryFigures\fiber_green_',eventType,'_',save_plt_as{ii},'.png']);
+        %     else
+        %         saveas(gca,['SummaryFigures\fiber_green_',eventType,'.png']);
+        %     end
+        % end
+
+
+        %% eCB vs ISO
+        figure;
+        plotFill(time_vector,iso{ii}.responsecurveZSmooth,'color',[163 73 164]/255);
+        hold on;
+        plotFill(time_vector,green{ii}.responsecurveZSmooth,'color',[0 1 0]);
+        % ylim([-1 1]);
+        xlim([-3 3])
+        saveas(gca,['SummaryFigures\fiber_iso_vs_green_',eventType,'.png']);
+
+        figure;
+        plotFill(time_vector,iso_PP{ii}.responsecurveZSmooth,'color',[163 73 164]/255);
+        hold on;
+        plotFill(time_vector,green_PP{ii}.responsecurveZSmooth,'color',[0 1 0]);
+        % ylim([-1 1]);
+        xlim([-3 3])
+        saveas(gca,['SummaryFigures\fiber_iso_vs_green_PP_',eventType,'.png']);
+
+
+
+
 
 
     end
+
 end
 
 

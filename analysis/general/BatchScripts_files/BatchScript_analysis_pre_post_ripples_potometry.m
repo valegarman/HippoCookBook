@@ -1,10 +1,12 @@
 %% BatchScript_analysis_ripplesPerSubsession
 
-clear; close all
-HCB_directory = what('HippoCookBook'); 
-sessionsTable = readtable([HCB_directory.path filesep 'indexedSessions.csv']); % the variable is called allSessions
-targetProject = 'POTometry';
-force_fiber_pre_post = true;
+% clear; close all
+% HCB_directory = what('HippoCookBook'); 
+% sessionsTable = readtable([HCB_directory.path filesep 'indexedSessions.csv']); % the variable is called allSessions
+% targetProject = 'POTometry';
+% force_fiber_pre_post = true;
+
+sessions = {'Y:\wt5\wt5_250319_sess13'};
 
 % Indexes for cell location
 inHippocampus = {'CA1sp' 'CA1so' 'CA1sr' 'CA1slm' 'CA1' 'CA3' 'DG' 'CA3sp' 'CA3sr'}; % only using hippocampus data... :);
@@ -12,10 +14,14 @@ inCA1 = {'CA1sp' 'CA1so' 'CA1sr' 'CA1slm' 'CA1'};
 inForebrain = {'CA1sp' 'CA1so' 'CA1sr' 'CA1slm' 'CA1' 'CA3' 'DG','CA3sp' 'CA3sr' 'PTLp' 'PTLp2_3' 'PTLp4' 'PTLp5' 'PTLp6', 'VISp1', 'VISp2_3', 'VISp4', 'VISp5', 'VISp6'};
 inCortex = {'PTLp' 'PTLp2_3' 'PTLp4' 'PTLp5' 'PTLp6', 'VISp1', 'VISp2_3', 'VISp4', 'VISp5', 'VISp6'};
 
-for ii = 1:length(sessionsTable.SessionName)
-    if contains(sessionsTable.Project(ii), targetProject) || strcmpi('all', targetProject)
-        fprintf(' > %3.i/%3.i session \n',ii, length(sessionsTable.SessionName)); %\n
-        cd([nas_path(sessionsTable.Location{ii}) filesep sessionsTable.Path{ii}]);
+for ii = 1:length(sessions)
+    % if contains(sessionsTable.Project(ii), targetProject) || strcmpi('all', targetProject)
+        % fprintf(' > %3.i/%3.i session \n',ii, length(sessionsTable.SessionName)); %\n
+        % cd([nas_path(sessionsTable.Location{ii}) filesep sessionsTable.Path{ii}]);
+
+        fprintf(' > %3.i/%3.i session \n',ii, length(sessions)); %\n
+        cd([sessions{ii}]);
+
         basepath = pwd;
 
         % 
@@ -29,44 +35,44 @@ for ii = 1:length(sessionsTable.SessionName)
 
         % Indexes for predicted cell type
         % is_pyr = strcmpi(cell_metrics.putativeCellType,'Pyramidal Cell') & ismember(cell_metrics.brainRegion,inHippocampus);
-        is_pyr = strcmpi(cell_metrics.putativeCellType,'Pyramidal Cell');
-        is_pyr_CA1 = strcmpi(cell_metrics.putativeCellType,'Pyramidal Cell') & ismember(cell_metrics.brainRegion,inCA1);
-        
-        % is_Camk2 = strcmpi(cell_metrics.ground_truth_classification.cell_types,'CAMK2+')' & ismember(cell_metrics.brainRegion,inHippocampus);
-        is_Camk2 = strcmpi(cell_metrics.ground_truth_classification.cell_types,'CAMK2+')';
-        is_Camk2_CA1 = strcmpi(cell_metrics.ground_truth_classification.cell_types,'CAMK2+')' & ismember(cell_metrics.brainRegion,inCA1);
-
-        % is_Camk2_deep = strcmpi(cell_metrics.ground_truth_classification.cell_subtypes,'CAMK2_DEEP')' & ismember(cell_metrics.brainRegion,inHippocampus);
-        is_Camk2_deep = strcmpi(cell_metrics.ground_truth_classification.cell_subtypes,'CAMK2_DEEP')';
-        is_Camk2_deep_CA1 = strcmpi(cell_metrics.ground_truth_classification.cell_subtypes,'CAMK2_DEEP')' & ismember(cell_metrics.brainRegion,inCA1);
-
-        % is_Camk2_sup = strcmpi(cell_metrics.ground_truth_classification.cell_subtypes,'CAMK2_SUP')' & ismember(cell_metrics.brainRegion,inHippocampus);
-        is_Camk2_sup = strcmpi(cell_metrics.ground_truth_classification.cell_subtypes,'CAMK2_SUP')';
-        is_Camk2_sup_CA1 = strcmpi(cell_metrics.ground_truth_classification.cell_subtypes,'CAMK2_SUP')' & ismember(cell_metrics.brainRegion,inCA1);
-
-        % is_pv = strcmpi(cell_metrics.ground_truth_classification.cell_types,'PV+')' & ismember(cell_metrics.brainRegion,inHippocampus);
-        is_pv = strcmpi(cell_metrics.ground_truth_classification.cell_types,'PV+')';
-        is_pv_CA1 = strcmpi(cell_metrics.ground_truth_classification.cell_types,'PV+') & ismember(cell_metrics.brainRegion,inCA1);
-
-        % is_sst = strcmpi(cell_metrics.ground_truth_classification.cell_types,'SST+')' & ismember(cell_metrics.brainRegion,inHippocampus);
-        is_sst = strcmpi(cell_metrics.ground_truth_classification.cell_types,'SST+')';
-        is_sst_CA1 = strcmpi(cell_metrics.ground_truth_classification.cell_types,'SST+')' & ismember(cell_metrics.brainRegion,inCA1);
-
-        % is_id2 = strcmpi(cell_metrics.ground_truth_classification.cell_types,'Id2+')' & ismember(cell_metrics.brainRegion,inHippocampus);
-        is_id2 = strcmpi(cell_metrics.ground_truth_classification.cell_types,'Id2+')';
-        is_id2_CA1 = strcmpi(cell_metrics.ground_truth_classification.cell_types,'Id2+') & ismember(cell_metrics.brainRegion,inCA1);
-
-        % is_vip = strcmpi(cell_metrics.ground_truth_classification.cell_types,'VIP+')' & ismember(cell_metrics.brainRegion,inHippocampus);
-        is_vip = strcmpi(cell_metrics.ground_truth_classification.cell_types,'VIP+')';
-        is_vip_CA1 = strcmpi(cell_metrics.ground_truth_classification.cell_types,'VIP+')' & ismember(cell_metrics.brainRegion,inCA1);
-
-        % is_no_sncg = strcmpi(cell_metrics.ground_truth_classification.cell_subtypes,'ID2_NOSNCG+')' & ismember(cell_metrics.brainRegion,inHippocampus);
-        is_no_sncg = strcmpi(cell_metrics.ground_truth_classification.cell_subtypes,'ID2_NOSNCG+')';
-        is_no_sncg_CA1 = strcmpi(cell_metrics.ground_truth_classification.cell_subtypes,'ID2_NOSNCG+')' & ismember(cell_metrics.brainRegion,inCA1);
-
-        % is_sncg = strcmpi(cell_metrics.ground_truth_classification.cell_subtypes,'ID2_SNCG+')' & ismember(cell_metrics.brainRegion,inHippocampus);
-        is_sncg = strcmpi(cell_metrics.ground_truth_classification.cell_subtypes,'ID2_SNCG+')';
-        is_sncg_CA1 = strcmpi(cell_metrics.ground_truth_classification.cell_subtypes,'ID2_NOSNCG+')' & ismember(cell_metrics.brainRegion,inCA1);
+        % is_pyr = strcmpi(cell_metrics.putativeCellType,'Pyramidal Cell');
+        % is_pyr_CA1 = strcmpi(cell_metrics.putativeCellType,'Pyramidal Cell') & ismember(cell_metrics.brainRegion,inCA1);
+        % 
+        % % is_Camk2 = strcmpi(cell_metrics.ground_truth_classification.cell_types,'CAMK2+')' & ismember(cell_metrics.brainRegion,inHippocampus);
+        % is_Camk2 = strcmpi(cell_metrics.ground_truth_classification.cell_types,'CAMK2+')';
+        % is_Camk2_CA1 = strcmpi(cell_metrics.ground_truth_classification.cell_types,'CAMK2+')' & ismember(cell_metrics.brainRegion,inCA1);
+        % 
+        % % is_Camk2_deep = strcmpi(cell_metrics.ground_truth_classification.cell_subtypes,'CAMK2_DEEP')' & ismember(cell_metrics.brainRegion,inHippocampus);
+        % is_Camk2_deep = strcmpi(cell_metrics.ground_truth_classification.cell_subtypes,'CAMK2_DEEP')';
+        % is_Camk2_deep_CA1 = strcmpi(cell_metrics.ground_truth_classification.cell_subtypes,'CAMK2_DEEP')' & ismember(cell_metrics.brainRegion,inCA1);
+        % 
+        % % is_Camk2_sup = strcmpi(cell_metrics.ground_truth_classification.cell_subtypes,'CAMK2_SUP')' & ismember(cell_metrics.brainRegion,inHippocampus);
+        % is_Camk2_sup = strcmpi(cell_metrics.ground_truth_classification.cell_subtypes,'CAMK2_SUP')';
+        % is_Camk2_sup_CA1 = strcmpi(cell_metrics.ground_truth_classification.cell_subtypes,'CAMK2_SUP')' & ismember(cell_metrics.brainRegion,inCA1);
+        % 
+        % % is_pv = strcmpi(cell_metrics.ground_truth_classification.cell_types,'PV+')' & ismember(cell_metrics.brainRegion,inHippocampus);
+        % is_pv = strcmpi(cell_metrics.ground_truth_classification.cell_types,'PV+')';
+        % is_pv_CA1 = strcmpi(cell_metrics.ground_truth_classification.cell_types,'PV+') & ismember(cell_metrics.brainRegion,inCA1);
+        % 
+        % % is_sst = strcmpi(cell_metrics.ground_truth_classification.cell_types,'SST+')' & ismember(cell_metrics.brainRegion,inHippocampus);
+        % is_sst = strcmpi(cell_metrics.ground_truth_classification.cell_types,'SST+')';
+        % is_sst_CA1 = strcmpi(cell_metrics.ground_truth_classification.cell_types,'SST+')' & ismember(cell_metrics.brainRegion,inCA1);
+        % 
+        % % is_id2 = strcmpi(cell_metrics.ground_truth_classification.cell_types,'Id2+')' & ismember(cell_metrics.brainRegion,inHippocampus);
+        % is_id2 = strcmpi(cell_metrics.ground_truth_classification.cell_types,'Id2+')';
+        % is_id2_CA1 = strcmpi(cell_metrics.ground_truth_classification.cell_types,'Id2+') & ismember(cell_metrics.brainRegion,inCA1);
+        % 
+        % % is_vip = strcmpi(cell_metrics.ground_truth_classification.cell_types,'VIP+')' & ismember(cell_metrics.brainRegion,inHippocampus);
+        % is_vip = strcmpi(cell_metrics.ground_truth_classification.cell_types,'VIP+')';
+        % is_vip_CA1 = strcmpi(cell_metrics.ground_truth_classification.cell_types,'VIP+')' & ismember(cell_metrics.brainRegion,inCA1);
+        % 
+        % % is_no_sncg = strcmpi(cell_metrics.ground_truth_classification.cell_subtypes,'ID2_NOSNCG+')' & ismember(cell_metrics.brainRegion,inHippocampus);
+        % is_no_sncg = strcmpi(cell_metrics.ground_truth_classification.cell_subtypes,'ID2_NOSNCG+')';
+        % is_no_sncg_CA1 = strcmpi(cell_metrics.ground_truth_classification.cell_subtypes,'ID2_NOSNCG+')' & ismember(cell_metrics.brainRegion,inCA1);
+        % 
+        % % is_sncg = strcmpi(cell_metrics.ground_truth_classification.cell_subtypes,'ID2_SNCG+')' & ismember(cell_metrics.brainRegion,inHippocampus);
+        % is_sncg = strcmpi(cell_metrics.ground_truth_classification.cell_subtypes,'ID2_SNCG+')';
+        % is_sncg_CA1 = strcmpi(cell_metrics.ground_truth_classification.cell_subtypes,'ID2_NOSNCG+')' & ismember(cell_metrics.brainRegion,inCA1);
 
         % if isempty(dir('*fiber_psth_ripples_PreSleep2.mat'))
             % 
@@ -203,6 +209,8 @@ for ii = 1:length(sessionsTable.SessionName)
         % computeRippleReversal;
         % cellTypeClassifier;
 
+        force_fiber_pre_post = true;
+
          try
             ripples_fiber = fiberPhotometryModulation_temp([],'eventType','ripples','reload_fiber',true);
         catch
@@ -274,6 +282,6 @@ for ii = 1:length(sessionsTable.SessionName)
         close all;
 
         
-    end
+    % end
     close all;
 end

@@ -63,7 +63,7 @@ if exist([session.general.name,'.MergePoints.events.mat'],'file')
     count = 1;
     for ii = 1:size(MergePoints.foldernames,2)
         %if sess(ii).isdir && ~isempty(dir([basepath filesep sess(ii).name filesep '*Basler*avi']))
-        if ~isempty(dir([basepath filesep MergePoints.foldernames{ii} filesep '*uLED_ttl.txt']))  % or '*uLED_ttl.csv'
+        if ~isempty(dir([basepath filesep MergePoints.foldernames{ii} filesep '*uLEDs.txt']))  % or '*uLED_ttl.csv' or 'ULED_ttl.txt' or 'uLEDs.txt'
             % interval = MergePoints.timestamps(ii,:);
             interval = [0 inf];
             cd([basepath filesep MergePoints.foldernames{ii}]); %cd([basepath filesep sess(ii).name]);
@@ -173,17 +173,17 @@ end
     
 %% Converting to optogenetic pulses
 
-load([session.general.name '.digitalIn.events.mat'],'digitalIn');
-for ii = 1:length(uLEDPulses.layout.code)
-    idx = uLEDPulses.code == ii;
-    digitalIn.timestampsOn{ii+1} = uLEDPulses.timestamps(idx,1);
-    digitalIn.timestampsOff{ii+1} = uLEDPulses.timestamps(idx,2);
-    digitalIn.ints{ii+1} = uLEDPulses.ints(idx,:);
-    digitalIn.dur{ii+1} = uLEDPulses.duration(idx,:);
-    digitalIn.intsPeriods{ii+1} = [min(uLEDPulses.timestamps(idx,1)),max(uLEDPulses.timestamps(idx,2))];
-end
-
-save([session.general.name '.digitalIn.events.mat'],'digitalIn');
+% load([session.general.name '.digitalIn.events.mat'],'digitalIn');
+% for ii = 1:length(uLEDPulses.layout.code)
+%     idx = uLEDPulses.code == ii;
+%     digitalIn.timestampsOn{ii+1} = uLEDPulses.timestamps(idx,1);
+%     digitalIn.timestampsOff{ii+1} = uLEDPulses.timestamps(idx,2);
+%     digitalIn.ints{ii+1} = uLEDPulses.ints(idx,:);
+%     digitalIn.dur{ii+1} = uLEDPulses.duration(idx,:);
+%     digitalIn.intsPeriods{ii+1} = [min(uLEDPulses.timestamps(idx,1)),max(uLEDPulses.timestamps(idx,2))];
+% end
+% 
+% save([session.general.name '.digitalIn.events.mat'],'digitalIn');
 
     
 

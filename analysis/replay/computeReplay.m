@@ -1,0 +1,201 @@
+function [replayScores] = computeReplay(varargin)
+% Computes replay
+% 
+% INPUTS
+% <optional>
+% 'basepath'            Default pwd
+% 'lfp'                 buzcode-formatted lfp structure (use bz_GetLFP)
+%                           needs fields: lfp.data, lfp.timestamps, lfp.samplingRate.
+%                           If empty or no exist, look for lfp in basePath folder
+% 'saveMat'             Detault true
+% 'force'               Default false
+% 
+% OUTPUT
+% replayScores          replayScores structure with scores 
+%
+% Pablo Abad. NeuCompLab (2025).
+% This function uses the RnR toolbox developed by David Tingley and Adrien
+% Peyrache (2019).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Parse options
+p = inputParser;
+addParameter(p,'basepath',pwd,@isstruct);
+addParameter(p,'spikes',[],@isstruct);
+addParameter(p,'ripples',[]);
+addParameter(p,'behavior',[]);
+addParameter(p,'firingMapsAvg',[]);
+addParameter(p,'placeFieldStats',[]);
+addParameter(p,'spatialModulation',[]);
+addParameter(p,'saveMat',true,@islogical);
+addParameter(p,'force',false,@islogical);
+addParameter(p,'plotting',true,@islogical);
+addParameter(p,'mode','bayes'); % bayes/rankOrder. Default: bayes
+% replay-specific
+addParameter(p,'nBinsThresh',5); % the minimum number of bins, per event, to analyze event (binSize * nBinsThresh = total event duration)
+addParameter(p,'binSize',.01);
+addParameter(p,'overlap',1);
+addParameter(p,'n_shuffles',100);
+% rank order replay
+addParameter(p,'nCellsPerEvent',4);
+
+
+parse(p,varargin{:})
+basepath = p.Results.basepath;
+spikes = p.Results.spikes;
+ripples = p.Results.ripples;
+behavior = p.Results.behavior;
+firingMapsAvg = p.Results.firingMapsAvg;
+placeFieldStats = p.Results.placeFieldStats;
+spatialModulation = p.Results.spatialModulation;
+saveMat = p.Results.saveMat;
+force = p.Results.force;
+plotting = p.Results.plotting;
+mode = p.Results.mode;
+nBinsThresh = p.Results.nBinsThresh;
+binSize = p.Results.binSize;
+overlap = p.Results.overlap;
+n_shuffles = p.Results.n_shuffles;
+nCellsPerEvent = p.Results.nCellsPerEvent;
+
+
+% Deal with inputs
+prevBasepath = pwd;
+cd(basepath);
+
+targetFile = dir(['*.',mode,'Replay.events.mat']);
+if ~isempty(targetFile) && ~force
+    disp('Replay already detected! Loading file.');
+    load(targetFile.name);
+    return
+end
+
+% Load spikes
+if isempty(spikes)
+    spikes = loadSpikes();
+end
+
+% Load ripples
+if isempty(ripples)
+    ripples = rippleMasterDetector();
+end
+
+% Load behavior
+if isempty(behavior)
+    behavior = getSessionLinearize();  
+end
+
+% Load firing Maps
+if isempty(firingMapsAvg)
+    firingMapsAvg = bz_firingMapAvg();
+end
+
+% Load placeFieldStats
+if isempty(placeFieldStats)
+    placeFieldStats = bz_findPlaceFields1D();
+end
+
+% Load spatialModulation
+if isempty(spatialModulation)
+    spatialModulation = getSpatialModulation();
+end
+
+
+%% Compute replay for all possible conditions (map_1 and map_2; for instace)
+
+for ii = 1:length(behavior.maps)
+
+    is_placeField_map{ii} = spatialModulation.(['is_placeField_map_',(num2str(ii))]);
+    template = spatialModulation.(['map_',(num2str(ii)),'_rateMaps']);
+    
+    % Let's clean the rate maps (all columns equal to 0) and neurons with
+    % very few spikes.
+    % non_silent_cells = max(template,[],2) > 0 & max(template,[],2) > 1;
+    % mask = ismember(1:size(template,1),find(non_silent_cells));
+    % template = template(mask,:);
+    % is_placeField_map{ii} = is_placeField_map{ii}(mask);
+
+    if strcmpi(mode,'bayes')
+
+        replayScores{ii} = bayesian_replay(spikes,ripples,template,find(is_placeField_map{ii}),'nBinsThresh',nBinsThresh,'binSize',binSize,'overlap',overlap,'n_shuffles',n_shuffles);
+        % replayScores{ii} = bayesian_replay(spikes_temp,ripples,template,[],'nBinsThresh',nBinsThresh,'binSize',binSize,'overlap',overlap,'n_shuffles',n_shuffles);
+
+    elseif strcmpi(mode,'rankOrder')
+
+        replayScores{ii} = rankOrder_replay(spikes,ripples,template,find(is_placeField_map{ii}),'nCellsPerEvt',nCellsPerEvent,'binSize',binSize,'overlap',overlap,'n_shuffles',n_shuffles);
+
+    end
+end
+
+% Save output
+
+if saveMat
+    session = loadSession();
+    if strcmpi(mode,'bayes')
+        save([session.general.name,'.bayesReplay.events.mat'],'replayScores');
+    elseif strcmpi(mode,'rankOrder')
+        save([session.general.name,'.rankOrderReplay.events.mat'],'replayScores');
+    end
+end
+
+
+% Plotting
+
+for ii = 1:length(replayScores)
+
+    if strcmpi(mode,'bayes')
+        figure('WindowState','maximized')
+        subplot(2,2,1)
+        histogram(replayScores{ii}.bayesLinearWeighted,50,'FaceColor',[.5 .6 .5], 'EdgeColor','k');
+        hold on;
+        histogram(replayScores{ii}.bayesLinearWeighted(replayScores{ii}.is_replay_linearWeighted_cellID),50,'FaceColor',[.1 .1 .1], 'EdgeColor','k');
+        xlim([-1 1]);
+        ylabel('Number of ripples');
+        xlabel('Bayes Linear Weighted');
+        legend('All ripples','Significant ripples','Location','best');
+        title('Replay bayes linearWeighted');
+    
+        subplot(2,2,2)
+        histogram(replayScores{ii}.bayesLinearWeighted,50,'FaceColor',[.5 .6 .5], 'EdgeColor','k');
+        hold on;
+        histogram(replayScores{ii}.bayesLinearWeighted(replayScores{ii}.is_replay_circularWeighted_cellID),50,'FaceColor',[.1 .1 .1], 'EdgeColor','k');
+        legend('All ripples','Significant ripples');
+        xlim([-1 1]);
+        ylabel('Number of ripples');
+        xlabel('Bayes Circular Weighted');
+        title('Replay bayes circularWeighted')
+    
+        subplot(2,2,3)
+        histogram(replayScores{ii}.bayesRadon,50,'FaceColor',[.5 .6 .5], 'EdgeColor','k');
+        hold on;
+        histogram(replayScores{ii}.bayesRadon(replayScores{ii}.is_replay_linearRadon_cellID),50,'FaceColor',[.1 .1 .1], 'EdgeColor','k');
+        legend('All ripples','Significant ripples');
+        ylabel('Number of ripples');
+        xlabel('Bayes circular Radon');
+        title('Replay bayes linearRadon');
+        
+        subplot(2,2,4)
+        histogram(replayScores{ii}.bayesRadon,50,'FaceColor',[.5 .6 .5], 'EdgeColor','k');
+        hold on;
+        histogram(replayScores{ii}.bayesRadon(replayScores{ii}.is_replay_circularRadon_cellID),50,'FaceColor',[.1 .1 .1], 'EdgeColor','k');
+        legend('All ripples','Significant ripples');
+        ylabel('Number of ripples');
+        xlabel('Bayes circular Radon');
+    
+        saveas(gca,['SummaryFigures\replayBayes_map_',num2str(ii),'.png']);
+
+    elseif strcmpi(mode,'rankOrder')
+
+        figure('WindowState','maximized');
+        histogram(replayScores{ii}.rankOrd,50,'FaceColor',[.5 .6 .5], 'EdgeColor','k');
+        hold on;
+        histogram(replayScores{ii}.rankOrd(replayScores{ii}.is_replay),50,'FaceColor',[.1 .1 .1], 'EdgeColor','k');
+        legend('All ripples','Significant ripples');
+        xlim([-1 1]);
+        ylabel('Number of ripples');
+        xlabel('Rank Order Correlation');
+        saveas(gca,['SummaryFigures\replayRankOrder_map_',num2str(ii),'.png']);
+    end
+end
+
+cd(prevBasepath);
+end

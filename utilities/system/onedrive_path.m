@@ -24,6 +24,8 @@ function dp = onedrive_path
             dp = 'C:\Users\amartinez11\OneDrive - imim.es\';
         case 'DESKTOP-4MOGMGG' % pablo's pc
             dp = 'C:\Users\pabad\OneDrive - imim.es\';
+        case 'IGNACIODCB' 
+            dp = 'C:\Users\ignac\imim.es\';
         otherwise
             error('Not recornized computer!');
     end

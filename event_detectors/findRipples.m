@@ -140,6 +140,11 @@ elseif isstruct(varargin{1})
         signal = bz_Filter(double(lfp.data),'filter','butter','passband',passband,'order',3);
         basename = basenameFromBasepath(basepath);
     end
+    if isfield(lfp,'region')
+        region = lfp.region;
+    else
+        region = 'N/A';
+    end
 elseif isnumeric(varargin{1})
     addRequired(p,'channel',@isnumeric) 
     parse(p,varargin{:});
@@ -434,6 +439,12 @@ if isfield(detectorinfo.detectionparms,'timestamps')
 end
 if isfield(p.Results,'channel')
     detectorinfo.detectionchannel = p.Results.channel;
+end
+try
+    if isfield(p.Results.lfp,'channels')
+        detectorinfo.detectionchannel = p.Results.lfp.channels;
+    end
+catch
 end
 if ~isempty(noise)
     detectorinfo.noisechannel = noise;

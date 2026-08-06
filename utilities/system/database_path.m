@@ -25,6 +25,8 @@ computerName = (strtrim(computerName));
             dp = 'Z:\';
         case 'MountainJorge'
             dp = [];
+        case 'DESKTOP-TR4TAI6'
+            dp= 'Y:';
         otherwise
             error('Computer name not found! Not possible to retrieve database path!');
     end

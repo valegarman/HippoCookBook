@@ -80,7 +80,7 @@ count = 1;
 for shankNumber = include_shanks
     shank_electrodes = session.extracellular.electrodeGroups.channels{shankNumber};
     for jj = 1:length(shank_electrodes)
-        voltage = smooth(double(continuous(:,shank_electrodes(jj))),smoothOpt) - y_position;
+        voltage = 0.5.*(smooth(double(continuous(:,shank_electrodes(jj))),smoothOpt) - y_position);
         plot(x_time, voltage,'color', cmap_elect(count,:));
         y_position = y_position - y_separation;
         count = count + 1;
@@ -111,53 +111,53 @@ for ii = 1:length(spikes.times)
     raster_spikes{ii} = spikes.times{ii}(InIntervals(spikes.times{ii}, interval)) - interval(1);
 end
 
-if strcmpi(lower(units_mode), 'raster')
-    nElements = cellfun(@numel, raster_spikes);
-    [~, idx] = sort(nElements, 'ascend');
-    shank_padding = zeros(size(idx));
-elseif strcmpi(lower(units_mode), 'raster_shank')
-    nElements = cellfun(@numel, raster_spikes);
-    shankID = spikes.shankID;
-    [~, idx] = sortrows([shankID' nElements'], [1 2]);
-    shank_padding = y_spikes_separation * 10 * [0 diff(shankID(idx))];
-end
-
-switch lower(spikeColorMap)
-    case 'black'
-        for ii = 1:length(idx)
-            if nElements(idx(ii)) > 1
-                plot(raster_spikes{idx(ii)}, y_position * ones(size(raster_spikes{idx(ii)})), '.', 'MarkerSize',spikesSize,'MarkerEdgeColor',[0 0 0]);
-                y_position = y_position + y_spikes_separation + shank_padding(ii);
-            end
-        end
-
-    case 'type'
-        for ii = 1:length(idx)
-            if nElements(idx(ii)) > 1
-                plot(raster_spikes{idx(ii)}, y_position * ones(size(raster_spikes{idx(ii)})), '.', 'MarkerSize',spikesSize,'MarkerEdgeColor',getColors(cell_metrics.putativeCellType(ind(ii))));
-                y_position = y_position + y_spikes_separation + shank_padding(ii);
-            end
-        end
-    case 'subtype'
-        for ii = 1:length(idx)
-            if nElements(idx(ii)) > 1
-                plot(raster_spikes{idx(ii)}, y_position * ones(size(raster_spikes{idx(ii)})), '.', 'MarkerSize',spikesSize,'MarkerEdgeColor',getColors(cell_metrics.ground_truth_classification.cell_types(ind(ii))));
-                y_position = y_position + y_spikes_separation + shank_padding(ii);
-            end
-        end
-    case 'shank'
-        cmap_shank = (cmapFunc(length(unique(spikes.shankID)) + 1));
-
-        for ii = 1:length(idx)
-            if nElements(idx(ii)) > 1
-                plot(raster_spikes{idx(ii)}, y_position * ones(size(raster_spikes{idx(ii)})), '.', 'MarkerSize',spikesSize,'MarkerEdgeColor',cmap_shank(shankID(idx(ii)),:));
-                y_position = y_position + y_spikes_separation + shank_padding(ii);
-            else
-                y_position = y_position + shank_padding(ii);
-            end
-        end
-end
-
+% if strcmpi(lower(units_mode), 'raster')
+%     nElements = cellfun(@numel, raster_spikes);
+%     [~, idx] = sort(nElements, 'ascend');
+%     shank_padding = zeros(size(idx));
+% elseif strcmpi(lower(units_mode), 'raster_shank')
+%     nElements = cellfun(@numel, raster_spikes);
+%     shankID = spikes.shankID;
+%     [~, idx] = sortrows([shankID' nElements'], [1 2]);
+%     shank_padding = y_spikes_separation * 10 * [0 diff(shankID(idx))];
+% end
+% 
+% switch lower(spikeColorMap)
+%     case 'black'
+%         for ii = 1:length(idx)
+%             if nElements(idx(ii)) > 1
+%                 plot(raster_spikes{idx(ii)}, y_position * ones(size(raster_spikes{idx(ii)})), '.', 'MarkerSize',spikesSize,'MarkerEdgeColor',[0 0 0]);
+%                 y_position = y_position + y_spikes_separation + shank_padding(ii);
+%             end
+%         end
+% 
+%     case 'type'
+%         for ii = 1:length(idx)
+%             if nElements(idx(ii)) > 1
+%                 plot(raster_spikes{idx(ii)}, y_position * ones(size(raster_spikes{idx(ii)})), '.', 'MarkerSize',spikesSize,'MarkerEdgeColor',getColors(cell_metrics.putativeCellType(idx(ii))));
+%                 y_position = y_position + y_spikes_separation + shank_padding(ii);
+%             end
+%         end
+%     case 'subtype'
+%         for ii = 1:length(idx)
+%             if nElements(idx(ii)) > 1
+%                 plot(raster_spikes{idx(ii)}, y_position * ones(size(raster_spikes{idx(ii)})), '.', 'MarkerSize',spikesSize,'MarkerEdgeColor',getColors(cell_metrics.ground_truth_classification.cell_types(idx(ii))));
+%                 y_position = y_position + y_spikes_separation + shank_padding(ii);
+%             end
+%         end
+%     case 'shank'
+%         cmap_shank = (cmapFunc(length(unique(spikes.shankID)) + 1));
+% 
+%         for ii = 1:length(idx)
+%             if nElements(idx(ii)) > 1
+%                 plot(raster_spikes{idx(ii)}, y_position * ones(size(raster_spikes{idx(ii)})), '.', 'MarkerSize',spikesSize,'MarkerEdgeColor',cmap_shank(shankID(idx(ii)),:));
+%                 y_position = y_position + y_spikes_separation + shank_padding(ii);
+%             else
+%                 y_position = y_position + shank_padding(ii);
+%             end
+%         end
+% end
+% 
 
 set(gca,'TickDir', 'out', 'YTick',[]);
 ylabel('Channels'); xlabel('Time');

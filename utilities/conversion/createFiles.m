@@ -33,11 +33,11 @@ cd(basepath);
 %% Creates the .dat files looking for all the subfolders
 
 % Deals with global.xml
-if ~isempty(dir('global.xml'))
-    session = sessionTemplate(basepath,'showGUI',false);
-else
-    error('global.xml not found. Can not retrieve number of channels. Quitting...');
-end
+% if ~isempty(dir('global.xml'))
+%     session = sessionTemplate(basepath,'showGUI',false);
+% else
+%     error('global.xml not found. Can not retrieve number of channels. Quitting...');
+% end
 
 nChannels = session.extracellular.nChannels;
 expName = strsplit(basepath,filesep);
