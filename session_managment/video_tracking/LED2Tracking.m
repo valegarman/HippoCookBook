@@ -31,6 +31,7 @@ function [tracking] = LED2Tracking(aviFile,varargin)
 %   saveMat        - default true
 %   artifactThreshold - max allow movements per frame (in cm, default 3).
 %                   Disabled if not convFact is provided.
+%   method          - 'fixed_thr', 'adaptative_thr'
 % 
 % OUTPUT
 %       - tracking.behaviour output structure, with the fields:
@@ -56,7 +57,7 @@ addParameter(p,'artifactThreshold',10,@isnumeric);
 addParameter(p,'convFact',[],@isnumeric); % 0.1149
 addParameter(p,'roiTracking',[],@ismatrix);
 addParameter(p,'roiLED',[],@ismatrix);
-addParameter(p,'forceReload',false,@islogical)
+addParameter(p,'forceReload',true,@islogical)
 addParameter(p,'saveFrames',true,@islogical)
 addParameter(p,'verbose',false,@islogical);
 addParameter(p,'thresh',.98,@isnumeric) % .98
@@ -65,6 +66,7 @@ addParameter(p,'leftTTL_reward',[],@isnumeric)
 addParameter(p,'rightTTL_reward',[],@isnumeric)
 addParameter(p,'saveMat',true,@islogical);
 addParameter(p,'basler_ttl_channel',[],@isnumeric); % by default, 5
+addParameter(p,'method','adaptative_thr'); 
 
 % addParameter(p,'RGBChannel',[],@isstr);
 
@@ -84,13 +86,13 @@ saveMat = p.Results.saveMat;
 basler_ttl_channel = p.Results.basler_ttl_channel;
 leftTTL_reward = p.Results.leftTTL_reward;
 rightTTL_reward = p.Results.rightTTL_reward;
-
+method = p.Results.method;
 
 
 % RGBChannel = p.Results.RGBChannel;
 
 %% Deal with inputs
-if ~isempty(dir([basepath filesep '*Tracking.Behavior.mat'])) || forceReload
+if ~isempty(dir([basepath filesep '*Tracking.Behavior.mat'])) && forceReload
     disp('Trajectory already detected! Loading file.');
     file = dir([basepath filesep '*Tracking.Behavior.mat']);
     load(file.name);
@@ -121,8 +123,9 @@ if ~exist('aviFile') || isempty(aviFile)
         return
     end
 end
+
 % attention, for now it only loads the red channel from the video!!
-if ~exist([basepath filesep aviFile '.mat'],'file') && ~forceReload
+if ~exist([basepath filesep aviFile '.mat'],'file')
     disp('Get average frame...');
     videoObj = VideoReader([aviFile '.avi']);   % get video
     numFrames = get(videoObj, 'NumFrames');
@@ -218,59 +221,223 @@ end
 
 %% DETECT LED POSITION
 bw = uint8(poly2mask(roiTracking(:,1),roiTracking(:,2),size(frames.r,1),size(frames.r,2)));
-disp('Detect LED position...');
-thr_fr = thresh * 255;
-if ~verbose
-    tic
-    f = waitbar(0,'Detecting LED position...');
-    for ii = 1:size(frames.r,3)
-        waitbar(ii/size(frames.r,3),f)
-        fr = frames.r(:,:,ii).*bw;
-        bin_fr = imbinarize(double(fr),thr_fr); %
-        bin_fr = bwareafilt(bin_fr,[10 300]);
-        stats_fr = regionprops(bin_fr);
-        maxBlob = find([stats_fr.Area]== max([stats_fr.Area]),1);
-        if ~isempty(maxBlob)
-            sz_fr(ii) = stats_fr(maxBlob).Area;
-            Rr_x(ii) = stats_fr(maxBlob).Centroid(1);
-            Rr_y(ii) = stats_fr(maxBlob).Centroid(2);
-        else
-            sz_fr(ii) = NaN;
-            Rr_x(ii) = NaN;
-            Rr_y(ii) = NaN;
+
+if strcmpi(method, 'fixed_thr')    
+    disp('Detect LED position...');
+    thr_fr = thresh * 255;
+    if ~verbose
+        tic
+        f = waitbar(0,'Detecting LED position...');
+        for ii = 1:size(frames.r,3)
+            waitbar(ii/size(frames.r,3),f)
+            fr = frames.r(:,:,ii).*bw;
+            bin_fr = imbinarize(double(fr),thr_fr); %
+            bin_fr = bwareafilt(bin_fr,[10 300]);
+            stats_fr = regionprops(bin_fr);
+            maxBlob = find([stats_fr.Area]== max([stats_fr.Area]),1);
+            if ~isempty(maxBlob)
+                sz_fr(ii) = stats_fr(maxBlob).Area;
+                Rr_x(ii) = stats_fr(maxBlob).Centroid(1);
+                Rr_y(ii) = stats_fr(maxBlob).Centroid(2);
+            else
+                sz_fr(ii) = NaN;
+                Rr_x(ii) = NaN;
+                Rr_y(ii) = NaN;
+            end
         end
+        close(f)
+        toc
+    else
+        h1 = figure;
+        hold on
+        tic
+        for ii = 1:size(frames.r,3)
+            fr = frames.r(:,:,ii).*bw;
+            bin_fr = imbinarize(double(fr),thr_fr); %
+            bin_fr = bwareafilt(bin_fr,[10 300]);
+            stats_fr = regionprops(bin_fr);
+            maxBlob = find([stats_fr.Area]== max([stats_fr.Area]),1);
+            if ~isempty(maxBlob)
+                sz_fr(ii) = stats_fr(maxBlob).Area;
+                Rr_x(ii) = stats_fr(maxBlob).Centroid(1);
+                Rr_y(ii) = stats_fr(maxBlob).Centroid(2);
+                cla
+                imagesc(fr)
+                plot(Rr_x(ii),Rr_y(ii),'or')
+                drawnow;
+            else
+                sz_fr(ii) = NaN;
+                Rr_x(ii) = NaN;
+                Rr_y(ii) = NaN;
+            end
+        end
+        toc
+        close(h1);
+    end
+
+elseif strcmpi(method, 'adaptative_thr')
+    %% Detect LED position with bright-pixel threshold + online Kalman
+
+    nFrames = size(frames.r,3);
+    
+    Rr_x  = NaN(nFrames,1);
+    Rr_y  = NaN(nFrames,1);
+    sz_fr = NaN(nFrames,1);
+    
+    % Parameters to adjust
+    thrPrctile = 99.95;
+    maxJump    = 25;      % pixels
+    q          = 0.05;    % Kalman process noise
+    r          = 10;      % Kalman measurement noise
+    minArea    = 1;
+    maxArea    = 80;
+    
+    % Kalman model
+    dt = 1/fs;
+    
+    A = [1 0 dt 0;
+         0 1 0 dt;
+         0 0 1  0;
+         0 0 0  1];
+    
+    H = [1 0 0 0;
+         0 1 0 0];
+    
+    Q = q * eye(4);
+    R = r * eye(2);
+    
+    state = [];
+    P = eye(4) * 100;
+    
+    f = waitbar(0,'Detecting LED position...');
+    
+    for ii = 1:nFrames
+    
+        waitbar(ii/nFrames,f)
+    
+        %% Frame preprocessing
+        fr = double(frames.r(:,:,ii)) .* double(bw);
+    
+        % Smooth image slightly
+        fr2 = imgaussfilt(fr,0.7);
+    
+        % Threshold only inside mask
+        pix = fr2(bw > 0);
+    
+        if isempty(pix) || all(isnan(pix))
+            continue
+        end
+    
+        thr = prctile(pix,thrPrctile);
+    
+        bin_fr = fr2 >= thr;
+        bin_fr = bin_fr & bw;
+    
+        % Clean tiny blobs
+        bin_fr = bwareaopen(bin_fr,minArea);
+        bin_fr = bwareafilt(bin_fr,[minArea maxArea]);
+    
+        %% Candidate extraction
+        stats_fr = regionprops(bin_fr,fr2,...
+            'Area','WeightedCentroid','MaxIntensity','MeanIntensity');
+    
+        %% Kalman prediction
+        if ~isempty(state)
+            statePred = A * state;
+            PPred = A * P * A' + Q;
+            predPos = statePred(1:2)';
+        else
+            statePred = [];
+            PPred = P;
+            predPos = [];
+        end
+    
+        maxBlob = [];
+    
+        %% Candidate selection
+        if ~isempty(stats_fr)
+    
+            candidates = cat(1,stats_fr.WeightedCentroid);
+    
+            brightness = [stats_fr.MaxIntensity]';
+            area       = [stats_fr.Area]';
+    
+            % Bright + not too tiny
+            candScore = brightness .* sqrt(area);
+    
+            if ~isempty(predPos)
+    
+                dist = sqrt(sum((candidates - predPos).^2,2));
+                valid = dist < maxJump;
+    
+                if any(valid)
+                    score = candScore(valid) ./ (1 + dist(valid).^2);
+                    idx = find(valid);
+                    [~,k] = max(score);
+                    maxBlob = idx(k);
+                else
+                    % Important fallback: do not lose the LED completely
+                    [~,maxBlob] = max(candScore);
+                end
+    
+            else
+                % First detected frame
+                [~,maxBlob] = max(candScore);
+            end
+        end
+    
+        %% Kalman update / fallback prediction
+        if ~isempty(maxBlob)
+    
+            z = candidates(maxBlob,:)';
+    
+            if isempty(state)
+                state = [z(1); z(2); 0; 0];
+                P = eye(4) * 10;
+            else
+                innovation = z - H * statePred;
+                S = H * PPred * H' + R;
+                K = PPred * H' / S;
+    
+                state = statePred + K * innovation;
+                P = (eye(4) - K * H) * PPred;
+            end
+    
+            Rr_x(ii)  = state(1);
+            Rr_y(ii)  = state(2);
+            sz_fr(ii) = stats_fr(maxBlob).Area;
+    
+        else
+    
+            % No candidate: keep prediction if Kalman is initialized
+            if ~isempty(state)
+                state = statePred;
+                P = PPred;
+    
+                Rr_x(ii) = state(1);
+                Rr_y(ii) = state(2);
+            else
+                Rr_x(ii) = NaN;
+                Rr_y(ii) = NaN;
+            end
+    
+            sz_fr(ii) = NaN;
+        end
+    
+        %% Optional visualization
+        % if mod(ii,20)==0
+        %     cla
+        %     imagesc(fr2); axis image
+        %     hold on
+        %     plot(Rr_x(ii),Rr_y(ii),'or')
+        %     drawnow
+        % end
+        
     end
     close(f)
-    toc
-else
-    h1 = figure;
-    hold on
-    tic
-    for ii = 1:size(frames.r,3)
-        fr = frames.r(:,:,ii).*bw;
-        bin_fr = imbinarize(double(fr),thr_fr); %
-        bin_fr = bwareafilt(bin_fr,[10 300]);
-        stats_fr = regionprops(bin_fr);
-        maxBlob = find([stats_fr.Area]== max([stats_fr.Area]),1);
-        if ~isempty(maxBlob)
-            sz_fr(ii) = stats_fr(maxBlob).Area;
-            Rr_x(ii) = stats_fr(maxBlob).Centroid(1);
-            Rr_y(ii) = stats_fr(maxBlob).Centroid(2);
-            cla
-            imagesc(fr)
-            plot(Rr_x(ii),Rr_y(ii),'or')
-            drawnow;
-        else
-            sz_fr(ii) = NaN;
-            Rr_x(ii) = NaN;
-            Rr_y(ii) = NaN;
-        end
-    end
-    toc
-    close(h1);
 end
 
-pos = [Rr_x; Rr_y]';
+pos = [Rr_x'; Rr_y']';
 
 %% postprocessing of LED position 
 pos = pos * convFact;                                   % cm or normalized

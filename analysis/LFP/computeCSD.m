@@ -50,6 +50,7 @@ addParameter(p,'plotLFP',false,@islogical);
 addParameter(p,'session',[],@isstruct);
 addParameter(p,'interpBadChannels',true,@islogical);
 addParameter(p,'interpBadChannels_fast',true,@islogical);
+addParameter(p,'intervals',[],@isnumerictype);
 
 parse(p,varargin{:});
 channels = p.Results.channels;
@@ -63,7 +64,7 @@ session = p.Results.session;
 win = p.Results.win;
 interpBadChannels_fast = p.Results.interpBadChannels_fast;
 interpBadChannels = p.Results.interpBadChannels;
-
+intervals = p.Results.intervals;
 
 % session input
 if isempty(session)
@@ -120,7 +121,7 @@ if ~isempty(lfp) && isnumeric(lfp)
     timestamps = [1:length(lfp)]'./samplingRate;
 else
     if isempty(lfp)
-        lfp = getLFP(channels);
+        lfp = getLFP(channels, 'intervals', intervals);
     elseif isstruct(lfp)
         [~,ia,~] = intersect(lfp.channels,channels,'stable');
         lfp.data = lfp.data(ia);

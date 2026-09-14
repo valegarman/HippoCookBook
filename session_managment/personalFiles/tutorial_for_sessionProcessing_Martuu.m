@@ -12,6 +12,9 @@ updateExpFolder({'V:\data\fCck1', 'Y:\fCck1'},'J:\data\fCck1');
 %   Example:
 batch_preprocessSession('basepath','X:\data\fCr1','analysisPath','F:\fCr1','cleanArtifacts',({[],1}),'analogChannelsList',[],'digitalChannelsList',6:16);
 
+preprocessSession('basepath',pwd,'analogChannelsList',[],'spikeSort',true,'getPos',false, 'cleanArtifacts', false,...
+                    'medianSubstr',false,'tracking_pixel_cm',NaN,'sessionSummary',true,'digitalChannelsList',[],'bazler_ttl_channel',[],'skipStimulationPeriods',false);
+
 % <OPTIONAL> If summary was not processed, it can be run in batch by 'batch_preprocessSession'
 batch_sessionSummary('basepath','G:\data\fPv4','cleanArtifacts',({65,[]}),'analogChannelsList',65,'digitalChannelsList',0);
 

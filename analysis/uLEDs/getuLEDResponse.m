@@ -546,6 +546,9 @@ end
 if saveMat
     disp('Saving...');
     save([basenameFromBasepath(pwd) '.' save_as '.cellinfo.mat'],'uLEDResponses');
+end
+
+if saveMat & getRaster
     save([basenameFromBasepath(pwd) '.' save_as '_raster.cellinfo.mat'],'uLEDResponses_raster','-v7.3');
 end
 
@@ -662,8 +665,9 @@ cd(prevPath);
 end
 
 function S = removeNaNFieldsRecursive(S)
-% Recorre la estructura (incluye arrays de structs / anidada) y limpia
-% campos numéricos eliminando rebanadas completamente NaN en TODAS las dimensiones.
+% Recursively traverses a structure (including struct arrays and nested
+% structures) and removes slices that are entirely NaN along the second
+% dimension of numeric fields.
 
     if numel(S) > 1
         for k = 1:numel(S)
@@ -675,58 +679,48 @@ function S = removeNaNFieldsRecursive(S)
     fn = fieldnames(S);
     for i = 1:numel(fn)
         val = S.(fn{i});
+
         if isstruct(val)
             S.(fn{i}) = removeNaNFieldsRecursive(val);
         elseif isnumeric(val)
-            S.(fn{i}) = cleanNumericAllDims(val);
+            S.(fn{i}) = cleanNumericDim2(val);
         end
     end
 end
 
-function val = cleanNumericAllDims(val)
-% Elimina:
-% - NaN en vectores (borra esos elementos).
-% - En N-D: rebanadas completamente NaN a lo largo de CADA dimensión.
-% Repite hasta estabilidad.
+function val = cleanNumericDim2(val)
+% Removes indices along the second dimension that are entirely NaN.
+%
+% For 2-D matrices:
+%   - Removes columns containing only NaN values.
+%
+% For N-D arrays:
+%   - Removes indices in the second dimension where the entire slice
+%     across all other dimensions is NaN.
 
-    if isempty(val); return; end
-
-    % Caso vector sencillo
-    if isvector(val)
-        val = val(~isnan(val));
-        return;
+    if isempty(val) || ndims(val) < 2
+        return
     end
 
-    changed = true;
-    while changed
-        changed = false;
-        nd = ndims(val);
-        % Recorremos todas las dimensiones
-        for d = 1:nd
-            sz = size(val);
-            if sz(d) == 0
-                continue; % nada que hacer
-            end
+    sz = size(val);
 
-            % Máscara N-D de NaNs
-            M = isnan(val);
+    % NaN mask
+    M = isnan(val);
 
-            % Reducimos sobre todas las dimensiones excepto d
-            other = setdiff(1:nd, d);
-            for k = other
-                M = all(M, k);
-            end
+    % Collapse all dimensions except dimension 2
+    otherDims = setdiff(1:ndims(val), 2);
 
-            % M ahora tiene tamaño 1 en todas las dims salvo en d (que conserva sz(d))
-            keep = ~reshape(M, [sz(d), 1]);  % vector lógico de longitud sz(d)
-
-            % Si hay algo que eliminar en la dimensión d
-            if ~all(keep)
-                idx = repmat({':'}, 1, nd);
-                idx{d} = keep;
-                val = val(idx{:});   % reindexamos conservando solo los índices válidos
-                changed = true;
-            end
-        end
+    for k = otherDims
+        M = all(M, k);
     end
+
+    % Logical vector indicating which indices to keep in dimension 2
+    removeDim2 = reshape(M, [1, sz(2)]);
+    keep = ~removeDim2;
+
+    % Apply indexing only along dimension 2
+    idx = repmat({':'}, 1, ndims(val));
+    idx{2} = keep;
+
+    val = val(idx{:});
 end

@@ -184,7 +184,7 @@ for ii = 1:length(sessions_basepaths)
             projectSessionResults.(name_of_result){ii} = NaN;
             warning(['Not possible to load: ', name_of_result]);
         else
-            projectSessionResults.(name_of_result){ii} = importdata(targetFile.name);
+            projectSessionResults.(name_of_result){ii} = importdata(targetFile(1).name);
         end
     end
 

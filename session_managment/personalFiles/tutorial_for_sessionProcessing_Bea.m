@@ -5,15 +5,16 @@
 %   'updateExpFolder({recordingPC_1, recordingPC_2, etc}, 'analysis unit')',
 %   Example:
 
-updateExpFolder_temp('G:\nore1','E:\nore1');
+updateExpFolder_temp('I:\social2','E:\social2');
 
 % 2% Then, preprocess session (includes artifacts removal, median signal
 %   removal, LFP and Kilosort, and running computeSessionSummary by 'batch_preprocessSession('basepath','sessionBasepath').
 %   Example:
-batch_preprocessSession('basepath','E:\nore1');
+batch_preprocessSession('basepath','E:\social2');
+preprocessSession('basepath',"E:\astro10\astro10_260610_sess1", 'digitalChannelsList', 1);
 
 % <OPTIONAL> If summary was not processed, it can be run in batch by 'batch_preprocessSession'
-batch_sessionSummary('basepath','E:\nore1','cleanArtifacts',({65,[]}),'analogChannelsList',65,'digitalChannelsList',0);
+batch_sessionSummary('basepath','G:\astro10\','analogChannelsList',[],'digitalChannelsList',[]);
 
 % <OPTIONAL> If only a single session should be processed
 preprocessSession('basepath',pwd,'analogChannelsList',[],'spikeSort',true,'getPos',false, 'cleanArtifacts', true,...

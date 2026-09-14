@@ -12,7 +12,7 @@ updateExpFolder_temp({'I:\trauma2\trauma2'},'E:\trauma2');
 %   Example:
 batch_preprocessSession('basepath','C:\wt3','analysisPath','F:\fCr1','cleanArtifacts',({[],1}),'analogChannelsList',[],'digitalChannelsList',1);
 
-preprocessSession('basepath','E:\trauma2\trauma2_260618_sess3','analogChannelsList',[],'digitalChannelsList',1);
+preprocessSession('basepath','E:\trauma2\trauma2_260618_sess2','analogChannelsList',[],'digitalChannelsList',1);
 
 % Spike sorting
 

@@ -1,4 +1,4 @@
-function    [SleepState] = bz_ThetaStates(basePath,makePlot)
+function    [SleepState] = bz_ThetaStates(basePath,makePlot, factor)
 % [SleepState] = bz_ThetaStates(basePath)
 
 % Takes the output of SleepScoreMaster and separtes WAKEstate into
@@ -9,6 +9,10 @@ function    [SleepState] = bz_ThetaStates(basePath,makePlot)
 
 if nargin < 2
    makePlot = 1;
+end
+
+if factor < 3
+   factor = 1;
 end
 
 %% %%%%%%%%%%%
@@ -22,8 +26,8 @@ end
             emg = SleepState.detectorinfo.detectionparms.SleepScoreMetrics.EMG;
             emgthr = SleepState.detectorinfo.detectionparms.SleepScoreMetrics.histsandthreshs.EMGthresh;
             ts = SleepState.detectorinfo.detectionparms.SleepScoreMetrics.t_clus;
-            theta_run = thratio>ththr & emg>emgthr;
-            Theta_NDX=find(thratio>ththr & emg>emgthr);
+            theta_run = thratio>(ththr/factor) & emg>emgthr;
+            Theta_NDX=find(thratio>ththr/factor & emg>emgthr);
             
             A(:,1)=SleepState.idx.states;
             A(Theta_NDX,2)=7;  

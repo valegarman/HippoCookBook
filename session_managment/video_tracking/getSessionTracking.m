@@ -53,7 +53,7 @@ addParameter(p,'roiTracking',[],@ismatrix);
 addParameter(p,'roiLED',[],@ismatrix);
 addParameter(p,'roisPath',[],@isfolder);
 addParameter(p,'saveMat',true,@islogical)
-addParameter(p,'forceReload',true,@islogical);
+addParameter(p,'forceReload',false,@islogical);
 addParameter(p,'LED_threshold',0.98,@isnumeric);
 addParameter(p,'tracking_ttl_channel',[],@isnumeric);
 addParameter(p,'dlc_ttl_channel',[]);
@@ -79,8 +79,6 @@ rightTTL_reward = p.Results.rightTTL_reward;
 homeTtl = p.Results.homeTtl;
 tracking_software = p.Results.tracking_software;
 interpolate_misstrackings = p.Results.interpolate_misstrackings;
-
-
 
 %% In case tracking already exists 
 if ~isempty(dir([basepath filesep '*Tracking.Behavior.mat'])) && forceReload
@@ -206,6 +204,19 @@ if count > 1 % if traking
     x_back = []; y_back = []; likelihood_back = [];
     x_tail1 = []; y_tail1 = []; likelihood_tail1 = [];
     x_tail2 = []; y_tail2 = []; likelihood_tail2 = [];
+
+    if ~isfield(tempTracking{ii}.position, 'likelihood')
+        tempTracking{ii}.position.likelihood = nan(size(tempTracking{ii}.position.x));
+        tempTracking{ii}.position_back.x = nan(size(tempTracking{ii}.position.x));
+        tempTracking{ii}.position_back.y = nan(size(tempTracking{ii}.position.x));
+        tempTracking{ii}.position_back.likelihood = nan(size(tempTracking{ii}.position.x));
+        tempTracking{ii}.position_tail1.x = nan(size(tempTracking{ii}.position.x));
+        tempTracking{ii}.position_tail1.y = nan(size(tempTracking{ii}.position.x));
+        tempTracking{ii}.position_tail1.likelihood = nan(size(tempTracking{ii}.position.x));
+        tempTracking{ii}.position_tail2.x = nan(size(tempTracking{ii}.position.x));
+        tempTracking{ii}.position_tail2.y = nan(size(tempTracking{ii}.position.x));
+        tempTracking{ii}.position_tail2.likelihood = nan(size(tempTracking{ii}.position.x));
+    end
     
     
     folder = []; samplingRate = []; description = [];
@@ -224,8 +235,6 @@ if count > 1 % if traking
         x_tail2 = [x_tail2; tempTracking{ii}.position_tail2.x];
         y_tail2 = [y_tail2; tempTracking{ii}.position_tail2.y];
         likelihood_tail2 = [likelihood_tail2; tempTracking{ii}.position_tail2.likelihood];
-
-
             
         velocity = [velocity; tempTracking{ii}.velocity];
         acceleration = [acceleration; tempTracking{ii}.acceleration];
