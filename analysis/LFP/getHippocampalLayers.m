@@ -140,11 +140,11 @@ for i = 1:length(session.extracellular.electrodeGroups.channels)
         end
         
         % Ripples [2 5]
-        ripples{i} = findRipples(channels{i}.pyramidal,'thresholds',[2 5],'passband',[80 200],'durations',[20 150],'saveMat',false,'restrict',restrict);
+        ripples{i} = findRipples(channels{i}.pyramidal,'thresholds',[2 5],'passband',[80 200],'durations',[20 150],'saveMat',false,'restrict',restrict, 'EMGThresh', 0);
         if isempty(ripples{i}.peaks)
             [~,maxHFOChannel] = max(powerProfile_hfo.mean(session.extracellular.electrodeGroups.channels{i}));
             maxHFOChannel = session.extracellular.electrodeGroups.channels{i}(maxHFOChannel);
-            ripples{i} = findRipples(maxHFOChannel,'thresholds',[.01 .05],'passband',[80 200],'durations',[20 150],'saveMat',false,'restrict',restrict);
+            ripples{i} = findRipples(maxHFOChannel,'thresholds',[.01 .05],'passband',[80 200],'durations',[20 150],'saveMat',false,'restrict',restrict, 'EMGThresh', 0);
         end
         
         twin = 0.1;

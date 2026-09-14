@@ -84,7 +84,7 @@ end
 cd(basepath);
 
 efields = fieldnames(behaviorTemp);
-tracking = getSessionTracking;
+tracking = getSessionTracking('forceReload', true);
 x = []; y = []; timestamps = []; lin = []; armMask = []; trialMask = []; recMask = [];
 startPoint = []; rReward = []; lReward = []; startDelay = []; endDelay = []; intersection = [];
 startPointTrials = []; endDelayTrials = []; visitedArm = []; choice = []; expectedArm = [];

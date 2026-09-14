@@ -241,12 +241,11 @@ end
 
 %% Fiber photometry analysis
 try
-    fiber = getSessionFiberPhotometry();
+    fiber = getSessionFiberPhotometry_pablo();
+    cd (basepath);
 catch
-    warning('No possible loading fiber photometry data. Was fiber photometry signal recorded in this experiment? ...')
+    warning('Not possible to load fiber');
 end
-cd(basepath)
-
 %% Kilosort concatenated sessions
 if spikeSort
     if  isempty(dir('*Kilosort*')) % if not kilosorted yet
@@ -272,6 +271,11 @@ if ~isempty(analysisPath)
     cd([analysisPath,'\',session.general.name])
 else
     cd(basepath)
+    %%
+    % 
+    % * ITEM1
+    % * ITEM2
+    % 
 end
 
 %% Get tracking positions 

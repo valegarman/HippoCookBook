@@ -584,6 +584,57 @@ if doPlot
         % plot([.5 max(pos)+.5],[0 0],'color',[.7 .7 .7]);
         for ii = 1:length(ind) 
             m = stats.descriptive.median(ii);
+<<<<<<< HEAD
+=======
+            s1 = stats.descriptive.q25(ii);
+            s2 = stats.descriptive.q75(ii);
+            if plotData && ~plotConnectors
+                posData = randn(length(find(group==ind(ii))),1)/10; 
+                posData((posData)>0.3) = posData((posData)>0.3)/2;
+                posData((posData)<-0.3) = posData((posData)<-0.3)/2;
+                plot(pos(ii)+ posData, y(group==ind(ii)),'o','color',[1 1 1],...
+                       'MarkerFaceColor',cloudColor,'MarkerEdgeColor','none','MarkerSize',dataSize);
+                   
+%                 scatter(pos(ii)+ posData, y(group==ind(ii)),'o','filled','MarkerEdgeColor','none','MarkerFaceColor','k',...
+%                     'MarkerFaceAlpha',0.4);
+            end
+
+            plot([pos(ii)-0.1 pos(ii)-0.1], [s1 s2],'-','MarkerFaceColor',color(ii,:),'MarkerEdgeColor',color(ii,:),...
+                'MarkerSize',dataSize,'color',color(ii,:),'LineWidth',2)
+            plot(pos(ii)-0.1, m,'o','MarkerFaceColor',roundPlotCenterColor(ii,:),'MarkerEdgeColor',color(ii,:),'MarkerSize',roundPlotSize);
+        end
+        if plotConnectors
+            posData = randn(ySize(1),1)/10;
+            posData((posData)>0.3) = posData((posData)>0.3)/2;
+            posData((posData)<-0.3) = posData((posData)<-0.3)/2;
+            if plotData
+                for ii = 1:length(ind) 
+                    plot(pos(ii)+ posData, y(group==ind(ii)),'o','color',[1 1 1],...
+                           'MarkerFaceColor','k','MarkerEdgeColor','none','MarkerSize',dataSize);
+                end
+            end
+
+            for ii = 1:length(yC{1}) 
+                plot(pos + posData(ii,:), yColumns(ii,:),'-','color',[.1 .1 .1 .5]);
+            end
+
+        end
+
+        xlim([.5 max(pos)+.5]);
+        set(gca,'xtick',[],'TickDir','out');
+        grid off
+        if strcmpi(orientation, 'horizontal')
+            view([90 90]); 
+        end
+
+
+    elseif strcmpi(plotType,'roundPlotMean')
+        
+        hold on
+        % plot([.5 max(pos)+.5],[0 0],'color',[.7 .7 .7]);
+        for ii = 1:length(ind) 
+            m = stats.descriptive.mean(ii);
+>>>>>>> 8a334ad557ff510c0e037a82745e333aa13384fb
             s1 = stats.descriptive.q25(ii);
             s2 = stats.descriptive.q75(ii);
             if plotData && ~plotConnectors

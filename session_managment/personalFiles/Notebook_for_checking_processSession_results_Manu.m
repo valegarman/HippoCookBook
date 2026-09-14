@@ -58,13 +58,13 @@ hippocampalLayers = getHippocampalLayers('force',true,'promt',true);
 % analysis.
 
 excludeIntervals = [];
-rippleChannel = 17;
+rippleChannel = 2;
 SWChannel = [];
-noiseChannel = 14;
+noiseChannel = 10;
 eventSpikeThreshold_shanks = [1:4]; % which shanks will be accounted for the spike threshold 
 eventSpikeThreshold = .5; % .5
 
-rippleMasterDetector_threshold = [1.5 3.5]; % [1.5 3.5] you can decrease this as needeed!!!
+rippleMasterDetector_threshold = [.75 1.5]; % [1.5 3.5] you can decrease this as needeed!!!
 
 ripples = rippleMasterDetector('rippleChannel',rippleChannel,'SWChannel',SWChannel,'force',true,'skipStimulationPeriods',true,'thresholds',...
     rippleMasterDetector_threshold,'eventSpikeThreshold_shanks', eventSpikeThreshold_shanks,'eventSpikeThreshold',eventSpikeThreshold,'excludeIntervals',excludeIntervals,'referenceChannel',noiseChannel); 
@@ -129,13 +129,14 @@ getSpikesReturnPlot('force',true);
 % no folder is present, you must run this code. You can play with the
 % LED_threshold level (threshold for LED detection), and check if TTL
 % channel are well defined. 
-LED_threshold = 0.98;
+LED_threshold = 0.5;
+getSessionTracking('roiTracking','manual','forceReload',true,'LED_threshold',LED_threshold, 'tracking_software', 'basler');
+
 spikes = loadSpikes;
-getSessionTracking('roiTracking','manual','forceReload',false,'LED_threshold',LED_threshold);
 % only if the animal run a figure-eight maze behavior
 %getSessionArmChoice('task','alternation','leftArmTtl_channel',2,'rightArmTtl_channel',3,'homeDelayTtl_channel',4);
-behaviour = getSessionLinearize('forceReload',true,'maze','tMaze');  
-firingMaps = bz_firingMapAvg(behavior, spikes,'saveMat',true);
+behaviour = getSessionLinearize('forceReload',true,'maze','linearMaze');  
+firingMaps = bz_firingMapAvg(behaviour, spikes,'saveMat',true);
 placeFieldStats = bz_findPlaceFields1D('firingMaps',firingMaps,'maxSize',.75,'sepEdge',0.03); %% ,'maxSize',.75,'sepEdge',0.03
 firingTrialsMap = firingMapPerTrial('force',true);
 spatialModulation = getSpatialModulation('force',true);

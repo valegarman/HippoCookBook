@@ -62,7 +62,7 @@ end
 %% COACTIVATION ANALYSIS
 % 0 Compute uled responses according to local parameters
 uledResponses = getuLEDResponse('force', true, 'winSize', winSize_uled, 'before_pulse_win',before_pulse_win, 'during_pulse_win', during_pulse_win, 'winSizePlot', winSizePlot, 'saveMat', true,...
-    'save_as', 'uledResponses_coactivation', 'test_in_plots',test_uled_responses, 'zscore_threshold', 1, 'numRep', numRep_uledResp, 'save_as', 'uledResponses_20');
+    'test_in_plots',test_uled_responses, 'zscore_threshold', 1, 'numRep', numRep_uledResp, 'save_as', 'uledResponses_20');
 switch lower(test_uled_responses)
     case 'boostrap'
         lightRespMat = squeeze((uledResponses.bootsTrapTest(:,1,:)));
@@ -286,6 +286,7 @@ winSize = [1];
 [allCcg, t_ccg] = CCG(uLEDcoactivation.coactivation_times,[],'binSize',binSize,'duration',winSize,'Fs',1/session.extracellular.sr);
 winCoactivation = p.Results.winCoactivation;
 winCoactivation = InIntervals(t_ccg, [-winCoactivation winCoactivation]);
+coactivation_matrix = eye(12);
 for kk = 1:size(allCcg,2)
     for jj = 1:size(allCcg,2)
         temp = zscore(allCcg(:,kk,jj));

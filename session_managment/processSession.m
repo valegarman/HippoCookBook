@@ -306,7 +306,7 @@ if ~any(ismember(excludeAnalysis, {'8',lower('eventsModulation')}))
 
     % 8.4 Fiber ripple analysis
     try
-        ripples_fiber = fiberPhotometryModulation_temp([],'eventType','ripples');
+        ripples_fiber = fiberPhotometryModulation_pablo([],'eventType','ripples','reload_fiber',false);
     catch
         warning('No fiber recording in this session...');
     end

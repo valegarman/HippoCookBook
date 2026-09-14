@@ -5,26 +5,26 @@
 %   'updateExpFolder({recordingPC_1, recordingPC_2, etc}, 'analysis unit')',
 %   Example:
 
-updateExpFolder_temp({'E:\cancer4'},'D:\cancer4');
-updateExpFolder_temp({'E:\cancer4'},'D:\cancer4');
-
+updateExpFolder_temp({'G:\NeuCompLab\experiments\Crabcer\Training\cancer8'},'D:\unindexedSubjects\cancer8');
+updateExpFolder_temp({'G:\NeuCompLab\experiments\Crabcer\Training\cancer9'},'D:\unindexedSubjects\cancer9');
 
 % 2% Then, preprocess session (includes artifacts removal, median signal
 %   removal, LFP and Kilosort, and running computeSessionSummary by 'batch_preprocessSession('basepath','sessionBasepath').
 %   Example:
 % preprocessSession('basepath','D:\camk13\camk13_250613_sess2\','analysisPath',[],'exclude_shanks',[],'cleanArtifacts',({[],[1, 2]}),'digitalChannelsList',[1 2],'sessionSummary',false,'getPos',false, 'medianSubstr', [1:3 4 11:12 14:18 21:23 27 30 32]);
-preprocessSession('basepath','Y:\unindexedSubjects\cancer2\cancer2_250703_sess2','analysisPath','E:\','exclude_shanks',[],'cleanArtifacts',[],'digitalChannelsList',[1:8],'sessionSummary',true,'getPos',false, 'medianSubstr', true);
+% preprocessSession('basepath','Y:\unindexedSubjects\cancer2\cancer2_250703_sess2','analysisPath','E:\','exclude_shanks',[],'cleanArtifacts',[],'digitalChannelsList',[1:8],'sessionSummary',true,'getPos',false, 'medianSubstr', true);
+% 
+% computeSessionSummary('digitalChannelsList',[1,2]);
+% 
+% uLEDPulses = getuLEDsPulses_legacy('uLEDs_ttl',[1 2]);
+% getuLEDResponse('restrict_to_baseline',false,'uLEDPulses',uLEDPulses);
+% 
+% optogeneticResponses = getOptogeneticResponse('force',true,'digitalChannelsList',[1,2,3,4,5,6,7,8,9,10,11,12,13]);
 
-computeSessionSummary('digitalChannelsList',[1,2]);
 
-uLEDPulses = getuLEDsPulses_legacy('uLEDs_ttl',[1 2]);
-getuLEDResponse('restrict_to_baseline',false,'uLEDPulses',uLEDPulses);
+batch_preprocessSession('basepath','D:\unindexedSubjects\cancer8','analysisPath','E:\');
+batch_preprocessSession('basepath','D:\unindexedSubjects\cancer9','analysisPath','E:\');
 
-optogeneticResponses = getOptogeneticResponse('force',true,'digitalChannelsList',[1,2,3,4,5,6,7,8,9,10,11,12,13]);
-
-
-
-batch_preprocessSession('basepath','X:\data\fCr1','analysisPath','F:\fCr1','cleanArtifacts',({[],1}),'analogChannelsList',[],'digitalChannelsList',1);
 
 % <OPTIONAL> If summary was not processed, it can be run in batch by 'batch_preprocessSession'
 batch_sessionSummary('basepath','G:\data\fPv4','cleanArtifacts',({65,[]}),'analogChannelsList',65,'digitalChannelsList',0);

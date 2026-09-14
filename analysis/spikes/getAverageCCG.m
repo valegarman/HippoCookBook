@@ -54,6 +54,8 @@ addParameter(p,'restrict_to_manipulation',false,@islogical);
 addParameter(p,'save_as','averageCCG',@ischar);
 addParameter(p,'win_Z',[-0.3 -0.15],@isnumeric);
 addParameter(p,'orderOfccZMedianMap',[]);
+addParameter(p,'session',[]);
+addParameter(p,'cell_metrics',[]);
 
 parse(p, varargin{:});
 basepath = p.Results.basepath;
@@ -79,13 +81,21 @@ restrict_to_manipulation = p.Results.restrict_to_manipulation;
 save_as = p.Results.save_as;
 win_Z = p.Results.win_Z;
 orderOfccZMedianMap = p.Results.orderOfccZMedianMap;
+session = p.Results.session;
+cell_metrics = p.Results.cell_metrics;
 
 % Deal with inputs
 prevPath = pwd;
 cd(basepath);
 
 % Load session
-session = loadSession();
+if isempty(session)
+    session = loadSession();
+end
+
+if isempty(cell_metrics)
+    cell_metrics =  loadCellMetrics;
+end
 
 targetFile = dir('*.averageCCG.cellinfo.mat');
 if ~isempty(targetFile) && ~force
@@ -95,7 +105,6 @@ if ~isempty(targetFile) && ~force
 end
 
 ints = [];
-session = loadSession;
 if isfield(session,'epochs') && isfield(session.epochs{1},'behavioralParadigm') && restrict_to_manipulation
     list_of_manipulations = list_of_manipulations_names;
     
@@ -111,7 +120,6 @@ if isfield(session,'epochs') && isfield(session.epochs{1},'behavioralParadigm') 
     end
 elseif isfield(session,'epochs') && isfield(session.epochs{1},'behavioralParadigm') && restrict_to_baseline
     list_of_manipulations = list_of_manipulations_names;
-    session = loadSession;
     for ii = 1:length(session.epochs)
         if ismember(session.epochs{ii}.behavioralParadigm, list_of_manipulations)
             ints = [0 session.epochs{ii}.startTime];
@@ -177,8 +185,6 @@ averageCCG.excludeIntervals = excludeIntervals;
 brainRegionCCG = [];
 if useBrainRegions && exist([basenameFromBasepath(basepath) '.cell_metrics.cellinfo.mat'])
     disp('Computing CCG by brain region');
-    cell_metrics = loadCellMetrics;
-    session = loadSession;
     
     if isfield(session,'brainRegions')
         efields = fieldnames(session.brainRegions);
@@ -285,7 +291,6 @@ if useBrainRegions && exist([basenameFromBasepath(basepath) '.cell_metrics.celli
     end
 end
 
-session = loadSession;
 shanksCCG = [];
 if useDistinctShanks && length(session.extracellular.electrodeGroups.channels)>1 % if more than 1 shanks
     for ii =  1: length(session.extracellular.electrodeGroups.channels)

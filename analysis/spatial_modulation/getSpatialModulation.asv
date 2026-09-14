@@ -16,8 +16,7 @@ function [spatialModulation] = getSpatialModulation(varargin)
 % OUTPUTS
 % spatialModulation
 %
-% MV 2022
-% 
+% MV-BuzsakiLab 2022
 %
 % to do: For now it only uses the biggest field if a neuron has more than
 % one field. 
@@ -239,7 +238,7 @@ isSpatialPerMap = MIp < 0.05;
 
 nMaps = size(MIreal,2);
 
-% store results
+% save results
 for jj = 1:nMaps
 
     spatialModulation.(['rate_space_MI_map' num2str(jj)]) = ...
@@ -254,6 +253,7 @@ for jj = 1:nMaps
     spatialModulation.(['is_MIspatial_map' num2str(jj)]) = ...
         MIp(:,jj) < 0.05;
 end
+
 
 %% 4 General metrics
 % 4.1 Stability (it does not separate between recordings... )

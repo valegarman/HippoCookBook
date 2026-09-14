@@ -69,7 +69,7 @@ end
 
 duration = 60;
 
-fid = fopen(fileTargetAmplifier.name,'r'); filename = fileTargetAmplifier.name;
+fid = fopen(fileTargetAmplifier.name, 'r'); filename = fileTargetAmplifier.name;
 C = strsplit(fileTargetAmplifier.name,'.dat'); filenameOut = [C{1} '_temp.dat'];
 fidOutput = fopen(filenameOut,'a');
 

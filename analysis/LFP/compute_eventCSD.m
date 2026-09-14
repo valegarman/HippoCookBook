@@ -36,7 +36,7 @@ samplingRate = p.Results.samplingRate;
 spat_smooth  = p.Results.spat_smooth;
 temp_smooth  = p.Results.temp_smooth;
 doDetrend    = p.Results.doDetrend;
-plotCSD      = p.Results.plotCSD;
+doPlot       = p.Results.doPlot;
 saveMat      = p.Results.saveMat;
 session      = p.Results.session;
 
@@ -95,7 +95,7 @@ nShanks = numel(elecGroups);
 eventCSD = struct();
 taxis = (-(twin(1)/samplingRate):(1/samplingRate):(twin(2)/samplingRate))*1e3;
 
-if plotCSD
+if doPlot
     figure('Position',[100 100 350*nShanks 500]);
 end
 

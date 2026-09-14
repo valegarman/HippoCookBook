@@ -30,7 +30,16 @@ resolHz=10; %spectral resolution in Hz
 nfft=floor(Fc/resolHz);
 nw=2; %parametro del multitaper ("time-bandwidth product")
 noverlap=nfft/1.024; %window overlap default:nfft/2
-aa=(100/resolHz)+1; bb=(600/resolHz)+1; cc=(400/resolHz)+1; %aa=11; bb=61; cc=41;
+
+f_low = 100;
+f_high = 600;
+if f_high < Fc * 2
+    f_high = min(floor(Fc/2));
+end
+aa = floor(f_low/resolHz) + 1;
+bb = floor(f_high/resolHz) + 1;
+% cc=(400/resolHz)+1; %aa=11; bb=61; cc=41;
+
 sumaAll=[];
 if wide
     xlow = 1;
@@ -39,6 +48,8 @@ else
     xlow = int32(floor(0.4*Fc));
     xhigh = int32(floor(0.6*Fc));
 end
+
+fmax = floor(Fc/2);
 
 nEvents=size(matDouble,2);
 for i=1:nEvents; 
@@ -68,8 +79,8 @@ ww=Ftf(aa:bb);
 Suma=Spc/sum(Spc);
 entropyData(i)=sum(-Suma.*log2(Suma)); 
 spectralm(i)=sum(Suma*ww);
-cp1 = find(int32(ww)==220); %Cut point a 250Hz
-cp2 = find(int32(ww)==270);
+cp1 = find(ww >= 220, 1, 'first');
+cp2 = find(ww >= 270, 1, 'first');
 [mx index]=max(Suma); 
 spectralmod(i)=ww(index);
 frippindex(i)=sum(Suma(cp1:end)); %250-600Hz band; %frippindex(i)=sum(Suma(20:50));

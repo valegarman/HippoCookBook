@@ -16,7 +16,7 @@ addParameter(p,'basepath',pwd,@isdir);
 addParameter(p,'spikes',[]);
 addParameter(p,'method','te',@ischar); % options are mi, glm, te
 addParameter(p,'restrict',[],@isnumeric); % ints to restrict to
-addParameter(p,'dt',0.1,@isnumeric); % 
+addParameter(p,'dt',0.02,@isnumeric); % 
 addParameter(p,'k',3,@isnumeric); % history length in bins, for transfer entropy
 addParameter(p,'n_shuffles',1000,@isnumeric); 
 addParameter(p,'doPlot',true,@islogical); 
@@ -274,10 +274,18 @@ switch lower(method)
         te_p =  nan(size(spikemat.data, 2), size(spikemat.data, 2));
         for jj = 1:nCols
             fprintf('Computing TE: neuron %d of %d\n', jj, nCols);
+            source = double(spikemat.data(:, jj));
             for kk =  1:nCols
-                temp = compute_TE_counts(double(spikemat.data(1:end, jj)), double(spikemat.data(1:end, kk)), k, n_shuffles);  % k=2, 100 shuffles
-                te_mat(jj,kk) = temp.value;
-                te_p(jj,kk) = temp.p;
+                if jj == kk
+                    continue
+                end
+                target = double(spikemat.data(:, kk));
+                temp = compute_TE_counts(source, target, k, n_shuffles);
+                % Use raw TE or corrected TE depending on what you want
+                te_mat(jj, kk) = temp.value;
+                % te_mat(jj, kk) = temp.corrected;
+
+                te_p(jj, kk) = temp.p;
             end
         end
 
@@ -559,101 +567,156 @@ cd(prevPath);
 end
 
 function TE = compute_TE_counts(source, target, k, n_shuffles)
-% Compute TE from 'source' to 'target' with spike count vectors
+% COMPUTE_TE_COUNTS Compute transfer entropy from source to target.
+%
+% TE = I(target_future ; source_past | target_past)
+%
 % Inputs:
-%   - source, target: spike count vectors (same length)
-%   - k: number of past bins
-%   - n_shuffles: number of surrogates for significance
+%   source, target : spike count vectors, same length
+%   k              : number of past bins
+%   n_shuffles     : number of source shuffles
 %
 % Outputs:
-%   - TE.value: transfer entropy (bits)
-%   - TE.p: p-value (shuffle test)
-%   - TE.null: null distribution
+%   TE.value       : raw transfer entropy, in bits
+%   TE.null        : shuffled null distribution
+%   TE.p           : one-sided shuffle p-value
+%   TE.corrected   : TE.value - mean(TE.null)
 
-    if nargin < 4
+    if nargin < 4 || isempty(n_shuffles)
         n_shuffles = 100;
     end
 
-    assert(length(source) == length(target), 'Inputs must be same length');
+    source = source(:);
+    target = target(:);
 
-    N = length(source);
+    assert(numel(source) == numel(target), ...
+        'source and target must have the same length');
 
-    % Create history matrices
-    X_past = buffer(source(1:end-1), k, k-1, 'nodelay')';
-    Y_past = buffer(target(1:end-1), k, k-1, 'nodelay')';
-    Y_future = target(k+1:end);
+    N = numel(source);
+    assert(N > k + 1, 'Time series is too short for this k');
 
-    % Align
-    min_len = min([size(X_past,1), size(Y_past,1), length(Y_future)]);
+    % Build aligned past/future states manually
+    nSamples = N - k;
 
-    X_past = X_past(1:min_len, :);
-    Y_past = Y_past(1:min_len, :);
-    Y_future = Y_future(1:min_len);
+    X_past = zeros(nSamples, k);
+    Y_past = zeros(nSamples, k);
+    Y_future = zeros(nSamples, 1);
 
-    % Build joint states
-    joint_past = [Y_past, X_past];
+    for t = 1:nSamples
+        idxPast = t:(t + k - 1);
 
-    % Compute TE as conditional mutual information
-    TE.value = conditional_mutual_info(Y_future, joint_past, Y_past);
+        X_past(t, :) = source(idxPast);
+        Y_past(t, :) = target(idxPast);
+        Y_future(t)  = target(t + k);
+    end
+
+    % Raw TE: I(target_future ; source_past | target_past)
+    TE.value = conditional_mutual_info(Y_future, X_past, Y_past);
 
     % Null distribution by shuffling source
-    TE.null = zeros(n_shuffles,1);
-    for s = 1:n_shuffles
-        shuffled = source(randperm(N));
-        Xp_s = buffer(shuffled(1:end-1), k, k-1, 'nodelay')';
+    TE.null = zeros(n_shuffles, 1);
 
-        % Align lengths
-        min_len = min(size(Xp_s,1), size(Y_past,1));
-        Xp_s = Xp_s(1:min_len, :);
-        Y_past_shuff = Y_past(1:min_len, :);
-        Y_future_shuff = Y_future(1:min_len);
-        
-        % Build surrogate joint past
-        jp_s = [Y_past_shuff, Xp_s];
-        
-        % Compute surrogate TE
-        TE.null(s) = conditional_mutual_info(Y_future_shuff, jp_s, Y_past_shuff);
+    for s = 1:n_shuffles
+        shuffled_source = source(randperm(N));
+
+        X_past_shuff = zeros(nSamples, k);
+
+        for t = 1:nSamples
+            idxPast = t:(t + k - 1);
+            X_past_shuff(t, :) = shuffled_source(idxPast);
+        end
+
+        TE.null(s) = conditional_mutual_info(Y_future, X_past_shuff, Y_past);
     end
 
-    TE.p = mean(TE.null >= TE.value);  % one-sided p-value
+    % One-sided p-value
+    TE.p = mean(TE.null >= TE.value);
+
+    % Bias-corrected / shuffle-corrected TE
+    TE.corrected = TE.value - mean(TE.null);
 end
 
-function I = conditional_mutual_info(Z, XY, X)
-% Compute conditional mutual information I(Z; Y | X)
-% Z: future of target (vector)
-% XY: [X_past, Y_past]
-% X: Y_past only
+function I = conditional_mutual_info(Z, Y, X)
+% CONDITIONAL_MUTUAL_INFO Compute I(Z ; Y | X), in bits.
+%
+% Inputs:
+%   Z : vector, variable of interest
+%   Y : vector or matrix, informative variable
+%   X : vector or matrix, conditioning variable
+%
+% Output:
+%   I : conditional mutual information in bits
+%
+% This computes:
+%
+%   I(Z;Y|X) = sum p(z,y,x) log2( p(z,y,x) p(x) / (p(z,x) p(y,x)) )
 
-    z_ids  = vector_to_id(Z);
-    xy_ids = matrix_to_id(XY);
-    x_ids  = matrix_to_id(X);
+    Z = Z(:);
 
-    % Probabilities
-    p_xyz = joint_hist3(z_ids, xy_ids);
-    p_zx  = joint_hist3(z_ids, x_ids);
-    p_xy  = accumarray(xy_ids, 1); p_xy = p_xy / sum(p_xy);
-    p_x   = accumarray(x_ids, 1);  p_x  = p_x / sum(p_x);
-
-    % Index mapping
-    [~,~,b_z]  = unique(z_ids);
-    [~,~,b_xy] = unique(xy_ids);
-    [~,~,b_x]  = unique(x_ids);
-
-    % Conditional MI
-    if any(b_xy > numel(p_xy)) || any(b_x > numel(p_x))
-        error('Indexing error: check mapping or histogram computation');
+    if isvector(Y)
+        Y = Y(:);
     end
-    I = 0;
-    for i = 1:length(z_ids)
-        p_joint  = p_xyz(b_z(i), b_xy(i));
-        p_z_cond = p_zx(b_z(i), b_x(i));
-        p_xy_    = p_xy(b_xy(i));
-        p_x_     = p_x(b_x(i));
 
-        if p_joint > 0 && p_z_cond > 0 && p_xy_ > 0 && p_x_ > 0
-            I = I + p_joint * log2((p_joint * p_x_) / (p_z_cond * p_xy_));
+    if isvector(X)
+        X = X(:);
+    end
+
+    n = numel(Z);
+
+    assert(size(Y, 1) == n, 'Z and Y must have the same number of samples');
+    assert(size(X, 1) == n, 'Z and X must have the same number of samples');
+
+    % Convert states to unique integer IDs
+    z_id = state_id(Z);
+    y_id = state_id(Y);
+    x_id = state_id(X);
+
+    xyz_states = [z_id, y_id, x_id];
+    zx_states  = [z_id, x_id];
+    yx_states  = [y_id, x_id];
+
+    [~, ~, xyz_id] = unique(xyz_states, 'rows');
+    [~, ~, zx_id]  = unique(zx_states,  'rows');
+    [~, ~, yx_id]  = unique(yx_states,  'rows');
+    [~, ~, x_id2]  = unique(x_id,       'rows');
+
+    % Empirical probabilities
+    p_xyz = accumarray(xyz_id, 1) / n;
+    p_zx  = accumarray(zx_id,  1) / n;
+    p_yx  = accumarray(yx_id,  1) / n;
+    p_x   = accumarray(x_id2,  1) / n;
+
+    % Sum over unique xyz states
+    I = 0;
+
+    for state = 1:numel(p_xyz)
+
+        idx = find(xyz_id == state, 1, 'first');
+
+        p1 = p_xyz(state);
+        p2 = p_zx(zx_id(idx));
+        p3 = p_yx(yx_id(idx));
+        p4 = p_x(x_id2(idx));
+
+        if p1 > 0 && p2 > 0 && p3 > 0 && p4 > 0
+            I = I + p1 * log2((p1 * p4) / (p2 * p3));
         end
     end
+
+    % Remove tiny numerical negatives
+    if I < 0 && abs(I) < 1e-12
+        I = 0;
+    end
+end
+
+function id = state_id(A)
+% STATE_ID Convert vector or matrix rows into integer state IDs.
+
+    if isvector(A)
+        A = A(:);
+    end
+
+    [~, ~, id] = unique(A, 'rows');
 end
 
 function ids = vector_to_id(vec)

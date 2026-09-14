@@ -109,7 +109,8 @@ addParameter(p,'model_file', '', @ischar);
 addParameter(p,'pred_every', 0.032, @isnumeric);
 addParameter(p,'verbose', false, @islogical);
 addParameter(p,'handle_overlap', 'mean', @ischar);
-addParameter(p,'exec_env', '', @ischar);
+addParameter(p,'exec_env', 'C:\Users\mvalero\.conda\envs\cnn-env\python.exe', @ischar);
+addParameter(p,'cnn_threshold', .7, @isnumeric);
 
 parse(p,varargin{:})
 
@@ -143,7 +144,7 @@ model_file = p.Results.model_file;
 handle_overlap = p.Results.handle_overlap;
 exec_env = p.Results.exec_env;
 dir_cnn = fileparts(which('detect_ripples_cnn.m'));
-
+cnn_threshold = p.Results.cnn_threshold;
 
 %% Load Session Metadata and several variables if not provided
 % session = sessionTemplate(basepath,'showGUI',false);
@@ -194,8 +195,6 @@ if useCSD
     rippleChannel = computeCSD([],'channels',rippleChannel);
 end
 
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%
 %% Detecting Ripples
 %%%%%%%%%%%%%%%%%%%%%%%%
@@ -206,27 +205,33 @@ if strcmp(detector, 'filter')
 elseif strcmp(detector, 'cnn')
     % Load channel configuration
     load([session.general.name,'.session.mat']);
-    channelConf = session.extracellular.electrodeGroups.channels;
-    % Get best shank
-    if isvarname('hippocampalLayers')
-        bestShank = hippocampalLayers.bestShank;
-    elseif ~isempty(dir([session.general.name,'.hippocampalLayers.channelinfo.mat']))
-        file = dir([session.general.name,'.hippocampalLayers.channelinfo.mat']);
-        load(file.name);
-        bestShank = hippocampalLayers.bestShank;
-    else
-        [hippocampalLayers] = getHippocampalLayers();
-        bestShank = hippocampalLayers.bestShank;
-    end
-    % Get channels near pyr that fits in the shank
-    channelsShank = channelConf{bestShank};
-    rippleChPos = find(channelsShank==rippleChannel);
-    if (rippleChPos < length(channelsShank)-5) && (rippleChPos > 2)
-        cnn_channels = channelsShank(rippleChPos + [-2:5]);
-    elseif (rippleChPos < length(channelsShank)-5)
-        cnn_channels = channelsShank(1:8);
-    elseif (rippleChPos > 2)
-        cnn_channels = channelsShank(end-7:end);
+    if length(cnn_channels) ~= 8
+        channelConf = session.extracellular.electrodeGroups.channels;
+        % Get best shank
+        if size(channelConf,1) > 1
+            if isvarname('hippocampalLayers')
+                bestShank = hippocampalLayers.bestShank;
+            elseif ~isempty(dir([session.general.name,'.hippocampalLayers.channelinfo.mat']))
+                file = dir([session.general.name,'.hippocampalLayers.channelinfo.mat']);
+                load(file.name);
+                bestShank = hippocampalLayers.bestShank;
+            else
+                [hippocampalLayers] = getHippocampalLayers();
+                bestShank = hippocampalLayers.bestShank;
+            end
+        else
+            bestShank = 1;
+        end
+        % Get channels near pyr that fits in the shank
+        channelsShank = channelConf{bestShank};
+        rippleChPos = find(channelsShank==rippleChannel);
+        if (rippleChPos < length(channelsShank)-5) && (rippleChPos > 2)
+            cnn_channels = channelsShank(rippleChPos + [-2:5]);
+        elseif (rippleChPos < length(channelsShank)-5)
+            cnn_channels = channelsShank(1:8);
+        elseif (rippleChPos > 2)
+            cnn_channels = channelsShank(end-7:end);
+        end
     end
     % Get LFP
     lfp = getLFP(cnn_channels,'basepath',basepath);
@@ -235,9 +240,27 @@ elseif strcmp(detector, 'cnn')
         model_file = fullfile(dir_cnn, 'cnn');
     end
     % Predict probability
-    ripples = detect_ripples_cnn(double(lfp.data), lfp.samplingRate, 'model_file', model_file, ...
+    SWR_prob = detect_ripples_cnn(double(lfp.data), lfp.samplingRate, 'model_file', model_file, ...
         'pred_every', pred_every, 'verbose', verbose, 'handle_overlap', handle_overlap, ...
         'exec_env', exec_env);
+    ripples.timestamps = get_intervals(SWR_prob, 'threshold', cnn_threshold);
+    ripples.peaks = arrayfun(@(i) ripples.timestamps(i,1) + find(SWR_prob(ripples.timestamps(i,1):ripples.timestamps(i,2)) == ...
+         max(SWR_prob(ripples.timestamps(i,1):ripples.timestamps(i,2))),1) - 1, 1:size(ripples.timestamps,1));
+    % in s
+    ripples.timestamps = ripples.timestamps/lfp.samplingRate;
+    ripples.peaks = (ripples.peaks/lfp.samplingRate)';
+
+    ripples.detectorinfo.detectorname = detector;
+    ripples.detectorinfo.detectiondate = date;
+    ripples.detectorinfo.detectionintervals = restrict;
+    ripples.detectorinfo.detectionparms.basepath = basepath;
+    ripples.detectorinfo.detectionparms.channel = cnn_channels;
+    ripples.detectorinfo.detectionparms.model_file = model_file;
+    ripples.detectorinfo.detectionparms.pred_every = pred_every;
+    ripples.detectorinfo.detectionparms.handle_overlap = handle_overlap;
+    ripples.detectorinfo.detectionparms.exec_env = exec_env;
+    ripples.detectorinfo.detectionchannel = rippleChannel;
+
 elseif strcmp(detector, 'filter2')
     % As in Castelli et al, 2025
     ripples = findRipples(rippleChannel,'thresholds',thresholds,'passband',passband,...
@@ -360,6 +383,7 @@ if isnumeric(eventSpikeThreshold) || eventSpikeThreshold
 end
 
 plotRippleChannel('rippleChannel',rippleChannel,'ripples',ripples); % to do, run this after ripple detection
+
 % EventExplorer(pwd, ripples)
 
 %% Ripple Stats

@@ -6,7 +6,7 @@ function [uLEDResponses_interval] = getuLEDResponse_intervals(intervals,varargin
 % during uLED stimulation that ocurr (or not) at a given interval
 %
 % <OPTIONALS>
-% uLEDPulses        uLEDPulses structure, output from getuLEDPulses.
+% uLEDPulses        uLEDPulses events structure, output from getuLEDPulses.
 % spikes            buzcode spikes structure, if not provided tries loadSpikes.
 % basepath          By default pwd.
 % numRep            For boostraping, default, 500. If 0, no boostraping.

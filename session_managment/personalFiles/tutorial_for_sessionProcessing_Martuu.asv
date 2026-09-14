@@ -12,6 +12,9 @@ updateExpFolder({'V:\data\fCck1', 'Y:\fCck1'},'J:\data\fCck1');
 %   Example:
 batch_preprocessSession('basepath','X:\data\fCr1','analysisPath','F:\fCr1','cleanArtifacts',({[],1}),'analogChannelsList',[],'digitalChannelsList',6:16);
 
+preprocessSession('basepath',pwd,'analogChannelsList',[],'spikeSort',true,'getPos',false, 'cleanArtifacts', false,...
+                    'medianSubstr',false,'tracking_pixel_cm',NaN,'sessionSummary',true,'digitalChannelsList',[],'bazler_ttl_channel',[],'skipStimulationPeriods',false);
+
 % <OPTIONAL> If summary was not processed, it can be run in batch by 'batch_preprocessSession'
 batch_sessionSummary('basepath','G:\data\fPv4','cleanArtifacts',({65,[]}),'analogChannelsList',65,'digitalChannelsList',0);
 
@@ -39,14 +42,15 @@ if ~isempty(bazler_ttl_channel)
     session.analysisTags.anymaze_ttl_channel = anymaze_ttl_channel;
  end
  save([basepath filesep session.general.name,'.session.mat'],'session','-v7.3');
+ 
 
 % 4.2 Processs individual sessions by by 'processSession'. Example:
 
-processSession('digital_optogenetic_channels',[],'analog_optogenetic_channels',[],'promt_hippo_layers',true);      % digital_optogenetic_channels (0-16) ask manu 
+processSession('digital_optogenetic_channels',1,'analog_optogenetic_channels',[],'promt_hippo_layers',true);      % digital_optogenetic_channels (0-16) ask manu 
                                                                                                                    % analog_optogenetic_channels - check the folder pulses, if no analog pulses is inside, put []
                                                                                                                    % promt_hippo_layers always put 'true', if analisys is done in cortex put 'false'
 % 5% Revise output using ProcessSession_notebook
-edit Notebook_for_checking_processSession_results.m
+edit Notebook_for_checking_processSession_results_Martu.m
 
 % 5% Index session
 indexNewSession;
