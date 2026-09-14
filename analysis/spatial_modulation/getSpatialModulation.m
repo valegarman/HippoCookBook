@@ -16,7 +16,8 @@ function [spatialModulation] = getSpatialModulation(varargin)
 % OUTPUTS
 % spatialModulation
 %
-% MV-BuzsakiLab 2022
+% MV 2022
+% 
 %
 % to do: For now it only uses the biggest field if a neuron has more than
 % one field. 

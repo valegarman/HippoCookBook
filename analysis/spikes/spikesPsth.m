@@ -231,7 +231,18 @@ if ~isnan(timestamps) & numRep > 0
     [stccg, t] = CCG([spikes.times randomEvents],[],'binSize',binSize,'duration',winSize,'norm','rate','Fs',1/sr);
     fprintf('\n'); %
     t_duringPulse = t > event_ints(1) & t < event_ints(2);
-    randomRatesDuringPulse = squeeze(mean(stccg(t_duringPulse, length(spikes.UID)+1:end,1:length(spikes.UID)),1));
+    
+    size(stccg)
+    length(spikes.UID)
+    numRep
+
+    randomRatesDuringPulse = squeeze(mean(stccg( ...
+        t_duringPulse, length(spikes.UID)+1:end, ...
+        1:length(spikes.UID)),1));
+
+    size(randomRatesDuringPulse)
+
+    
     psth.bootsTrapRate(:,jj) = mean(randomRatesDuringPulse,1);
     psth.bootsTrapRateStd(:,jj) = std(randomRatesDuringPulse,[],1);
     psth.bootsTrapRateSEM(:,jj) = std(randomRatesDuringPulse,[],1)/sqrt(numRep);
