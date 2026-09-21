@@ -390,3 +390,21 @@ cancer2_250702_sess1,cancer2,cancer2\cancer2_250702_sess1,neural,c57b1/6,wild ty
 cancer2_250709_sess8,cancer2,cancer2\cancer2_250709_sess8,neural,unknown,,"none",maze,8,CA1sp CA1so,Crabcer
 cancer3_250704_sess3,cancer3,cancer3\cancer3_250704_sess3,neural,c57b1/6,wild type,"none",tmaze,62,CA1so PTLp CA1sp CA1sr,Crabcer
 cancer3_250711_sess10,cancer3,cancer3\cancer3_250711_sess10,neural,c57b1/6,wild type,"none",no,39,PTLp CA1so CA1sp CA1sr,Crabcer
+app_706_sess1,app_706,app_706\app_706_sess1,neural,c57b1/6,app/ps1,"none",no,3,CA1so PTLp CA1sp CA1sr CA1slm,IR
+app_862_sess1,app_862,app_862\app_862_sess1,neural,c57b1/6,app/ps1,"none",no,13,CA1so PTLp CA1sp CA1sr CA1slm,IR
+app_865_sess1,app_865,app_865\app_865_sess1,neural,c57b1/6,app/ps1,"none",no,5,CA1so PTLp CA1sp CA1sr CA1slm,IR
+app_880_sess1,app_880,app_880\app_880_sess1,neural,c57b1/6,app/ps1,"none",no,1,CA1so PTLp CA1sp CA1sr CA1slm,IR
+appcre_684_sess1,appcre_684,appcre_684\appcre_684_sess1,neural,c57b1/6,app-irko,"none",no,5,CA1sp CA1so CA1sr CA1slm PTLp,IR
+appcre_695_sess1,appcre_695,appcre_695\appcre_695_sess1,neural,c57b1/6,app-irko,"none",no,8,CA1sp CA1so CA1sr PTLp,IR
+appcre_696_sess1,appcre_696,appcre_696\appcre_696_sess1,neural,c57b1/6,app/irko,"none",no,9,CA1sp CA1so CA1sr PTLp,IR
+cre_687_sess1,cre_687,cre_687\cre_687_sess1,neural,c57b1/6,irko,"none",no,5,CA1sp CA1so PTLp CA1sr CA1slm,IR
+cre_688_sess1,cre_688,cre_688\cre_688_sess1,neural,c57b1/6,irko,"none",no,6,CA1sp CA1so PTLp CA1sr CA1slm,IR
+cre_702_sess1,cre_702,cre_702\cre_702_sess1,neural,c57b1/6,irko,"none",no,17,CA1sp CA1sr CA1slm CA1so PTLp,IR
+cre_711_sess1,cre_711,cre_711\cre_711_sess1,neural,c57b1/6,irko,"none",no,17,CA1sp CA1sr CA1slm CA1so PTLp,IR
+cre_719_sess1,cre_719,cre_719\cre_719_sess1,neural,c57b1/6,irko,"none",no,4,CA1sp CA1so CA1sr CA1slm PTLp,IR
+wt_673_sess1,wt_673,wt_673\wt_673_sess1,neural,c57b1/6,wt,"none",no,7,CA1sp CA1sr CA1so PTLp CA1slm,IR
+wt_679_sess1,wt_679,wt_679\wt_679_sess1,neural,c57b1/6,wt,"none",no,4,CA1sp CA1so PTLp CA1sr CA1slm,IR
+wt_697_sess1,wt_697,wt_697\wt_697_sess1,neural,c57b1/6,wt,"none",no,6,CA1sp CA1so PTLp CA1sr CA1slm,IR
+wt_703_sess1,wt_703,wt_703\wt_703_sess1,neural,c57b1/6,wt,"none",no,3,CA1sp CA1so PTLp CA1sr CA1slm,IR
+wt_718_sess1,wt_718,wt_718\wt_718_sess1,neural,c57b1/6,wild type,"none",no,7,CA1sp CA1so PTLp CA1sr CA1slm,IR
+wt_721_sess1,wt_721,wt_721\wt_721_sess1,neural,c57b1/6,wild type,"none",no,7,CA1sp CA1so PTLp CA1sr CA1slm,IR
