@@ -5,12 +5,12 @@
 %   'updateExpFolder({recordingPC_1, recordingPC_2, etc}, 'analysis unit')',
 %   Example:
 
-updateExpFolder_temp('F:\wt21', 'D:\wt21');
+updateExpFolder_temp('H:\trauma3', 'Z:\trauma3');
 
 % 2% Then, preprocess session (includes artifacts removal, median signal
 %   removal, LFP and Kilosort, and running computeSessionSummary by 'batch_preprocessSession('basepath','sessionBasepath').
 %   Example:
-batch_preprocessSession('basepath','D:\trauma222', 'digitalChannelsList',1);
+batch_preprocessSession('basepath','Z:\trauma3', 'digitalChannelsList', 1);
 
 % <OPTIONAL> If summary was not processed, it can be run in batch by 'batch_preprocessSession'
 batch_sessionSummary('basepath','G:\data\fPv4','cleanArtifacts',({65,[]}),'analogChannelsList',65,'digitalChannelsList',0);
