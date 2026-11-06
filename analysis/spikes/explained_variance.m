@@ -36,8 +36,6 @@ function [evStats] = explained_variance(spikes,pre_ints,r_ints,post_ints,varargi
 %    =========================================================================
 %     .
 %   Manuel Valero, 2020
-% TO DO: average contribution of each neuron to the EV
-%
 
 % Parse inputs 
 p = inputParser;

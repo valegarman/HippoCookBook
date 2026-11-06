@@ -584,8 +584,6 @@ if doPlot
         % plot([.5 max(pos)+.5],[0 0],'color',[.7 .7 .7]);
         for ii = 1:length(ind) 
             m = stats.descriptive.median(ii);
-<<<<<<< HEAD
-=======
             s1 = stats.descriptive.q25(ii);
             s2 = stats.descriptive.q75(ii);
             if plotData && ~plotConnectors
@@ -634,9 +632,8 @@ if doPlot
         % plot([.5 max(pos)+.5],[0 0],'color',[.7 .7 .7]);
         for ii = 1:length(ind) 
             m = stats.descriptive.mean(ii);
->>>>>>> 8a334ad557ff510c0e037a82745e333aa13384fb
-            s1 = stats.descriptive.q25(ii);
-            s2 = stats.descriptive.q75(ii);
+            s1 = stats.descriptive.mean(ii) - 1.96 * stats.descriptive.SEM(ii);
+            s2 = stats.descriptive.mean(ii) + 1.96 * stats.descriptive.SEM(ii);
             if plotData && ~plotConnectors
                 posData = randn(length(find(group==ind(ii))),1)/10; 
                 posData((posData)>0.3) = posData((posData)>0.3)/2;

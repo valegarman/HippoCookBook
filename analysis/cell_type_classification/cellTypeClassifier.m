@@ -52,7 +52,17 @@ if isfield(cell_metrics,'ground_truth_classification') && force == false
 end
 
 modelType = lower(modelType);
-directory = what('HippoCookBook\analysis\cell_type_classification');
+% Model folder: resolve in a platform-independent way
+model_dir = fileparts(mfilename('fullpath'));
+if exist(fullfile(model_dir,'Mdl_hippocampus5_ModelPack.mat'),'file') == 0
+    % Fallback: look for the folder on the MATLAB path (works on any OS)
+    directory = what(fullfile('HippoCookBook','analysis','cell_type_classification'));
+    if isempty(directory)
+        error(['Cell type classification models not found. ' ...
+               'Add HippoCookBook/analysis/cell_type_classification to the MATLAB path.']);
+    end
+    model_dir = directory(1).path;
+end
 
 switch modelType
     case lower('hippocampus5')
@@ -82,7 +92,7 @@ switch modelType
             'VariableNames', {'Spike_width','acg_tau_rise','ab_ratio','cv2','theta_r'});
 
         % --- 3) Load ModelPack (models + VIP threshold + feature list) ---
-        packPath = fullfile(directory.path,'Mdl_hippocampus5_ModelPack.mat');
+        packPath = fullfile(model_dir,'Mdl_hippocampus5_ModelPack.mat');
         assert(exist(packPath,'file')>0, 'ModelPack not found at %s', packPath);
         S = load(packPath,'ModelPack');
         P = S.ModelPack;
@@ -189,7 +199,7 @@ switch modelType
 
     case 'fobrebrain5'
         % Legacy/alternative model: keep original behavior
-        Mdl = importdata([directory.path filesep 'Mdl_forebrain5.mat']);
+        Mdl = importdata(fullfile(model_dir,'Mdl_forebrain5.mat'));
         T_feat = [cell_metrics.troughToPeak' ...
             cell_metrics.acg_tau_rise' ...
             cell_metrics.ab_ratio' ...
@@ -201,7 +211,7 @@ switch modelType
 
     case 'fobrebrain4'
         % Legacy/alternative model: keep original behavior
-        Mdl = importdata([directory.path filesep 'Mdl_forebrain4.mat']);
+        Mdl = importdata(fullfile(model_dir,'Mdl_forebrain4.mat'));
         T_feat = [cell_metrics.troughToPeak' ...
             cell_metrics.acg_tau_rise' ...
             cell_metrics.ab_ratio' ...
@@ -211,7 +221,7 @@ switch modelType
 
     otherwise
         warning('Model not recognized! Using forebrain4 model!');
-        Mdl = importdata([directory.path filesep 'Mdl_forebrain4.mat']);
+        Mdl = importdata(fullfile(model_dir,'Mdl_forebrain4.mat'));
         T_feat = [cell_metrics.troughToPeak' ...
             cell_metrics.acg_tau_rise' ...
             cell_metrics.ab_ratio' ...
@@ -278,7 +288,7 @@ if isempty(ripples_psth)
 end
 if ~isempty(ripples_psth)
     if ~isempty(find(ismember(cell_metrics.brainRegion, 'CA1sp'),1))
-        Mdl_sncg = importdata([directory.path filesep 'Mdl_sncg.mat']);
+        Mdl_sncg = importdata(fullfile(model_dir,'Mdl_sncg.mat'));
         features = [log10(cell_metrics.acg_tau_rise)' cell_metrics.cv2' log10(cell_metrics.firingRate)' ripples_psth.rateZDuringPulse];
         predicted_sncg = predict(Mdl_sncg,features);  % do not overwrite main 'score'
         cell_subtypes(ismember(cell_subtypes, 'ID2+') & predicted_sncg & ismember(cell_metrics.brainRegion, 'CA1sp')' & ripples_psth.rateZDuringPulse<3.5) = {'ID2_SNCG+'};
@@ -442,7 +452,7 @@ if doPlot
     xlabel('Time (ms)');
     ylabel('Probability (normalized)');
 
-    exportgraphics(fig, ['SummaryFigures\cell_familty_classification.png']);
+    exportgraphics(fig, fullfile('SummaryFigures','cell_familty_classification.png'));
 
 end
 
