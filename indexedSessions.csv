@@ -431,3 +431,4 @@ cancer14_260721_sess6,cancer14,cancer14\cancer14_260721_sess6,neural,c57b1/6,wil
 cancer17_261001_sess1,cancer17,cancer17\cancer17_261001_sess1,neural,c57b1/6,wild type,"none",no,72,CA1so PTLp CA1sp CA1sr,Crabcer
 cancer11_260514_sess1,cancer11,cancer11\cancer11_260514_sess1,neural,c57b1/6,wild type,"none",no,56,CA1so PTLp CA1sp CA1sr,Crabcer
 cancer15_260719_sess4,cancer15,cancer15\cancer15_260719_sess4,neural,c57b1/6,wild type,"none",tmaze,59,CA1so PTLp CA1sp,Crabcer
+cancer5_250719_sess4,cancer5,cancer5\cancer5_250719_sess4,neural,c57b1/6,c57bl6/n,"none",no,51,CA1so pCA1sp CA1sp CA1sr CA1slm,Crabcer
